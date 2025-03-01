@@ -1,0 +1,9 @@
+name: windows-latest
+run-name: windows-latest
+on: [push]
+jobs:
+  conan-create:
+    uses: ./.github/workflows/main.yml
+    with:
+        runs-on: windows-latest
+        profile: ./conan/vs2022_x86_64_Debug.profile
