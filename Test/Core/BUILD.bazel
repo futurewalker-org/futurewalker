@@ -6,3 +6,11 @@ fw_test(
     srcs = ["Core.cpp"],
     tags = ["Core"],
 )
+
+fw_test(
+    name = "Concepts",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["Concepts.cpp"],
+    tags = ["Core"],
+)
+
