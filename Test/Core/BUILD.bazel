@@ -1,0 +1,8 @@
+load("//:defs.bzl", "fw_test")
+
+fw_test(
+    name = "Core",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["Core.cpp"],
+    tags = ["Core"],
+)
