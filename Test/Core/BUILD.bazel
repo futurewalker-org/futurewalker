@@ -14,3 +14,9 @@ fw_test(
     tags = ["Core"],
 )
 
+fw_test(
+    name = "Boolean",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["Boolean.cpp"],
+    tags = ["Core"],
+)
