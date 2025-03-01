@@ -14,5 +14,17 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Install Conan
+        run: pip install conan
+      - name: Display Conan version
+        run: conan --version
+      - name: Detect default profile
+        run: conan profile detect
       - name: Build
         run:  conan build . -pr:b=default -pr:h=${{ inputs.profile }} --build=missing
