@@ -20,3 +20,24 @@ fw_test(
     srcs = ["Boolean.cpp"],
     tags = ["Core"],
 )
+
+fw_test(
+    name = "Integer",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["Integer.cpp"],
+    tags = ["Core"],
+)
+
+fw_test(
+    name = "Float",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["Float.cpp"],
+    tags = ["Core"],
+)
+
+fw_test(
+    name = "Math",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["Math.cpp"],
+    tags = ["Core"],
+)

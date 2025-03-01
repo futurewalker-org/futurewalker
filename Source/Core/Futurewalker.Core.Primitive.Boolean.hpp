@@ -51,7 +51,7 @@ public:
     ///
     inline constexpr Boolean operator!() const noexcept
     {
-        return Boolean(_value == T());
+        return Boolean(!_value);
     }
 
 public:
