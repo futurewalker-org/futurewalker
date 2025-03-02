@@ -48,3 +48,10 @@ fw_test(
     srcs = ["Pointer.cpp"],
     tags = ["Core"],
 )
+
+fw_test(
+    name = "StringView",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["StringView.cpp"],
+    tags = ["Core"],
+)
