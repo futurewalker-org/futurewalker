@@ -1,8 +1,22 @@
 load("//:defs.bzl", "fw_test")
 
 fw_test(
+    name = "Base",
+    deps = ["@futurewalker//:Base"],
+    srcs = ["Base.cpp"],
+    tags = ["Base"],
+)
+
+fw_test(
     name = "Locator",
     deps = ["@futurewalker//:Base"],
     srcs = ["Locator.cpp"],
+    tags = ["Base"],
+)
+
+fw_test(
+    name = "UniqueIdentifierManager",
+    deps = ["@futurewalker//:Base"],
+    srcs = ["UniqueIdentifierManager.cpp"],
     tags = ["Base"],
 )
