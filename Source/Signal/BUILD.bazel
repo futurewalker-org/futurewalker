@@ -1,0 +1,11 @@
+load("//:defs.bzl", "fw_library")
+
+fw_library(
+    name = "Signal",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//Source/Core",
+        "//Source/Async",
+        "@boost//:boost-headers",
+    ],
+)

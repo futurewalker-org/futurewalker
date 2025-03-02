@@ -1,0 +1,15 @@
+load("//:defs.bzl", "fw_test")
+
+fw_test(
+    name = "Signal",
+    deps = ["@futurewalker//:Signal"],
+    srcs = ["Signal.cpp"],
+    tags = ["Signal"],
+)
+
+fw_test(
+    name = "Tracker",
+    deps = ["@futurewalker//:Signal"],
+    srcs = ["Tracker.cpp"],
+    tags = ["Signal"],
+)
