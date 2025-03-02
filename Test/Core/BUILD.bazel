@@ -41,3 +41,10 @@ fw_test(
     srcs = ["Math.cpp"],
     tags = ["Core"],
 )
+
+fw_test(
+    name = "Pointer",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["Pointer.cpp"],
+    tags = ["Core"],
+)
