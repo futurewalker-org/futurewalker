@@ -97,3 +97,10 @@ fw_test(
     srcs = ["TypeId.cpp"],
     tags = ["Core"],
 )
+
+fw_test(
+    name = "TimePoint",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["TimePoint.cpp"],
+    tags = ["Core"],
+)
