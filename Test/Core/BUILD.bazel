@@ -83,3 +83,10 @@ fw_test(
     srcs = ["StringFunction.cpp"],
     tags = ["Core"],
 )
+
+fw_test(
+    name = "Optional",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["Optional.cpp"],
+    tags = ["Core"],
+)
