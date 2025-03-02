@@ -55,3 +55,10 @@ fw_test(
     srcs = ["StringView.cpp"],
     tags = ["Core"],
 )
+
+fw_test(
+    name = "String",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["String.cpp"],
+    tags = ["Core"],
+)
