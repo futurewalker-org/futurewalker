@@ -12,7 +12,7 @@ namespace FW_EXPORT
 /// @brief Boolean wrapper class.
 ///
 template <class T, class Tag>
-class Boolean
+class Boolean final
 {
 public:
     inline constexpr Boolean() = delete;
