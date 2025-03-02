@@ -1,5 +1,25 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_binary", "cc_test")
 
+COMPILE_OPTIONS = select({
+    "@platforms//os:windows" : [
+        "/utf-8", # this is required by fmt. we can remove it when char8_t is supported in std::format.
+        "/permissive-",
+        "/Zc:__cplusplus",
+        "/Zc:preprocessor",
+    ],
+    "//conditions:default" : [],
+})
+
+WARNINGS = select({
+    "@platforms//os:windows" : [
+        "/W4",
+        "/WX",
+    ],
+    "//conditions:default" : [],
+})
+
+COPTS = COMPILE_OPTIONS + WARNINGS
+
 def fw_library(name, visibility, deps):
 
     name_hdrs = name + "_hdrs" 
@@ -16,6 +36,7 @@ def fw_library(name, visibility, deps):
         visibility = ["//visibility:private"],
         deps = deps,
         strip_include_prefix = ".",
+        copts = COPTS,
     )
 
     cc_library(
@@ -25,6 +46,7 @@ def fw_library(name, visibility, deps):
         visibility = ["//visibility:private"],
         deps = deps + [lib_hdrs],
         strip_include_prefix = "./Platform",
+        copts = COPTS,
     )
 
     cc_library(
@@ -34,6 +56,7 @@ def fw_library(name, visibility, deps):
         visibility = ["//visibility:private"],
         deps = deps + [lib_platform],
         strip_include_prefix = "./Win",
+        copts = COPTS,
     )
 
     cc_library(
@@ -46,6 +69,7 @@ def fw_library(name, visibility, deps):
             "@platforms//os:windows" : [lib_win],
             "//conditions:default" : [],
         }),
+        copts = COPTS,
     )
 
 def fw_binary(**kwargs):
@@ -59,4 +83,5 @@ def fw_test(name, deps, srcs, tags):
         deps = deps + ["@catch2//:catch2"],
         srcs = srcs,
         tags = tags,
+        copts = COPTS,
     )
