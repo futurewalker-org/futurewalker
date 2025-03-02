@@ -24,10 +24,10 @@ public:
 ///
 constexpr Bool BuildConfig::IsDebug() noexcept
 {
-#if defined(_NDEBUG)
-    return false;
-#else
+#if FW_ENABLE_DEBUG
     return true;
+#else
+    return false;
 #endif
 }
 }

@@ -20,6 +20,14 @@
     #define FW_DETAIL_NS FW_NS::FW_DETAIL
 #endif
 
+#ifndef FW_ENABLE_DEBUG
+    #ifdef _NDEBUG
+        #define FW_ENABLE_DEBUG 0
+    #else
+        #define FW_ENABLE_DEBUG 1
+    #endif
+#endif
+
 namespace FW_NS
 {
 namespace FW_DETAIL
