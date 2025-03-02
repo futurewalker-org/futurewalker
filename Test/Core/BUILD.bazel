@@ -62,3 +62,10 @@ fw_test(
     srcs = ["String.cpp"],
     tags = ["Core"],
 )
+
+fw_test(
+    name = "TypeTraits",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["TypeTraits.cpp"],
+    tags = ["Core"],
+)
