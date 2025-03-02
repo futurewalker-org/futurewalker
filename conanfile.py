@@ -11,6 +11,7 @@ class Futurewalker(ConanFile):
     def requirements(self):
         self.requires("boost/[1.87.0]")
         self.requires("catch2/[3.8.0]")
+        self.requires("fmt/[11.1.3]")
 
     def validate_build(self):
         check_min_cppstd(self, "23")

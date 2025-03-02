@@ -4,4 +4,4 @@ module(
 )
 
 conan_extension = use_extension("//build/conan:conan_deps_module_extension.bzl", "conan_extension")
-use_repo(conan_extension, "boost", "catch2", "bzip2", "zlib")
+use_repo(conan_extension, "boost", "catch2", "bzip2", "zlib", "fmt")
