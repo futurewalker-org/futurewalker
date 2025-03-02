@@ -9,3 +9,9 @@ alias(
     actual = "//Source/Base",
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "Async",
+    actual = "//Source/Async",
+    visibility = ["//visibility:public"],
+)

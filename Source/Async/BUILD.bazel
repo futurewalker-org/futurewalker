@@ -1,0 +1,10 @@
+load("//:defs.bzl", "fw_library")
+
+fw_library(
+    name = "Async",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//Source/Base",
+        "//Source/Core",
+    ],
+)

@@ -1,0 +1,15 @@
+load("//:defs.bzl", "fw_test")
+
+fw_test(
+    name = "Task",
+    deps = ["@futurewalker//:Async"],
+    srcs = ["Task.cpp"],
+    tags = ["Async"],
+)
+
+fw_test(
+    name = "ThreadPool",
+    deps = ["@futurewalker//:Async"],
+    srcs = ["ThreadPool.cpp"],
+    tags = ["Async"],
+)
