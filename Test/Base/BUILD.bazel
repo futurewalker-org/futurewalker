@@ -1,0 +1,8 @@
+load("//:defs.bzl", "fw_test")
+
+fw_test(
+    name = "Locator",
+    deps = ["@futurewalker//:Base"],
+    srcs = ["Locator.cpp"],
+    tags = ["Base"],
+)

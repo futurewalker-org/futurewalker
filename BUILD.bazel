@@ -3,3 +3,9 @@ alias(
     actual = "//Source/Core",
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "Base",
+    actual = "//Source/Base",
+    visibility = ["//visibility:public"],
+)
