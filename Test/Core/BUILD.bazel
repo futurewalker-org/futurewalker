@@ -90,3 +90,10 @@ fw_test(
     srcs = ["Optional.cpp"],
     tags = ["Core"],
 )
+
+fw_test(
+    name = "TypeId",
+    deps = ["@futurewalker//:Core"],
+    srcs = ["TypeId.cpp"],
+    tags = ["Core"],
+)
