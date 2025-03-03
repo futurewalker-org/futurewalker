@@ -1,0 +1,8 @@
+load("//:defs.bzl", "fw_test")
+
+fw_test(
+    name = "DependencyNode",
+    deps = ["@futurewalker//:Dependency"],
+    srcs = ["DependencyNode.cpp"],
+    tags = ["Dependency"],
+)

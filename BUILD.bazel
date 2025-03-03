@@ -27,3 +27,9 @@ alias(
     actual = "//Source/Event",
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "Dependency",
+    actual = "//Source/Dependency",
+    visibility = ["//visibility:public"],
+)
