@@ -1,0 +1,8 @@
+load("//:defs.bzl", "fw_test")
+
+fw_test(
+    name = "Animation",
+    deps = ["@futurewalker//:Animation"],
+    srcs = ["AnimationTimer.cpp"],
+    tags = ["Animation"],
+)
