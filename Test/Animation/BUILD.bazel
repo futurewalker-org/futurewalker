@@ -1,8 +1,9 @@
-load("//:defs.bzl", "fw_test")
+load("//:defs.bzl", "fw_test_suite")
 
-fw_test(
-    name = "Animation",
+fw_test_suite(
     deps = ["@futurewalker//:Animation"],
-    srcs = ["AnimationTimer.cpp"],
     tags = ["Animation"],
+    names = [
+        "AnimationTimer",
+    ],
 )

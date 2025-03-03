@@ -1,15 +1,10 @@
-load("//:defs.bzl", "fw_test")
+load("//:defs.bzl", "fw_test_suite")
 
-fw_test(
-    name = "Event",
+fw_test_suite(
     deps = ["@futurewalker//:Event"],
-    srcs = ["Event.cpp"],
     tags = ["Event"],
-)
-
-fw_test(
-    name = "EventReceiver",
-    deps = ["@futurewalker//:Event"],
-    srcs = ["EventReceiver.cpp"],
-    tags = ["Event"],
+    names = [
+        "Event",
+        "EventReceiver",
+    ],
 )

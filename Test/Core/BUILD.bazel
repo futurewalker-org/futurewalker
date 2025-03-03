@@ -1,106 +1,23 @@
-load("//:defs.bzl", "fw_test")
+load("//:defs.bzl", "fw_test_suite")
 
-fw_test(
-    name = "Core",
+fw_test_suite(
     deps = ["@futurewalker//:Core"],
-    srcs = ["Core.cpp"],
     tags = ["Core"],
-)
-
-fw_test(
-    name = "Concepts",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["Concepts.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "Boolean",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["Boolean.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "Integer",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["Integer.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "Float",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["Float.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "Math",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["Math.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "Pointer",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["Pointer.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "StringView",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["StringView.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "String",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["String.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "TypeTraits",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["TypeTraits.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "Memory",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["Memory.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "StringFunction",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["StringFunction.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "Optional",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["Optional.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "TypeId",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["TypeId.cpp"],
-    tags = ["Core"],
-)
-
-fw_test(
-    name = "TimePoint",
-    deps = ["@futurewalker//:Core"],
-    srcs = ["TimePoint.cpp"],
-    tags = ["Core"],
+    names = [
+        "Boolean",
+        "Concepts",
+        "Core",
+        "Float",
+        "Integer",
+        "Math",
+        "Memory",
+        "Optional",
+        "Pointer",
+        "String",
+        "StringFunction",
+        "StringView",
+        "TimePoint",
+        "TypeId",
+        "TypeTraits",
+    ],
 )

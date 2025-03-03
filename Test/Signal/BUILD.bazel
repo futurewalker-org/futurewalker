@@ -1,15 +1,10 @@
-load("//:defs.bzl", "fw_test")
+load("//:defs.bzl", "fw_test_suite")
 
-fw_test(
-    name = "Signal",
+fw_test_suite(
     deps = ["@futurewalker//:Signal"],
-    srcs = ["Signal.cpp"],
     tags = ["Signal"],
-)
-
-fw_test(
-    name = "Tracker",
-    deps = ["@futurewalker//:Signal"],
-    srcs = ["Tracker.cpp"],
-    tags = ["Signal"],
+    names = [
+        "Signal",
+        "Tracker",
+    ],
 )

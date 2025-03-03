@@ -1,8 +1,9 @@
-load("//:defs.bzl", "fw_test")
+load("//:defs.bzl", "fw_test_suite")
 
-fw_test(
-    name = "DependencyNode",
+fw_test_suite(
     deps = ["@futurewalker//:Dependency"],
-    srcs = ["DependencyNode.cpp"],
     tags = ["Dependency"],
+    names = [
+        "DependencyNode",
+    ],
 )

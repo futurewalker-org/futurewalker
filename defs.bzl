@@ -14,6 +14,8 @@ WARNINGS = select({
     "@platforms//os:windows" : [
         "/W4",
         "/WX",
+        "/external:anglebrackets",
+        "/external:W0",
     ],
     "//conditions:default" : [],
 })
@@ -85,3 +87,12 @@ def fw_test(name, deps, srcs, tags):
         tags = tags,
         copts = COPTS,
     )
+
+def fw_test_suite(deps, tags, names):
+    for name in names:
+        fw_test(
+            name = name,
+            deps = deps,
+            srcs = ["%s.cpp" % name],
+            tags = tags,
+        )
