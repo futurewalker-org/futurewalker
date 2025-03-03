@@ -54,4 +54,21 @@ TEST_CASE("Channel")
         ch = AlphaChannel::MakeFromU32(UInt32(0));
         REQUIRE(ch == 0.0);
     }
+
+    SECTION("get/set")
+    {
+        auto ch = AlphaChannel(0.0);
+        ch.GetValue();
+        ch.GetU8();
+        ch.GetU16();
+        ch.GetU32();
+        ch.GetF32();
+        ch.GetF64();
+        ch.SetValue(0.0);
+        ch.SetU8(UInt8(0));
+        ch.SetU16(UInt16(0));
+        ch.SetU32(UInt32(0));
+        ch.SetF32(0.f);
+        ch.SetF64(0.0);
+    }
 }

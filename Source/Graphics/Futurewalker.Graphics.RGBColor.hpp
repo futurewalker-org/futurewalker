@@ -31,34 +31,42 @@ public:
     constexpr auto GetRedU8() const -> UInt8;
     constexpr auto GetRedU16() const -> UInt16;
     constexpr auto GetRedU32() const -> UInt32;
+    constexpr auto GetRedF32() const -> Float32;
     constexpr auto GetRedF64() const -> Float64;
 
     constexpr auto GetGreen() const -> ColorChannelType;
     constexpr auto GetGreenU8() const -> UInt8;
     constexpr auto GetGreenU16() const -> UInt16;
     constexpr auto GetGreenU32() const -> UInt32;
+    constexpr auto GetGreenF32() const -> Float32;
     constexpr auto GetGreenF64() const -> Float64;
 
     constexpr auto GetBlue() const -> ColorChannelType;
     constexpr auto GetBlueU8() const -> UInt8;
     constexpr auto GetBlueU16() const -> UInt16;
     constexpr auto GetBlueU32() const -> UInt32;
+    constexpr auto GetBlueF32() const -> Float32;
     constexpr auto GetBlueF64() const -> Float64;
 
     constexpr auto SetRed(const ColorChannelType& r) -> void;
     constexpr auto SetRedU8(const UInt8& r) -> void;
     constexpr auto SetRedU16(const UInt16& r) -> void;
     constexpr auto SetRedU32(const UInt32& r) -> void;
+    constexpr auto SetRedF32(const Float32& r) -> void;
     constexpr auto SetRedF64(const Float64& r) -> void;
 
+    constexpr auto SetGreen(const ColorChannelType& g) -> void;
     constexpr auto SetGreenU8(const UInt8& g) -> void;
     constexpr auto SetGreenU16(const UInt16& g) -> void;
     constexpr auto SetGreenU32(const UInt32& g) -> void;
+    constexpr auto SetGreenF32(const Float32& g) -> void;
     constexpr auto SetGreenF64(const Float64& g) -> void;
 
+    constexpr auto SetBlue(const ColorChannelType& b) -> void;
     constexpr auto SetBlueU8(const UInt8& b) -> void;
     constexpr auto SetBlueU16(const UInt16& b) -> void;
     constexpr auto SetBlueU32(const UInt32& b) -> void;
+    constexpr auto SetBlueF32(const Float32& b) -> void;
     constexpr auto SetBlueF64(const Float64& b) -> void;
 
     friend inline constexpr bool operator==(const RGBColorT&, const RGBColorT&) = default;
@@ -160,6 +168,15 @@ constexpr auto RGBColorT<Tag>::GetRedU32() const -> UInt32
 /// @brief Get red channel.
 ///
 template <class Tag>
+constexpr auto RGBColorT<Tag>::GetRedF32() const -> Float32
+{
+    return _r.GetF32();
+}
+
+///
+/// @brief Get red channel.
+///
+template <class Tag>
 constexpr auto RGBColorT<Tag>::GetRedF64() const -> Float64
 {
     return _r.GetF64();
@@ -199,6 +216,15 @@ template <class Tag>
 constexpr auto RGBColorT<Tag>::GetGreenU32() const -> UInt32
 {
     return _g.GetU32();
+}
+
+///
+/// @brief Get green channel.
+///
+template <class Tag>
+constexpr auto RGBColorT<Tag>::GetGreenF32() const -> Float32
+{
+    return _g.GetF32();
 }
 
 ///
@@ -250,6 +276,15 @@ constexpr auto RGBColorT<Tag>::GetBlueU32() const -> UInt32
 /// @brief Get blue channel.
 ///
 template <class Tag>
+constexpr auto RGBColorT<Tag>::GetBlueF32() const -> Float32
+{
+    return _b.GetF32();
+}
+
+///
+/// @brief Get blue channel.
+///
+template <class Tag>
 constexpr auto RGBColorT<Tag>::GetBlueF64() const -> Float64
 {
     return _b.GetF64();
@@ -295,9 +330,27 @@ constexpr auto RGBColorT<Tag>::SetRedU32(const UInt32& r) -> void
 /// @brief Set red channel.
 ///
 template <class Tag>
+constexpr auto RGBColorT<Tag>::SetRedF32(const Float32& r) -> void
+{
+    _r.SetF32(r);
+}
+
+///
+/// @brief Set red channel.
+///
+template <class Tag>
 constexpr auto RGBColorT<Tag>::SetRedF64(const Float64& r) -> void
 {
     _r.SetF64(r);
+}
+
+///
+/// @brief Set green channel.
+///
+template <class Tag>
+constexpr auto RGBColorT<Tag>::SetGreen(const ColorChannelType& g) -> void
+{
+    _g = g;
 }
 
 ///
@@ -331,9 +384,27 @@ constexpr auto RGBColorT<Tag>::SetGreenU32(const UInt32& g) -> void
 /// @brief Set green channel.
 ///
 template <class Tag>
+constexpr auto RGBColorT<Tag>::SetGreenF32(const Float32& g) -> void
+{
+    _g.SetF32(g);
+}
+
+///
+/// @brief Set green channel.
+///
+template <class Tag>
 constexpr auto RGBColorT<Tag>::SetGreenF64(const Float64& g) -> void
 {
     _g.SetF64(g);
+}
+
+///
+/// @brief Set green channel.
+///
+template <class Tag>
+constexpr auto RGBColorT<Tag>::SetBlue(const ColorChannelType& b) -> void
+{
+    _b = b;
 }
 
 ///
@@ -361,6 +432,15 @@ template <class Tag>
 constexpr auto RGBColorT<Tag>::SetBlueU32(const UInt32& b) -> void
 {
     _b.SetU32(b);
+}
+
+///
+/// @brief Set blue channel.
+///
+template <class Tag>
+constexpr auto RGBColorT<Tag>::SetBlueF32(const Float32& b) -> void
+{
+    _b.SetF32(b);
 }
 
 ///

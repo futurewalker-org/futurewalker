@@ -36,10 +36,14 @@ public:
     constexpr auto GetU8() const noexcept -> UInt8;
     constexpr auto GetU16() const noexcept -> UInt16;
     constexpr auto GetU32() const noexcept -> UInt32;
+    constexpr auto GetF32() const noexcept -> Float32;
+    constexpr auto GetF64() const noexcept -> Float64;
 
     constexpr auto SetU8(const UInt8& v) noexcept -> void;
     constexpr auto SetU16(const UInt16& v) noexcept -> void;
     constexpr auto SetU32(const UInt32& v) noexcept -> void;
+    constexpr auto SetF32(const Float32& v) noexcept -> void;
+    constexpr auto SetF64(const Float64& v) noexcept -> void;
 
     auto operator==(const ChannelT&) const -> bool = default;;
     auto operator<=>(const ChannelT&) const = default;
@@ -143,6 +147,24 @@ constexpr auto ChannelT<Tag>::GetU32() const noexcept -> UInt32
 }
 
 ///
+/// @brief Get Float32 value.
+///
+template <class Tag>
+constexpr auto ChannelT<Tag>::GetF32() const noexcept -> Float32
+{
+    return Float32(_v);
+}
+
+///
+/// @brief Get Float64 value.
+///
+template <class Tag>
+constexpr auto ChannelT<Tag>::GetF64() const noexcept -> Float64
+{
+    return Float64(_v);
+}
+
+///
 /// @brief Set UInt8 value.
 ///
 template <class Tag>
@@ -170,6 +192,24 @@ constexpr auto ChannelT<Tag>::SetU32(const UInt32& v) noexcept -> void
 {
     const auto max = std::numeric_limits<UInt32::ValueType>::max();
     _v = v / Float64(max);
+}
+
+///
+/// @brief Set F32 value.
+///
+template <class Tag>
+constexpr auto ChannelT<Tag>::SetF32(const Float32& v) noexcept -> void
+{
+    _v = v;
+}
+
+///
+/// @brief Set F64 value.
+///
+template <class Tag>
+constexpr auto ChannelT<Tag>::SetF64(const Float64& v) noexcept -> void
+{
+    _v = v;
 }
 }
 }
