@@ -20,6 +20,7 @@
 #include "Futurewalker.Core.PointerIterator.hpp"
 #include "Futurewalker.Core.Prelude.hpp"
 #include "Futurewalker.Core.Primitive.hpp"
+#include "Futurewalker.Core.PropertyStore.hpp"
 #include "Futurewalker.Core.Stacktrace.hpp"
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.StringFunction.hpp"

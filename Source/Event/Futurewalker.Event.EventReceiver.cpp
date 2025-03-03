@@ -1,0 +1,104 @@
+﻿// SPDX-License-Identifier: MIT
+
+#include "Futurewalker.Event.EventReceiver.hpp"
+
+#include "Futurewalker.Async.AsyncFunction.hpp"
+
+namespace FW_DETAIL_NS
+{
+///
+/// @brief Send event to receiver.
+///
+/// @param[in] delegate Delegate.
+///
+/// @return Non-null EventReceiver object.
+///
+auto EventReceiver::Make(Delegate delegate) -> Unique<EventReceiver>
+{
+    return Unique<EventReceiver>::Make(PassKey<EventReceiver>(), std::move(delegate));
+}
+
+///
+/// @brief Send event to receiver.
+///
+EventReceiver::EventReceiver(PassKey<EventReceiver>, Delegate delegate)
+  : _delegate {std::move(delegate)}
+{
+    _tracker = Tracker::Make();
+}
+
+///
+/// @brief Send event to receiver.
+///
+/// @param[in, out] event Event to send.
+///
+auto EventReceiver::SendEvent(Event& event) -> Async<Bool>
+{
+    if (_delegate.dispatchEvent)
+    {
+        co_return co_await _delegate.dispatchEvent(event, [&](Event& event) -> Async<Bool> { co_return co_await DispatchEvent(event); });
+    }
+    co_return co_await DispatchEvent(event);
+}
+
+///
+/// @brief Send event in a detached asynchronous context.
+///
+/// @param[in, out] event
+///
+/// @return When all event slots complate without suspending current coroutine, it returns result of event dispatch.
+/// @return Retruns `false` otherwise.
+///
+auto EventReceiver::SendEventDetached(Event& event) -> Bool
+{
+    const auto r = Shared<Bool>::Make(false);
+    const auto e = Shared<Event>::Make(event);
+    AsyncFunction::SpawnFn([=, this] -> Async<void> { *r = co_await SendEvent(*e); });
+    event = *e;
+    return *r;
+}
+
+///
+/// @brief Get tracker.
+///
+auto EventReceiver::GetTracker() -> Tracker&
+{
+    return *_tracker;
+}
+
+///
+/// @brief Get tracker.
+///
+auto EventReceiver::GetTracker() const -> const Tracker&
+{
+    return *_tracker;
+}
+
+///
+/// @brief Get EventReceiver instance.
+///
+auto EventReceiver::GetEventReceiver() -> EventReceiver&
+{
+    return *this;
+}
+
+///
+/// @brief Get EventReceiver instance.
+///
+auto EventReceiver::GetEventReceiver() const -> const EventReceiver&
+{
+    return *this;
+}
+
+///
+/// @brief Dispatch event to connected objects.
+///
+/// @param[in] event Event to dispatch.
+///
+/// @note This function is intended to be used from delegate.
+///
+auto EventReceiver::DispatchEvent(Event& event) -> Async<Bool>
+{
+    co_return co_await _eventSignal(event);
+}
+}

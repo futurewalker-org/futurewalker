@@ -1,0 +1,15 @@
+load("//:defs.bzl", "fw_test")
+
+fw_test(
+    name = "Event",
+    deps = ["@futurewalker//:Event"],
+    srcs = ["Event.cpp"],
+    tags = ["Event"],
+)
+
+fw_test(
+    name = "EventReceiver",
+    deps = ["@futurewalker//:Event"],
+    srcs = ["EventReceiver.cpp"],
+    tags = ["Event"],
+)
