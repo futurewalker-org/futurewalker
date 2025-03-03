@@ -1,0 +1,21 @@
+﻿// SPDX-License-Identifier: MIT
+#pragma once
+
+#include "Futurewalker.Core.Prelude.hpp"
+
+namespace FW_DETAIL_NS
+{
+namespace FW_EXPORT
+{
+template <class>
+class Radius2;
+
+///
+/// @brief A two-dimensional radius type.
+///
+/// @tparam T Value type.
+///
+template <class T>
+using Radius = Radius2<T>;
+}
+}

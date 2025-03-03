@@ -1,0 +1,57 @@
+load("//:defs.bzl", "fw_test")
+
+fw_test(
+    name = "Channel",
+    deps = ["@futurewalker//:Graphics"],
+    srcs = ["Channel.cpp"],
+    tags = ["Graphics"],
+)
+
+fw_test(
+    name = "Point",
+    deps = ["@futurewalker//:Graphics"],
+    srcs = ["Point.cpp"],
+    tags = ["Graphics"],
+)
+
+fw_test(
+    name = "Size",
+    deps = ["@futurewalker//:Graphics"],
+    srcs = ["Size.cpp"],
+    tags = ["Graphics"],
+)
+
+fw_test(
+    name = "Offset",
+    deps = ["@futurewalker//:Graphics"],
+    srcs = ["Offset.cpp"],
+    tags = ["Graphics"],
+)
+
+fw_test(
+    name = "Rect",
+    deps = ["@futurewalker//:Graphics"],
+    srcs = ["Rect.cpp"],
+    tags = ["Graphics"],
+)
+
+fw_test(
+    name = "Radius",
+    deps = ["@futurewalker//:Graphics"],
+    srcs = ["Radius.cpp"],
+    tags = ["Graphics"],
+)
+
+fw_test(
+    name = "RGBColor",
+    deps = ["@futurewalker//:Graphics"],
+    srcs = ["RGBColor.cpp"],
+    tags = ["Graphics"],
+)
+
+fw_test(
+    name = "RGBAColor",
+    deps = ["@futurewalker//:Graphics"],
+    srcs = ["RGBAColor.cpp"],
+    tags = ["Graphics"],
+)

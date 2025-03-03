@@ -39,3 +39,9 @@ alias(
     actual = "//Source/Animation",
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "Graphics",
+    actual = "//Source/Graphics",
+    visibility = ["//visibility:public"],
+)
