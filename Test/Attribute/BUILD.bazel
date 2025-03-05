@@ -4,6 +4,7 @@ fw_test_suite(
     deps = ["@futurewalker//:Attribute"],
     tags = ["Attribute"],
     names = [
+        "AttributeNode",
         "AttributeValue",
     ],
 )
