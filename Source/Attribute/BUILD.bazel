@@ -1,0 +1,12 @@
+load("//:defs.bzl", "fw_library")
+
+fw_library(
+    name = "Attribute",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//Source/Core",
+        "//Source/Base",
+        "//Source/Event",
+        "//Source/Dependency",
+    ],
+)

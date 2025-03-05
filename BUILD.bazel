@@ -45,3 +45,9 @@ alias(
     actual = "//Source/Graphics",
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "Attribute",
+    actual = "//Source/Attribute",
+    visibility = ["//visibility:public"],
+)
