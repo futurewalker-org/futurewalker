@@ -43,13 +43,13 @@ public:
     }
 
     template <class U>
-    constexpr StaticReference(const StaticReference<U>& other) noexcept
+    constexpr StaticReference(StaticReference<U> const& other) noexcept
       : _ref {other._ref}
     {
     }
 
     template <class U>
-    constexpr auto operator=(const StaticReference<U>& other) noexcept -> StaticReference&
+    constexpr auto operator=(StaticReference<U> const& other) noexcept -> StaticReference&
     {
         _ref = other._ref;
         return *this;

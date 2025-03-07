@@ -154,9 +154,9 @@ template <class To, class From>
 concept ConstructibleFromAnyReferenceOf =      //
   std::destructible<To> &&                     //
   (std::is_constructible_v<To, From&> ||       //
-   std::is_constructible_v<To, const From&> || //
+   std::is_constructible_v<To, From const&> || //
    std::is_constructible_v<To, From&&> ||      //
-   std::is_constructible_v<To, const From&&>); //
+   std::is_constructible_v<To, From const&&>); //
 
 ///
 /// @brief Convertible from at least one of reference types.
@@ -164,9 +164,9 @@ concept ConstructibleFromAnyReferenceOf =      //
 template <class To, class From>
 concept ConvertibleFromAnyReferenceOf =     //
   std::is_convertible_v<From&, To> ||       //
-  std::is_convertible_v<const From&, To> || //
+  std::is_convertible_v<From const&, To> || //
   std::is_convertible_v<From&&, To> ||      //
-  std::is_convertible_v<const From&&, To>;  //
+  std::is_convertible_v<From const&&, To>;  //
 
 ///
 /// @brief Assignable from at least one of reference types.
@@ -174,9 +174,9 @@ concept ConvertibleFromAnyReferenceOf =     //
 template <class To, class From>
 concept AssignableFromAnyReferenceOf =     //
   std::is_assignable_v<To, From&> ||       //
-  std::is_assignable_v<To, const From&> || //
+  std::is_assignable_v<To, From const&> || //
   std::is_assignable_v<To, From&&> ||      //
-  std::is_assignable_v<To, const From&&>;  //
+  std::is_assignable_v<To, From const&&>;  //
 
 ///
 /// @brief Invocable concept.

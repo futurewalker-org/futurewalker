@@ -11,7 +11,7 @@ namespace FW_DETAIL_NS
 ///
 auto SystemClock::GetCurrentTime() -> SystemTime
 {
-    const auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
+    auto const nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
     return SystemTime(nanos.count() * 1e-9);
 }
 }

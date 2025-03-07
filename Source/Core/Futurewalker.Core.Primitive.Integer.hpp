@@ -32,72 +32,72 @@ class Integer final
 
 public:
     ///
-    /// @brief
+    /// @brief Value type.
     ///
     using ValueType = T;
 
     ///
-    /// @brief
+    /// @brief Tag type.
     ///
     using TagType = Tag;
 
     ///
-    /// @brief
+    /// @brief Get minimum and maximum value pair.
     ///
-    /// @param a
-    /// @param b
+    /// @param a Value to compare.
+    /// @param b Value to compare.
     ///
-    /// @return
+    /// @return (min, max) pair.
     ///
-    static inline constexpr auto MinMax(const Integer& a, const Integer& b) noexcept -> std::pair<Integer, Integer>
+    static inline constexpr auto MinMax(Integer const& a, Integer const& b) noexcept -> std::pair<Integer, Integer>
     {
         return Utility::MinMax(a, b);
     }
 
     ///
-    /// @brief 
+    /// @brief Get larger value.
     ///
-    /// @param a 
-    /// @param b 
+    /// @param a Value to compare.
+    /// @param b Value to compare.
     ///
-    /// @return 
+    /// @return Larger value.
     ///
-    static inline constexpr auto Max(const Integer& a, const Integer& b) noexcept -> Integer
+    static inline constexpr auto Max(Integer const& a, Integer const& b) noexcept -> Integer
     {
         return Utility::Max(a, b);
     }
 
     ///
-    /// @brief 
+    /// @brief Get smaller value.
     ///
-    /// @param a 
-    /// @param b 
+    /// @param a Value to compare.
+    /// @param b Value to compare.
     ///
-    /// @return 
+    /// @return Smaller value.
     ///
-    static inline constexpr auto Min(const Integer& a, const Integer& b) noexcept -> Integer
+    static inline constexpr auto Min(Integer const& a, Integer const& b) noexcept -> Integer
     {
         return Utility::Min(a, b);
     }
 
     ///
-    /// @brief 
+    /// @brief Clamp value.
     ///
-    /// @param val 
-    /// @param min 
-    /// @param max 
+    /// @param val Value to clamp.
+    /// @param min Minimum value.
+    /// @param max Maximum value.
     ///
-    /// @return 
+    /// @return Clamped value.
     ///
-    static inline constexpr auto Clamp(const Integer& val, const Integer& min, const Integer& max) -> Integer
+    static inline constexpr auto Clamp(Integer const& val, Integer const& min, Integer const& max) -> Integer
     {
         return Utility::Clamp(val, min, max);
     }
 
 public:
     inline constexpr Integer() = delete;
-    inline constexpr Integer(const Integer&) = default;
-    inline constexpr Integer& operator=(const Integer&) = default;
+    inline constexpr Integer(Integer const&) = default;
+    inline constexpr Integer& operator=(Integer const&) = default;
 
     ///
     /// @brief Construct from integer value.
@@ -105,8 +105,8 @@ public:
     /// @param[in] value An integer value.
     ///
     template <class U>
-    requires Concepts::ImplicitlyConvertibleTo<U, T>
-    inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, T>) Integer(const U& value) noexcept
+        requires Concepts::ImplicitlyConvertibleTo<U, T>
+    inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, T>) Integer(U const& value) noexcept
       : _value {static_cast<T>(value)}
     {
     }
@@ -117,8 +117,8 @@ public:
     /// @param[in] value An integer value.
     ///
     template <class U>
-    requires Concepts::ImplicitlyConvertibleTo<U, T>
-    inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, T>) Integer(const Integer<U, Tag>& value) noexcept
+        requires Concepts::ImplicitlyConvertibleTo<U, T>
+    inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, T>) Integer(Integer<U, Tag> const& value) noexcept
       : _value {static_cast<T>(value._value)}
     {
     }
@@ -129,8 +129,8 @@ public:
     /// @param[in] value A floating point value.
     ///
     template <class U>
-    requires Concepts::ImplicitlyConvertibleTo<U, T>
-    inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, T>) Integer(const Float<U, Tag>& value) noexcept
+        requires Concepts::ImplicitlyConvertibleTo<U, T>
+    inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, T>) Integer(Float<U, Tag> const& value) noexcept
       : _value {static_cast<T>(value)}
     {
     }
@@ -146,49 +146,49 @@ public:
     }
 
 public:
-    inline constexpr Integer& operator+=(const Integer& x) noexcept
+    inline constexpr Integer& operator+=(Integer const& x) noexcept
     {
         _value += x._value;
         return *this;
     }
 
-    inline constexpr Integer& operator-=(const Integer& x) noexcept
+    inline constexpr Integer& operator-=(Integer const& x) noexcept
     {
         _value -= x._value;
         return *this;
     }
 
-    inline constexpr Integer& operator*=(const Integer& x) noexcept
+    inline constexpr Integer& operator*=(Integer const& x) noexcept
     {
         _value *= x._value;
         return *this;
     }
 
-    inline constexpr Integer& operator/=(const Integer& x) noexcept
+    inline constexpr Integer& operator/=(Integer const& x) noexcept
     {
         _value /= x._value;
         return *this;
     }
 
-    inline constexpr Integer& operator%=(const Integer& x) noexcept
+    inline constexpr Integer& operator%=(Integer const& x) noexcept
     {
         _value %= x._value;
         return *this;
     }
 
-    inline constexpr Integer& operator|=(const Integer& x) noexcept
+    inline constexpr Integer& operator|=(Integer const& x) noexcept
     {
         _value |= x._value;
         return *this;
     }
 
-    inline constexpr Integer& operator&=(const Integer& x) noexcept
+    inline constexpr Integer& operator&=(Integer const& x) noexcept
     {
         _value &= x._value;
         return *this;
     }
 
-    inline constexpr Integer& operator^=(const Integer& x) noexcept
+    inline constexpr Integer& operator^=(Integer const& x) noexcept
     {
         _value ^= x._value;
         return *this;
@@ -216,12 +216,12 @@ public:
         return Integer(+_value);
     }
 
-    friend inline constexpr auto operator<=>(const Integer& l, const Integer& r) noexcept
+    friend inline constexpr auto operator<=>(Integer const& l, Integer const& r) noexcept
     {
         return l._value <=> r._value;
     }
 
-    friend inline constexpr bool operator==(const Integer& l, const Integer& r) noexcept
+    friend inline constexpr bool operator==(Integer const& l, Integer const& r) noexcept
     {
         return l._value == r._value;
     }
@@ -238,7 +238,7 @@ private:
 template <class T, class TagType>
 struct std::hash<FW_NS::Integer<T, TagType>>
 {
-    constexpr auto operator()(const FW_NS::Integer<T, TagType>& v) const noexcept -> size_t
+    constexpr auto operator()(FW_NS::Integer<T, TagType> const& v) const noexcept -> size_t
     {
         return std::hash<T>()(static_cast<T>(v));
     }
@@ -250,7 +250,7 @@ struct std::hash<FW_NS::Integer<T, TagType>>
 template <class T, class TagType>
 struct boost::hash<FW_NS::Integer<T, TagType>>
 {
-    constexpr auto operator()(const FW_NS::Integer<T, TagType>& v) const noexcept -> size_t
+    constexpr auto operator()(FW_NS::Integer<T, TagType> const& v) const noexcept -> size_t
     {
         return std::hash<T>()(static_cast<T>(v));
     }

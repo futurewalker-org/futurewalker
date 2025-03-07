@@ -23,8 +23,8 @@ namespace FW_EXPORT
 /// If input buffer is UTF-8 but not represented by array of `char8_t`, use `StringFunction::Utf8ToString()` or `StringFunction::Utf8ToStringUnchecked()`.
 /// 
 /// ```cpp
-/// const auto buffer = std::string(...);
-/// const auto string = StringFunction::Utf8ToString(buffer);
+/// auto const buffer = std::string(...);
+/// auto const string = StringFunction::Utf8ToString(buffer);
 /// ```
 ///
 class String final
@@ -39,15 +39,15 @@ public:
     ~String() noexcept;
 
     String(ValueType c) noexcept;
-    String(Pointer<const ValueType> chars);
-    String(Pointer<const ValueType> chars, const SizeType size);
-    String(const ValueType* chars);
-    String(const ValueType* chars, const SizeType size);
+    String(Pointer<ValueType const> chars);
+    String(Pointer<ValueType const> chars, SizeType size);
+    String(ValueType const* chars);
+    String(ValueType const* chars, SizeType size);
     String(StringView view);
-    String(const String& other);
+    String(String const& other);
     String(String&& other) noexcept;
 
-    auto operator=(const String& other) -> String&;
+    auto operator=(String const& other) -> String&;
     auto operator=(String&& other) noexcept -> String&;
 
     template <Concepts::ContiguousIterator Iter>
@@ -60,8 +60,8 @@ public:
 
     operator StringView() const noexcept;
 
-    [[nodiscard]] auto operator==(const String& other) const noexcept -> bool;
-    [[nodiscard]] auto operator<=>(const String& other) const noexcept -> std::strong_ordering;
+    [[nodiscard]] auto operator==(String const& other) const noexcept -> bool;
+    [[nodiscard]] auto operator<=>(String const& other) const noexcept -> std::strong_ordering;
 
     [[nodiscard]] auto IsEmpty() const noexcept -> Bool;
     [[nodiscard]] auto GetView() const noexcept -> StringView;

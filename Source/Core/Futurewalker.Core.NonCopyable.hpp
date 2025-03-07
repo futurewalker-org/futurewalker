@@ -18,8 +18,8 @@ namespace FW_EXPORT
 struct NonCopyable
 {
     NonCopyable() = default;
-    NonCopyable(const NonCopyable&) = delete;
-    NonCopyable& operator=(const NonCopyable&) = delete;
+    NonCopyable(NonCopyable const&) = delete;
+    NonCopyable& operator=(NonCopyable const&) = delete;
 };
 }
 }

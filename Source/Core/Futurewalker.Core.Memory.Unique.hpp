@@ -231,20 +231,20 @@ public:
     }
 
     template <class U, class V>
-    friend constexpr auto operator<=>(const Unique<U>& lhs, const Unique<V>& rhs) -> std::strong_ordering;
+    friend constexpr auto operator<=>(Unique<U> const& lhs, Unique<V> const& rhs) -> std::strong_ordering;
 
     template <class U, class V>
-    friend constexpr auto operator==(const Unique<U>& lhs, const Unique<V>& rhs) -> bool;
+    friend constexpr auto operator==(Unique<U> const& lhs, Unique<V> const& rhs) -> bool;
 
     template <class U>
-    friend constexpr auto operator==(const Unique<U>& lhs, std::nullptr_t rhs) -> bool;
+    friend constexpr auto operator==(Unique<U> const& lhs, std::nullptr_t rhs) -> bool;
 };
 
 ///
 /// @brief Three-way comparison.
 ///
 template <class U, class V>
-constexpr auto operator<=>(const Unique<U>& lhs, const Unique<V>& rhs) -> std::strong_ordering
+constexpr auto operator<=>(Unique<U> const& lhs, Unique<V> const& rhs) -> std::strong_ordering
 {
     return lhs._ptr <=> rhs._ptr;
 }
@@ -253,7 +253,7 @@ constexpr auto operator<=>(const Unique<U>& lhs, const Unique<V>& rhs) -> std::s
 /// @brief Equality comparison.
 ///
 template <class U, class V>
-constexpr auto operator==(const Unique<U>& lhs, const Unique<V>& rhs) -> bool
+constexpr auto operator==(Unique<U> const& lhs, Unique<V> const& rhs) -> bool
 {
     return lhs._ptr == rhs._ptr;
 }
@@ -262,7 +262,7 @@ constexpr auto operator==(const Unique<U>& lhs, const Unique<V>& rhs) -> bool
 /// @brief Equality comparison.
 ///
 template <class U>
-constexpr auto operator==(const Unique<U>& lhs, std::nullptr_t rhs) -> bool
+constexpr auto operator==(Unique<U> const& lhs, std::nullptr_t rhs) -> bool
 {
     return lhs._ptr == rhs;
 }

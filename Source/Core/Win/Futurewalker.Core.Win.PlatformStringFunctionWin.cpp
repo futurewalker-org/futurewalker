@@ -11,7 +11,7 @@ namespace FW_DETAIL_NS
 ///
 auto PlatformStringFunctionWin::WideToUtf8(std::wstring_view sv) -> String
 {
-    const auto len = ::WideCharToMultiByte(CP_UTF8, 0, sv.data(), static_cast<int>(sv.length()), NULL, 0, NULL, NULL);
+    auto const len = ::WideCharToMultiByte(CP_UTF8, 0, sv.data(), static_cast<int>(sv.length()), NULL, 0, NULL, NULL);
     if (len == 0)
     {
         return {};
@@ -37,7 +37,7 @@ auto PlatformStringFunctionWin::Utf8ToWide(StringView sv) -> std::wstring
         return {};
     }
 
-    const auto len = ::MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(static_cast<const char8_t*>(sv.GetData())), static_cast<int>(sv.GetSize()), NULL, 0);
+    auto const len = ::MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(static_cast<char8_t const*>(sv.GetData())), static_cast<int>(sv.GetSize()), NULL, 0);
     if (len == 0)
     {
         return {};
@@ -46,7 +46,7 @@ auto PlatformStringFunctionWin::Utf8ToWide(StringView sv) -> std::wstring
     auto ret = std::wstring();
     ret.resize(len);
 
-    if (::MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(static_cast<const char8_t*>(sv.GetData())), static_cast<int>(sv.GetSize()), ret.data(), static_cast<int>(ret.length())) != 0)
+    if (::MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(static_cast<char8_t const*>(sv.GetData())), static_cast<int>(sv.GetSize()), ret.data(), static_cast<int>(ret.length())) != 0)
     {
         return ret;
     }

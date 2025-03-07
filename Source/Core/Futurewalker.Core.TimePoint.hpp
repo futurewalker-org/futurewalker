@@ -23,11 +23,11 @@ public:
     constexpr TimePoint() = default;
 
     template <class U>
-    inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, Float64>) TimePoint(const U& value) noexcept;
+    inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, Float64>) TimePoint(U const& value) noexcept;
 
-    auto operator<=>(const TimePoint&) const = default;
+    auto operator<=>(TimePoint const&) const = default;
 
-    friend inline constexpr auto operator==(const TimePoint& l, const TimePoint& r) noexcept -> bool
+    friend inline constexpr auto operator==(TimePoint const& l, TimePoint const& r) noexcept -> bool
     {
         return l._seconds == r._seconds;
     }
@@ -35,8 +35,8 @@ public:
     constexpr auto GetIntervalSinceEpoch() const noexcept -> TimeInterval;
 
 public:
-    inline constexpr auto operator+=(const TimeInterval& x) noexcept -> TimePoint&;
-    inline constexpr auto operator-=(const TimeInterval& x) noexcept -> TimePoint&;
+    inline constexpr auto operator+=(TimeInterval const& x) noexcept -> TimePoint&;
+    inline constexpr auto operator-=(TimeInterval const& x) noexcept -> TimePoint&;
 
 private:
     Float64 _seconds = 0;
@@ -49,7 +49,7 @@ private:
 ///
 template <class Clock>
 template <class U>
-inline constexpr TimePoint<Clock>::TimePoint(const U& value) noexcept
+inline constexpr TimePoint<Clock>::TimePoint(U const& value) noexcept
   : _seconds {static_cast<Float64>(value)}
 {
 }
@@ -67,7 +67,7 @@ inline constexpr auto TimePoint<Clock>::GetIntervalSinceEpoch() const noexcept -
 /// @brief Add interval to time point.
 ///
 template <class Clock>
-inline constexpr auto TimePoint<Clock>::operator+=(const TimeInterval& x) noexcept -> TimePoint&
+inline constexpr auto TimePoint<Clock>::operator+=(TimeInterval const& x) noexcept -> TimePoint&
 {
     _seconds += static_cast<Float64>(x);
     return *this;
@@ -77,7 +77,7 @@ inline constexpr auto TimePoint<Clock>::operator+=(const TimeInterval& x) noexce
 /// @brief Subtract time interval from time point.
 ///
 template <class Clock>
-inline constexpr auto TimePoint<Clock>::operator-=(const TimeInterval& x) noexcept -> TimePoint&
+inline constexpr auto TimePoint<Clock>::operator-=(TimeInterval const& x) noexcept -> TimePoint&
 {
     _seconds -= static_cast<Float64>(x);
     return *this;

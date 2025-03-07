@@ -32,15 +32,15 @@ public:
 
 public:
     Identifier() = delete;
-    Identifier(const Identifier&) = default;
-    Identifier& operator=(const Identifier&) = default;
+    Identifier(Identifier const&) = default;
+    Identifier& operator=(Identifier const&) = default;
 
     ///
     /// @brief Construct Identifier from value.
     ///
     template <class U>
     requires Concepts::ImplicitlyConvertibleTo<U, ValueType>
-    inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, ValueType>) Identifier(const U& value) noexcept
+    inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, ValueType>) Identifier(U const& value) noexcept
       : _value {static_cast<ValueType>(value)}
     {
     }
@@ -63,7 +63,7 @@ public:
         return Identifier<OtherValue, OtherTag>(_value);
     }
 
-    constexpr auto operator<=>(const Identifier&) const = default;
+    constexpr auto operator<=>(Identifier const&) const = default;
 
 private:
     ValueType _value;
@@ -79,7 +79,7 @@ using Id = Identifier<UInt64, void>;
 template <class Value, class Tag>
 struct std::hash<FW_NS::Identifier<Value, Tag>>
 {
-    constexpr auto operator()(const FW_NS::Identifier<Value, Tag>& v) const noexcept -> size_t
+    constexpr auto operator()(FW_NS::Identifier<Value, Tag> const& v) const noexcept -> size_t
     {
         return std::hash<Value>()(static_cast<Value>(v));
     }
@@ -88,7 +88,7 @@ struct std::hash<FW_NS::Identifier<Value, Tag>>
 template <class Value, class Tag>
 struct boost::hash<FW_NS::Identifier<Value, Tag>>
 {
-    constexpr auto operator()(const FW_NS::Identifier<Value, Tag>& v) const noexcept -> size_t
+    constexpr auto operator()(FW_NS::Identifier<Value, Tag> const& v) const noexcept -> size_t
     {
         return boost::hash<Value>()(static_cast<Value>(v));
     }

@@ -34,22 +34,22 @@ public:
     using SizeType = SInt64;
     using IndexType = SInt64;
     using Pointer = FW_NS::Pointer<ValueType>;
-    using ConstPointer = FW_NS::Pointer<const ValueType>;
+    using ConstPointer = FW_NS::Pointer<ValueType const>;
     using Reference = ValueType&;
-    using ConstReference = const ValueType&;
+    using ConstReference = ValueType const&;
     using ConstIterator = ConstPointerIterator<ValueType, StringView>;
     using Iterator = ConstIterator;
 
 public:
     constexpr StringView() noexcept = default;
-    constexpr StringView(const StringView&) noexcept = default;
+    constexpr StringView(StringView const&) noexcept = default;
     constexpr StringView(ConstPointer str) noexcept;
     constexpr StringView(ConstPointer str, SizeType len) noexcept;
-    constexpr StringView(const ValueType* str) noexcept;
-    constexpr StringView(const ValueType* str, SizeType len) noexcept;
+    constexpr StringView(ValueType const* str) noexcept;
+    constexpr StringView(ValueType const* str, SizeType len) noexcept;
 
     template <Concepts::Integral T>
-    StringView(const T&) = delete;
+    StringView(T const&) = delete;
 
     StringView(std::nullptr_t) = delete;
 
@@ -57,8 +57,8 @@ public:
     constexpr StringView(It begin, It end);
 
     [[nodiscard]] constexpr auto operator[](IndexType index) const -> ConstReference;
-    [[nodiscard]] constexpr auto operator==(const StringView& other) const noexcept -> bool;
-    [[nodiscard]] constexpr auto operator<=>(const StringView& other) const noexcept -> std::strong_ordering;
+    [[nodiscard]] constexpr auto operator==(StringView const& other) const noexcept -> bool;
+    [[nodiscard]] constexpr auto operator<=>(StringView const& other) const noexcept -> std::strong_ordering;
 
     [[nodiscard]] constexpr auto begin() const noexcept -> Iterator;
     [[nodiscard]] constexpr auto cbegin() const noexcept -> ConstIterator;
@@ -70,10 +70,10 @@ public:
     [[nodiscard]] constexpr auto GetData() const noexcept -> ConstPointer;
 
     [[nodiscard]] constexpr auto GetSubstring(IndexType begin, IndexType end) const noexcept -> StringView;
-    [[nodiscard]] constexpr auto Contains(const StringView& str) const noexcept -> Bool;
-    [[nodiscard]] constexpr auto Count(const StringView& str) const noexcept -> SizeType;
-    [[nodiscard]] constexpr auto StartsWith(const StringView& str) const noexcept -> Bool;
-    [[nodiscard]] constexpr auto EndsWith(const StringView& str) const noexcept -> Bool;
+    [[nodiscard]] constexpr auto Contains(StringView const& str) const noexcept -> Bool;
+    [[nodiscard]] constexpr auto Count(StringView const& str) const noexcept -> SizeType;
+    [[nodiscard]] constexpr auto StartsWith(StringView const& str) const noexcept -> Bool;
+    [[nodiscard]] constexpr auto EndsWith(StringView const& str) const noexcept -> Bool;
 
 private:
     ConstPointer _data = nullptr;
@@ -101,16 +101,16 @@ constexpr StringView::StringView(ConstPointer str, SizeType len) noexcept
 ///
 /// @brief Construct StringView from null-terminated string.
 ///
-constexpr StringView::StringView(const ValueType* str) noexcept
-  : StringView(FW_NS::Pointer<const ValueType>(str))
+constexpr StringView::StringView(ValueType const* str) noexcept
+  : StringView(FW_NS::Pointer<ValueType const>(str))
 {
 }
 
 ///
 /// @brief Construct StringView from char span.
 ///
-constexpr StringView::StringView(const ValueType* str, SizeType len) noexcept
-  : StringView(FW_NS::Pointer<const ValueType>(str), len)
+constexpr StringView::StringView(ValueType const* str, SizeType len) noexcept
+  : StringView(FW_NS::Pointer<ValueType const>(str), len)
 {
 }
 
@@ -137,7 +137,7 @@ constexpr auto StringView::operator[](IndexType index) const -> ConstReference
 ///
 /// @brief operator==
 ///
-constexpr auto StringView::operator==(const StringView& other) const noexcept -> bool
+constexpr auto StringView::operator==(StringView const& other) const noexcept -> bool
 {
     return operator<=>(other) == std::strong_ordering::equal;
 }
@@ -145,14 +145,14 @@ constexpr auto StringView::operator==(const StringView& other) const noexcept ->
 ///
 /// @brief operator<=>
 ///
-constexpr auto StringView::operator<=>(const StringView& other) const noexcept -> std::strong_ordering
+constexpr auto StringView::operator<=>(StringView const& other) const noexcept -> std::strong_ordering
 {
-    const auto ord = (GetSize() <=> other.GetSize());
+    auto const ord = (GetSize() <=> other.GetSize());
     if (ord == std::strong_ordering::equal)
     {
-        const auto data = static_cast<const char8_t*>(GetData());
-        const auto otherData = static_cast<const char8_t*>(other.GetData());
-        const auto r = std::char_traits<char8_t>::compare(data, otherData, static_cast<size_t>(GetSize()));
+        auto const data = static_cast<const char8_t*>(GetData());
+        auto const otherData = static_cast<const char8_t*>(other.GetData());
+        auto const r = std::char_traits<char8_t>::compare(data, otherData, static_cast<size_t>(GetSize()));
         return (r == 0) ? std::strong_ordering::equal : ((r < 0) ? std::strong_ordering::less : std::strong_ordering::greater);
     }
     return ord;
@@ -222,15 +222,15 @@ constexpr auto StringView::GetData() const noexcept -> ConstPointer
 ///
 constexpr auto StringView::GetSubstring(IndexType begin, IndexType end) const noexcept -> StringView
 {
-    const auto b = Utility::Clamp(begin, IndexType(0), GetSize());
-    const auto e = Utility::Clamp(end, IndexType(0), GetSize());
+    auto const b = Utility::Clamp(begin, IndexType(0), GetSize());
+    auto const e = Utility::Clamp(end, IndexType(0), GetSize());
     return StringView(GetData() + b, Utility::Max(e - b, SizeType(0)));
 }
 
 ///
 /// @brief Returns true if the string contains the specified string.
 ///
-constexpr auto StringView::Contains(const StringView& str) const noexcept -> Bool
+constexpr auto StringView::Contains(StringView const& str) const noexcept -> Bool
 {
     auto i1 = SizeType(0);
     auto i2 = SizeType(0);
@@ -255,7 +255,7 @@ constexpr auto StringView::Contains(const StringView& str) const noexcept -> Boo
 ///
 /// @brief Count string.
 ///
-constexpr auto StringView::Count(const StringView& str) const noexcept -> SizeType
+constexpr auto StringView::Count(StringView const& str) const noexcept -> SizeType
 {
     auto i1 = SizeType(0);
     auto i2 = SizeType(0);
@@ -282,7 +282,7 @@ constexpr auto StringView::Count(const StringView& str) const noexcept -> SizeTy
 ///
 /// @brief Starts with string?
 ///
-constexpr auto StringView::StartsWith(const StringView& str) const noexcept -> Bool
+constexpr auto StringView::StartsWith(StringView const& str) const noexcept -> Bool
 {
     if (GetSize() < str.GetSize())
     {
@@ -302,14 +302,14 @@ constexpr auto StringView::StartsWith(const StringView& str) const noexcept -> B
 ///
 /// @brief Ends with string?
 ///
-constexpr auto StringView::EndsWith(const StringView& str) const noexcept -> Bool
+constexpr auto StringView::EndsWith(StringView const& str) const noexcept -> Bool
 {
     if (GetSize() < str.GetSize())
     {
         return false;
     }
 
-    const auto base = GetSize() - str.GetSize();
+    auto const base = GetSize() - str.GetSize();
     for (SizeType i = 0; i < str.GetSize(); ++i)
     {
         if ((*this)[base + i] != str[i])

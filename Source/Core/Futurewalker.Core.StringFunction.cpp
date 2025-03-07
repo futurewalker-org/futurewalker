@@ -13,7 +13,7 @@ template <class T, class Tag>
 struct fmt::formatter<FW_NS::Integer<T, Tag>, char8_t> : fmt::formatter<T, char8_t>
 {
     template <class FormatContext>
-    auto format(const FW_NS::Integer<T, Tag>& a, FormatContext& ctx) const
+    auto format(FW_NS::Integer<T, Tag> const& a, FormatContext& ctx) const
     {
         return fmt::formatter<T, char8_t>::format(static_cast<T>(a), ctx);
     }
@@ -23,7 +23,7 @@ template <class T, class Tag>
 struct fmt::formatter<FW_NS::Float<T, Tag>, char8_t> : fmt::formatter<T, char8_t>
 {
     template <class FormatContext>
-    auto format(const FW_NS::Float<T, Tag>& a, FormatContext& ctx) const
+    auto format(FW_NS::Float<T, Tag> const& a, FormatContext& ctx) const
     {
         return fmt::formatter<T, char8_t>::format(static_cast<T>(a), ctx);
     }
@@ -33,7 +33,7 @@ template <class Tag>
 struct fmt::formatter<FW_NS::Boolean<Tag>, char8_t> : fmt::formatter<bool, char8_t>
 {
     template <class FormatContext>
-    auto format(const FW_NS::Boolean<Tag>& a, FormatContext& ctx) const
+    auto format(FW_NS::Boolean<Tag> const& a, FormatContext& ctx) const
     {
         return fmt::formatter<bool, char8_t>::format(static_cast<bool>(a), ctx);
     }
@@ -43,9 +43,9 @@ template <>
 struct fmt::formatter<FW_NS::StringView, char8_t> : fmt::formatter<std::u8string_view, char8_t>
 {
     template <class FormatContext>
-    auto format(const FW_NS::StringView& a, FormatContext& ctx) const
+    auto format(FW_NS::StringView const& a, FormatContext& ctx) const
     {
-        const auto str = std::basic_string_view(static_cast<const char8_t*>(a.GetData()), static_cast<size_t>(a.GetSize()));
+        auto const str = std::basic_string_view(static_cast<const char8_t*>(a.GetData()), static_cast<size_t>(a.GetSize()));
         return fmt::formatter<std::u8string_view, char8_t>::format(str, ctx);
     }
 };
@@ -64,9 +64,9 @@ namespace FW_DETAIL_NS
 ///
 /// @return Constructed String.
 ///
-auto StringFunction::ConvertUtf8ToString(std::string_view sv) -> String
+auto StringFunction::ConvertUtf8ToString(std::string_view const sv) -> String
 {
-    const auto utf8Str = boost::locale::conv::utf_to_utf<char8_t>(sv.data(), sv.data() + sv.length(), boost::locale::conv::method_type::skip);
+    auto const utf8Str = boost::locale::conv::utf_to_utf<char8_t>(sv.data(), sv.data() + sv.length(), boost::locale::conv::method_type::skip);
     return String(utf8Str.data(), SInt64(utf8Str.length()));
 }
 
@@ -81,7 +81,7 @@ auto StringFunction::ConvertUtf8ToString(std::string_view sv) -> String
 ///
 /// @return Constructed String.
 ///
-auto StringFunction::ConvertUtf8ToStringUnchecked(std::string_view sv) -> String
+auto StringFunction::ConvertUtf8ToStringUnchecked(std::string_view const sv) -> String
 {
     // `String` uses `memcpy` to copy buffer, so we can use `reinterpret_cast` without UB here.
     // NOTE: This is implementation detail. Users should not rely on this behavior.
@@ -98,23 +98,23 @@ auto StringFunction::ConvertUtf8ToStringUnchecked(std::string_view sv) -> String
 ///
 /// @throw Exception on format error.
 ///
-auto StringFunction::FormatImpl(const StringView& formatter, const std::span<const FormatParameter>& params) -> String
+auto StringFunction::FormatImpl(StringView const formatter, std::span<FormatParameter const> const& params) -> String
 {
     using FormatContext = fmt::buffered_context<char8_t>;
 
     fmt::dynamic_format_arg_store<FormatContext> args;
     args.reserve(params.size(), 0);
 
-    for (const auto& param : params)
+    for (auto const& param : params)
     {
-        std::visit([&](const auto& v) { args.push_back(v); }, param);
+        std::visit([&](auto const& v) { args.push_back(v); }, param);
     }
 
     try
     {
-        const auto data = static_cast<const char8_t*>(formatter.GetData());
-        const auto size = static_cast<size_t>(formatter.GetSize());
-        const auto str = fmt::vformat<char8_t>(std::basic_string_view(data, size), args);
+        auto const data = static_cast<char8_t const*>(formatter.GetData());
+        auto const size = static_cast<size_t>(formatter.GetSize());
+        auto const str = fmt::vformat<char8_t>(std::basic_string_view(data, size), args);
         return String(StringView(str.data(), StringView::SizeType(str.length())));
     }
     catch (fmt::format_error&)

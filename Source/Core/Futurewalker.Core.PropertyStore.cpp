@@ -23,7 +23,7 @@ auto PropertyStore::GetPropertyStore() -> PropertyStore&
 ///
 /// @brief Get property store.
 ///
-auto PropertyStore::GetPropertyStore() const -> const PropertyStore&
+auto PropertyStore::GetPropertyStore() const -> PropertyStore const&
 {
     return *this;
 }

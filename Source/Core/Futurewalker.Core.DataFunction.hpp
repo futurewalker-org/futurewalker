@@ -18,7 +18,7 @@ class DataFunction final : NonConstructible
 {
 public:
     template <class T, class U>
-    static void CopyMemory(Pointer<U> dst, Pointer<const T> src, const SInt64 size) noexcept;
+    static void CopyMemory(Pointer<U> dst, Pointer<T const> src, SInt64 const size) noexcept;
 };
 
 ///
@@ -34,11 +34,11 @@ public:
 /// @note `size` should be greater than zero.
 ///
 template <class T, class U>
-void DataFunction::CopyMemory(Pointer<U> dst, Pointer<const T> src, const SInt64 size) noexcept
+void DataFunction::CopyMemory(Pointer<U> dst, Pointer<T const> src, SInt64 const size) noexcept
 {
     if (dst && src && size > 0)
     {
-        std::memcpy(static_cast<U*>(dst), static_cast<const T*>(src), static_cast<size_t>(size));
+        std::memcpy(static_cast<U*>(dst), static_cast<T const*>(src), static_cast<size_t>(size));
     }
 }
 }

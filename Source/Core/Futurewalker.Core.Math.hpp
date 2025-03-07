@@ -19,40 +19,40 @@ class Math : NonConstructible
 {
 public:
     template <Concepts::FloatingPoint T>
-    static inline constexpr Bool IsFinite(const T& value) noexcept;
+    static inline constexpr Bool IsFinite(T const& value) noexcept;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr Bool IsInfinite(const T& value) noexcept;
+    static inline constexpr Bool IsInfinite(T const& value) noexcept;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr Bool IsNaN(const T& value) noexcept;
+    static inline constexpr Bool IsNaN(T const& value) noexcept;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr auto Trunc(const T& value) noexcept -> T;
+    static inline constexpr auto Trunc(T const& value) noexcept -> T;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr auto Floor(const T& value) noexcept -> T;
+    static inline constexpr auto Floor(T const& value) noexcept -> T;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr auto Ceil(const T& value) noexcept -> T;
+    static inline constexpr auto Ceil(T const& value) noexcept -> T;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr auto Round(const T& value) noexcept -> T;
+    static inline constexpr auto Round(T const& value) noexcept -> T;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr auto Abs(const T& value) noexcept -> T;
+    static inline constexpr auto Abs(T const& value) noexcept -> T;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr auto Sqrt(const T& value) noexcept -> T;
+    static inline constexpr auto Sqrt(T const& value) noexcept -> T;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr auto Pow(const T& base, const T& exponent) noexcept -> T;
+    static inline constexpr auto Pow(T const& base, T const& exponent) noexcept -> T;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr Bool IsNearlyEqual(const T& lhs, const T& rhs, const T& tolerance = 1e-6) noexcept;
+    static inline constexpr Bool IsNearlyEqual(T const& lhs, T const& rhs, T const& tolerance = 1e-6) noexcept;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr Bool IsNearlyEqualRelative(const T& lhs, const T& rhs, const T& precision = 1e-6, const T& minTolerance = 1e-6) noexcept;
+    static inline constexpr Bool IsNearlyEqualRelative(T const& lhs, T const& rhs, T const& precision = 1e-6, T const& minTolerance = 1e-6) noexcept;
 };
 
 ///
@@ -67,7 +67,7 @@ public:
 /// @return `true` when `value` is finite, otherwise `false`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr Bool Math::IsFinite(const T& value) noexcept
+inline constexpr Bool Math::IsFinite(T const& value) noexcept
 {
     return std::isfinite(value);
 }
@@ -82,7 +82,7 @@ inline constexpr Bool Math::IsFinite(const T& value) noexcept
 /// @return `true` when `value` is infinite, otherwise `false`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr Bool Math::IsInfinite(const T& value) noexcept
+inline constexpr Bool Math::IsInfinite(T const& value) noexcept
 {
     return std::isinf(value);
 }
@@ -99,7 +99,7 @@ inline constexpr Bool Math::IsInfinite(const T& value) noexcept
 /// @return `true` when `value` is not-a-number, otherwise `false`.W
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr Bool Math::IsNaN(const T& value) noexcept
+inline constexpr Bool Math::IsNaN(T const& value) noexcept
 {
     return std::isnan(value);
 }
@@ -114,7 +114,7 @@ inline constexpr Bool Math::IsNaN(const T& value) noexcept
 /// @return Truncated value of `value`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr auto Math::Trunc(const T& value) noexcept -> T
+inline constexpr auto Math::Trunc(T const& value) noexcept -> T
 {
     if (IsFinite(value))
     {
@@ -133,11 +133,11 @@ inline constexpr auto Math::Trunc(const T& value) noexcept -> T
 /// @return Floored value of `value`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr auto Math::Floor(const T& value) noexcept -> T
+inline constexpr auto Math::Floor(T const& value) noexcept -> T
 {
     if (IsFinite(value))
     {
-        const auto digit = Trunc(value);
+        auto const digit = Trunc(value);
         return ((value - digit) < static_cast<T>(0.0)) ? digit - static_cast<T>(1.0) : digit;
     }
     return value;
@@ -153,11 +153,11 @@ inline constexpr auto Math::Floor(const T& value) noexcept -> T
 /// @return Ceiled value of `value`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr auto Math::Ceil(const T& value) noexcept -> T
+inline constexpr auto Math::Ceil(T const& value) noexcept -> T
 {
     if (IsFinite(value))
     {
-        const auto digit = Trunc(value);
+        auto const digit = Trunc(value);
         return ((value - digit) <= static_cast<T>(0.0)) ? digit : digit + static_cast<T>(1.0);
     }
     return value;
@@ -173,11 +173,11 @@ inline constexpr auto Math::Ceil(const T& value) noexcept -> T
 /// @return Rounded value of `value`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr auto Math::Round(const T& value) noexcept -> T
+inline constexpr auto Math::Round(T const& value) noexcept -> T
 {
     if (IsFinite(value))
     {
-        const auto floor = Floor(value);
+        auto const floor = Floor(value);
         if ((value - floor) < static_cast<T>(0.5))
         {
             return floor;
@@ -199,7 +199,7 @@ inline constexpr auto Math::Round(const T& value) noexcept -> T
 /// @return Absolute value of `value`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr auto Math::Abs(const T& value) noexcept -> T
+inline constexpr auto Math::Abs(T const& value) noexcept -> T
 {
     return std::abs(value);
 }
@@ -214,7 +214,7 @@ inline constexpr auto Math::Abs(const T& value) noexcept -> T
 /// @return Square root of `value`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr auto Math::Sqrt(const T& value) noexcept -> T
+inline constexpr auto Math::Sqrt(T const& value) noexcept -> T
 {
     return std::sqrt(value);
 }
@@ -230,7 +230,7 @@ inline constexpr auto Math::Sqrt(const T& value) noexcept -> T
 /// @return `base` raised by power of `exponent`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr auto Math::Pow(const T& base, const T& exponent) noexcept -> T
+inline constexpr auto Math::Pow(T const& base, T const& exponent) noexcept -> T
 {
     return std::pow(base, exponent);
 }
@@ -251,7 +251,7 @@ inline constexpr auto Math::Pow(const T& base, const T& exponent) noexcept -> T
 /// @return `true` if `lhs` and `rhs` are equal within `tolerance`, otherwise `false`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr Bool Math::IsNearlyEqual(const T& lhs, const T& rhs, const T& tolerance) noexcept
+inline constexpr Bool Math::IsNearlyEqual(T const& lhs, T const& rhs, T const& tolerance) noexcept
 {
     if (rhs == lhs)
     {
@@ -277,11 +277,11 @@ inline constexpr Bool Math::IsNearlyEqual(const T& lhs, const T& rhs, const T& t
 /// @return `true` if `lhs` and `rhs` are equal within relative `precision`, otherwise `false`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr Bool Math::IsNearlyEqualRelative(const T& lhs, const T& rhs, const T& precision, const T& minTolerance) noexcept
+inline constexpr Bool Math::IsNearlyEqualRelative(T const& lhs, T const& rhs, T const& precision, T const& minTolerance) noexcept
 {
-    const auto l = Abs(lhs);
-    const auto r = Abs(rhs);
-    const auto diff = Abs(rhs - lhs);
+    auto const l = Abs(lhs);
+    auto const r = Abs(rhs);
+    auto const diff = Abs(rhs - lhs);
 
     if (lhs == rhs)
     {

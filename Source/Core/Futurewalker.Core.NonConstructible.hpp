@@ -15,7 +15,7 @@ namespace FW_EXPORT
 struct NonConstructible
 {
     NonConstructible() = delete;
-    NonConstructible(const NonConstructible&) = delete;
+    NonConstructible(NonConstructible const&) = delete;
 };
 }
 }

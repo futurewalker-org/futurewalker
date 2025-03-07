@@ -16,15 +16,15 @@ class Boolean final
 {
 public:
     inline constexpr Boolean() = delete;
-    inline constexpr Boolean(const Boolean&) = default;
-    inline constexpr auto operator=(const Boolean&) -> Boolean& = default;
+    inline constexpr Boolean(Boolean const&) = default;
+    inline constexpr auto operator=(Boolean const&) -> Boolean& = default;
 
     ///
     /// @brief Construct boolean value.
     ///
     /// @param[in] value Boolean value.
     ///
-    inline constexpr Boolean(const T& value) noexcept
+    inline constexpr Boolean(T const& value) noexcept
       : _value {value}
     {
     }
@@ -33,34 +33,34 @@ public:
     /// @brief Disallow implicit conversions.
     ///
     template <class U>
-    requires (Concepts::Arithmetic<U> || Concepts::Pointer<U> || Concepts::Array<U>)
-    Boolean(const U&) = delete;
+    requires(Concepts::Arithmetic<U> || Concepts::Pointer<U> || Concepts::Array<U>)
+    Boolean(U const&) = delete;
 
     ///
     /// @brief Conversion operator to bool.
     ///
     /// @note Some libraries like Catch2 does static_cast<const bool&>() internally, which breaks with explicit operator bool() on gcc and msvc.
     ///
-    inline explicit constexpr operator const bool&() const noexcept
+    inline explicit constexpr operator bool const&() const noexcept
     {
-        return static_cast<const bool&>(_value);
+        return static_cast<bool const&>(_value);
     }
 
     ///
     /// @brief Negation of boolean.
     ///
-    inline constexpr Boolean operator!() const noexcept
+    inline constexpr auto operator!() const noexcept -> Boolean
     {
         return Boolean(!_value);
     }
 
 public:
-    friend inline constexpr bool operator==(const Boolean& l, const Boolean& r) noexcept
+    friend inline constexpr bool operator==(Boolean const& l, Boolean const& r) noexcept
     {
         return l._value == r._value;
     }
 
-    friend inline constexpr bool operator!=(const Boolean& l, const Boolean& r) noexcept
+    friend inline constexpr bool operator!=(Boolean const& l, Boolean const& r) noexcept
     {
         return l._value != r._value;
     }

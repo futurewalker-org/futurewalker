@@ -23,8 +23,8 @@ class Weak final
 
 public:
     Weak() = default;
-    Weak(const Weak&) = default;
-    Weak& operator=(const Weak&) = default;
+    Weak(Weak const&) = default;
+    Weak& operator=(Weak const&) = default;
 
     ///
     /// @brief Construct from rvalue.
@@ -56,7 +56,7 @@ public:
     /// @brief Copy from other weak.
     ///
     template <class U>
-    Weak(const Weak<U>& other)
+    Weak(Weak<U> const& other)
       : _weak {other._weak}
     {
     }
@@ -65,7 +65,7 @@ public:
     /// @brief Assign other weak.
     ///
     template <class U>
-    Weak& operator=(const Weak<U>& other)
+    Weak& operator=(Weak<U> const& other)
     {
         _weak = other._weak;
         return *this;
@@ -75,7 +75,7 @@ public:
     /// @brief Construct from shared<T>.
     ///
     template <class U>
-    Weak(const Shared<U>& u)
+    Weak(Shared<U> const& u)
       : _weak {u._ptr}
     {
     }
@@ -111,7 +111,7 @@ public:
     /// @brief Compare based on ownership.
     ///
     template <class U>
-    Bool IsOwnerBefore(const Weak<U>& other) const
+    Bool IsOwnerBefore(Weak<U> const& other) const
     {
         return _weak.owner_before(other._weak);
     }

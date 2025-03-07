@@ -25,8 +25,8 @@ class Tracked final
 
 public:
     Tracked() = default;
-    Tracked(const Tracked&) = default;
-    Tracked& operator=(const Tracked&) = default;
+    Tracked(Tracked const&) = default;
+    Tracked& operator=(Tracked const&) = default;
 
     ///
     /// @brief Construct from rvalue.
@@ -58,7 +58,7 @@ public:
     /// @brief Copy from other weak.
     ///
     template <class U>
-    Tracked(const Tracked<U>& other)
+    Tracked(Tracked<U> const& other)
       : _weak {other._weak}
     {
     }
@@ -67,7 +67,7 @@ public:
     /// @brief Assign other weak.
     ///
     template <class U>
-    Tracked& operator=(const Tracked<U>& other)
+    Tracked& operator=(Tracked<U> const& other)
     {
         _weak = other._weak;
         return *this;
@@ -77,7 +77,7 @@ public:
     /// @brief Construct from Unique<T>.
     ///
     template <class U>
-    Tracked(const Unique<U>& u)
+    Tracked(Unique<U> const& u)
       : _weak {u._ptr}
     {
     }
@@ -86,7 +86,7 @@ public:
     /// @brief Construct from Shared<T>.
     ///
     template <class U>
-    Tracked(const Shared<U>& u)
+    Tracked(Shared<U> const& u)
       : _weak {u._ptr}
     {
     }
@@ -95,7 +95,7 @@ public:
     /// @brief Construct from Weak<T>.
     ///
     template <class U>
-    Tracked(const Weak<U>& u)
+    Tracked(Weak<U> const& u)
       : _weak {u._weak}
     {
     }

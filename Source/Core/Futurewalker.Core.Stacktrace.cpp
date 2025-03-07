@@ -9,7 +9,7 @@ namespace FW_DETAIL_NS
 class Stacktrace::Impl
 {
 public:
-    Impl(const boost::stacktrace::stacktrace& stacktrace)
+    Impl(boost::stacktrace::stacktrace const& stacktrace)
       : stacktrace {stacktrace}
     {
     }
@@ -40,7 +40,7 @@ Stacktrace::~Stacktrace() noexcept = default;
 ///
 /// @brief Copy constructor.
 ///
-Stacktrace::Stacktrace(const Stacktrace& other)
+Stacktrace::Stacktrace(Stacktrace const& other)
   : _impl {other._impl ? std::make_unique<Impl>(*other._impl) : nullptr}
 {
 }
@@ -56,7 +56,7 @@ Stacktrace::Stacktrace(Stacktrace&& other) noexcept
 ///
 /// @brief Copy assignment operator.
 ///
-auto Stacktrace::operator=(const Stacktrace& other) -> Stacktrace&
+auto Stacktrace::operator=(Stacktrace const& other) -> Stacktrace&
 {
     _impl = other._impl ? std::make_unique<Impl>(*other._impl) : nullptr;
     return *this;
@@ -82,7 +82,7 @@ auto Stacktrace::IsEmpty() const -> Bool
 ///
 /// @brief Get string representation of stacktrace.
 ///
-auto Stacktrace::GetString() const -> std::string
+auto Stacktrace::GetCString() const -> std::string
 {
     return _impl ? to_string(_impl->stacktrace) : "";
 }

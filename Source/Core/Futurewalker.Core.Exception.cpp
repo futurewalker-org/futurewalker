@@ -14,15 +14,15 @@ namespace FW_DETAIL_NS
 /// @param location Source location.
 /// @param stacktrace Stacktrace.
 ///
-Exception::Exception(const ErrorCode errorCode, const std::string_view message, const std::source_location location, const Stacktrace stacktrace)
+Exception::Exception(ErrorCode const errorCode, std::string_view const message, std::source_location const location, Stacktrace const stacktrace)
   : exception()
   , _errorCode {errorCode}
   , _location {location}
   , _stacktrace {stacktrace}
 {
-    const auto fileName = location.file_name();
-    const auto functionName = location.function_name();
-    const auto stacktraceString = _stacktrace.GetString();
+    auto const fileName = location.file_name();
+    auto const functionName = location.function_name();
+    auto const stacktraceString = _stacktrace.GetCString();
     _what = std::format("{}({},{}) {}: code={} {}\n{}", fileName, location.line(), location.column(), functionName, std::to_underlying(errorCode), message, stacktraceString);
 }
 
@@ -53,7 +53,7 @@ auto Exception::GetStacktrace() const -> Stacktrace
 ///
 /// @brief Returns the explanatory string.
 ///
-auto Exception::what() const noexcept -> const char*
+auto Exception::what() const noexcept -> char const*
 {
     return _what.c_str();
 }

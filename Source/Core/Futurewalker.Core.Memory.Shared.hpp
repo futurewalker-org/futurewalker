@@ -43,8 +43,8 @@ public:
 
 public:
     Shared() = default;
-    Shared(const Shared&) = default;
-    Shared& operator=(const Shared&) = default;
+    Shared(Shared const&) = default;
+    Shared& operator=(Shared const&) = default;
 
     ///
     /// @brief Construct from std::shared_ptr.
@@ -195,7 +195,7 @@ public:
     ///
     /// @brief Reset.
     ///
-    void Reset() noexcept
+    auto Reset() noexcept -> void
     {
         _ptr.reset();
     }
@@ -203,7 +203,7 @@ public:
     ///
     /// @brief Swap.
     ///
-    void Swap(Shared& other) noexcept
+    auto Swap(Shared& other) noexcept -> void
     {
         if (this != &other)
         {
@@ -215,7 +215,7 @@ public:
     /// @brief Compare based on ownership.
     ///
     template <class U>
-    Bool IsOwnerBefore(const Shared<U>& other) const
+    auto IsOwnerBefore(Shared<U> const& other) const -> Bool
     {
         return _ptr.owner_before(other._ptr);
     }
@@ -275,20 +275,20 @@ public:
     }
 
     template <class U, class V>
-    friend constexpr auto operator<=>(const Shared<U>& lhs, const Shared<V>& rhs) -> std::strong_ordering;
+    friend constexpr auto operator<=>(Shared<U> const& lhs, Shared<V> const& rhs) -> std::strong_ordering;
 
     template <class U, class V>
-    friend constexpr auto operator==(const Shared<U>& lhs, const Shared<V>& rhs) -> bool;
+    friend constexpr auto operator==(Shared<U> const& lhs, Shared<V> const& rhs) -> bool;
 
     template <class U>
-    friend constexpr auto operator==(const Shared<U>& lhs, std::nullptr_t rhs) -> bool;
+    friend constexpr auto operator==(Shared<U> const& lhs, std::nullptr_t rhs) -> bool;
 };
 
 ///
 /// @brief Three-way comparison.
 ///
 template <class U, class V>
-constexpr auto operator<=>(const Shared<U>& lhs, const Shared<V>& rhs) -> std::strong_ordering
+constexpr auto operator<=>(Shared<U> const& lhs, Shared<V> const& rhs) -> std::strong_ordering
 {
     return lhs._ptr <=> rhs._ptr;
 }
@@ -297,7 +297,7 @@ constexpr auto operator<=>(const Shared<U>& lhs, const Shared<V>& rhs) -> std::s
 /// @brief Equality comparison.
 ///
 template <class U, class V>
-constexpr auto operator==(const Shared<U>& lhs, const Shared<V>& rhs) -> bool
+constexpr auto operator==(Shared<U> const& lhs, Shared<V> const& rhs) -> bool
 {
     return lhs._ptr == rhs._ptr;
 }
@@ -306,7 +306,7 @@ constexpr auto operator==(const Shared<U>& lhs, const Shared<V>& rhs) -> bool
 /// @brief  Equality comparison.
 ///
 template <class U>
-constexpr auto operator==(const Shared<U>& lhs, std::nullptr_t rhs) -> bool
+constexpr auto operator==(Shared<U> const& lhs, std::nullptr_t rhs) -> bool
 {
     return lhs._ptr == rhs;
 }

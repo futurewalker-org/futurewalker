@@ -22,19 +22,20 @@ public:
     static auto Make() -> Unique<PropertyStore>;
 
     PropertyStore() = default;
-    PropertyStore(const PropertyStore&) = default;
-    PropertyStore& operator=(const PropertyStore&) = default;
+    PropertyStore(PropertyStore const&) = default;
     PropertyStore(PropertyStore&&) noexcept = default;
-    PropertyStore& operator=(PropertyStore&&) noexcept = default;
+
+    auto operator=(PropertyStore const&) -> PropertyStore& = default;
+    auto operator=(PropertyStore&&) noexcept -> PropertyStore& = default;
 
     auto GetPropertyStore() -> PropertyStore&;
-    auto GetPropertyStore() const -> const PropertyStore&;
+    auto GetPropertyStore() const -> PropertyStore const&;
 
     template <class Owner, class T>
-    static auto SetValue(Owner& owner, const Id key, const T& value) -> void;
+    static auto SetValue(Owner& owner, Id const key, const T& value) -> void;
 
     template <class T, class Owner>
-    static auto GetValue(const Owner& owner, const Id key) -> Optional<T>;
+    static auto GetValue(Owner const& owner, Id const key) -> Optional<T>;
 
 private:
     HashMap<Id, std::any> _map;
@@ -44,7 +45,7 @@ private:
 /// @brief Set property value.
 ///
 template <class Owner, class T>
-auto PropertyStore::SetValue(Owner& owner, const Id key, const T& value) -> void
+auto PropertyStore::SetValue(Owner& owner, Id const key, const T& value) -> void
 {
     auto& map = owner.GetPropertyStore()._map;
     map.emplace(key, value);
@@ -54,12 +55,12 @@ auto PropertyStore::SetValue(Owner& owner, const Id key, const T& value) -> void
 /// @brief Get property value.
 ///
 template <class T, class Owner>
-auto PropertyStore::GetValue(const Owner& owner, const Id key) -> Optional<T>
+auto PropertyStore::GetValue(Owner const& owner, Id const key) -> Optional<T>
 {
-    const auto& map = owner.GetPropertyStore()._map;
-    if (const auto it = map.find(key); it != map.end())
+    auto const& map = owner.GetPropertyStore()._map;
+    if (auto const it = map.find(key); it != map.end())
     {
-        if (const auto ptr = std::any_cast<const T>(&it->second))
+        if (auto const ptr = std::any_cast<T const>(&it->second))
         {
             return *ptr;
         }

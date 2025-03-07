@@ -22,15 +22,15 @@ public:
 
     Stacktrace() noexcept;
     ~Stacktrace() noexcept;
-    Stacktrace(const Stacktrace& other);
+    Stacktrace(Stacktrace const& other);
     Stacktrace(Stacktrace&& other) noexcept;
 
-    auto operator=(const Stacktrace& other) -> Stacktrace&;
+    auto operator=(Stacktrace const& other) -> Stacktrace&;
     auto operator=(Stacktrace&& other) noexcept -> Stacktrace&;
 
     auto IsEmpty() const -> Bool;
 
-    auto GetString() const -> std::string;
+    auto GetCString() const -> std::string;
 
 private:
     class Impl;

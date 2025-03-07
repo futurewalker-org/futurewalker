@@ -247,8 +247,8 @@ TEST_CASE("String")
 
     SECTION("Swap")
     {
-        const auto small = String(u8"abcdef");
-        const auto large = String(u8"The quick brown fox jumps over the lazy dog");
+        auto const small = String(u8"abcdef");
+        auto const large = String(u8"The quick brown fox jumps over the lazy dog");
 
         auto str1 = small;
         auto str2 = large;

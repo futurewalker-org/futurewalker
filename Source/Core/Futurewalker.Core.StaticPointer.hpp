@@ -25,8 +25,8 @@ class StaticPointer
 
 public:
     StaticPointer() = delete;
-    StaticPointer(const StaticPointer&) noexcept = default;
-    StaticPointer& operator=(const StaticPointer&) noexcept = default;
+    StaticPointer(StaticPointer const&) noexcept = default;
+    StaticPointer& operator=(StaticPointer const&) noexcept = default;
 
     ///
     /// @brief Construct from other StaticPointer.
@@ -182,7 +182,7 @@ public:
     ///
     /// @brief operator+=
     ///
-    constexpr auto operator+=(const SInt64 x) noexcept -> StaticPointer&
+    constexpr auto operator+=(SInt64 const x) noexcept -> StaticPointer&
     {
         _ptr += static_cast<ptrdiff_t>(x);
         return *this;
@@ -191,7 +191,7 @@ public:
     ///
     /// @brief operator-=
     ///
-    constexpr auto operator-=(const SInt64 x) noexcept -> StaticPointer&
+    constexpr auto operator-=(SInt64 const x) noexcept -> StaticPointer&
     {
         _ptr -= static_cast<ptrdiff_t>(x);
         return *this;
@@ -220,7 +220,7 @@ public:
     ///
     constexpr auto operator++(int) noexcept -> StaticPointer
     {
-        const auto tmp = *this;
+        auto const tmp = *this;
         ++_ptr;
         return tmp;
     }
@@ -230,7 +230,7 @@ public:
     ///
     constexpr auto operator--(int) noexcept -> StaticPointer
     {
-        const auto tmp = *this;
+        auto const tmp = *this;
         --_ptr;
         return tmp;
     }
@@ -238,7 +238,7 @@ public:
     ///
     /// @brief operator[]
     ///
-    constexpr auto operator[](const SInt64 d) const noexcept -> auto&
+    constexpr auto operator[](SInt64 const d) const noexcept -> auto&
     requires Concepts::NonVoid<T>
     {
         return _ptr[static_cast<ptrdiff_t>(d)];
@@ -247,7 +247,7 @@ public:
     ///
     /// @brief operator<=>
     ///
-    friend constexpr auto operator<=>(const StaticPointer& l, const StaticPointer& r) noexcept -> std::strong_ordering
+    friend constexpr auto operator<=>(StaticPointer const& l, StaticPointer const& r) noexcept -> std::strong_ordering
     {
         return l._ptr <=> r._ptr;
     }
@@ -255,7 +255,7 @@ public:
     ///
     /// @brief operator==
     ///
-    friend constexpr bool operator==(const StaticPointer& l, const StaticPointer& r) noexcept
+    friend constexpr bool operator==(StaticPointer const& l, StaticPointer const& r) noexcept
     {
         return l._ptr == r._ptr;
     }
@@ -263,7 +263,7 @@ public:
     ///
     /// @brief operator+
     ///
-    friend constexpr auto operator+(const StaticPointer& ptr, const SInt64 x) noexcept -> StaticPointer
+    friend constexpr auto operator+(StaticPointer const& ptr, SInt64 const x) noexcept -> StaticPointer
     {
         auto tmp = ptr;
         tmp += x;
@@ -273,7 +273,7 @@ public:
     ///
     /// @brief operator-
     ///
-    friend constexpr auto operator-(const StaticPointer& ptr, const SInt64 x) noexcept -> StaticPointer
+    friend constexpr auto operator-(StaticPointer const& ptr, SInt64 const x) noexcept -> StaticPointer
     {
         auto tmp = ptr;
         tmp -= x;
@@ -346,7 +346,7 @@ StaticPointer(T*) -> StaticPointer<T>;
 template <class T>
 struct std::hash<FW_NS::StaticPointer<T>>
 {
-    constexpr auto operator()(const FW_NS::StaticPointer<T>& p) const noexcept -> size_t
+    constexpr auto operator()(FW_NS::StaticPointer<T> const& p) const noexcept -> size_t
     {
         return std::hash<T*>()(static_cast<T*>(p));
     }
@@ -355,7 +355,7 @@ struct std::hash<FW_NS::StaticPointer<T>>
 template <class T>
 struct boost::hash<FW_NS::StaticPointer<T>>
 {
-    constexpr auto operator()(const FW_NS::StaticPointer<T>& p) const noexcept -> size_t
+    constexpr auto operator()(FW_NS::StaticPointer<T> const& p) const noexcept -> size_t
     {
         return std::hash<T*>()(static_cast<T*>(p));
     }

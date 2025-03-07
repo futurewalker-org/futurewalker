@@ -13,9 +13,9 @@ namespace
 /// @param[in] size Size of input string.
 /// @param[in] capacity Size of buffer allocate.
 ///
-auto AllocateSharedString(Pointer<const char8_t> data, const auto size, const auto capacity) -> std::shared_ptr<char8_t[]>
+auto AllocateSharedString(Pointer<char8_t const> const data, auto const size, auto const capacity) -> std::shared_ptr<char8_t[]>
 {
-    auto ptr = std::make_shared<char8_t[]>(static_cast<size_t>(capacity));
+    auto const ptr = std::make_shared<char8_t[]>(static_cast<size_t>(capacity));
     DataFunction::CopyMemory(Pointer(ptr.get()), data, size);
     return ptr;
 }
@@ -23,8 +23,8 @@ auto AllocateSharedString(Pointer<const char8_t> data, const auto size, const au
 
 struct String::Internal
 {
-    static constexpr auto smallStringCapacity = sizeof(SmallString::data); ///< Capacity of small string.
-    static constexpr auto largeStringFlag = uint8_t(1 << 7);               ///< Flag used to determine large string mode.
+    static auto constexpr smallStringCapacity = sizeof(SmallString::data); ///< Capacity of small string.
+    static auto constexpr largeStringFlag = uint8_t(1 << 7);               ///< Flag used to determine large string mode.
 };
 
 ///
@@ -55,7 +55,7 @@ String::~String() noexcept
 ///
 /// @param[in] c Character.
 ///
-String::String(const ValueType c) noexcept
+String::String(ValueType c) noexcept
   : String(StringView(&c, 1))
 {
 }
@@ -65,7 +65,7 @@ String::String(const ValueType c) noexcept
 ///
 /// @param[in] chars Null-terminated UTF8 string.
 ///
-String::String(Pointer<const ValueType> chars)
+String::String(Pointer<ValueType const> chars)
   : String(StringView(chars))
 {
 }
@@ -76,7 +76,7 @@ String::String(Pointer<const ValueType> chars)
 /// @param[in] chars UTF8 string.
 /// @param[in] size Size of UTF8 string.
 ///
-String::String(Pointer<const ValueType> chars, const SizeType size)
+String::String(Pointer<ValueType const> chars, SizeType size)
   : String(StringView(chars, size))
 {
 }
@@ -86,7 +86,7 @@ String::String(Pointer<const ValueType> chars, const SizeType size)
 ///
 /// @param[in] chars Null-terminated UTF8 string.
 ///
-String::String(const ValueType* chars)
+String::String(ValueType const* chars)
   : String(StringView(chars))
 {
 }
@@ -97,7 +97,7 @@ String::String(const ValueType* chars)
 /// @param[in] chars UTF8 string.
 /// @param[in] size Size of UTF8 string.
 ///
-String::String(const ValueType* chars, const SizeType size)
+String::String(ValueType const* chars, SizeType size)
   : String(StringView(chars, size))
 {
 }
@@ -117,7 +117,7 @@ String::String(StringView view)
 ///
 /// @brief Copy constructor.
 ///
-String::String(const String& other)
+String::String(String const& other)
   : String()
 {
     if (other.IsSmallString())
@@ -143,7 +143,7 @@ String::String(String&& other) noexcept
 ///
 /// @brief operator=
 ///
-String& String::operator=(const String& other)
+String& String::operator=(String const& other)
 {
     if (this != &other)
     {
@@ -177,7 +177,7 @@ String::operator StringView() const noexcept
 ///
 /// @brief operator==
 ///
-auto String::operator==(const String& other) const noexcept -> bool
+auto String::operator==(String const& other) const noexcept -> bool
 {
     return GetView() == other.GetView();
 }
@@ -185,7 +185,7 @@ auto String::operator==(const String& other) const noexcept -> bool
 ///
 /// @brief operator<=>
 ///
-auto String::operator<=>(const String& other) const noexcept -> std::strong_ordering
+auto String::operator<=>(String const& other) const noexcept -> std::strong_ordering
 {
     return GetView() <=> other.GetView();
 }
@@ -220,7 +220,7 @@ auto String::GetView() const noexcept -> StringView
 ///
 /// @param[in] pos Position of character.
 ///
-auto String::GetChar(ValueType& value, const IndexType pos) const noexcept -> Bool
+auto String::GetChar(ValueType& value, IndexType const pos) const noexcept -> Bool
 {
     if (pos < 0 || GetSize() <= pos)
     {
@@ -236,28 +236,28 @@ auto String::GetChar(ValueType& value, const IndexType pos) const noexcept -> Bo
 /// @param[in] begin Index of beginning of range.
 /// @param[in] end Index of end of range.
 ///
-auto String::GetSubstring(const IndexType begin, const IndexType end) const noexcept -> String
+auto String::GetSubstring(IndexType const begin, IndexType const end) const noexcept -> String
 {
     if (begin < 0 || begin > end || end > GetSize())
     {
         return {};
     }
 
-    const auto newSize = (end - begin);
-    const auto newCapacity = (GetCapacity() - begin);
+    auto const newSize = (end - begin);
+    auto const newCapacity = (GetCapacity() - begin);
 
     if (IsSmallString())
     {
-        const auto data = GetConstData();
-        const auto newData = (data + begin);
-        const auto view = StringView(newData, newSize);
+        auto const data = GetConstData();
+        auto const newData = (data + begin);
+        auto const view = StringView(newData, newSize);
         return String(view);
     }
     else
     {
         auto ret = String();
         ret._small.~SmallString();
-        const auto newData = _large.data.get() + static_cast<ptrdiff_t>(begin);
+        auto const newData = _large.data.get() + static_cast<ptrdiff_t>(begin);
         new (&ret._large) LargeString {
           .data = std::shared_ptr<ValueType[]>(_large.data, newData),
           .capacity = static_cast<int64_t>(newCapacity),
@@ -274,8 +274,8 @@ auto String::GetSubstring(const IndexType begin, const IndexType end) const noex
 ///
 auto String::GetCString() const -> std::u8string
 {
-    const auto ptr = static_cast<const ValueType*>(GetConstData());
-    const auto len = static_cast<size_t>(GetSize());
+    auto const ptr = static_cast<ValueType const*>(GetConstData());
+    auto const len = static_cast<size_t>(GetSize());
     return std::u8string(ptr, len);
 }
 
@@ -288,7 +288,7 @@ auto String::GetCString() const -> std::u8string
 ///
 /// @pre size must not be negative.
 ///
-void String::Resize(const SizeType size)
+void String::Resize(SizeType const size)
 {
     if (size < 0)
     {
@@ -298,9 +298,9 @@ void String::Resize(const SizeType size)
     Reserve(size);
     SetSize(size);
 
-    if (const auto oldSize = GetSize(); oldSize < size)
+    if (auto const oldSize = GetSize(); oldSize < size)
     {
-        const auto data = GetMutableData();
+        auto const data = GetMutableData();
         for (auto i = oldSize; i < size; ++i)
         {
             data[i] = ValueType();
@@ -315,14 +315,14 @@ void String::Resize(const SizeType size)
 ///
 /// @note Invalidates previously returned iterators and data pointers.
 ///
-void String::Reserve(const SizeType capacity)
+void String::Reserve(SizeType const capacity)
 {
     if (IsSmallString())
     {
         if (capacity > GetCapacity())
         {
-            const auto size = GetSize();
-            const auto data = AllocateSharedString(GetConstData(), size, capacity);
+            auto const size = GetSize();
+            auto const data = AllocateSharedString(GetConstData(), size, capacity);
             _small.~SmallString();
             new (&_large) LargeString {
               .data = data,
@@ -337,7 +337,7 @@ void String::Reserve(const SizeType capacity)
     {
         if (capacity > GetCapacity() || _large.data.use_count() != 1)
         {
-            const auto cap = std::max(capacity, GetCapacity());
+            auto const cap = std::max(capacity, GetCapacity());
             _large.data = AllocateSharedString(GetConstData(), GetSize(), cap);
             _large.capacity = static_cast<int64_t>(cap);
         }
@@ -358,7 +358,7 @@ void String::Clear()
 /// @param[in] begin Index of beginning of range to erase.
 /// @param[in] end Index of end of range to erase (non-inclusive).
 ///
-auto String::Erase(const IndexType begin, const IndexType end) -> void
+auto String::Erase(IndexType const begin, IndexType const end) -> void
 {
     if (begin < 0 || begin > end || end > GetSize())
     {
@@ -370,8 +370,8 @@ auto String::Erase(const IndexType begin, const IndexType end) -> void
         return;
     }
 
-    const auto data = GetMutableData();
-    const auto copyCount = GetSize() - end;
+    auto const data = GetMutableData();
+    auto const copyCount = GetSize() - end;
     for (auto i = SizeType(0); i < copyCount; ++i)
     {
         data[begin + i] = data[end + i];
@@ -386,7 +386,7 @@ auto String::Erase(const IndexType begin, const IndexType end) -> void
 /// @param[in] end Index of end of range to replace.
 /// @param[in] str String to replace range.
 ///
-auto String::Replace(const IndexType begin, const IndexType end, const StringView str) -> void
+auto String::Replace(IndexType const begin, IndexType const end, StringView const str) -> void
 {
     if (begin < 0 || begin > end || end > GetSize())
     {
@@ -398,15 +398,15 @@ auto String::Replace(const IndexType begin, const IndexType end, const StringVie
         return;
     }
 
-    const auto oldSize = GetSize();
-    const auto newSize = oldSize - (end - begin) + str.GetSize();
+    auto const oldSize = GetSize();
+    auto const newSize = oldSize - (end - begin) + str.GetSize();
     Reserve(newSize);
 
-    const auto data = GetMutableData();
-    const auto copyCount = oldSize - end;
+    auto const data = GetMutableData();
+    auto const copyCount = oldSize - end;
 
-    const auto dstSize = end - begin;
-    const auto srcSize = str.GetSize();
+    auto const dstSize = end - begin;
+    auto const srcSize = str.GetSize();
 
     if (dstSize > srcSize)
     {
@@ -437,15 +437,15 @@ auto String::Replace(const IndexType begin, const IndexType end, const StringVie
 /// @param[in] pos Position to insert string.
 /// @param[in] str String to be inserted.
 ///
-auto String::Insert(const IndexType pos, const StringView str) -> void
+auto String::Insert(IndexType const pos, StringView const str) -> void
 {
     if (pos < 0 || GetSize() < pos)
     {
         return;
     }
 
-    const auto oldSize = GetSize();
-    const auto newSize = oldSize + str.GetSize();
+    auto const oldSize = GetSize();
+    auto const newSize = oldSize + str.GetSize();
 
     if (oldSize == newSize)
     {
@@ -528,7 +528,7 @@ auto String::IsSmallString() const -> Bool
 ///
 /// @param[in] size New size.
 ///
-auto String::SetSize(const SizeType size) -> void
+auto String::SetSize(SizeType const size) -> void
 {
     if (IsSmallString())
     {
@@ -573,7 +573,7 @@ auto String::GetCapacity() const noexcept -> SizeType
 ///
 /// @brief Get immutable data pointer.
 ///
-auto String::GetConstData() const -> Pointer<const ValueType>
+auto String::GetConstData() const -> Pointer<ValueType const>
 {
     if (IsSmallString())
     {
