@@ -25,7 +25,7 @@ public:
     ///
     /// @note This function does not check current build option.
     ///
-    virtual auto Print(const StringView message) -> void = 0;
+    virtual auto Print(StringView const message) -> void = 0;
 
     ///
     /// @brief Break current program's execution.

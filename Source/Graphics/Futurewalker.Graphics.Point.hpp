@@ -37,7 +37,7 @@ public:
     /// @param rhs Point to compare
     /// @param tolerance Absolute tolerance
     ///
-    static inline constexpr Bool IsNearlyEquals(const Point2& lhs ,const Point2& rhs, const T& tolerance = 1e-6) noexcept
+    static inline constexpr Bool IsNearlyEquals(Point2 const& lhs, Point2 const& rhs, T const& tolerance = 1e-6) noexcept
     {
         return ValueType::IsNearlyEqual(lhs._x, rhs._x, tolerance) && ValueType::IsNearlyEqual(lhs._y, rhs._y, tolerance);
     }
@@ -50,7 +50,7 @@ public:
     /// @param precision Relative precision
     /// @param minTolerance Absolute minimum tolerance
     ///
-    static inline constexpr Bool IsNearlyEqualRelative(const Point2& lhs, const Point2& rhs, const T& precision = 1e-6, const T& minTolerance = 1e-6) noexcept
+    static inline constexpr Bool IsNearlyEqualRelative(Point2 const& lhs, Point2 const& rhs, T const& precision = 1e-6, T const& minTolerance = 1e-6) noexcept
     {
         return ValueType::IsNearlyEqualRelative(lhs._x, rhs._y, precision, minTolerance) && ValueType::IsNearlyEqualRelative(lhs._x, rhs._y, precision, minTolerance);
     }
@@ -63,7 +63,7 @@ public:
     ///
     /// @return Euclidean distance between two points
     ///
-    static inline constexpr auto DistanceBetween(const Point2& lhs, const Point2& rhs)
+    static inline constexpr auto DistanceBetween(Point2 const& lhs, Point2 const& rhs)
     {
         return ValueType::Sqrt(ValueType::Pow(rhs._x - lhs._x, 2) + ValueType::Pow(rhs._y - lhs._y, 2));
     }
@@ -76,7 +76,7 @@ public:
     ///
     /// @return Point of minimum components
     ///
-    static inline constexpr auto Min(const Point2& lhs, const Point2& rhs) -> Point2
+    static inline constexpr auto Min(Point2 const& lhs, Point2 const& rhs) -> Point2
     {
         return Point2(ValueType::Min(lhs._x, rhs._x), ValueType::Min(lhs._y, rhs._y));
     }
@@ -89,7 +89,7 @@ public:
     ///
     /// @return Point of maximum components
     ///
-    static inline constexpr auto Max(const Point2& lhs, const Point2& rhs) -> Point2
+    static inline constexpr auto Max(Point2 const& lhs, Point2 const& rhs) -> Point2
     {
         return Point2(ValueType::Max(lhs._x, rhs._x), ValueType::Max(lhs._y, rhs._y));
     }
@@ -101,7 +101,7 @@ public:
     ///
     /// @return Rounded point
     ///
-    static inline constexpr auto Round(const Point2& point) -> Point2
+    static inline constexpr auto Round(Point2 const& point) -> Point2
     {
         return Point2(ValueType::Round(point._x), ValueType::Round(point._y));
     }
@@ -113,7 +113,7 @@ public:
     ///
     /// @return Floored point
     ///
-    static inline constexpr auto Floor(const Point2& point) -> Point2
+    static inline constexpr auto Floor(Point2 const& point) -> Point2
     {
         return Point2(ValueType::Floor(point._x), ValueType::Floor(point._y));
     }
@@ -125,7 +125,7 @@ public:
     ///
     /// @return Ceiled point
     ///
-    static inline constexpr auto Ceil(const Point2& point) -> Point2
+    static inline constexpr auto Ceil(Point2 const& point) -> Point2
     {
         return Point2(ValueType::Ceil(point._x), ValueType::Ceil(point._y));
     }
@@ -141,12 +141,12 @@ public:
     ///
     /// @brief Copy constructor.
     ///
-    inline constexpr Point2(const Point2&) = default;
+    inline constexpr Point2(Point2 const&) = default;
 
     ///
     /// @brief Copy assignment operator.
     ///
-    inline constexpr auto operator=(const Point2&) -> Point2& = default;
+    inline constexpr auto operator=(Point2 const&) -> Point2& = default;
 
     ///
     /// @brief Construct Point2 from X and Y values.
@@ -166,7 +166,7 @@ public:
     ///
     /// @return
     ///
-    inline constexpr auto GetX() const noexcept -> const ValueType&
+    inline constexpr auto GetX() const noexcept -> ValueType const&
     {
         return _x;
     }
@@ -176,7 +176,7 @@ public:
     ///
     /// @return
     ///
-    inline constexpr auto SetX(const ValueType& x) noexcept -> void
+    inline constexpr auto SetX(ValueType const& x) noexcept -> void
     {
         _x = x;
     }
@@ -186,7 +186,7 @@ public:
     ///
     /// @return
     ///
-    inline constexpr auto GetY() const noexcept -> const ValueType&
+    inline constexpr auto GetY() const noexcept -> ValueType const&
     {
         return _y;
     }
@@ -196,7 +196,7 @@ public:
     ///
     /// @return
     ///
-    inline constexpr auto SetY(const ValueType& y) noexcept -> void
+    inline constexpr auto SetY(ValueType const& y) noexcept -> void
     {
         _y = y;
     }
@@ -212,7 +212,7 @@ public:
     ///
     /// @brief operator==
     ///
-    friend inline constexpr bool operator==(const Point2& l, const Point2& r)
+    friend inline constexpr bool operator==(Point2 const& l, Point2 const& r)
     {
         return (l._x == r._x) && (l._y == r._y);
     }
@@ -220,7 +220,7 @@ public:
     ///
     /// @brief operator!=
     ///
-    friend inline constexpr bool operator!=(const Point2& l, const Point2& r)
+    friend inline constexpr bool operator!=(Point2 const& l, Point2 const& r)
     {
         return (l._x != r._x) || (l._y != r._y);
     }
@@ -230,7 +230,7 @@ public:
     ///
     /// @param off Amount of offset.
     ///
-    inline constexpr auto operator+=(const Offset2<ValueType>& off) noexcept -> Point2&
+    inline constexpr auto operator+=(Offset2<ValueType> const& off) noexcept -> Point2&
     {
         _x += off.GetDeltaX();
         _y += off.GetDeltaY();
@@ -242,7 +242,7 @@ public:
     ///
     /// @param off Amount of offset.
     ///
-    inline constexpr auto operator-=(const Offset2<ValueType>& off) noexcept -> Point2&
+    inline constexpr auto operator-=(Offset2<ValueType> const& off) noexcept -> Point2&
     {
         _x -= off.GetDeltaX();
         _y -= off.GetDeltaY();

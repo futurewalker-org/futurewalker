@@ -9,7 +9,7 @@ auto AnimationTimerEvent::Tick::GetTime() const -> MonotonicTime
     return _time;
 }
 
-auto AnimationTimerEvent::Tick::SetTime(const MonotonicTime& time) -> void
+auto AnimationTimerEvent::Tick::SetTime(MonotonicTime const& time) -> void
 {
     _time = time;
 }

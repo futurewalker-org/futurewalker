@@ -15,7 +15,7 @@ namespace
 {
 UniqueId DependencyNodePropertyKeyOwner;
 
-auto SetOwnerSlot(const Shared<DependencyNode>& node, Shared<AttributeSlot> owner) -> void 
+auto SetOwnerSlot(Shared<DependencyNode> const& node, Shared<AttributeSlot> owner) -> void 
 {
     if (node)
     {
@@ -23,11 +23,11 @@ auto SetOwnerSlot(const Shared<DependencyNode>& node, Shared<AttributeSlot> owne
     }
 }
 
-auto GetOwnerSlot(const Shared<DependencyNode>& node) -> Shared<AttributeSlot>
+auto GetOwnerSlot(Shared<DependencyNode> const& node) -> Shared<AttributeSlot>
 {
     if (node)
     {
-        if (const auto owner = PropertyStore::GetValue<Weak<AttributeSlot>>(*node, DependencyNodePropertyKeyOwner))
+        if (auto const owner = PropertyStore::GetValue<Weak<AttributeSlot>>(*node, DependencyNodePropertyKeyOwner))
         {
             return owner->Lock();
         }
@@ -98,7 +98,7 @@ auto AttributeSlot::GetValueCache() const -> Optional<AttributeValue>
 ///
 /// @param value 
 ///
-auto AttributeSlot::SetValueCache(const AttributeValue& value) -> Bool
+auto AttributeSlot::SetValueCache(AttributeValue const& value) -> Bool
 {
     if (!_valueCache || (*_valueCache != value))
     {
@@ -160,7 +160,7 @@ auto AttributeSlot::GetValue() const -> Optional<AttributeValue>
 ///
 /// @param value 
 ///
-auto AttributeSlot::SetValue(const AttributeValue& value) -> void
+auto AttributeSlot::SetValue(AttributeValue const& value) -> void
 {
     _value = value;
 }
@@ -232,7 +232,7 @@ auto AttributeSlot::DetachFromSourceDependentSlot() -> void
 {
     if (_sourceDependency)
     {
-        if (const auto parent = _sourceDependency->GetParent())
+        if (auto const parent = _sourceDependency->GetParent())
         {
             parent->RemoveChild(_sourceDependency);
         }
@@ -246,7 +246,7 @@ auto AttributeSlot::DetachFromValueDependentSlot() -> void
 {
     if (_valueDependency)
     {
-        if (const auto parent = _valueDependency->GetParent())
+        if (auto const parent = _valueDependency->GetParent())
         {
             parent->RemoveChild(_valueDependency);
         }
@@ -260,7 +260,7 @@ auto AttributeSlot::GetSourceDependentSlot() -> Shared<AttributeSlot>
 {
     if (_sourceDependency)
     {
-        if (const auto parent = _sourceDependency->GetParent())
+        if (auto const parent = _sourceDependency->GetParent())
         {
             return GetOwnerSlot(parent);
         }
@@ -275,7 +275,7 @@ auto AttributeSlot::GetValueDependentSlot() -> Shared<AttributeSlot>
 {
     if (_valueDependency)
     {
-        if (const auto parent = _valueDependency->GetParent())
+        if (auto const parent = _valueDependency->GetParent())
         {
             return GetOwnerSlot(parent);
         }
@@ -324,7 +324,7 @@ auto AttributeSlot::GetValueDependantSlots() -> std::vector<Shared<AttributeSlot
 ///
 /// @param self 
 ///
-auto AttributeSlot::SetSelf(const Shared<AttributeSlot>& self) -> void
+auto AttributeSlot::SetSelf(Shared<AttributeSlot> const& self) -> void
 {
     _self = self;
 }

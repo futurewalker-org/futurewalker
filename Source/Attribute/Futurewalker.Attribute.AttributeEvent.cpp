@@ -17,7 +17,7 @@ auto AttributeEvent::ValueChanged::GetId() const -> AttributeId
 ///
 /// @param id
 ///
-auto AttributeEvent::ValueChanged::SetId(const AttributeId& id) -> void
+auto AttributeEvent::ValueChanged::SetId(AttributeId const& id) -> void
 {
     _id = id;
 }
@@ -35,7 +35,7 @@ auto AttributeEvent::ValueChanged::GetValue() const -> Optional<AttributeValue>
 ///
 /// @param value 
 ///
-auto AttributeEvent::ValueChanged::SetValue(const AttributeValue& value) -> void
+auto AttributeEvent::ValueChanged::SetValue(AttributeValue const& value) -> void
 {
     _value = value;
 }

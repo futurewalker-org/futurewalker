@@ -12,7 +12,7 @@ namespace FW_DETAIL_NS
 ///
 /// @param message Message to print.
 ///
-auto PlatformDebugWin::Print(const StringView message) -> void
+auto PlatformDebugWin::Print(StringView const message) -> void
 {
     std::wstring wideMessage = PlatformStringFunctionWin::Utf8ToWide(message);
     wideMessage += L'\n';

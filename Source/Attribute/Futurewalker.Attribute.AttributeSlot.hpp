@@ -30,7 +30,7 @@ public:
     auto GetDescription() -> StaticAttributeBaseRef;
 
     auto GetValueCache() const -> Optional<AttributeValue>;
-    auto SetValueCache(const AttributeValue& value) -> Bool;
+    auto SetValueCache(AttributeValue const& value) -> Bool;
     auto ClearValueCache() -> void;
 
     auto GetReferenceCache() const -> Optional<StaticAttributeBaseRef>;
@@ -38,7 +38,7 @@ public:
     auto ClearReferenceCache() -> void;
 
     auto GetValue() const -> Optional<AttributeValue>;
-    auto SetValue(const AttributeValue& value) -> void;
+    auto SetValue(AttributeValue const& value) -> void;
     auto ClearValue() -> void;
 
     auto GetReference() const -> Optional<StaticAttributeBaseRef>;
@@ -58,7 +58,7 @@ public:
     auto GetValueDependantSlots() -> std::vector<Shared<AttributeSlot>>;
 
 private:
-    auto SetSelf(const Shared<AttributeSlot>& self) -> void;
+    auto SetSelf(Shared<AttributeSlot> const& self) -> void;
     auto GetSelf() -> Shared<AttributeSlot>;
 
     auto Initialize() -> void;

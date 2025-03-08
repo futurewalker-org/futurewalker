@@ -54,7 +54,7 @@ public:
     String(Iter begin, Iter end);
 
     template <Concepts::Integral T>
-    String(const T&) = delete;
+    String(T const&) = delete;
 
     String(std::nullptr_t) = delete;
 

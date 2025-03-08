@@ -35,7 +35,7 @@ public:
     ///
     /// @return Offset of minimum components
     ///
-    static inline constexpr auto Min(const Offset2& lhs, const Offset2& rhs) -> Offset2
+    static inline constexpr auto Min(Offset2 const& lhs, Offset2 const& rhs) -> Offset2
     {
         return Offset2(ValueType::Min(lhs._dx, rhs._dx), ValueType::Min(lhs._dy, rhs._dy));
     }
@@ -48,7 +48,7 @@ public:
     ///
     /// @return Offset of maximum components
     ///
-    static inline constexpr auto Max(const Offset2& lhs, const Offset2& rhs) -> Offset2
+    static inline constexpr auto Max(Offset2 const& lhs, Offset2 const& rhs) -> Offset2
     {
         return Offset2(ValueType::Max(lhs._dx, rhs._dx), ValueType::Max(lhs._dy, rhs._dy));
     }
@@ -60,7 +60,7 @@ public:
     ///
     /// @return Rounded offset
     ///
-    static inline constexpr auto Round(const Offset2& offset) -> Offset2
+    static inline constexpr auto Round(Offset2 const& offset) -> Offset2
     {
         return Offset2(ValueType::Round(offset._dx), ValueType::Round(offset._dy));
     }
@@ -72,7 +72,7 @@ public:
     ///
     /// @return Floored offset
     ///
-    static inline constexpr auto Floor(const Offset2& offset) -> Offset2
+    static inline constexpr auto Floor(Offset2 const& offset) -> Offset2
     {
         return Offset2(ValueType::Floor(offset._dx), ValueType::Floor(offset._dy));
     }
@@ -84,7 +84,7 @@ public:
     ///
     /// @return Ceiled offset
     ///
-    static inline constexpr auto Ceil(const Offset2& offset) -> Offset2
+    static inline constexpr auto Ceil(Offset2 const& offset) -> Offset2
     {
         return Offset2(ValueType::Ceil(offset._dx), ValueType::Ceil(offset._dy));
     }
@@ -98,7 +98,7 @@ public:
     ///
     /// @brief Copy constructor.
     ///
-    inline constexpr Offset2(const Offset2&) = default;
+    inline constexpr Offset2(Offset2 const&) = default;
 
     ///
     /// @brief Construct from (dx, dy).
@@ -106,7 +106,7 @@ public:
     /// @param dx dx
     /// @param dy dy
     ///
-    inline constexpr Offset2(const ValueType& dx, const ValueType& dy) noexcept
+    inline constexpr Offset2(ValueType const& dx, ValueType const& dy) noexcept
       : _dx {dx}
       , _dy {dy}
     {
@@ -115,12 +115,12 @@ public:
     ///
     /// @brief Assignment operator.
     ///
-    inline constexpr auto operator=(const Offset2&) -> Offset2& = default;
+    inline constexpr auto operator=(Offset2 const&) -> Offset2& = default;
 
     ///
     /// @brief Get dx.
     ///
-    inline constexpr auto GetDeltaX() const noexcept -> const ValueType&
+    inline constexpr auto GetDeltaX() const noexcept -> ValueType const&
     {
         return _dx;
     }
@@ -128,7 +128,7 @@ public:
     ///
     /// @brief Set dx.
     ///
-    inline constexpr auto SetDeltaX(const ValueType& dx) noexcept -> void
+    inline constexpr auto SetDeltaX(ValueType const& dx) noexcept -> void
     {
         _dx = dx;
     }
@@ -136,7 +136,7 @@ public:
     ///
     /// @brief Get dy.
     ///
-    inline constexpr auto GetDeltaY() const noexcept -> const ValueType&
+    inline constexpr auto GetDeltaY() const noexcept -> ValueType const&
     {
         return _dy;
     }
@@ -144,7 +144,7 @@ public:
     ///
     /// @brief Set dy.
     ///
-    inline constexpr auto SetDeltaY(const ValueType& dy) noexcept -> void
+    inline constexpr auto SetDeltaY(ValueType const& dy) noexcept -> void
     {
         _dy = dy;
     }
@@ -160,7 +160,7 @@ public:
     ///
     /// @brief operator==
     ///
-    friend inline constexpr bool operator==(const Offset2& lhs, const Offset2& rhs) noexcept
+    friend inline constexpr bool operator==(Offset2 const& lhs, Offset2 const& rhs) noexcept
     {
         return (lhs._dx == rhs._dx) && (lhs._dy == rhs._dy);
     }
@@ -168,7 +168,7 @@ public:
     ///
     /// @brief operator!=
     ///
-    friend inline constexpr bool operator!=(const Offset2& lhs, const Offset2& rhs) noexcept
+    friend inline constexpr bool operator!=(Offset2 const& lhs, Offset2 const& rhs) noexcept
     {
         return (lhs._dx != rhs._dx) || (lhs._dy != rhs._dy);
     }
@@ -176,7 +176,7 @@ public:
     ///
     /// @brief
     ///
-    inline constexpr auto operator+=(const Offset2& x) noexcept -> Offset2&
+    inline constexpr auto operator+=(Offset2 const& x) noexcept -> Offset2&
     {
         _dx += x._dx;
         _dy += x._dy;
@@ -186,7 +186,7 @@ public:
     ///
     /// @brief
     ///
-    inline constexpr auto operator-=(const Offset2& x) noexcept -> Offset2&
+    inline constexpr auto operator-=(Offset2 const& x) noexcept -> Offset2&
     {
         _dx -= x._dx;
         _dy -= x._dy;

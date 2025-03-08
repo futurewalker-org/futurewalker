@@ -6,7 +6,7 @@ using namespace Futurewalker;
 
 TEST_CASE("Boolean")
 {
-    const auto t = Bool(true);
+    auto const t = Bool(true);
     REQUIRE(t);
     REQUIRE(!!t);
     REQUIRE(t == true);
@@ -14,7 +14,7 @@ TEST_CASE("Boolean")
     REQUIRE(t != false);
     REQUIRE(!t != true);
 
-    const auto f = Bool(false);
+    auto const f = Bool(false);
     REQUIRE_FALSE(f);
     REQUIRE(!f);
     REQUIRE(f == false);

@@ -9,9 +9,9 @@ namespace FW_DETAIL_NS
 ///
 /// @brief Debug print.
 ///
-auto Debug::PrintPriv(const StringView message) -> void
+auto Debug::PrintPriv(StringView const message) -> void
 {
-    if (const auto debug = Locator::GetInstance<PlatformDebug>())
+    if (auto const debug = Locator::GetInstance<PlatformDebug>())
     {
         debug->Print(message);
     }
@@ -22,7 +22,7 @@ auto Debug::PrintPriv(const StringView message) -> void
 ///
 auto Debug::BreakPriv() -> void
 {
-    if (const auto debug = Locator::GetInstance<PlatformDebug>())
+    if (auto const debug = Locator::GetInstance<PlatformDebug>())
     {
         debug->Break();
     }

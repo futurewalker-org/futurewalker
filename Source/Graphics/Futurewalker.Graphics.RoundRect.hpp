@@ -45,7 +45,7 @@ public:
     ///
     /// @brief Copy constructor.
     ///
-    inline constexpr RoundRect2(const RoundRect2&) = default;
+    inline constexpr RoundRect2(RoundRect2 const&) = default;
 
     ///
     /// @brief Construct rounded rectangle.
@@ -56,7 +56,7 @@ public:
     /// @param br Bottom right corner radius.
     /// @param bl Bottom left corner radius.
     ///
-    inline constexpr RoundRect2(const RectType& rect, const RadiusType& tl, const RadiusType& tr, const RadiusType& br, const RadiusType& bl)
+    inline constexpr RoundRect2(RectType const& rect, RadiusType const& tl, RadiusType const& tr, RadiusType const& br, RadiusType const& bl)
       : _rect {rect}
       , _tl {tl}
       , _tr {tr}
@@ -68,7 +68,7 @@ public:
     ///
     /// @brief Copy assignment operator.
     ///
-    inline constexpr auto operator=(const RoundRect2&) -> RoundRect2& = default;
+    inline constexpr auto operator=(RoundRect2 const&) -> RoundRect2& = default;
 
     ///
     /// @brief 
@@ -83,7 +83,7 @@ public:
     ///
     /// @param rect
     ///
-    inline constexpr auto SetRect(const RectType& rect) noexcept -> void
+    inline constexpr auto SetRect(RectType const& rect) noexcept -> void
     {
         _rect = rect;
     }
@@ -101,7 +101,7 @@ public:
     ///
     /// @param tl 
     ///
-    inline constexpr auto SetTopLeftRadius(const RadiusType& tl) noexcept -> void
+    inline constexpr auto SetTopLeftRadius(RadiusType const& tl) noexcept -> void
     {
         _tl = tl;
     }
@@ -119,7 +119,7 @@ public:
     ///
     /// @param tr 
     ///
-    inline constexpr auto SetTopRightRadius(const RadiusType& tr) noexcept -> void
+    inline constexpr auto SetTopRightRadius(RadiusType const& tr) noexcept -> void
     {
         _tr = tr;
     }
@@ -137,7 +137,7 @@ public:
     ///
     /// @param br 
     ///
-    inline constexpr auto SetBottomRightRadius(const RadiusType& br) noexcept -> void
+    inline constexpr auto SetBottomRightRadius(RadiusType const& br) noexcept -> void
     {
         _br = br;
     }
@@ -155,13 +155,13 @@ public:
     ///
     /// @param bl 
     ///
-    inline constexpr auto SetBottomLeftRadius(const RadiusType& bl) noexcept -> void
+    inline constexpr auto SetBottomLeftRadius(RadiusType const& bl) noexcept -> void
     {
         _bl = bl;
     }
 
-    friend inline constexpr bool operator==(const RoundRect2&, const RoundRect2&) = default;
-    friend inline constexpr bool operator!=(const RoundRect2&, const RoundRect2&) = default;
+    friend inline constexpr bool operator==(RoundRect2 const&, RoundRect2 const&) = default;
+    friend inline constexpr bool operator!=(RoundRect2 const&, RoundRect2 const&) = default;
 
 private:
     RectType _rect;

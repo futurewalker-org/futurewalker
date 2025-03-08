@@ -26,7 +26,7 @@ TEST_CASE("Unique")
 
     SECTION("Default")
     {
-        const auto i = Unique<SInt32>();
+        auto const i = Unique<SInt32>();
         REQUIRE(!i);
     }
 
@@ -46,7 +46,7 @@ TEST_CASE("Unique")
         REQUIRE(!i);
 
         // Move into const.
-        auto k = Unique<const SInt32>(std::move(j));
+        auto k = Unique<SInt32 const>(std::move(j));
         REQUIRE(k);
     }
 
@@ -85,7 +85,7 @@ TEST_CASE("Shared")
 {
     SECTION("Default constructor")
     {
-        auto s = Shared<const SInt32>();
+        auto s = Shared<SInt32 const>();
         REQUIRE(!s);
         REQUIRE(s.GetUseCount() == 0);
     }
@@ -103,7 +103,7 @@ TEST_CASE("Shared")
 
     SECTION("Void instantiation")
     {
-        const auto i = Shared<SInt32>();
+        auto const i = Shared<SInt32>();
         auto v = Shared<const void>(i);
     }
 
@@ -140,7 +140,7 @@ TEST_CASE("Shared")
 
     SECTION("Move assignment")
     {
-        auto s1 = Shared<const SInt32>::Make(42);
+        auto s1 = Shared<SInt32 const>::Make(42);
         auto s2 = std::move(s1);
         REQUIRE(!s1);
         REQUIRE(s2);
@@ -160,14 +160,14 @@ TEST_CASE("Shared")
 
         SECTION("Move constructor")
         {
-            auto s = Shared<const SInt32>(std::move(u));
+            auto s = Shared<SInt32 const>(std::move(u));
             REQUIRE(!u);
             REQUIRE(s);
         }
 
         SECTION("Move assignment")
         {
-            auto s = Shared<const SInt32>::Make(24);
+            auto s = Shared<SInt32 const>::Make(24);
             s = std::move(u);
             REQUIRE(!u);
             REQUIRE(s);
@@ -236,7 +236,7 @@ TEST_CASE("Tracked")
 {
     SECTION("Default")
     {
-        const auto i = Tracked<SInt32>();
+        auto const i = Tracked<SInt32>();
         REQUIRE(i.IsExpired());
     }
 

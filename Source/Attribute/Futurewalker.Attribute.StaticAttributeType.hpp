@@ -14,6 +14,6 @@ template <class T>
 class StaticAttribute;
 
 template <class T>
-using StaticAttributeRef = StaticReference<const StaticAttribute<T>>;
+using StaticAttributeRef = StaticReference<StaticAttribute<T> const>;
 }
 }

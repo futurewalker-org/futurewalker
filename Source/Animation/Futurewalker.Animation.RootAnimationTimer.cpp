@@ -31,7 +31,7 @@ RootAnimationTimer::RootAnimationTimer(PassKey<AnimationTimer> key, Delegate del
 ///
 /// @param active
 ///
-auto RootAnimationTimer::SetActive(const Bool active) -> void
+auto RootAnimationTimer::SetActive(Bool const active) -> void
 {
     if (_active != active)
     {

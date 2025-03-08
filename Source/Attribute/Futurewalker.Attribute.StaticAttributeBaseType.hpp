@@ -10,6 +10,6 @@
 namespace FW_DETAIL_NS
 {
 class StaticAttributeBase;
-using StaticAttributeBaseRef = StaticReference<const StaticAttributeBase>;
+using StaticAttributeBaseRef = StaticReference<StaticAttributeBase const>;
 using StaticAttributeValue = std::variant<AttributeValue, StaticAttributeBaseRef>;
 }

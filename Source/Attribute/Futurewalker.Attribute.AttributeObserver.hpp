@@ -43,7 +43,7 @@ public:
     {
         _eventReceiver = EventReceiver::Make();
 
-        if (const auto attributeNode = _node.Lock())
+        if (auto const attributeNode = _node.Lock())
         {
             _signalConnection = EventReceiver::Connect(*attributeNode, *this, &AttributeObserver::ReceiveEvent);
         }
@@ -64,7 +64,7 @@ public:
     ///
     auto GetValue() const -> Optional<T>
     {
-        if (const auto node = _node.Lock())
+        if (auto const node = _node.Lock())
         {
             return AttributeNode::GetValue<T>(*node, _description);
         }
@@ -76,9 +76,9 @@ public:
     ///
     /// @param value New value of the attribute.
     ///
-    auto SetValue(const T& value) -> void
+    auto SetValue(T const& value) -> void
     {
-        if (const auto node = _node.Lock())
+        if (auto const node = _node.Lock())
         {
             AttributeNode::SetValue<T>(*node, _description, value);
         }
@@ -89,9 +89,9 @@ public:
     ///
     /// @param reference Reference of other attribute.
     ///
-    auto SetReference(const StaticAttribute<T>& reference) -> void
+    auto SetReference(StaticAttribute<T> const& reference) -> void
     {
-        if (const auto node = _node.Lock())
+        if (auto const node = _node.Lock())
         {
             AttributeNode::SetReference(*node, _description, reference);
         }
@@ -108,7 +108,7 @@ public:
     ///
     /// @brief Get tracker.
     ///
-    auto GetTracker() const -> const Tracker&
+    auto GetTracker() const -> Tracker const&
     {
         return _eventReceiver->GetTracker();
     }
@@ -124,7 +124,7 @@ public:
     ///
     /// @brief Get event receiver.
     ///
-    auto GetEventReceiver() const -> const EventReceiver&
+    auto GetEventReceiver() const -> EventReceiver const&
     {
         return *_eventReceiver;
     }
@@ -134,7 +134,7 @@ private:
     {
         if (event.Is<AttributeEvent::ValueChanged>())
         {
-            const auto& parameter = event.As<AttributeEvent::ValueChanged>();
+            auto const& parameter = event.As<AttributeEvent::ValueChanged>();
             if (parameter.GetId() == _description.Get().GetId())
             {
                 GetEventReceiver().SendEventDetached(event);

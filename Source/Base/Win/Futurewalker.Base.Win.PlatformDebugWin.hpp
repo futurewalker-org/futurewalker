@@ -15,7 +15,7 @@ namespace FW_EXPORT
 class PlatformDebugWin : public PlatformDebug
 {
 public:
-    auto Print(const StringView message) -> void override;
+    auto Print(StringView const message) -> void override;
     auto Break() -> void override;
 };
 

@@ -28,10 +28,10 @@ class AttributeEvent::ValueChanged : public AttributeEvent
 {
 public:
     auto GetId() const -> AttributeId;
-    auto SetId(const AttributeId& id) -> void;
+    auto SetId(AttributeId const& id) -> void;
 
     auto GetValue() const -> Optional<AttributeValue>;
-    auto SetValue(const AttributeValue& value) -> void;
+    auto SetValue(AttributeValue const& value) -> void;
 
 private:
     AttributeId _id = 0U;

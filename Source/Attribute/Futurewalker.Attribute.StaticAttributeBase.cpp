@@ -9,7 +9,7 @@ namespace FW_DETAIL_NS
 ///
 /// @param value
 ///
-StaticAttributeBase::StaticAttributeBase(const AttributeValue& value)
+StaticAttributeBase::StaticAttributeBase(AttributeValue const& value)
   : _default {value}
 {
 }
@@ -19,7 +19,7 @@ StaticAttributeBase::StaticAttributeBase(const AttributeValue& value)
 ///
 /// @param reference
 ///
-StaticAttributeBase::StaticAttributeBase(StaticReference<const StaticAttributeBase> reference)
+StaticAttributeBase::StaticAttributeBase(StaticAttributeBaseRef reference)
   : _default {reference}
 {
 }
@@ -41,7 +41,7 @@ auto StaticAttributeBase::GetId() const noexcept -> AttributeId
 ///
 auto StaticAttributeBase::GetDefaultValue() const -> Optional<AttributeValue>
 {
-    if (const auto ptr = std::get_if<AttributeValue>(&_default))
+    if (auto const ptr = std::get_if<AttributeValue>(&_default))
     {
         return *ptr;
     }
@@ -53,9 +53,9 @@ auto StaticAttributeBase::GetDefaultValue() const -> Optional<AttributeValue>
 ///
 /// @return
 ///
-auto StaticAttributeBase::GetDefaultReference() const -> Optional<StaticReference<const StaticAttributeBase>>
+auto StaticAttributeBase::GetDefaultReference() const -> Optional<StaticAttributeBaseRef>
 {
-    if (const auto ptr = std::get_if<StaticReference<const StaticAttributeBase>>(&_default))
+    if (auto const ptr = std::get_if<StaticAttributeBaseRef>(&_default))
     {
         return *ptr;
     }

@@ -34,7 +34,7 @@ public:
     /// @return Reference to unique attribute object.
     ///
     template <auto = [] {}>
-    static auto MakeWithDefaultValue(const T& value) -> StaticAttributeRef<T>
+    static auto MakeWithDefaultValue(T const& value) -> StaticAttributeRef<T>
     {
         static auto attribute = StaticAttribute<T>(AttributeValue(value));
         return attribute;
@@ -57,12 +57,12 @@ public:
 private:
     StaticAttribute() = delete;
 
-    StaticAttribute(const AttributeValue& value)
+    StaticAttribute(AttributeValue const& value)
       : StaticAttributeBase {value}
     {
     }
 
-    StaticAttribute(StaticReference<const StaticAttribute<T>> reference)
+    StaticAttribute(StaticAttributeRef<T> reference)
       : StaticAttributeBase {reference}
     {
     }

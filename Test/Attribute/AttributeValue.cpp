@@ -10,7 +10,7 @@ TEST_CASE("AttributeValue")
     {
         auto val = AttributeValue(SInt32(42));
         REQUIRE(*val.GetValue<SInt32>() == 42);
-        REQUIRE(!val.GetValue<const SInt32>()); // FIXME: might be better to ignore cv.
+        REQUIRE(!val.GetValue<SInt32 const>()); // FIXME: might be better to ignore cv.
     }
 
     SECTION("Copy")

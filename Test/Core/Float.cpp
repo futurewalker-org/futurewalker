@@ -39,7 +39,7 @@ TEST_CASE("Float")
 
         SECTION("Construction")
         {
-            const auto f = Float32(3.14f);
+            auto const f = Float32(3.14f);
             REQUIRE(Float32::IsFinite(f));
             REQUIRE(!Float32::IsNaN(f));
             REQUIRE(!Float32::IsInfinite(f));
@@ -49,7 +49,7 @@ TEST_CASE("Float")
 
     SECTION("Unary operators")
     {
-        const auto f = Float32(1);
+        auto const f = Float32(1);
         REQUIRE(-f == -1.f);
         REQUIRE(+f == +1.f);
         REQUIRE(f == 1.f);
@@ -106,7 +106,7 @@ TEST_CASE("Float")
 
     SECTION("MinMax")
     {
-        const auto f = Float32(42.0);
+        auto const f = Float32(42.0);
         REQUIRE(Float32::Min(f, 3.14f) == 3.14f);
         REQUIRE(Float32::Max(f, 3.14f) == 42.0f);
         REQUIRE(Float32::MinMax(f, 3.14f).first == 3.14f);

@@ -35,31 +35,31 @@ public:
     DependencyNode(PassKey<DependencyNode>, Delegate delegate);
 
     auto Notify() -> void;
-    auto NotifyWithEvent(const Event& event) -> void;
+    auto NotifyWithEvent(Event const& event) -> void;
 
-    auto AddChild(const Shared<DependencyNode>& node, Pointer<const DependencyNode> after) -> void;
-    auto GetChildAt(const SInt64 index) -> Shared<DependencyNode>;
+    auto AddChild(Shared<DependencyNode> const& node, Pointer<DependencyNode const> after) -> void;
+    auto GetChildAt(SInt64 const index) -> Shared<DependencyNode>;
     auto GetChildCount() const -> SInt64;
-    auto RemoveChild(const Shared<DependencyNode>& node) -> void;
+    auto RemoveChild(Shared<DependencyNode> const& node) -> void;
 
     auto GetParent() -> Shared<DependencyNode>;
-    auto GetParent() const -> Shared<const DependencyNode>;
+    auto GetParent() const -> Shared<DependencyNode const>;
 
     auto GetPropertyStore() -> PropertyStore&;
-    auto GetPropertyStore() const -> const PropertyStore&;
+    auto GetPropertyStore() const -> PropertyStore const&;
 
 private:
     auto GetSelf() -> Shared<DependencyNode>;
-    auto SetSelf(const Shared<DependencyNode>& self) -> void;
-    auto SetParent(const Shared<DependencyNode>& parent) -> void;
+    auto SetSelf(Shared<DependencyNode> const& self) -> void;
+    auto SetParent(Shared<DependencyNode> const& parent) -> void;
 
     auto RemoveFromParent() -> void;
 
-    auto NotifyCore(const Event& event) -> void;
-    auto NotifySelf(const Event& event) -> Bool;
-    auto NotifyChildren(const Event& event) -> void;
+    auto NotifyCore(Event const& event) -> void;
+    auto NotifySelf(Event const& event) -> Bool;
+    auto NotifyChildren(Event const& event) -> void;
 
-    auto SendNotifyEvent(const Event& event) -> Bool;
+    auto SendNotifyEvent(Event const& event) -> Bool;
 
 private:
     Delegate _delegate;

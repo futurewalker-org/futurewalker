@@ -43,7 +43,7 @@ class AnimationTimerEvent::Tick : public AnimationTimerEvent
 {
 public:
     auto GetTime() const -> MonotonicTime;
-    auto SetTime(const MonotonicTime& time) -> void;
+    auto SetTime(MonotonicTime const& time) -> void;
 
 private:
     MonotonicTime _time;

@@ -140,7 +140,7 @@ auto AnimationTimer::SetEnabled(Bool const enabled) -> void
 
         if (enabledFromRoot)
         {
-            if (const auto parent = GetParent())
+            if (auto const parent = GetParent())
             {
                 enabledFromRoot = parent->_enabledFromRoot;
             }
@@ -152,7 +152,7 @@ auto AnimationTimer::SetEnabled(Bool const enabled) -> void
 
             SendAnimationTimerEnabledChangedEvent();
 
-            for (const auto& child : _children)
+            for (auto const& child : _children)
             {
                 child->SendDependencyNodeEnabledChangedEvent(enabledFromRoot);
             }

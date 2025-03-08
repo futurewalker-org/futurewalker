@@ -31,7 +31,7 @@ public:
     /// @param rhs Radius to compare
     /// @param tolerance Absolute tolerance
     ///
-    static inline constexpr Bool IsNearlyEquals(const Radius2& lhs ,const Radius2& rhs, const T& tolerance = 1e-6) noexcept
+    static inline constexpr Bool IsNearlyEquals(Radius2 const& lhs, Radius2 const& rhs, T const& tolerance = 1e-6) noexcept
     {
         return ValueType::IsNearlyEqual(lhs._x, rhs._x, tolerance) && ValueType::IsNearlyEqual(lhs._y, rhs._y, tolerance);
     }
@@ -44,7 +44,7 @@ public:
     /// @param precision Relative precision
     /// @param minTolerance Absolute minimum tolerance
     ///
-    static inline constexpr Bool IsNearlyEqualRelative(const Radius2& lhs, const Radius2& rhs, const T& precision = 1e-6, const T& minTolerance = 1e-6) noexcept
+    static inline constexpr Bool IsNearlyEqualRelative(Radius2 const& lhs, Radius2 const& rhs, T const& precision = 1e-6, T const& minTolerance = 1e-6) noexcept
     {
         return ValueType::IsNearlyEqualRelative(lhs._x, rhs._y, precision, minTolerance) && ValueType::IsNearlyEqualRelative(lhs._x, rhs._y, precision, minTolerance);
     }
@@ -57,7 +57,7 @@ public:
     ///
     /// @return Radius of minimum components
     ///
-    static inline constexpr auto Min(const Radius2& lhs, const Radius2& rhs) -> Radius2
+    static inline constexpr auto Min(Radius2 const& lhs, Radius2 const& rhs) -> Radius2
     {
         return Radius2(ValueType::Min(lhs._x, rhs._x), ValueType::Min(lhs._y, rhs._y));
     }
@@ -70,7 +70,7 @@ public:
     ///
     /// @return Radius of maximum components
     ///
-    static inline constexpr auto Max(const Radius2& lhs, const Radius2& rhs) -> Radius2
+    static inline constexpr auto Max(Radius2 const& lhs, Radius2 const& rhs) -> Radius2
     {
         return Radius2(ValueType::Max(lhs._x, rhs._x), ValueType::Max(lhs._y, rhs._y));
     }
@@ -82,7 +82,7 @@ public:
     ///
     /// @return Rounded radius
     ///
-    static inline constexpr auto Round(const Radius2& radius) -> Radius2
+    static inline constexpr auto Round(Radius2 const& radius) -> Radius2
     {
         return Radius2(ValueType::Round(radius._x), ValueType::Round(radius._y));
     }
@@ -94,7 +94,7 @@ public:
     ///
     /// @return Floored radius
     ///
-    static inline constexpr auto Floor(const Radius2& radius) -> Radius2
+    static inline constexpr auto Floor(Radius2 const& radius) -> Radius2
     {
         return Radius2(ValueType::Floor(radius._x), ValueType::Floor(radius._y));
     }
@@ -106,7 +106,7 @@ public:
     ///
     /// @return Ceiled radius
     ///
-    static inline constexpr auto Ceil(const Radius2& radius) -> Radius2
+    static inline constexpr auto Ceil(Radius2 const& radius) -> Radius2
     {
         return Radius2(ValueType::Ceil(radius._x), ValueType::Ceil(radius._y));
     }
@@ -122,12 +122,12 @@ public:
     ///
     /// @brief Copy constructor.
     ///
-    inline constexpr Radius2(const Radius2&) = default;
+    inline constexpr Radius2(Radius2 const&) = default;
 
     ///
     /// @brief Copy assignment operator.
     ///
-    inline constexpr auto operator=(const Radius2&) -> Radius2& = default;
+    inline constexpr auto operator=(Radius2 const&) -> Radius2& = default;
 
     ///
     /// @brief Construct Radius2 from X and Y values.
@@ -145,7 +145,7 @@ public:
     ///
     /// @brief Get X.
     ///
-    inline constexpr auto GetX() const noexcept -> const ValueType&
+    inline constexpr auto GetX() const noexcept -> ValueType const&
     {
         return _x;
     }
@@ -153,7 +153,7 @@ public:
     ///
     /// @brief Set X.
     ///
-    inline constexpr auto SetX(const ValueType& x) noexcept -> void
+    inline constexpr auto SetX(ValueType const& x) noexcept -> void
     {
         _x = x;
     }
@@ -161,7 +161,7 @@ public:
     ///
     /// @brief Get Y.
     ///
-    inline constexpr auto GetY() const noexcept -> const ValueType&
+    inline constexpr auto GetY() const noexcept -> ValueType const&
     {
         return _y;
     }
@@ -169,7 +169,7 @@ public:
     ///
     /// @brief Set Y.
     ///
-    inline constexpr auto SetY(const ValueType& y) noexcept -> void
+    inline constexpr auto SetY(ValueType const& y) noexcept -> void
     {
         _y = y;
     }
@@ -191,8 +191,8 @@ public:
         return U<ValueType>(_x, _y);
     }
 
-    friend inline constexpr bool operator==(const Radius2& l, const Radius2& r) = default;
-    friend inline constexpr bool operator!=(const Radius2& l, const Radius2& r) = default;
+    friend inline constexpr bool operator==(Radius2 const& l, Radius2 const& r) = default;
+    friend inline constexpr bool operator!=(Radius2 const& l, Radius2 const& r) = default;
 
 private:
     ValueType _x = static_cast<T>(0);

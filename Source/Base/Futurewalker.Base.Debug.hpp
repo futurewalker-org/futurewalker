@@ -24,12 +24,12 @@ class Debug : NonConstructible
 {
 public:
     template <class... Args>
-    static inline auto Print(const char* message, [[maybe_unused]] Args&&... args) -> void;
-    static inline auto Assert(const Bool boolean, const char* message = "", std::source_location location = std::source_location::current(), Stacktrace stacktrace = Stacktrace::MakeCurrent()) -> void;
+    static inline auto Print(char const* message, Args&&... args) -> void;
+    static inline auto Assert(Bool const boolean, char const* message = "", std::source_location location = std::source_location::current(), Stacktrace stacktrace = Stacktrace::MakeCurrent()) -> void;
     static inline auto Break() -> void;
 
 private:
-    static auto PrintPriv(const StringView message) -> void;
+    static auto PrintPriv(StringView const message) -> void;
     static auto BreakPriv() -> void;
 };
 
@@ -42,7 +42,7 @@ private:
 /// @param[in] args Format arguments.
 ///
 template <class... Args>
-inline auto Debug::Print(const char* message, [[maybe_unused]] Args&&... args) -> void
+inline auto Debug::Print(char const* message, Args&&... args) -> void
 {
     Debug::PrintPriv(StringFunction::Format(StringFunction::ConvertUtf8ToStringUnchecked(message), std::forward<Args>(args)...));
 }
@@ -57,13 +57,13 @@ inline auto Debug::Print(const char* message, [[maybe_unused]] Args&&... args) -
 /// @param[in] location Source location of caller.
 /// @param[in] stacktrace  stacktrace  stacktrace  stacktrace 
 ///
-inline auto Debug::Assert(const Bool boolean, const char* message, std::source_location location, Stacktrace stacktrace) -> void
+inline auto Debug::Assert(Bool const boolean, char const* message, std::source_location location, Stacktrace stacktrace) -> void
 {
     if (!boolean)
     {
-        const auto function = StringFunction::ConvertUtf8ToStringUnchecked(location.function_name());
-        const auto file = StringFunction::ConvertUtf8ToStringUnchecked(location.file_name());
-        const auto trace = StringFunction::ConvertUtf8ToStringUnchecked(stacktrace.GetString());
+        auto const function = StringFunction::ConvertUtf8ToStringUnchecked(location.function_name());
+        auto const file = StringFunction::ConvertUtf8ToStringUnchecked(location.file_name());
+        auto const trace = StringFunction::ConvertUtf8ToStringUnchecked(stacktrace.GetCString());
         Debug::Print("Assertion failed: {} {} {}:{}:{}", StringFunction::ConvertUtf8ToStringUnchecked(message), function, file, location.line(), location.column());
         Debug::Print("{}", trace);
         std::abort();

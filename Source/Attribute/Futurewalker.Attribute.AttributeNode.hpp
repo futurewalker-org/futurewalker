@@ -34,17 +34,17 @@ public:
 
     AttributeNode(PassKey<AttributeNode>);
 
-    auto AddChild(const Shared<AttributeNode>& child) -> void;
-    auto RemoveChild(const Shared<AttributeNode>& child) -> void;
+    auto AddChild(Shared<AttributeNode> const& child) -> void;
+    auto RemoveChild(Shared<AttributeNode> const& child) -> void;
 
     auto GetAttributeNode() -> AttributeNode&;
-    auto GetAttributeNode() const -> const AttributeNode&;
+    auto GetAttributeNode() const -> AttributeNode const&;
 
     auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> const Tracker&;
+    auto GetTracker() const -> Tracker const&;
 
     auto GetEventReceiver() -> EventReceiver&;
-    auto GetEventReceiver() const -> const EventReceiver&;
+    auto GetEventReceiver() const -> EventReceiver const&;
 
     template <class T, class Owner>
     static auto GetValue(Owner& owner, StaticAttributeRef<T> description) -> Optional<T>;
@@ -59,30 +59,30 @@ public:
 
 private:
     auto GetSelf() -> Shared<AttributeNode>;
-    auto GetSelf() const -> Shared<const AttributeNode>;
+    auto GetSelf() const -> Shared<AttributeNode const>;
 
     auto GetParent() -> Shared<AttributeNode>;
-    auto GetParent() const -> Shared<const AttributeNode>;
+    auto GetParent() const -> Shared<AttributeNode const>;
 
     auto GetRoot() -> Shared<AttributeNode>;
-    auto GetRoot() const -> Shared<const AttributeNode>;
+    auto GetRoot() const -> Shared<AttributeNode const>;
 
-    auto IsAncestorOf(ReferenceArg<const AttributeNode> node) const -> Bool;
+    auto IsAncestorOf(ReferenceArg<AttributeNode const> node) const -> Bool;
 
     auto AddAttributeSlot(StaticAttributeBaseRef description) -> void;
     auto ResetAttributeSlot(StaticAttributeBaseRef description) -> void;
-    auto SetAttributeSlotValue(StaticAttributeBaseRef description, const AttributeValue& value) -> void;
-    auto SetAttributeSlotReference(StaticAttributeBaseRef description, const StaticAttributeBaseRef reference) -> void;
+    auto SetAttributeSlotValue(StaticAttributeBaseRef description, AttributeValue const& value) -> void;
+    auto SetAttributeSlotReference(StaticAttributeBaseRef description, StaticAttributeBaseRef const reference) -> void;
 
     auto InsertAttributeSlot(StaticAttributeBaseRef description) -> Shared<AttributeSlot>;
-    auto FindAttributeSlot(const AttributeId& id) -> Shared<AttributeSlot>;
-    auto FindAncestorAttributeSlot(const AttributeId& id) -> Shared<AttributeSlot>;
+    auto FindAttributeSlot(AttributeId const& id) -> Shared<AttributeSlot>;
+    auto FindAncestorAttributeSlot(AttributeId const& id) -> Shared<AttributeSlot>;
 
     auto ResolveSource(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
-    auto ResolveSourceCore(StaticAttributeBaseRef reference, const SInt64 depth) -> Shared<AttributeSlot>;
+    auto ResolveSourceCore(StaticAttributeBaseRef reference, SInt64 const depth) -> Shared<AttributeSlot>;
 
     auto ResolveValue(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
-    auto ResolveValueCore(StaticAttributeBaseRef reference, const SInt64 depth) -> Shared<AttributeSlot>;
+    auto ResolveValueCore(StaticAttributeBaseRef reference, SInt64 const depth) -> Shared<AttributeSlot>;
 
     auto UpdateSlotCacheRecursive(AttributeSlot& slot) -> void;
 
@@ -113,11 +113,11 @@ auto AttributeNode::GetValue(Owner& owner, StaticAttributeRef<T> description) ->
 
         node.AddAttributeSlot(description);
 
-        const auto id = description.Get().GetId();
+        auto const id = description.Get().GetId();
 
-        if (const auto slot = node.FindAttributeSlot(id))
+        if (auto const slot = node.FindAttributeSlot(id))
         {
-            if (const auto cache = slot->GetValueCache())
+            if (auto const cache = slot->GetValueCache())
             {
                 return cache->template GetValue<T>();
             }

@@ -69,9 +69,9 @@ private:
 
     static auto GetSelf() -> Locator&;
 
-    auto AddInstance(const Id& id, const Shared<void>& instance) -> void;
-    auto CreateInstance(const Id& id) -> Shared<void>;
-    auto FindInstance(const Id& id) const -> Shared<void>;
+    auto AddInstance(Id const& id, Shared<void> const& instance) -> void;
+    auto CreateInstance(Id const& id) -> Shared<void>;
+    auto FindInstance(Id const& id) const -> Shared<void>;
 
 private:
     mutable std::recursive_mutex _mutex;
@@ -181,13 +181,13 @@ auto Locator::InternalRegister(Args&&... args) -> Bool
 {
     using Interface = typename Resolver<Implementation>::Interface;
     auto resolver = [=]() -> Shared<void> {
-        const auto instance = Shared<Interface>(Resolver<Implementation>::Resolve(args...));
-        const auto id = static_cast<Id>(TypeId::Get<Interface>());
+        auto const instance = Shared<Interface>(Resolver<Implementation>::Resolve(args...));
+        auto const id = static_cast<Id>(TypeId::Get<Interface>());
         GetSelf().AddInstance(id, instance);
         return instance;
     };
-    const auto lock = std::lock_guard(_mutex);
-    const auto result = _factoryMap.try_emplace(static_cast<Id>(TypeId::Get<Interface>()), std::move(resolver));
+    auto const lock = std::lock_guard(_mutex);
+    auto const result = _factoryMap.try_emplace(static_cast<Id>(TypeId::Get<Interface>()), std::move(resolver));
     return result.second;
 }
 
@@ -197,7 +197,7 @@ auto Locator::InternalRegister(Args&&... args) -> Bool
 template <class Interface>
 auto Locator::InternalUnregister() -> void
 {
-    const auto lock = std::lock_guard(_mutex);
+    auto const lock = std::lock_guard(_mutex);
     _factoryMap.erase(static_cast<Id>(TypeId::Get<Interface>()));
 }
 
@@ -207,8 +207,8 @@ auto Locator::InternalUnregister() -> void
 template <class Interface>
 auto Locator::InternalIsRegistered() -> Bool
 {
-    const auto id = TypeId::Get<Interface>();
-    const auto lock = std::lock_guard(_mutex);
+    auto const id = TypeId::Get<Interface>();
+    auto const lock = std::lock_guard(_mutex);
     return _factoryMap.contains(id);
 }
 
@@ -218,8 +218,8 @@ auto Locator::InternalIsRegistered() -> Bool
 template <class Interface>
 auto Locator::InternalResolve() -> Shared<Interface>
 {
-    const auto lock = std::lock_guard(_mutex);
-    const auto id = TypeId::Get<Interface>();
+    auto const lock = std::lock_guard(_mutex);
+    auto const id = TypeId::Get<Interface>();
     if (auto instance = FindInstance(static_cast<Id>(id)))
     {
         return instance.Assume<Interface>();
@@ -237,8 +237,8 @@ auto Locator::InternalResolve() -> Shared<Interface>
 template <class Interface>
 auto Locator::InternalGetInstance() -> Shared<Interface>
 {
-    const auto lock = std::lock_guard(_mutex);
-    const auto id = TypeId::Get<Interface>();
+    auto const lock = std::lock_guard(_mutex);
+    auto const id = TypeId::Get<Interface>();
     if (auto instance = FindInstance(static_cast<Id>(id)))
     {
         return instance.Assume<Interface>();

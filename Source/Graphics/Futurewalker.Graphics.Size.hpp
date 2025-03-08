@@ -31,7 +31,7 @@ public:
     ///
     /// @return Normalized size
     ///
-    static inline constexpr auto Normalize(const Size2& size) -> Size2
+    static inline constexpr auto Normalize(Size2 const& size) -> Size2
     {
         return Size2(ValueType::Max(ValueType(0), size._w), ValueType::Max(ValueType(0), size._h));
     }
@@ -44,7 +44,7 @@ public:
     ///
     /// @return Size of minimum components
     ///
-    static inline constexpr auto Min(const Size2& lhs, const Size2& rhs) -> Size2
+    static inline constexpr auto Min(Size2 const& lhs, Size2 const& rhs) -> Size2
     {
         return Size2(ValueType::Min(lhs._w, rhs._w), ValueType::Min(lhs._h, rhs._h));
     }
@@ -57,7 +57,7 @@ public:
     ///
     /// @return Size of maximum components
     ///
-    static inline constexpr auto Max(const Size2& lhs, const Size2& rhs) -> Size2
+    static inline constexpr auto Max(Size2 const& lhs, Size2 const& rhs) -> Size2
     {
         return Size2(ValueType::Max(lhs._w, rhs._w), ValueType::Max(lhs._h, rhs._h));
     }
@@ -69,7 +69,7 @@ public:
     ///
     /// @return Rounded size
     ///
-    static inline constexpr auto Round(const Size2& size) -> Size2
+    static inline constexpr auto Round(Size2 const& size) -> Size2
     {
         return Size2(ValueType::Round(size._w), ValueType::Round(size._h));
     }
@@ -81,7 +81,7 @@ public:
     ///
     /// @return Floored size
     ///
-    static inline constexpr auto Floor(const Size2& size) -> Size2
+    static inline constexpr auto Floor(Size2 const& size) -> Size2
     {
         return Size2(ValueType::Floor(size._w), ValueType::Floor(size._h));
     }
@@ -93,7 +93,7 @@ public:
     ///
     /// @return Ceiled size
     ///
-    static inline constexpr auto Ceil(const Size2& size) -> Size2
+    static inline constexpr auto Ceil(Size2 const& size) -> Size2
     {
         return Size2(ValueType::Ceil(size._w), ValueType::Ceil(size._h));
     }
@@ -109,7 +109,7 @@ public:
     ///
     /// @brief Copy constructor.
     ///
-    inline constexpr Size2(const Size2&) = default;
+    inline constexpr Size2(Size2 const&) = default;
 
     ///
     /// @brief Construct from components
@@ -117,7 +117,7 @@ public:
     /// @param width Width
     /// @param height Height
     ///
-    inline constexpr Size2(const ValueType& width, const ValueType& height)
+    inline constexpr Size2(ValueType const& width, ValueType const& height)
       : _w {width}
       , _h {height}
     {
@@ -128,7 +128,7 @@ public:
     ///
     /// @param extent Extent of width and height
     ///
-    inline constexpr explicit Size2(const ValueType& extent)
+    inline constexpr explicit Size2(ValueType const& extent)
       : _w {extent}
       , _h {extent}
     {
@@ -137,12 +137,12 @@ public:
     ///
     /// @brief Copy assignment operator.
     ///
-    inline constexpr auto operator=(const Size2&) -> Size2& = default;
+    inline constexpr auto operator=(Size2 const&) -> Size2& = default;
 
     ///
     /// @brief Get width.
     ///
-    inline constexpr auto GetWidth() const noexcept -> const ValueType&
+    inline constexpr auto GetWidth() const noexcept -> ValueType const&
     {
         return _w;
     }
@@ -150,7 +150,7 @@ public:
     ///
     /// @brief Set width.
     ///
-    inline constexpr void SetWidth(const ValueType& width) noexcept
+    inline constexpr void SetWidth(ValueType const& width) noexcept
     {
         _w = width;
     }
@@ -158,7 +158,7 @@ public:
     ///
     /// @brief Get height.
     ///
-    inline constexpr auto GetHeight() const noexcept -> const ValueType&
+    inline constexpr auto GetHeight() const noexcept -> ValueType const&
     {
         return _h;
     }
@@ -166,7 +166,7 @@ public:
     ///
     /// @brief Set height.
     ///
-    inline constexpr void SetHeight(const ValueType& height) noexcept
+    inline constexpr void SetHeight(ValueType const& height) noexcept
     {
         _h = height;
     }
@@ -187,9 +187,9 @@ public:
         return ValueType::IsFinite(_w) && ValueType::IsFinite(_h);
     }
 
-    friend inline constexpr bool operator==(const Size2&, const Size2&) = default;
+    friend inline constexpr bool operator==(Size2 const&, Size2 const&) = default;
 
-    friend inline constexpr bool operator!=(const Size2&, const Size2&) = default;
+    friend inline constexpr bool operator!=(Size2 const&, Size2 const&) = default;
 
 private:
     ValueType _w = static_cast<T>(0);

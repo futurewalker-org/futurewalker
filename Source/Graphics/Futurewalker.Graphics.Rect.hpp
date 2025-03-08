@@ -33,7 +33,7 @@ public:
     [[nodiscard]]
     static inline constexpr auto Infinite() noexcept -> Rect2
     {
-        const auto inf = ValueType::Infinity();
+        auto const inf = ValueType::Infinity();
         return Rect2(-inf, -inf, inf, inf);
     }
 
@@ -45,10 +45,10 @@ public:
     /// @return Sorted rectangle
     ///
     [[nodiscard]]
-    static inline constexpr auto Sort(const Rect2& rect) noexcept -> Rect2
+    static inline constexpr auto Sort(Rect2 const& rect) noexcept -> Rect2
     {
-        const auto [l, r] = ValueType::MinMax(rect._l, rect._r);
-        const auto [t, b] = ValueType::MinMax(rect._t, rect._b);
+        auto const [l, r] = ValueType::MinMax(rect._l, rect._r);
+        auto const [t, b] = ValueType::MinMax(rect._t, rect._b);
         return Rect2(l, t, r, b);
     }
 
@@ -62,7 +62,7 @@ public:
     /// @return Inflated rectangle
     ///
     [[nodiscard]]
-    static inline constexpr auto Inflate(const Rect2& rect, const ValueType& dx, const ValueType& dy) noexcept -> Rect2
+    static inline constexpr auto Inflate(Rect2 const& rect, ValueType const& dx, ValueType const& dy) noexcept -> Rect2
     {
         return Rect2(rect._l - dx, rect._t - dy, rect._r + dx, rect._b + dy);
     }
@@ -76,10 +76,10 @@ public:
     /// @return Offsetted rectangle
     ///
     [[nodiscard]]
-    static inline constexpr auto Offset(const Rect2& rect, const Offset2<ValueType>& offset) noexcept -> Rect2
+    static inline constexpr auto Offset(Rect2 const& rect, Offset2<ValueType> const& offset) noexcept -> Rect2
     {
-        const auto dx = offset.GetDeltaX();
-        const auto dy = offset.GetDeltaY();
+        auto const dx = offset.GetDeltaX();
+        auto const dy = offset.GetDeltaY();
         return Rect2(rect._l + dx, rect._t + dy, rect._r + dx, rect._b + dy);
     }
 
@@ -92,7 +92,7 @@ public:
     /// @return Intersection of two rectangles
     ///
     [[nodiscard]]
-    static inline constexpr auto Intersect(const Rect2& lhs, const Rect2& rhs) noexcept -> Rect2
+    static inline constexpr auto Intersect(Rect2 const& lhs, Rect2 const& rhs) noexcept -> Rect2
     {
         if (lhs.IsEmpty() || rhs.IsEmpty())
         {
@@ -110,7 +110,7 @@ public:
     /// @return true if the point is inside rectangle
     ///
     [[nodiscard]]
-    static inline constexpr auto Intersect(const Rect2& lhs, const Point<ValueType>& rhs) noexcept -> Bool
+    static inline constexpr auto Intersect(Rect2 const& lhs, Point<ValueType> const& rhs) noexcept -> Bool
     {
         if (lhs.IsEmpty())
         {
@@ -136,7 +136,7 @@ public:
     /// @return Union of two rectangles
     ///
     [[nodiscard]]
-    static inline constexpr auto Union(const Rect2& lhs, const Rect2& rhs) noexcept -> Rect2
+    static inline constexpr auto Union(Rect2 const& lhs, Rect2 const& rhs) noexcept -> Rect2
     {
         if (lhs.IsEmpty())
         {
@@ -160,7 +160,7 @@ public:
     ///
     /// @brief Copy constructor.
     ///
-    inline constexpr Rect2(const Rect2&) = default;
+    inline constexpr Rect2(Rect2 const&) = default;
 
     ///
     /// @brief Construct rectangle from LTRB values. 
@@ -170,7 +170,7 @@ public:
     /// @param right Right
     /// @param bottom Bottom
     ///
-    inline constexpr Rect2(const ValueType& left, const ValueType& top, const ValueType& right, const ValueType bottom)
+    inline constexpr Rect2(ValueType const& left, ValueType const& top, ValueType const& right, ValueType const bottom)
       : _l {left}
       , _t {top}
       , _r {right}
@@ -184,7 +184,7 @@ public:
     /// @param pos Position of rectangle
     /// @param size Size of rectangle
     ///
-    inline constexpr Rect2(const Point2<ValueType>& position, const Size2<ValueType>& size)
+    inline constexpr Rect2(Point2<ValueType> const& position, Size2<ValueType> const& size)
       : _l {position.GetX()}
       , _t {position.GetY()}
       , _r {_l + size.GetWidth()}
@@ -195,12 +195,12 @@ public:
     ///
     /// @brief Copy assignment operator.
     ///
-    inline constexpr auto operator=(const Rect2&) -> Rect2& = default;
+    inline constexpr auto operator=(Rect2 const&) -> Rect2& = default;
 
     ///
     /// @brief Get left value.
     ///
-    inline constexpr auto GetLeft() const noexcept -> const ValueType&
+    inline constexpr auto GetLeft() const noexcept -> ValueType const&
     {
         return _l;
     }
@@ -208,7 +208,7 @@ public:
     ///
     /// @brief Set left value.
     ///
-    inline constexpr void SetLeft(const ValueType& left) noexcept
+    inline constexpr void SetLeft(ValueType const& left) noexcept
     {
         _l = left;
     }
@@ -216,7 +216,7 @@ public:
     ///
     /// @brief Get top value.
     ///
-    inline constexpr auto GetTop() const noexcept -> const ValueType&
+    inline constexpr auto GetTop() const noexcept -> ValueType const&
     {
         return _t;
     }
@@ -224,7 +224,7 @@ public:
     ///
     /// @brief Set top value.
     ///
-    inline constexpr void SetTop(const ValueType& top) noexcept
+    inline constexpr void SetTop(ValueType const& top) noexcept
     {
         _t = top;
     }
@@ -232,7 +232,7 @@ public:
     ///
     /// @brief Get right value.
     ///
-    inline constexpr auto GetRight() const noexcept -> const ValueType&
+    inline constexpr auto GetRight() const noexcept -> ValueType const&
     {
         return _r;
     }
@@ -240,7 +240,7 @@ public:
     ///
     /// @brief Set right value.
     ///
-    inline constexpr void SetRight(const ValueType& right) noexcept
+    inline constexpr void SetRight(ValueType const& right) noexcept
     {
         _r = right;
     }
@@ -248,7 +248,7 @@ public:
     ///
     /// @brief Get bottom value.
     ///
-    inline constexpr auto GetBottom() const noexcept -> const ValueType&
+    inline constexpr auto GetBottom() const noexcept -> ValueType const&
     {
         return _b;
     }
@@ -256,7 +256,7 @@ public:
     ///
     /// @brief Set bottom value.
     ///
-    inline constexpr void SetBottom(const ValueType& bottom) noexcept
+    inline constexpr void SetBottom(ValueType const& bottom) noexcept
     {
         _b = bottom;
     }
@@ -288,7 +288,7 @@ public:
     ///
     /// @brief Set size.
     ///
-    inline constexpr void SetSize(const Size2<ValueType>& size) noexcept
+    inline constexpr void SetSize(Size2<ValueType> const& size) noexcept
     {
         _r = _l + size.GetWidth();
         _b = _t + size.GetHeight();
@@ -305,7 +305,7 @@ public:
     ///
     /// @brief Set position.
     ///
-    inline constexpr void SetPosition(const Point2<ValueType>& position) noexcept
+    inline constexpr void SetPosition(Point2<ValueType> const& position) noexcept
     {
         SetTopLeft(position);
     }
@@ -321,7 +321,7 @@ public:
     ///
     /// @brief Set top left point.
     ///
-    inline constexpr void SetTopLeft(const Point2<ValueType>& topLeft) noexcept
+    inline constexpr void SetTopLeft(Point2<ValueType> const& topLeft) noexcept
     {
         _l = topLeft.GetX();
         _t = topLeft.GetY();
@@ -338,7 +338,7 @@ public:
     ///
     /// @brief Set top right point.
     ///
-    inline constexpr void SetTopRight(const Point2<ValueType>& topRight) noexcept
+    inline constexpr void SetTopRight(Point2<ValueType> const& topRight) noexcept
     {
         _r = topRight.GetX();
         _t = topRight.GetY();
@@ -355,7 +355,7 @@ public:
     ///
     /// @brief Set bottom left point.
     ///
-    inline constexpr void SetBottomLeft(const Point2<ValueType>& bottomLeft) noexcept
+    inline constexpr void SetBottomLeft(Point2<ValueType> const& bottomLeft) noexcept
     {
         _l = bottomLeft.GetX();
         _b = bottomLeft.GetY();
@@ -372,7 +372,7 @@ public:
     ///
     /// @brief Set bottom right point.
     ///
-    inline constexpr void SetBottomRight(const Point2<ValueType>& bottomRight) noexcept
+    inline constexpr void SetBottomRight(Point2<ValueType> const& bottomRight) noexcept
     {
         _r = bottomRight.GetX();
         _b = bottomRight.GetY();
@@ -418,8 +418,8 @@ public:
         return _l <= _r && _t <= _b;
     }
 
-    friend inline constexpr bool operator==(const Rect2&, const Rect2&) = default;
-    friend inline constexpr bool operator!=(const Rect2&, const Rect2&) = default;
+    friend inline constexpr bool operator==(Rect2 const&, Rect2 const&) = default;
+    friend inline constexpr bool operator!=(Rect2 const&, Rect2 const&) = default;
 
 private:
     ValueType _l = static_cast<T>(0);

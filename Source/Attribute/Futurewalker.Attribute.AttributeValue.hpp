@@ -18,13 +18,13 @@ class AttributeValue
 {
 public:
     AttributeValue() = delete;
-    AttributeValue(const AttributeValue& other) noexcept;
+    AttributeValue(AttributeValue const& other) noexcept;
 
     ///
     /// @brief Create value by copying from source.
     ///
     template <class T>
-    explicit AttributeValue(const T& value)
+    explicit AttributeValue(T const& value)
     {
         _holder = Shared<Holder<T>>::Make(value);
     }
@@ -39,21 +39,21 @@ public:
     template <class T>
     auto GetValue() const -> Optional<T>
     {
-        if (const auto ptr = _holder.Maybe<const Holder<T>>())
+        if (auto const ptr = _holder.Maybe<Holder<T> const>())
         {
             return ptr->value;
         }
         return {};
     }
 
-    auto operator=(const AttributeValue& other) noexcept -> AttributeValue&;
-    auto operator==(const AttributeValue& other) const noexcept -> bool;
+    auto operator=(AttributeValue const& other) noexcept -> AttributeValue&;
+    auto operator==(AttributeValue const& other) const noexcept -> bool;
 
 private:
     struct HolderBase
     {
         virtual ~HolderBase() = default;
-        virtual auto EqualsTo(const Shared<const HolderBase>& other) const -> bool = 0;
+        virtual auto EqualsTo(Shared<HolderBase const> const& other) const -> bool = 0;
     };
 
     template <class T>
@@ -61,14 +61,14 @@ private:
     {
         T value;
 
-        Holder(const T& value)
+        Holder(T const& value)
           : value {value}
         {
         }
 
-        auto EqualsTo(const Shared<const HolderBase>& other) const -> bool override
+        auto EqualsTo(Shared<HolderBase const> const& other) const -> bool override
         {
-            if (const auto otherPtr = other.Maybe<const Holder<T>>())
+            if (auto const otherPtr = other.Maybe<Holder<T> const>())
             {
                 return value == otherPtr->value;
             }
@@ -76,7 +76,7 @@ private:
         }
     };
 
-    Shared<const HolderBase> _holder;
+    Shared<HolderBase const> _holder;
 };
 }
 }

@@ -30,10 +30,10 @@ class DependencyNodeEvent::Notify final : public DependencyNodeEvent
 {
 public:
     auto GetSender() const -> Shared<DependencyNode>;
-    auto SetSender(const Shared<DependencyNode>& sender) -> void;
+    auto SetSender(Shared<DependencyNode> const& sender) -> void;
 
-    auto GetEvent() const -> const Event&;
-    auto SetEvent(const Event& event) -> void;
+    auto GetEvent() const -> Event const&;
+    auto SetEvent(Event const& event) -> void;
 
 private:
     Weak<DependencyNode> _sender;

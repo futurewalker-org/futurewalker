@@ -59,7 +59,7 @@ auto Tracker::Track(T& t) -> Weak<Tracker>
 /// @param[in] t Reference of trackable object.
 ///
 template <class T>
-auto Tracker::Track(const T& t) -> Weak<Tracker const>
+auto Tracker::Track(T const& t) -> Weak<Tracker const>
 {
     auto& tracker = t.GetTracker();
     return tracker.GetSelf();

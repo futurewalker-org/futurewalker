@@ -52,7 +52,7 @@ TEST_CASE("Locator")
     Locator::Register<TestDependency>();
     REQUIRE_THROWS(Locator::Resolve<TestSingleton>());
     Locator::Register<TestSingleton>();
-    const auto singleton = Locator::Resolve<TestSingleton>();
+    auto const singleton = Locator::Resolve<TestSingleton>();
     REQUIRE(singleton);
     REQUIRE(singleton == Locator::GetInstance<TestSingleton>());
     REQUIRE(singleton->GetDependency() == Locator::GetInstance<TestDependency>());

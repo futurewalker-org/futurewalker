@@ -19,12 +19,12 @@ class StaticAttributeBase : NonCopyable
 {
 public:
     StaticAttributeBase() = delete;
-    StaticAttributeBase(const AttributeValue& value);
-    StaticAttributeBase(StaticReference<const StaticAttributeBase> reference);
+    StaticAttributeBase(AttributeValue const& value);
+    StaticAttributeBase(StaticAttributeBaseRef reference);
 
     auto GetId() const noexcept -> AttributeId;
     auto GetDefaultValue() const -> Optional<AttributeValue>;
-    auto GetDefaultReference() const -> Optional<StaticReference<const StaticAttributeBase>>;
+    auto GetDefaultReference() const -> Optional<StaticAttributeBaseRef>;
 
 private:
     UniqueAttributeId _uniqueId;

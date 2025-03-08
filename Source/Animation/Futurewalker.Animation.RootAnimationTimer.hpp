@@ -22,7 +22,7 @@ public:
 
     RootAnimationTimer(PassKey<AnimationTimer> key, Delegate delegate);
 
-    auto SetActive(const Bool active) -> void;
+    auto SetActive(Bool const active) -> void;
     
     auto UpdateCurrentTime() -> void;
 

@@ -32,7 +32,7 @@ public:
     auto GetPropertyStore() const -> PropertyStore const&;
 
     template <class Owner, class T>
-    static auto SetValue(Owner& owner, Id const key, const T& value) -> void;
+    static auto SetValue(Owner& owner, Id const key, T const& value) -> void;
 
     template <class T, class Owner>
     static auto GetValue(Owner const& owner, Id const key) -> Optional<T>;
@@ -45,7 +45,7 @@ private:
 /// @brief Set property value.
 ///
 template <class Owner, class T>
-auto PropertyStore::SetValue(Owner& owner, Id const key, const T& value) -> void
+auto PropertyStore::SetValue(Owner& owner, Id const key, T const& value) -> void
 {
     auto& map = owner.GetPropertyStore()._map;
     map.emplace(key, value);

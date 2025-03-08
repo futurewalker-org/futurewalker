@@ -18,7 +18,7 @@ auto Locator::GetSelf() -> Locator&
 /// @param[in] id Id.
 /// @param[in] instance Instance.
 ///
-void Locator::AddInstance(const Id& id, const Shared<void>& instance)
+void Locator::AddInstance(Id const& id, Shared<void> const& instance)
 {
     if (instance)
     {
@@ -31,9 +31,9 @@ void Locator::AddInstance(const Id& id, const Shared<void>& instance)
 ///
 /// @param[in] id Type id.
 ///
-auto Locator::CreateInstance(const Id& id) -> Shared<void>
+auto Locator::CreateInstance(Id const& id) -> Shared<void>
 {
-    const auto it = _factoryMap.find(id);
+    auto const it = _factoryMap.find(id);
     if (it != _factoryMap.end())
     {
         if (it->second)
@@ -49,9 +49,9 @@ auto Locator::CreateInstance(const Id& id) -> Shared<void>
 ///
 /// @param[in] id Type id.
 ///
-auto Locator::FindInstance(const Id& id) const -> Shared<void>
+auto Locator::FindInstance(Id const& id) const -> Shared<void>
 {
-    const auto it = _instanceMap.find(id);
+    auto const it = _instanceMap.find(id);
     if (it != _instanceMap.end())
     {
         return it->second.Lock();

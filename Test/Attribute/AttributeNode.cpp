@@ -7,12 +7,12 @@
 
 using namespace Futurewalker;
 
-const auto integerAttribute = StaticAttribute<SInt32>::MakeWithDefaultValue(42);
+auto const integerAttribute = StaticAttribute<SInt32>::MakeWithDefaultValue(42);
 
 TEST_CASE("AttributeNode")
 {
     Locator::Register<UniqueIdentifierManager>();
-    const auto uniqueIdManager = Locator::Resolve<UniqueIdentifierManager>();
+    auto const uniqueIdManager = Locator::Resolve<UniqueIdentifierManager>();
 
     auto node = AttributeNode::Make();
 
@@ -58,7 +58,7 @@ TEST_CASE("AttributeNode")
 
     SECTION("reference to same node")
     {
-        static const auto referencingAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference(integerAttribute);
+        static auto const referencingAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference(integerAttribute);
 
         SECTION("get default value")
         {
@@ -86,7 +86,7 @@ TEST_CASE("AttributeNode")
 
     SECTION("reference to parent node")
     {
-        static const auto referencingAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference(integerAttribute);
+        static auto const referencingAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference(integerAttribute);
 
         auto child = AttributeNode::Make();
         node->AddChild(child);
@@ -111,7 +111,7 @@ TEST_CASE("AttributeNode")
 
     SECTION("reference from child")
     {
-        static const auto referencingAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference(integerAttribute);
+        static auto const referencingAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference(integerAttribute);
 
         auto child = AttributeNode::Make();
         node->AddChild(child);
@@ -177,7 +177,7 @@ TEST_CASE("AttributeNode")
 
         SECTION("simple reference")
         {
-            static const auto testAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference(integerAttribute);
+            static auto const testAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference(integerAttribute);
 
             auto child = AttributeNode::Make();
 
@@ -198,7 +198,7 @@ TEST_CASE("AttributeNode")
     {
         SECTION("simple value")
         {
-            const auto child = AttributeNode::Make();
+            auto const child = AttributeNode::Make();
 
             node->AddChild(child);
 
@@ -211,7 +211,7 @@ TEST_CASE("AttributeNode")
 
         SECTION("simple value")
         {
-            const auto child = AttributeNode::Make();
+            auto const child = AttributeNode::Make();
 
             node->AddChild(child);
 
@@ -229,8 +229,8 @@ TEST_CASE("AttributeNode")
 
         SECTION("simple value")
         {
-            const auto child1 = AttributeNode::Make();
-            const auto child2 = AttributeNode::Make();
+            auto const child1 = AttributeNode::Make();
+            auto const child2 = AttributeNode::Make();
 
             node->AddChild(child1);
             child1->AddChild(child2);

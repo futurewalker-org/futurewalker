@@ -66,10 +66,10 @@ protected:
 private:
     auto GetSelfBase() -> Shared<AnimationTimer>;
     auto GetSelfBase() const -> Shared<AnimationTimer const>;
-    auto SetSelfBase(const Shared<AnimationTimer>& self) -> void;
+    auto SetSelfBase(Shared<AnimationTimer> const& self) -> void;
     auto GetParent() -> Shared<AnimationTimer>;
     auto GetParent() const -> Shared<AnimationTimer const>;
-    auto SetParent(const Shared<AnimationTimer>& parent) -> void;
+    auto SetParent(Shared<AnimationTimer> const& parent) -> void;
     auto IsRoot() const -> Bool;
 
     auto AdoptChild(Shared<AnimationTimer> const& child, Pointer<AnimationTimer const> after) -> void;

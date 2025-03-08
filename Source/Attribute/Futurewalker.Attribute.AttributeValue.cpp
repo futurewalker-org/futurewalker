@@ -11,7 +11,7 @@ namespace FW_DETAIL_NS
 ///
 /// @param other 
 ///
-AttributeValue::AttributeValue(const AttributeValue& other) noexcept
+AttributeValue::AttributeValue(AttributeValue const& other) noexcept
   : _holder {other._holder}
 {
 }
@@ -21,7 +21,7 @@ AttributeValue::AttributeValue(const AttributeValue& other) noexcept
 ///
 /// @param other
 ///
-auto AttributeValue::operator=(const AttributeValue& other) noexcept -> AttributeValue&
+auto AttributeValue::operator=(AttributeValue const& other) noexcept -> AttributeValue&
 {
     _holder = other._holder;
     return *this;
@@ -30,7 +30,7 @@ auto AttributeValue::operator=(const AttributeValue& other) noexcept -> Attribut
 ///
 /// @brief operator==
 ///
-auto AttributeValue::operator==(const AttributeValue& other) const noexcept -> bool
+auto AttributeValue::operator==(AttributeValue const& other) const noexcept -> bool
 {
     if (_holder == other._holder)
     {

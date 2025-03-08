@@ -19,7 +19,7 @@ public:
     ///
     /// @brief Construct from StaticAttributeRef.
     ///
-    AttributeArg(const StaticAttributeRef<T>& reference)
+    AttributeArg(StaticAttributeRef<T> const& reference)
       : _reference {reference}
     {
     }
@@ -28,7 +28,7 @@ public:
     /// @brief Construct from 
     ///
     template <class U, auto = [] {}>
-    AttributeArg(const U& value)
+    AttributeArg(U const& value)
       : _reference {StaticAttribute<T>::MakeWithDefaultValue(value)}
     {
     }

@@ -42,7 +42,7 @@ auto DependencyNode::Notify() -> void
 ///
 /// @param event Event object.
 ///
-auto DependencyNode::NotifyWithEvent(const Event& event) -> void
+auto DependencyNode::NotifyWithEvent(Event const& event) -> void
 {
     auto parameter = DependencyNodeEvent::Notify();
     parameter.SetEvent(event);
@@ -52,20 +52,20 @@ auto DependencyNode::NotifyWithEvent(const Event& event) -> void
 ///
 /// @brief Add child node.
 ///
-auto DependencyNode::AddChild(const Shared<DependencyNode>& node, Pointer<const DependencyNode> after) -> void
+auto DependencyNode::AddChild(Shared<DependencyNode> const& node, Pointer<DependencyNode const> after) -> void
 {
     if (node)
     {
         node->RemoveFromParent();
         node->SetParent(GetSelf());
-        _children.insert(std::find_if(_children.begin(), _children.end(), [&](const auto& child) { return child.GetPointer() == after; }), node);
+        _children.insert(std::find_if(_children.begin(), _children.end(), [&](auto const& child) { return child.GetPointer() == after; }), node);
     }
 }
 
 ///
 /// @brief Get child node at index.
 ///
-auto DependencyNode::GetChildAt(const SInt64 index) -> Shared<DependencyNode>
+auto DependencyNode::GetChildAt(SInt64 const index) -> Shared<DependencyNode>
 {
     if (0 <= index && index < GetChildCount())
     {
@@ -85,14 +85,14 @@ auto DependencyNode::GetChildCount() const -> SInt64
 ///
 /// @brief Remove child node.
 ///
-auto DependencyNode::RemoveChild(const Shared<DependencyNode>& node) -> void
+auto DependencyNode::RemoveChild(Shared<DependencyNode> const& node) -> void
 {
     if (!node)
     {
         return;
     }
 
-    for (const auto& child : _children)
+    for (auto const& child : _children)
     {
         if (node == child)
         {
@@ -113,7 +113,7 @@ auto DependencyNode::GetParent() -> Shared<DependencyNode>
 ///
 /// @brief Get parent node.
 ///
-auto DependencyNode::GetParent() const -> Shared<const DependencyNode>
+auto DependencyNode::GetParent() const -> Shared<DependencyNode const>
 {
     return _parent.Lock();
 }
@@ -129,7 +129,7 @@ auto DependencyNode::GetPropertyStore() -> PropertyStore&
 ///
 /// @brief Get property store.
 ///
-auto DependencyNode::GetPropertyStore() const -> const PropertyStore&
+auto DependencyNode::GetPropertyStore() const -> PropertyStore const&
 {
     return _propertyStore->GetPropertyStore();
 }
@@ -145,7 +145,7 @@ auto DependencyNode::GetSelf() -> Shared<DependencyNode>
 ///
 /// @brief Set self.
 ///
-auto DependencyNode::SetSelf(const Shared<DependencyNode>& self) -> void
+auto DependencyNode::SetSelf(Shared<DependencyNode> const& self) -> void
 {
     _self = self;
 }
@@ -153,7 +153,7 @@ auto DependencyNode::SetSelf(const Shared<DependencyNode>& self) -> void
 ///
 /// @brief Set parent.
 ///
-auto DependencyNode::SetParent(const Shared<DependencyNode>& parent) -> void
+auto DependencyNode::SetParent(Shared<DependencyNode> const& parent) -> void
 {
     _parent = parent;
 }
@@ -165,8 +165,8 @@ auto DependencyNode::RemoveFromParent() -> void
 {
     if (auto parent = GetParent())
     {
-        const auto self = GetSelf();
-        const auto it = std::remove(parent->_children.begin(), parent->_children.end(), self);
+        auto const self = GetSelf();
+        auto const it = std::remove(parent->_children.begin(), parent->_children.end(), self);
         parent->_children.erase(it, parent->_children.end());
         SetParent(nullptr);
     }
@@ -175,7 +175,7 @@ auto DependencyNode::RemoveFromParent() -> void
 ///
 /// @brief Send notify event.
 ///
-auto DependencyNode::NotifyCore(const Event& event) -> void
+auto DependencyNode::NotifyCore(Event const& event) -> void
 {
     if (!NotifySelf(event))
     {
@@ -186,7 +186,7 @@ auto DependencyNode::NotifyCore(const Event& event) -> void
 ///
 /// @brief Send notify event to self.
 ///
-auto DependencyNode::NotifySelf(const Event& event) -> Bool
+auto DependencyNode::NotifySelf(Event const& event) -> Bool
 {
     try
     {
@@ -202,9 +202,9 @@ auto DependencyNode::NotifySelf(const Event& event) -> Bool
 ///
 /// @brief Notify child nodes.
 ///
-auto DependencyNode::NotifyChildren(const Event& event) -> void
+auto DependencyNode::NotifyChildren(Event const& event) -> void
 {
-    for (const auto& child : _children)
+    for (auto const& child : _children)
     {
         child->NotifyCore(event);
     }
@@ -213,7 +213,7 @@ auto DependencyNode::NotifyChildren(const Event& event) -> void
 ///
 /// @brief Send notification event to owner.
 ///
-auto DependencyNode::SendNotifyEvent(const Event& event) -> Bool
+auto DependencyNode::SendNotifyEvent(Event const& event) -> Bool
 {
     if (_delegate.dispatchEvent)
     {
