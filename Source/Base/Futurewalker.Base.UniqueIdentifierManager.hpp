@@ -52,7 +52,7 @@ struct Locator::Resolver<UniqueIdentifierManager>
 template <class IdentifierType>
 auto UniqueIdentifierManager::Generate() -> IdentifierType
 {
-    if (auto manager = Locator::GetInstance<UniqueIdentifierManager>())
+    if (auto const manager = Locator::GetInstance<UniqueIdentifierManager>())
     {
         return IdentifierType(manager->GetNext());
     }

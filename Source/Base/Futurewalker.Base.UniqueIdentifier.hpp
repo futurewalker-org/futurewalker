@@ -29,7 +29,7 @@ public:
     ///
     /// @brief Implicit conversion to Identifier.
     ///
-    operator IdentifierType() const noexcept
+    operator IdentifierType() const
     {
         if (_id == 0U)
         {
