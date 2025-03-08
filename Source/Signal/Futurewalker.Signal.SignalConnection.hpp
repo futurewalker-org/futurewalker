@@ -19,8 +19,8 @@ class SignalConnection final
 {
 public:
     SignalConnection() = default;
-    SignalConnection(const SignalConnection&) = default;
-    SignalConnection& operator=(const SignalConnection&) = default;
+    SignalConnection(SignalConnection const&) = default;
+    SignalConnection& operator=(SignalConnection const&) = default;
 
     auto IsConnected() const -> Bool;
     auto Disconnect() -> void;

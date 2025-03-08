@@ -35,12 +35,12 @@ struct TaskPromiseBase : NonCopyable
 
             auto await_suspend(std::coroutine_handle<Self> c) noexcept -> std::coroutine_handle<>
             {
-                if (const auto continuation = c.promise().cancel())
+                if (auto const continuation = c.promise().cancel())
                 {
                     return continuation;
                 }
 
-                if (const auto continuation = c.promise()._continuation)
+                if (auto const continuation = c.promise()._continuation)
                 {
                     return continuation;
                 }
@@ -125,7 +125,7 @@ struct [[nodiscard]] TaskAwaitableBase : NonCopyable
     {
         if constexpr (Concepts::CancellablePromise<Promise>)
         {
-            if (const auto continuation = c.promise().cancel())
+            if (auto const continuation = c.promise().cancel())
             {
                 return continuation;
             }
@@ -137,8 +137,6 @@ struct [[nodiscard]] TaskAwaitableBase : NonCopyable
     }
 };
 
-namespace FW_EXPORT
-{
 ///
 /// @brief Task type.
 ///
@@ -288,5 +286,4 @@ public:
         this->RethrowException();
     }
 };
-}
 }

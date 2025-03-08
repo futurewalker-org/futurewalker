@@ -24,18 +24,18 @@ public:
     static auto Track(T& t) -> Weak<Tracker>;
 
     template <class T>
-    static auto Track(const T& t) -> Weak<const Tracker>;
+    static auto Track(T const& t) -> Weak<Tracker const>;
 
 public:
     Tracker(PassKey<Tracker>);
 
     auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> const Tracker&;
+    auto GetTracker() const -> Tracker const&;
 
 private:
     void SetSelf(Weak<Tracker> self);
     auto GetSelf() -> Shared<Tracker>;
-    auto GetSelf() const -> Shared<const Tracker>;
+    auto GetSelf() const -> Shared<Tracker const>;
 
 private:
     Weak<Tracker> _self;
@@ -59,7 +59,7 @@ auto Tracker::Track(T& t) -> Weak<Tracker>
 /// @param[in] t Reference of trackable object.
 ///
 template <class T>
-auto Tracker::Track(const T& t) -> Weak<const Tracker>
+auto Tracker::Track(const T& t) -> Weak<Tracker const>
 {
     auto& tracker = t.GetTracker();
     return tracker.GetSelf();

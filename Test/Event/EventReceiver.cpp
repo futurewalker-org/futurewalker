@@ -72,7 +72,7 @@ TEST_CASE("EventReceiver")
         {
             TestClass2()
             {
-                m_eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event& e, const EventFunction& d) -> Async<Bool> { co_return co_await DispatchEvent(e, d); }});
+                m_eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event& e, EventFunction const& d) -> Async<Bool> { co_return co_await DispatchEvent(e, d); }});
             }
 
             auto SendEvent(Event& event) -> Async<Bool>
@@ -80,7 +80,7 @@ TEST_CASE("EventReceiver")
                 co_return co_await GetEventReceiver().SendEvent(event);
             }
 
-            auto DispatchEvent(Event& event, const EventFunction& dispatch) -> Async<Bool>
+            auto DispatchEvent(Event& event, EventFunction const& dispatch) -> Async<Bool>
             {
                 co_return co_await dispatch(event);
             }
@@ -107,6 +107,6 @@ TEST_CASE("EventReceiver")
         auto testClass = Shared<TestClass2>::Make();
         EventReceiver::Connect(*testClass, *testClass, &TestClass2::ReceiveEvent);
         auto event = Event();
-        REQUIRE(AsyncFunction::SyncWaitFn([&]() -> Future<Bool> { co_return co_await testClass->SendEvent(event); }));
+        REQUIRE(AsyncFunction::SyncWaitFn([&]() -> Lazy<Bool> { co_return co_await testClass->SendEvent(event); }));
     }
 }

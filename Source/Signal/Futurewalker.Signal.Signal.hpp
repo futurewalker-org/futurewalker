@@ -124,13 +124,13 @@ public:
     ///
     /// @brief Connect with automatic tracking.
     ///
-    auto Connect(Weak<const Tracker> t, SlotFunctionType slot, SignalConnectPosition pos) -> SignalConnection
+    auto Connect(Weak<Tracker const> t, SlotFunctionType slot, SignalConnectPosition pos) -> SignalConnection
     {
         return SignalConnection(_signal.connect(SlotType(std::move(slot)).track_foreign(SignalWeakWrapper(t)), InternalGetBoostConnectPosition(pos)));
     }
 
 private:
-    auto InternalGetBoostConnectPosition(const SignalConnectPosition pos) const -> boost::signals2::connect_position
+    auto InternalGetBoostConnectPosition(SignalConnectPosition const pos) const -> boost::signals2::connect_position
     {
         switch (pos)
         {

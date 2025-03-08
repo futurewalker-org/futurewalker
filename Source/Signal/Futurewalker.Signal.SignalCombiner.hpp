@@ -4,7 +4,7 @@
 #include "Futurewalker.Signal.Prelude.hpp"
 
 #include "Futurewalker.Async.Async.hpp"
-#include "Futurewalker.Async.Future.hpp"
+#include "Futurewalker.Async.Lazy.hpp"
 #include "Futurewalker.Async.AsyncFunction.hpp"
 
 #include "Futurewalker.Core.Optional.hpp"
@@ -54,12 +54,12 @@ struct SignalCombinerAnyOf
 template <class T>
 struct AsyncSignalCombinerAnyOf
 {
-    using result_type = Future<Bool>;
+    using result_type = Lazy<Bool>;
 
     template <class It>
-    auto operator()(It begin, It end) const -> Future<Bool>
+    auto operator()(It begin, It end) const -> Lazy<Bool>
     {
-        auto result = []() -> Future<Bool> { co_return false; }();
+        auto result = []() -> Lazy<Bool> { co_return false; }();
         for (auto it = begin; it != end; ++it)
         {
             try
@@ -69,9 +69,9 @@ struct AsyncSignalCombinerAnyOf
 
                 // NOTE: We're referencing stack-allocated caches at this point, so making this function coroutine causes stack use-after-free.
                 // Instead of co_awaiting result directly, return new coroutine which awaits each awaitable when co_awaited.
-                result = AsyncFunction::Fn([result = std::move(result), awaitable = std::move(ref)]() mutable -> Future<Bool> {
-                    const auto b1 = co_await std::move(result);
-                    const auto b2 = co_await std::move(awaitable);
+                result = AsyncFunction::Fn([result = std::move(result), awaitable = std::move(ref)]() mutable -> Lazy<Bool> {
+                    auto const b1 = co_await std::move(result);
+                    auto const b2 = co_await std::move(awaitable);
                     co_return b1 || b2;
                 });
             }

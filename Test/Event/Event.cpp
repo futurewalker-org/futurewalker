@@ -17,7 +17,7 @@ TEST_CASE("Event")
         struct TestEvent : EventParameter
         {
             TestEvent() = default;
-            TestEvent(const TestEvent&) = default;
+            TestEvent(TestEvent const&) = default;
             int i = 42;
         };
 
@@ -27,7 +27,7 @@ TEST_CASE("Event")
 
         SECTION("Copy")
         {
-            const auto copy = event;
+            auto const copy = event;
             REQUIRE(copy.As<TestEvent>().i == 42);
 
             event.As<TestEvent>().i = 24;
@@ -47,7 +47,7 @@ TEST_CASE("Event")
         {
         };
 
-        const auto event = Event(DerivedEvent());
+        auto const event = Event(DerivedEvent());
         REQUIRE(event.Is<BaseEvent>());
         REQUIRE(event.Is<DerivedEvent>());
     }

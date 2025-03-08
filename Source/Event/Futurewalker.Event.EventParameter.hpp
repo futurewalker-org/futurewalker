@@ -16,8 +16,8 @@ class EventParameter
 {
 public:
     EventParameter() = default;
-    EventParameter(const EventParameter&) = default;
-    EventParameter& operator=(const EventParameter&) = default;
+    EventParameter(EventParameter const&) = default;
+    EventParameter& operator=(EventParameter const&) = default;
     virtual ~EventParameter() noexcept = 0;
 
     template <class T>

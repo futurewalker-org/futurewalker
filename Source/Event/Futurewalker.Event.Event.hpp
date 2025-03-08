@@ -19,13 +19,13 @@ class Event
 {
 public:
     Event() noexcept = default;
-    Event(const Event& other);
+    Event(Event const& other);
     Event(Event&& other) noexcept;
-    Event& operator=(const Event& other);
+    Event& operator=(Event const& other);
     Event& operator=(Event&& other) noexcept;
 
     template <Concepts::DerivedFrom<EventParameter> EventType>
-    explicit Event(const EventType& event);
+    explicit Event(EventType const& event);
 
     template <class EventType>
     auto Is() const noexcept -> Bool;
@@ -34,10 +34,10 @@ public:
     auto As() -> EventType&;
 
     template <class EventType>
-    auto As() const -> const EventType&;
+    auto As() const -> EventType const&;
 
     auto GetPropertySore() -> PropertyStore&;
-    auto GetPropertySore() const -> const PropertyStore&;
+    auto GetPropertySore() const -> PropertyStore const&;
 
 private:
     struct Holder;
@@ -73,7 +73,7 @@ struct Event::EventTypeHolder final : Holder
     {
     }
 
-    EventTypeHolder(const EventType& event)
+    EventTypeHolder(EventType const& event)
       : event {event}
     {
     }
@@ -95,7 +95,7 @@ struct Event::EventTypeHolder final : Holder
 /// @param[in] event Event value.
 ///
 template <Concepts::DerivedFrom<EventParameter> EventType>
-Event::Event(const EventType& event)
+Event::Event(EventType const& event)
 {
     _holder = std::make_unique<EventTypeHolder<EventType>>(event);
 }
@@ -134,7 +134,7 @@ auto Event::As() -> EventType&
 /// @throw Exception on type miss match.
 ///
 template <class EventType>
-auto Event::As() const -> const EventType&
+auto Event::As() const -> EventType const&
 {
     if (_holder)
     {

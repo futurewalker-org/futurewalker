@@ -4,6 +4,7 @@
 #include <Futurewalker.Async.AsyncFunction.hpp>
 
 using namespace Futurewalker;
+using namespace FW_DETAIL_NS;
 
 TEST_CASE("Task")
 {

@@ -51,8 +51,8 @@ auto EventReceiver::SendEvent(Event& event) -> Async<Bool>
 ///
 auto EventReceiver::SendEventDetached(Event& event) -> Bool
 {
-    const auto r = Shared<Bool>::Make(false);
-    const auto e = Shared<Event>::Make(event);
+    auto const r = Shared<Bool>::Make(false);
+    auto const e = Shared<Event>::Make(event);
     AsyncFunction::SpawnFn([=, this]() -> Async<void> { *r = co_await SendEvent(*e); });
     event = *e;
     return *r;
@@ -69,7 +69,7 @@ auto EventReceiver::GetTracker() -> Tracker&
 ///
 /// @brief Get tracker.
 ///
-auto EventReceiver::GetTracker() const -> const Tracker&
+auto EventReceiver::GetTracker() const -> Tracker const&
 {
     return *_tracker;
 }
@@ -85,7 +85,7 @@ auto EventReceiver::GetEventReceiver() -> EventReceiver&
 ///
 /// @brief Get EventReceiver instance.
 ///
-auto EventReceiver::GetEventReceiver() const -> const EventReceiver&
+auto EventReceiver::GetEventReceiver() const -> EventReceiver const&
 {
     return *this;
 }

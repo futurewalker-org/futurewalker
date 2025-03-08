@@ -106,7 +106,7 @@ public:
     ///
     auto Wait() const -> Optional<T>
     {
-        if (const auto& result = _future.get())
+        if (auto const& result = _future.get())
         {
             return *result;
         }
@@ -125,7 +125,7 @@ public:
     {
         if (_future.wait_for(duration) == std::future_status::ready)
         {
-            if (const auto& result = _future.get())
+            if (auto const& result = _future.get())
             {
                 return *result;
             }

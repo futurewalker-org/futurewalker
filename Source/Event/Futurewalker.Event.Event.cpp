@@ -7,7 +7,7 @@ namespace FW_DETAIL_NS
 ///
 /// @brief Copy constructor.
 ///
-Event::Event(const Event& other)
+Event::Event(Event const& other)
   : _propertyStore {other._propertyStore}
 {
     if (other._holder)
@@ -29,7 +29,7 @@ Event::Event(Event&& other) noexcept
 ///
 /// @brief operator=
 ///
-Event& Event::operator=(const Event& other)
+Event& Event::operator=(Event const& other)
 {
     if (other._holder)
     {
@@ -60,7 +60,7 @@ auto Event::GetPropertySore() -> PropertyStore&
 ///
 /// @brief Get property store.
 ///
-auto Event::GetPropertySore() const -> const PropertyStore&
+auto Event::GetPropertySore() const -> PropertyStore const&
 {
     return _propertyStore;
 }

@@ -44,7 +44,7 @@ TEST_CASE("Signal")
     SECTION("Async Combiner")
     {
         int i = 0;
-        auto sig = Signal<Future<Bool>(int&), AsyncSignalCombinerAnyOf>();
+        auto sig = Signal<Lazy<Bool>(int&), AsyncSignalCombinerAnyOf>();
         auto async = sig(i);
     }
 }

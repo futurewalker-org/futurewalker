@@ -9,7 +9,7 @@ namespace FW_DETAIL_NS
 ///
 auto Tracker::Make() -> Shared<Tracker>
 {
-    const auto tracker = Shared<Tracker>::Make(PassKey<Tracker>());
+    auto const tracker = Shared<Tracker>::Make(PassKey<Tracker>());
     tracker->SetSelf(tracker);
     return tracker;
 }
@@ -32,7 +32,7 @@ auto Tracker::GetTracker() -> Tracker&
 ///
 /// @brief Get Tracker reference.
 ///
-auto Tracker::GetTracker() const -> const Tracker&
+auto Tracker::GetTracker() const -> Tracker const&
 {
     return *this;
 }
@@ -56,7 +56,7 @@ auto Tracker::GetSelf() -> Shared<Tracker>
 ///
 /// @brief Get self.
 ///
-auto Tracker::GetSelf() const -> Shared<const Tracker>
+auto Tracker::GetSelf() const -> Shared<Tracker const>
 {
     return _self.Lock();
 }

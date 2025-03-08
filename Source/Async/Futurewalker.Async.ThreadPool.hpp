@@ -40,7 +40,7 @@ public:
         boost::asio::post(_pool, [c] {
             if constexpr (Concepts::CancellablePromise<Promise>)
             {
-                if (const auto continuation = c.promise().cancel())
+                if (auto const continuation = c.promise().cancel())
                 {
                     continuation.resume();
                     return;
@@ -78,7 +78,7 @@ public:
     {
         if constexpr (Concepts::CancellablePromise<Promise>)
         {
-            if (const auto continuation = c.promise().cancel())
+            if (auto const continuation = c.promise().cancel())
             {
                 return continuation;
             }
@@ -86,10 +86,10 @@ public:
 
         _timer = boost::asio::steady_timer(_pool);
         _timer->expires_after(_delay);
-        _timer->async_wait([this, c](const auto& e) {
+        _timer->async_wait([this, c](auto const& e) {
             if constexpr (Concepts::CancellablePromise<Promise>)
             {
-                if (const auto continuation = c.promise().cancel())
+                if (auto const continuation = c.promise().cancel())
                 {
                     continuation.resume();
                     return;
@@ -153,7 +153,7 @@ public:
     ///
     /// @param[in] threadCount Number of threads in pool.
     ///
-    explicit ThreadPool(const SInt64 threadCount)
+    explicit ThreadPool(SInt64 const threadCount)
       : _pool(static_cast<size_t>(threadCount))
     {
     }

@@ -5,9 +5,6 @@
 
 namespace FW_DETAIL_NS
 {
-namespace FW_EXPORT
-{
 template <class T>
 class Task;
-}
 }

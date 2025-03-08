@@ -4,6 +4,8 @@ fw_test_suite(
     deps = ["@futurewalker//:Async"],
     tags = ["Async"],
     names = [
+        "Async",
+        "Lazy",
         "Task",
         "ThreadPool",
     ],

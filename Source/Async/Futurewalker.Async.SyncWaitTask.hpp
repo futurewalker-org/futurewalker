@@ -17,7 +17,7 @@ struct SyncWaitTask
 {
     struct promise_type;
 
-    SyncWaitTask(const SyncWaitTask&) = delete;
+    SyncWaitTask(SyncWaitTask const&) = delete;
     SyncWaitTask(SyncWaitTask&&) = delete;
 
     SyncWaitTask(std::coroutine_handle<promise_type> coroutine)
