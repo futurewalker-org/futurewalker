@@ -1,0 +1,40 @@
+﻿// SPDX-License-Identifier: MIT
+#pragma once
+
+#include "Futurewalker.Application.ViewLayerManagerType.hpp"
+#include "Futurewalker.Application.PlatformViewLayerContext.hpp"
+#include "Futurewalker.Application.PlatformDrawableViewLayerContextType.hpp"
+
+#include "Futurewalker.Base.Locator.hpp"
+
+#include "Futurewalker.Core.NonCopyable.hpp"
+
+namespace FW_DETAIL_NS
+{
+namespace FW_EXPORT
+{
+///
+/// @brief ViewLayer manager.
+///
+class ViewLayerManager : public NonCopyable
+{
+public:
+    ViewLayerManager(Shared<PlatformViewLayerContext> const& viewLayerContext, Shared<PlatformDrawableViewLayerContext> const& drawableViewLayerContext);
+
+    auto MakeLayer(ViewLayerKind const kind) -> Shared<ViewLayer>;
+    auto Register(ViewLayerKind const kind, ViewLayerManagerMakeFunction const& function) -> void;
+
+private:
+    ViewLayerManagerMakeFunctionMap _map;
+    Shared<PlatformViewLayerContext> _viewLayerContext;
+    Shared<PlatformDrawableViewLayerContext> _drawableViewLayerContext;
+};
+
+template <>
+struct Locator::Resolver<ViewLayerManager>
+{
+    using Interface = ViewLayerManager;
+    static auto Resolve() -> Shared<ViewLayerManager>;
+};
+}
+}
