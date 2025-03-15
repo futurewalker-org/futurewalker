@@ -42,7 +42,7 @@ auto AxisConstraints::MakeMinMax(Dp const min, Dp const max) noexcept -> AxisCon
 /// @param rhs
 /// @param tolerance
 ///
-auto AxisConstraints::IsNearlyEqual(AxisConstraints const& lhs, AxisConstraints const& rhs, const Float64 tolerance) noexcept -> Bool
+auto AxisConstraints::IsNearlyEqual(AxisConstraints const& lhs, AxisConstraints const& rhs, Float64 const tolerance) noexcept -> Bool
 {
     return Dp::IsNearlyEqual(lhs._min, rhs._min, tolerance) && Dp::IsNearlyEqual(lhs._max, rhs._max, tolerance);
 }

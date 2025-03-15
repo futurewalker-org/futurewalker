@@ -21,31 +21,31 @@ class AxisConstraints
 {
 public:
     static auto MakeUnconstrained() noexcept -> AxisConstraints;
-    static auto MakeExact(const Dp value) noexcept -> AxisConstraints;
-    static auto MakeMinMax(const Dp min, const Dp max) noexcept -> AxisConstraints;
+    static auto MakeExact(Dp const value) noexcept -> AxisConstraints;
+    static auto MakeMinMax(Dp const min, Dp const max) noexcept -> AxisConstraints;
 
-    static auto IsNearlyEqual(const AxisConstraints& lhs, const AxisConstraints& rhs, const Float64 tolerance = 1e-6) noexcept -> Bool;
-    static auto IsNearlyEqualRelative(const AxisConstraints& lhs, const AxisConstraints& rhs, const Float64 precision = 1e-6, const Float64 minTolerance = 1e-6) noexcept -> Bool;
-    static auto Constrain(const AxisConstraints& cs, const Dp value) -> Dp;
+    static auto IsNearlyEqual(AxisConstraints const& lhs, AxisConstraints const& rhs, Float64 const tolerance = 1e-6) noexcept -> Bool;
+    static auto IsNearlyEqualRelative(AxisConstraints const& lhs, AxisConstraints const& rhs, Float64 const precision = 1e-6, Float64 const minTolerance = 1e-6) noexcept -> Bool;
+    static auto Constrain(AxisConstraints const& cs, Dp const value) -> Dp;
 
 public:
     AxisConstraints() = default;
-    AxisConstraints(const AxisConstraints&) = default;
+    AxisConstraints(AxisConstraints const&) = default;
 
-    auto operator=(const AxisConstraints&) -> AxisConstraints& = default;
-    auto operator<=>(const AxisConstraints&) const = default;
+    auto operator=(AxisConstraints const&) -> AxisConstraints& = default;
+    auto operator<=>(AxisConstraints const&) const = default;
 
     auto GetMin() const -> Dp;
-    auto SetMin(const Dp min) -> void;
+    auto SetMin(Dp const min) -> void;
 
     auto GetMax() const -> Dp;
-    auto SetMax(const Dp max) -> void;
+    auto SetMax(Dp const max) -> void;
 
     auto IsBounded() const -> Bool;
     auto IsExact() const -> Bool;
 
 private:
-    AxisConstraints(const Dp min, const Dp max);
+    AxisConstraints(Dp const min, Dp const max);
 
 private:
     Dp _min = 0.0;
