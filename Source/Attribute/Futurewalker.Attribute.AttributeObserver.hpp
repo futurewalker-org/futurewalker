@@ -89,7 +89,7 @@ public:
     ///
     /// @param reference Reference of other attribute.
     ///
-    auto SetReference(StaticAttribute<T> const& reference) -> void
+    auto SetReference(StaticAttributeRef<T> reference) -> void
     {
         if (auto const node = _node.Lock())
         {

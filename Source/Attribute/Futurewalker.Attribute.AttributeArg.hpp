@@ -1,9 +1,9 @@
 ﻿// SPDX-License-Identifier: MIT
 #pragma once
 
-#include "Futurewalker.Attribute.Prelude.hpp"
+#include "Futurewalker.Attribute.StaticAttribute.hpp"
 
-#include "Futurewalker.Attribute.StaticAttributeType.hpp"
+#include "Futurewalker.Core.NonCopyable.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -12,34 +12,53 @@ namespace FW_EXPORT
 ///
 /// @brief Argument wrapper for attributes.
 ///
+/// Wraps variant of types which can be assigned to an attribute.
+///
+/// @note This class is intended to used as functions arguments. Do not use for other purposes.
+///
 template <class T>
-class AttributeArg
+class AttributeArg : NonCopyable
 {
 public:
     ///
     /// @brief Construct from StaticAttributeRef.
     ///
-    AttributeArg(StaticAttributeRef<T> const& reference)
-      : _reference {reference}
+    /// @param[in] reference Attribute reference.
+    ///
+    consteval AttributeArg(StaticAttribute<T> const& reference)
+      : _variant {StaticAttributeRef(reference)}
     {
     }
 
     ///
-    /// @brief Construct from 
+    /// @brief Construct from value.
     ///
-    template <class U, auto = [] {}>
+    /// @param[in] value Value of the attribute
+    ///
+    template <class U>
     AttributeArg(U const& value)
-      : _reference {StaticAttribute<T>::MakeWithDefaultValue(value)}
+      : _variant {T(value)}
     {
     }
 
-    auto GetDescription() const -> StaticAttributeRef<T>
+    ///
+    /// @brief Get value.
+    ///
+    auto GetValue() const -> Pointer<T const>
     {
-        return _reference;
+        return std::get_if<T>(&_variant);
+    }
+
+    ///
+    /// @brief Get reference.
+    ///
+    auto GetReference() const -> Pointer<StaticAttributeRef<T> const>
+    {
+        return std::get_if<StaticAttributeRef<T>>(&_variant);
     }
 
 private:
-    StaticAttributeRef<T> _reference;
+    std::variant<StaticAttributeRef<T>, T> _variant;
 };
 }
 }

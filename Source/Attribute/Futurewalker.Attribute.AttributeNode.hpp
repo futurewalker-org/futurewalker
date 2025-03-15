@@ -46,16 +46,33 @@ public:
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
 
+    template <const auto* Attribute>
+    using ValueTypeOf = typename std::remove_pointer_t<decltype(Attribute)>::ValueType;
+
+    template <const auto* Attribute, class Owner>
+    static auto GetValue(Owner& owner) -> Optional<ValueTypeOf<Attribute>>;
     template <class T, class Owner>
-    static auto GetValue(Owner& owner, StaticAttributeRef<T> description) -> Optional<T>;
+    static auto GetValue(Owner& owner, StaticAttributeRef<T> attribute) -> Optional<T>;
+
+    template <const auto* Attribute, class U, class Owner>
+    static auto SetValue(Owner& owner, const U& value) -> void;
     template <class T, class U, class Owner>
-    static auto SetValue(Owner& owner, StaticAttributeRef<T> description, const U& value) -> void;
+    static auto SetValue(Owner& owner, StaticAttributeRef<T> attribute, const U& value) -> void;
+
+    template <const auto* Attribute, class Owner>
+    static auto SetReference(Owner& owner, StaticAttributeRef<ValueTypeOf<Attribute>> reference) -> void;
     template <class T, class Owner>
-    static auto SetReference(Owner& owner, StaticAttributeRef<T> description, StaticAttributeRef<T> reference) -> void;
+    static auto SetReference(Owner& owner, StaticAttributeRef<T> attribute, StaticAttributeRef<T> reference) -> void;
+
+    template <const auto* Attribute, class Owner>
+    static auto Clear(Owner& owner) -> void;
     template <class T, class Owner>
-    static auto Clear(Owner& owner, StaticAttributeRef<T> description) -> void;
+    static auto Clear(Owner& owner, StaticAttributeRef<T> attribute) -> void;
+
+    template <const auto* Attribute, class Owner>
+    static auto GetObserver(Owner& owner) -> Unique<AttributeObserver<ValueTypeOf<Attribute>>>;
     template <class T, class Owner>
-    static auto GetObserver(Owner& owner, StaticAttributeRef<T> description) -> Unique<AttributeObserver<T>>;
+    static auto GetObserver(Owner& owner, StaticAttributeRef<T> attribute) -> Unique<AttributeObserver<T>>;
 
 private:
     auto GetSelf() -> Shared<AttributeNode>;
@@ -99,21 +116,37 @@ private:
 ///
 /// @brief Get value of attribute.
 ///
+/// @tparam Attribute Attribute 
+///
 /// @param[in] owner Reference to owner of AttributeNode.
-/// @param[in] description Description of attribute.
+///
+template <const auto* Attribute, class Owner>
+auto AttributeNode::GetValue(Owner& owner) -> Optional<ValueTypeOf<Attribute>>
+{
+    static_assert(Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(*Attribute);
+    return GetValue(owner, attribute);
+}
+
+///
+/// @brief Get value of attribute.
+///
+/// @param[in] owner Reference to owner of AttributeNode.
+/// @param[in] attribute Description of attribute.
 ///
 /// @return Value of the attribute.
 ///
 template <class T, class Owner>
-auto AttributeNode::GetValue(Owner& owner, StaticAttributeRef<T> description) -> Optional<T>
+auto AttributeNode::GetValue(Owner& owner, StaticAttributeRef<T> attribute) -> Optional<T>
 {
-    if (CheckReferenceLoop(description))
+    if (CheckReferenceLoop(attribute))
     {
         auto& node = owner.GetAttributeNode();
 
-        node.AddAttributeSlot(description);
+        node.AddAttributeSlot(attribute);
 
-        auto const id = description.Get().GetId();
+        auto const id = attribute.Get().GetId();
 
         if (auto const slot = node.FindAttributeSlot(id))
         {
@@ -129,73 +162,141 @@ auto AttributeNode::GetValue(Owner& owner, StaticAttributeRef<T> description) ->
 ///
 /// @brief Set value of attribute.
 ///
+/// @tparam Attribute Attribute
+///
+/// @param[in] owner Reference to owner of AttributeNode 
+/// @param[in] value Value of the attribute  
+///
+template <const auto* Attribute, class U, class Owner>
+auto AttributeNode::SetValue(Owner& owner, U const& value) -> void
+{
+    static_assert(Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(*Attribute);
+    return SetValue(owner, attribute, value);
+}
+
+///
+/// @brief Set value of attribute.
+///
 /// @param[in] owner Reference to owner of AttributeNode.
-/// @param[in] description Description of attribute.
+/// @param[in] attribute Description of attribute.
 /// @param[in] value Value of attribute.
 ///
 template <class T, class U, class Owner>
-auto AttributeNode::SetValue(Owner& owner, StaticAttributeRef<T> description, const U& value) -> void
+auto AttributeNode::SetValue(Owner& owner, StaticAttributeRef<T> attribute, U const& value) -> void
 {
-    if (CheckReferenceLoop(description))
+    if (CheckReferenceLoop(attribute))
     {
         auto& node = owner.GetAttributeNode();
-        node.AddAttributeSlot(description);
-        node.SetAttributeSlotValue(description, AttributeValue(T(value)));
+        node.AddAttributeSlot(attribute);
+        node.SetAttributeSlotValue(attribute, AttributeValue(T(value)));
     }
+}
+
+///
+/// @brief Set reference of attribute
+///
+/// @tparam Attribute Attribute
+/// @tparam Reference Reference to other attribute
+///
+/// @param[in] owner Reference to owner of AttributeNode
+///
+template <const auto* Attribute, class Owner>
+auto AttributeNode::SetReference(Owner& owner, StaticAttributeRef<ValueTypeOf<Attribute>> reference) -> void
+{
+    static_assert(Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(*Attribute);
+    return SetReference(owner, attribute, reference);
 }
 
 ///
 /// @brief Set reference of attribute.
 ///
 /// @param[in] owner Reference to owner of AttributeNode.
-/// @param[in] description Description of attribute.
+/// @param[in] attribute Description of attribute.
 /// @param[in] reference Reference to another attribute.
 ///
 template <class T, class Owner>
-auto AttributeNode::SetReference(Owner& owner, StaticAttributeRef<T> description, StaticAttributeRef<T> reference) -> void
+auto AttributeNode::SetReference(Owner& owner, StaticAttributeRef<T> attribute, StaticAttributeRef<T> reference) -> void
 {
-    if (CheckReferenceLoop(description))
+    if (CheckReferenceLoop(attribute))
     {
         auto& node = owner.GetAttributeNode();
-        node.AddAttributeSlot(description);
-        node.SetAttributeSlotReference(description, reference);
+        node.AddAttributeSlot(attribute);
+        node.SetAttributeSlotReference(attribute, reference);
     }
 }
 
 ///
 /// @brief Clear value/reference of attribute.
 ///
+/// @tparam Attribute Attribute
+///
+/// @param[in] owner Reference to owner of AttributeNode
+///
+template <const auto* Attribute, class Owner>
+auto AttributeNode::Clear(Owner& owner) -> void
+{
+    static_assert(Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(*Attribute);
+    return Clear(owner, attribute);
+}
+
+///
+/// @brief Clear value/reference of attribute.
+///
 /// @param[in] owner Reference to owner of attribute node.
-/// @param[in] description Description of attribute.
+/// @param[in] attribute Description of attribute.
 ///
 template <class T, class Owner>
-auto AttributeNode::Clear(Owner& owner, StaticAttributeRef<T> description) -> void
+auto AttributeNode::Clear(Owner& owner, StaticAttributeRef<T> attribute) -> void
 {
-    if (CheckReferenceLoop(description))
+    if (CheckReferenceLoop(attribute))
     {
         auto& node = owner.GetAttributeNode();
-        node.ResetAttributeSlot(description);
+        node.ResetAttributeSlot(attribute);
     }
+}
+
+///
+/// @brief Get observer to attribute. 
+///
+/// @tparam Attribute Attribute
+///
+/// @param[in] owner Reference to owner of AttributeNode 
+///
+/// @return Observer of the attribute.
+///
+template <auto const* Attribute, class Owner>
+auto AttributeNode::GetObserver(Owner& owner) -> Unique<AttributeObserver<ValueTypeOf<Attribute>>>
+{
+    static_assert(Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(*Attribute);
+    return GetObserver(owner, attribute);
 }
 
 ///
 /// @brief Get observer for attribute.
 ///
 /// @param[in] owner Reference to owner of attribute node.
-/// @param[in] description Description of attribute to observe.
+/// @param[in] attribute Description of attribute to observe.
 ///
 /// @return Observer of the attribute.
 ///
 template <class T, class Owner>
-auto AttributeNode::GetObserver(Owner& owner, StaticAttributeRef<T> description) -> Unique<AttributeObserver<T>>
+auto AttributeNode::GetObserver(Owner& owner, StaticAttributeRef<T> attribute) -> Unique<AttributeObserver<T>>
 {
-    if (CheckReferenceLoop(description))
+    if (CheckReferenceLoop(attribute))
     {
         auto& node = owner.GetAttributeNode();
-        node.AddAttributeSlot(description);
-        return Unique<AttributeObserver<T>>::Make(PassKey<AttributeNode>(), node._self, description);
+        node.AddAttributeSlot(attribute);
+        return Unique<AttributeObserver<T>>::Make(PassKey<AttributeNode>(), node._self, attribute);
     }
-    return Unique<AttributeObserver<T>>::Make(PassKey<AttributeNode>(), Weak<AttributeNode>(), description);
+    return Unique<AttributeObserver<T>>::Make(PassKey<AttributeNode>(), Weak<AttributeNode>(), attribute);
 }
 }
 }

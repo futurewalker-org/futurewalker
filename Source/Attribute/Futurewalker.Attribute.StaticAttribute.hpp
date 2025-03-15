@@ -27,17 +27,20 @@ class StaticAttribute : public StaticAttributeBase
 {
 public:
     ///
+    /// @brief Value type.
+    ///
+    using ValueType = T;
+
+    ///
     /// @brief Create new attribute with default value.
     ///
     /// @param value Initial value of attribute. 
     ///
     /// @return Reference to unique attribute object.
     ///
-    template <auto = [] {}>
-    static auto MakeWithDefaultValue(T const& value) -> StaticAttributeRef<T>
+    static auto MakeWithDefaultValue(T const& value) -> StaticAttribute<T>
     {
-        static auto attribute = StaticAttribute<T>(AttributeValue(value));
-        return attribute;
+        return StaticAttribute<T>(AttributeValue(value));
     }
 
     ///
@@ -47,11 +50,10 @@ public:
     ///
     /// @return Reference to unique attribute object.
     ///
-    template <auto = [] {}>
-    static auto MakeWithDefaultReference(StaticAttributeRef<T> reference) -> StaticAttributeRef<T>
+    template <const auto* Reference>
+    static auto MakeWithDefaultReference() -> StaticAttribute<T>
     {
-        static auto attribute = StaticAttribute<T>(reference);
-        return attribute;
+        return StaticAttribute<T>(StaticReference(*Reference));
     }
 
 private:
