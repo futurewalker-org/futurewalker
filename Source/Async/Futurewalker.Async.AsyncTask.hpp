@@ -33,7 +33,7 @@ public:
         }
 
         template <class U>
-        requires !SingleThreaded || AwaitableTraits<std::remove_reference_t<U>>::ResumesOnSameThread
+        requires (!SingleThreaded || AwaitableTraits<std::remove_reference_t<U>>::ResumesOnSameThread)
         auto await_transform(U&& u) -> decltype(auto)
         {
             return std::forward<U>(u);
