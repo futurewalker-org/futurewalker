@@ -8,13 +8,7 @@
 #include "Futurewalker.Application.PlatformDrawableViewLayerContextType.hpp"
 #include "Futurewalker.Application.CornerRadius.hpp"
 
-#include "Futurewalker.Graphics.RecordingSurfaceType.hpp"
-#include "Futurewalker.Graphics.GraphicsCanvasType.hpp"
-#include "Futurewalker.Graphics.GraphicsPathType.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
-#include "Futurewalker.Graphics.Rect.hpp"
-#include "Futurewalker.Graphics.RoundRect.hpp"
-#include "Futurewalker.Graphics.Offset.hpp"
+#include "Futurewalker.Geometry.hpp"
 
 #include "Futurewalker.Base.UniqueIdentifier.hpp"
 

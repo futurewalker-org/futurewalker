@@ -1,0 +1,9 @@
+load("//:defs.bzl", "fw_library")
+
+fw_library(
+    name = "Color",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//Source/Core",
+    ],
+)

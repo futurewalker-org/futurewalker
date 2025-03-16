@@ -6,9 +6,6 @@
 #include "Futurewalker.Application.PlatformViewLayer.hpp"
 #include "Futurewalker.Application.DrawableViewLayer.hpp"
 
-#include "Futurewalker.Graphics.RecordingSurface.hpp"
-#include "Futurewalker.Graphics.GraphicsCanvas.hpp"
-#include "Futurewalker.Graphics.DrawOption.hpp"
 #include "Futurewalker.Graphics.DisplayList.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
@@ -107,7 +104,7 @@ auto ViewDrawInfo::EndDrawPath() -> void
 ///
 /// @brief
 ///
-auto ViewDrawInfo::SetDisplayList(Shared<DisplayList> const& displayList) -> void
+auto ViewDrawInfo::SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void
 {
     _displayList = displayList;
 }

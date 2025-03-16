@@ -5,9 +5,9 @@
 #include "Futurewalker.Application.PlatformViewLayerControlType.hpp"
 #include "Futurewalker.Application.ViewType.hpp"
 
-#include "Futurewalker.Graphics.Offset.hpp"
-#include "Futurewalker.Graphics.Rect.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+#include "Futurewalker.Geometry.hpp"
+
+#include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.PassKey.hpp"

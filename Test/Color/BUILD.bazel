@@ -1,0 +1,11 @@
+load("//:defs.bzl", "fw_test_suite")
+
+fw_test_suite(
+    deps = ["@futurewalker//:Color"],
+    tags = ["Color"],
+    names = [
+        "Channel",
+        "RGBAColor",
+        "RGBColor",
+    ],
+)

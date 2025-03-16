@@ -4,13 +4,5 @@ fw_test_suite(
     deps = ["@futurewalker//:Graphics"],
     tags = ["Graphics"],
     names = [
-        "Channel",
-        "Offset",
-        "Point",
-        "Radius",
-        "Rect",
-        "RGBAColor",
-        "RGBColor",
-        "Size",
     ],
 )

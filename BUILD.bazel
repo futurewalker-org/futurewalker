@@ -41,6 +41,24 @@ alias(
 )
 
 alias(
+    name = "Geometry",
+    actual = "//Source/Geometry",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "Color",
+    actual = "//Source/Color",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "Unit",
+    actual = "//Source/Unit",
+    visibility = ["//visibility:public"],
+)
+
+alias(
     name = "Graphics",
     actual = "//Source/Graphics",
     visibility = ["//visibility:public"],
@@ -51,3 +69,10 @@ alias(
     actual = "//Source/Attribute",
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "Application",
+    actual = "//Source/Application",
+    visibility = ["//visibility:public"],
+)
+

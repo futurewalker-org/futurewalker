@@ -5,9 +5,10 @@
 #include "Futurewalker.Application.PlatformViewLayerControl.hpp"
 
 #include "Futurewalker.Graphics.DisplayList.hpp"
-#include "Futurewalker.Graphics.Rect.hpp"
-#include "Futurewalker.Graphics.Offset.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+
+#include "Futurewalker.Geometry.hpp"
+
+#include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Core.Memory.hpp"
 
@@ -30,7 +31,7 @@ public:
     ///
     /// @note Renders content of DisplayList into underlying buffer, then presents new content to screen.
     ///
-    virtual auto Draw(Shared<DisplayList> const& displayList, Offset<Dp> const& offset, Float64 const scale) -> Bool = 0;
+    virtual auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset, Float64 const scale) -> Bool = 0;
 };
 }
 }

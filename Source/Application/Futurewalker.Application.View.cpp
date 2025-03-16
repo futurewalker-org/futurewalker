@@ -992,7 +992,7 @@ auto View::Measure(MeasureScope& scope) -> void
 /// Second pass of layout update.
 ///
 /// Arrange() determines positions of child views.
-/// It is required to call ArrangeScope.ArrangeChild() to every child of the view before returning this function.
+/// It is required to call ArrangeScope.ArrangeChild() to every child of the view before exiting this function.
 ///
 /// You can obtain previously measured size of child views by ArrangeScope.GetMeasuredSize() for layout computation.
 ///
@@ -1016,6 +1016,14 @@ auto View::Arrange(ArrangeScope& scope) -> void
 
 ///
 /// @brief Draw content of the view.
+///
+/// Updating visual of the view.
+///
+/// Draw() determines how contents of the view will be rendered on screen.
+/// Drawing commands will be cached and re-used until next call of InvalidateVisual().
+///
+/// You can also set properties of the layer on which drawing commands will be rendered via DrawScope.
+/// Setting layer properties will be more efficient than achieving same effect with drawing commands.
 ///
 /// @param scope Scope of the operation
 ///

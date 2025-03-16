@@ -20,9 +20,7 @@
 
 #include "Futurewalker.Attribute.AttributeNode.hpp"
 
-#include "Futurewalker.Graphics.Rect.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
-
+#include "Futurewalker.Geometry.hpp"
 
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.PassKey.hpp"
@@ -47,14 +45,14 @@ namespace FW_EXPORT
 ///
 /// Subclasses derive from `View` have to be allocated by View's factory function.
 /// Subclasses should provide `static` functions which internally call `View::MakeDerived<DerivedView>()` to create instances.
-/// Note the first argument of subclasses have to be `PassKey<View>`, which will be implicitly passed from `View::MakeDerived<Derived>()`.
+/// Note the first argument of subclasses constructor have to be `PassKey<View>`, which will be implicitly passed from `View::MakeDerived<Derived>()`.
 ///
 /// ### View initialization
 ///
 /// Constructors are sometimes too early to perform initialization.
-/// For example, connecting events requires lifetime tracking, which is unavailable during constructor call.
+/// For example, connecting event callbacks requires lifetime tracking, which is unavailable during constructor call.
 /// Instead, it is recommended to provide initialization code by overriding `Initialize()` function.
-/// `View::MakeDerived()` will call `View::Initialize()` after setting up lifetime tracking, so it is safe to connect events there.
+/// `View::MakeDerived()` will call `View::Initialize()` after setting up lifetime tracking, so it is safe to connect callbacks there.
 ///
 /// Constructors can still be used for setting default values for member variables, etc.
 ///

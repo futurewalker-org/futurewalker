@@ -1,0 +1,13 @@
+load("//:defs.bzl", "fw_test_suite")
+
+fw_test_suite(
+    deps = ["@futurewalker//:Geometry", "@futurewalker//:Unit"],
+    tags = ["Geometry"],
+    names = [
+        "Offset",
+        "Point",
+        "Radius",
+        "Rect",
+        "Size",
+    ],
+)

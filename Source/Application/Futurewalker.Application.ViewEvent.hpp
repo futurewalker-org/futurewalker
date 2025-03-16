@@ -4,7 +4,7 @@
 #include "Futurewalker.Application.ViewEventType.hpp"
 #include "Futurewalker.Application.ViewType.hpp"
 
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+#include "Futurewalker.Geometry.hpp"
 
 #include "Futurewalker.Event.Event.hpp"
 #include "Futurewalker.Core.PropertyStore.hpp"

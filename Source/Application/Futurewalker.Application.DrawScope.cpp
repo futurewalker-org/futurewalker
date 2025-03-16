@@ -3,8 +3,8 @@
 #include "Futurewalker.Application.DrawScope.hpp"
 #include "Futurewalker.Application.View.hpp"
 
-#include "Futurewalker.Graphics.RecordingSurface.hpp"
-#include "Futurewalker.Graphics.NoOpGraphicsCanvas.hpp"
+#include "Futurewalker.Graphics.SceneRecorder.hpp"
+#include "Futurewalker.Graphics.NoOpScene.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -31,7 +31,7 @@ auto DrawScope::GetParameter() const -> DrawParameter const&
 ///
 /// @brief
 ///
-auto DrawScope::GetCanvas() -> GraphicsCanvas&
+auto DrawScope::GetScene() -> Graphics::Scene&
 {
     return BeginRecording();
 }
@@ -55,7 +55,7 @@ auto DrawScope::SetOpacity(Float64 const opacity) -> void
 ///
 /// @brief
 ///
-auto DrawScope::GetDisplayList(PassKey<View>) -> Shared<DisplayList>
+auto DrawScope::GetDisplayList(PassKey<View>) -> Shared<Graphics::DisplayList>
 {
     return EndRecording();
 }
@@ -89,20 +89,20 @@ auto DrawScope::DrawRootView(PassKey<RootView>, View& view) -> void
 ///
 /// @brief
 ///
-auto DrawScope::BeginRecording() -> GraphicsCanvas&
+auto DrawScope::BeginRecording() -> Graphics::Scene&
 {
     _recordedDisplayList = nullptr;
 
     if (!_recordingSurface)
     {
-        _recordingSurface = RecordingSurface::Make();
+        _recordingSurface = Graphics::SceneRecorder::Make();
         _recordingCanvas = _recordingSurface->BeginRecording();
     }
 
     if (!_recordingCanvas)
     {
         FW_DEBUG_ASSERT(false);
-        _recordingCanvas = Shared<NoOpGraphicsCanvas>::Make();
+        _recordingCanvas = Shared<Graphics::NoOpScene>::Make();
     }
     return *_recordingCanvas;
 }
@@ -110,7 +110,7 @@ auto DrawScope::BeginRecording() -> GraphicsCanvas&
 ///
 /// @brief
 ///
-auto DrawScope::EndRecording() -> Shared<DisplayList>
+auto DrawScope::EndRecording() -> Shared<Graphics::DisplayList>
 {
     if (_recordingSurface)
     {

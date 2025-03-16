@@ -34,39 +34,43 @@ def fw_library(name, visibility, deps):
 
     cc_library(
         name = name_hdrs,
-        hdrs = native.glob(["*.hpp"]),
+        hdrs = native.glob(["*.hpp"], allow_empty=True),
         visibility = ["//visibility:private"],
         deps = deps,
-        strip_include_prefix = ".",
+        #strip_include_prefix = ".",
+        includes = ["."],
         copts = COPTS,
     )
 
     cc_library(
         name = name_platform,
-        srcs = native.glob(["Platform/*.cpp"]),
-        hdrs = native.glob(["Platform/*.hpp"]),
+        srcs = native.glob(["Platform/*.cpp"], allow_empty=True),
+        hdrs = native.glob(["Platform/*.hpp"], allow_empty=True),
         visibility = ["//visibility:private"],
         deps = deps + [lib_hdrs],
-        strip_include_prefix = "./Platform",
+        #strip_include_prefix = "./Platform",
+        includes = ["./Platform"],
         copts = COPTS,
     )
 
     cc_library(
         name = name_win,
-        srcs = native.glob(["Win/*.cpp"]),
-        hdrs = native.glob(["Win/*.hpp"]),
+        srcs = native.glob(["Win/*.cpp"], allow_empty=True),
+        hdrs = native.glob(["Win/*.hpp"], allow_empty=True),
         visibility = ["//visibility:private"],
         deps = deps + [lib_platform],
-        strip_include_prefix = "./Win",
+        #strip_include_prefix = "./Win",
+        includes = ["./Win"],
         copts = COPTS,
     )
 
     cc_library(
         name = name,
         visibility = visibility,
-        srcs = native.glob(["*.cpp"]),
-        hdrs = native.glob(["*.hpp"]),
-        strip_include_prefix = ".",
+        srcs = native.glob(["*.cpp"], allow_empty=True),
+        hdrs = native.glob(["*.hpp"], allow_empty=True),
+        #strip_include_prefix = ".",
+        includes = ["."],
         deps = deps + [lib_platform] + select({
             "@platforms//os:windows" : [lib_win],
             "//conditions:default" : [],

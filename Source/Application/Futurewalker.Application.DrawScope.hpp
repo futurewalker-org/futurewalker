@@ -6,11 +6,11 @@
 #include "Futurewalker.Application.ViewType.hpp"
 #include "Futurewalker.Application.RootViewType.hpp"
 
-#include "Futurewalker.Graphics.GraphicsCanvasType.hpp"
-#include "Futurewalker.Graphics.RecordingSurfaceType.hpp"
+#include "Futurewalker.Graphics.SceneType.hpp"
+#include "Futurewalker.Graphics.SceneRecorderType.hpp"
 #include "Futurewalker.Graphics.DisplayListType.hpp"
-#include "Futurewalker.Graphics.Rect.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+
+#include "Futurewalker.Geometry.hpp"
 
 #include "Futurewalker.Core.ReferenceArg.hpp"
 #include "Futurewalker.Core.PassKey.hpp"
@@ -31,27 +31,27 @@ public:
 
     auto GetParameter() const -> DrawParameter const&;
 
-    auto GetCanvas() -> GraphicsCanvas&;
+    auto GetScene() -> Graphics::Scene&;
 
     auto SetClipMode(ViewClipMode const clipMode) -> void;
     auto SetOpacity(Float64 const opacity) -> void;
 
-    auto GetDisplayList(PassKey<View>) -> Shared<DisplayList>;
+    auto GetDisplayList(PassKey<View>) -> Shared<Graphics::DisplayList>;
     auto GetClipMode(PassKey<View>) -> ViewClipMode;
     auto GetOpacity(PassKey<View>) -> Float64;
 
     static auto DrawRootView(PassKey<RootView>, View& view) -> void;
 
 private:
-    auto BeginRecording() -> GraphicsCanvas&;
-    auto EndRecording() -> Shared<DisplayList>;
+    auto BeginRecording() -> Graphics::Scene&;
+    auto EndRecording() -> Shared<Graphics::DisplayList>;
 
 private:
     View& _view;
     DrawParameter _parameter;
-    Shared<RecordingSurface> _recordingSurface;
-    Shared<GraphicsCanvas> _recordingCanvas;
-    Shared<DisplayList> _recordedDisplayList;
+    Shared<Graphics::SceneRecorder> _recordingSurface;
+    Shared<Graphics::Scene> _recordingCanvas;
+    Shared<Graphics::DisplayList> _recordedDisplayList;
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
 };

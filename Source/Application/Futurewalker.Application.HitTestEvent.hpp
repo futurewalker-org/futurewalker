@@ -6,8 +6,9 @@
 
 #include "Futurewalker.Event.EventParameter.hpp"
 
-#include "Futurewalker.Graphics.Point.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+#include "Futurewalker.Geometry.hpp"
+
+#include "Futurewalker.Unit.hpp"
 
 namespace FW_DETAIL_NS
 {

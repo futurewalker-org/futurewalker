@@ -8,10 +8,11 @@
 #include "Futurewalker.Application.PlatformDrawableViewLayerContextType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 
-#include "Futurewalker.Graphics.RecordingSurfaceType.hpp"
-#include "Futurewalker.Graphics.GraphicsCanvasType.hpp"
 #include "Futurewalker.Graphics.DisplayListType.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+
+#include "Futurewalker.Geometry.hpp"
+
+#include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Core.Primitive.hpp"
 #include "Futurewalker.Core.Memory.hpp"
@@ -39,7 +40,7 @@ public:
     auto BeginDrawPath() -> Bool;
     auto EndDrawPath() -> void;
 
-    auto SetDisplayList(Shared<DisplayList> const& displayList) -> void;
+    auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void;
     auto SetDisplayScale(DisplayScale const displayScale) -> void;
     auto SetBackingScale(BackingScale const backingScale) -> void;
     auto SetClipMode(ViewClipMode const clipMode) -> void;
@@ -71,7 +72,7 @@ private:
     Bool _invalidatedPath = false;
     std::vector<SubLayerInfo> _subLayerInfo;
     ViewLayerId _drawableLayerId = ViewLayerId(0U);
-    Shared<DisplayList> _displayList;
+    Shared<Graphics::DisplayList> _displayList;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
     ViewClipMode _clipMode = ViewClipMode::None;

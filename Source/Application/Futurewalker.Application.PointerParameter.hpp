@@ -6,8 +6,9 @@
 #include "Futurewalker.Application.PointerScopeType.hpp"
 #include "Futurewalker.Application.ViewType.hpp"
 
-#include "Futurewalker.Graphics.Point.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+#include "Futurewalker.Geometry.hpp"
+
+#include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Core.MonotonicTime.hpp"
 #include "Futurewalker.Core.PassKey.hpp"
@@ -30,7 +31,7 @@ public:
     auto GetPhaseFlags(PassKey<View>) const -> PointerEventPhaseFlags;
     auto SetPhaseFlags(PointerEventPhaseFlags const flags) -> void;
 
-    auto GetPointerEvent() const -> const PointerEvent&;
+    auto GetPointerEvent() const -> PointerEvent const&;
     auto SetPointerEvent(PointerEvent const& pointerEvent) -> void;
 
 private:

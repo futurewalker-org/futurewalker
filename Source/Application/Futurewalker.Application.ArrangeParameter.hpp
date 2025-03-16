@@ -3,8 +3,9 @@
 
 #include "Futurewalker.Application.ArrangeParameterType.hpp"
 
-#include "Futurewalker.Graphics.Rect.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+#include "Futurewalker.Geometry.hpp"
+
+#include "Futurewalker.Unit.hpp"
 
 namespace FW_DETAIL_NS
 {

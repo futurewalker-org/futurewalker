@@ -6,8 +6,7 @@
 #include "Futurewalker.Application.ViewType.hpp"
 #include "Futurewalker.Application.RootViewType.hpp"
 
-#include "Futurewalker.Graphics.Point.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+#include "Futurewalker.Geometry.hpp"
 
 #include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.ReferenceArg.hpp"

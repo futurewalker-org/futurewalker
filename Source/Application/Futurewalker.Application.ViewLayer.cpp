@@ -5,9 +5,6 @@
 #include "Futurewalker.Application.PlatformDrawableViewLayerContext.hpp"
 #include "Futurewalker.Application.PlatformDrawableViewLayerControl.hpp"
 
-#include "Futurewalker.Graphics.RecordingSurface.hpp"
-#include "Futurewalker.Graphics.GraphicsCanvas.hpp"
-
 #include "Futurewalker.Base.Debug.hpp"
 #include "Futurewalker.Base.Locator.hpp"
 #include "Futurewalker.Base.UniqueIdentifier.hpp"

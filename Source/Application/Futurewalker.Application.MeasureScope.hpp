@@ -7,8 +7,7 @@
 #include "Futurewalker.Application.ViewType.hpp"
 #include "Futurewalker.Application.RootViewType.hpp"
 
-#include "Futurewalker.Graphics.Size.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+#include "Futurewalker.Geometry.hpp"
 
 #include "Futurewalker.Core.ReferenceArg.hpp"
 #include "Futurewalker.Core.NonCopyable.hpp"

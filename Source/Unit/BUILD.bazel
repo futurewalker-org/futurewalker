@@ -1,0 +1,10 @@
+load("//:defs.bzl", "fw_library")
+
+fw_library(
+    name = "Unit",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//Source/Core",
+        "//Source/Geometry",
+    ],
+)

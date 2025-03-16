@@ -6,6 +6,9 @@ fw_library(
     deps = [
         "//Source/Core",
         "//Source/Base",
-        #"@skia//:skia",
+        "//Source/Color",
+        "//Source/Geometry",
+        "//Source/Unit",
+        "@skia//:skia",
     ],
 )

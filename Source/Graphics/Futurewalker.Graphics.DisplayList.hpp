@@ -2,12 +2,14 @@
 #pragma once
 
 #include "Futurewalker.Graphics.DisplayListType.hpp"
-#include "Futurewalker.Graphics.Rect.hpp"
-#include "Futurewalker.Graphics.GraphicsUnits.hpp"
+
+#include "Futurewalker.Geometry.hpp"
+
+#include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Core.NonCopyable.hpp"
 
-namespace FW_DETAIL_NS
+namespace FW_GRAPHICS_DETAIL_NS
 {
 namespace FW_EXPORT
 {
