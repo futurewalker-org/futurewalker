@@ -4,5 +4,7 @@ fw_test_suite(
     deps = ["@futurewalker//:Graphics"],
     tags = ["Graphics"],
     names = [
+        "SceneRecorder",
+        "TextShaper",
     ],
 )

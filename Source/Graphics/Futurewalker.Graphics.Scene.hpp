@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MIT
 #pragma once
 
 #include "Futurewalker.Graphics.SceneType.hpp"
@@ -13,6 +13,7 @@
 #include "Futurewalker.Geometry.hpp"
 
 #include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.NonCopyable.hpp"
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
@@ -21,7 +22,7 @@ namespace FW_EXPORT
 ///
 /// @brief Base class of scene builders.
 ///
-class Scene
+class Scene : NonCopyable
 {
 public:
     struct LayerParam
