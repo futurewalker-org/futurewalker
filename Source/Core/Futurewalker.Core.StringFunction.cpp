@@ -89,6 +89,30 @@ auto StringFunction::ConvertUtf8ToStringUnchecked(std::string_view const sv) -> 
 }
 
 ///
+/// @brief Convert String to std::string
+///
+/// @param sv StringView
+///
+auto StringFunction::ConvertStringToStdString(StringView const sv) -> std::string
+{
+    auto const data = reinterpret_cast<const char*>(static_cast<const char8_t*>(sv.GetData()));
+    auto const size = static_cast<size_t>(sv.GetSize());
+    return std::string(data, size);
+}
+
+///
+/// @brief Convert String to std::u8string
+///
+/// @param sv StringView
+///
+auto StringFunction::ConvertStringToStdU8String(StringView const sv) -> std::u8string
+{
+    auto const data = static_cast<const char8_t*>(sv.GetData());
+    auto const size = static_cast<size_t>(sv.GetSize());
+    return std::u8string(data, size);
+}
+
+///
 /// @brief Format string with parameters.
 ///
 /// @param[in] format Formatter string.
