@@ -13,6 +13,11 @@ class Futurewalker(ConanFile):
         self.requires("catch2/[3.8.0]")
         self.requires("fmt/[11.1.3]")
 
+        if self.settings.os == "Windows":
+            self.requires("skia/[130.20241118.0]", options={"use_direct3d":True})
+        else:
+            self.requires("skia/[130.20241118.0]")
+            
     def validate_build(self):
         check_min_cppstd(self, "23")
 
