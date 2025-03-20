@@ -75,4 +75,3 @@ alias(
     actual = "//Source/Application",
     visibility = ["//visibility:public"],
 )
-

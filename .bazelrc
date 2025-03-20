@@ -1,2 +1,1 @@
-startup --output_user_root=.
-build --experimental_convenience_symlinks=ignore
+try-import build/conan/conan_bzl.rc

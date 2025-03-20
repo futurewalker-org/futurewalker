@@ -1,10 +1,11 @@
 load("//:defs.bzl", "fw_test_suite")
 
 fw_test_suite(
-    deps = ["@futurewalker//:Application", "@futurewalker//:Test"],
+    deps = ["@futurewalker//:Application", "//Source/Test"],
     tags = ["Application"],
     names = [
         "CornerRadius",
         "EdgeInsets",
+        "View",
     ],
 )

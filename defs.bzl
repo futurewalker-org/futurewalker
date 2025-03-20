@@ -22,6 +22,16 @@ WARNINGS = select({
 
 COPTS = COMPILE_OPTIONS + WARNINGS
 
+DEFINES = select({
+    "@platforms//os:windows" : [
+        "UNICODE",
+        "_UNICODE",
+        "WINVER=0x0A00",
+        "_WIN32_WINNT=0x0A00",
+    ],
+    "//conditions:default" : [],
+})
+
 def fw_library(name, visibility, deps):
 
     name_hdrs = name + "_hdrs" 
@@ -37,8 +47,8 @@ def fw_library(name, visibility, deps):
         hdrs = native.glob(["*.hpp"], allow_empty=True),
         visibility = ["//visibility:private"],
         deps = deps,
-        #strip_include_prefix = ".",
         includes = ["."],
+        defines = DEFINES,
         copts = COPTS,
     )
 
@@ -48,8 +58,8 @@ def fw_library(name, visibility, deps):
         hdrs = native.glob(["Platform/*.hpp"], allow_empty=True),
         visibility = ["//visibility:private"],
         deps = deps + [lib_hdrs],
-        #strip_include_prefix = "./Platform",
         includes = ["./Platform"],
+        defines = DEFINES,
         copts = COPTS,
     )
 
@@ -59,8 +69,8 @@ def fw_library(name, visibility, deps):
         hdrs = native.glob(["Win/*.hpp"], allow_empty=True),
         visibility = ["//visibility:private"],
         deps = deps + [lib_platform],
-        #strip_include_prefix = "./Win",
         includes = ["./Win"],
+        defines = DEFINES,
         copts = COPTS,
     )
 
@@ -69,8 +79,8 @@ def fw_library(name, visibility, deps):
         visibility = visibility,
         srcs = native.glob(["*.cpp"], allow_empty=True),
         hdrs = native.glob(["*.hpp"], allow_empty=True),
-        #strip_include_prefix = ".",
         includes = ["."],
+        defines = DEFINES,
         deps = deps + [lib_platform] + select({
             "@platforms//os:windows" : [lib_win],
             "//conditions:default" : [],
@@ -89,6 +99,7 @@ def fw_test(name, deps, srcs, tags):
         deps = deps + ["@catch2//:catch2"],
         srcs = srcs,
         tags = tags,
+        defines = DEFINES,
         copts = COPTS,
     )
 
