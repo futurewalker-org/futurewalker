@@ -30,4 +30,4 @@ class Futurewalker(ConanFile):
 
     def build(self):
         bazel = Bazel(self)
-        bazel.build(target="//Test/...", args=["--verbose_failures"])
+        self.run("bazel {} test //Test/... --config=conan-config --test_output=errors".format(bazel._get_startup_command_options()))
