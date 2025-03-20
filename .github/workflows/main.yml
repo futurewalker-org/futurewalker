@@ -32,5 +32,13 @@ jobs:
         run: conan --version
       - name: Detect default profile
         run: conan profile detect
+      - name: Checkout Skia recipe
+        uses: actions/checkout@v4
+        with:
+          repository: 'mocabe/conan-skia'
+          path: 'conan-skia'
+          refn: 'main'
+      - name: Add Skia recipe to Conan
+        run: conan remote add conan_skia ./conan-skia
       - name: Build
         run:  conan build . -pr:b=default -pr:h=${{ inputs.profile }} --build=missing
