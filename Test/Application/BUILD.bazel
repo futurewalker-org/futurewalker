@@ -4,6 +4,7 @@ fw_test_suite(
     deps = ["@futurewalker//:Application", "//Source/Test"],
     tags = ["Application"],
     names = [
+        "BoxConstraints",
         "CornerRadius",
         "EdgeInsets",
         "View",
