@@ -23,8 +23,8 @@ namespace FW_EXPORT
 class Debug : NonConstructible
 {
 public:
-    template <class... Args>
-    static inline auto Print(char const* message, Args&&... args) -> void;
+    static inline auto Print(std::string_view const message) -> void;
+    static inline auto Log(DebugLogLevel const level, std::string_view const message) -> void;
     static inline auto Assert(Bool const boolean, char const* message = "", std::source_location location = std::source_location::current(), Stacktrace stacktrace = Stacktrace::MakeCurrent()) -> void;
     static inline auto Break() -> void;
 
@@ -34,17 +34,41 @@ private:
 };
 
 ///
-/// @brief Print formatted string to debug output.
+/// @brief Print string to debug output.
 ///
-/// @tparam Args Variadic types of format arguments.
+/// @param[in] message ASCII string to print
 ///
-/// @param[in] message ASCII format string to print.
-/// @param[in] args Format arguments.
-///
-template <class... Args>
-inline auto Debug::Print(char const* message, Args&&... args) -> void
+inline auto Debug::Print(std::string_view const message) -> void
 {
-    Debug::PrintPriv(StringFunction::Format(StringFunction::ConvertUtf8ToStringUnchecked(message), std::forward<Args>(args)...));
+    Debug::PrintPriv(StringFunction::ConvertASCIIToString(message));
+}
+
+///
+/// @brief Log string to debug output.
+///
+/// @param[in] level Debug log level
+/// @param[in] message ASCII string to print
+///
+inline auto Debug::Log(DebugLogLevel const level, std::string_view const message) -> void
+{
+    auto const levelString = [&]() -> char const* {
+        switch (level)
+        {
+            case DebugLogLevel::Info:
+                return "I";
+            case DebugLogLevel::Warning:
+                return "W";
+            case DebugLogLevel::Error:
+                return "E";
+        }
+        return nullptr;
+    }();
+
+    if (levelString)
+    {
+        auto const formattedString = std::format("[{}]: {}", levelString, message);
+        Debug::PrintPriv(StringFunction::ConvertASCIIToString(formattedString));
+    }
 }
 
 ///
@@ -52,20 +76,20 @@ inline auto Debug::Print(char const* message, Args&&... args) -> void
 ///
 /// @tparam F A type of assertion functor.
 ///
-/// @param[in] boolean Assertion function. Must return boolean-testable value.
-/// @param[in] message ASCII assertion message.
-/// @param[in] location Source location of caller.
-/// @param[in] stacktrace  stacktrace  stacktrace  stacktrace 
+/// @param[in] boolean Assertion function. Must return boolean-testable value
+/// @param[in] message ASCII assertion message
+/// @param[in] location Source location of caller
+/// @param[in] stacktrace Stacktrace of caller
 ///
 inline auto Debug::Assert(Bool const boolean, char const* message, std::source_location location, Stacktrace stacktrace) -> void
 {
     if (!boolean)
     {
-        auto const function = StringFunction::ConvertUtf8ToStringUnchecked(location.function_name());
-        auto const file = StringFunction::ConvertUtf8ToStringUnchecked(location.file_name());
-        auto const trace = StringFunction::ConvertUtf8ToStringUnchecked(stacktrace.GetCString());
-        Debug::Print("Assertion failed: {} {} {}:{}:{}", StringFunction::ConvertUtf8ToStringUnchecked(message), function, file, location.line(), location.column());
-        Debug::Print("{}", trace);
+        auto const function = location.function_name();
+        auto const file = location.file_name();
+        auto const trace = stacktrace.GetCString();
+        Debug::Log(DebugLogLevel::Error, std::format("Assertion failed: {} {} {}:{}:{}", message, function, file, location.line(), location.column()));
+        Debug::Log(DebugLogLevel::Error, std::format("Stacktrace:\n{}", trace));
         std::abort();
     }
 }

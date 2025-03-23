@@ -22,7 +22,7 @@ auto SkiaTextShaper::Shape(String const& text) -> Shared<ShapedText>
     auto const width = SK_FloatInfinity;
     auto const font = SkFont(nullptr, 96);
 
-    auto const str = text.GetCString();
+    auto const str = StringFunction::ConvertStringToStdU8String(text);
     auto const utf8 = reinterpret_cast<const char*>(str.c_str());
     auto const utf8Bytes = str.size();
 

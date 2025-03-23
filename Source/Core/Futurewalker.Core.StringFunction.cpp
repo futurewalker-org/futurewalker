@@ -53,6 +53,30 @@ struct fmt::formatter<FW_NS::StringView, char8_t> : fmt::formatter<std::u8string
 namespace FW_DETAIL_NS
 {
 ///
+/// @brief Create String from ASCII C string with runtime checks.
+///
+/// Copies content of incoming C string into new String object.
+/// Any invalid code points found in incoming string will be ignored (skipped).
+///
+/// @param[in] sv A view of ASCII string.
+///
+/// @return Constructed String.
+///
+auto StringFunction::ConvertASCIIToString(std::string_view const sv) -> String
+{
+    auto result = String();
+    result.Reserve(String::SizeType(sv.size()));
+    for (const auto& c : sv)
+    {
+        if (0 <= c && c <= 0x7F)
+        {
+            result.Insert(result.GetView().GetSize(), String(String::ValueType(c)));
+        }
+    }
+    return result;
+}
+
+///
 /// @brief Create String from UTF-8 C string with runtime checks.
 ///
 /// Copies content of incoming C string into new String object.
@@ -89,9 +113,12 @@ auto StringFunction::ConvertUtf8ToStringUnchecked(std::string_view const sv) -> 
 }
 
 ///
-/// @brief Convert String to std::string
+/// @brief Convert String to std::string.
 ///
-/// @param sv StringView
+/// @param[in] sv UTF-8 string view
+///
+/// @note No transcoding will be performed.
+/// @note Resulting string will be in UTF-8 regardless of current encoding of char.
 ///
 auto StringFunction::ConvertStringToStdString(StringView const sv) -> std::string
 {
@@ -101,9 +128,11 @@ auto StringFunction::ConvertStringToStdString(StringView const sv) -> std::strin
 }
 
 ///
-/// @brief Convert String to std::u8string
+/// @brief Convert String to std::u8string.
 ///
-/// @param sv StringView
+/// @param[in] sv UTF-8 string view
+///
+/// @note No transcoding will be performed.
 ///
 auto StringFunction::ConvertStringToStdU8String(StringView const sv) -> std::u8string
 {

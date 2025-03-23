@@ -270,16 +270,6 @@ auto String::GetSubstring(IndexType const begin, IndexType const end) const noex
 }
 
 ///
-/// @brief Get C-style string.
-///
-auto String::GetCString() const -> std::u8string
-{
-    auto const ptr = static_cast<ValueType const*>(GetConstData());
-    auto const len = static_cast<size_t>(GetSize());
-    return std::u8string(ptr, len);
-}
-
-///
 /// @brief Resize string.
 ///
 /// @param[in] size New size of string.

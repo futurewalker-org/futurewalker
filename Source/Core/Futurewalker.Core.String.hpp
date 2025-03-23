@@ -67,7 +67,6 @@ public:
     [[nodiscard]] auto GetView() const noexcept -> StringView;
     [[nodiscard]] auto GetChar(ValueType& value, IndexType pos) const noexcept -> Bool;
     [[nodiscard]] auto GetSubstring(IndexType begin, IndexType end) const noexcept -> String;
-    [[nodiscard]] auto GetCString() const -> std::u8string;
 
     auto Resize(SizeType size) -> void;
     auto Reserve(SizeType capacity) -> void;
