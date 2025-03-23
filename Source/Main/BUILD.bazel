@@ -1,0 +1,14 @@
+load("//:defs.bzl", "fw_library")
+
+fw_library(
+    name = "Main",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//Source/Application",
+        "@boost//:boost-headers",
+        "@boost//:boost-nowide",
+    ],
+    linkopts_win = [
+        "/DEFAULTLIB:shell32.lib" # boost-nowide
+    ],
+)

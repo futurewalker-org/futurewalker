@@ -22,6 +22,8 @@ WARNINGS = select({
 
 COPTS = COMPILE_OPTIONS + WARNINGS
 
+LINKOPTS = []
+
 DEFINES = select({
     "@platforms//os:windows" : [
         "UNICODE",
@@ -32,7 +34,7 @@ DEFINES = select({
     "//conditions:default" : [],
 })
 
-def fw_library(name, visibility, deps):
+def fw_library(name, visibility, deps, copts=[], copts_win=[], linkopts=[], linkopts_win=[]):
 
     name_hdrs = name + "_hdrs" 
     name_platform  = name + "_platform"
@@ -49,7 +51,8 @@ def fw_library(name, visibility, deps):
         deps = deps,
         includes = ["."],
         defines = DEFINES,
-        copts = COPTS,
+        copts = COPTS + copts,
+        linkopts = LINKOPTS + linkopts,
     )
 
     cc_library(
@@ -60,7 +63,8 @@ def fw_library(name, visibility, deps):
         deps = deps + [lib_hdrs],
         includes = ["./Platform"],
         defines = DEFINES,
-        copts = COPTS,
+        copts = COPTS + copts,
+        linkopts = LINKOPTS + linkopts,
     )
 
     cc_library(
@@ -71,7 +75,8 @@ def fw_library(name, visibility, deps):
         deps = deps + [lib_platform],
         includes = ["./Win"],
         defines = DEFINES,
-        copts = COPTS,
+        copts = COPTS + copts + copts_win,
+        linkopts = LINKOPTS + linkopts + linkopts_win,
     )
 
     cc_library(
@@ -85,12 +90,34 @@ def fw_library(name, visibility, deps):
             "@platforms//os:windows" : [lib_win],
             "//conditions:default" : [],
         }),
-        copts = COPTS,
+        copts = COPTS + copts,
+        linkopts = LINKOPTS + linkopts,
     )
 
-def fw_binary(**kwargs):
+def fw_binary(name, visibility, deps, copts=[], copts_win=[], linkopts=[], linkopts_win=[]):
+
+    name_win = name + "_win"
+    lib_win = ":%s" % name_win
+
+    cc_library(
+        name = name_win,
+        srcs = native.glob(["Win/*.cpp"], allow_empty=True),
+        hdrs = native.glob(["Win/*.hpp"], allow_empty=True),
+        visibility = ["//visibility:private"],
+        includes = ["./Win"],
+        deps = deps,
+        copts = COPTS + copts + copts_win,
+        linkopts = LINKOPTS + linkopts + linkopts_win,
+    )
+
     cc_binary(
-        **kwargs,
+        name = name,
+        visibility = visibility,
+        srcs = native.glob(["*.cpp"], allow_empty=True),
+        includes = ["."],
+        deps = [lib_win] + deps,
+        copts = COPTS + copts,
+        linkopts = LINKOPTS + linkopts,
     )
 
 def fw_test(name, deps, srcs, tags):

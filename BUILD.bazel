@@ -75,3 +75,9 @@ alias(
     actual = "//Source/Application",
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "Main",
+    actual = "//Source/Main",
+    visibility = ["//visibility:public"],
+)

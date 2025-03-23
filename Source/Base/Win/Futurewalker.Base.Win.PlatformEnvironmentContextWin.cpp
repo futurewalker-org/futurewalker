@@ -13,10 +13,12 @@ namespace FW_DETAIL_NS
 ///
 /// @brief Constructor.
 ///
-/// @param[in] instanceHandle Instance handle.
-///
-PlatformEnvironmentContextWin::PlatformEnvironmentContextWin(Shared<PlatformDebug> debug, Shared<PlatformInstanceHandleWin> instanceHandle)
-  : PlatformEnvironmentContext(debug)
+PlatformEnvironmentContextWin::PlatformEnvironmentContextWin(
+  Shared<PlatformDebug> debug,
+  Shared<PlatformSystemInfo> systemInfo,
+  Shared<PlatformCommandLine> commandLine,
+  Shared<PlatformInstanceHandleWin> instanceHandle)
+  : PlatformEnvironmentContext(debug, systemInfo, commandLine)
   , _instanceHandle {instanceHandle}
 {
 }
@@ -27,7 +29,9 @@ PlatformEnvironmentContextWin::PlatformEnvironmentContextWin(Shared<PlatformDebu
 auto Locator::Resolver<PlatformEnvironmentContextWin>::Resolve() -> Shared<PlatformEnvironmentContextWin>
 {
     auto debug = Locator::Resolve<PlatformDebug>();
+    auto systemInfo = Locator::Resolve<PlatformSystemInfo>();
+    auto commandLine = Locator::Resolve<PlatformCommandLine>();
     auto instanceHandle = Locator::ResolveWithDefault<PlatformInstanceHandleWin>();
-    return Shared<PlatformEnvironmentContextWin>::Make(debug, instanceHandle);
+    return Shared<PlatformEnvironmentContextWin>::Make(debug, systemInfo, commandLine, instanceHandle);
 }
 }

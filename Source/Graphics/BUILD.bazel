@@ -11,4 +11,8 @@ fw_library(
         "//Source/Unit",
         "@skia//:skia",
     ],
+    linkopts_win = [
+        "/DEFAULTLIB:d3d11.lib",
+        "/DEFAULTLIB:d3d12.lib",
+    ],
 )
