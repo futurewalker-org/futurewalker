@@ -5,9 +5,6 @@
 
 namespace FW_DETAIL_NS
 {
-namespace FW_EXPORT
-{
-template <class T, bool SingleThreaded = false>
-class LazyTask;
-}
+template <class T>
+struct ResumesOnSameThreadTask;
 }
