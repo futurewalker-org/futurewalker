@@ -213,7 +213,7 @@ auto View::LocalToAncestorPoint(Point<Dp> const& point, ReferenceArg<View const>
         {
             return result;
         }
-        result = point + (*self).GetFrameRect().GetTopLeft().As<Offset>();
+        result = result + (*self).GetFrameRect().GetTopLeft().As<Offset>();
         self = (*self).GetParent();
     }
     return point;
@@ -235,7 +235,7 @@ auto View::AncestorToLocalPoint(Point<Dp> const& point, ReferenceArg<View const>
         {
             return result;
         }
-        result = point - (*self).GetFrameRect().GetTopLeft().As<Offset>();
+        result = result - (*self).GetFrameRect().GetTopLeft().As<Offset>();
         self = (*self).GetParent();
     }
     return point;
