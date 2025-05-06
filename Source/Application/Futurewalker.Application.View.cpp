@@ -16,6 +16,7 @@
 #include "Futurewalker.Application.AxisConstraints.hpp"
 #include "Futurewalker.Application.ViewLayer.hpp"
 #include "Futurewalker.Application.ViewLayerManager.hpp"
+#include "Futurewalker.Application.FocusNode.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -58,12 +59,6 @@ auto View::Make() -> Shared<View>
 ///
 View::View(PassKey<View>)
 {
-    _eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); }});
-    _propertyStore = PropertyStore::Make();
-    _animationTimer = AnimationTimer::Make();
-    _attributeNode = AttributeNode::Make();
-    _layerManager = Locator::Resolve<ViewLayerManager>();
-    _layer = _layerManager->MakeLayer(ViewLayerKindNormal);
 }
 
 ///
@@ -447,6 +442,29 @@ auto View::SetEnabled(Bool const enabled) -> void
 }
 
 ///
+/// @brief 
+///
+auto View::IsFocused() const -> Bool
+{
+    return GetFocusNode().IsFocused();
+}
+
+///
+/// @brief
+///
+auto View::SetFocused(Bool const focused) -> void
+{
+    if (focused)
+    {
+        GetFocusNode().RequestFocus();
+    }
+    else
+    {
+        GetFocusNode().ReleaseFocus();
+    }
+}
+
+///
 /// @brief
 ///
 auto View::IsActive() const -> Bool
@@ -468,14 +486,6 @@ auto View::IsAttached() const -> Bool
         return RootIsAttached();
     }
     return _attached;
-}
-
-///
-/// @brief 
-///
-auto View::IsFocused() const -> Bool
-{
-    return false;
 }
 
 ///
@@ -1117,6 +1127,22 @@ auto View::SetPointerTrackingFlags(ViewPointerTrackingFlags const pointerTrackin
 }
 
 ///
+/// @brief Get tracking flags.
+///
+auto View::GetFocusTrackingFlags() const -> ViewFocusTrackingFlags
+{
+    return _focusTrackingFlags;
+}
+
+///
+/// @brief Set tracking flags.
+///
+auto View::SetFocusTrackingFlags(ViewFocusTrackingFlags const focusTrackingFlags) -> void
+{
+    _focusTrackingFlags = focusTrackingFlags;
+}
+
+///
 /// @brief Get number of child views.
 ///
 auto View::GetChildCount() const -> SInt64
@@ -1372,6 +1398,22 @@ auto View::RootGetAnimationTimer() const -> AnimationTimer const&
 ///
 /// @brief
 ///
+auto View::RootGetFocusNode() -> FocusNode&
+{
+    return *_focusNode;
+}
+
+///
+/// @brief
+///
+auto View::RootGetFocusNode() const -> FocusNode const&
+{
+    return *_focusNode;
+}
+
+///
+/// @brief
+///
 auto View::RootGetAttributeNode() -> AttributeNode&
 {
     return *_attributeNode;
@@ -1466,14 +1508,6 @@ auto View::GetSelfBase() const -> Shared<View const>
 ///
 /// @brief
 ///
-auto View::SetSelfBase(Shared<View> const& self) -> void
-{
-    _self = self;
-}
-
-///
-/// @brief
-///
 auto View::SetParent(Shared<View> const& parent) -> void
 {
     auto const oldParent = _parent.Lock();
@@ -1486,12 +1520,14 @@ auto View::SetParent(Shared<View> const& parent) -> void
             auto const indexAfter = *parent->GetChildIndex(*this) + 1;
             auto const viewAfter = parent->GetChildAt(indexAfter);
             parent->GetAnimationTimer().AddChild(_animationTimer, viewAfter ? &viewAfter->GetAnimationTimer() : nullptr);
+            parent->GetFocusNode().AddChild(_focusNode, viewAfter ? &viewAfter->GetFocusNode() : nullptr);
             parent->GetAttributeNode().AddChild(_attributeNode);
             parent->GetLayer().AddChild(_layer, viewAfter ? &viewAfter->GetLayer() : nullptr);
         }
         else
         {
             oldParent->GetAttributeNode().RemoveChild(_attributeNode);
+            oldParent->GetFocusNode().RemoveChild(_focusNode);
             oldParent->GetAnimationTimer().RemoveChild(_animationTimer);
             oldParent->GetLayer().RemoveChild(_layer);
         }
@@ -1549,6 +1585,23 @@ auto View::IsRoot() const -> Bool
 ///
 /// @brief
 ///
+auto View::InitializeSelf(Shared<View> const& self) -> void
+{
+    _self = self;
+    _eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); }});
+    _propertyStore = PropertyStore::Make();
+    _animationTimer = AnimationTimer::Make();
+    _focusNode = FocusNode::Make();
+    _attributeNode = AttributeNode::Make();
+    _layerManager = Locator::Resolve<ViewLayerManager>();
+    _layer = _layerManager->MakeLayer(ViewLayerKindNormal);
+
+    EventReceiver::Connect(*_focusNode, *this, &View::SendEvent);
+}
+
+///
+/// @brief
+///
 auto View::GetAnimationTimer() -> AnimationTimer&
 {
     if (IsRoot())
@@ -1568,6 +1621,30 @@ auto View::GetAnimationTimer() const -> AnimationTimer const&
         return RootGetAnimationTimer();
     }
     return *_animationTimer;
+}
+
+///
+/// @brief
+///
+auto View::GetFocusNode() -> FocusNode&
+{
+    if (IsRoot())
+    {
+        return RootGetFocusNode();
+    }
+    return *_focusNode;
+}
+
+///
+/// @brief
+///
+auto View::GetFocusNode() const -> FocusNode const&
+{
+    if (IsRoot())
+    {
+        return RootGetFocusNode();
+    }
+    return *_focusNode;
 }
 
 ///
@@ -1725,7 +1802,7 @@ auto View::Detach() -> void
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto View::InvalidateLayoutPath() -> void
 {

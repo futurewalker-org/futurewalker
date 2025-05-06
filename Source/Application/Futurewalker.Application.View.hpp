@@ -15,6 +15,7 @@
 #include "Futurewalker.Application.ViewDrawInfo.hpp"
 #include "Futurewalker.Application.LayoutDirection.hpp"
 #include "Futurewalker.Application.ViewLayerManagerType.hpp"
+#include "Futurewalker.Application.FocusNodeType.hpp"
 
 #include "Futurewalker.Animation.AnimationTimer.hpp"
 
@@ -100,9 +101,11 @@ public:
     auto IsEnabledFromRoot() const -> Bool;
     auto SetEnabled(Bool const enabled) -> void;
 
+    auto IsFocused() const -> Bool;
+    auto SetFocused(Bool const focused) -> void;
+
     auto IsActive() const -> Bool;
     auto IsAttached() const -> Bool;
-    auto IsFocused() const -> Bool;
 
     auto SendEvent(Event& event) -> Async<Bool>;
     auto SendEventDetached(Event& event) -> Bool;
@@ -155,6 +158,9 @@ protected:
     auto GetPointerTrackingFlags() const -> ViewPointerTrackingFlags;
     auto SetPointerTrackingFlags(ViewPointerTrackingFlags const pointerTrackingFlags) -> void;
 
+    auto GetFocusTrackingFlags() const -> ViewFocusTrackingFlags;
+    auto SetFocusTrackingFlags(ViewFocusTrackingFlags const focusTrackingFlags) -> void;
+
     auto GetChildCount() const -> SInt64;
     auto GetChildIndex(ReferenceArg<View const> view) const -> Optional<SInt64>;
     auto GetChildAt(SInt64 const index) -> Shared<View>;
@@ -196,6 +202,8 @@ private:
     virtual auto RootGetBackingScale() const -> BackingScale;
     virtual auto RootGetAnimationTimer() -> AnimationTimer&;
     virtual auto RootGetAnimationTimer() const -> AnimationTimer const&;
+    virtual auto RootGetFocusNode() -> FocusNode&;
+    virtual auto RootGetFocusNode() const -> FocusNode const&;
     virtual auto RootGetAttributeNode() -> AttributeNode&;
     virtual auto RootGetAttributeNode() const -> AttributeNode const&;
     virtual auto RootGetLayer() -> ViewLayer&;
@@ -209,7 +217,6 @@ private:
 private:
     auto GetSelfBase() -> Shared<View>;
     auto GetSelfBase() const -> Shared<View const>;
-    auto SetSelfBase(Shared<View> const& self) -> void;
     auto SetParent(Shared<View> const& parent) -> void;
     auto GetParent() -> Shared<View>;
     auto GetParent() const -> Shared<View const>;
@@ -217,8 +224,13 @@ private:
     auto GetRoot() const -> Shared<View const>;
     auto IsRoot() const -> Bool;
 
+    auto InitializeSelf(Shared<View> const& self) -> void;
+
     auto GetAnimationTimer() -> AnimationTimer&;
     auto GetAnimationTimer() const -> AnimationTimer const&;
+
+    auto GetFocusNode() -> FocusNode&;
+    auto GetFocusNode() const -> FocusNode const&;
 
     auto GetLayer() -> ViewLayer&;
     auto GetLayer() const -> ViewLayer const&;
@@ -254,6 +266,7 @@ private:
     ViewLayoutInfo _layoutInfo;
     ViewDrawInfo _drawInfo;
     Shared<AnimationTimer> _animationTimer;
+    Shared<FocusNode> _focusNode;
     Shared<AttributeNode> _attributeNode;
     Shared<ViewLayerManager> _layerManager;
     Shared<ViewLayer> _layer;
@@ -266,6 +279,7 @@ private:
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
     ViewPointerTrackingFlags _pointerTrackingFlags = ViewPointerTrackingFlags::None;
+    ViewFocusTrackingFlags _focusTrackingFlags = ViewFocusTrackingFlags::None;
 };
 
 ///
@@ -314,7 +328,7 @@ auto View::MakeDerived(Args&&... args) -> Shared<Derived>
 {
     auto key = PassKey<View>();
     auto view = Shared<Derived>::Make(key, std::forward<Args>(args)...);
-    static_cast<View&>(*view).SetSelfBase(view);
+    static_cast<View&>(*view).InitializeSelf(view);
     static_cast<View&>(*view).Initialize();
     return view;
 }

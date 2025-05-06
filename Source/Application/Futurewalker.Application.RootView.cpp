@@ -2,6 +2,7 @@
 
 #include "Futurewalker.Application.RootView.hpp"
 #include "Futurewalker.Application.RootViewEvent.hpp"
+#include "Futurewalker.Application.RootFocusNode.hpp"
 #include "Futurewalker.Application.ContainerView.hpp"
 #include "Futurewalker.Application.MeasureScope.hpp"
 #include "Futurewalker.Application.ArrangeScope.hpp"
@@ -11,6 +12,7 @@
 #include "Futurewalker.Application.ViewLayer.hpp"
 #include "Futurewalker.Application.ViewLayerManager.hpp"
 #include "Futurewalker.Application.PointerEvent.hpp"
+#include "Futurewalker.Application.FocusEvent.hpp"
 
 #include "Futurewalker.Animation.RootAnimationTimer.hpp"
 
@@ -24,27 +26,28 @@ namespace FW_DETAIL_NS
 ///
 /// @brief Make view.
 ///
-auto RootView::Make(Delegate delegate) -> Shared<RootView>
+auto RootView::Make(Delegate const& delegate) -> Shared<RootView>
 {
-    return View::MakeDerived<RootView>(std::move(delegate));
+    return View::MakeDerived<RootView>(delegate);
+}
+
+///
+/// @brief Make view with content.
+///
+auto RootView::MakeWithContent(Delegate const& delegate, Shared<View> const& content) -> Shared<RootView>
+{
+    auto view = RootView::Make(delegate);
+    view->SetContent(content);
+    return view;
 }
 
 ///
 /// @brief Constructor.
 ///
-RootView::RootView(PassKey<View> key, Delegate delegate)
+RootView::RootView(PassKey<View> key, Delegate const& delegate)
   : View(key)
   , _delegate {delegate}
 {
-    _viewLayerManager = Locator::Resolve<ViewLayerManager>();
-
-    _animationTimer = RootAnimationTimer::Make({
-      .requestTick = [&] { return RequestFrame(); },
-      .getCurrentTime = [&] { return GetFrameTime(); },
-    });
-
-    _attributeNode = AttributeNode::Make();
-    _drawInfo.Initialize();
 }
 
 ///
@@ -75,11 +78,22 @@ auto RootView::SetContent(Shared<View> view) -> void
 ///
 auto RootView::Initialize() -> void
 {
+    _viewLayerManager = Locator::Resolve<ViewLayerManager>();
+    _animationTimer = RootAnimationTimer::Make({
+      .requestTick = [&] { return RequestFrame(); },
+      .getCurrentTime = [&] { return GetFrameTime(); },
+    });
+    _focusNode = RootFocusNode::Make();
+    _attributeNode = AttributeNode::Make();
+
+    _drawInfo.Initialize();
+
     _container = ContainerView::Make();
 
     AddChildFront(_container);
 
     EventReceiver::Connect(*this, *this, &RootView::ReceiveEvent);
+    EventReceiver::Connect(*_focusNode, *this, &RootView::ReceiveFocusEvent);
 }
 
 ///
@@ -143,6 +157,39 @@ auto RootView::ReceiveEvent(Event& event) -> Async<Bool>
     else if (event.Is<ViewEvent::Detached>())
     {
         SetAnimationTimerActive(false);
+    }
+    co_return false;
+}
+
+///
+/// @brief
+///
+auto RootView::ReceiveFocusEvent(Event& event) -> Async<Bool>
+{
+    if (event.Is<FocusEvent>())
+    {
+        if (auto focus = _focusNode->GetFocusedNode())
+        {
+            if (focus != _focusNode)
+            {
+                if (_inputMethod)
+                {
+                    if (event.Is<FocusEvent::FocusWillChange>())
+                    {
+                        auto inputEvent = Event(InputEvent::Detach());
+                        co_await focus->SendEvent(inputEvent);
+                    }
+                    else if (event.Is<FocusEvent::FocusDidChange>())
+                    {
+                        auto inputEventParameter = InputEvent::Attach();
+                        inputEventParameter.SetInputMethod(_inputMethod);
+                        auto inputEvent = Event(inputEventParameter);
+                        co_await focus->SendEvent(inputEvent);
+                    }
+                }
+            }
+        }
+        co_return true;
     }
     co_return false;
 }
@@ -476,6 +523,22 @@ auto RootView::RootGetAnimationTimer() -> AnimationTimer&
 auto RootView::RootGetAnimationTimer() const -> AnimationTimer const&
 {
     return *_animationTimer;
+}
+
+///
+/// @brief
+///
+auto RootView::RootGetFocusNode() -> FocusNode&
+{
+    return *_focusNode;
+}
+
+///
+/// @brief
+///
+auto RootView::RootGetFocusNode() const -> FocusNode const&
+{
+    return *_focusNode;
 }
 
 ///

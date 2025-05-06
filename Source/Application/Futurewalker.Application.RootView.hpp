@@ -4,6 +4,7 @@
 #include "Futurewalker.Application.RootViewType.hpp"
 #include "Futurewalker.Application.RootViewDrawInfo.hpp"
 #include "Futurewalker.Application.RootViewLayoutInfo.hpp"
+#include "Futurewalker.Application.RootFocusNodeType.hpp"
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.ViewLayerManagerType.hpp"
@@ -30,9 +31,10 @@ public:
         Function<void()> requestFrame;
         Function<MonotonicTime()> getFrameTime;
     };
-    static auto Make(Delegate delegate) -> Shared<RootView>;
+    static auto Make(Delegate const& delegate) -> Shared<RootView>;
+    static auto MakeWithContent(Delegate const& delegate, Shared<View> const& content) -> Shared<RootView>;
 
-    RootView(PassKey<View> key, Delegate delegate);
+    RootView(PassKey<View> key, Delegate const& delegate);
 
     auto GetContent() -> Shared<View>;
     auto SetContent(Shared<View> view) -> void;
@@ -41,6 +43,7 @@ protected:
     auto Initialize() -> void override;
 
     auto ReceiveEvent(Event& event) -> Async<Bool>;
+    auto ReceiveFocusEvent(Event& event) -> Async<Bool>;
 
     auto UpdateAnimation() -> void;
     auto UpdateLayout() -> void;
@@ -64,6 +67,8 @@ private:
     auto RootGetBackingScale() const -> BackingScale override;
     auto RootGetAnimationTimer() -> AnimationTimer& override;
     auto RootGetAnimationTimer() const -> AnimationTimer const& override;
+    auto RootGetFocusNode() -> FocusNode& override;
+    auto RootGetFocusNode() const -> FocusNode const& override;
     auto RootGetAttributeNode() -> AttributeNode& override;
     auto RootGetAttributeNode() const -> AttributeNode const& override;
     auto RootGetLayer() -> ViewLayer& override;
@@ -82,6 +87,7 @@ private:
     Delegate _delegate;
     Shared<ViewLayerManager> _viewLayerManager;
     Shared<RootAnimationTimer> _animationTimer;
+    Shared<RootFocusNode> _focusNode;
     Shared<AttributeNode> _parentAttributeNode;
     Shared<AttributeNode> _attributeNode;
     Shared<ContainerView> _container;
