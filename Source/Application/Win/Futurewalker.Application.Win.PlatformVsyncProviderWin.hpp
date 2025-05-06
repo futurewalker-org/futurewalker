@@ -25,31 +25,31 @@ namespace FW_EXPORT
 ///
 class PlatformVsyncProviderWin : NonCopyable
 {
+    struct CallbackData
+    {
+        Weak<void> data;
+        PlatformVsyncCallbackFunction callback;
+    };
+
 public:
     PlatformVsyncProviderWin();
     ~PlatformVsyncProviderWin();
 
     auto GetCurrentFrameTime() const -> MonotonicTime;
     
-    auto RegisterCallback(Weak<void> data, PlatformVsyncCallbackFunction callback) -> void;
-    auto UnregisterCallback(Weak<void> data) -> void;
+    auto PostFrameCallback(Weak<void> data, PlatformVsyncCallbackFunction callback) -> void;
 
 private:
-    auto HasCallback() const -> Bool;
+    auto GetCallbacks() -> std::vector<CallbackData>;
     auto WaitForCallbackOnThread() -> Bool;
 
     auto RequestStop() -> void;
     auto StopRequested() const -> Bool;
 
     static auto GetLastCompletedFrameTime(MonotonicTime& frameTime) -> Bool;
-    static auto DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo) -> Task<void>;
+    static auto DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, std::vector<CallbackData> const callbacks) -> Task<void>;
 
 private:
-    struct CallbackData
-    {
-        Weak<void> data;
-        PlatformVsyncCallbackFunction callback;
-    };
     mutable std::mutex _mutex;
     std::condition_variable _condVar;
     std::vector<CallbackData> _callbacks;

@@ -53,9 +53,10 @@ PlatformVsyncProviderWin::PlatformVsyncProviderWin()
                   .targetTimestamp = frameTime,
                 };
 
-                if (this->HasCallback())
+                auto callbacks = this->GetCallbacks();
+                if (!callbacks.empty())
                 {
-                    AsyncFunction::Spawn(DispatchCallbacks(frameInfo));
+                    AsyncFunction::Spawn(DispatchCallbacks(frameInfo, std::move(callbacks)));
                 }
             }
             else if (result == WAIT_TIMEOUT || result == WAIT_FAILED)
@@ -95,7 +96,7 @@ auto PlatformVsyncProviderWin::GetCurrentFrameTime() const -> MonotonicTime
 /// @param data User data.
 /// @param callback Callback function.
 ///
-auto PlatformVsyncProviderWin::RegisterCallback(Weak<void> data, PlatformVsyncCallbackFunction callback) -> void
+auto PlatformVsyncProviderWin::PostFrameCallback(Weak<void> data, PlatformVsyncCallbackFunction callback) -> void
 {
     if (data.IsExpired())
     {
@@ -124,42 +125,12 @@ auto PlatformVsyncProviderWin::RegisterCallback(Weak<void> data, PlatformVsyncCa
 }
 
 ///
-/// @brief Unregister callback.
-///
-/// @param data User data
-///
-auto PlatformVsyncProviderWin::UnregisterCallback(Weak<void> data) -> void
-{
-    if (data.IsExpired())
-    {
-        return;
-    }
-
-    auto lock = std::unique_lock(_mutex);
-    
-    const auto it = std::find_if(_callbacks.begin(), _callbacks.end(), [&](const auto& cb) {
-        const auto lhs = cb.data.Lock();
-        const auto rhs = data.Lock();
-        if (lhs && rhs)
-        {
-            return lhs == rhs;
-        }
-        return false;
-    });
-
-    if (it != _callbacks.end())
-    {
-        _callbacks.erase(it);
-    }
-}
-
-///
 /// @brief Returns true if there is a callback.
 ///
-auto PlatformVsyncProviderWin::HasCallback() const -> Bool
+auto PlatformVsyncProviderWin::GetCallbacks() -> std::vector<CallbackData>
 {
     auto lock = std::unique_lock(_mutex);
-    return !_callbacks.empty();
+    return std::move(_callbacks);
 }
 
 ///
@@ -234,29 +205,21 @@ auto PlatformVsyncProviderWin::GetLastCompletedFrameTime(MonotonicTime& frameTim
 ///
 /// @return A task.
 ///
-auto PlatformVsyncProviderWin::DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo) -> Task<void>
+auto PlatformVsyncProviderWin::DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, std::vector<CallbackData> const callbacks) -> Task<void>
 {
     try
     {
-        if (auto mainThread = Locator::GetInstance<MainThread>())
+        co_await MainThread::Schedule();
+
+        if (auto provider = Locator::GetInstance<PlatformVsyncProviderWin>())
         {
-            co_await mainThread->Schedule();
-
-            if (auto provider = Locator::GetInstance<PlatformVsyncProviderWin>())
+            for (const auto& callback : callbacks)
             {
-                const auto callbacks = [&] {
-                    auto lock = std::unique_lock(provider->_mutex);
-                    return std::move(provider->_callbacks);
-                }();
-
-                for (const auto& callback : callbacks)
+                if (auto data = callback.data.Lock())
                 {
-                    if (auto data = callback.data.Lock())
+                    if (callback.callback)
                     {
-                        if (callback.callback)
-                        {
-                            callback.callback(data, frameInfo);
-                        }
+                        callback.callback(data, frameInfo);
                     }
                 }
             }
