@@ -311,12 +311,6 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
             co_return;
         }
 
-        if (pointerEventType == PointerEventType::Up)
-        {
-            int i = 42;
-            (void)i;
-        }
-
         // 1. Use HitTest to pick a candidate for sending events. This becomes initial `target` view.
         //    When there's a view capturing pointer events, it will becomes `target` view insdead.
         // 2. Propagate `Capture` phase event until it reaches initial `target`, to see if any of ancestors intercepts propagation.
