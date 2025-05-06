@@ -208,7 +208,7 @@ auto String::IsEmpty() const noexcept -> Bool
 ///
 /// @brief Get view of string.
 ///
-/// @note Any modification to string will invalidate returned view.
+/// @note Unsafe: Any modification to string will invalidate returned view.
 ///
 auto String::GetView() const noexcept -> StringView
 {

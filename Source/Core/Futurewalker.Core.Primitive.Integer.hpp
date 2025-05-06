@@ -105,7 +105,7 @@ public:
     /// @param[in] value An integer value.
     ///
     template <class U>
-        requires Concepts::ImplicitlyConvertibleTo<U, T>
+    requires Concepts::ImplicitlyConvertibleTo<U, T>
     inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, T>) Integer(U const& value) noexcept
       : _value {static_cast<T>(value)}
     {
@@ -117,7 +117,7 @@ public:
     /// @param[in] value An integer value.
     ///
     template <class U>
-        requires Concepts::ImplicitlyConvertibleTo<U, T>
+    requires Concepts::ImplicitlyConvertibleTo<U, T>
     inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, T>) Integer(Integer<U, Tag> const& value) noexcept
       : _value {static_cast<T>(value._value)}
     {
@@ -129,7 +129,7 @@ public:
     /// @param[in] value A floating point value.
     ///
     template <class U>
-        requires Concepts::ImplicitlyConvertibleTo<U, T>
+    requires Concepts::ImplicitlyConvertibleTo<U, T>
     inline constexpr explicit(!Concepts::NarrowConvertibleTo<U, T>) Integer(Float<U, Tag> const& value) noexcept
       : _value {static_cast<T>(value)}
     {

@@ -25,7 +25,7 @@ namespace FW_EXPORT
 /// It is recommended to use String for most of the cases.
 ///
 /// StringView should only be used for transient objects like function arguments.
-/// Returning StringView from functions can lead to dangling pointers thus not considered safe.
+/// Returning StringView from functions can lead to dangling pointers thus considered unsafe.
 ///
 class StringView final
 {
