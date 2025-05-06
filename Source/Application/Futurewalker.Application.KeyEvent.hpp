@@ -1,0 +1,69 @@
+﻿// SPDX-License-Identifier: MIT
+#pragma once
+
+#include "Futurewalker.Application.KeyEventType.hpp"
+
+#include "Futurewalker.Event.EventParameter.hpp"
+
+#include "Futurewalker.Core.String.hpp"
+#include "Futurewalker.Core.MonotonicTime.hpp"
+
+namespace FW_DETAIL_NS
+{
+namespace FW_EXPORT
+{
+///
+/// @brief Key event.
+///
+class KeyEvent : public EventParameter
+{
+public:
+    auto GetTimestamp() const -> MonotonicTime;
+    auto SetTimestamp(MonotonicTime const timestamp) -> void;
+
+public:
+    class Down;
+    class Up;
+
+public:
+    MonotonicTime _timestamp;
+};
+
+///
+/// @brief Key down event.
+///
+class KeyEvent::Down final : public KeyEvent
+{
+public:
+    auto GetKey() const -> String;
+    auto SetKey(String const& key) -> void;
+
+    auto GetUnmodifiedKey() const -> String;
+    auto SetUnmodifiedKey(String const& unmodifiedKey) -> void;
+
+    auto GetText() const -> String;
+    auto SetText(String const& text) -> void;
+
+    auto GetModifiers() const -> ModifierKeyFlags;
+    auto SetModifiers(ModifierKeyFlags const modifiers) -> void;
+
+    auto IsRepeat() const -> Bool;
+    auto SetRepeat(Bool const repeat) -> void;
+
+private:
+    String _key;
+    String _unmodifiedKey;
+    String _text;
+    ModifierKeyFlags _modifiers = ModifierKeyFlags::None;
+    Bool _repeat = false;
+};
+
+///
+/// @brief Key up event.
+///
+class KeyEvent::Up final : public KeyEvent
+{
+public:
+};
+}
+}
