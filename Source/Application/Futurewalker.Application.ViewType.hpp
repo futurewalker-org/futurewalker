@@ -48,5 +48,14 @@ enum class ViewPointerTrackingFlags
     None = 0,     ///< No pointer tracking.
     All = 1 << 0, ///< Track all pointer intputs.
 };
+
+///
+/// @brief View's focus tracking flags.
+///
+enum class ViewFocusTrackingFlags
+{
+    None = 0, ///< No focus tracking.
+    All = 1 << 0, ///< Track all focus events.
+};
 }
 }
