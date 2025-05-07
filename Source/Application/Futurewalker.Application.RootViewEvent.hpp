@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.ViewLayerType.hpp"
+#include "Futurewalker.Application.InputMethodType.hpp"
 
 #include "Futurewalker.Event.EventType.hpp"
 #include "Futurewalker.Event.EventParameter.hpp"
@@ -33,6 +34,8 @@ public:
     class Resize;
     class Frame;
     class Pointer;
+    class Key;
+    class Input;
 };
 
 class RootViewEvent::Owner final : public RootViewEvent
@@ -56,6 +59,9 @@ public:
     auto GetParentAttributeNode() const -> Shared<AttributeNode>;
     auto SetParentAttributeNode(Shared<AttributeNode> parentAttributeNode) -> void;
 
+    auto GetInputMethod() const -> Shared<InputMethod>;
+    auto SetInputMethod(Shared<InputMethod> const& inputMethod) -> void;
+
 private:
     Bool _attached = false;
     Bool _active = false;
@@ -63,6 +69,7 @@ private:
     BackingScale _backingScale = 1.0;
     Shared<ViewLayer> _parentLayer;
     Shared<AttributeNode> _parentAttributeNode;
+    Shared<InputMethod> _inputMethod;
 };
 
 class RootViewEvent::Resize final : public RootViewEvent
@@ -84,6 +91,28 @@ class RootViewEvent::Pointer final : public RootViewEvent
 {
 public:
     Pointer(Event& event);
+
+    auto GetEvent() -> Event&;
+
+private:
+    Event& _event;
+};
+
+class RootViewEvent::Key final : public RootViewEvent
+{
+public:
+    Key(Event& event);
+
+    auto GetEvent() -> Event&;
+
+private:
+    Event& _event;
+};
+
+class RootViewEvent::Input final : public RootViewEvent
+{
+public:
+    Input(Event& event);
 
     auto GetEvent() -> Event&;
 

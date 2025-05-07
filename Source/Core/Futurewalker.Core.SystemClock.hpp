@@ -15,7 +15,7 @@ namespace FW_EXPORT
 class SystemClock : NonConstructible
 {
 public:
-    static auto GetCurrentTime() -> SystemTime;
+    static auto GetNow() -> SystemTime;
 };
 }
 }

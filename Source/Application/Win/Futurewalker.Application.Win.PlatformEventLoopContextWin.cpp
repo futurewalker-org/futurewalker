@@ -216,7 +216,7 @@ auto CALLBACK PlatformEventLoopContextWin::MessageWindowProcedure(HWND wnd, UINT
 auto Locator::Resolver<PlatformEventLoopContextWin>::Resolve() -> Shared<PlatformEventLoopContextWin>
 {
     auto instanceHandle = Locator::Resolve<PlatformInstanceHandleWin>();
-    auto threadPool = Locator::Resolve<ThreadPool>();
+    auto threadPool = Locator::ResolveWithDefault<ThreadPool>();
     return PlatformEventLoopContextWin::Make(instanceHandle, threadPool);
 }
 }

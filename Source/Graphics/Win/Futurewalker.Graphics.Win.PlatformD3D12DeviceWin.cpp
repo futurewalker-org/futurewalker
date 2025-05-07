@@ -71,11 +71,11 @@ auto PlatformD3D12DeviceWin::ChooseAdapter(PlatformD3D12DevicePreference const p
         {
             debug->EnableDebugLayer();
             dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
-            FW_DEBUG_PRINT("PlatformD3D12DeviceWin: Debug layer enabled.");
+            FW_DEBUG_LOG_INFO("PlatformD3D12DeviceWin: Debug layer enabled.");
         }
         else
         {
-            FW_DEBUG_PRINT("PlatformD3D12DeviceWin: Debug layer unavailable.");
+            FW_DEBUG_LOG_WARNING("PlatformD3D12DeviceWin: Debug layer unavailable.");
         }
     }
 
@@ -83,7 +83,7 @@ auto PlatformD3D12DeviceWin::ChooseAdapter(PlatformD3D12DevicePreference const p
     auto hr = ::CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(dxgiFactory.GetAddressOf()));
     if (FAILED(hr))
     {
-        FW_DEBUG_PRINT("PlatformD3D12DeviceWin: CreateDXGIFactory2 failed.");
+        FW_DEBUG_LOG_ERROR("PlatformD3D12DeviceWin: CreateDXGIFactory2 failed.");
         return {};
     }
 
@@ -123,7 +123,7 @@ auto PlatformD3D12DeviceWin::ChooseAdapter(PlatformD3D12DevicePreference const p
     }
     else
     {
-        FW_DEBUG_PRINT("PlatformD3D12DeviceWin: CreateDXGIFactory6 unavailable. GPU preference will be ignored.");
+        FW_DEBUG_LOG_WARNING("PlatformD3D12DeviceWin: CreateDXGIFactory6 unavailable. GPU preference will be ignored.");
 
         auto adapter = Microsoft::WRL::ComPtr<IDXGIAdapter1>();
         auto adapterIndex = UINT(0);

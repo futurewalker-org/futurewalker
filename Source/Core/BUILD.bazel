@@ -6,5 +6,6 @@ fw_library(
     deps = [
         "@boost//:boost-headers",
         "@fmt//:fmt",
+        "@icu//:icu",
     ],
 )

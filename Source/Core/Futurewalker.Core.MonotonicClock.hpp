@@ -15,7 +15,7 @@ namespace FW_EXPORT
 class MonotonicClock : NonConstructible
 {
 public:
-    static auto GetCurrentTime() -> MonotonicTime;
+    static auto GetNow() -> MonotonicTime;
 };
 }
 }

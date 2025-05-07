@@ -64,6 +64,16 @@ auto RootViewEvent::Owner::SetParentAttributeNode(Shared<AttributeNode> parentAt
     _parentAttributeNode = parentAttributeNode;
 }
 
+auto RootViewEvent::Owner::GetInputMethod() const -> Shared<InputMethod>
+{
+    return _inputMethod;
+}
+
+auto RootViewEvent::Owner::SetInputMethod(Shared<InputMethod> const& inputMethod) -> void
+{
+    _inputMethod = inputMethod;
+}
+
 auto RootViewEvent::Resize::GetSize() const -> Size<Dp>
 {
     return _size;
@@ -80,6 +90,26 @@ RootViewEvent::Pointer::Pointer(Event& event)
 }
 
 auto RootViewEvent::Pointer::GetEvent() -> Event&
+{
+    return _event;
+}
+
+RootViewEvent::Key::Key(Event& event)
+  : _event {event}
+{
+}
+
+auto RootViewEvent::Key::GetEvent() -> Event&
+{
+    return _event;
+}
+
+RootViewEvent::Input::Input(Event& event)
+  : _event {event}
+{
+}
+
+auto RootViewEvent::Input::GetEvent() -> Event&
 {
     return _event;
 }

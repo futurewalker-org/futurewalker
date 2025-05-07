@@ -45,6 +45,8 @@ public:
     auto Schedule() -> AsyncTask<void> override;
     auto ScheduleAfter(const std::chrono::nanoseconds& delay) -> AsyncTask<void> override;
 
+    auto IsRunning() const -> Bool;
+
     auto SetNativeHandle(PassKey<PlatformEventLoopContextWin>, HWND hwnd) -> void;
     auto MessageWindowProcedure(PassKey<PlatformEventLoopContextWin>, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> LRESULT;
 

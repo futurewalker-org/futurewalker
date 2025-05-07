@@ -8,6 +8,7 @@
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.ViewLayerManagerType.hpp"
+#include "Futurewalker.Application.InputMethodType.hpp" 
 
 #include "Futurewalker.Animation.RootAnimationTimerType.hpp"
 
@@ -55,6 +56,8 @@ protected:
 
 private:
     auto DispatchPointerEvent(Event& event) -> Async<void>;
+    auto DispatchKeyEvent(Event& event) -> Async<void>;
+    auto DispatchInputEvent(Event& event) -> Async<void>;
     auto GetPointerCaptureView(PointerId const id) -> Shared<View>;
     auto SetPointerCaptureView(PointerId const id, Shared<View> const& view) -> void;
     auto GetPointerOverView(PointerId const id) -> Shared<View>;
@@ -91,6 +94,7 @@ private:
     Shared<AttributeNode> _parentAttributeNode;
     Shared<AttributeNode> _attributeNode;
     Shared<ContainerView> _container;
+    Shared<InputMethod> _inputMethod;
     RootViewDrawInfo _drawInfo;
     RootViewLayoutInfo _layoutInfo;
     using PointerWeakViewMap = HashMap<PointerId, Weak<View>>;

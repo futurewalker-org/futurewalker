@@ -1,0 +1,390 @@
+﻿// SPDX-License-Identifier: MIT
+
+#include "Futurewalker.Application.Win.PlatformKeyboardLayoutWin.hpp"
+#include "Futurewalker.Application.Key.hpp"
+
+#include "Futurewalker.Base.Debug.hpp"
+
+#include "Futurewalker.Core.Win.PlatformStringFunctionWin.hpp"
+
+namespace FW_DETAIL_NS
+{
+namespace FW_EXPORT
+{
+namespace
+{
+auto IsControlChar(WCHAR c) -> Bool
+{
+    return c < 0x20;
+}
+}
+
+///
+/// @brief Constructor.
+///
+PlatformKeyboardLayoutWin::PlatformKeyboardLayoutWin()
+{
+    UpdateLayout();
+}
+
+///
+/// @brief Update mappings to current keyboard layout.
+///
+auto PlatformKeyboardLayoutWin::UpdateLayout() -> void
+{
+    auto const hkl = ::GetKeyboardLayout(0);
+    if (_hkl == hkl)
+    {
+        return;
+    }
+
+    _hkl = hkl;
+    _map = {};
+
+    auto mappedCount = SInt32(0);
+
+    for (auto i = 0; i <= std::to_underlying(PlatformModifierFlagsWin::All); ++i)
+    {
+        auto const modifiers = static_cast<PlatformModifierFlagsWin>(i);
+
+        _map[modifiers] = std::vector<std::wstring>(256);
+
+        auto keyboardState = std::array<BYTE, 256>();
+
+        static_assert((static_cast<PlatformModifierFlagsWin>(1) & PlatformModifierFlagsWin::Shift) != PlatformModifierFlagsWin::None);
+
+        if ((modifiers & PlatformModifierFlagsWin::Shift) != PlatformModifierFlagsWin::None)
+        {
+            keyboardState[VK_SHIFT] |= 0x80;
+        }
+
+        if ((modifiers & PlatformModifierFlagsWin::Control) != PlatformModifierFlagsWin::None)
+        {
+            keyboardState[VK_CONTROL] |= 0x80;
+        }
+
+        if ((modifiers & PlatformModifierFlagsWin::LAlt) != PlatformModifierFlagsWin::None)
+        {
+            keyboardState[VK_LMENU] |= 0x80;
+        }
+
+        if ((modifiers & PlatformModifierFlagsWin::RAlt) != PlatformModifierFlagsWin::None)
+        {
+            keyboardState[VK_RMENU] |= 0x80;
+        }
+
+        for (auto vkc = 0; vkc < 256; ++vkc)
+        {
+            // NOTE: ToUnicodeEx() sometimes returns non-printable ASCII control characters.
+            // We ignore them so conversions can fallback to search printable variant by dropping some modifiers.
+            auto chars = std::array<WCHAR, 5>();
+            auto const r = ::ToUnicodeEx(vkc, 0, keyboardState.data(), chars.data(), static_cast<int>(chars.size()), 0, _hkl);
+            if (r < 0)
+            {
+                // Dead key was written to chars.
+                // FIXME: Is it OK to assume length is 1?
+                if (!IsControlChar(chars[0]))
+                {
+                    _map[modifiers][vkc] = std::wstring(&chars[0], 1z);
+                }
+            }
+            else if (r > 0)
+            {
+                if (!IsControlChar(chars[0]))
+                {
+                    _map[modifiers][vkc] = std::wstring(&chars[0], static_cast<size_t>(r));
+                }
+            }
+
+            if (r != 0)
+            {
+                ++mappedCount;
+            }
+        }
+    }
+
+    FW_DEBUG_LOG_INFO("PlatformKeyboardLayoutWin: UpdateLayout() Mapped {} virtual key codes", static_cast<int>(mappedCount));
+}
+
+///
+/// @brief Get unmodified key name.
+///
+auto PlatformKeyboardLayoutWin::GetUnmodifiedKey(DWORD virtualKeyCode) const -> String
+{
+    if (auto const chars = MapVirtualKeyCodeToChars(virtualKeyCode, PlatformModifierFlagsWin::None))
+    {
+        if (auto namedKey = MapControlCharsToNamedKey(*chars))
+        {
+            return *namedKey;
+        }
+        return PlatformStringFunctionWin::WideToUtf8(*chars);
+    }
+    else
+    {
+        if (auto namedKey = MapVirtualKeyCodeToNamedKey(virtualKeyCode))
+        {
+            return *namedKey;
+        }
+    }
+    return Key::Unidentified;
+}
+
+///
+/// @brief Get key name and text value for key down event.
+///
+/// @note Consumes WM_(SYS)CHAR events in message loop.
+///
+auto PlatformKeyboardLayoutWin::GetKeyAndText(HWND hWnd, DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> std::pair<String, String>
+{
+    // Collect WM_CHAR and WM_DEACHAR posted by TranslateMessage().
+    auto chars = std::wstring();
+    {
+        auto msg = MSG();
+        while (::PeekMessageW(&msg, hWnd, WM_CHAR, WM_CHAR, PM_REMOVE))
+        {
+            if (msg.message == WM_CHAR)
+            {
+                FW_DEBUG_LOG_INFO("PlatformKeyboardLayoutWin WM_CHAR {:x}", msg.wParam);
+                chars.push_back(static_cast<WCHAR>(msg.wParam));
+            }
+        }
+        while (::PeekMessageW(&msg, hWnd, WM_SYSCHAR, WM_CHAR, PM_REMOVE))
+        {
+            if (msg.message == WM_SYSCHAR)
+            {
+                FW_DEBUG_LOG_INFO("PlatformKeyboardLayoutWin WM_SYSCHAR {:x}", msg.wParam);
+                chars.push_back(static_cast<WCHAR>(msg.wParam));
+            }
+        }
+    }
+    auto deadChars = std::wstring();
+    {
+        auto msg = MSG();
+        while (::PeekMessageW(&msg, hWnd, WM_DEADCHAR, WM_DEADCHAR, PM_REMOVE))
+        {
+            if (msg.message == WM_DEADCHAR)
+            {
+                FW_DEBUG_LOG_INFO("PlatformKeyboardLayoutWin WM_DEADCHAR {:x}", msg.wParam);
+                deadChars.push_back(static_cast<WCHAR>(msg.wParam));
+            }
+        }
+        while (::PeekMessageW(&msg, hWnd, WM_SYSDEADCHAR, WM_SYSDEADCHAR, PM_REMOVE))
+        {
+            if (msg.message == WM_SYSDEADCHAR)
+            {
+                FW_DEBUG_LOG_INFO("PlatformKeyboardLayoutWin WM_SYSDEADCHAR {:x}", msg.wParam);
+                deadChars.push_back(static_cast<WCHAR>(msg.wParam));
+            }
+        }
+    }
+
+    auto text = String();
+    if (!chars.empty() && !IsControlChar(chars[0])) 
+    {
+        text = PlatformStringFunctionWin::WideToUtf8(chars);
+    }
+    else if (!deadChars.empty() && !IsControlChar(deadChars[0]))
+    {
+        text = PlatformStringFunctionWin::WideToUtf8(deadChars);
+    }
+
+    if (auto namedKey = MapControlCharsToNamedKey(chars))
+    {
+        return {*namedKey, text};
+    }
+
+    // We have control char but could not map it to named key.
+    // Give up chars and search for printable variant by using VKC. This includes handling of 0x00.
+    if (chars.size() == 1 && IsControlChar(chars[0]))
+    {
+        chars.clear();
+    }
+
+    if (chars.empty())
+    {
+        if (deadChars.empty())
+        {
+            if (auto namedKey = MapVirtualKeyCodeToNamedKey(virtualKeyCode))
+            {
+                return {*namedKey, text};
+            }
+
+            // Search printable representation by dropping modifiers except Shift or AltGr.
+            // This behavior follows W3C UI Events KeyEvent specification.
+
+            auto const shift = PlatformModifierFlagsWin::Shift;
+            auto const altGr = PlatformModifierFlagsWin::Control & PlatformModifierFlagsWin::RAlt;
+
+            auto modifierCombinations = std::vector<PlatformModifierFlagsWin>();
+
+            modifierCombinations.push_back(modifiers);
+
+            if ((modifiers & (shift | altGr)) != PlatformModifierFlagsWin::None)
+            {
+                modifierCombinations.push_back(shift | altGr);
+            }
+
+            if ((modifiers & shift) != PlatformModifierFlagsWin::None)
+            {
+                modifierCombinations.push_back(shift);
+            }
+
+            if ((modifiers & altGr) != PlatformModifierFlagsWin::None)
+            {
+                modifierCombinations.push_back(altGr);
+            }
+
+            modifierCombinations.push_back(PlatformModifierFlagsWin::None);
+
+            for (auto const& fallbackModifiers : modifierCombinations)
+            {
+                if (auto const c = MapVirtualKeyCodeToChars(virtualKeyCode, fallbackModifiers))
+                {
+                    return {PlatformStringFunctionWin::WideToUtf8(*c), text};
+                }
+            }
+            return {Key::Unidentified, text};
+        }
+        else
+        {
+            return {Key::Dead, text};
+        }
+    }
+    else
+    {
+        return {PlatformStringFunctionWin::WideToUtf8(chars), text};
+    }
+}
+
+///
+/// @brief Get current state of modifier keys.
+///
+auto PlatformKeyboardLayoutWin::GetModifierState() const -> ModifierKeyFlags
+{
+    auto flags = ModifierKeyFlags::None;
+    auto testAndSet = [&](auto vkc, auto flag) {
+        if (::GetKeyState(vkc) & 0x8000)
+        {
+            flags |= flag;
+        }
+    };
+    testAndSet(VK_SHIFT, ModifierKeyFlags::Shift);
+    testAndSet(VK_CONTROL, ModifierKeyFlags::Control);
+    testAndSet(VK_MENU, ModifierKeyFlags::Alt);
+    return flags;
+}
+
+///
+/// @brief Get current state of modifier keys.
+///
+auto PlatformKeyboardLayoutWin::GetPlatformModifierState() const -> PlatformModifierFlagsWin
+{
+    auto flags = PlatformModifierFlagsWin::None;
+    auto testAndSet = [&](auto vkc, auto flag) {
+        if (::GetKeyState(vkc) & 0x8000)
+        {
+            flags |= flag;
+        }
+    };
+    testAndSet(VK_SHIFT, PlatformModifierFlagsWin::Shift);
+    testAndSet(VK_CONTROL, PlatformModifierFlagsWin::Control);
+    testAndSet(VK_LMENU, PlatformModifierFlagsWin::LAlt);
+    testAndSet(VK_RMENU, PlatformModifierFlagsWin::RAlt);
+    return flags;
+}
+
+///
+/// @brief Map virtual key code to chars.
+///
+auto PlatformKeyboardLayoutWin::MapVirtualKeyCodeToChars(DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> Optional<std::wstring>
+{
+    if (0 <= virtualKeyCode && virtualKeyCode < 256)
+    {
+        auto const it = _map.find(modifiers);
+        if (it != _map.end())
+        {
+            if (virtualKeyCode < std::ssize(it->second))
+            {
+                if (!it->second[virtualKeyCode].empty())
+                {
+                    return it->second[virtualKeyCode];
+                }
+            }
+            else
+            {
+                FW_DEBUG_ASSERT(false);
+            }
+        }
+    }
+    return {};
+}
+
+///
+/// @brief Map virtual key code to named key.
+///
+auto PlatformKeyboardLayoutWin::MapVirtualKeyCodeToNamedKey(DWORD virtualKeyCode) const -> Optional<String>
+{
+    switch (virtualKeyCode)
+    {
+        case VK_BACK:
+            return Key::Backspace;
+        case VK_TAB:
+            return Key::Tab;
+        case VK_RETURN:
+            return Key::Enter;
+        case VK_CAPITAL:
+            return Key::CapsLock;
+        case VK_SHIFT:
+        case VK_LSHIFT:
+        case VK_RSHIFT:
+            return Key::Shift;
+        case VK_CONTROL:
+        case VK_LCONTROL:
+        case VK_RCONTROL:
+            return Key::Control;
+        case VK_ESCAPE:
+            return Key::Escape;
+        case VK_LEFT:
+            return Key::ArrowLeft;
+        case VK_UP:
+            return Key::ArrowUp;
+        case VK_RIGHT:
+            return Key::ArrowRight;
+        case VK_DOWN:
+            return Key::ArrowDown;
+        case VK_INSERT:
+            return Key::Insert;
+        case VK_DELETE:
+            return Key::Delete;
+        case VK_PROCESSKEY:
+            return Key::Process;
+    }
+    return {};
+}
+
+///
+/// @brief Map control chars to named keys.
+///
+auto PlatformKeyboardLayoutWin::MapControlCharsToNamedKey(std::wstring_view chars) const -> Optional<String>
+{
+    if (chars.size() == 1)
+    {
+        // Map some control characters into named keys.
+        switch (chars[0])
+        {
+            case '\x08':
+                return Key::Backspace;
+            case '\x09':
+                return Key::Tab;
+            case '\x0D':
+                return Key::Enter;
+            case '\x1B':
+                return Key::Escape;
+            case '\x7F':
+                return Key::Delete;
+        }
+    }
+    return {};
+}
+}
+}

@@ -207,6 +207,14 @@ auto PlatformEventLoopWin::ScheduleAfter(const std::chrono::nanoseconds& delay) 
 }
 
 ///
+/// @brief Check if the event loop is running.
+///
+auto PlatformEventLoopWin::IsRunning() const -> Bool
+{
+    return _running.load();
+}
+
+///
 /// @brief Set native handle.
 ///
 /// @param hwnd Message window handle

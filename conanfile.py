@@ -12,6 +12,7 @@ class Futurewalker(ConanFile):
         self.requires("boost/[1.87.0]")
         self.requires("catch2/[3.8.0]")
         self.requires("fmt/[11.1.3]")
+        self.requires("icu/[74.2]")
 
         if self.settings.os == "Windows":
             self.requires("skia/[130.20241118.0]", options={"use_direct3d":True})

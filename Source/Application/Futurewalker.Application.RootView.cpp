@@ -13,6 +13,8 @@
 #include "Futurewalker.Application.ViewLayerManager.hpp"
 #include "Futurewalker.Application.PointerEvent.hpp"
 #include "Futurewalker.Application.FocusEvent.hpp"
+#include "Futurewalker.Application.KeyEvent.hpp"
+#include "Futurewalker.Application.InputEvent.hpp"
 
 #include "Futurewalker.Animation.RootAnimationTimer.hpp"
 
@@ -108,6 +110,7 @@ auto RootView::ReceiveEvent(Event& event) -> Async<Bool>
         _active = parameter.GetActive();
         _displayScale = parameter.GetDisplayScale();
         _backingScale = parameter.GetBackingScale();
+        _inputMethod = parameter.GetInputMethod();
 
         _drawInfo.SetParentLayer(parameter.GetParentLayer());
 
@@ -148,6 +151,21 @@ auto RootView::ReceiveEvent(Event& event) -> Async<Bool>
         auto& parameter = event.As<RootViewEvent::Pointer>();
         auto& sourceEvent = parameter.GetEvent();
         co_await DispatchPointerEvent(sourceEvent);
+        co_return true;
+    }
+    else if (event.Is<RootViewEvent::Key>())
+    {
+        auto& parameter = event.As<RootViewEvent::Key>();
+        auto& sourceEvent = parameter.GetEvent();
+        co_await DispatchKeyEvent(sourceEvent);
+        co_return true;
+    }
+    else if (event.Is<RootViewEvent::Input>())
+    {
+        auto& parameter = event.As<RootViewEvent::Input>();
+        auto& sourceEvent = parameter.GetEvent();
+        co_await DispatchInputEvent(sourceEvent);
+        co_return true;
     }
     else if (event.Is<ViewEvent::Attached>())
     {
@@ -417,6 +435,29 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
             PointerScope::DispatchRootView({}, *this, outParameter);
         }
     }
+}
+
+///
+/// @brief Dispatch key event.
+///
+auto RootView::DispatchKeyEvent(Event& event) -> Async<void>
+{
+    if (event.Is<KeyEvent>())
+    {
+        if (auto focus = _focusNode->GetFocusedNode())
+        {
+            co_await focus->SendEvent(event);
+        }
+    }
+}
+
+///
+/// @brief Dispatch input event.
+///
+auto RootView::DispatchInputEvent(Event& event) -> Async<void>
+{
+    (void)event;
+    co_return;
 }
 
 ///

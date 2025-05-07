@@ -18,7 +18,7 @@ PlatformMainThreadWin::PlatformMainThreadWin(Shared<PlatformEventLoopContextWin>
   : _eventLoopContext {eventLoopContext.As<PlatformEventLoopContextWin>()}
   , _tid {tid}
 {
-    FW_DEBUG_ASSERT(false);
+    FW_DEBUG_ASSERT(_eventLoopContext);
 }
 
 ///

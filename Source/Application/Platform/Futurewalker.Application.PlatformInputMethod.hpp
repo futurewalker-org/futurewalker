@@ -1,0 +1,26 @@
+﻿// SPDX-License-Identifier: MIT
+#pragma once
+
+#include "Futurewalker.Application.PlatformInputMethodType.hpp"
+#include "Futurewalker.Application.PlatformInputMethodEditable.hpp"
+
+#include "Futurewalker.Core.NonCopyable.hpp"
+#include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.Range.hpp"
+#include "Futurewalker.Core.Primitive.hpp"
+
+namespace FW_DETAIL_NS
+{
+namespace FW_EXPORT
+{
+///
+/// @brief Platform input context.
+///
+class PlatformInputMethod : NonCopyable
+{
+public:
+    virtual ~PlatformInputMethod() = 0;
+    virtual auto SetEditable(Shared<PlatformInputMethodEditable> const& editable) -> void = 0;
+};
+}
+}

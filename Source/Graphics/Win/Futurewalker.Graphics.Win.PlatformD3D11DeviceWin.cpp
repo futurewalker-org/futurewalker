@@ -37,9 +37,11 @@ auto PlatformD3D11DeviceWin::CreateDevice() -> Microsoft::WRL::ComPtr<ID3D11Devi
 
     if (auto device = CreateDeviceForType(D3D_DRIVER_TYPE_WARP))
     {
-        FW_DEBUG_PRINT("PlatformD3D11DeviceWin: Hardware device unavailable. Selecting WARP device");
+        FW_DEBUG_LOG_WARNING("PlatformD3D11DeviceWin: Hardware device unavailable. Selecting WARP device");
         return device;
     }
+
+    FW_DEBUG_LOG_ERROR("PlatformD3D11DeviceWin: Device unavailable");
 
     throw Exception(ErrorCode::Failure, "Failed to create D3D11 Device");
 }

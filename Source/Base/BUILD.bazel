@@ -6,4 +6,7 @@ fw_library(
     deps = [
         "//Source/Core",
     ],
+    linkopts_win = [
+        "/DEFAULTLIB:WindowsApp.lib",
+    ],
 )
