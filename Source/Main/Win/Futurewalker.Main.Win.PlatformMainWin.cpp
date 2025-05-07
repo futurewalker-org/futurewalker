@@ -1,6 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 
-#include "Futurewalker.Main.Win.Prelude.hpp"
+#include "Futurewalker.Main.Win.PlatformMainWin.hpp"
 #include "Futurewalker.Main.Win.PlatformExitCodeWin.hpp"
 #include "Futurewalker.Main.Main.hpp"
 
@@ -18,32 +18,27 @@
 #include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"
 #include "Futurewalker.Application.Win.PlatformViewLayercontextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformDrawableViewLayerContextWin.hpp"
+#include "Futurewalker.Application.Win.PlatformScreenContextWin.hpp"
 
 #include "Futurewalker.Graphics.Win.PlatformD3D11DeviceWin.hpp"
 #include "Futurewalker.Graphics.Win.PlatformD3D12DeviceWin.hpp"
 
 #include "Futurewalker.Async.AsyncFunction.hpp"
 
-///
-/// @brief Main entry point of GUI based windows application.
-///
-/// @param hInst A handle to the current instance of the application.
-/// @param hInstPrev A handle to the previous instance of the application. This parameter is always NULL.
-/// @param cmdline The command line for the application.
-/// @param cmdshow Controls how the window is to be shown.
-///
-/// @return
-///
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+// test
+#include "Futurewalker.Application.Win.PlatformInputMethodContextWin.hpp"
+
+namespace FW_DETAIL_NS
 {
-    (void)hPrevInstance; // Always NULL.
-    (void)lpCmdLine;     // Ignored. PlatformCommandLineWin handles arguments by itself.
-    (void)nCmdShow;      // Ignored.
-
-    using namespace FW_NS;
-
+///
+/// @brief Register platform singletons.
+///
+/// @param instanceHandle Instance handle
+///
+auto PlatformMainWin::Register(HINSTANCE instanceHandle) -> void
+{
     Locator::Register<PlatformEnvironmentContextWin>();
-    Locator::Register<PlatformInstanceHandleWin>(hInstance);
+    Locator::Register<PlatformInstanceHandleWin>(instanceHandle);
     Locator::Register<PlatformCommandLineWin>();
     Locator::Register<PlatformSystemInfoWin>();
     Locator::Register<PlatformDebugWin>();
@@ -56,12 +51,44 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
     Locator::Register<PlatformDCompositionDeviceWin>();
     Locator::Register<PlatformViewLayerContextWin>();
     Locator::Register<PlatformDrawableViewLayerContextWin>();
+    Locator::Register<PlatformScreenContextWin>();
+}
 
-    auto main = []() -> Async<ExitCode> { co_return co_await Main(); };
-
+///
+/// @brief Call Main().
+///
+auto PlatformMainWin::Main() -> ExitCode
+{
     // On Windows, we just synchronously call Main() without creating event loop.
     // This is because Application::Run() will create its own event loop there.
-    const auto exitCode = AsyncFunction::SpawnFn(main).Wait();
+    auto const main = []() -> Async<ExitCode> { co_return co_await FW_NS::Main(); };
+    if (auto const exitCode = AsyncFunction::SpawnFn(main).Wait())
+    {
+        return *exitCode;
+    }
+    return ExitCode::Failure;
+}
+}
 
-    return PlatformExitCodeWin::GetPlatformExitCode(exitCode ? *exitCode : ExitCode::Failure);
+///
+/// @brief Main entry point of GUI based windows application.
+///
+/// @param hInst A handle to the current instance of the application.
+/// @param hInstPrev A handle to the previous instance of the application. This parameter is always NULL.
+/// @param cmdline The command line for the application.
+/// @param cmdshow Controls how the window is to be shown.
+///
+/// @return
+///
+auto WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow) -> int
+{
+    (void)hPrevInstance; // Always NULL.
+    (void)lpCmdLine;     // Ignored. PlatformCommandLineWin handles arguments by itself.
+    (void)nCmdShow;      // Ignored.
+
+    using namespace FW_NS;
+
+    PlatformMainWin::Register(hInstance);
+
+    return PlatformExitCodeWin::GetPlatformExitCode(PlatformMainWin::Main());
 }
