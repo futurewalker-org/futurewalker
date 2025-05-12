@@ -1707,13 +1707,13 @@ auto View::DispatchEvent(Event& event, EventFunction const& dispatch) -> Async<B
 {
     if (event.Is<ViewEvent::Notify>())
     {
-        return DispatchNotifyEvent(event, dispatch);
+        co_return co_await DispatchNotifyEvent(event, dispatch);
     }
     else if (event.Is<ViewEventNotifyBubble>())
     {
-        return DispatchNotifyBubbleEvent(event, dispatch);
+        co_return co_await DispatchNotifyBubbleEvent(event, dispatch);
     }
-    return dispatch(event);
+    co_return co_await dispatch(event);
 }
 
 ///
