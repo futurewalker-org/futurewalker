@@ -54,7 +54,7 @@ auto NoOpScene::AddRoundRect(RoundRectParam param) -> void
     (void)param;
 }
 
-auto NoOpScene::AddShapedText(ShapedTextParam param) -> void
+auto NoOpScene::AddText(TextParam param) -> void
 {
     (void)param;
 }

@@ -187,8 +187,8 @@ auto SkiaScene::PushTranslate(TranslateParam param) -> void
 {
     if (_canvas)
     {
-        auto const dx = static_cast<SkScalar>(param.translate.GetDeltaX());
-        auto const dy = static_cast<SkScalar>(param.translate.GetDeltaY());
+        auto const dx = static_cast<SkScalar>(param.x);
+        auto const dy = static_cast<SkScalar>(param.y);
         _canvas->save();
         _canvas->translate(dx, dy);
     }
@@ -203,7 +203,7 @@ auto SkiaScene::PushRotate(RotateParam param) -> void
 {
     if (_canvas)
     {
-        auto const r = static_cast<SkScalar>(param.rotate);
+        auto const r = static_cast<SkScalar>(param.degree);
         _canvas->save();
         _canvas->rotate(r);
     }
@@ -291,9 +291,9 @@ auto SkiaScene::AddRoundRect(RoundRectParam param) -> void
 ///
 /// @param param
 ///
-auto SkiaScene::AddShapedText(ShapedTextParam param) -> void
+auto SkiaScene::AddText(TextParam param) -> void
 {
-    if (auto const skiaShapedText = param.shapedText.Maybe<SkiaShapedText>())
+    if (auto const skiaShapedText = param.shaped.Maybe<SkiaShapedText>())
     {
         if (auto const textBlob = skiaShapedText->GetTextBlob())
         {

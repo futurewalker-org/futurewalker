@@ -78,7 +78,7 @@ auto PlatformDrawableViewLayerWin::Draw(Shared<Graphics::DisplayList> const& dis
             if (_surface)
             {
                 return _surface->Draw([&](Graphics::Scene& scene) {
-                    scene.PushTranslate({.translate = offset});
+                    scene.PushTranslate({.x = offset.GetDeltaX(), .y = offset.GetDeltaY()});
                     scene.PushScale({.x = scale, .y = scale});
                     scene.AddDisplayList({.displayList = displayList});
                     scene.Pop({});

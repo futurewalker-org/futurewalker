@@ -46,12 +46,13 @@ public:
 
     struct TranslateParam
     {
-        Offset<Dp> translate;
+        Dp x = 0;
+        Dp y = 0;
     };
 
     struct RotateParam
     {
-        Degree rotate = 0;
+        Degree degree = 0;
     };
 
     struct ScaleParam
@@ -95,9 +96,10 @@ public:
         Dp strokeWidth = 1.0;
     };
 
-    struct ShapedTextParam
+    struct TextParam
     {
-        Shared<ShapedText> shapedText;
+        Shared<ShapedText> shaped;
+        RGBAColor color;
     };
 
     struct DisplayListParam
@@ -116,7 +118,7 @@ public:
     virtual auto AddLine(LineParam param) -> void = 0;
     virtual auto AddRect(RectParam param) -> void = 0;
     virtual auto AddRoundRect(RoundRectParam param) -> void = 0;
-    virtual auto AddShapedText(ShapedTextParam param) -> void = 0;
+    virtual auto AddText(TextParam param) -> void = 0;
     virtual auto AddDisplayList(DisplayListParam param) -> void = 0;
 };
 }
