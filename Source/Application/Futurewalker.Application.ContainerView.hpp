@@ -20,13 +20,13 @@ class ContainerView : public View
 {
 public:
     static auto Make() -> Shared<ContainerView>;
-    static auto MakeWithContent(Shared<View> content) -> Shared<ContainerView>;
+    static auto MakeWithContent(Shared<View> const& content) -> Shared<ContainerView>;
 
     ContainerView(PassKey<View> key);
 
     auto GetContent() -> Shared<View>;
     auto GetContent() const -> Shared<View const>;
-    auto SetContent(Shared<View> view) -> void;
+    auto SetContent(Shared<View> const& view) -> void;
 
     auto SetBackgroundColor(AttributeArg<RGBAColor> color) -> void;
 

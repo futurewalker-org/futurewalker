@@ -28,7 +28,7 @@ auto ContainerView::Make() -> Shared<ContainerView>
 ///
 /// @param[in] content Content of new instance.
 ///
-auto ContainerView::MakeWithContent(Shared<View> content) -> Shared<ContainerView>
+auto ContainerView::MakeWithContent(Shared<View> const& content) -> Shared<ContainerView>
 {
     auto view = Make();
     view->SetContent(content);
@@ -64,7 +64,7 @@ auto ContainerView::GetContent() const -> Shared<View const>
 ///
 /// @param[in] view New content view.
 ///
-auto ContainerView::SetContent(Shared<View> view) -> void
+auto ContainerView::SetContent(Shared<View> const& view) -> void
 {
     if (const auto content = GetContent())
     {
