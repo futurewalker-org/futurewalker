@@ -270,7 +270,7 @@ auto PlatformViewLayerWin::NotifyRootVisualChanged(Microsoft::WRL::ComPtr<IDComp
                     InternalUpdateOffset();
                     InternalUpdateOpacity();
                     InternalUpdateClip();
-                    parentVisual->AddVisual(_visual.Get(), FALSE, nullptr);
+                    parentVisual->AddVisual(_visual.Get(), TRUE, parent->GetPrevChildVisual(GetSelf()).Get());
                 }
             }
         }
@@ -356,6 +356,29 @@ auto PlatformViewLayerWin::GetBelowWindowHandleCore(Shared<PlatformViewLayerWin 
         }
     }
     return NULL;
+}
+
+///
+/// @brief Get visual of previous child layer.
+///
+auto PlatformViewLayerWin::GetPrevChildVisual(Shared<PlatformViewLayer> child) -> Microsoft::WRL::ComPtr<IDCompositionVisual3>
+{
+    for (auto it = _children.rbegin(); it != _children.rend(); ++it)
+    {
+        if (*it == child)
+        {
+            auto const next = std::next(it);
+            if (next != _children.rend())
+            {
+                if (auto const& layer = *next)
+                {
+                    return layer->InternalGetVisual();
+                }
+            }
+            return {};
+        }
+    }
+    return {};
 }
 
 ///

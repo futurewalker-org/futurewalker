@@ -67,6 +67,8 @@ private:
     auto GetBelowWindowHandle() const -> HWND;
     auto GetBelowWindowHandleCore(Shared<PlatformViewLayerWin const> child) const -> HWND;
 
+    auto GetPrevChildVisual(Shared<PlatformViewLayer> child) -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
+
 private:
     ///
     /// @brief Create visual node for this layer.
