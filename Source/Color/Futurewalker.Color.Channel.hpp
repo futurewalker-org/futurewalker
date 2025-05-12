@@ -171,7 +171,7 @@ template <class Tag>
 constexpr auto ChannelT<Tag>::SetU8(UInt8 const& v) noexcept -> void
 {
     auto const max = std::numeric_limits<UInt8::ValueType>::max();
-    _v = v / Float64(max);
+    _v = static_cast<UInt8::ValueType>(v) / float64_t(max);
 }
 
 ///
@@ -181,7 +181,7 @@ template <class Tag>
 constexpr auto ChannelT<Tag>::SetU16(UInt16 const& v) noexcept -> void
 {
     auto const max = std::numeric_limits<UInt16::ValueType>::max();
-    _v = v / Float64(max);
+    _v = static_cast<UInt16::ValueType>(v) / float64_t(max);
 }
 
 ///
@@ -191,7 +191,7 @@ template <class Tag>
 constexpr auto ChannelT<Tag>::SetU32(UInt32 const& v) noexcept -> void
 {
     auto const max = std::numeric_limits<UInt32::ValueType>::max();
-    _v = v / Float64(max);
+    _v = static_cast<UInt32::ValueType>(v) / float64_t(max);
 }
 
 ///
