@@ -26,7 +26,7 @@ TEST_CASE("AnimationTimer")
         auto requestCount = 0;
         auto r = RootAnimationTimer::Make(RootAnimationTimer::Delegate {
           .requestTick = [&] { ++requestCount; },
-          .getCurrentTime = [] { return MonotonicClock::GetCurrentTime(); },
+          .getCurrentTime = [] { return MonotonicClock::GetNow(); },
         });
         auto c = AnimationTimer::Make();
 
