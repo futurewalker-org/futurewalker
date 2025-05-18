@@ -49,10 +49,10 @@ public:
     static inline constexpr auto Pow(T const& base, T const& exponent) noexcept -> T;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr Bool IsNearlyEqual(T const& lhs, T const& rhs, T const& tolerance = 1e-6) noexcept;
+    static inline constexpr auto IsNearlyEqual(T const& lhs, T const& rhs, T const& tolerance = 1e-6) noexcept -> Bool;
 
     template <Concepts::FloatingPoint T>
-    static inline constexpr Bool IsNearlyEqualRelative(T const& lhs, T const& rhs, T const& precision = 1e-6, T const& minTolerance = 1e-6) noexcept;
+    static inline constexpr auto IsNearlyEqualRelative(T const& lhs, T const& rhs, T const& precision = 1e-6, T const& minTolerance = 1e-6) noexcept -> Bool;
 };
 
 ///
@@ -251,7 +251,7 @@ inline constexpr auto Math::Pow(T const& base, T const& exponent) noexcept -> T
 /// @return `true` if `lhs` and `rhs` are equal within `tolerance`, otherwise `false`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr Bool Math::IsNearlyEqual(T const& lhs, T const& rhs, T const& tolerance) noexcept
+inline constexpr auto Math::IsNearlyEqual(T const& lhs, T const& rhs, T const& tolerance) noexcept -> Bool
 {
     if (rhs == lhs)
     {
@@ -277,7 +277,7 @@ inline constexpr Bool Math::IsNearlyEqual(T const& lhs, T const& rhs, T const& t
 /// @return `true` if `lhs` and `rhs` are equal within relative `precision`, otherwise `false`.
 ///
 template <Concepts::FloatingPoint T>
-inline constexpr Bool Math::IsNearlyEqualRelative(T const& lhs, T const& rhs, T const& precision, T const& minTolerance) noexcept
+inline constexpr auto Math::IsNearlyEqualRelative(T const& lhs, T const& rhs, T const& precision, T const& minTolerance) noexcept -> Bool
 {
     auto const l = Abs(lhs);
     auto const r = Abs(rhs);
