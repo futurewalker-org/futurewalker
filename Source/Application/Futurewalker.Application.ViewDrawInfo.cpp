@@ -306,6 +306,7 @@ auto ViewDrawInfo::FindSubLayerAttachPosition(ViewLayer& layer, ViewLayerId cons
     {
         if (it->layer)
         {
+            FW_DEBUG_ASSERT(layer.GetChildIndex(it->layer));
             return it->layer;
         }
         FW_DEBUG_ASSERT(false);

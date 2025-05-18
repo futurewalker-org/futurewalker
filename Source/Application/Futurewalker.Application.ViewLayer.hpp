@@ -51,6 +51,7 @@ public:
     auto AddChild(Shared<ViewLayer> layer, Pointer<ViewLayer const> after) -> void;
     auto RemoveChild(Shared<ViewLayer> layer) -> void;
 
+    auto GetChildCount() const -> SInt64;
     auto GetChildIndex(ReferenceArg<ViewLayer const> layer) const -> Optional<SInt64>;
     auto GetChildAt(SInt64 const index) -> Shared<ViewLayer>;
 

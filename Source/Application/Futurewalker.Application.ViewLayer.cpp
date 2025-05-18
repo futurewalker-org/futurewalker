@@ -80,6 +80,14 @@ auto ViewLayer::RemoveChild(Shared<ViewLayer> layer) -> void
 }
 
 ///
+/// @brief Get number of children.
+///
+auto ViewLayer::GetChildCount() const -> SInt64
+{
+    return std::ssize(_children);
+}
+
+///
 /// @brief Get index of child layer.
 ///
 /// @param layer
