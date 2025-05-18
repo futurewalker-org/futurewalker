@@ -68,5 +68,15 @@ public:
 private:
     T _value;
 };
+
+///
+/// @brief Boolean constant of true.
+///
+inline constexpr auto True = Bool(true);
+
+///
+/// @brief Boolean constant of false.
+///
+inline constexpr auto False = Bool(false);
 }
 }

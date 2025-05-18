@@ -543,7 +543,7 @@ auto AttributeNode::ResolveValueCore(StaticAttributeBaseRef reference, SInt64 co
 ///
 auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
 {
-    Bool valueChanged = false;
+    auto valueChanged = False;
 
     slot.DetachFromValueDependentSlot();
 
