@@ -3,3 +3,4 @@ full_deploy/
 MODULE.bazel.lock
 .vscode
 .clwb
+.aswb
