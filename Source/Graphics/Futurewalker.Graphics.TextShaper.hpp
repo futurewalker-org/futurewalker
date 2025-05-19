@@ -3,6 +3,10 @@
 
 #include "Futurewalker.Graphics.Prelude.hpp"
 #include "Futurewalker.Graphics.ShapedTextType.hpp"
+#include "Futurewalker.Graphics.FontSize.hpp"
+#include "Futurewalker.Graphics.Typeface.hpp"
+
+#include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Memory.hpp"
@@ -22,7 +26,7 @@ public:
 
 public:
     virtual ~TextShaper() = 0;
-    virtual auto Shape(String const& text) -> Shared<ShapedText> = 0;
+    virtual auto Shape(String const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> Shared<ShapedText> = 0;
 };
 }
 }

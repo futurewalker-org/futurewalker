@@ -12,13 +12,10 @@
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
-///
-/// @brief
-///
-class SkiaDisplayList : public DisplayList
+class SkiaDisplayList final : public DisplayList
 {
 public:
-    explicit SkiaDisplayList(const sk_sp<SkPicture>& picture);
+    explicit SkiaDisplayList(sk_sp<SkPicture> const& picture);
 
     auto GetBounds() const -> Rect<Dp> override;
 
