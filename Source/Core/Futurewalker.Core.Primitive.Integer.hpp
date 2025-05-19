@@ -21,7 +21,7 @@ namespace FW_EXPORT
 /// @brief Safe wrapper for builtin integer types.
 ///
 template <Concepts::Integral T, class Tag>
-class Integer final
+class Integer
   : boost::integer_arithmetic<Integer<T, Tag>,
     boost::bitwise<Integer<T, Tag>,
     boost::unit_steppable<Integer<T, Tag>

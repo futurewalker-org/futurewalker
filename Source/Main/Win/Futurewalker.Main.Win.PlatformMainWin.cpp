@@ -22,6 +22,7 @@
 
 #include "Futurewalker.Graphics.Win.PlatformD3D11DeviceWin.hpp"
 #include "Futurewalker.Graphics.Win.PlatformD3D12DeviceWin.hpp"
+#include "Futurewalker.Graphics.Win.PlatformSkiaFontManagerWin.hpp"
 
 #include "Futurewalker.Async.AsyncFunction.hpp"
 
@@ -52,6 +53,7 @@ auto PlatformMainWin::Register(HINSTANCE instanceHandle) -> void
     Locator::Register<PlatformViewLayerContextWin>();
     Locator::Register<PlatformDrawableViewLayerContextWin>();
     Locator::Register<PlatformScreenContextWin>();
+    Locator::Register<Graphics::PlatformSkiaFontManagerWin>();
 }
 
 ///

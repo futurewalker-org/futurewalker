@@ -2,6 +2,8 @@
 
 #include "Futurewalker.Application.ApplicationContext.hpp"
 
+#include "Futurewalker.Graphics.FontManager.hpp"
+
 #include "Futurewalker.Attribute.AttributeNode.hpp"
 
 namespace FW_DETAIL_NS
@@ -9,7 +11,8 @@ namespace FW_DETAIL_NS
 ///
 /// @brief
 ///
-ApplicationContext::ApplicationContext()
+ApplicationContext::ApplicationContext(Shared<Graphics::FontManager> const& fontManager)
+  : _fontManager {fontManager}
 {
     _attributeNode = AttributeNode::Make();
 }
@@ -25,7 +28,7 @@ auto ApplicationContext::GetAttributeNode() -> AttributeNode&
 ///
 /// @brief
 ///
-auto ApplicationContext::GetAttributeNode() const ->  AttributeNode const&
+auto ApplicationContext::GetAttributeNode() const -> AttributeNode const&
 {
     return *_attributeNode;
 }
@@ -35,6 +38,7 @@ auto ApplicationContext::GetAttributeNode() const ->  AttributeNode const&
 ///
 auto Locator::Resolver<ApplicationContext>::Resolve() -> Shared<ApplicationContext>
 {
-    return Shared<ApplicationContext>::Make();
+    auto const fontManager = Locator::ResolveWithDefault<Graphics::FontManager>();
+    return Shared<ApplicationContext>::Make(fontManager);
 }
 }

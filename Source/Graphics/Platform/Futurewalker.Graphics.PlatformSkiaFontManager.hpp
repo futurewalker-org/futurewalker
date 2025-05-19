@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: MIT
+#pragma once
+
+#include "Futurewalker.Graphics.PlatformSkiaFontManagerType.hpp"
+#include "Futurewalker.Graphics.FontStyle.hpp"
+#include "Futurewalker.Graphics.TypefaceType.hpp"
+#include "Futurewalker.Graphics.FontKind.hpp"
+
+#include "Futurewalker.Core.NonCopyable.hpp"
+#include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.String.hpp"
+
+#include <include/core/SkFontMgr.h>
+
+namespace FW_GRAPHICS_DETAIL_NS
+{
+namespace FW_EXPORT
+{
+///
+/// @brief
+///
+class PlatformSkiaFontManager : NonCopyable
+{
+public:
+    virtual ~PlatformSkiaFontManager() = 0;
+    virtual auto FindTypefaceByFamilyNameAndStyle(String const& familyName, FontStyle const& style) -> Shared<Typeface> = 0;
+    virtual auto GetSkFontMgr() -> sk_sp<SkFontMgr> = 0;
+};
+}
+}
