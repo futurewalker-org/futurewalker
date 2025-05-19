@@ -18,7 +18,7 @@ class TestPlatformDrawableViewLayerControl : public PlatformDrawableViewLayerCon
         (void)displayList;
         (void)offset;
         (void)scale;
-        FW_DEBUG_PRINT("TestPlatformDrawableViewLayerControl::Draw() called");
+        FW_DEBUG_LOG_INFO("TestPlatformDrawableViewLayerControl::Draw() called");
         return true;
     }
 };
