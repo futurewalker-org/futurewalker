@@ -9,6 +9,7 @@ fw_library(
         "@boost//:boost-nowide",
     ],
     linkopts_win = [
-        "/DEFAULTLIB:shell32.lib" # boost-nowide
+        "/DEFAULTLIB:shell32.lib", # boost-nowide
+        "/SUBSYSTEM:WINDOWS",
     ],
 )
