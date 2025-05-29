@@ -96,8 +96,6 @@ auto ViewLayoutFunction::AlignToPixelGridByCeil(Dp const length, View const& vie
 
 auto ViewLayoutFunction::AlignToPixelGridByCeil(Point<Dp> const& point, View const& view) -> Point<Dp>
 {
-    auto const displayScale = view.GetDisplayScale();
-    auto const backingScale = view.GetBackingScale();
     auto const x = AlignToPixelGridByCeil(point.GetX(), view);
     auto const y = AlignToPixelGridByCeil(point.GetY(), view);
     return Point<Dp>(x, y);
@@ -105,8 +103,6 @@ auto ViewLayoutFunction::AlignToPixelGridByCeil(Point<Dp> const& point, View con
 
 auto ViewLayoutFunction::AlignToPixelGridByCeil(Size<Dp> const& size, View const& view) -> Size<Dp>
 {
-    auto const displayScale = view.GetDisplayScale();
-    auto const backingScale = view.GetBackingScale();
     auto const w = AlignToPixelGridByCeil(size.GetWidth(), view);
     auto const h = AlignToPixelGridByCeil(size.GetHeight(), view);
     return Size<Dp>(w, h);

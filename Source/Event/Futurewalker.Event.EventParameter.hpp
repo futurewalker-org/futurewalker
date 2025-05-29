@@ -29,7 +29,7 @@ public:
     template <class Self, class T>
     auto As(this Self& self) -> T&
     {
-        return DynamicCastFunction::As<T>(*this);
+        return DynamicCastFunction::As<T>(self);
     }
 };
 }

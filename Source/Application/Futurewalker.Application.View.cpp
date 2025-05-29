@@ -850,7 +850,7 @@ auto View::EnterPointerScope(PassKey<PointerScope> key, PointerParameter const& 
         }
 
         auto dispatch = [&](auto& view, auto const& parameter, auto const type) {
-            auto const offset = view.GetFrameRect().GetPosition().As<Offset>();
+            auto const offset = view.GetFrameRect().GetPosition().template As<Offset>();
             auto cancelEvent = parameter.GetPointerEvent();
             cancelEvent.SetEventType(type);
             cancelEvent.SetPosition(cancelEvent.GetPosition() - offset);

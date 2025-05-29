@@ -69,4 +69,4 @@ inline constexpr auto operator~(E const e) noexcept
     return static_cast<E>(~std::to_underlying(e));
 }
 
-#define FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(E) template <> struct FW_NS::EnumClassFlagTraits<E> : std::true_type {}
+#define FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(E) template <> struct EnumClassFlagTraits<E> : std::true_type {}

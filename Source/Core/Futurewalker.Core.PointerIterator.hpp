@@ -14,7 +14,7 @@ namespace FW_EXPORT
 /// @brief An iterator type for pointers which iterate over contiguous buffer.
 ///
 template <class ValueType, class TagType>
-class PointerIterator : public boost::stl_interfaces::iterator_interface<std::contiguous_iterator_tag, ValueType>
+class PointerIterator : public boost::stl_interfaces::v2::iterator_interface<PointerIterator<ValueType, TagType>, std::contiguous_iterator_tag, ValueType>
 {
     ValueType* _it = nullptr;
 
@@ -78,7 +78,7 @@ public:
     ///
     /// @brief operator++(int)
     ///
-    using boost::stl_interfaces::iterator_interface<std::contiguous_iterator_tag, ValueType>::operator++;
+    using boost::stl_interfaces::v2::iterator_interface<PointerIterator<ValueType, TagType>, std::contiguous_iterator_tag, ValueType>::operator++;
 };
 
 ///

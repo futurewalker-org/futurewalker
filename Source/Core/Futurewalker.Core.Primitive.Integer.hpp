@@ -6,7 +6,6 @@
 #include "Futurewalker.Core.Concepts.hpp"
 #include "Futurewalker.Core.Utility.hpp"
 
-#include <boost/operators.hpp>
 #include <boost/functional/hash.hpp>
 
 #include <boost/safe_numerics/checked_integer.hpp>
@@ -22,10 +21,6 @@ namespace FW_EXPORT
 ///
 template <Concepts::Integral T, class Tag>
 class Integer
-  : boost::integer_arithmetic<Integer<T, Tag>,
-    boost::bitwise<Integer<T, Tag>,
-    boost::unit_steppable<Integer<T, Tag>
-    >>>
 {
     template <Concepts::Integral T_, class Tag_>
     friend class Integer;
@@ -214,6 +209,76 @@ public:
     inline constexpr auto operator+() const noexcept -> Integer
     {
         return Integer(+_value);
+    }
+
+    friend inline constexpr auto operator+(Integer const& l, Integer const& r) noexcept
+    {
+        auto tmp = l;
+        tmp+= r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator-(Integer const& l, Integer const& r) noexcept
+    {
+        auto tmp = l;
+        tmp-= r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator*(Integer const& l, Integer const& r) noexcept
+    {
+        auto tmp = l;
+        tmp*= r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator/(Integer const& l, Integer const& r) noexcept
+    {
+        auto tmp = l;
+        tmp/= r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator%(Integer const& l, Integer const& r) noexcept
+    {
+        auto tmp = l;
+        tmp%= r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator&(Integer const& l, Integer const& r) noexcept
+    {
+        auto tmp = l;
+        tmp&= r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator|(Integer const& l, Integer const& r) noexcept
+    {
+        auto tmp = l;
+        tmp|= r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator^(Integer const& l, Integer const& r) noexcept
+    {
+        auto tmp = l;
+        tmp^= r;
+        return tmp;
+    }
+
+    friend inline constexpr Integer operator++(Integer& l, int) noexcept
+    {
+        auto tmp = l;
+        ++l;
+        return tmp;
+    }
+
+    friend inline constexpr Integer operator--(Integer& l, int) noexcept
+    {
+        auto tmp = l;
+        --l;
+        return tmp;
     }
 
     friend inline constexpr auto operator<=>(Integer const& l, Integer const& r) noexcept

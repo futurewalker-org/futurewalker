@@ -16,10 +16,7 @@ namespace FW_EXPORT
 /// @tparam Tag Tag type
 ///
 template <Concepts::FloatingPoint T, class Tag>
-// clang-format off
 class Offset2<Float<T, Tag>>
-  : boost::additive<Offset2<Float<T, Tag>>>
-// clang-format on
 {
 public:
     ///
@@ -207,6 +204,20 @@ public:
     inline constexpr auto operator+() const noexcept -> Offset2
     {
         return Offset2(+_dx, +_dy);
+    }
+
+    friend inline constexpr auto operator+(Offset2 const& l, Offset2 const& r) noexcept
+    {
+        auto tmp = l;
+        tmp += r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator-(Offset2 const& l, Offset2 const& r) noexcept
+    {
+        auto tmp = l;
+        tmp -= r;
+        return tmp;
     }
 
     ///

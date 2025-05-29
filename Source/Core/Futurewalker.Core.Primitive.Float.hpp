@@ -8,8 +8,6 @@
 #include "Futurewalker.Core.Math.hpp"
 #include "Futurewalker.Core.Utility.hpp" 
 
-#include <boost/operators.hpp>
-
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -18,14 +16,7 @@ namespace FW_EXPORT
 /// @brief Safe wrapper for builtin float types.
 ///
 template <Concepts::FloatingPoint T, class Tag>
-// clang-format off
-class Float final
-  : boost::additive<Float<T, Tag>,
-    boost::multiplicative<Float<T, Tag>,
-    boost::incrementable<Float<T, Tag>,
-    boost::decrementable<Float<T, Tag>
-    >>>>
-// clang-format on
+class Float
 {
     template <Concepts::FloatingPoint T_, class Tag_>
     friend class Float;
@@ -337,6 +328,48 @@ public:
     inline constexpr auto operator+() const noexcept -> Float
     {
         return Float(+_value);
+    }
+
+    friend inline constexpr auto operator+(Float const& l, Float const& r) noexcept
+    {
+        auto tmp = l;
+        tmp+= r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator-(Float const& l, Float const& r) noexcept
+    {
+        auto tmp = l;
+        tmp-= r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator*(Float const& l, Float const& r) noexcept
+    {
+        auto tmp = l;
+        tmp*= r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator/(Float const& l, Float const& r) noexcept
+    {
+        auto tmp = l;
+        tmp/= r;
+        return tmp;
+    }
+
+    friend inline constexpr Float operator++(Float& l, int) noexcept
+    {
+        auto tmp = l;
+        ++l;
+        return tmp;
+    }
+
+    friend inline constexpr Float operator--(Float& l, int) noexcept
+    {
+        auto tmp = l;
+        --l;
+        return tmp;
     }
 
     friend inline constexpr auto operator<=>(Float const& l, Float const& r) noexcept

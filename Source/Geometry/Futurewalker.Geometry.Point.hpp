@@ -17,12 +17,7 @@ namespace FW_EXPORT
 /// @tparam Tag Tag type.
 ///
 template <Concepts::FloatingPoint T, class Tag>
-// clang-format off
 class Point2<Float<T, Tag>>
-  : boost::addable<Point2<Float<T, Tag>>, Offset2<Float<T, Tag>>,
-    boost::subtractable<Point2<Float<T, Tag>>, Offset2<Float<T, Tag>>
-  >>
-// clang-format on
 {
 public:
     ///
@@ -247,6 +242,20 @@ public:
         _x -= off.GetDeltaX();
         _y -= off.GetDeltaY();
         return *this;
+    }
+
+    friend inline constexpr auto operator+(Point2 const& l, Offset2<ValueType> const& r) noexcept
+    {
+        auto tmp = l;
+        tmp += r;
+        return tmp;
+    }
+
+    friend inline constexpr auto operator-(Point2 const& l, Offset2<ValueType> const& r) noexcept
+    {
+        auto tmp = l;
+        tmp -= r;
+        return tmp;
     }
 
     ///
