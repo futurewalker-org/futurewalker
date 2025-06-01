@@ -3,8 +3,6 @@
 #include "Futurewalker.Application.Win.PlatformWindowWin.hpp"
 #include "Futurewalker.Application.Win.PlatformWindowContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformRootViewLayerWin.hpp"
-#include "Futurewalker.Application.Win.PlatformEventLoopContextWin.hpp"
-#include "Futurewalker.Application.Win.PlatformEventLoopWin.hpp"
 #include "Futurewalker.Application.Win.PlatformKeyboardLayoutWin.hpp"
 #include "Futurewalker.Application.PlatformWindowEvent.hpp"
 #include "Futurewalker.Application.PlatformFrameEvent.hpp"
@@ -16,12 +14,15 @@
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodWin.hpp"
+#include "Futurewalker.Application.MainThread.hpp"
 #include "Futurewalker.Application.Key.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 #include "Futurewalker.Base.Debug.hpp"
 
 #include "Futurewalker.Unit.hpp"
+
+#include "Futurewalker.Async.AsyncFunction.hpp"
 
 #include "Futurewalker.Core.MonotonicClock.hpp"
 #include "Futurewalker.Core.StringFunction.hpp"
@@ -505,25 +506,10 @@ auto PlatformWindowWin::RequestFrame() -> void
         if (const auto context = GetContext())
         {
             context->RequestFrame(GetSelf(), [](Shared<void> data, PlatformVsyncFrameInfo const& frameInfo) {
-                const auto window = data.Assume<PlatformWindowWin>();
-                if (!window)
+                if (const auto window = data.Assume<PlatformWindowWin>())
                 {
-                    return;
+                    window->HandleFrameSwap(frameInfo.targetTimestamp);
                 }
-
-                const auto eventLoopContext = Locator::GetInstance<PlatformEventLoopContext>();
-                if (!eventLoopContext)
-                {
-                    return;
-                }
-
-                const auto eventLoop = eventLoopContext->GetEventLoopForThread().As<PlatformEventLoopWin>();
-                if (!eventLoop)
-                {
-                    return;
-                }
-
-                window->HandleFrameSwap(frameInfo.targetTimestamp);
             });
         }
     }
@@ -1865,14 +1851,16 @@ void PlatformWindowWin::PointerUpdate(WPARAM const wParam)
 ///
 auto PlatformWindowWin::SendWindowEventDetached(Event const& event) -> void
 {
-    if (const auto eventLoopContext = Locator::GetInstance<PlatformEventLoopContext>())
-    {
-        if (const auto eventLoop = eventLoopContext->GetEventLoopForThread().As<PlatformEventLoopWin>())
+    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
+        try
         {
-            const auto self = GetSelf();
-            eventLoop->Spawn(AsyncFunction::Fn([self, e = event] mutable -> Lazy<void> { co_await self->SendWindowEvent(e); }), false);
+            co_await self->SendWindowEvent(e);
         }
-    }
+        catch (...)
+        {
+            FW_DEBUG_ASSERT(false);
+        }
+    });
 }
 
 ///
@@ -1880,14 +1868,16 @@ auto PlatformWindowWin::SendWindowEventDetached(Event const& event) -> void
 ///
 auto PlatformWindowWin::SendFrameEventDetached(Event const& event) -> void
 {
-    if (auto eventLoopContext = Locator::GetInstance<PlatformEventLoopContext>())
-    {
-        if (auto eventLoop = eventLoopContext->GetEventLoopForThread().As<PlatformEventLoopWin>())
+    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
+        try
         {
-            const auto self = GetSelf();
-            eventLoop->Spawn(AsyncFunction::Fn([self, e = event] mutable -> Lazy<void> { co_await self->SendFrameEvent(e); }), false);
+            co_await self->SendFrameEvent(e);
         }
-    }
+        catch (...)
+        {
+            FW_DEBUG_ASSERT(false);
+        }
+    });
 }
 
 ///
@@ -1895,14 +1885,16 @@ auto PlatformWindowWin::SendFrameEventDetached(Event const& event) -> void
 ///
 auto PlatformWindowWin::SendPointerEventDetached(Event const& event) -> void
 {
-    if (const auto eventLoopContext = Locator::GetInstance<PlatformEventLoopContext>())
-    {
-        if (const auto eventLoop = eventLoopContext->GetEventLoopForThread().As<PlatformEventLoopWin>())
+    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
+        try
         {
-            const auto self = GetSelf();
-            eventLoop->Spawn(AsyncFunction::Fn([self, e = event] mutable -> Lazy<void> { co_await self->SendPointerEvent(e); }), false);
+            co_await self->SendPointerEvent(e);
         }
-    }
+        catch (...)
+        {
+            FW_DEBUG_ASSERT(false);
+        }
+    });
 }
 
 ///
@@ -1910,14 +1902,16 @@ auto PlatformWindowWin::SendPointerEventDetached(Event const& event) -> void
 ///
 auto PlatformWindowWin::SendKeyEventDetached(Event const& event) -> void
 {
-    if (const auto eventLoopContext = Locator::GetInstance<PlatformEventLoopContext>())
-    {
-        if (const auto eventLoop = eventLoopContext->GetEventLoopForThread().As<PlatformEventLoopWin>())
+    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
+        try
         {
-            const auto self = GetSelf();
-            eventLoop->Spawn(AsyncFunction::Fn([self, e = event] mutable -> Lazy<void> { co_await self->SendKeyEvent(e); }), false);
+            co_await self->SendKeyEvent(e);
         }
-    }
+        catch (...)
+        {
+            FW_DEBUG_ASSERT(false);
+        }
+    });
 }
 
 ///
@@ -1925,14 +1919,16 @@ auto PlatformWindowWin::SendKeyEventDetached(Event const& event) -> void
 ///
 auto PlatformWindowWin::SendInputEventDetached(Event const& event) -> void
 {
-    if (const auto eventLoopContext = Locator::GetInstance<PlatformEventLoopContext>())
-    {
-        if (const auto eventLoop = eventLoopContext->GetEventLoopForThread().As<PlatformEventLoopWin>())
+    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
+        try
         {
-            const auto self = GetSelf();
-            eventLoop->Spawn(AsyncFunction::Fn([self, e = event] mutable -> Lazy<void> { co_await self->SendInputEvent(e); }), false);
+            co_await self->SendInputEvent(e);
         }
-    }
+        catch (...)
+        {
+            FW_DEBUG_ASSERT(false);
+        }
+    });
 }
 
 ///
@@ -1940,28 +1936,23 @@ auto PlatformWindowWin::SendInputEventDetached(Event const& event) -> void
 ///
 auto PlatformWindowWin::PostWindowEvent(Event const& event) -> void
 {
-    if (const auto eventLoopContext = Locator::GetInstance<PlatformEventLoopContext>())
-    {
-        if (const auto eventLoop = eventLoopContext->GetEventLoopForThread().As<PlatformEventLoopWin>())
+    auto weakSelf = Weak(GetSelf());
+    AsyncFunction::SpawnFn([=]() -> Task<void> {
+        try
         {
-            auto weakSelf = Weak(GetSelf());
-            AsyncFunction::SpawnFn([=]() -> Task<void> {
-                try
-                {
-                    co_await eventLoop->Schedule();
+            co_await MainThread::Schedule();
 
-                    if (const auto self = weakSelf.Lock())
-                    {
-                        auto e = event;
-                        co_await self->SendWindowEvent(e);
-                    }
-                }
-                catch (...)
-                {
-                }
-            });
+            if (const auto self = weakSelf.Lock())
+            {
+                auto e = event;
+                co_await self->SendWindowEvent(e);
+            }
         }
-    }
+        catch (...)
+        {
+            FW_DEBUG_ASSERT(false);
+        }
+    });
 }
 
 ///

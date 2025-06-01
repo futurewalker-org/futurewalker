@@ -3,7 +3,6 @@
 
 #include "Futurewalker.Application.Win.Prelude.hpp"
 #include "Futurewalker.Application.PlatformApplicationContext.hpp"
-#include "Futurewalker.Application.PlatformEventLoopContext.hpp"
 #include "Futurewalker.Application.PlatformScreenContext.hpp"
 #include "Futurewalker.Application.PlatformWindowContext.hpp"
 #include "Futurewalker.Application.PlatformMainThread.hpp"
@@ -11,6 +10,7 @@
 
 #include "Futurewalker.Base.Locator.hpp"
 #include "Futurewalker.Base.Win.PlatformThreadRuntimeContextWin.hpp"
+#include "Futurewalker.Base.Win.PlatformInstanceHandleWin.hpp" 
 
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.PassKey.hpp"
@@ -26,7 +26,7 @@ class PlatformApplicationContextWin : public PlatformApplicationContext
 {
 public:
     static auto Make(
-      Shared<PlatformEventLoopContext> eventLoopContext,
+      Shared<PlatformInstanceHandleWin> instanceHandle,
       Shared<PlatformThreadRuntimeContextWin> mainThreadRuntimeContext,
       Shared<PlatformMainThread> mainThread,
       Shared<PlatformScreenContext> screenContext,
@@ -34,24 +34,33 @@ public:
 
     PlatformApplicationContextWin(
       PassKey<PlatformApplicationContextWin>,
-      Shared<PlatformEventLoopContext> eventLoopContext,
+      Shared<PlatformInstanceHandleWin> instanceHandle,
       Shared<PlatformThreadRuntimeContextWin> mainThreadRuntimeContext,
       Shared<PlatformMainThread> mainThread,
       Shared<PlatformScreenContext> screenContext,
       Shared<PlatformWindowContext> windowContext);
 
+    ~PlatformApplicationContextWin() override;
+
     auto MakePlatformApplication(PlatformApplication::Delegate delegate) -> Shared<PlatformApplication> override;
 
     auto GetCurrentApplication() -> Shared<PlatformApplicationWin>;
 
+    auto CreateMessageWindow(PassKey<PlatformApplicationWin>, PlatformApplicationWin& application) -> HWND;
+    auto DestroyMessageWindow(PassKey<PlatformApplicationWin>, HWND hwnd) -> void;
+
+private:
+    static auto CALLBACK MessageWindowProcedure(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
+
 private:
     Weak<PlatformApplicationContextWin> _self;
-    Shared<PlatformEventLoopContext> _eventLoopContext;
+    Shared<PlatformInstanceHandleWin> _instanceHandle;
     Shared<PlatformThreadRuntimeContextWin> _mainThreadRuntimeContext;
     Shared<PlatformMainThread> _mainThread;
     Shared<PlatformScreenContext> _screenContext;
     Shared<PlatformWindowContext> _windowContext;
     Weak<PlatformApplicationWin> _currentApplication;
+    ATOM _classAtom = 0;
 };
 
 ///

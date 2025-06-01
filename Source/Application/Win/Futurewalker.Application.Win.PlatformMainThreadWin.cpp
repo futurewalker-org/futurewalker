@@ -1,8 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 
 #include "Futurewalker.Application.Win.PlatformMainThreadWin.hpp"
-#include "Futurewalker.Application.Win.PlatformEventLoopContextWin.hpp"
-#include "Futurewalker.Application.Win.PlatformEventLoopWin.hpp"
+#include "Futurewalker.Application.Win.PlatformApplicationContextWin.hpp"
+#include "Futurewalker.Application.Win.PlatformApplicationWin.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 #include "Futurewalker.Base.Debug.hpp"
@@ -14,11 +14,8 @@ namespace FW_DETAIL_NS
 ///
 /// @brief
 ///
-PlatformMainThreadWin::PlatformMainThreadWin(Shared<PlatformEventLoopContextWin> eventLoopContext, const std::thread::id tid)
-  : _eventLoopContext {eventLoopContext.As<PlatformEventLoopContextWin>()}
-  , _tid {tid}
+PlatformMainThreadWin::PlatformMainThreadWin()
 {
-    FW_DEBUG_ASSERT(_eventLoopContext);
 }
 
 ///
@@ -26,7 +23,14 @@ PlatformMainThreadWin::PlatformMainThreadWin(Shared<PlatformEventLoopContextWin>
 ///
 auto PlatformMainThreadWin::IsMainThread() const -> Bool
 {
-    return std::this_thread::get_id() == _tid;
+    if (auto applicationContext = Locator::GetInstance<PlatformApplicationContext>().Maybe<PlatformApplicationContextWin>())
+    {
+        if (auto application = applicationContext->GetCurrentApplication())
+        {
+            return application->IsMainThread();
+        }
+    }
+    return false;
 }
 
 ///
@@ -34,9 +38,12 @@ auto PlatformMainThreadWin::IsMainThread() const -> Bool
 ///
 auto PlatformMainThreadWin::Schedule() -> AsyncTask<void>
 {
-    if (auto eventLoop = _eventLoopContext->GetEventLoopForThreadId(_tid))
+    if (auto applicationContext = Locator::GetInstance<PlatformApplicationContextWin>())
     {
-        co_return co_await eventLoop->Schedule();
+        if (auto application = applicationContext->GetCurrentApplication())
+        {
+            co_return co_await application->Schedule();
+        }
     }
     throw Exception(ErrorCode::Failure);
 }
@@ -48,9 +55,12 @@ auto PlatformMainThreadWin::Schedule() -> AsyncTask<void>
 ///
 auto PlatformMainThreadWin::ScheduleAfter(const std::chrono::nanoseconds& delay) -> AsyncTask<void>
 {
-    if (auto eventLoop = _eventLoopContext->GetEventLoopForThreadId(_tid))
+    if (auto applicationContext = Locator::GetInstance<PlatformApplicationContextWin>())
     {
-        co_return co_await eventLoop->ScheduleAfter(delay);
+        if (auto application = applicationContext->GetCurrentApplication())
+        {
+            co_return co_await application->ScheduleAfter(delay);
+        }
     }
     throw Exception(ErrorCode::Failure);
 }
@@ -60,9 +70,8 @@ auto PlatformMainThreadWin::ScheduleAfter(const std::chrono::nanoseconds& delay)
 ///
 /// @param[in] tid
 ///
-auto Locator::Resolver<PlatformMainThreadWin>::Resolve(const std::thread::id tid) -> Shared<PlatformMainThreadWin>
+auto Locator::Resolver<PlatformMainThreadWin>::Resolve() -> Shared<PlatformMainThreadWin>
 {
-    auto eventLoopContext = Locator::Resolve<PlatformEventLoopContext>().As<PlatformEventLoopContextWin>();
-    return Shared<PlatformMainThreadWin>::Make(eventLoopContext, tid);
+    return Shared<PlatformMainThreadWin>::Make();
 }
 }

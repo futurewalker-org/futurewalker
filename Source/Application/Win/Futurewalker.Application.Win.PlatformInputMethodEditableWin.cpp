@@ -2,8 +2,6 @@
 
 #include "Futurewalker.Application.Win.PlatformInputMethodEditableWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWin.hpp"
-#include "Futurewalker.Application.Win.PlatformEventLoopContextWin.hpp"
-#include "Futurewalker.Application.Win.PlatformEventLoopWin.hpp"
 #include "Futurewalker.Application.PlatformInputEvent.hpp"
 
 #include "Futurewalker.Core.StringFunction.hpp"
@@ -177,17 +175,11 @@ auto PlatformInputMethodEditableWin::GetRangeFromU16Range(Range<CodeUnit> range)
 
 auto PlatformInputMethodEditableWin::InternalBeforeInsertText(String const& text) -> Bool
 {
-    if (const auto eventLoopContext = Locator::GetInstance<PlatformEventLoopContext>())
-    {
-        if (const auto eventLoop = eventLoopContext->GetEventLoopForThread().As<PlatformEventLoopWin>())
-        {
-            const auto self = GetSelf();
-            auto parameter = PlatformInputEvent::InsertText();
-            parameter.SetText(text);
-            auto event = Event(parameter);
-            eventLoop->Spawn(AsyncFunction::Fn([self, e = event] mutable -> Lazy<void> { co_await self->SendInputEvent(e); }), false);
-        }
-    }
+    auto const self = GetSelf();
+    auto parameter = PlatformInputEvent::InsertText();
+    parameter.SetText(text);
+    auto event = Event(parameter);
+    AsyncFunction::SpawnFn([self, e = event] mutable -> Lazy<void> { co_await self->SendInputEvent(e); });
     return true;
 }
 

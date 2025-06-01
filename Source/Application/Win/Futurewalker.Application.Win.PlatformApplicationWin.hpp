@@ -3,11 +3,15 @@
 
 #include "Futurewalker.Application.Win.PlatformApplicationWinType.hpp"
 #include "Futurewalker.Application.PlatformApplication.hpp"
-#include "Futurewalker.Application.PlatformEventLoop.hpp"
-
 #include "Futurewalker.Application.Win.PlatformApplicationContextWin.hpp"
 
-#include "Futurewalker.Application.PlatformMainThread.hpp"
+#include "Futurewalker.Async.ThreadPool.hpp"
+
+#include "Futurewalker.Async.AsyncTask.hpp"
+#include "Futurewalker.Async.LazyTask.hpp"
+
+#include <deque>
+#include <thread>
 
 namespace FW_DETAIL_NS
 {
@@ -19,23 +23,44 @@ namespace FW_EXPORT
 class PlatformApplicationWin : public PlatformApplication
 {
 public:
-    PlatformApplicationWin(Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<PlatformEventLoop> eventLoop, Shared<PlatformMainThread> mainThread);
+    static auto Make(Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<ThreadPool> threadPool) -> Shared<PlatformApplicationWin>;
+
+    PlatformApplicationWin(PassKey<PlatformApplicationWin>, Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<ThreadPool> threadPool);
+
     auto Run() -> Async<void> override;
     auto Exit() -> void override;
     auto IsRunning() -> Bool override;
     auto IsActive() -> Bool override;
     auto IsForeground() -> Bool override;
 
+    auto IsMainThread() const -> Bool;
+    auto Schedule() -> AsyncTask<void>;
+    auto ScheduleAfter(const std::chrono::nanoseconds& delay) -> AsyncTask<void>;
+
     auto SetActive(Bool const active) -> void;
+    auto SetNativeHandle(PassKey<PlatformApplicationContextWin>, HWND hwnd) -> void;
+    auto MessageWindowProcedure(PassKey<PlatformApplicationContextWin>, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> LRESULT;
+
+private:
+    auto TranslateAndDispatchMessage(MSG const& msg) -> Bool;
+    auto HandlePostedEvent(bool& callDefaultProcedure, WPARAM wParam, LPARAM lParam) -> LRESULT;
+    auto Post(LazyTask<void> task) -> void;
+    auto PopTask() -> Optional<LazyTask<void>>;
+    auto HasTask() -> Bool;
 
 private:
     auto SyncSendApplicationEvent(Event const& event) -> void;
 
 private:
+    Weak<PlatformApplicationWin> _self;
     Shared<PlatformApplicationContextWin> _context;
-    Shared<PlatformEventLoop> _eventLoop;
-    Shared<PlatformMainThread> _mainThread;
+    Shared<ThreadPool> _threadPool;
+    HWND _hwnd = NULL;
+    Bool _running = false;
     Bool _active = false;
+    std::deque<LazyTask<void>> _tasks;
+    std::mutex _mutex;
+    std::thread::id _threadId;
 };
 }
 }

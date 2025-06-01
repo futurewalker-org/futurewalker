@@ -12,7 +12,6 @@
 #include "Futurewalker.Base.Locator.hpp"
 
 #include "Futurewalker.Application.Win.PlatformApplicationContextWin.hpp"
-#include "Futurewalker.Application.Win.PlatformEventLoopContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformWindowContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformMainThreadWin.hpp"
 #include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"
@@ -45,7 +44,6 @@ auto PlatformMainWin::Register(HINSTANCE instanceHandle) -> void
     Locator::Register<PlatformDebugWin>();
     Locator::Register<PlatformMainThreadWin>();
     Locator::Register<PlatformApplicationContextWin>();
-    Locator::Register<PlatformEventLoopContextWin>();
     Locator::Register<PlatformWindowContextWin>();
     Locator::Register<PlatformD3D11DeviceWin>();
     Locator::Register<PlatformD3D12DeviceWin>();

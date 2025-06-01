@@ -7,7 +7,6 @@ fw_test_suite(
         "BoxConstraints",
         "CornerRadius",
         "EdgeInsets",
-        "EventLoop",
         "View",
     ],
 )

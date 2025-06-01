@@ -2,7 +2,6 @@
 
 #include "Futurewalker.Application.Win.PlatformWindowContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformWindowWin.hpp"
-#include "Futurewalker.Application.Win.PlatformEventLoopContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformVsyncProviderWin.hpp"
 #include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"
 #include "Futurewalker.Application.Win.PlatformKeyboardLayoutWin.hpp"
