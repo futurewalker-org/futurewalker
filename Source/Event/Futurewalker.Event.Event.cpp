@@ -44,8 +44,8 @@ Event& Event::operator=(Event const& other)
 ///
 Event& Event::operator=(Event&& other) noexcept
 {
-    Event tmp = std::move(other);
-    std::swap(_holder, other._holder);
+    auto tmp = std::move(other);
+    std::swap(_holder, tmp._holder);
     return *this;
 }
 

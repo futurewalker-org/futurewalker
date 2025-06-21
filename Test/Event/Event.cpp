@@ -34,6 +34,17 @@ TEST_CASE("Event")
             REQUIRE(event.As<TestEvent>().i == 24);
             REQUIRE(copy.As<TestEvent>().i == 42);
         }
+
+        SECTION("Assign")
+        {
+            auto copy = Event();
+            copy = event;
+            REQUIRE(copy.As<TestEvent>().i == 42);
+
+            event.As<TestEvent>().i = 24;
+            REQUIRE(event.As<TestEvent>().i == 24);
+            REQUIRE(copy.As<TestEvent>().i == 42);
+        }
     }
 
     SECTION("Polymorphic")
