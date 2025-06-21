@@ -35,7 +35,7 @@ public:
         EventFunction sendFrameEvent;
         EventFunction sendWindowEvent;
     };
-    PlatformWindow(Delegate const& delegate);
+    PlatformWindow(PassKey<PlatformWindow>, Delegate const& delegate);
 
     virtual ~PlatformWindow() = 0;
 
@@ -69,14 +69,51 @@ public:
     virtual auto GetInputMethod() -> Shared<PlatformInputMethod> = 0;
 
 protected:
+    virtual auto Initialize() -> void = 0;
+
     auto SendPointerEvent(Event& event) -> Async<Bool>;
     auto SendKeyEvent(Event& event) -> Async<Bool>;
     auto SendInputEvent(Event& event) -> Async<Bool>;
     auto SendFrameEvent(Event& event) -> Async<Bool>;
     auto SendWindowEvent(Event& event) -> Async<Bool>;
 
+    auto SendWindowEventDetached(Event const& event) -> void;
+    auto SendFrameEventDetached(Event const& event) -> void;
+    auto SendPointerEventDetached(Event const& event) -> void;
+    auto SendKeyEventDetached(Event const& event) -> void;
+    auto SendInputEventDetached(Event const& event) -> void;
+
+    template <class Self>
+    auto GetSelf(this Self& self) -> Shared<Self>;
+
+    template <class Derived, class... Args>
+    static auto MakeDerived(Args&&... args) -> Shared<Derived>;
+
 private:
+    Weak<PlatformWindow> _self;
     Delegate _delegate;
 };
+
+///
+/// @brief Get self.
+///
+template <class Self>
+auto PlatformWindow::GetSelf(this Self& self) -> Shared<Self>
+{
+    return static_cast<TypeTraits::PropagateCVRef<Self&, PlatformWindow>>(self)._self.Lock().template Assume<Self>();
+}
+
+///
+/// @brief Get derived instance.
+///
+template <class Derived, class... Args>
+auto PlatformWindow::MakeDerived(Args&&... args) -> Shared<Derived>
+{
+    auto key = PassKey<PlatformWindow>();
+    auto view = Shared<Derived>::Make(key, std::forward<Args>(args)...);
+    static_cast<PlatformWindow&>(*view)._self = view;
+    static_cast<PlatformWindow&>(*view).Initialize();
+    return view;
+}
 }
 }

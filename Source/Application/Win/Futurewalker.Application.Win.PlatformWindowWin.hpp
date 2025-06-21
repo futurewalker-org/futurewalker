@@ -114,12 +114,6 @@ private:
     auto PointerEnter(Bool const enter, WPARAM const wParam) -> void;
     auto PointerUpdate(WPARAM const wParam) -> void;
 
-    auto SendWindowEventDetached(Event const& event) -> void;
-    auto SendFrameEventDetached(Event const& event) -> void;
-    auto SendPointerEventDetached(Event const& event) -> void;
-    auto SendKeyEventDetached(Event const& event) -> void;
-    auto SendInputEventDetached(Event const& event) -> void;
-
     auto PostWindowEvent(Event const& event) -> void;
 
     auto DisableWindow(Shared<PlatformWindowWin> const& source) -> void;

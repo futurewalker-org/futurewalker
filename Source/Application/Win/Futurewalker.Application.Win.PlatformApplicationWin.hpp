@@ -25,7 +25,7 @@ class PlatformApplicationWin : public PlatformApplication
 public:
     static auto Make(Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<ThreadPool> threadPool) -> Shared<PlatformApplicationWin>;
 
-    PlatformApplicationWin(PassKey<PlatformApplicationWin>, Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<ThreadPool> threadPool);
+    PlatformApplicationWin(PassKey<PlatformApplication>, Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<ThreadPool> threadPool);
 
     auto Run() -> Async<void> override;
     auto Exit() -> void override;
@@ -41,6 +41,9 @@ public:
     auto SetNativeHandle(PassKey<PlatformApplicationContextWin>, HWND hwnd) -> void;
     auto MessageWindowProcedure(PassKey<PlatformApplicationContextWin>, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> LRESULT;
 
+protected:
+    auto Initialize() -> void override;
+
 private:
     auto TranslateAndDispatchMessage(MSG const& msg) -> Bool;
     auto HandlePostedEvent(bool& callDefaultProcedure, WPARAM wParam, LPARAM lParam) -> LRESULT;
@@ -49,10 +52,6 @@ private:
     auto HasTask() -> Bool;
 
 private:
-    auto SyncSendApplicationEvent(Event const& event) -> void;
-
-private:
-    Weak<PlatformApplicationWin> _self;
     Shared<PlatformApplicationContextWin> _context;
     Shared<ThreadPool> _threadPool;
     HWND _hwnd = NULL;

@@ -17,15 +17,13 @@ namespace FW_DETAIL_NS
 ///
 auto PlatformApplicationWin::Make(Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<ThreadPool> threadPool) -> Shared<PlatformApplicationWin>
 {
-    auto application = Shared<PlatformApplicationWin>::Make(PassKey<PlatformApplicationWin>(), delegate, context, threadPool);
-    application->_self = application;
-    return application;
+    return PlatformApplication::MakeDerived<PlatformApplicationWin>(delegate, context, threadPool);
 }
 
 ///
 /// @brief
 ///
-PlatformApplicationWin::PlatformApplicationWin(PassKey<PlatformApplicationWin>, Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<ThreadPool> threadPool)
+PlatformApplicationWin::PlatformApplicationWin(PassKey<PlatformApplication>, Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<ThreadPool> threadPool)
   : PlatformApplication(delegate)
   , _context {context}
   , _threadPool {threadPool}
@@ -180,7 +178,7 @@ auto PlatformApplicationWin::Schedule() -> AsyncTask<void>
         {
         }
     };
-    co_await Awaitable {_self};
+    co_await Awaitable {GetSelf()};
 }
 
 ///
@@ -190,7 +188,7 @@ auto PlatformApplicationWin::Schedule() -> AsyncTask<void>
 ///
 auto PlatformApplicationWin::ScheduleAfter(const std::chrono::nanoseconds& delay) -> AsyncTask<void>
 {
-    auto self = _self;
+    auto self = GetSelf();
 
     co_await _threadPool->ScheduleAfter(delay);
 
@@ -215,7 +213,7 @@ auto PlatformApplicationWin::SetActive(Bool const active) -> void
         auto parameter = PlatformApplicationEvent::ActiveChanged();
         parameter.SetActive(active);
         auto event = Event(parameter);
-        SyncSendApplicationEvent(event);
+        SendApplicationEventDetached(event);
     }
 }
 
@@ -249,6 +247,13 @@ auto PlatformApplicationWin::MessageWindowProcedure(PassKey<PlatformApplicationC
         return ::DefWindowProcW(hwnd, msg, wParam, lParam);
     }
     return result;
+}
+
+///
+/// @brief Initialize.
+///
+auto PlatformApplicationWin::Initialize() -> void
+{
 }
 
 ///
@@ -333,16 +338,5 @@ auto PlatformApplicationWin::HasTask() -> Bool
 {
     std::unique_lock lock(_mutex);
     return !_tasks.empty();
-}
-
-///
-/// @brief
-///
-auto PlatformApplicationWin::SyncSendApplicationEvent(Event const& event) -> void
-{
-    AsyncFunction::SpawnFn([&]() -> Lazy<void> {
-        auto e = event;
-        co_await SendApplicationEvent(e);
-    });
 }
 }
