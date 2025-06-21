@@ -24,7 +24,7 @@ public:
       -> Shared<PlatformWindowWin>;
 
     PlatformWindowWin(
-      PassKey<PlatformWindowWin>,
+      PassKey<PlatformWindow> key,
       Shared<PlatformWindowContextWin> context,
       Shared<PlatformDCompositionDeviceWin> compositionDevice,
       PlatformWindowOptions const& options,
@@ -73,6 +73,9 @@ public:
 public:
     auto SetNativeHandle(PassKey<PlatformWindowContextWin>, HWND hwnd) -> void;
     auto WindowProcedure(PassKey<PlatformWindowContextWin>, HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT;
+
+protected:
+    auto Initialize() -> void override;
 
 private:
     auto HandleCreate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;

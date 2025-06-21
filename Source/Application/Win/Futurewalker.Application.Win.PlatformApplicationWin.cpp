@@ -192,7 +192,7 @@ auto PlatformApplicationWin::ScheduleAfter(const std::chrono::nanoseconds& delay
 
     co_await _threadPool->ScheduleAfter(delay);
 
-    if (auto app = self.Lock())
+    if (auto app = GetSelf())
     {
         co_return co_await app->Schedule();
     }

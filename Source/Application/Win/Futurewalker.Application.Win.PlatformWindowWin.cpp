@@ -37,19 +37,18 @@
 namespace FW_DETAIL_NS
 {
 ///
-/// @brief 
+/// @brief
 ///
-/// @param context 
-/// @param options 
-/// @param delegate 
+/// @param context
+/// @param options
+/// @param delegate
 ///
-/// @return 
+/// @return
 ///
 auto PlatformWindowWin::Make(Shared<PlatformWindowContextWin> context, Shared<PlatformDCompositionDeviceWin> compositionDevice, PlatformWindowOptions const& options, Delegate const& delegate)
   -> Shared<PlatformWindowWin>
 {
-    auto key = PassKey<PlatformWindowWin>();
-    auto window = Shared<PlatformWindowWin>::Make(key, context, compositionDevice, options, delegate);
+    auto window = PlatformWindow::MakeDerived<PlatformWindowWin>(context, compositionDevice, options, delegate);
     window->SetSelf(window);
     context->InitializeWindow(window, options);
     return window;
@@ -63,12 +62,12 @@ auto PlatformWindowWin::Make(Shared<PlatformWindowContextWin> context, Shared<Pl
 /// @param delegate
 ///
 PlatformWindowWin::PlatformWindowWin(
-  PassKey<PlatformWindowWin>,
+  PassKey<PlatformWindow> key,
   Shared<PlatformWindowContextWin> context,
   Shared<PlatformDCompositionDeviceWin> compositionDevice,
   PlatformWindowOptions const& options,
   Delegate const& delegate)
-  : PlatformWindow(delegate)
+  : PlatformWindow(key, delegate)
   , _context {context}
   , _compositionDevice {compositionDevice}
   , _options {options}
@@ -557,6 +556,13 @@ auto PlatformWindowWin::SetNativeHandle(PassKey<PlatformWindowContextWin>, HWND 
         _dpi = ::GetDpiForWindow(_hwnd);
         _rootViewLayer = PlatformRootViewLayerWin::Make(_hwnd, _compositionDevice);
     }
+}
+
+//!
+//! @brief Initialize.
+//!
+auto PlatformWindowWin::Initialize() -> void
+{
 }
 
 ///
