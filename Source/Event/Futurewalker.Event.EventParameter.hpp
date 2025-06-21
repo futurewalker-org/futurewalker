@@ -23,13 +23,19 @@ public:
     template <class T>
     auto Is() const -> Bool
     {
-        return DynamicCastFunction::Is<T>(this);
+        return DynamicCastFunction::Is<T const>(this);
     }
 
-    template <class Self, class T>
-    auto As(this Self& self) -> T&
+    template <class T>
+    auto As() -> T&
     {
-        return DynamicCastFunction::As<T>(self);
+        return DynamicCastFunction::As<T>(*this);
+    }
+
+    template <class T>
+    auto As() const -> T const&
+    {
+        return DynamicCastFunction::As<T const>(*this);
     }
 };
 }
