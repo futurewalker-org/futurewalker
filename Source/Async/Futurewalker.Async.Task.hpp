@@ -270,7 +270,7 @@ template <>
 class Task<void>::promise_type : public TaskPromiseBase<void>
 {
 public:
-    using TaskPromiseBase::TaskPromiseBase;
+    using TaskPromiseBase<void>::TaskPromiseBase;
 
     auto get_return_object() -> Task<void>
     {

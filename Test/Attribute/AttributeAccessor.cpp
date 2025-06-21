@@ -1,4 +1,3 @@
-#include <corecrt_io.h>
 #include <catch2/catch_all.hpp>
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
