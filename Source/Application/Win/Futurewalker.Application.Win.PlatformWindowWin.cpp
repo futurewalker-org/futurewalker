@@ -1198,77 +1198,6 @@ static void SetPointerInfoParams(PlatformPointerEvent& parameter, POINTER_INFO c
 }
 
 ///
-/// @brief Convert tilt values to spherical values.
-///
-/// @return Spherical (azimuth, altitude) pair.
-///
-static auto ConvertTiltToSpherical(Degree const& tiltX, Degree const& tiltY) -> std::pair<Degree, Degree>
-{
-    // NOTE: Conversion is based on W3C PointerEvent spec:
-    // https://w3c.github.io/pointerevents/#converting-between-tiltx-tilty-and-altitudeangle-azimuthangle
-
-    auto const tiltXRad = UnitFunction::ConvertDegreeToRadian(tiltX);
-    auto const tiltYRad = UnitFunction::ConvertDegreeToRadian(tiltY);
-
-    auto const pi = std::numbers::pi_v<float64_t> / 2;
-
-    Radian azimuth = 0.0;
-    if (tiltX == 0.0)
-    {
-        if (tiltY > 0)
-        {
-            azimuth = pi / 2;
-        }
-        else if (tiltY < 0)
-        {
-            azimuth = 3 * pi / 2;
-        }
-    }
-    else if (tiltY == 0)
-    {
-        if (tiltX < 0)
-        {
-            azimuth = pi;
-        }
-    }
-    else if (Degree::Abs(tiltX) == 90 || Degree::Abs(tiltY) == 90)
-    {
-        azimuth = 0;
-    }
-    else
-    {
-        auto const tanX = std::tan(static_cast<float64_t>(tiltXRad));
-        auto const tanY = std::tan(static_cast<float64_t>(tiltYRad));
-        azimuth = std::atan2(tanY, tanX);
-        if (azimuth < 0)
-        {
-            azimuth += 2 * pi;
-        }
-    }
-
-    Radian altitude = 0.0;
-    if (Degree::Abs(tiltX) == 90 || Degree::Abs(tiltY) == 90)
-    {
-        altitude = 0;
-    }
-    else if (tiltX == 0)
-    {
-        altitude = Radian(pi / 2) - Radian::Abs(tiltYRad);
-    }
-    else if (tiltY == 0)
-    {
-        altitude = Radian(pi / 2) - Radian::Abs(tiltXRad);
-    }
-    else
-    {
-        auto const txr = static_cast<float64_t>(tiltXRad);
-        auto const tyr = static_cast<float64_t>(tiltYRad);
-        altitude = std::atan(1.0 / std::sqrt(std::pow(std::tan(txr), 2)) + std::pow(std::tan(tyr), 2));
-    }
-    return {UnitFunction::ConvertRadianToDegree(azimuth), UnitFunction::ConvertRadianToDegree(altitude)};
-}
-
-///
 /// @brief
 ///
 static void SetPointerEventParams(PlatformPointerEvent& parameter, UINT32 const pointerId, HWND const hwnd)
@@ -1289,8 +1218,8 @@ static void SetPointerEventParams(PlatformPointerEvent& parameter, UINT32 const 
             return;
         }
         SetPointerInfoParams(parameter, info.pointerInfo, hwnd);
-        const auto [azimuth, altitude] = ConvertTiltToSpherical(info.tiltX, info.tiltY);
-        parameter.SetTwist(info.rotation / 360.0);
+        const auto [azimuth, altitude] = PlatformPointerEvent::ConvertTiltToSpherical(info.tiltX, info.tiltY);
+        parameter.SetTwist(info.rotation);
         parameter.SetTiltX(info.tiltX);
         parameter.SetTiltY(info.tiltY);
         parameter.SetAzimuth(azimuth);

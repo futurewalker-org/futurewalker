@@ -13,18 +13,6 @@ namespace FW_EXPORT
 class PointerEvent;
 using PointerId = Identifier<UInt64, PointerEvent>;
 
-enum class PointerEventType
-{
-    Down,
-    Up,
-    Enter,
-    Leave,
-    Over,
-    Out,
-    Move,
-    Cancel,
-};
-
 enum class PointerType
 {
     Other = 0,
@@ -34,27 +22,53 @@ enum class PointerType
     TouchPad,
 };
 
+enum class PointerGesturePhase
+{
+    None = 0,
+    Begin,
+    Update,
+    End,
+    Cancel,
+};
+
+enum class PointerWheelPrecision
+{
+    Coarse,
+    Precise,
+};
+
+enum class PointerButton
+{
+    Unknown = 0,
+    Button1, // Primary button.
+    Button2, // Secondary button.
+    Button3, // Tertiary button.
+    ButtonX1,
+    ButtonX2,
+    Barrel,
+    Eraser,
+};
+
 enum class PointerButtonFlags : uint32_t
 {
     None = 0,
-    Button1  = 1 << 0, // Mouse left button or pen tip.
-    Button2  = 1 << 1, // Mouse right button.
-    Button3  = 1 << 2, // Mouse middle button.
-    ButtonX1 = 1 << 3, // Mouse extended button 1.
-    ButtonX2 = 1 << 4, // Mouse extended button 2.
-    Barrel   = 1 << 5, // Pen barrel button.
-    Eraser   = 1 << 6, // Pen eraser button.
+    Button1 = 1 << 1,  // Mouse left button or pen tip.
+    Button2 = 1 << 2,  // Mouse right button.
+    Button3 = 1 << 3,  // Mouse middle button.
+    ButtonX1 = 1 << 4, // Mouse extended button 1.
+    ButtonX2 = 1 << 5, // Mouse extended button 2.
+    Barrel = 1 << 6,   // Pen barrel button.
+    Eraser = 1 << 7,   // Pen eraser button.
 };
 FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(PointerButtonFlags);
 
-
-enum class PointerEventPhaseFlags : uint32_t
+enum class PointerPhaseFlags : uint32_t
 {
     None = 0,
     Capture = 1 << 0, //
-    Bubble  = 1 << 1, // 
-    Target  = 1 << 2, //
+    Bubble = 1 << 1,  //
+    Target = 1 << 2,  //
 };
-FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(PointerEventPhaseFlags);
+FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(PointerPhaseFlags);
 }
 }

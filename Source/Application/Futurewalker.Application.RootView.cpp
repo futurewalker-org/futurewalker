@@ -290,15 +290,14 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
     if (event.Is<PointerEvent>())
     {
         auto const& parameter = event.As<PointerEvent>();
-        auto const pointerEventType = parameter.GetEventType();
         auto const pointerId = parameter.GetPointerId();
 
-        if (pointerEventType == PointerEventType::Enter || pointerEventType == PointerEventType::Over)
+        if (parameter.Is<PointerEvent::Motion::Enter>() || parameter.Is<PointerEvent::Motion::Over>())
         {
             co_return;
         }
 
-        if (pointerEventType == PointerEventType::Leave || pointerEventType == PointerEventType::Out || pointerEventType == PointerEventType::Cancel)
+        if (parameter.Is<PointerEvent::Motion::Leave>() || parameter.Is<PointerEvent::Motion::Out>() || parameter.Is<PointerEvent::Motion::Cancel>())
         {
             if (auto const overView = GetPointerOverView(pointerId))
             {
@@ -306,22 +305,24 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
 
                 auto oldEnterViews = GetPathFromDescendant(overView);
 
-                auto outEventParameter = parameter;
-                outEventParameter.SetEventType(PointerEventType::Out);
-                auto outParameter = PointerParameter(outEventParameter);
+                auto outEventParameter = PointerEvent::Motion::Out();
+                static_cast<PointerEvent::Motion&>(outEventParameter) = parameter.As<PointerEvent::Motion>();
+                auto outParameter = PointerParameter();
+                outParameter.SetPointerEvent(Event(outEventParameter));
                 outParameter.SetTargetView(overView);
-                outParameter.SetPhaseFlags(PointerEventPhaseFlags::Target);
+                outParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                 PointerScope::DispatchRootView({}, *this, outParameter);
 
                 for (auto const& oldEnterView : oldEnterViews)
                 {
                     if (IsAncestorOf(oldEnterView))
                     {
-                        auto leaveEventParameter = parameter;
-                        leaveEventParameter.SetEventType(PointerEventType::Leave);
-                        auto leaveParameter = PointerParameter(leaveEventParameter);
+                        auto leaveEventParameter = PointerEvent::Motion::Leave();
+                        static_cast<PointerEvent::Motion&>(leaveEventParameter) = parameter.As<PointerEvent::Motion>();
+                        auto leaveParameter = PointerParameter();
+                        leaveParameter.SetPointerEvent(Event(leaveEventParameter));
                         leaveParameter.SetTargetView(oldEnterView);
-                        leaveParameter.SetPhaseFlags(PointerEventPhaseFlags::Target);
+                        leaveParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                         PointerScope::DispatchRootView({}, *this, leaveParameter);
                     }
                 }
@@ -353,10 +354,10 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
 
         if (targetView)
         {
-            auto trackingEventParameter = parameter;
-            auto trackingParameter = PointerParameter(trackingEventParameter);
+            auto trackingParameter = PointerParameter();
+            trackingParameter.SetPointerEvent(event);
             trackingParameter.SetTargetView(targetView);
-            trackingParameter.SetPhaseFlags(PointerEventPhaseFlags::Capture);
+            trackingParameter.SetPhaseFlags(PointerPhaseFlags::Capture);
             if (auto const interceptView = PointerScope::DispatchRootView({}, *this, trackingParameter))
             {
                 targetView = interceptView;
@@ -373,11 +374,12 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
 
             if (overView)
             {
-                auto outEventParameter = parameter;
-                outEventParameter.SetEventType(PointerEventType::Out);
-                auto outParameter = PointerParameter(outEventParameter);
+                auto outEventParameter = PointerEvent::Motion::Out();
+                static_cast<PointerEvent::Motion&>(outEventParameter) = parameter.As<PointerEvent::Motion>();
+                auto outParameter = PointerParameter();
+                outParameter.SetPointerEvent(Event(outEventParameter));
                 outParameter.SetTargetView(overView);
-                outParameter.SetPhaseFlags(PointerEventPhaseFlags::Target);
+                outParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                 PointerScope::DispatchRootView({}, *this, outParameter);
             }
 
@@ -388,11 +390,12 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
                 {
                     if (IsAncestorOf(oldEnterView))
                     {
-                        auto leaveEventParameter = parameter;
-                        leaveEventParameter.SetEventType(PointerEventType::Leave);
-                        auto leaveParameter = PointerParameter(leaveEventParameter);
+                        auto leaveEventParameter = PointerEvent::Motion::Leave();
+                        static_cast<PointerEvent::Motion&>(leaveEventParameter) = parameter.As<PointerEvent::Motion>();
+                        auto leaveParameter = PointerParameter();
+                        leaveParameter.SetPointerEvent(Event(leaveEventParameter));
                         leaveParameter.SetTargetView(oldEnterView);
-                        leaveParameter.SetPhaseFlags(PointerEventPhaseFlags::Target);
+                        leaveParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                         PointerScope::DispatchRootView({}, *this, leaveParameter);
                     }
                 }
@@ -405,11 +408,12 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
                 {
                     if (IsAncestorOf(newEnterView))
                     {
-                        auto enterEventParameter = parameter;
-                        enterEventParameter.SetEventType(PointerEventType::Enter);
-                        auto enterParameter = PointerParameter(enterEventParameter);
+                        auto enterEventParameter = PointerEvent::Motion::Enter();
+                        static_cast<PointerEvent::Motion&>(enterEventParameter) = parameter.As<PointerEvent::Motion>();
+                        auto enterParameter = PointerParameter();
+                        enterParameter.SetPointerEvent(Event(enterEventParameter));
                         enterParameter.SetTargetView(newEnterView);
-                        enterParameter.SetPhaseFlags(PointerEventPhaseFlags::Target);
+                        enterParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                         PointerScope::DispatchRootView({}, *this, enterParameter);
                     }
                 }
@@ -417,21 +421,22 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
 
             if (targetView)
             {
-                auto targetEventParameter = parameter;
-                targetEventParameter.SetEventType(PointerEventType::Over);
-                auto targetParameter = PointerParameter(targetEventParameter);
+                auto targetEventParameter = PointerEvent::Motion::Over();
+                static_cast<PointerEvent::Motion&>(targetEventParameter) = parameter.As<PointerEvent::Motion>();
+                auto targetParameter = PointerParameter();
+                targetParameter.SetPointerEvent(Event(targetEventParameter));
                 targetParameter.SetTargetView(targetView);
-                targetParameter.SetPhaseFlags(PointerEventPhaseFlags::Target);
+                targetParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                 PointerScope::DispatchRootView({}, *this, targetParameter);
             }
         }
 
         if (targetView)
         {
-            auto outEventParameter = parameter;
-            auto outParameter = PointerParameter(outEventParameter);
+            auto outParameter = PointerParameter();
+            outParameter.SetPointerEvent(event);
             outParameter.SetTargetView(targetView);
-            outParameter.SetPhaseFlags(PointerEventPhaseFlags::Target);
+            outParameter.SetPhaseFlags(PointerPhaseFlags::Target);
             PointerScope::DispatchRootView({}, *this, outParameter);
         }
     }

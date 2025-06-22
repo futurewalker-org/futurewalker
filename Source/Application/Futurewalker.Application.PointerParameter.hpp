@@ -23,21 +23,19 @@ namespace FW_EXPORT
 class PointerParameter
 {
 public:
-    explicit PointerParameter(PointerEvent const& pointerEvent);
-
     auto GetTargetView(PassKey<View>) const -> Shared<View>;
     auto SetTargetView(Shared<View> const& targetView) -> void;
 
-    auto GetPhaseFlags(PassKey<View>) const -> PointerEventPhaseFlags;
-    auto SetPhaseFlags(PointerEventPhaseFlags const flags) -> void;
+    auto GetPhaseFlags(PassKey<View>) const -> PointerPhaseFlags;
+    auto SetPhaseFlags(PointerPhaseFlags const flags) -> void;
 
-    auto GetPointerEvent() const -> PointerEvent const&;
-    auto SetPointerEvent(PointerEvent const& pointerEvent) -> void;
+    auto GetPointerEvent() const -> Event const&;
+    auto SetPointerEvent(Event const& pointerEvent) -> void;
 
 private:
     Weak<View> _targetView;
-    PointerEvent _pointerEvent;
-    PointerEventPhaseFlags _phaseFlags = PointerEventPhaseFlags::None;
+    Event _pointerEvent;
+    PointerPhaseFlags _phaseFlags = PointerPhaseFlags::None;
 };
 }
 }

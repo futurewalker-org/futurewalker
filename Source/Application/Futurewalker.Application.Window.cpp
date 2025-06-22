@@ -576,8 +576,8 @@ auto Window::ReceivePointerEvent(Event& event) -> Async<Bool>
     {
         if (_rootView)
         {
-            auto parameter = RootViewEvent::Pointer(event);
-            auto rootViewEvent = Event(parameter);
+            auto rootViewEventParameter = RootViewEvent::Pointer(event);
+            auto rootViewEvent = Event(rootViewEventParameter);
             co_await _rootView->SendEvent(rootViewEvent);
         }
     }
@@ -943,54 +943,8 @@ auto Window::HandlePlatformFrameEvent(Event& event) -> Async<Bool>
 ///
 auto Window::HandlePlatformPointerEvent(Event& event) -> Async<Bool>
 {
-    auto const& parameter = event.As<PlatformPointerEvent>();
-
-    auto copyPointerEventParameter = [this](PointerEvent& to, PlatformPointerEvent const& from) -> void {
-        to.SetPointerId(from.GetPointerId());
-        to.SetPointerType(from.GetPointerType());
-        to.SetPosition(LocalToRootViewPoint(from.GetPosition()));
-        to.SetTimestamp(from.GetTimestamp());
-        to.SetPrimaryPointer(from.IsPrimaryPointer());
-        to.SetTiltX(from.GetTiltX());
-        to.SetTiltY(from.GetTiltY());
-        to.SetAzimuth(from.GetAzimuth());
-        to.SetAltitude(from.GetAltitude());
-        to.SetTwist(from.GetTwist());
-        to.SetPressure(from.GetPressure());
-    };
-
-    auto eventType = Optional<PointerEventType>();
-
-    switch (parameter.GetEventType())
-    {
-        case PlatformPointerEventType::Down:
-            eventType = PointerEventType::Down;
-            break;
-        case PlatformPointerEventType::Up:
-            eventType = PointerEventType::Up;
-            break;
-        case PlatformPointerEventType::Move:
-            eventType = PointerEventType::Move;
-            break;
-        case PlatformPointerEventType::Enter:
-            eventType = PointerEventType::Enter;
-            break;
-        case PlatformPointerEventType::Leave:
-            eventType = PointerEventType::Leave;
-            break;
-        case PlatformPointerEventType::Cancel:
-            eventType = PointerEventType::Cancel;
-            break;
-    }
-
-    if (eventType)
-    {
-        auto sendingParameter = PointerEvent(*eventType);
-        copyPointerEventParameter(sendingParameter, parameter);
-        auto sendingEvent = Event(sendingParameter);
+    auto sendingEvent = ConvertPointerEvent(event);
         co_return co_await SendEvent(sendingEvent);
-    }
-    co_return false;
 }
 
 auto Window::HandlePlatformKeyEvent(Event& event) -> Async<Bool>
@@ -1023,5 +977,101 @@ auto Window::HandlePlatformInputEvent(Event& event) -> Async<Bool>
 {
     (void)event;
     co_return false;
+}
+
+auto Window::ConvertPointerEvent(Event const& from) const noexcept -> Event
+{
+    auto copyPointerEventParameter = [](Event& to, Event const& from) -> void {
+        to.As<PointerEvent>().SetPointerId(from.As<PlatformPointerEvent>().GetPointerId());
+        to.As<PointerEvent>().SetPointerType(from.As<PlatformPointerEvent>().GetPointerType());
+        to.As<PointerEvent>().SetTimestamp(from.As<PlatformPointerEvent>().GetTimestamp());
+        to.As<PointerEvent>().SetPrimaryPointer(from.As<PlatformPointerEvent>().IsPrimaryPointer());
+    };
+
+    auto copyPointerMotionParameter = [&](Event& to, Event const& from) -> void {
+        FW_DEBUG_ASSERT(to.Is<PointerEvent::Motion>());
+        to.As<PointerEvent::Motion>().SetPointerId(from.As<PlatformPointerEvent::Motion>().GetPointerId());
+        to.As<PointerEvent::Motion>().SetPointerType(from.As<PlatformPointerEvent::Motion>().GetPointerType());
+        to.As<PointerEvent::Motion>().SetTimestamp(from.As<PlatformPointerEvent::Motion>().GetTimestamp());
+        to.As<PointerEvent::Motion>().SetPrimaryPointer(from.As<PlatformPointerEvent::Motion>().IsPrimaryPointer());
+        to.As<PointerEvent::Motion>().SetPosition(LocalToRootViewPoint(from.As<PlatformPointerEvent::Motion>().GetPosition()));
+        to.As<PointerEvent::Motion>().SetTiltX(from.As<PlatformPointerEvent::Motion>().GetTiltX());
+        to.As<PointerEvent::Motion>().SetTiltY(from.As<PlatformPointerEvent::Motion>().GetTiltY());
+        to.As<PointerEvent::Motion>().SetAzimuth(from.As<PlatformPointerEvent::Motion>().GetAzimuth());
+        to.As<PointerEvent::Motion>().SetAltitude(from.As<PlatformPointerEvent::Motion>().GetAltitude());
+        to.As<PointerEvent::Motion>().SetTwist(from.As<PlatformPointerEvent::Motion>().GetTwist());
+        to.As<PointerEvent::Motion>().SetPressure(from.As<PlatformPointerEvent::Motion>().GetPressure());
+        to.As<PointerEvent::Motion>().SetTangentialPressure(from.As<PlatformPointerEvent::Motion>().GetTangentialPressure());
+        to.As<PointerEvent::Motion>().SetButton(from.As<PlatformPointerEvent::Motion>().GetButton());
+        to.As<PointerEvent::Motion>().SetButtons(from.As<PlatformPointerEvent::Motion>().GetButtons());
+        to.As<PointerEvent::Motion>().SetModifiers(from.As<PlatformPointerEvent::Motion>().GetModifiers());
+    };
+
+    auto copyPointerGestureParameter = [](Event& to, Event const& from) -> void { to.As<PointerEvent::Gesture>().SetPhase(from.As<PlatformPointerEvent::Gesture>().GetPhase()); };
+
+    auto to = Event();
+    if (from.Is<PlatformPointerEvent::Motion>())
+    {
+        if (from.Is<PlatformPointerEvent::Motion::Down>())
+        {
+            to = Event(PointerEvent::Motion::Down());
+        }
+        else if (from.Is<PlatformPointerEvent::Motion::Up>())
+        {
+            to = Event(PointerEvent::Motion::Up());
+        }
+        else if (from.Is<PlatformPointerEvent::Motion::Move>())
+        {
+            to = Event(PointerEvent::Motion::Move());
+        }
+        else if (from.Is<PlatformPointerEvent::Motion::Enter>())
+        {
+            to = Event(PointerEvent::Motion::Enter());
+        }
+        else if (from.Is<PlatformPointerEvent::Motion::Leave>())
+        {
+            to = Event(PointerEvent::Motion::Leave());
+        }
+        else if (from.Is<PlatformPointerEvent::Motion::Cancel>())
+        {
+            to = Event(PointerEvent::Motion::Cancel());
+        }
+        copyPointerMotionParameter(to, from);
+    }
+    else if (from.Is<PlatformPointerEvent::Gesture>())
+    {
+        if (from.Is<PlatformPointerEvent::Gesture::Magnify>())
+        {
+            to = Event(PointerEvent::Gesture::Magnify());
+            to.As<PointerEvent::Gesture::Magnify>().SetScale(from.As<PlatformPointerEvent::Gesture::Magnify>().GetScale());
+        }
+        else if (from.Is<PlatformPointerEvent::Gesture::Rotate>())
+        {
+            to = Event(PointerEvent::Gesture::Rotate());
+            to.As<PointerEvent::Gesture::Rotate>().SetRotation(from.As<PlatformPointerEvent::Gesture::Rotate>().GetRotation());
+        }
+        else if (from.Is<PlatformPointerEvent::Gesture::Swipe>())
+        {
+            to = Event(PointerEvent::Gesture::Swipe());
+            to.As<PointerEvent::Gesture::Swipe>().SetDeltaX(from.As<PlatformPointerEvent::Gesture::Swipe>().GetDeltaX());
+            to.As<PointerEvent::Gesture::Swipe>().SetDeltaY(from.As<PlatformPointerEvent::Gesture::Swipe>().GetDeltaY());
+        }
+        else if (from.Is<PlatformPointerEvent::Gesture::Scroll>())
+        {
+            to = Event(PointerEvent::Gesture::Scroll());
+            to.As<PointerEvent::Gesture::Scroll>().SetDeltaX(from.As<PlatformPointerEvent::Gesture::Scroll>().GetDeltaX());
+            to.As<PointerEvent::Gesture::Scroll>().SetDeltaY(from.As<PlatformPointerEvent::Gesture::Scroll>().GetDeltaY());
+        }
+        copyPointerGestureParameter(to, from);
+    }
+    else if (from.Is<PlatformPointerEvent::Wheel>())
+    {
+        to = Event(PointerEvent::Wheel());
+        to.As<PointerEvent::Wheel>().SetDeltaX(from.As<PlatformPointerEvent::Wheel>().GetDeltaX());
+        to.As<PointerEvent::Wheel>().SetDeltaY(from.As<PlatformPointerEvent::Wheel>().GetDeltaY());
+        to.As<PointerEvent::Wheel>().SetPrecision(from.As<PlatformPointerEvent::Wheel>().GetPrecision());
+    }
+    copyPointerEventParameter(to, from);
+    return to;
 }
 }

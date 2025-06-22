@@ -5,16 +5,6 @@
 namespace FW_DETAIL_NS
 {
 ///
-/// @brief Construct pointer parameter.
-///
-/// @param pointerEvent
-///
-PointerParameter::PointerParameter(PointerEvent const& pointerEvent)
-  : _pointerEvent {pointerEvent}
-{
-}
-
-///
 /// @brief
 ///
 auto PointerParameter::GetTargetView(PassKey<View>) const -> Shared<View>
@@ -35,7 +25,7 @@ auto PointerParameter::SetTargetView(Shared<View> const& targetView) -> void
 ///
 /// @brief
 ///
-auto PointerParameter::GetPhaseFlags(PassKey<View>) const -> PointerEventPhaseFlags
+auto PointerParameter::GetPhaseFlags(PassKey<View>) const -> PointerPhaseFlags
 {
     return _phaseFlags;
 }
@@ -43,7 +33,7 @@ auto PointerParameter::GetPhaseFlags(PassKey<View>) const -> PointerEventPhaseFl
 ///
 /// @brief
 ///
-auto PointerParameter::SetPhaseFlags(PointerEventPhaseFlags const flags) -> void
+auto PointerParameter::SetPhaseFlags(PointerPhaseFlags const flags) -> void
 {
     _phaseFlags = flags;
 }
@@ -51,7 +41,7 @@ auto PointerParameter::SetPhaseFlags(PointerEventPhaseFlags const flags) -> void
 ///
 /// @brief
 ///
-auto PointerParameter::GetPointerEvent() const -> PointerEvent const&
+auto PointerParameter::GetPointerEvent() const -> Event const&
 {
     return _pointerEvent;
 }
@@ -59,7 +49,7 @@ auto PointerParameter::GetPointerEvent() const -> PointerEvent const&
 ///
 /// @brief
 ///
-auto PointerParameter::SetPointerEvent(PointerEvent const& pointerEvent) -> void
+auto PointerParameter::SetPointerEvent(Event const& pointerEvent) -> void
 {
     _pointerEvent = pointerEvent;
 }

@@ -91,10 +91,7 @@ auto TextEdit::Arrange(ArrangeScope& scope) -> void
 
 auto TextEdit::ReceiveEvent(Event& event) -> Async<Bool>
 {
-    if (event.Is<ViewEvent>())
-    {
-        co_return false;
-    }
+    (void)event;
     co_return false;
 }
 
@@ -152,26 +149,24 @@ auto TextEdit::ReceivePointerEvent(Event& event) -> Async<Bool>
 {
     if (event.Is<PointerEvent>())
     {
-        auto const& parameter = event.As<PointerEvent>();
-        auto const eventType = parameter.GetEventType();
-        if (eventType == PointerEventType::Down)
+        if (event.Is<PointerEvent::Motion::Down>())
         {
             FW_DEBUG_LOG_INFO("TextEdit: Pointer down");
             SetFocused(true);
         }
-        else if (eventType == PointerEventType::Up)
+        else if (event.Is<PointerEvent::Motion::Up>())
         {
             FW_DEBUG_LOG_INFO("TextEdit: Pointer up");
         }
-        else if (eventType == PointerEventType::Move)
+        else if (event.Is<PointerEvent::Motion::Move>())
         {
             FW_DEBUG_LOG_INFO("TextEdit: Pointer move");
         }
-        else if (eventType == PointerEventType::Enter)
+        else if (event.Is<PointerEvent::Motion::Enter>())
         {
             FW_DEBUG_LOG_INFO("TextEdit: Pointer enter");
         }
-        else if (eventType == PointerEventType::Leave)
+        else if (event.Is<PointerEvent::Motion::Leave>())
         {
             FW_DEBUG_LOG_INFO("TextEdit: Pointer leave");
         }

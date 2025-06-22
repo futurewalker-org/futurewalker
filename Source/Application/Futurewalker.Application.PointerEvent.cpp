@@ -7,34 +7,6 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 ///
-/// @brief
-///
-/// @param eventType
-///
-PointerEvent::PointerEvent(PointerEventType const eventType)
-  : _eventType {eventType}
-{
-}
-
-///
-/// @brief
-///
-auto PointerEvent::GetEventType() const -> PointerEventType
-{
-    return _eventType;
-}
-
-///
-/// @brief
-///
-/// @param eventType
-///
-auto PointerEvent::SetEventType(PointerEventType const eventType) -> void
-{
-    _eventType = eventType;
-}
-
-///
 /// @brief 
 ///
 auto PointerEvent::GetPointerId() const -> PointerId
@@ -68,24 +40,6 @@ auto PointerEvent::GetPointerType() const -> PointerType
 auto PointerEvent::SetPointerType(PointerType const type) -> void
 {
     _type = type;
-}
-
-///
-/// @brief 
-///
-auto PointerEvent::GetPosition() const -> Point<Dp>
-{
-    return _position;
-}
-
-///
-/// @brief
-///
-/// @param pos
-///
-auto PointerEvent::SetPosition(Point<Dp> const& position) -> void
-{
-    _position = position;
 }
 
 ///
@@ -129,7 +83,55 @@ auto PointerEvent::SetPrimaryPointer(Bool const isPrimaryPointer) -> void
 ///
 /// @brief 
 ///
-auto PointerEvent::GetTiltX() const -> Degree
+auto PointerEvent::GetPosition() const -> Point<Dp>
+{
+    return _position;
+}
+
+///
+/// @brief
+///
+/// @param pos
+///
+auto PointerEvent::SetPosition(Point<Dp> const& position) -> void
+{
+    _position = position;
+}
+
+auto PointerEvent::Wheel::GetDeltaX() const -> Float64
+{
+    return _deltaX;
+}
+
+auto PointerEvent::Wheel::SetDeltaX(Float64 const deltaX) -> void
+{
+    _deltaX = deltaX;
+}
+
+auto PointerEvent::Wheel::GetDeltaY() const -> Float64
+{
+    return _deltaY;
+}
+
+auto PointerEvent::Wheel::SetDeltaY(Float64 const deltaY) -> void
+{
+    _deltaY = deltaY;
+}
+
+auto PointerEvent::Wheel::GetPrecision() const -> PointerWheelPrecision
+{
+    return _precision;
+}
+
+auto PointerEvent::Wheel::SetPrecision(PointerWheelPrecision const precision) -> void
+{
+    _precision = precision;
+}
+
+///
+/// @brief 
+///
+auto PointerEvent::Motion::GetTiltX() const -> Degree
 {
     return _tiltX;
 }
@@ -139,7 +141,7 @@ auto PointerEvent::GetTiltX() const -> Degree
 ///
 /// @param tiltX
 ///
-auto PointerEvent::SetTiltX(Degree const tiltX) -> void
+auto PointerEvent::Motion::SetTiltX(Degree const tiltX) -> void
 {
     _tiltX = tiltX;
 }
@@ -147,7 +149,7 @@ auto PointerEvent::SetTiltX(Degree const tiltX) -> void
 ///
 /// @brief
 ///
-auto PointerEvent::GetTiltY() const -> Degree
+auto PointerEvent::Motion::GetTiltY() const -> Degree
 {
     return _tiltY;
 }
@@ -157,7 +159,7 @@ auto PointerEvent::GetTiltY() const -> Degree
 ///
 /// @param tiltY
 ///
-auto PointerEvent::SetTiltY(Degree const tiltY) -> void
+auto PointerEvent::Motion::SetTiltY(Degree const tiltY) -> void
 {
     _tiltY = tiltY;
 }
@@ -165,7 +167,7 @@ auto PointerEvent::SetTiltY(Degree const tiltY) -> void
 ///
 /// @brief
 ///
-auto PointerEvent::GetAzimuth() const -> Degree
+auto PointerEvent::Motion::GetAzimuth() const -> Degree
 {
     return _azimuth;
 }
@@ -175,7 +177,7 @@ auto PointerEvent::GetAzimuth() const -> Degree
 ///
 /// @param azimuth
 ///
-auto PointerEvent::SetAzimuth(Degree const azimuth) -> void
+auto PointerEvent::Motion::SetAzimuth(Degree const azimuth) -> void
 {
     _azimuth = azimuth;
 }
@@ -183,7 +185,7 @@ auto PointerEvent::SetAzimuth(Degree const azimuth) -> void
 ///
 /// @brief
 ///
-auto PointerEvent::GetAltitude() const -> Degree
+auto PointerEvent::Motion::GetAltitude() const -> Degree
 {
     return _altitude;
 }
@@ -193,7 +195,7 @@ auto PointerEvent::GetAltitude() const -> Degree
 ///
 /// @param altitude
 ///
-auto PointerEvent::SetAltitude(Degree const altitude) -> void
+auto PointerEvent::Motion::SetAltitude(Degree const altitude) -> void
 {
     _altitude = altitude;
 }
@@ -201,7 +203,7 @@ auto PointerEvent::SetAltitude(Degree const altitude) -> void
 ///
 /// @brief
 ///
-auto PointerEvent::GetTwist() const -> Degree
+auto PointerEvent::Motion::GetTwist() const -> Degree
 {
     return _twist;
 }
@@ -211,7 +213,7 @@ auto PointerEvent::GetTwist() const -> Degree
 ///
 /// @param twist
 ///
-auto PointerEvent::SetTwist(Degree const twist) -> void
+auto PointerEvent::Motion::SetTwist(Degree const twist) -> void
 {
     _twist = twist;
 }
@@ -219,7 +221,7 @@ auto PointerEvent::SetTwist(Degree const twist) -> void
 ///
 /// @brief 
 ///
-auto PointerEvent::GetPressure() const -> Float64
+auto PointerEvent::Motion::GetPressure() const -> Float64
 {
     return _pressure;
 }
@@ -229,9 +231,117 @@ auto PointerEvent::GetPressure() const -> Float64
 ///
 /// @param pressure
 ///
-auto PointerEvent::SetPressure(Float64 const pressure) -> void
+auto PointerEvent::Motion::SetPressure(Float64 const pressure) -> void
 {
     _pressure = pressure;
+}
+
+auto PointerEvent::Motion::GetTangentialPressure() const -> Float64
+{
+    return _tangentialPressure;
+}
+
+auto PointerEvent::Motion::SetTangentialPressure(Float64 const pressure) -> void
+{
+    _tangentialPressure = pressure;
+}
+
+auto PointerEvent::Motion::GetButton() const -> PointerButton
+{
+    return _button;
+}
+
+auto PointerEvent::Motion::SetButton(PointerButton const button) -> void
+{
+    _button = button;
+}
+
+auto PointerEvent::Motion::GetButtons() const -> PointerButtonFlags
+{
+    return _buttonState;
+}
+
+auto PointerEvent::Motion::SetButtons(PointerButtonFlags const buttons) -> void
+{
+    _buttonState = buttons;
+}
+
+auto PointerEvent::Motion::GetModifiers() const -> ModifierKeyFlags
+{
+    return _modifierState;
+}
+
+auto PointerEvent::Motion::SetModifiers(ModifierKeyFlags const modifiers) -> void
+{
+    _modifierState = modifiers;
+}
+
+auto PointerEvent::Gesture::GetPhase() const -> PointerGesturePhase
+{
+    return _phase;
+}
+
+auto PointerEvent::Gesture::SetPhase(PointerGesturePhase const phase) -> void
+{
+    _phase = phase;
+}
+
+auto PointerEvent::Gesture::Magnify::GetScale() const -> Float64
+{
+    return _scale;
+}
+
+auto PointerEvent::Gesture::Magnify::SetScale(Float64 const scale) -> void
+{
+    _scale = scale;
+}
+
+auto PointerEvent::Gesture::Rotate::GetRotation() const -> Degree
+{
+    return _rotation;
+}
+
+auto PointerEvent::Gesture::Rotate::SetRotation(Degree const rotation) -> void
+{
+    _rotation = rotation;
+}
+
+auto PointerEvent::Gesture::Swipe::GetDeltaX() const -> Dp
+{
+    return _deltaX;
+}
+
+auto PointerEvent::Gesture::Swipe::SetDeltaX(Dp const deltaX) -> void
+{
+    _deltaX = deltaX;
+}
+
+auto PointerEvent::Gesture::Swipe::GetDeltaY() const -> Dp
+{
+    return _deltaY;
+}
+
+auto PointerEvent::Gesture::Swipe::SetDeltaY(Dp const deltaY) -> void
+{
+    _deltaY = deltaY;
+}
+
+auto PointerEvent::Gesture::Scroll::GetDeltaX() const -> Dp
+{
+    return _deltaX;
+}
+auto PointerEvent::Gesture::Scroll::SetDeltaX(Dp const deltaX) -> void
+{
+    _deltaX = deltaX;
+}
+
+auto PointerEvent::Gesture::Scroll::GetDeltaY() const -> Dp
+{
+    return _deltaY;
+}
+auto PointerEvent::Gesture::Scroll::SetDeltaY(Dp const deltaY) -> void
+{
+    _deltaY = deltaY;
 }
 }
 }

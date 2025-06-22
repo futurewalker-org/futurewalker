@@ -212,6 +212,8 @@ private:
     auto HandlePlatformKeyEvent(Event& event) -> Async<Bool>;
     auto HandlePlatformInputEvent(Event& event) -> Async<Bool>;
 
+    auto ConvertPointerEvent(Event const& from) const noexcept -> Event;
+
 private:
     Weak<Window> _self;
     Weak<Window> _owner;

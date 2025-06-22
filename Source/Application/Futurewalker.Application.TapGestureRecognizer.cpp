@@ -29,10 +29,9 @@ auto TapGestureRecognizer::PointerIntercept(const Delegate& delegate, const Poin
 auto TapGestureRecognizer::Pointer(const Delegate& delegate, const PointerEvent& event, const Rect<Dp>& area) -> Bool
 {
     const auto pointerId = event.GetPointerId();
-    const auto type = event.GetEventType();
     const auto pos = event.GetPosition();
 
-    if (type == PointerEventType::Down)
+    if (event.Is<PointerEvent::Motion::Down>())
     {
         if (Rect<Dp>::Intersect(area, pos))
         {
@@ -44,7 +43,7 @@ auto TapGestureRecognizer::Pointer(const Delegate& delegate, const PointerEvent&
             SetPressed(true);
         }
     }
-    else if (type == PointerEventType::Up)
+    else if (event.Is<PointerEvent::Motion::Up>())
     {
         if (_pressed)
         {
@@ -62,7 +61,7 @@ auto TapGestureRecognizer::Pointer(const Delegate& delegate, const PointerEvent&
             }
         }
     }
-    else if (type == PointerEventType::Cancel)
+    else if (event.Is<PointerEvent::Motion::Cancel>())
     {
         if (delegate.releasePointer)
         {
