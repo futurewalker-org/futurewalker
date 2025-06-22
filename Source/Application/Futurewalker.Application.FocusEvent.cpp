@@ -1,1 +1,1 @@
-﻿// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MPL-2.0

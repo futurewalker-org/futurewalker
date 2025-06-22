@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWin.hpp"

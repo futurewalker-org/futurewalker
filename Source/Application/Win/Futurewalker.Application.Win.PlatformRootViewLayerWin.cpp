@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.Win.PlatformRootViewLayerWin.hpp"
 #include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"

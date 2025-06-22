@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.WindowFrameView.hpp"
 #include "Futurewalker.Application.ContainerView.hpp"

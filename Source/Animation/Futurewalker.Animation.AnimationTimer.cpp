@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Animation.AnimationTimer.hpp"
 #include "Futurewalker.Animation.AnimationTimerEvent.hpp"

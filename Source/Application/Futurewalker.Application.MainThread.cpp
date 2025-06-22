@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.MainThread.hpp"
 #include "Futurewalker.Application.PlatformMainThread.hpp"

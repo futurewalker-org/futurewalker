@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Attribute.AttributeSlot.hpp"
 #include "Futurewalker.Attribute.StaticAttributeBase.hpp"

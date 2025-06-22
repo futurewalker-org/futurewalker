@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.WindowAreaManager.hpp"
 #include "Futurewalker.Application.WindowAreaManagerEvent.hpp"

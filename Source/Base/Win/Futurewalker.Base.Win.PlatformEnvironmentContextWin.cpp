@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Base.Win.PlatformEnvironmentContextWin.hpp"
 #include "Futurewalker.Base.Win.PlatformInstanceHandleWin.hpp"

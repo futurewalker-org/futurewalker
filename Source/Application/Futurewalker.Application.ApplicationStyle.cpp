@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.ApplicationStyle.hpp"
 #include "Futurewalker.Application.ApplicationColor.hpp"

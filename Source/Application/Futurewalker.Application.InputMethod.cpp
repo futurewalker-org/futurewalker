@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.InputMethod.hpp"
 #include "Futurewalker.Application.InputMethodEditable.hpp"
