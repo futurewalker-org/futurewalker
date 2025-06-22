@@ -38,7 +38,7 @@ auto PlatformMainThreadWin::IsMainThread() const -> Bool
 ///
 auto PlatformMainThreadWin::Schedule() -> AsyncTask<void>
 {
-    if (auto applicationContext = Locator::GetInstance<PlatformApplicationContextWin>())
+    if (auto applicationContext = Locator::GetInstance<PlatformApplicationContext>().Maybe<PlatformApplicationContextWin>())
     {
         if (auto application = applicationContext->GetCurrentApplication())
         {
@@ -55,7 +55,7 @@ auto PlatformMainThreadWin::Schedule() -> AsyncTask<void>
 ///
 auto PlatformMainThreadWin::ScheduleAfter(const std::chrono::nanoseconds& delay) -> AsyncTask<void>
 {
-    if (auto applicationContext = Locator::GetInstance<PlatformApplicationContextWin>())
+    if (auto applicationContext = Locator::GetInstance<PlatformApplicationContext>().Maybe<PlatformApplicationContextWin>())
     {
         if (auto application = applicationContext->GetCurrentApplication())
         {
