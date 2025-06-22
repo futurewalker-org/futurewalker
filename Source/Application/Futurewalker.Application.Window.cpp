@@ -203,7 +203,7 @@ auto Window::GetContentRect() const -> Rect<Dp>
 ///
 /// @brief Convert local point to root point.
 ///
-auto Window::LocalToRootViewPoint(Point<Dp> const& point) -> Point<Dp>
+auto Window::LocalToRootViewPoint(Point<Dp> const& point) const -> Point<Dp>
 {
     const auto contentRect = GetContentRect();
     return Point<Dp>(point.GetX() - contentRect.GetLeft(), point.GetY() - contentRect.GetTop());
@@ -212,7 +212,7 @@ auto Window::LocalToRootViewPoint(Point<Dp> const& point) -> Point<Dp>
 ///
 /// @brief Convert root point to local point.
 ///
-auto Window::RootViewToLocalPoint(Point<Dp> const& point) -> Point<Dp>
+auto Window::RootViewToLocalPoint(Point<Dp> const& point) const -> Point<Dp>
 {
     const auto contentRect = GetContentRect();
     return Point<Dp>(point.GetX() + contentRect.GetLeft(), point.GetY() + contentRect.GetTop());
@@ -221,7 +221,7 @@ auto Window::RootViewToLocalPoint(Point<Dp> const& point) -> Point<Dp>
 ///
 /// @brief 
 ///
-auto Window::LocalToRootViewRect(Rect<Dp> const& rect) -> Rect<Dp>
+auto Window::LocalToRootViewRect(Rect<Dp> const& rect) const -> Rect<Dp>
 {
     const auto lt = LocalToRootViewPoint(rect.GetTopLeft());
     const auto rb = LocalToRootViewPoint(rect.GetBottomRight());
@@ -231,7 +231,7 @@ auto Window::LocalToRootViewRect(Rect<Dp> const& rect) -> Rect<Dp>
 ///
 /// @brief 
 ///
-auto Window::RootViewToLocalRect(Rect<Dp> const& rect) -> Rect<Dp>
+auto Window::RootViewToLocalRect(Rect<Dp> const& rect) const -> Rect<Dp>
 {
     const auto lt = RootViewToLocalPoint(rect.GetTopLeft());
     const auto rb = RootViewToLocalPoint(rect.GetBottomRight());
@@ -241,7 +241,7 @@ auto Window::RootViewToLocalRect(Rect<Dp> const& rect) -> Rect<Dp>
 ///
 /// @brief 
 ///
-auto Window::LocalToOwnerPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) -> Point<Dp>
+auto Window::LocalToOwnerPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) const -> Point<Dp>
 {
     (void)owner;
     return point;
@@ -250,7 +250,7 @@ auto Window::LocalToOwnerPoint(Point<Dp> const& point, ReferenceArg<Window const
 ///
 /// @brief 
 ///
-auto Window::OwnerToLocalPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) -> Point<Dp>
+auto Window::OwnerToLocalPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) const -> Point<Dp>
 {
     (void)owner;
     return point;
@@ -259,7 +259,7 @@ auto Window::OwnerToLocalPoint(Point<Dp> const& point, ReferenceArg<Window const
 ///
 /// @brief 
 ///
-auto Window::LocalToOwnerRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) -> Rect<Dp>
+auto Window::LocalToOwnerRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) const -> Rect<Dp>
 {
     (void)owner;
     return rect;
@@ -268,7 +268,7 @@ auto Window::LocalToOwnerRect(Rect<Dp> const& rect, ReferenceArg<Window const> o
 ///
 /// @brief 
 ///
-auto Window::OwnerToLocalRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) -> Rect<Dp>
+auto Window::OwnerToLocalRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) const -> Rect<Dp>
 {
     (void)owner;
     return rect;

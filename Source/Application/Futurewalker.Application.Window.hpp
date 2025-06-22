@@ -122,17 +122,17 @@ public:
     auto GetFrameRect() const -> Rect<Dp>;
     auto GetContentRect() const -> Rect<Dp>;
 
-    auto LocalToRootViewPoint(Point<Dp> const& point) -> Point<Dp>;
-    auto RootViewToLocalPoint(Point<Dp> const& point) -> Point<Dp>;
+    auto LocalToRootViewPoint(Point<Dp> const& point) const -> Point<Dp>;
+    auto RootViewToLocalPoint(Point<Dp> const& point) const -> Point<Dp>;
 
-    auto LocalToRootViewRect(Rect<Dp> const& rect) -> Rect<Dp>;
-    auto RootViewToLocalRect(Rect<Dp> const& rect) -> Rect<Dp>;
+    auto LocalToRootViewRect(Rect<Dp> const& rect) const -> Rect<Dp>;
+    auto RootViewToLocalRect(Rect<Dp> const& rect) const -> Rect<Dp>;
 
-    auto LocalToOwnerPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) -> Point<Dp>;
-    auto OwnerToLocalPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) -> Point<Dp>;
+    auto LocalToOwnerPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) const -> Point<Dp>;
+    auto OwnerToLocalPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) const -> Point<Dp>;
 
-    auto LocalToOwnerRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) -> Rect<Dp>;
-    auto OwnerToLocalRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) -> Rect<Dp>;
+    auto LocalToOwnerRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) const -> Rect<Dp>;
+    auto OwnerToLocalRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) const -> Rect<Dp>;
 
     auto GetTitle() const -> String;
     auto SetTitle(String const& title) -> void;
