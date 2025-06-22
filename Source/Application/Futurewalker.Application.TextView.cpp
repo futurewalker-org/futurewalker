@@ -135,7 +135,7 @@ auto TextView::Draw(DrawScope& scope) -> void
     }
 }
 
-auto TextView::ReceiveEvent(Event& event) -> Async<Bool>
+auto TextView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {

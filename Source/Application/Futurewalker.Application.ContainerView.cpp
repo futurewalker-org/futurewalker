@@ -117,7 +117,7 @@ auto ContainerView::Draw(DrawScope& scope) -> void
 ///
 /// @brief Handle event.
 ///
-auto ContainerView::ReceiveEvent(Event& event) -> Async<Bool>
+auto ContainerView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<ViewEvent::ChildRemoved>())
     {

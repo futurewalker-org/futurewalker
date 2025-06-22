@@ -27,7 +27,7 @@ class EventReceiver : NonCopyable
 public:
     struct Delegate
     {
-        Function<Async<Bool>(Event& event, EventFunction const& dispatch)> dispatchEvent;
+        Function<Async<Bool>(Event<>& event, EventFunction const& dispatch)> dispatchEvent;
     };
     static auto Make(Delegate delegate = {}) -> Unique<EventReceiver>;
 
@@ -40,8 +40,8 @@ public:
 public:
     EventReceiver(PassKey<EventReceiver>, Delegate delegate);
 
-    auto SendEvent(Event& event) -> Async<Bool>;
-    auto SendEventDetached(Event& event) -> Bool;
+    auto SendEvent(Event<>& event) -> Async<Bool>;
+    auto SendEventDetached(Event<>& event) -> Bool;
 
     auto GetTracker() -> Tracker&;
     auto GetTracker() const -> Tracker const&;
@@ -50,7 +50,7 @@ public:
     auto GetEventReceiver() const -> EventReceiver const&;
 
 private:
-    auto DispatchEvent(Event& event) -> Async<Bool>;
+    auto DispatchEvent(Event<>& event) -> Async<Bool>;
 
 private:
     Delegate _delegate;
@@ -68,7 +68,7 @@ template <class Receiver, class Function>
 auto EventReceiver::Connect(Receiver& receiver, Function&& function) -> SignalConnection
 {
     auto& eventReceiver = receiver.GetEventReceiver();
-    auto slot = [function](Event& event) -> Lazy<Bool> { return AsyncFunction::Fn([=, &event]() -> Lazy<Bool> { co_return co_await std::invoke(function, event); }); };
+    auto slot = [function](Event<>& event) -> Lazy<Bool> { return AsyncFunction::Fn([=, &event]() -> Lazy<Bool> { co_return co_await std::invoke(function, event); }); };
     return SignalFunction::Connect(eventReceiver._eventSignal, std::move(slot), SignalConnectPosition::front);
 }
 
@@ -83,7 +83,7 @@ template <class Receiver, class Observer, class Function>
 auto EventReceiver::Connect(Receiver& receiver, Observer&& observer, Function&& function) -> SignalConnection
 {
     auto& eventReceiver = receiver.GetEventReceiver();
-    auto slot = [function]<class T>(T&& observer, Event& event) -> Lazy<Bool> {
+    auto slot = [function]<class T>(T&& observer, Event<>& event) -> Lazy<Bool> {
         // Observer may be destroyed when returned task is awaited, so we need to track it.
         // Function also need to be copied since slot can be destroyed.
         auto tracker = Tracker::Track(observer);

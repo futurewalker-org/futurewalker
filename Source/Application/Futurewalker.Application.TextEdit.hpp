@@ -28,11 +28,11 @@ protected:
     auto Draw(DrawScope& scope) -> void override;
     auto Measure(MeasureScope& scope) -> void override;
     auto Arrange(ArrangeScope& scope) -> void override;
-    auto ReceiveEvent(Event& event) -> Async<Bool>;
-    auto ReceiveInputEvent(Event& event) -> Async<Bool>;
-    auto ReceiveKeyEvent(Event& event) -> Async<Bool>;
-    auto ReceivePointerEvent(Event& event) -> Async<Bool>;
-    auto ReceiveFocusEvent(Event& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveInputEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveKeyEvent(Event<>& event) -> Async<Bool>;
+    auto ReceivePointerEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveFocusEvent(Event<>& event) -> Async<Bool>;
 
 private:
     auto InternalSetInputMethod(Shared<InputMethod> const& context) -> void;

@@ -90,34 +90,34 @@ public:
 class RootViewEvent::Pointer final : public RootViewEvent
 {
 public:
-    Pointer(Event& event);
+    Pointer(Event<>& event);
 
-    auto GetEvent() -> Event&;
+    auto GetEvent() -> Event<>&;
 
 private:
-    Event& _event;
+    Event<>& _event;
 };
 
 class RootViewEvent::Key final : public RootViewEvent
 {
 public:
-    Key(Event& event);
+    Key(Event<>& event);
 
-    auto GetEvent() -> Event&;
+    auto GetEvent() -> Event<>&;
 
 private:
-    Event& _event;
+    Event<>& _event;
 };
 
 class RootViewEvent::Input final : public RootViewEvent
 {
 public:
-    Input(Event& event);
+    Input(Event<>& event);
 
-    auto GetEvent() -> Event&;
+    auto GetEvent() -> Event<>&;
 
 private:
-    Event& _event;
+    Event<>& _event;
 };
 }
 }

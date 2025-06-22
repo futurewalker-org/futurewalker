@@ -16,8 +16,8 @@ namespace FW_EXPORT
 class TapGestureRecognizer final : public GestureRecognizer
 {
 public:
-    auto PointerIntercept(const Delegate& delegate, const PointerEvent& event, const Rect<Dp>& area) -> Bool override;
-    auto Pointer(const Delegate& delegate, const PointerEvent& event, const Rect<Dp>& area) -> Bool override;
+    auto PointerIntercept(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool override;
+    auto Pointer(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool override;
 
 private:
     auto SetPressed(const Bool pressed) -> void;

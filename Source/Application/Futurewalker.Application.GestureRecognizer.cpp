@@ -13,12 +13,12 @@ GestureRecognizer::GestureRecognizer()
 
 GestureRecognizer::~GestureRecognizer() = default;
 
-auto GestureRecognizer::SendEvent(Event& event) -> Async<Bool>
+auto GestureRecognizer::SendEvent(Event<>& event) -> Async<Bool>
 {
     co_return co_await _eventReceiver->SendEvent(event);
 }
 
-auto GestureRecognizer::SendEventDetached(Event& event) -> Bool
+auto GestureRecognizer::SendEventDetached(Event<>& event) -> Bool
 {
     return _eventReceiver->SendEventDetached(event);
 }

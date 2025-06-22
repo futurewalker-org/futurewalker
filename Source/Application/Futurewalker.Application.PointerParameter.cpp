@@ -41,7 +41,7 @@ auto PointerParameter::SetPhaseFlags(PointerPhaseFlags const flags) -> void
 ///
 /// @brief
 ///
-auto PointerParameter::GetPointerEvent() const -> Event const&
+auto PointerParameter::GetPointerEvent() const -> Event<PointerEvent> const&
 {
     return _pointerEvent;
 }
@@ -49,7 +49,7 @@ auto PointerParameter::GetPointerEvent() const -> Event const&
 ///
 /// @brief
 ///
-auto PointerParameter::SetPointerEvent(Event const& pointerEvent) -> void
+auto PointerParameter::SetPointerEvent(Event<PointerEvent> const& pointerEvent) -> void
 {
     _pointerEvent = pointerEvent;
 }

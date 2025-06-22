@@ -84,32 +84,32 @@ auto RootViewEvent::Resize::SetSize(Size<Dp> const& size) -> void
     _size = size;
 }
 
-RootViewEvent::Pointer::Pointer(Event& event)
+RootViewEvent::Pointer::Pointer(Event<>& event)
   : _event {event}
 {
 }
 
-auto RootViewEvent::Pointer::GetEvent() -> Event&
+auto RootViewEvent::Pointer::GetEvent() -> Event<>&
 {
     return _event;
 }
 
-RootViewEvent::Key::Key(Event& event)
+RootViewEvent::Key::Key(Event<>& event)
   : _event {event}
 {
 }
 
-auto RootViewEvent::Key::GetEvent() -> Event&
+auto RootViewEvent::Key::GetEvent() -> Event<>&
 {
     return _event;
 }
 
-RootViewEvent::Input::Input(Event& event)
+RootViewEvent::Input::Input(Event<>& event)
   : _event {event}
 {
 }
 
-auto RootViewEvent::Input::GetEvent() -> Event&
+auto RootViewEvent::Input::GetEvent() -> Event<>&
 {
     return _event;
 }

@@ -7,12 +7,12 @@
 namespace FW_DETAIL_NS
 {
 ///
-/// @brief 
+/// @brief
 ///
-/// @param event 
-/// @param area 
+/// @param event
+/// @param area
 ///
-auto TapGestureRecognizer::PointerIntercept(const Delegate& delegate, const PointerEvent& event, const Rect<Dp>& area) -> Bool
+auto TapGestureRecognizer::PointerIntercept(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool
 {
     (void)delegate;
     (void)event;
@@ -21,15 +21,15 @@ auto TapGestureRecognizer::PointerIntercept(const Delegate& delegate, const Poin
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param event 
-/// @param area 
+/// @param event
+/// @param area
 ///
-auto TapGestureRecognizer::Pointer(const Delegate& delegate, const PointerEvent& event, const Rect<Dp>& area) -> Bool
+auto TapGestureRecognizer::Pointer(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool
 {
-    const auto pointerId = event.GetPointerId();
-    const auto pos = event.GetPosition();
+    const auto pointerId = event->GetPointerId();
+    const auto pos = event->GetPosition();
 
     if (event.Is<PointerEvent::Motion::Down>())
     {
@@ -56,7 +56,7 @@ auto TapGestureRecognizer::Pointer(const Delegate& delegate, const PointerEvent&
 
             if (Rect<Dp>::Intersect(area, pos))
             {
-                auto gestureEvent = Event(TapGestureEvent(TapGestureEventType::Tap));
+                auto gestureEvent = Event<>(Event<TapGestureEvent>::Make(TapGestureEventType::Tap));
                 SendEventDetached(gestureEvent);
             }
         }
@@ -85,12 +85,12 @@ auto TapGestureRecognizer::SetPressed(const Bool pressed) -> void
 
         if (_pressed)
         {
-            auto event = Event(TapGestureEvent(TapGestureEventType::Down));
+            auto event = Event<>(Event<TapGestureEvent>::Make(TapGestureEventType::Down));
             SendEventDetached(event);
         }
         else
         {
-            auto event = Event(TapGestureEvent(TapGestureEventType::Up));
+            auto event = Event<>(Event<TapGestureEvent>::Make(TapGestureEventType::Up));
             SendEventDetached(event);
         }
     }

@@ -33,7 +33,7 @@ protected:
     auto Initialize() -> void override;
     auto Measure(MeasureScope& scope) -> void override;
     auto Draw(DrawScope& scope) -> void override;
-    auto ReceiveEvent(Event& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
 
 private:
     auto GetTypeface() const -> Shared<Graphics::Typeface>;

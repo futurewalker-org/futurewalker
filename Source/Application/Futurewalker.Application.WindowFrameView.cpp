@@ -152,7 +152,7 @@ auto WindowFrameView::Draw(DrawScope& scope) -> void
     });
 }
 
-auto WindowFrameView::ReceiveEvent(Event& event) -> Async<Bool>
+auto WindowFrameView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<WindowAreaManagerEvent::TitleBarAreaRectChanged>() ||
         event.Is<WindowAreaManagerEvent::TitleBarAvailableAreaRectChanged>() ||
@@ -167,7 +167,7 @@ auto WindowFrameView::ReceiveEvent(Event& event) -> Async<Bool>
 ///
 /// @brief Handle attribute event.
 ///
-auto WindowFrameView::ReceiveAttributeEvent(Event& event) -> Async<Bool>
+auto WindowFrameView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {

@@ -6,6 +6,8 @@
 #include "Futurewalker.Application.PointerScopeType.hpp"
 #include "Futurewalker.Application.ViewType.hpp"
 
+#include "Futurewalker.Event.Event.hpp"
+
 #include "Futurewalker.Geometry.hpp"
 
 #include "Futurewalker.Unit.hpp"
@@ -29,12 +31,12 @@ public:
     auto GetPhaseFlags(PassKey<View>) const -> PointerPhaseFlags;
     auto SetPhaseFlags(PointerPhaseFlags const flags) -> void;
 
-    auto GetPointerEvent() const -> Event const&;
-    auto SetPointerEvent(Event const& pointerEvent) -> void;
+    auto GetPointerEvent() const -> Event<PointerEvent> const&;
+    auto SetPointerEvent(Event<PointerEvent> const& pointerEvent) -> void;
 
 private:
     Weak<View> _targetView;
-    Event _pointerEvent;
+    Event<PointerEvent> _pointerEvent;
     PointerPhaseFlags _phaseFlags = PointerPhaseFlags::None;
 };
 }

@@ -71,17 +71,17 @@ public:
 protected:
     virtual auto Initialize() -> void = 0;
 
-    auto SendPointerEvent(Event& event) -> Async<Bool>;
-    auto SendKeyEvent(Event& event) -> Async<Bool>;
-    auto SendInputEvent(Event& event) -> Async<Bool>;
-    auto SendFrameEvent(Event& event) -> Async<Bool>;
-    auto SendWindowEvent(Event& event) -> Async<Bool>;
+    auto SendPointerEvent(Event<>& event) -> Async<Bool>;
+    auto SendKeyEvent(Event<>& event) -> Async<Bool>;
+    auto SendInputEvent(Event<>& event) -> Async<Bool>;
+    auto SendFrameEvent(Event<>& event) -> Async<Bool>;
+    auto SendWindowEvent(Event<>& event) -> Async<Bool>;
 
-    auto SendWindowEventDetached(Event const& event) -> void;
-    auto SendFrameEventDetached(Event const& event) -> void;
-    auto SendPointerEventDetached(Event const& event) -> void;
-    auto SendKeyEventDetached(Event const& event) -> void;
-    auto SendInputEventDetached(Event const& event) -> void;
+    auto SendWindowEventDetached(Event<> const& event) -> void;
+    auto SendFrameEventDetached(Event<> const& event) -> void;
+    auto SendPointerEventDetached(Event<> const& event) -> void;
+    auto SendKeyEventDetached(Event<> const& event) -> void;
+    auto SendInputEventDetached(Event<> const& event) -> void;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;

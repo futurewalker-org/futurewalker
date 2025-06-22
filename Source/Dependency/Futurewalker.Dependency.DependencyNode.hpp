@@ -27,7 +27,7 @@ class DependencyNode final : NonCopyable
 public:
     struct Delegate
     {
-        Function<Bool(Event&)> dispatchEvent;
+        Function<Bool(Event<>&)> dispatchEvent;
     };
     static auto Make(Delegate delegate) -> Shared<DependencyNode>;
 
@@ -35,7 +35,7 @@ public:
     DependencyNode(PassKey<DependencyNode>, Delegate delegate);
 
     auto Notify() -> void;
-    auto NotifyWithEvent(Event const& event) -> void;
+    auto NotifyWithEvent(Event<> const& event) -> void;
 
     auto AddChild(Shared<DependencyNode> const& node, Pointer<DependencyNode const> after) -> void;
     auto GetChildAt(SInt64 const index) -> Shared<DependencyNode>;
@@ -55,11 +55,11 @@ private:
 
     auto RemoveFromParent() -> void;
 
-    auto NotifyCore(Event const& event) -> void;
-    auto NotifySelf(Event const& event) -> Bool;
-    auto NotifyChildren(Event const& event) -> void;
+    auto NotifyCore(Event<> const& event) -> void;
+    auto NotifySelf(Event<> const& event) -> Bool;
+    auto NotifyChildren(Event<> const& event) -> void;
 
-    auto SendNotifyEvent(Event const& event) -> Bool;
+    auto SendNotifyEvent(Event<> const& event) -> Bool;
 
 private:
     Delegate _delegate;

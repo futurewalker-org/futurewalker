@@ -98,12 +98,12 @@ auto FocusNode::GetEventReceiver() const -> EventReceiver const&
     return *_eventReceiver;
 }
 
-auto FocusNode::SendEvent(Event& event) -> Async<Bool>
+auto FocusNode::SendEvent(Event<>& event) -> Async<Bool>
 {
     co_return co_await GetEventReceiver().SendEvent(event);
 }
 
-auto FocusNode::SendEventDetached(Event& event) -> Bool
+auto FocusNode::SendEventDetached(Event<>& event) -> Bool
 {
     return GetEventReceiver().SendEventDetached(event);
 }

@@ -45,7 +45,7 @@ auto WindowAreaManager::SetTitleBarAvailableAreaRect(Rect<Dp> const& rect) -> vo
     if (_titleBarAvailableAreaRect != rect)
     {
         _titleBarAvailableAreaRect = rect;
-        auto event = Event(WindowAreaManagerEvent::TitleBarAvailableAreaRectChanged());
+        auto event = Event<>(Event<WindowAreaManagerEvent::TitleBarAvailableAreaRectChanged>());
         _eventReceiver->SendEventDetached(event);
     }
 }
@@ -60,7 +60,7 @@ auto WindowAreaManager::SetTitleBarAreaRect(Rect<Dp> const& rect) -> void
     if (_titleBarAreaRect != rect)
     {
         _titleBarAreaRect = rect;
-        auto event = Event(WindowAreaManagerEvent::TitleBarAreaRectChanged());
+        auto event = Event<>(Event<WindowAreaManagerEvent::TitleBarAreaRectChanged>());
         _eventReceiver->SendEventDetached(event);
     }
 }
@@ -75,7 +75,7 @@ auto WindowAreaManager::SetContentAreaRect(Rect<Dp> const& rect) -> void
     if (_contentAreaRect != rect)
     {
         _contentAreaRect = rect;
-        auto event = Event(WindowAreaManagerEvent::ContentAreaRectChanged());
+        auto event = Event<>(Event<WindowAreaManagerEvent::ContentAreaRectChanged>());
         _eventReceiver->SendEventDetached(event);
     }
 }

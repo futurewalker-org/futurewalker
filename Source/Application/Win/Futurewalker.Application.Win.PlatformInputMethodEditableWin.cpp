@@ -176,9 +176,9 @@ auto PlatformInputMethodEditableWin::GetRangeFromU16Range(Range<CodeUnit> range)
 auto PlatformInputMethodEditableWin::InternalBeforeInsertText(String const& text) -> Bool
 {
     auto const self = GetSelf();
-    auto parameter = PlatformInputEvent::InsertText();
-    parameter.SetText(text);
-    auto event = Event(parameter);
+    auto parameter = Event<PlatformInputEvent::InsertText>();
+    parameter->SetText(text);
+    auto event = Event<>(parameter);
     AsyncFunction::SpawnFn([self, e = event] mutable -> Lazy<void> { co_await self->SendInputEvent(e); });
     return true;
 }

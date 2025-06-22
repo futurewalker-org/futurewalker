@@ -52,7 +52,7 @@ public:
     virtual auto DeleteSurroundingText(CodePoint before, CodePoint after) -> void = 0;
 
 protected:
-    auto SendInputEvent(Event& event) -> Async<Bool>;
+    auto SendInputEvent(Event<>& event) -> Async<Bool>;
 
 private:
     Delegate _delegate;

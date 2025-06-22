@@ -64,7 +64,7 @@ public:
     auto Attach(PassKey<InputMethod>, Shared<PlatformInputMethod> inputMethod) -> void;
 
 private:
-    auto HandlePlatformInputEvent(Event& event) -> Async<Bool>;
+    auto HandlePlatformInputEvent(Event<>& event) -> Async<Bool>;
 
 private:
     Shared<PlatformInputMethodEditable> _platform;

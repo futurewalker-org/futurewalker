@@ -645,10 +645,10 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
         {
             if (auto const owner = slot.GetOwner())
             {
-                auto parameter = AttributeEvent::ValueChanged();
-                parameter.SetId(slot.GetDescription().Get().GetId());
-                parameter.SetValue(*valueCache);
-                auto event = Event(parameter);
+                auto parameter = Event<AttributeEvent::ValueChanged>::Make();
+                parameter->SetId(slot.GetDescription().Get().GetId());
+                parameter->SetValue(*valueCache);
+                auto event = Event<>(parameter);
                 owner->_eventReceiver->SendEventDetached(event);
             }
         }

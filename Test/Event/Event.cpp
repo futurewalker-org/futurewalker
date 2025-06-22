@@ -21,29 +21,30 @@ TEST_CASE("Event")
             int i = 42;
         };
 
-        auto event = Event(TestEvent());
+        auto event = Event<TestEvent>::Make();
+        REQUIRE(event->i == 42);
         REQUIRE(event.Is<TestEvent>());
-        REQUIRE(event.As<TestEvent>().i == 42);
+        REQUIRE(event.As<TestEvent>()->i == 42);
 
         SECTION("Copy")
         {
             auto const copy = event;
-            REQUIRE(copy.As<TestEvent>().i == 42);
+            REQUIRE(copy.As<TestEvent>()->i == 42);
 
-            event.As<TestEvent>().i = 24;
-            REQUIRE(event.As<TestEvent>().i == 24);
-            REQUIRE(copy.As<TestEvent>().i == 42);
+            event->i = 24;
+            REQUIRE(event->i == 24);
+            REQUIRE(copy.As<TestEvent>()->i == 42);
         }
 
         SECTION("Assign")
         {
             auto copy = Event();
             copy = event;
-            REQUIRE(copy.As<TestEvent>().i == 42);
+            REQUIRE(copy.As<TestEvent>()->i == 42);
 
-            event.As<TestEvent>().i = 24;
-            REQUIRE(event.As<TestEvent>().i == 24);
-            REQUIRE(copy.As<TestEvent>().i == 42);
+            event->i = 24;
+            REQUIRE(event->i == 24);
+            REQUIRE(copy.As<TestEvent>()->i == 42);
         }
     }
 
@@ -58,7 +59,7 @@ TEST_CASE("Event")
         {
         };
 
-        auto const event = Event(DerivedEvent());
+        auto const event = Event<DerivedEvent>::Make();
         REQUIRE(event.Is<BaseEvent>());
         REQUIRE(event.Is<DerivedEvent>());
     }

@@ -198,7 +198,7 @@ public:
     }
 
 private:
-    auto ReceiveEvent(Event& event) -> Async<Bool>
+    auto ReceiveEvent(Event<>& event) -> Async<Bool>
     {
         if (event.Is<AttributeEvent::ValueChanged>())
         {
@@ -211,7 +211,7 @@ private:
     {
         if (_eventReceiver)
         {
-            auto event = Event(AttributeEvent::ValueChanged());
+            auto event = Event<>(Event<AttributeEvent::ValueChanged>());
             _eventReceiver->SendEventDetached(event);
         }
     }

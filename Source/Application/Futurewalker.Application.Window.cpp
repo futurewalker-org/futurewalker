@@ -363,7 +363,7 @@ auto Window::GetScreen() const -> Shared<Screen>
 ///
 /// @return True if the event is handled.
 ///
-auto Window::SendEvent(Event& event) -> Async<Bool>
+auto Window::SendEvent(Event<>& event) -> Async<Bool>
 {
     co_return co_await GetEventReceiver().SendEvent(event);
 }
@@ -446,12 +446,12 @@ auto Window::Close() -> Async<Bool>
     if (!IsClosed())
     {
         auto cancelled = Bool(false);
-        auto event = Event(WindowEvent::CloseRequested());
+        auto event = Event<>(Event<WindowEvent::CloseRequested>());
         if (co_await SendEvent(event))
         {
             if (event.Is<WindowEvent::CloseRequested>())
             {
-                cancelled = event.As<WindowEvent::CloseRequested>().IsCancelled();
+                cancelled = event.As<WindowEvent::CloseRequested>()->IsCancelled();
             }
         }
 
@@ -538,7 +538,7 @@ auto Window::GetAttributeNode() const -> AttributeNode const&
 ///
 /// @brief Receive window event.
 ///
-auto Window::ReceiveWindowEvent(Event& event) -> Async<Bool>
+auto Window::ReceiveWindowEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<WindowEvent::SizeChanged>())
     {
@@ -558,7 +558,7 @@ auto Window::ReceiveWindowEvent(Event& event) -> Async<Bool>
 ///
 /// @brief 
 ///
-auto Window::ReceiveFrameEvent(Event& event) -> Async<Bool>
+auto Window::ReceiveFrameEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<FrameEvent::Tick>())
     {
@@ -570,14 +570,13 @@ auto Window::ReceiveFrameEvent(Event& event) -> Async<Bool>
 ///
 /// @brief Receive pointer event.
 ///
-auto Window::ReceivePointerEvent(Event& event) -> Async<Bool>
+auto Window::ReceivePointerEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<PointerEvent>())
     {
         if (_rootView)
         {
-            auto rootViewEventParameter = RootViewEvent::Pointer(event);
-            auto rootViewEvent = Event(rootViewEventParameter);
+            auto rootViewEvent = Event<>(Event<RootViewEvent::Pointer>::Make(event));
             co_await _rootView->SendEvent(rootViewEvent);
         }
     }
@@ -587,28 +586,26 @@ auto Window::ReceivePointerEvent(Event& event) -> Async<Bool>
 ///
 /// @brief
 ///
-auto Window::ReceiveKeyEvent(Event& event) -> Async<Bool>
+auto Window::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<KeyEvent>())
     {
         if (_rootView)
         {
-            auto parameter = RootViewEvent::Key(event);
-            auto rootViewEvent = Event(parameter);
+            auto rootViewEvent = Event<>(Event<RootViewEvent::Key>::Make(event));
             co_await _rootView->SendEvent(rootViewEvent);
         }
     }
     co_return false;
 }
 
-auto Window::ReceiveInputEvent(Event& event) -> Async<Bool>
+auto Window::ReceiveInputEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<InputEvent>())
     {
         if (_rootView)
         {
-            auto parameter = RootViewEvent::Input(event);
-            auto rootViewEvent = Event(parameter);
+            auto rootViewEvent = Event<>(Event<RootViewEvent::Input>::Make(event));
             co_await _rootView->SendEvent(rootViewEvent);
         }
     }
@@ -661,11 +658,11 @@ auto Window::Realize(WindowOptions const& options) -> void
     };
 
     const auto delegate = PlatformWindow::Delegate {
-      .sendPointerEvent = [this](Event& e) -> Async<Bool> { co_return co_await HandlePlatformPointerEvent(e); },
-      .sendKeyEvent = [this](Event& e) -> Async<Bool> { co_return co_await HandlePlatformKeyEvent(e); },
-      .sendInputEvent = [this](Event& e) -> Async<Bool> { co_return co_await HandlePlatformInputEvent(e); },
-      .sendFrameEvent = [this](Event& e) -> Async<Bool> { co_return co_await HandlePlatformFrameEvent(e); },
-      .sendWindowEvent = [this](Event& e) -> Async<Bool> { co_return co_await HandlePlatformWindowEvent(e); },
+      .sendPointerEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformPointerEvent(e); },
+      .sendKeyEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformKeyEvent(e); },
+      .sendInputEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformInputEvent(e); },
+      .sendFrameEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformFrameEvent(e); },
+      .sendWindowEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformWindowEvent(e); },
     };
 
     _platformObject = _platformContext->MakePlatformWindow(platformOptions, delegate);
@@ -684,7 +681,7 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
     _platformContext = Locator::Resolve<PlatformWindowContext>();
 
     _eventReceiver = EventReceiver::Make({
-      .dispatchEvent = [&](Event& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); },
+      .dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); },
     });
 
     if (const auto applicationContext = Locator::GetInstance<ApplicationContext>())
@@ -752,7 +749,7 @@ auto Window::GetFrameTime() const -> MonotonicTime
 /// @param event
 /// @param dispatch
 ///
-auto Window::DispatchEvent(Event& event, EventFunction const& dispatch) -> Async<Bool>
+auto Window::DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>
 {
     co_return co_await dispatch(event);
 }
@@ -764,15 +761,15 @@ auto Window::AttachRootView() -> void
 {
     if (_rootView)
     {
-        auto parameter = RootViewEvent::Owner();
-        parameter.SetActive(IsActive());
-        parameter.SetAttached(true);
-        parameter.SetDisplayScale(GetDisplayScale());
-        parameter.SetBackingScale(GetBackingScale());
-        parameter.SetParentLayer(_rootViewLayer);
-        parameter.SetParentAttributeNode(_attributeNode);
-        parameter.SetInputMethod(_inputMethod);
-        auto event = Event(parameter);
+        auto parameter = Event<RootViewEvent::Owner>();
+        parameter->SetActive(IsActive());
+        parameter->SetAttached(true);
+        parameter->SetDisplayScale(GetDisplayScale());
+        parameter->SetBackingScale(GetBackingScale());
+        parameter->SetParentLayer(_rootViewLayer);
+        parameter->SetParentAttributeNode(_attributeNode);
+        parameter->SetInputMethod(_inputMethod);
+        auto event = Event<>(parameter);
         _rootView->SendEventDetached(event);
     }
 }
@@ -784,15 +781,15 @@ auto Window::DetachRootView() -> void
 {
     if (_rootView)
     {
-        auto parameter = RootViewEvent::Owner();
-        parameter.SetActive(false);
-        parameter.SetAttached(false);
-        parameter.SetBackingScale(1.0);
-        parameter.SetDisplayScale(1.0);
-        parameter.SetParentAttributeNode(nullptr);
-        parameter.SetParentLayer(nullptr);
-        parameter.SetInputMethod(nullptr);
-        auto event = Event(parameter);
+        auto parameter = Event<RootViewEvent::Owner>();
+        parameter->SetActive(false);
+        parameter->SetAttached(false);
+        parameter->SetBackingScale(1.0);
+        parameter->SetDisplayScale(1.0);
+        parameter->SetParentAttributeNode(nullptr);
+        parameter->SetParentLayer(nullptr);
+        parameter->SetInputMethod(nullptr);
+        auto event = Event<>(parameter);
         _rootView->SendEventDetached(event);
     }
 }
@@ -804,9 +801,9 @@ auto Window::ResizeRootView(Size<Dp> const& size) -> void
 {
     if (_rootView)
     {
-        auto parameter = RootViewEvent::Resize();
-        parameter.SetSize(size);
-        auto event = Event(parameter);
+        auto parameter = Event<RootViewEvent::Resize>();
+        parameter->SetSize(size);
+        auto event = Event<>(parameter);
         _rootView->SendEventDetached(event);
     }
 }
@@ -818,8 +815,8 @@ auto Window::UpdateRootView() -> void
 {
     if (_rootView)
     {
-        auto parameter = RootViewEvent::Frame();
-        auto event = Event(parameter);
+        auto parameter = Event<RootViewEvent::Frame>();
+        auto event = Event<>(parameter);
         _rootView->SendEventDetached(event);
     }
 }
@@ -854,29 +851,29 @@ auto Window::GetPlatformViewLayer() -> Shared<PlatformViewLayer>
 ///
 /// @return
 ///
-auto Window::HandlePlatformWindowEvent(Event& event) -> Async<Bool>
+auto Window::HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<PlatformWindowEvent::VisibleChanged>())
     {
-        auto windowEventParameter = WindowEvent::VisibleChanged();
-        windowEventParameter.SetVisible(IsVisible());
-        auto windowEvent = Event(windowEventParameter);
+        auto windowEventParameter = Event<WindowEvent::VisibleChanged>();
+        windowEventParameter->SetVisible(IsVisible());
+        auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;
     }
     else if (event.Is<PlatformWindowEvent::ActiveChanged>())
     {
-        auto windowEventParameter = WindowEvent::ActiveChanged();
-        windowEventParameter.SetActive(IsActive());
-        auto windowEvent = Event(windowEventParameter);
+        auto windowEventParameter = Event<WindowEvent::ActiveChanged>::Make();
+        windowEventParameter->SetActive(IsActive());
+        auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;
     }
     else if (event.Is<PlatformWindowEvent::FocusedChanged>())
     {
-        auto windowEventParameter = WindowEvent::FocusedChanged();
-        windowEventParameter.SetFocused(IsFocused());
-        auto windowEvent = Event(windowEventParameter);
+        auto windowEventParameter = Event<WindowEvent::FocusedChanged>::Make();
+        windowEventParameter->SetFocused(IsFocused());
+        auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;
     }
@@ -887,30 +884,30 @@ auto Window::HandlePlatformWindowEvent(Event& event) -> Async<Bool>
     }
     else if (event.Is<PlatformWindowEvent::Closed>())
     {
-        auto windowEvent = Event(WindowEvent::Closed());
+        auto windowEvent = Event<>(Event<WindowEvent::Closed>());
         co_await SendEvent(windowEvent);
         co_return true;
     }
     else if (event.Is<PlatformWindowEvent::SizeChanged>())
     {
-        auto windowEventParameter = WindowEvent::SizeChanged();
-        windowEventParameter.SetSize(GetSize());
-        auto windowEvent = Event(windowEventParameter);
+        auto windowEventParameter = Event<WindowEvent::SizeChanged>();
+        windowEventParameter->SetSize(GetSize());
+        auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;
     }
     else if (event.Is<PlatformWindowEvent::PositionChanged>())
     {
-        auto windowEventParameter = WindowEvent::PositionChanged();
-        windowEventParameter.SetPosition(GetPosition());
-        auto windowEvent = Event(windowEventParameter);
+        auto windowEventParameter = Event<WindowEvent::PositionChanged>();
+        windowEventParameter->SetPosition(GetPosition());
+        auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;
     }
     else if (event.Is<PlatformWindowEvent::AreaChanged>())
     {
-        auto windowEventParameter = WindowEvent::AreaChanged();
-        auto windowEvent = Event(windowEventParameter);
+        auto windowEventParameter = Event<WindowEvent::AreaChanged>();
+        auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;
     }
@@ -920,14 +917,14 @@ auto Window::HandlePlatformWindowEvent(Event& event) -> Async<Bool>
 ///
 /// @brief
 ///
-auto Window::HandlePlatformFrameEvent(Event& event) -> Async<Bool>
+auto Window::HandlePlatformFrameEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<PlatformFrameEvent::Tick>())
     {
-        auto const& parameter = event.As<PlatformFrameEvent::Tick>();
-        auto frameEventParameter = FrameEvent::Tick();
-        frameEventParameter.SetTargetTimestamp(parameter.GetTargetTimestamp());
-        auto frameEvent = Event(frameEventParameter);
+        auto const parameter = event.As<PlatformFrameEvent::Tick>();
+        auto frameEventParameter = Event<FrameEvent::Tick>();
+        frameEventParameter->SetTargetTimestamp(parameter->GetTargetTimestamp());
+        auto frameEvent = Event<>(frameEventParameter);
         co_await SendEvent(frameEvent);
         co_return true;
     }
@@ -941,137 +938,145 @@ auto Window::HandlePlatformFrameEvent(Event& event) -> Async<Bool>
 ///
 /// @return
 ///
-auto Window::HandlePlatformPointerEvent(Event& event) -> Async<Bool>
+auto Window::HandlePlatformPointerEvent(Event<>& event) -> Async<Bool>
 {
     auto sendingEvent = ConvertPointerEvent(event);
-        co_return co_await SendEvent(sendingEvent);
+    co_return co_await SendEvent(sendingEvent);
 }
 
-auto Window::HandlePlatformKeyEvent(Event& event) -> Async<Bool>
+auto Window::HandlePlatformKeyEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<PlatformKeyEvent::Down>())
     {
-        auto const& parameter = event.As<PlatformKeyEvent::Down>();
-        auto sendingParameter = KeyEvent::Down();
-        sendingParameter.SetKey(parameter.GetKey());
-        sendingParameter.SetUnmodifiedKey(parameter.GetUnmodifiedKey());
-        sendingParameter.SetText(parameter.GetText());
-        sendingParameter.SetModifiers(parameter.GetModifiers());
-        sendingParameter.SetRepeat(parameter.IsRepeat());
-        sendingParameter.SetTimestamp(parameter.GetTimestamp());
-        auto sendingEvent = Event(sendingParameter);
+        auto const parameter = event.As<PlatformKeyEvent::Down>();
+        auto sendingParameter = Event<KeyEvent::Down>();
+        sendingParameter->SetKey(parameter->GetKey());
+        sendingParameter->SetUnmodifiedKey(parameter->GetUnmodifiedKey());
+        sendingParameter->SetText(parameter->GetText());
+        sendingParameter->SetModifiers(parameter->GetModifiers());
+        sendingParameter->SetRepeat(parameter->IsRepeat());
+        sendingParameter->SetTimestamp(parameter->GetTimestamp());
+        auto sendingEvent = Event<>(sendingParameter);
         co_return co_await SendEvent(sendingEvent);
     }
     else if (event.Is<PlatformKeyEvent::Up>())
     {
-        auto const& parameter = event.As<PlatformKeyEvent::Up>();
-        auto sendingParameter = KeyEvent::Up();
-        sendingParameter.SetTimestamp(parameter.GetTimestamp());
-        auto sendingEvent = Event(sendingParameter);
+        auto const parameter = event.As<PlatformKeyEvent::Up>();
+        auto sendingParameter = Event<KeyEvent::Up>();
+        sendingParameter->SetTimestamp(parameter->GetTimestamp());
+        auto sendingEvent = Event<>(sendingParameter);
         co_return co_await SendEvent(sendingEvent);
     }
     co_return false;
 }
 
-auto Window::HandlePlatformInputEvent(Event& event) -> Async<Bool>
+auto Window::HandlePlatformInputEvent(Event<>& event) -> Async<Bool>
 {
     (void)event;
     co_return false;
 }
 
-auto Window::ConvertPointerEvent(Event const& from) const noexcept -> Event
+auto Window::ConvertPointerEvent(Event<> const& from) const noexcept -> Event<>
 {
-    auto copyPointerEventParameter = [](Event& to, Event const& from) -> void {
-        to.As<PointerEvent>().SetPointerId(from.As<PlatformPointerEvent>().GetPointerId());
-        to.As<PointerEvent>().SetPointerType(from.As<PlatformPointerEvent>().GetPointerType());
-        to.As<PointerEvent>().SetTimestamp(from.As<PlatformPointerEvent>().GetTimestamp());
-        to.As<PointerEvent>().SetPrimaryPointer(from.As<PlatformPointerEvent>().IsPrimaryPointer());
+    auto copyPointerEventParameter = [](PointerEvent& to, PlatformPointerEvent const& from) -> void {
+        to.SetPointerId(from.GetPointerId());
+        to.SetPointerType(from.GetPointerType());
+        to.SetTimestamp(from.GetTimestamp());
+        to.SetPrimaryPointer(from.IsPrimaryPointer());
     };
 
-    auto copyPointerMotionParameter = [&](Event& to, Event const& from) -> void {
-        FW_DEBUG_ASSERT(to.Is<PointerEvent::Motion>());
-        to.As<PointerEvent::Motion>().SetPointerId(from.As<PlatformPointerEvent::Motion>().GetPointerId());
-        to.As<PointerEvent::Motion>().SetPointerType(from.As<PlatformPointerEvent::Motion>().GetPointerType());
-        to.As<PointerEvent::Motion>().SetTimestamp(from.As<PlatformPointerEvent::Motion>().GetTimestamp());
-        to.As<PointerEvent::Motion>().SetPrimaryPointer(from.As<PlatformPointerEvent::Motion>().IsPrimaryPointer());
-        to.As<PointerEvent::Motion>().SetPosition(LocalToRootViewPoint(from.As<PlatformPointerEvent::Motion>().GetPosition()));
-        to.As<PointerEvent::Motion>().SetTiltX(from.As<PlatformPointerEvent::Motion>().GetTiltX());
-        to.As<PointerEvent::Motion>().SetTiltY(from.As<PlatformPointerEvent::Motion>().GetTiltY());
-        to.As<PointerEvent::Motion>().SetAzimuth(from.As<PlatformPointerEvent::Motion>().GetAzimuth());
-        to.As<PointerEvent::Motion>().SetAltitude(from.As<PlatformPointerEvent::Motion>().GetAltitude());
-        to.As<PointerEvent::Motion>().SetTwist(from.As<PlatformPointerEvent::Motion>().GetTwist());
-        to.As<PointerEvent::Motion>().SetPressure(from.As<PlatformPointerEvent::Motion>().GetPressure());
-        to.As<PointerEvent::Motion>().SetTangentialPressure(from.As<PlatformPointerEvent::Motion>().GetTangentialPressure());
-        to.As<PointerEvent::Motion>().SetButton(from.As<PlatformPointerEvent::Motion>().GetButton());
-        to.As<PointerEvent::Motion>().SetButtons(from.As<PlatformPointerEvent::Motion>().GetButtons());
-        to.As<PointerEvent::Motion>().SetModifiers(from.As<PlatformPointerEvent::Motion>().GetModifiers());
+    auto copyPointerMotionParameter = [&](PointerEvent::Motion& to, PlatformPointerEvent::Motion const& from) -> void {
+        to.SetPointerId(from.GetPointerId());
+        to.SetPointerType(from.GetPointerType());
+        to.SetTimestamp(from.GetTimestamp());
+        to.SetPrimaryPointer(from.IsPrimaryPointer());
+        to.SetPosition(LocalToRootViewPoint(from.GetPosition()));
+        to.SetTiltX(from.GetTiltX());
+        to.SetTiltY(from.GetTiltY());
+        to.SetAzimuth(from.GetAzimuth());
+        to.SetAltitude(from.GetAltitude());
+        to.SetTwist(from.GetTwist());
+        to.SetPressure(from.GetPressure());
+        to.SetTangentialPressure(from.GetTangentialPressure());
+        to.SetButton(from.GetButton());
+        to.SetButtons(from.GetButtons());
+        to.SetModifiers(from.GetModifiers());
     };
 
-    auto copyPointerGestureParameter = [](Event& to, Event const& from) -> void { to.As<PointerEvent::Gesture>().SetPhase(from.As<PlatformPointerEvent::Gesture>().GetPhase()); };
+    auto copyPointerGestureParameter = [](PointerEvent::Gesture& to, PlatformPointerEvent::Gesture const& from) -> void { to.SetPhase(from.GetPhase()); };
 
-    auto to = Event();
+    auto to = Event<PointerEvent>();
     if (from.Is<PlatformPointerEvent::Motion>())
     {
+        auto motionEvent = Event<PointerEvent::Motion>();
         if (from.Is<PlatformPointerEvent::Motion::Down>())
         {
-            to = Event(PointerEvent::Motion::Down());
+            motionEvent = Event<PointerEvent::Motion::Down>();
         }
         else if (from.Is<PlatformPointerEvent::Motion::Up>())
         {
-            to = Event(PointerEvent::Motion::Up());
+            motionEvent = Event<PointerEvent::Motion::Up>();
         }
         else if (from.Is<PlatformPointerEvent::Motion::Move>())
         {
-            to = Event(PointerEvent::Motion::Move());
+            motionEvent = Event<PointerEvent::Motion::Move>();
         }
         else if (from.Is<PlatformPointerEvent::Motion::Enter>())
         {
-            to = Event(PointerEvent::Motion::Enter());
+            motionEvent = Event<PointerEvent::Motion::Enter>();
         }
         else if (from.Is<PlatformPointerEvent::Motion::Leave>())
         {
-            to = Event(PointerEvent::Motion::Leave());
+            motionEvent = Event<PointerEvent::Motion::Leave>();
         }
         else if (from.Is<PlatformPointerEvent::Motion::Cancel>())
         {
-            to = Event(PointerEvent::Motion::Cancel());
+            motionEvent = Event<PointerEvent::Motion::Cancel>();
         }
-        copyPointerMotionParameter(to, from);
+        copyPointerMotionParameter(*motionEvent, *from.As<PlatformPointerEvent::Motion>());
+        to = motionEvent;
     }
     else if (from.Is<PlatformPointerEvent::Gesture>())
     {
+        auto gestureEvent = Event<PointerEvent::Gesture>();
         if (from.Is<PlatformPointerEvent::Gesture::Magnify>())
         {
-            to = Event(PointerEvent::Gesture::Magnify());
-            to.As<PointerEvent::Gesture::Magnify>().SetScale(from.As<PlatformPointerEvent::Gesture::Magnify>().GetScale());
+            auto magnifyEvent = Event<PointerEvent::Gesture::Magnify>();
+            magnifyEvent->SetScale(from.As<PlatformPointerEvent::Gesture::Magnify>()->GetScale());
+            gestureEvent = magnifyEvent;
         }
         else if (from.Is<PlatformPointerEvent::Gesture::Rotate>())
         {
-            to = Event(PointerEvent::Gesture::Rotate());
-            to.As<PointerEvent::Gesture::Rotate>().SetRotation(from.As<PlatformPointerEvent::Gesture::Rotate>().GetRotation());
+            auto rotateEvent = Event<PointerEvent::Gesture::Rotate>();
+            rotateEvent->SetRotation(from.As<PlatformPointerEvent::Gesture::Rotate>()->GetRotation());
+            gestureEvent = rotateEvent;
         }
         else if (from.Is<PlatformPointerEvent::Gesture::Swipe>())
         {
-            to = Event(PointerEvent::Gesture::Swipe());
-            to.As<PointerEvent::Gesture::Swipe>().SetDeltaX(from.As<PlatformPointerEvent::Gesture::Swipe>().GetDeltaX());
-            to.As<PointerEvent::Gesture::Swipe>().SetDeltaY(from.As<PlatformPointerEvent::Gesture::Swipe>().GetDeltaY());
+            auto swipeEvent = Event<PointerEvent::Gesture::Swipe>();
+            swipeEvent->SetDeltaX(from.As<PlatformPointerEvent::Gesture::Swipe>()->GetDeltaX());
+            swipeEvent->SetDeltaY(from.As<PlatformPointerEvent::Gesture::Swipe>()->GetDeltaY());
+            gestureEvent = swipeEvent;
         }
         else if (from.Is<PlatformPointerEvent::Gesture::Scroll>())
         {
-            to = Event(PointerEvent::Gesture::Scroll());
-            to.As<PointerEvent::Gesture::Scroll>().SetDeltaX(from.As<PlatformPointerEvent::Gesture::Scroll>().GetDeltaX());
-            to.As<PointerEvent::Gesture::Scroll>().SetDeltaY(from.As<PlatformPointerEvent::Gesture::Scroll>().GetDeltaY());
+            auto scrollEvent = Event<PointerEvent::Gesture::Scroll>();
+            scrollEvent->SetDeltaX(from.As<PlatformPointerEvent::Gesture::Scroll>()->GetDeltaX());
+            scrollEvent->SetDeltaY(from.As<PlatformPointerEvent::Gesture::Scroll>()->GetDeltaY());
+            gestureEvent = scrollEvent;
         }
-        copyPointerGestureParameter(to, from);
+        copyPointerGestureParameter(*gestureEvent, *from.As<PlatformPointerEvent::Gesture>());
+        to = gestureEvent;
     }
     else if (from.Is<PlatformPointerEvent::Wheel>())
     {
-        to = Event(PointerEvent::Wheel());
-        to.As<PointerEvent::Wheel>().SetDeltaX(from.As<PlatformPointerEvent::Wheel>().GetDeltaX());
-        to.As<PointerEvent::Wheel>().SetDeltaY(from.As<PlatformPointerEvent::Wheel>().GetDeltaY());
-        to.As<PointerEvent::Wheel>().SetPrecision(from.As<PlatformPointerEvent::Wheel>().GetPrecision());
+        auto wheelEvent = Event<PointerEvent::Wheel>();
+        wheelEvent->SetDeltaX(from.As<PlatformPointerEvent::Wheel>()->GetDeltaX());
+        wheelEvent->SetDeltaY(from.As<PlatformPointerEvent::Wheel>()->GetDeltaY());
+        wheelEvent->SetPrecision(from.As<PlatformPointerEvent::Wheel>()->GetPrecision());
+        to = wheelEvent;
     }
-    copyPointerEventParameter(to, from);
+    copyPointerEventParameter(*to, *from.As<PlatformPointerEvent>());
     return to;
 }
 }

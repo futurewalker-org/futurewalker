@@ -45,7 +45,7 @@ public:
     auto NotifyLayoutChange() -> void;
 
 private:
-    auto SendInputEvent(Event& event) -> Async<Bool>;
+    auto SendInputEvent(Event<>& event) -> Async<Bool>;
 
     auto GetSelf() -> Shared<PlatformInputMethodTextStoreWin>;
 

@@ -145,7 +145,7 @@ public:
 
     auto GetScreen() const -> Shared<Screen>;
 
-    auto SendEvent(Event& event) -> Async<Bool>;
+    auto SendEvent(Event<>& event) -> Async<Bool>;
 
     auto Minimize() -> void;
     auto Maximize() -> void;
@@ -179,11 +179,11 @@ protected:
     static auto MakeDerived(WindowOptions const& options, Args&&... args) -> Shared<Derived>;
 
 private:
-    auto ReceiveWindowEvent(Event& event) -> Async<Bool>;
-    auto ReceiveFrameEvent(Event& event) -> Async<Bool>;
-    auto ReceivePointerEvent(Event& event) -> Async<Bool>;
-    auto ReceiveKeyEvent(Event& event) -> Async<Bool>;
-    auto ReceiveInputEvent(Event& event) -> Async<Bool>;
+    auto ReceiveWindowEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveFrameEvent(Event<>& event) -> Async<Bool>;
+    auto ReceivePointerEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveKeyEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveInputEvent(Event<>& event) -> Async<Bool>;
 
 private:
     auto GetSelfBase() -> Shared<Window>;
@@ -194,7 +194,7 @@ private:
     auto RequestFrame() -> void;
     auto GetFrameTime() const -> MonotonicTime;
 
-    auto DispatchEvent(Event& event, EventFunction const& dispatch) -> Async<Bool>;
+    auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
 
     auto AttachRootView() -> void;
     auto DetachRootView() -> void;
@@ -206,13 +206,13 @@ private:
 
     auto GetPlatformViewLayer() -> Shared<PlatformViewLayer>;
 
-    auto HandlePlatformWindowEvent(Event& event) -> Async<Bool>;
-    auto HandlePlatformFrameEvent(Event& event) -> Async<Bool>;
-    auto HandlePlatformPointerEvent(Event& event) -> Async<Bool>;
-    auto HandlePlatformKeyEvent(Event& event) -> Async<Bool>;
-    auto HandlePlatformInputEvent(Event& event) -> Async<Bool>;
+    auto HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>;
+    auto HandlePlatformFrameEvent(Event<>& event) -> Async<Bool>;
+    auto HandlePlatformPointerEvent(Event<>& event) -> Async<Bool>;
+    auto HandlePlatformKeyEvent(Event<>& event) -> Async<Bool>;
+    auto HandlePlatformInputEvent(Event<>& event) -> Async<Bool>;
 
-    auto ConvertPointerEvent(Event const& from) const noexcept -> Event;
+    auto ConvertPointerEvent(Event<> const& from) const noexcept -> Event<>;
 
 private:
     Weak<Window> _self;

@@ -18,7 +18,7 @@ public:
     EventParameter() = default;
     EventParameter(EventParameter const&) = default;
     EventParameter& operator=(EventParameter const&) = default;
-    virtual ~EventParameter() noexcept = 0;
+    virtual ~EventParameter() noexcept;
 
     template <class T>
     auto Is() const -> Bool

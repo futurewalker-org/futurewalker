@@ -11,7 +11,7 @@ PlatformInputMethodEditable::PlatformInputMethodEditable(Delegate const& delegat
 
 PlatformInputMethodEditable::~PlatformInputMethodEditable() = default;
 
-auto PlatformInputMethodEditable::SendInputEvent(Event& event) -> Async<Bool>
+auto PlatformInputMethodEditable::SendInputEvent(Event<>& event) -> Async<Bool>
 {
     if (_delegate.sendInputevent)
     {

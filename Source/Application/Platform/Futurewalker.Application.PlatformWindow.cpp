@@ -26,7 +26,7 @@ PlatformWindow::~PlatformWindow() = default;
 ///
 /// @param event
 ///
-auto PlatformWindow::SendPointerEvent(Event& event) -> Async<Bool>
+auto PlatformWindow::SendPointerEvent(Event<>& event) -> Async<Bool>
 {
     if (_delegate.sendPointerEvent)
     {
@@ -40,7 +40,7 @@ auto PlatformWindow::SendPointerEvent(Event& event) -> Async<Bool>
 ///
 /// @param event
 ///
-auto PlatformWindow::SendKeyEvent(Event& event) -> Async<Bool>
+auto PlatformWindow::SendKeyEvent(Event<>& event) -> Async<Bool>
 {
     if (_delegate.sendKeyEvent)
     {
@@ -54,7 +54,7 @@ auto PlatformWindow::SendKeyEvent(Event& event) -> Async<Bool>
 ///
 /// @param event
 ///
-auto PlatformWindow::SendInputEvent(Event& event) -> Async<Bool>
+auto PlatformWindow::SendInputEvent(Event<>& event) -> Async<Bool>
 {
     if (_delegate.sendInputEvent)
     {
@@ -66,7 +66,7 @@ auto PlatformWindow::SendInputEvent(Event& event) -> Async<Bool>
 ///
 /// @brief
 ///
-auto PlatformWindow::SendFrameEvent(Event& event) -> Async<Bool>
+auto PlatformWindow::SendFrameEvent(Event<>& event) -> Async<Bool>
 {
     if (_delegate.sendFrameEvent)
     {
@@ -82,7 +82,7 @@ auto PlatformWindow::SendFrameEvent(Event& event) -> Async<Bool>
 ///
 /// @return
 ///
-auto PlatformWindow::SendWindowEvent(Event& event) -> Async<Bool>
+auto PlatformWindow::SendWindowEvent(Event<>& event) -> Async<Bool>
 {
     if (_delegate.sendWindowEvent)
     {
@@ -94,7 +94,7 @@ auto PlatformWindow::SendWindowEvent(Event& event) -> Async<Bool>
 ///
 /// @brief
 ///
-auto PlatformWindow::SendWindowEventDetached(Event const& event) -> void
+auto PlatformWindow::SendWindowEventDetached(Event<> const& event) -> void
 {
     AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
         try
@@ -111,7 +111,7 @@ auto PlatformWindow::SendWindowEventDetached(Event const& event) -> void
 ///
 /// @brief
 ///
-auto PlatformWindow::SendFrameEventDetached(Event const& event) -> void
+auto PlatformWindow::SendFrameEventDetached(Event<> const& event) -> void
 {
     AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
         try
@@ -128,7 +128,7 @@ auto PlatformWindow::SendFrameEventDetached(Event const& event) -> void
 ///
 /// @brief
 ///
-auto PlatformWindow::SendPointerEventDetached(Event const& event) -> void
+auto PlatformWindow::SendPointerEventDetached(Event<> const& event) -> void
 {
     AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
         try
@@ -145,7 +145,7 @@ auto PlatformWindow::SendPointerEventDetached(Event const& event) -> void
 ///
 /// @brief
 ///
-auto PlatformWindow::SendKeyEventDetached(Event const& event) -> void
+auto PlatformWindow::SendKeyEventDetached(Event<> const& event) -> void
 {
     AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
         try
@@ -162,7 +162,7 @@ auto PlatformWindow::SendKeyEventDetached(Event const& event) -> void
 ///
 /// @brief
 ///
-auto PlatformWindow::SendInputEventDetached(Event const& event) -> void
+auto PlatformWindow::SendInputEventDetached(Event<> const& event) -> void
 {
     AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
         try

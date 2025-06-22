@@ -23,7 +23,7 @@ auto DependencyNodeEvent::Notify::SetSender(Shared<DependencyNode> const& sender
 ///
 /// @brief Get event.
 ///
-auto DependencyNodeEvent::Notify::GetEvent() const ->  Event const&
+auto DependencyNodeEvent::Notify::GetEvent() const -> Event<> const&
 {
     return _event;
 }
@@ -31,7 +31,7 @@ auto DependencyNodeEvent::Notify::GetEvent() const ->  Event const&
 ///
 /// @brief Set event.
 ///
-auto DependencyNodeEvent::Notify::SetEvent(Event const& event) -> void
+auto DependencyNodeEvent::Notify::SetEvent(Event<> const& event) -> void
 {
     _event = event;
 }

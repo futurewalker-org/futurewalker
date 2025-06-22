@@ -117,7 +117,7 @@ private:
     auto PointerEnter(Bool const enter, WPARAM const wParam) -> void;
     auto PointerUpdate(WPARAM const wParam) -> void;
 
-    auto PostWindowEvent(Event const& event) -> void;
+    auto PostWindowEvent(Event<> const& event) -> void;
 
     auto DisableWindow(Shared<PlatformWindowWin> const& source) -> void;
     auto EnableWindow(Shared<PlatformWindowWin> const& source) -> void;

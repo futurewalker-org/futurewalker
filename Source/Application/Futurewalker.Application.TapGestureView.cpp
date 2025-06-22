@@ -54,12 +54,12 @@ auto TapGestureView::Initialize() -> void
     EventReceiver::Connect(*_gestureRecognizer, *this, &TapGestureView::ReceiveEvent);
 }
 
-auto TapGestureView::ReceiveEvent(Event& event) -> Async<Bool>
+auto TapGestureView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<TapGestureEvent>())
     {
-        const auto type = event.As<TapGestureEvent>().GetEventType();
-        auto tapEvent = Event(TapGestureViewEvent(type));
+        const auto type = event.As<TapGestureEvent>()->GetEventType();
+        auto tapEvent = Event<>(Event<TapGestureViewEvent>::Make(type));
         co_await SendEvent(tapEvent);
         co_return true;
     }

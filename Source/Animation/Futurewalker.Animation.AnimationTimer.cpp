@@ -311,7 +311,7 @@ auto AnimationTimer::RemoveFromParent() -> void
 ///
 /// @brief
 ///
-auto AnimationTimer::SendEvent(Event& event) -> Bool
+auto AnimationTimer::SendEvent(Event<>& event) -> Bool
 {
     return GetEventReceiver().SendEventDetached(event);
 }
@@ -321,11 +321,11 @@ auto AnimationTimer::SendEvent(Event& event) -> Bool
 ///
 /// @param event
 ///
-auto AnimationTimer::ReceiveEvent(Event& event) -> Bool
+auto AnimationTimer::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<DependencyNodeEvent::Notify>())
     {
-        auto const& notifyEvent = event.As<DependencyNodeEvent::Notify>().GetEvent();
+        auto const notifyEvent = event.As<DependencyNodeEvent::Notify>()->GetEvent();
 
         if (notifyEvent.Is<DependencyNodeNotifyTick>())
         {
@@ -334,7 +334,7 @@ auto AnimationTimer::ReceiveEvent(Event& event) -> Bool
                 if (_tickRequested)
                 {
                     _tickRequested = false;
-                    SendAnimationTimerTickEvent(notifyEvent.As<DependencyNodeNotifyTick>().time);
+                    SendAnimationTimerTickEvent(notifyEvent.As<DependencyNodeNotifyTick>()->time);
                     return false;
                 }
             }
@@ -342,7 +342,7 @@ auto AnimationTimer::ReceiveEvent(Event& event) -> Bool
         }
         else if (notifyEvent.Is<DependencyNodeNotifyActiveChanged>())
         {
-            auto const active = notifyEvent.As<DependencyNodeNotifyActiveChanged>().active;
+            auto const active = notifyEvent.As<DependencyNodeNotifyActiveChanged>()->active;
             if (_active != active)
             {
                 _active = active;
@@ -352,7 +352,7 @@ auto AnimationTimer::ReceiveEvent(Event& event) -> Bool
         }
         else if (notifyEvent.Is<DependencyNodeNotifyEnabledChanged>())
         {
-            auto const enabled = notifyEvent.As<DependencyNodeNotifyEnabledChanged>().enabled;
+            auto const enabled = notifyEvent.As<DependencyNodeNotifyEnabledChanged>()->enabled;
             if (_enabled && _enabledFromRoot != enabled)
             {
                 _enabledFromRoot = enabled;
@@ -401,9 +401,9 @@ auto AnimationTimer::GetEventReceiver() const -> EventReceiver const&
 ///
 auto AnimationTimer::SendDependencyNodeTickEvent(MonotonicTime const time) -> void
 {
-    auto parameter = DependencyNodeNotifyTick();
-    parameter.time = time;
-    _dependencyNode->NotifyWithEvent(Event(parameter));
+    auto parameter = Event<DependencyNodeNotifyTick>();
+    parameter->time = time;
+    _dependencyNode->NotifyWithEvent(parameter);
 }
 
 ///
@@ -411,10 +411,9 @@ auto AnimationTimer::SendDependencyNodeTickEvent(MonotonicTime const time) -> vo
 ///
 auto AnimationTimer::SendDependencyNodeActiveChangedEvent(Bool const active) -> void
 {
-    auto parameter = DependencyNodeNotifyActiveChanged();
-    parameter.active = active;
-    auto event = Event(parameter);
-    _dependencyNode->NotifyWithEvent(event);
+    auto parameter = Event<DependencyNodeNotifyActiveChanged>();
+    parameter->active = active;
+    _dependencyNode->NotifyWithEvent(parameter);
 }
 
 ///
@@ -422,10 +421,9 @@ auto AnimationTimer::SendDependencyNodeActiveChangedEvent(Bool const active) -> 
 ///
 auto AnimationTimer::SendDependencyNodeEnabledChangedEvent(Bool const enabled) -> void
 {
-    auto parameter = DependencyNodeNotifyEnabledChanged();
-    parameter.enabled = enabled;
-    auto event = Event(parameter);
-    _dependencyNode->NotifyWithEvent(event);
+    auto parameter = Event<DependencyNodeNotifyEnabledChanged>();
+    parameter->enabled = enabled;
+    _dependencyNode->NotifyWithEvent(parameter);
 }
 
 ///
@@ -433,9 +431,9 @@ auto AnimationTimer::SendDependencyNodeEnabledChangedEvent(Bool const enabled) -
 ///
 auto AnimationTimer::SendAnimationTimerTickEvent(MonotonicTime const time) -> void
 {
-    auto parameter = AnimationTimerEvent::Tick();
-    parameter.SetTime(time);
-    auto timerEvent = Event(parameter);
+    auto parameter = Event<AnimationTimerEvent::Tick>();
+    parameter->SetTime(time);
+    auto timerEvent = Event<>(parameter);
     SendEvent(timerEvent);
 }
 
@@ -444,7 +442,7 @@ auto AnimationTimer::SendAnimationTimerTickEvent(MonotonicTime const time) -> vo
 ///
 auto AnimationTimer::SendAnimationTimerActiveChangedEvent() -> void
 {
-    auto event = Event(AnimationTimerEvent::ActiveChanged());
+    auto event = Event<>(Event<AnimationTimerEvent::ActiveChanged>());
     SendEvent(event);
 }
 
@@ -453,7 +451,7 @@ auto AnimationTimer::SendAnimationTimerActiveChangedEvent() -> void
 ///
 auto AnimationTimer::SendAnimationTimerEnabledChangedEvent() -> void
 {
-    auto event = Event(AnimationTimerEvent::EnabledChanged());
+    auto event = Event<>(Event<AnimationTimerEvent::EnabledChanged>());
     SendEvent(event);
 }
 

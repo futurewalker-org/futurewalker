@@ -42,8 +42,8 @@ protected:
     auto Measure(MeasureScope& scope) -> void override;
     auto Arrange(ArrangeScope& scope) -> void override;
     auto Draw(DrawScope& scope) -> void override;
-    auto ReceiveEvent(Event& event) -> Async<Bool>;
-    auto ReceiveAttributeEvent(Event& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 
 private:
     auto GetAreaManager() -> Shared<WindowAreaManager>;

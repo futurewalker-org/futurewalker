@@ -130,12 +130,12 @@ public:
     }
 
 private:
-    auto ReceiveEvent(Event& event) -> Async<Bool>
+    auto ReceiveEvent(Event<>& event) -> Async<Bool>
     {
         if (event.Is<AttributeEvent::ValueChanged>())
         {
-            auto const& parameter = event.As<AttributeEvent::ValueChanged>();
-            if (parameter.GetId() == _description.Get().GetId())
+            auto const parameter = event.As<AttributeEvent::ValueChanged>();
+            if (parameter->GetId() == _description.Get().GetId())
             {
                 GetEventReceiver().SendEventDetached(event);
                 co_return true;

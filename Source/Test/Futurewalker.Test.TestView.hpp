@@ -35,7 +35,7 @@ public:
         EventReceiver::Connect(*this, *this, &TestView::ReceiveEvent);
     }
 
-    auto ReceiveEvent(Event& event) -> Async<Bool>
+    auto ReceiveEvent(Event<>& event) -> Async<Bool>
     {
         if (event.Is<ViewEvent::VisibleChanged>())
         {

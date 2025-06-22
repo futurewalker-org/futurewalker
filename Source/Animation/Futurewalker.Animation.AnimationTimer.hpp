@@ -77,8 +77,8 @@ private:
 
     auto RemoveFromParent() -> void;
 
-    auto SendEvent(Event& event) -> Bool;
-    auto ReceiveEvent(Event& event) -> Bool;
+    auto SendEvent(Event<>& event) -> Bool;
+    auto ReceiveEvent(Event<>& event) -> Bool;
 
     auto SendDependencyNodeTickEvent(MonotonicTime const time) -> void;
     auto SendDependencyNodeActiveChangedEvent(Bool const active) -> void;

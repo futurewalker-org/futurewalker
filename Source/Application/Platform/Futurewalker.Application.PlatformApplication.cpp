@@ -27,7 +27,7 @@ PlatformApplication::PlatformApplication(Delegate const& delegate)
 ///
 /// @param event
 ///
-auto PlatformApplication::SendApplicationEvent(Event& event) -> Async<Bool>
+auto PlatformApplication::SendApplicationEvent(Event<>& event) -> Async<Bool>
 {
     if (_delegate.sendApplicationEvent)
     {
@@ -41,7 +41,7 @@ auto PlatformApplication::SendApplicationEvent(Event& event) -> Async<Bool>
 ///
 /// @param event
 ///
-auto PlatformApplication::SendApplicationEventDetached(Event const& event) -> void
+auto PlatformApplication::SendApplicationEventDetached(Event<> const& event) -> void
 {
     AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
         try

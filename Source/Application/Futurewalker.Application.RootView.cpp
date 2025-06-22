@@ -101,20 +101,20 @@ auto RootView::Initialize() -> void
 ///
 /// @brief Handle event.
 ///
-auto RootView::ReceiveEvent(Event& event) -> Async<Bool>
+auto RootView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<RootViewEvent::Owner>())
     {
-        auto const& parameter = event.As<RootViewEvent::Owner>();
-        _attached = parameter.GetAttached();
-        _active = parameter.GetActive();
-        _displayScale = parameter.GetDisplayScale();
-        _backingScale = parameter.GetBackingScale();
-        _inputMethod = parameter.GetInputMethod();
+        auto const parameter = event.As<RootViewEvent::Owner>();
+        _attached = parameter->GetAttached();
+        _active = parameter->GetActive();
+        _displayScale = parameter->GetDisplayScale();
+        _backingScale = parameter->GetBackingScale();
+        _inputMethod = parameter->GetInputMethod();
 
-        _drawInfo.SetParentLayer(parameter.GetParentLayer());
+        _drawInfo.SetParentLayer(parameter->GetParentLayer());
 
-        auto const parentAttributeNode = parameter.GetParentAttributeNode();
+        auto const parentAttributeNode = parameter->GetParentAttributeNode();
         if (parentAttributeNode != _parentAttributeNode)
         {
             if (_parentAttributeNode)
@@ -133,8 +133,8 @@ auto RootView::ReceiveEvent(Event& event) -> Async<Bool>
     }
     else if (event.Is<RootViewEvent::Resize>())
     {
-        auto const& parameter = event.As<RootViewEvent::Resize>();
-        auto const size = parameter.GetSize();
+        auto const parameter = event.As<RootViewEvent::Resize>();
+        auto const size = parameter->GetSize();
         if (_layoutInfo.SetSize(size))
         {
             _drawInfo.GetLayer().SetSize(size);
@@ -148,22 +148,22 @@ auto RootView::ReceiveEvent(Event& event) -> Async<Bool>
     }
     else if (event.Is<RootViewEvent::Pointer>())
     {
-        auto& parameter = event.As<RootViewEvent::Pointer>();
-        auto& sourceEvent = parameter.GetEvent();
+        auto parameter = event.As<RootViewEvent::Pointer>();
+        auto& sourceEvent = parameter->GetEvent();
         co_await DispatchPointerEvent(sourceEvent);
         co_return true;
     }
     else if (event.Is<RootViewEvent::Key>())
     {
-        auto& parameter = event.As<RootViewEvent::Key>();
-        auto& sourceEvent = parameter.GetEvent();
+        auto parameter = event.As<RootViewEvent::Key>();
+        auto& sourceEvent = parameter->GetEvent();
         co_await DispatchKeyEvent(sourceEvent);
         co_return true;
     }
     else if (event.Is<RootViewEvent::Input>())
     {
-        auto& parameter = event.As<RootViewEvent::Input>();
-        auto& sourceEvent = parameter.GetEvent();
+        auto parameter = event.As<RootViewEvent::Input>();
+        auto& sourceEvent = parameter->GetEvent();
         co_await DispatchInputEvent(sourceEvent);
         co_return true;
     }
@@ -182,7 +182,7 @@ auto RootView::ReceiveEvent(Event& event) -> Async<Bool>
 ///
 /// @brief
 ///
-auto RootView::ReceiveFocusEvent(Event& event) -> Async<Bool>
+auto RootView::ReceiveFocusEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<FocusEvent>())
     {
@@ -194,14 +194,14 @@ auto RootView::ReceiveFocusEvent(Event& event) -> Async<Bool>
                 {
                     if (event.Is<FocusEvent::FocusWillChange>())
                     {
-                        auto inputEvent = Event(InputEvent::Detach());
+                        auto inputEvent = Event<>(Event<InputEvent::Detach>());
                         co_await focus->SendEvent(inputEvent);
                     }
                     else if (event.Is<FocusEvent::FocusDidChange>())
                     {
-                        auto inputEventParameter = InputEvent::Attach();
-                        inputEventParameter.SetInputMethod(_inputMethod);
-                        auto inputEvent = Event(inputEventParameter);
+                        auto inputEventParameter = Event<InputEvent::Attach>();
+                        inputEventParameter->SetInputMethod(_inputMethod);
+                        auto inputEvent = Event<>(inputEventParameter);
                         co_await focus->SendEvent(inputEvent);
                     }
                 }
@@ -285,12 +285,12 @@ auto RootView::GetFrameTime() const -> MonotonicTime
 ///
 /// @brief 
 ///
-auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
+auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
 {
     if (event.Is<PointerEvent>())
     {
-        auto const& parameter = event.As<PointerEvent>();
-        auto const pointerId = parameter.GetPointerId();
+        auto const parameter = event.As<PointerEvent>();
+        auto const pointerId = parameter->GetPointerId();
 
         if (parameter.Is<PointerEvent::Motion::Enter>() || parameter.Is<PointerEvent::Motion::Over>())
         {
@@ -305,10 +305,10 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
 
                 auto oldEnterViews = GetPathFromDescendant(overView);
 
-                auto outEventParameter = PointerEvent::Motion::Out();
-                static_cast<PointerEvent::Motion&>(outEventParameter) = parameter.As<PointerEvent::Motion>();
+                auto outEventParameter = Event<PointerEvent::Motion::Out>();
+                static_cast<PointerEvent::Motion&>(*outEventParameter) = *parameter.As<PointerEvent::Motion>();
                 auto outParameter = PointerParameter();
-                outParameter.SetPointerEvent(Event(outEventParameter));
+                outParameter.SetPointerEvent(outEventParameter);
                 outParameter.SetTargetView(overView);
                 outParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                 PointerScope::DispatchRootView({}, *this, outParameter);
@@ -317,10 +317,10 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
                 {
                     if (IsAncestorOf(oldEnterView))
                     {
-                        auto leaveEventParameter = PointerEvent::Motion::Leave();
-                        static_cast<PointerEvent::Motion&>(leaveEventParameter) = parameter.As<PointerEvent::Motion>();
+                        auto leaveEventParameter = Event<PointerEvent::Motion::Leave>();
+                        static_cast<PointerEvent::Motion&>(*leaveEventParameter) = *parameter.As<PointerEvent::Motion>();
                         auto leaveParameter = PointerParameter();
-                        leaveParameter.SetPointerEvent(Event(leaveEventParameter));
+                        leaveParameter.SetPointerEvent(leaveEventParameter);
                         leaveParameter.SetTargetView(oldEnterView);
                         leaveParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                         PointerScope::DispatchRootView({}, *this, leaveParameter);
@@ -355,7 +355,7 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
         if (targetView)
         {
             auto trackingParameter = PointerParameter();
-            trackingParameter.SetPointerEvent(event);
+            trackingParameter.SetPointerEvent(event.As<PointerEvent>());
             trackingParameter.SetTargetView(targetView);
             trackingParameter.SetPhaseFlags(PointerPhaseFlags::Capture);
             if (auto const interceptView = PointerScope::DispatchRootView({}, *this, trackingParameter))
@@ -374,10 +374,10 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
 
             if (overView)
             {
-                auto outEventParameter = PointerEvent::Motion::Out();
-                static_cast<PointerEvent::Motion&>(outEventParameter) = parameter.As<PointerEvent::Motion>();
+                auto outEventParameter = Event<PointerEvent::Motion::Out>();
+                static_cast<PointerEvent::Motion&>(*outEventParameter) = *parameter.As<PointerEvent::Motion>();
                 auto outParameter = PointerParameter();
-                outParameter.SetPointerEvent(Event(outEventParameter));
+                outParameter.SetPointerEvent(outEventParameter);
                 outParameter.SetTargetView(overView);
                 outParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                 PointerScope::DispatchRootView({}, *this, outParameter);
@@ -390,10 +390,10 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
                 {
                     if (IsAncestorOf(oldEnterView))
                     {
-                        auto leaveEventParameter = PointerEvent::Motion::Leave();
-                        static_cast<PointerEvent::Motion&>(leaveEventParameter) = parameter.As<PointerEvent::Motion>();
+                        auto leaveEventParameter = Event<PointerEvent::Motion::Leave>();
+                        static_cast<PointerEvent::Motion&>(*leaveEventParameter) = *parameter.As<PointerEvent::Motion>();
                         auto leaveParameter = PointerParameter();
-                        leaveParameter.SetPointerEvent(Event(leaveEventParameter));
+                        leaveParameter.SetPointerEvent(leaveEventParameter);
                         leaveParameter.SetTargetView(oldEnterView);
                         leaveParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                         PointerScope::DispatchRootView({}, *this, leaveParameter);
@@ -408,10 +408,10 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
                 {
                     if (IsAncestorOf(newEnterView))
                     {
-                        auto enterEventParameter = PointerEvent::Motion::Enter();
-                        static_cast<PointerEvent::Motion&>(enterEventParameter) = parameter.As<PointerEvent::Motion>();
+                        auto enterEventParameter = Event<PointerEvent::Motion::Enter>();
+                        static_cast<PointerEvent::Motion&>(*enterEventParameter) = *parameter.As<PointerEvent::Motion>();
                         auto enterParameter = PointerParameter();
-                        enterParameter.SetPointerEvent(Event(enterEventParameter));
+                        enterParameter.SetPointerEvent(enterEventParameter);
                         enterParameter.SetTargetView(newEnterView);
                         enterParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                         PointerScope::DispatchRootView({}, *this, enterParameter);
@@ -421,10 +421,10 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
 
             if (targetView)
             {
-                auto targetEventParameter = PointerEvent::Motion::Over();
-                static_cast<PointerEvent::Motion&>(targetEventParameter) = parameter.As<PointerEvent::Motion>();
+                auto targetEventParameter = Event<PointerEvent::Motion::Over>();
+                static_cast<PointerEvent::Motion&>(*targetEventParameter) = *parameter.As<PointerEvent::Motion>();
                 auto targetParameter = PointerParameter();
-                targetParameter.SetPointerEvent(Event(targetEventParameter));
+                targetParameter.SetPointerEvent(targetEventParameter);
                 targetParameter.SetTargetView(targetView);
                 targetParameter.SetPhaseFlags(PointerPhaseFlags::Target);
                 PointerScope::DispatchRootView({}, *this, targetParameter);
@@ -434,7 +434,7 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
         if (targetView)
         {
             auto outParameter = PointerParameter();
-            outParameter.SetPointerEvent(event);
+            outParameter.SetPointerEvent(event.As<PointerEvent>());
             outParameter.SetTargetView(targetView);
             outParameter.SetPhaseFlags(PointerPhaseFlags::Target);
             PointerScope::DispatchRootView({}, *this, outParameter);
@@ -445,7 +445,7 @@ auto RootView::DispatchPointerEvent(Event& event) -> Async<void>
 ///
 /// @brief Dispatch key event.
 ///
-auto RootView::DispatchKeyEvent(Event& event) -> Async<void>
+auto RootView::DispatchKeyEvent(Event<>& event) -> Async<void>
 {
     if (event.Is<KeyEvent>())
     {
@@ -459,7 +459,7 @@ auto RootView::DispatchKeyEvent(Event& event) -> Async<void>
 ///
 /// @brief Dispatch input event.
 ///
-auto RootView::DispatchInputEvent(Event& event) -> Async<void>
+auto RootView::DispatchInputEvent(Event<>& event) -> Async<void>
 {
     (void)event;
     co_return;

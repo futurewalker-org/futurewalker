@@ -52,7 +52,7 @@ auto RootFocusNode::SetFocusedNode(Shared<FocusNode> const& newNode) -> void
     if (oldNode != newNode)
     {
         {
-            auto event = Event(FocusEvent::FocusWillChange());
+            auto event = Event<>(Event<FocusEvent::FocusWillChange>());
             SendEventDetached(event);
         }
 
@@ -60,20 +60,18 @@ auto RootFocusNode::SetFocusedNode(Shared<FocusNode> const& newNode) -> void
 
         if (oldNode)
         {
-            auto parameter = FocusEvent::FocusOut();
-            auto event = Event(parameter);
+            auto event = Event<>(Event<FocusEvent::FocusOut>());
             oldNode->SendEventDetached(event);
         }
 
         if (newNode)
         {
-            auto parameter = FocusEvent::FocusIn();
-            auto event = Event(parameter);
+            auto event = Event<>(Event<FocusEvent::FocusIn>());
             newNode->SendEventDetached(event);
         }
 
         {
-            auto event = Event(FocusEvent::FocusDidChange());
+            auto event = Event<>(Event<FocusEvent::FocusDidChange>());
             SendEventDetached(event);
         }
     }

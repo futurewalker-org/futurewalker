@@ -30,7 +30,7 @@ InputMethodEditable::InputMethodEditable(PassKey<InputMethodEditable>)
     if (auto inputMethodContext = Locator::GetInstance<PlatformInputMethodContext>())
     {
         _platform = inputMethodContext->MakeEditable({
-          .sendInputevent = [&](Event& event) -> Async<Bool> { co_return co_await HandlePlatformInputEvent(event); },
+          .sendInputevent = [&](Event<>& event) -> Async<Bool> { co_return co_await HandlePlatformInputEvent(event); },
         });
     }
     else
@@ -249,27 +249,27 @@ auto InputMethodEditable::Attach(PassKey<InputMethod>, Shared<PlatformInputMetho
 ///
 /// @brief
 ///
-auto InputMethodEditable::HandlePlatformInputEvent(Event& event) -> Async<Bool>
+auto InputMethodEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool>
 {
     if (_eventReceiver)
     {
         if (event.Is<PlatformInputEvent::InsertText>())
         {
-            auto inputEventParameter = InputEvent::InsertText();
-            inputEventParameter.SetText(event.As<PlatformInputEvent::InsertText>().GetText());
-            auto inputEvent = Event(inputEventParameter);
+            auto inputEventParameter = Event<InputEvent::InsertText>::Make();
+            inputEventParameter->SetText(event.As<PlatformInputEvent::InsertText>()->GetText());
+            auto inputEvent = Event<>(inputEventParameter);
             co_return co_await _eventReceiver->SendEvent(inputEvent);
         }
         else if (event.Is<PlatformInputEvent::InsertCompositionText>())
         {
-            auto inputEventParameter = InputEvent::InsertCompositionText();
-            inputEventParameter.SetText(event.As<PlatformInputEvent::InsertCompositionText>().GetText());
-            auto inputEvent = Event(inputEventParameter);
+            auto inputEventParameter = Event<InputEvent::InsertCompositionText>();
+            inputEventParameter->SetText(event.As<PlatformInputEvent::InsertCompositionText>()->GetText());
+            auto inputEvent = Event<>(inputEventParameter);
             co_return co_await _eventReceiver->SendEvent(inputEvent);
         }
         else if (event.Is<PlatformInputEvent::SelectionChange>())
         {
-            auto inputEvent = Event(InputEvent::SelectionChange());
+            auto inputEvent = Event<>(Event<InputEvent::SelectionChange>());
             co_return co_await _eventReceiver->SendEvent(inputEvent);
         }
     }

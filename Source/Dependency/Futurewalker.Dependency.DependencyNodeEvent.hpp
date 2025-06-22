@@ -32,12 +32,12 @@ public:
     auto GetSender() const -> Shared<DependencyNode>;
     auto SetSender(Shared<DependencyNode> const& sender) -> void;
 
-    auto GetEvent() const -> Event const&;
-    auto SetEvent(Event const& event) -> void;
+    auto GetEvent() const -> Event<> const&;
+    auto SetEvent(Event<> const& event) -> void;
 
 private:
     Weak<DependencyNode> _sender;
-    Event _event;
+    Event<> _event;
 };
 }
 }

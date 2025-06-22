@@ -32,11 +32,11 @@ EventReceiver::EventReceiver(PassKey<EventReceiver>, Delegate delegate)
 ///
 /// @param[in, out] event Event to send.
 ///
-auto EventReceiver::SendEvent(Event& event) -> Async<Bool>
+auto EventReceiver::SendEvent(Event<>& event) -> Async<Bool>
 {
     if (_delegate.dispatchEvent)
     {
-        co_return co_await _delegate.dispatchEvent(event, [&](Event& event) -> Async<Bool> { co_return co_await DispatchEvent(event); });
+        co_return co_await _delegate.dispatchEvent(event, [&](Event<>& event) -> Async<Bool> { co_return co_await DispatchEvent(event); });
     }
     co_return co_await DispatchEvent(event);
 }
@@ -49,10 +49,10 @@ auto EventReceiver::SendEvent(Event& event) -> Async<Bool>
 /// @return When all event slots complate without suspending current coroutine, it returns result of event dispatch.
 /// @return Retruns `false` otherwise.
 ///
-auto EventReceiver::SendEventDetached(Event& event) -> Bool
+auto EventReceiver::SendEventDetached(Event<>& event) -> Bool
 {
     auto const r = Shared<Bool>::Make(false);
-    auto const e = Shared<Event>::Make(event);
+    auto const e = Shared<Event<>>::Make(event);
     AsyncFunction::SpawnFn([=, this]() -> Async<void> { *r = co_await SendEvent(*e); });
     event = *e;
     return *r;
@@ -97,7 +97,7 @@ auto EventReceiver::GetEventReceiver() const -> EventReceiver const&
 ///
 /// @note This function is intended to be used from delegate.
 ///
-auto EventReceiver::DispatchEvent(Event& event) -> Async<Bool>
+auto EventReceiver::DispatchEvent(Event<>& event) -> Async<Bool>
 {
     co_return co_await _eventSignal(event);
 }

@@ -89,20 +89,20 @@ auto TextEdit::Arrange(ArrangeScope& scope) -> void
     View::Arrange(scope);
 }
 
-auto TextEdit::ReceiveEvent(Event& event) -> Async<Bool>
+auto TextEdit::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     (void)event;
     co_return false;
 }
 
-auto TextEdit::ReceiveKeyEvent(Event& event) -> Async<Bool>
+auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<KeyEvent::Down>())
     {
         FW_DEBUG_LOG_INFO("TextEdit::Down");
 
-        auto const& parameter = event.As<KeyEvent::Down>();
-        auto const key = parameter.GetKey();
+        auto const parameter = event.As<KeyEvent::Down>();
+        auto const key = parameter->GetKey();
 
         if (key == Key::Backspace)
         {
@@ -122,13 +122,13 @@ auto TextEdit::ReceiveKeyEvent(Event& event) -> Async<Bool>
     co_return false;
 }
 
-auto TextEdit::ReceiveInputEvent(Event& event) -> Async<Bool>
+auto TextEdit::ReceiveInputEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<InputEvent::Attach>())
     {
         FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent SetContext");
-        auto const& parameter = event.As<InputEvent::Attach>();
-        InternalSetInputMethod(parameter.GetInputMethod());
+        auto const parameter = event.As<InputEvent::Attach>();
+        InternalSetInputMethod(parameter->GetInputMethod());
         co_return true;
     }
     else if (event.Is<InputEvent::Detach>())
@@ -145,7 +145,7 @@ auto TextEdit::ReceiveInputEvent(Event& event) -> Async<Bool>
     co_return false;
 }
 
-auto TextEdit::ReceivePointerEvent(Event& event) -> Async<Bool>
+auto TextEdit::ReceivePointerEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<PointerEvent>())
     {
@@ -175,7 +175,7 @@ auto TextEdit::ReceivePointerEvent(Event& event) -> Async<Bool>
     co_return false;
 }
 
-auto TextEdit::ReceiveFocusEvent(Event& event) -> Async<Bool>
+auto TextEdit::ReceiveFocusEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<FocusEvent::FocusIn>())
     {

@@ -14,7 +14,7 @@ TEST_CASE("EventReceiver")
     {
         auto b = Bool(false);
         auto eventReceiver = EventReceiver::Make();
-        EventReceiver::Connect(*eventReceiver, [&](Event&) -> Async<Bool> {
+        EventReceiver::Connect(*eventReceiver, [&](Event<>&) -> Async<Bool> {
             b = true;
             co_return true;
         });
@@ -34,7 +34,7 @@ TEST_CASE("EventReceiver")
                 m_eventReceiver = EventReceiver::Make();
             }
 
-            auto ReceiveEvent(Event&) -> Async<Bool>
+            auto ReceiveEvent(Event<>&) -> Async<Bool>
             {
                 ++eventCount;
                 co_return true;
@@ -72,20 +72,20 @@ TEST_CASE("EventReceiver")
         {
             TestClass2()
             {
-                m_eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event& e, EventFunction const& d) -> Async<Bool> { co_return co_await DispatchEvent(e, d); }});
+                m_eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event<>& e, EventFunction const& d) -> Async<Bool> { co_return co_await DispatchEvent(e, d); }});
             }
 
-            auto SendEvent(Event& event) -> Async<Bool>
+            auto SendEvent(Event<>& event) -> Async<Bool>
             {
                 co_return co_await GetEventReceiver().SendEvent(event);
             }
 
-            auto DispatchEvent(Event& event, EventFunction const& dispatch) -> Async<Bool>
+            auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>
             {
                 co_return co_await dispatch(event);
             }
 
-            auto ReceiveEvent(Event&) -> Async<Bool>
+            auto ReceiveEvent(Event<>&) -> Async<Bool>
             {
                 co_return true;
             }

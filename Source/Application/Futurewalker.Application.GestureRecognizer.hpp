@@ -2,9 +2,10 @@
 #pragma once
 
 #include "Futurewalker.Application.GestureRecognizerType.hpp" 
-#include "Futurewalker.Application.PointerEventType.hpp"
+#include "Futurewalker.Application.PointerEvent.hpp"
 
 #include "Futurewalker.Event.EventReceiverType.hpp"
+#include "Futurewalker.Event.Event.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -32,11 +33,11 @@ public:
         Function<void(PointerId)> releasePointer;
     };
     virtual ~GestureRecognizer() = 0;
-    virtual auto PointerIntercept(Delegate const& delegate, PointerEvent const& event, Rect<Dp> const& area) -> Bool = 0;
-    virtual auto Pointer(Delegate const& delegate, PointerEvent const& event, Rect<Dp> const& area) -> Bool = 0;
+    virtual auto PointerIntercept(Delegate const& delegate, Event<PointerEvent> const& event, Rect<Dp> const& area) -> Bool = 0;
+    virtual auto Pointer(Delegate const& delegate, Event<PointerEvent> const& event, Rect<Dp> const& area) -> Bool = 0;
 
-    auto SendEvent(Event& event) -> Async<Bool>;
-    auto SendEventDetached(Event& event) -> Bool;
+    auto SendEvent(Event<>& event) -> Async<Bool>;
+    auto SendEventDetached(Event<>& event) -> Bool;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;

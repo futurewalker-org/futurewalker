@@ -42,8 +42,8 @@ public:
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
 
-    auto SendEvent(Event& event) -> Async<Bool>;
-    auto SendEventDetached(Event& event) -> Bool;
+    auto SendEvent(Event<>& event) -> Async<Bool>;
+    auto SendEventDetached(Event<>& event) -> Bool;
 
 protected:
     template <Concepts::DerivedFrom<FocusNode> Derived, class... Args>

@@ -33,7 +33,7 @@ DependencyNode::DependencyNode(PassKey<DependencyNode>, Delegate delegate)
 ///
 auto DependencyNode::Notify() -> void
 {
-    auto event = Event(DependencyNodeEvent::Notify());
+    auto event = Event<DependencyNodeEvent::Notify>();
     NotifyCore(event);
 }
 
@@ -42,11 +42,11 @@ auto DependencyNode::Notify() -> void
 ///
 /// @param event Event object.
 ///
-auto DependencyNode::NotifyWithEvent(Event const& event) -> void
+auto DependencyNode::NotifyWithEvent(Event<> const& event) -> void
 {
-    auto parameter = DependencyNodeEvent::Notify();
-    parameter.SetEvent(event);
-    NotifyCore(Event(parameter));
+    auto notifyEvent = Event<DependencyNodeEvent::Notify>();
+    notifyEvent->SetEvent(event);
+    NotifyCore(notifyEvent);
 }
 
 ///
@@ -175,7 +175,7 @@ auto DependencyNode::RemoveFromParent() -> void
 ///
 /// @brief Send notify event.
 ///
-auto DependencyNode::NotifyCore(Event const& event) -> void
+auto DependencyNode::NotifyCore(Event<> const& event) -> void
 {
     if (!NotifySelf(event))
     {
@@ -186,7 +186,7 @@ auto DependencyNode::NotifyCore(Event const& event) -> void
 ///
 /// @brief Send notify event to self.
 ///
-auto DependencyNode::NotifySelf(Event const& event) -> Bool
+auto DependencyNode::NotifySelf(Event<> const& event) -> Bool
 {
     try
     {
@@ -202,7 +202,7 @@ auto DependencyNode::NotifySelf(Event const& event) -> Bool
 ///
 /// @brief Notify child nodes.
 ///
-auto DependencyNode::NotifyChildren(Event const& event) -> void
+auto DependencyNode::NotifyChildren(Event<> const& event) -> void
 {
     for (auto const& child : _children)
     {
@@ -213,12 +213,13 @@ auto DependencyNode::NotifyChildren(Event const& event) -> void
 ///
 /// @brief Send notification event to owner.
 ///
-auto DependencyNode::SendNotifyEvent(Event const& event) -> Bool
+auto DependencyNode::SendNotifyEvent(Event<> const& event) -> Bool
 {
     if (_delegate.dispatchEvent)
     {
-        auto copyEvent = event;
-        copyEvent.As<DependencyNodeEvent::Notify>().SetSender(GetSelf());
+        auto notifyEvent = event.As<DependencyNodeEvent::Notify>();
+        notifyEvent->SetSender(GetSelf());
+        auto copyEvent = Event<>(notifyEvent);
         return _delegate.dispatchEvent(copyEvent);
     }
     return false;

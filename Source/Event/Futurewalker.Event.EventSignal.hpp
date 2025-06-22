@@ -18,6 +18,6 @@ using EventSignalCombiner = AsyncSignalCombinerAnyOf<T>;
 ///
 /// @brief A signal type used for event connections.
 ///
-using EventSignal = Signal<Lazy<Bool>(Event&), EventSignalCombiner>;
+using EventSignal = Signal<Lazy<Bool>(Event<>&), EventSignalCombiner>;
 }
 }
