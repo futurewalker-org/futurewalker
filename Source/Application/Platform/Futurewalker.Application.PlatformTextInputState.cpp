@@ -542,7 +542,7 @@ auto PlatformTextInputState::BeforeInsertText(String const& text) -> Bool
 
 auto PlatformTextInputState::BeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool
 {
-    if (_delegate.beforeInsertText)
+    if (_delegate.beforeDeleteSurroundingText)
     {
         return _delegate.beforeDeleteSurroundingText(before, after);
     }
