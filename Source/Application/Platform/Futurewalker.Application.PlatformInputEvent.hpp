@@ -5,6 +5,8 @@
 
 #include "Futurewalker.Event.EventParameter.hpp"
 
+#include "Futurewalker.Unit.Text.hpp"
+
 #include "Futurewalker.Core.String.hpp"
 
 namespace FW_DETAIL_NS
@@ -15,6 +17,7 @@ class PlatformInputEvent : public EventParameter
 {
 public:
     class InsertText;
+    class DeleteSurroundingText;
     class InsertCompositionText;
     class SelectionChange;
     class CompositionStart;
@@ -25,18 +28,31 @@ public:
 class PlatformInputEvent::InsertText final : public PlatformInputEvent
 {
 public:
-    auto GetText() const -> String { return _text; };
-    auto SetText(String const& text) -> void { _text = text; }
+    auto GetText() const -> String;
+    auto SetText(String const& text) -> void;
 
 private:
     String _text;
 };
 
+class PlatformInputEvent::DeleteSurroundingText final : public PlatformInputEvent
+{
+public:
+    auto GetBefore() const -> CodePoint;
+    auto SetBefore(CodePoint before) -> void;
+    auto GetAfter() const -> CodePoint;
+    auto SetAfter(CodePoint after) -> void;
+
+private:
+    CodePoint _before = 0;
+    CodePoint _after = 0;
+};
+
 class PlatformInputEvent::InsertCompositionText final : public PlatformInputEvent
 {
 public:
-    auto GetText() const -> String { return _text; }
-    auto SetText(String const& text) -> void { _text = text; }
+    auto GetText() const -> String;
+    auto SetText(String const& text) -> void;
 
 private:
     String _text;

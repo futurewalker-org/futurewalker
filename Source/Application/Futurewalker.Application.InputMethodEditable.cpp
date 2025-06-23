@@ -260,6 +260,14 @@ auto InputMethodEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool
             auto inputEvent = Event<>(inputEventParameter);
             co_return co_await _eventReceiver->SendEvent(inputEvent);
         }
+        else if (event.Is<PlatformInputEvent::DeleteSurroundingText>())
+        {
+            auto inputEventParameter = Event<InputEvent::DeleteSurroundingText>::Make();
+            inputEventParameter->SetBefore(event.As<PlatformInputEvent::DeleteSurroundingText>()->GetBefore());
+            inputEventParameter->SetAfter(event.As<PlatformInputEvent::DeleteSurroundingText>()->GetAfter());
+            auto inputEvent = Event<>(inputEventParameter);
+            co_return co_await _eventReceiver->SendEvent(inputEvent);
+        }
         else if (event.Is<PlatformInputEvent::InsertCompositionText>())
         {
             auto inputEventParameter = Event<InputEvent::InsertCompositionText>();

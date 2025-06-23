@@ -6,6 +6,8 @@
 
 #include "Futurewalker.Event.EventParameter.hpp"
 
+#include "Futurewalker.Unit.Text.hpp"
+
 #include "Futurewalker.Core.Range.hpp"
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.Memory.hpp"
@@ -70,15 +72,15 @@ class InputEvent::SelectionChange final : public InputEvent
 class InputEvent::DeleteSurroundingText final : public InputEvent
 {
 public:
-    auto GetBefore() const -> SInt64;
-    auto SetBefore(SInt64 before) -> void;
+    auto GetBefore() const -> CodePoint;
+    auto SetBefore(CodePoint before) -> void;
 
-    auto GetAfter() const -> SInt64;
-    auto SetAfter(SInt64 after) -> void;
+    auto GetAfter() const -> CodePoint;
+    auto SetAfter(CodePoint after) -> void;
 
 private:
-    SInt64 _before = 0;
-    SInt64 _after = 0;
+    CodePoint _before = 0;
+    CodePoint _after = 0;
 };
 }
 }

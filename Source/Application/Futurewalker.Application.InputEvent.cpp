@@ -24,22 +24,22 @@ auto InputEvent::InsertText::SetText(String const& text) -> void
     _text = text;
 }
 
-auto InputEvent::DeleteSurroundingText::GetBefore() const -> SInt64
+auto InputEvent::DeleteSurroundingText::GetBefore() const -> CodePoint
 {
     return _before;
 }
 
-auto InputEvent::DeleteSurroundingText::SetBefore(SInt64 before) -> void
+auto InputEvent::DeleteSurroundingText::SetBefore(CodePoint before) -> void
 {
     _before = before;
 }
 
-auto InputEvent::DeleteSurroundingText::GetAfter() const -> SInt64
+auto InputEvent::DeleteSurroundingText::GetAfter() const -> CodePoint
 {
     return _after;
 }
 
-auto InputEvent::DeleteSurroundingText::SetAfter(SInt64 after) -> void
+auto InputEvent::DeleteSurroundingText::SetAfter(CodePoint after) -> void
 {
     _after = after;
 }

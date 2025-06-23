@@ -26,6 +26,7 @@ public:
     struct Delegate
     {
         Function<Bool(String const& text)> beforeInsertText;
+        Function<Bool(CodePoint before, CodePoint after)> beforeDeleteSurroundingText;
     };
     PlatformTextInputState(Delegate const& delegate);
 
@@ -56,6 +57,9 @@ public:
     auto GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>;
     auto GetRangeFromU8Range(Range<CodeUnit> range) const -> Range<CodePoint>;
 
+    auto GetU16RangeFromRange(Range<CodePoint> range) const -> Range<CodeUnit>;
+    auto GetU8RangeFromRange(Range<CodePoint> range) const -> Range<CodeUnit>;
+
 private:
     auto FindCodePointFromU8Index(CodeUnit index) const -> CodePoint;
     auto FindCodePointFromU16Index(CodeUnit index) const -> CodePoint;
@@ -70,6 +74,7 @@ private:
 
 private:
     auto BeforeInsertText(String const& text) -> Bool;
+    auto BeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool;
 
 private:
     Delegate _delegate;

@@ -290,16 +290,19 @@ auto PlatformTextInputState::DeleteSurroundingText(CodePoint before, CodePoint a
     auto const textRange = GetTextRange();
     auto const selectedRange = _selectedRange;
 
-    auto const postBegin = selectedRange.GetEnd();
-    auto const postEnd = ClampToRange(selectedRange.GetEnd() + after, textRange);
-    DeleteTextCore({postBegin, postEnd});
+    if (BeforeDeleteSurroundingText(before, after))
+    {
+        auto const postBegin = selectedRange.GetEnd();
+        auto const postEnd = ClampToRange(selectedRange.GetEnd() + after, textRange);
+        DeleteTextCore({postBegin, postEnd});
 
-    auto const preBegin = ClampToRange(selectedRange.GetBegin() - before, textRange);
-    auto const preEnd = selectedRange.GetBegin();
-    DeleteTextCore({preBegin, preEnd});
+        auto const preBegin = ClampToRange(selectedRange.GetBegin() - before, textRange);
+        auto const preEnd = selectedRange.GetBegin();
+        DeleteTextCore({preBegin, preEnd});
 
-    auto const offset = preEnd - preBegin;
-    _selectedRange = {selectedRange.GetBegin() - offset, selectedRange.GetEnd() - offset};
+        auto const offset = preEnd - preBegin;
+        _selectedRange = {selectedRange.GetBegin() - offset, selectedRange.GetEnd() - offset};
+    }
 }
 
 auto PlatformTextInputState::GetU16Text() const -> std::u16string_view
@@ -387,6 +390,16 @@ auto PlatformTextInputState::GetRangeFromU8Range(Range<CodeUnit> range) const ->
     auto const begin = FindCodePointFromU8Index(range.GetBegin());
     auto const end = FindCodePointFromU8Index(range.GetEnd());
     return {begin, end};
+}
+
+auto PlatformTextInputState::GetU16RangeFromRange(Range<CodePoint> range) const -> Range<CodeUnit>
+{
+    return FindU16RangeFromCodePointRange(range);
+}
+
+auto PlatformTextInputState::GetU8RangeFromRange(Range<CodePoint> range) const -> Range<CodeUnit>
+{
+    return FindU8RangeFromCodePointRange(range);
 }
 
 auto PlatformTextInputState::FindCodePointFromU8Index(CodeUnit index) const -> CodePoint
@@ -523,6 +536,15 @@ auto PlatformTextInputState::BeforeInsertText(String const& text) -> Bool
     if (_delegate.beforeInsertText)
     {
         return _delegate.beforeInsertText(text);
+    }
+    return true;
+}
+
+auto PlatformTextInputState::BeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool
+{
+    if (_delegate.beforeInsertText)
+    {
+        return _delegate.beforeDeleteSurroundingText(before, after);
     }
     return true;
 }

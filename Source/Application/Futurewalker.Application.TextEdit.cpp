@@ -139,6 +139,13 @@ auto TextEdit::ReceiveInputEvent(Event<>& event) -> Async<Bool>
     }
     else if (event.Is<InputEvent::InsertText>())
     {
+        FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent InsertText");
+        InvalidateVisual();
+        co_return false;
+    }
+    else if (event.Is<InputEvent::DeleteSurroundingText>())
+    {
+        FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent DeleteSurroundgText");
         InvalidateVisual();
         co_return false;
     }
