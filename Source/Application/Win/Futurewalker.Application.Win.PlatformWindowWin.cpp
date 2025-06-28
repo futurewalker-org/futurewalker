@@ -1385,22 +1385,26 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
                 FW_DEBUG_ASSERT(false);
             }
 
-            if (!text.IsEmpty())
+            try
             {
-                try
+                if (text.IsEmpty())
                 {
-                    if (key != Key::Dead)
+                    if (_textStore)
                     {
-                        if (_textStore)
-                        {
-                            _textStore->InsertTextFromKeyEvent(text);
-                        }
+                        _textStore->InputKeyFromKeyEvent(key);
                     }
                 }
-                catch (...)
+                else if (key != Key::Dead)
                 {
-                    FW_DEBUG_ASSERT(false);
+                    if (_textStore)
+                    {
+                        _textStore->InsertTextFromKeyEvent(text);
+                    }
                 }
+            }
+            catch (...)
+            {
+                FW_DEBUG_ASSERT(false);
             }
         }
         return 0;

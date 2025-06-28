@@ -226,8 +226,22 @@ auto PlatformTextInputState::GetTextRange() const -> Range<CodePoint>
 
 auto PlatformTextInputState::SetText(String const& text) -> Bool
 {
+    auto const textRange = GetU16TextRange();
+    auto const selectedRange = _selectedRange;
+
     CodePoint codePoints = 0;
-    return MakeStringData8WithBounds(_utf8Text, _utf16Text, codePoints, _utf8Bounds, _utf16Bounds, text);
+    auto const textChanged = MakeStringData8WithBounds(_utf8Text, _utf16Text, codePoints, _utf8Bounds, _utf16Bounds, text);
+    auto const newTextRange = GetU16TextRange();
+    auto const newSelectedRange = _selectedRange;
+
+    OnTextChange(textRange.GetBegin(), textRange.GetEnd(), newTextRange.GetEnd());
+
+    if (selectedRange != newSelectedRange)
+    {
+        OnSelectionChange();
+    }
+
+    return textChanged;
 }
 
 auto PlatformTextInputState::GetSelectedRange() const -> Range<CodePoint>
@@ -235,13 +249,29 @@ auto PlatformTextInputState::GetSelectedRange() const -> Range<CodePoint>
     return _selectedRange;
 }
 
+auto PlatformTextInputState::GetNormalizedSelectedRange() const -> Range<CodePoint>
+{
+    return Range<CodePoint>::Normalize(_selectedRange);
+}
+
 auto PlatformTextInputState::SetSelectedRange(Range<CodePoint> const& range) -> Bool
 {
     auto const textRange = GetTextRange();
-    _selectedRange.SetBegin(ClampToRange(range.GetBegin(), textRange));
-    _selectedRange.SetEnd(ClampToRange(range.GetEnd(), textRange));
+    auto const selectedRange = _selectedRange;
 
-    if (range != _selectedRange)
+    auto const newBegin = ClampToRange(range.GetBegin(), textRange);
+    auto const newEnd = ClampToRange(range.GetEnd(), textRange);
+    auto const newSelectedRange = Range<CodePoint>(newBegin, newEnd);
+
+    auto const selectionChanged = (newSelectedRange != selectedRange);
+    auto const rangeChanged = range != newSelectedRange;
+
+    if (selectionChanged)
+    {
+        OnSelectionChange();
+    }
+
+    if (rangeChanged)
     {
         return false;
     }
@@ -266,7 +296,7 @@ auto PlatformTextInputState::SetComposingRange(Range<CodePoint> const& range) ->
     return true;
 }
 
-auto PlatformTextInputState::InsertText(String const& text, CodePoint caretPosition) -> void
+auto PlatformTextInputState::InsertText(String const& text, CodePoint caretPosition, Bool anticipated) -> void
 {
     auto utf8Text = String();
     auto utf8Bounds = std::vector<CodeUnit>();
@@ -274,34 +304,65 @@ auto PlatformTextInputState::InsertText(String const& text, CodePoint caretPosit
     auto utf16Bounds = std::vector<CodeUnit>();
     auto codePoints = CodePoint(0);
     MakeStringData8WithBounds(utf8Text, utf16Text, codePoints, utf8Bounds, utf16Bounds, text);
-
-    if (BeforeInsertText(utf8Text))
-    {
-        auto const oldSelection = _selectedRange;
-        InsertTextCore(utf8Text, utf8Bounds, utf16Text, utf16Bounds, oldSelection);
-
-        auto const newSelection = oldSelection.GetBegin() + ((caretPosition > 0) ? codePoints + caretPosition - 1 : caretPosition);
-        _selectedRange = {newSelection, newSelection};
-    }
+    InsertTextData(caretPosition, anticipated, utf8Text, utf8Bounds, utf16Text, utf16Bounds, codePoints);
 }
 
-auto PlatformTextInputState::DeleteSurroundingText(CodePoint before, CodePoint after) -> void
+auto PlatformTextInputState::DeleteSurroundingText(CodePoint before, CodePoint after, Bool anticipated) -> void
 {
-    auto const textRange = GetTextRange();
-    auto const selectedRange = _selectedRange;
-
     if (BeforeDeleteSurroundingText(before, after))
     {
+        auto const textRange = GetTextRange();
+        auto const selectedRange = GetNormalizedSelectedRange();
+
         auto const postBegin = selectedRange.GetEnd();
         auto const postEnd = ClampToRange(selectedRange.GetEnd() + after, textRange);
+        auto const postEnd16 = FindU16IndexFromCodePoint(postEnd);
         DeleteTextCore({postBegin, postEnd});
 
         auto const preBegin = ClampToRange(selectedRange.GetBegin() - before, textRange);
+        auto const preBegin16 = FindU16IndexFromCodePoint(preBegin);
         auto const preEnd = selectedRange.GetBegin();
         DeleteTextCore({preBegin, preEnd});
 
         auto const offset = preEnd - preBegin;
-        _selectedRange = {selectedRange.GetBegin() - offset, selectedRange.GetEnd() - offset};
+        auto const newBegin = selectedRange.GetBegin() - offset;
+        auto const newEnd = selectedRange.GetEnd() - offset;
+        if (_selectedRange.GetLength() > 0)
+        {
+            _selectedRange = {newBegin, newEnd};
+        }
+        else
+        {
+            _selectedRange = {newEnd, newBegin};
+        }
+
+        if (!anticipated)
+        {
+            OnTextChange(preBegin16, postEnd16, FindU16IndexFromCodePoint(newEnd));
+
+            if (before != 0)
+            {
+                OnSelectionChange();
+            }
+        }
+    }
+    else
+    {
+        if (anticipated)
+        {
+            auto const textRange = GetTextRange();
+            auto const selectedRange = GetNormalizedSelectedRange();
+            auto const oldBegin = ClampToRange(selectedRange.GetBegin() - before, textRange);
+            auto const oldEnd = ClampToRange(oldBegin + selectedRange.GetLength(), textRange);
+            auto const oldRange = FindU16RangeFromCodePointRange({oldBegin, oldEnd});
+            auto const newRange = GetU16NormalizedSelectedRange();
+            OnTextChange(oldRange.GetBegin(), oldRange.GetEnd(), newRange.GetEnd());
+
+            if (before != 0)
+            {
+                OnSelectionChange();
+            }
+        }
     }
 }
 
@@ -336,11 +397,28 @@ auto PlatformTextInputState::GetU16SelectedRange() const -> Range<CodeUnit>
     return {b16, e16};
 }
 
-auto PlatformTextInputState::SetU16SelectedRange(Range<CodeUnit> range) -> void
+auto PlatformTextInputState::GetU16NormalizedSelectedRange() const -> Range<CodeUnit>
 {
+    auto const selectedRange = GetU16SelectedRange();
+    return Range<CodeUnit>::Normalize(selectedRange);
+}
+
+auto PlatformTextInputState::SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void
+{
+    auto const selectedRange = _selectedRange;
     auto const b = FindCodePointFromU16Index(range.GetBegin());
     auto const e = FindCodePointFromU16Index(range.GetEnd());
-    _selectedRange = {b, e};
+    auto const newSelectedRange = Range<CodePoint>(b, e);
+
+    if (newSelectedRange != selectedRange)
+    {
+        _selectedRange = newSelectedRange;
+
+        if (!anticipated || range != GetU16SelectedRange())
+        {
+            OnSelectionChange();
+        }
+    }
 }
 
 auto PlatformTextInputState::GetU16ComposingRange() const -> Range<CodeUnit>
@@ -359,7 +437,7 @@ auto PlatformTextInputState::SetU16ComposingRange(Range<CodeUnit> range) -> void
     _composingRange = {b, e};
 }
 
-auto PlatformTextInputState::InsertU16Text(std::u16string_view text, CodePoint caretPosition) -> void
+auto PlatformTextInputState::InsertU16Text(std::u16string_view text, CodePoint caretPosition, Bool anticipated) -> void
 {
     auto utf8Text = String();
     auto utf8Bounds = std::vector<CodeUnit>();
@@ -367,15 +445,7 @@ auto PlatformTextInputState::InsertU16Text(std::u16string_view text, CodePoint c
     auto utf16Bounds = std::vector<CodeUnit>();
     auto codePoints = CodePoint(0);
     MakeStringData16WithBounds(utf8Text, utf16Text, codePoints, utf8Bounds, utf16Bounds, text);
-
-    if (BeforeInsertText(utf8Text))
-    {
-        auto const oldSelection = _selectedRange;
-        InsertTextCore(utf8Text, utf8Bounds, utf16Text, utf16Bounds, oldSelection);
-
-        auto const newSelection = oldSelection.GetBegin() + ((caretPosition > 0) ? codePoints + caretPosition - 1 : caretPosition);
-        _selectedRange = {newSelection, newSelection};
-    }
+    InsertTextData(caretPosition, anticipated, utf8Text, utf8Bounds, utf16Text, utf16Bounds, codePoints);
 }
 
 auto PlatformTextInputState::GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>
@@ -438,6 +508,13 @@ auto PlatformTextInputState::FindCodePointFromU16Index(CodeUnit index) const -> 
     return CodePoint::Max(0, CodePoint(_utf16Bounds.size()) - 1);
 }
 
+auto PlatformTextInputState::FindU8IndexFromCodePoint(CodePoint codePoint) const -> CodeUnit
+{
+    auto const boundsRange = Range<CodePoint>(0, CodePoint(_utf8Bounds.size()));
+    auto const index = ClampToRange(codePoint, boundsRange);
+    return _utf8Bounds[static_cast<size_t>(index)];
+}
+
 auto PlatformTextInputState::FindU8RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>
 {
     auto const boundsRange = Range<CodePoint>(0, CodePoint(_utf8Bounds.size()));
@@ -447,12 +524,58 @@ auto PlatformTextInputState::FindU8RangeFromCodePointRange(Range<CodePoint> rang
     return Range<CodeUnit>(_utf8Bounds[static_cast<size_t>(b)], _utf8Bounds[static_cast<size_t>(e)]);
 }
 
+auto PlatformTextInputState::FindU16IndexFromCodePoint(CodePoint codePoint) const -> CodeUnit
+{
+    auto const boundsRange = Range<CodePoint>(0, CodePoint(_utf16Bounds.size()));
+    auto const index = ClampToRange(codePoint, boundsRange);
+    return _utf16Bounds[static_cast<size_t>(index)];
+}
+
 auto PlatformTextInputState::FindU16RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>
 {
     auto const boundsRange = Range<CodePoint>(0, CodePoint(_utf16Bounds.size()));
     auto const b = ClampToRange(range.GetBegin(), boundsRange);
     auto const e = ClampToRange(range.GetEnd(), boundsRange);
     return Range<CodeUnit>(_utf16Bounds[static_cast<size_t>(b)], _utf16Bounds[static_cast<size_t>(e)]);
+}
+
+auto PlatformTextInputState::InsertTextData(
+  CodePoint caretPosition,
+  Bool anticipated,
+  StringView utf8Text,
+  std::span<CodeUnit const> utf8Bounds,
+  std::u16string_view utf16Text,
+  std::span<CodeUnit const> utf16Bounds,
+  CodePoint codePoints) -> void
+{
+    if (BeforeInsertText(utf8Text))
+    {
+        auto const oldSelection = GetNormalizedSelectedRange();
+        auto const oldU16Selection = GetU16NormalizedSelectedRange();
+        InsertTextCore(utf8Text, utf8Bounds, utf16Text, utf16Bounds, oldSelection);
+
+        auto const newPosition = oldSelection.GetBegin() + ((caretPosition > 0) ? codePoints + caretPosition - 1 : caretPosition);
+        _selectedRange = {newPosition, newPosition};
+
+        if (!anticipated)
+        {
+            OnTextChange(oldU16Selection.GetBegin(), oldU16Selection.GetEnd(), oldU16Selection.GetBegin() + std::ssize(utf16Text));
+
+            if (_selectedRange != oldSelection)
+            {
+                OnSelectionChange();
+            }
+        }
+    }
+    else
+    {
+        if (anticipated)
+        {
+            auto const u16SelectedRange = GetU16NormalizedSelectedRange();
+            OnTextChange(u16SelectedRange.GetBegin(), u16SelectedRange.GetBegin() + std::ssize(utf16Text), u16SelectedRange.GetEnd());
+            OnSelectionChange();
+        }
+    }
 }
 
 auto PlatformTextInputState::InsertTextCore(StringView utf8Text, std::span<CodeUnit const> utf8Bounds, std::u16string_view utf16Text, std::span<CodeUnit const> utf16Bounds, Range<CodePoint> range)
@@ -547,5 +670,21 @@ auto PlatformTextInputState::BeforeDeleteSurroundingText(CodePoint before, CodeP
         return _delegate.beforeDeleteSurroundingText(before, after);
     }
     return true;
+}
+
+auto PlatformTextInputState::OnTextChange(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End) -> void
+{
+    if (_delegate.onTextChange)
+    {
+        _delegate.onTextChange(u16Begin, oldU16End, newU16End);
+    }
+}
+
+auto PlatformTextInputState::OnSelectionChange() -> void
+{
+    if (_delegate.onSelectionChange)
+    {
+        _delegate.onSelectionChange();
+    }
 }
 }

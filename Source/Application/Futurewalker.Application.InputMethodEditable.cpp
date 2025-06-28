@@ -258,7 +258,15 @@ auto InputMethodEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool
             auto inputEventParameter = Event<InputEvent::InsertText>::Make();
             inputEventParameter->SetText(event.As<PlatformInputEvent::InsertText>()->GetText());
             auto inputEvent = Event<>(inputEventParameter);
-            co_return co_await _eventReceiver->SendEvent(inputEvent);
+            if (co_await _eventReceiver->SendEvent(inputEvent))
+            {
+                inputEventParameter = inputEvent.As<InputEvent::InsertText>();
+                auto result = event.As<PlatformInputEvent::InsertText>();
+                result->SetText(inputEventParameter->GetText());
+                result->SetCancel(inputEventParameter->GetCancel());
+                event = result;
+                co_return true;
+            }
         }
         else if (event.Is<PlatformInputEvent::DeleteSurroundingText>())
         {
@@ -266,7 +274,16 @@ auto InputMethodEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool
             inputEventParameter->SetBefore(event.As<PlatformInputEvent::DeleteSurroundingText>()->GetBefore());
             inputEventParameter->SetAfter(event.As<PlatformInputEvent::DeleteSurroundingText>()->GetAfter());
             auto inputEvent = Event<>(inputEventParameter);
-            co_return co_await _eventReceiver->SendEvent(inputEvent);
+            if (co_await _eventReceiver->SendEvent(inputEvent))
+            {
+                inputEventParameter = inputEvent.As<InputEvent::DeleteSurroundingText>();
+                auto result = event.As<PlatformInputEvent::DeleteSurroundingText>();
+                result->SetCancel(inputEventParameter->GetCancel());
+                result->SetBefore(inputEventParameter->GetBefore());
+                result->SetAfter(inputEventParameter->GetAfter());
+                event = result;
+                co_return true;
+            }
         }
         else if (event.Is<PlatformInputEvent::InsertCompositionText>())
         {

@@ -12,15 +12,16 @@ namespace FW_DETAIL_NS
 {
 auto PlatformInputMethodEditableWin::Make(Delegate const& delegate) -> Shared<PlatformInputMethodEditableWin>
 {
-    auto editable = Shared<PlatformInputMethodEditableWin>::Make(PassKey<PlatformInputMethodEditableWin>(), delegate);
-    editable->_self = editable;
-    return editable;
+    return PlatformInputMethodEditable::MakeDerived<PlatformInputMethodEditableWin>(delegate);
 }
 
-PlatformInputMethodEditableWin::PlatformInputMethodEditableWin(PassKey<PlatformInputMethodEditableWin>, Delegate const& delegate)
-  : PlatformInputMethodEditable(delegate)
+PlatformInputMethodEditableWin::PlatformInputMethodEditableWin(PassKey<PlatformInputMethodEditable> key, Delegate const& delegate)
+  : PlatformInputMethodEditable(key, delegate)
   , _state {{
       .beforeInsertText = [&](String const& text) { return InternalBeforeInsertText(text); },
+      .beforeDeleteSurroundingText = [&](CodePoint before, CodePoint after) { return InternalBeforeDeleteSurroundingText(before, after); },
+      .onTextChange = [&](CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) { return InternalOnTextChange(u16OldBegin, u16OldEnd, u16NewEnd); },
+      .onSelectionChange = [&]() { return InternalOnSelectionChange(); },
     }}
 {
 }
@@ -47,12 +48,7 @@ auto PlatformInputMethodEditableWin::GetTextRange() const -> Range<CodePoint>
 
 auto PlatformInputMethodEditableWin::SetText(String const& text) -> void
 {
-    if (_state.SetText(text))
-    {
-    }
-    else
-    {
-    }
+    _state.SetText(text);
 }
 
 auto PlatformInputMethodEditableWin::GetSelectedRange() const -> Range<CodePoint>
@@ -62,12 +58,7 @@ auto PlatformInputMethodEditableWin::GetSelectedRange() const -> Range<CodePoint
 
 auto PlatformInputMethodEditableWin::SetSelectedRange(Range<CodePoint> const& range) -> void
 {
-    if (_state.SetSelectedRange(range))
-    {
-    }
-    else
-    {
-    }
+    _state.SetSelectedRange(range);
 }
 
 auto PlatformInputMethodEditableWin::GetComposingRange() const -> Range<CodePoint>
@@ -77,12 +68,7 @@ auto PlatformInputMethodEditableWin::GetComposingRange() const -> Range<CodePoin
 
 auto PlatformInputMethodEditableWin::SetComposingRange(Range<CodePoint> const& range) -> void
 {
-    if (_state.SetSelectedRange(range))
-    {
-    }
-    else
-    {
-    }
+    _state.SetSelectedRange(range);
 }
 
 auto PlatformInputMethodEditableWin::GetLayoutRect() const -> Rect<Dp>
@@ -120,12 +106,12 @@ auto PlatformInputMethodEditableWin::SetLayoutInfo(Graphics::TextLayoutInfo cons
 
 auto PlatformInputMethodEditableWin::InsertText(String const& text, CodePoint caretPosition) -> void
 {
-    _state.InsertText(text, caretPosition);
+    _state.InsertText(text, caretPosition, false);
 }
 
 auto PlatformInputMethodEditableWin::DeleteSurroundingText(CodePoint before, CodePoint after) -> void
 {
-    _state.DeleteSurroundingText(before, after);
+    _state.DeleteSurroundingText(before, after, false);
 }
 
 auto PlatformInputMethodEditableWin::GetU16Text() const -> std::u16string_view
@@ -148,9 +134,9 @@ auto PlatformInputMethodEditableWin::GetU16SelectedRange() const -> Range<CodeUn
     return _state.GetU16SelectedRange();
 }
 
-auto PlatformInputMethodEditableWin::SetU16SelectedRange(Range<CodeUnit> range) -> void
+auto PlatformInputMethodEditableWin::SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void
 {
-    _state.SetU16SelectedRange(range);
+    _state.SetU16SelectedRange(range, anticipated);
 }
 
 auto PlatformInputMethodEditableWin::GetU16ComposingRange() const -> Range<CodeUnit>
@@ -163,9 +149,9 @@ auto PlatformInputMethodEditableWin::SetU16ComposingRange(Range<CodeUnit> range)
     _state.SetU16ComposingRange(range);
 }
 
-auto PlatformInputMethodEditableWin::InsertU16Text(std::u16string_view const text, CodePoint caretPosition) -> void
+auto PlatformInputMethodEditableWin::InsertU16Text(std::u16string_view const text, CodePoint caretPosition, Bool anticipated) -> void
 {
-    _state.InsertU16Text(text, caretPosition);
+    _state.InsertU16Text(text, caretPosition, anticipated);
 }
 
 auto PlatformInputMethodEditableWin::GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>
@@ -175,17 +161,53 @@ auto PlatformInputMethodEditableWin::GetRangeFromU16Range(Range<CodeUnit> range)
 
 auto PlatformInputMethodEditableWin::InternalBeforeInsertText(String const& text) -> Bool
 {
-    auto const self = GetSelf();
     auto parameter = Event<PlatformInputEvent::InsertText>();
     parameter->SetText(text);
     auto event = Event<>(parameter);
-    AsyncFunction::SpawnFn([self, e = event] mutable -> Lazy<void> { co_await self->SendInputEvent(e); });
+    if (SendInputEventDetached(event))
+    {
+        if (event.Is<PlatformInputEvent::InsertText>())
+        {
+            parameter = event.As<PlatformInputEvent::InsertText>();
+            return parameter->GetCancel();
+        }
+        return false;
+    }
     return true;
 }
 
-auto PlatformInputMethodEditableWin::GetSelf() -> Shared<PlatformInputMethodEditableWin>
+auto PlatformInputMethodEditableWin::InternalBeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool
 {
-    return _self.Lock();
+    auto parameter = Event<PlatformInputEvent::DeleteSurroundingText>();
+    parameter->SetBefore(before);
+    parameter->SetAfter(after);
+    auto event = Event<>(parameter);
+    if (SendInputEventDetached(event))
+    {
+        if (event.Is<PlatformInputEvent::DeleteSurroundingText>())
+        {
+            parameter = event.As<PlatformInputEvent::DeleteSurroundingText>();
+            return parameter->GetCancel();
+        }
+        return false;
+    }
+    return true;
+}
+
+auto PlatformInputMethodEditableWin::InternalOnTextChange(CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void
+{
+    if (auto textStore = GetTextStore())
+    {
+        textStore->NotifyTextChange(u16OldBegin, u16OldEnd, u16NewEnd);
+    }
+}
+
+auto PlatformInputMethodEditableWin::InternalOnSelectionChange() -> void
+{
+    if (auto textStore = GetTextStore())
+    {
+        textStore->NotifySelectionChange();
+    }
 }
 
 auto PlatformInputMethodEditableWin::GetTextStore() -> Shared<PlatformInputMethodTextStoreWin>

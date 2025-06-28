@@ -4,7 +4,7 @@
 
 namespace FW_DETAIL_NS
 {
-PlatformInputMethodEditable::PlatformInputMethodEditable(Delegate const& delegate)
+PlatformInputMethodEditable::PlatformInputMethodEditable(PassKey<PlatformInputMethodEditable>, Delegate const& delegate)
   : _delegate {delegate}
 {
 }
@@ -18,5 +18,19 @@ auto PlatformInputMethodEditable::SendInputEvent(Event<>& event) -> Async<Bool>
         co_return co_await _delegate.sendInputevent(event);
     }
     co_return false;
+}
+
+auto PlatformInputMethodEditable::SendInputEventDetached(Event<>& event) -> Bool
+{
+    auto const self = GetSelf();
+    auto const e = Shared<Event<>>::Make(event);
+    auto const r = Shared<Bool>::Make(false);
+    AsyncFunction::SpawnFn([=] -> Lazy<void> { *r = co_await self->SendInputEvent(*e); });
+    if (*r)
+    {
+        event = *e;
+        return true;
+    }
+    return false;
 }
 }

@@ -4,6 +4,16 @@
 
 namespace FW_DETAIL_NS
 {
+auto PlatformInputEvent::InsertText::GetCancel() const -> Bool
+{
+    return _cancel;
+}
+
+auto PlatformInputEvent::InsertText::SetCancel(Bool cancel) -> void
+{
+    _cancel = cancel;
+}
+
 auto PlatformInputEvent::InsertText::GetText() const -> String
 {
     return _text;
@@ -12,6 +22,16 @@ auto PlatformInputEvent::InsertText::GetText() const -> String
 auto PlatformInputEvent::InsertText::SetText(String const& text) -> void
 {
     _text = text;
+}
+
+auto PlatformInputEvent::DeleteSurroundingText::GetCancel() const -> Bool
+{
+    return _cancel;
+}
+
+auto PlatformInputEvent::DeleteSurroundingText::SetCancel(Bool cancel) -> void
+{
+    _cancel = cancel;
 }
 
 auto PlatformInputEvent::DeleteSurroundingText::GetBefore() const -> CodePoint

@@ -100,18 +100,6 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
     if (event.Is<KeyEvent::Down>())
     {
         FW_DEBUG_LOG_INFO("TextEdit::Down");
-
-        auto const parameter = event.As<KeyEvent::Down>();
-        auto const key = parameter->GetKey();
-
-        if (key == Key::Backspace)
-        {
-            InternalDeleteBackward();
-        }
-        else if (key == Key::Delete)
-        {
-            InternalDeleteForward();
-        }
         co_return true;
     }
     else if (event.Is<KeyEvent::Up>())

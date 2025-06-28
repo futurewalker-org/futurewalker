@@ -14,6 +14,16 @@ auto InputEvent::Attach::SetInputMethod(Shared<InputMethod> const& inputMethod) 
     _inputMethod = inputMethod;
 }
 
+auto InputEvent::InsertText::GetCancel() const -> Bool
+{
+    return _cancel;
+}
+
+auto InputEvent::InsertText::SetCancel(Bool cancel) -> void
+{
+    _cancel = cancel;
+}
+
 auto InputEvent::InsertText::GetText() const -> String
 {
     return _text;
@@ -22,6 +32,16 @@ auto InputEvent::InsertText::GetText() const -> String
 auto InputEvent::InsertText::SetText(String const& text) -> void
 {
     _text = text;
+}
+
+auto InputEvent::DeleteSurroundingText::GetCancel() const -> Bool
+{
+    return _cancel;
+}
+
+auto InputEvent::DeleteSurroundingText::SetCancel(Bool cancel) -> void
+{
+    _cancel = cancel;
 }
 
 auto InputEvent::DeleteSurroundingText::GetBefore() const -> CodePoint
@@ -42,5 +62,15 @@ auto InputEvent::DeleteSurroundingText::GetAfter() const -> CodePoint
 auto InputEvent::DeleteSurroundingText::SetAfter(CodePoint after) -> void
 {
     _after = after;
+}
+
+auto InputEvent::InsertCompositionText::GetText() const -> String
+{
+    return _text;
+}
+
+auto InputEvent::InsertCompositionText::SetText(String const& text) -> void
+{
+    _text = text;
 }
 }

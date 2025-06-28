@@ -23,9 +23,9 @@ public:
     class Attach;
     class Detach;
     class InsertText;
+    class DeleteSurroundingText;
     class InsertCompositionText;
     class SelectionChange;
-    class DeleteSurroundingText;
     class CompositionStart;
     class CompositionUpdate;
     class CompositionEnd;
@@ -48,30 +48,23 @@ class InputEvent::Detach final : public InputEvent
 class InputEvent::InsertText final : public InputEvent
 {
 public:
+    auto GetCancel() const -> Bool;
+    auto SetCancel(Bool cancel) -> void;
+
     auto GetText() const -> String;
     auto SetText(String const& text) -> void;
 
 private:
+    Bool _cancel = false;
     String _text;
-};
-
-class InputEvent::InsertCompositionText final : public InputEvent
-{
-public:
-    auto GetText() const -> String { return _text; }
-    auto SetText(String const& text) -> void { _text = text; }
-
-private:
-    String _text;
-};
-
-class InputEvent::SelectionChange final : public InputEvent
-{
 };
 
 class InputEvent::DeleteSurroundingText final : public InputEvent
 {
 public:
+    auto GetCancel() const -> Bool;
+    auto SetCancel(Bool cancel) -> void;
+
     auto GetBefore() const -> CodePoint;
     auto SetBefore(CodePoint before) -> void;
 
@@ -79,8 +72,23 @@ public:
     auto SetAfter(CodePoint after) -> void;
 
 private:
+    Bool _cancel = false;
     CodePoint _before = 0;
     CodePoint _after = 0;
+};
+
+class InputEvent::InsertCompositionText final : public InputEvent
+{
+public:
+    auto GetText() const -> String;
+    auto SetText(String const& text) -> void;
+
+private:
+    String _text;
+};
+
+class InputEvent::SelectionChange final : public InputEvent
+{
 };
 }
 }

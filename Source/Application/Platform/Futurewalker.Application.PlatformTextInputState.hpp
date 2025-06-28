@@ -27,6 +27,8 @@ public:
     {
         Function<Bool(String const& text)> beforeInsertText;
         Function<Bool(CodePoint before, CodePoint after)> beforeDeleteSurroundingText;
+        Function<void(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End)> onTextChange;
+        Function<void()> onSelectionChange;
     };
     PlatformTextInputState(Delegate const& delegate);
 
@@ -36,23 +38,25 @@ public:
     auto SetText(String const& text) -> Bool;
 
     auto GetSelectedRange() const -> Range<CodePoint>;
+    auto GetNormalizedSelectedRange() const -> Range<CodePoint>;
     auto SetSelectedRange(Range<CodePoint> const& text) -> Bool;
 
     auto GetComposingRange() const -> Range<CodePoint>;
     auto SetComposingRange(Range<CodePoint> const& text) -> Bool;
 
-    auto InsertText(String const& text, CodePoint caretPosition) -> void;
-    auto DeleteSurroundingText(CodePoint before, CodePoint after) -> void;
+    auto InsertText(String const& text, CodePoint caretPosition, Bool anticipated) -> void;
+    auto DeleteSurroundingText(CodePoint before, CodePoint after, Bool anticipated) -> void;
 
     auto GetU16Text() const -> std::u16string_view;
     auto GetU16Text(Range<CodeUnit> range) const -> std::u16string_view;
     auto GetU16TextRange() const -> Range<CodeUnit>;
     auto GetU16SelectedRange() const -> Range<CodeUnit>;
-    auto SetU16SelectedRange(Range<CodeUnit> range) -> void;
+    auto GetU16NormalizedSelectedRange() const -> Range<CodeUnit>;
+    auto SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void;
     auto GetU16ComposingRange() const -> Range<CodeUnit>;
     auto SetU16ComposingRange(Range<CodeUnit> range) -> void;
 
-    auto InsertU16Text(std::u16string_view text, CodePoint caretPosition) -> void;
+    auto InsertU16Text(std::u16string_view text, CodePoint caretPosition, Bool anticipated) -> void;
 
     auto GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>;
     auto GetRangeFromU8Range(Range<CodeUnit> range) const -> Range<CodePoint>;
@@ -63,9 +67,12 @@ public:
 private:
     auto FindCodePointFromU8Index(CodeUnit index) const -> CodePoint;
     auto FindCodePointFromU16Index(CodeUnit index) const -> CodePoint;
+    auto FindU8IndexFromCodePoint(CodePoint codePoint) const -> CodeUnit;
     auto FindU8RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>;
+    auto FindU16IndexFromCodePoint(CodePoint codePoint) const -> CodeUnit;
     auto FindU16RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>;
 
+    auto InsertTextData(CodePoint caretPosition, Bool anticipated, StringView utf8Text, std::span<CodeUnit const> utf8Bounds, std::u16string_view utf16Text, std::span<CodeUnit const> utf16Bounds, CodePoint codePoints) -> void;
     auto InsertTextCore(StringView utf8Text, std::span<CodeUnit const> utf8Bounds, std::u16string_view utf16Text, std::span<CodeUnit const> utf16Bounds, Range<CodePoint> range) -> void;
     auto InsertU8TextCore(StringView utf8Text, std::span<CodeUnit const> utf8Bounds, Range<CodePoint> range) -> void;
     auto InsertU16TextCore(std::u16string_view utf16String, std::span<CodeUnit const> utf16Bounds, Range<CodePoint> range) -> void;
@@ -75,6 +82,8 @@ private:
 private:
     auto BeforeInsertText(String const& text) -> Bool;
     auto BeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool;
+    auto OnTextChange(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End) -> void;
+    auto OnSelectionChange() -> void;
 
 private:
     Delegate _delegate;

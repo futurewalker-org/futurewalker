@@ -18,7 +18,7 @@ class PlatformInputMethodEditableWin : public PlatformInputMethodEditable
 public:
     static auto Make(Delegate const& delegate) -> Shared<PlatformInputMethodEditableWin>;
 
-    PlatformInputMethodEditableWin(PassKey<PlatformInputMethodEditableWin>, Delegate const& delegate);
+    PlatformInputMethodEditableWin(PassKey<PlatformInputMethodEditable> key, Delegate const& delegate);
 
     auto SetTextStore(Shared<PlatformInputMethodTextStoreWin> textStore) -> void;
 
@@ -46,22 +46,23 @@ public:
     auto GetU16Text(Range<CodeUnit> range) const -> std::u16string_view;
     auto GetU16TextRange() const -> Range<CodeUnit>;
     auto GetU16SelectedRange() const -> Range<CodeUnit>;
-    auto SetU16SelectedRange(Range<CodeUnit> range) -> void;
+    auto SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void;
     auto GetU16ComposingRange() const -> Range<CodeUnit>;
     auto SetU16ComposingRange(Range<CodeUnit> range) -> void;
 
-    auto InsertU16Text(std::u16string_view const text, CodePoint caretPosition) -> void;
+    auto InsertU16Text(std::u16string_view const text, CodePoint caretPosition, Bool anticipated) -> void;
 
     auto GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>;
 
 private:
     auto InternalBeforeInsertText(String const& text) -> Bool;
+    auto InternalBeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool;
+    auto InternalOnTextChange(CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void;
+    auto InternalOnSelectionChange() -> void;
 
-    auto GetSelf() -> Shared<PlatformInputMethodEditableWin>;
     auto GetTextStore() -> Shared<PlatformInputMethodTextStoreWin>;
 
 private:
-    Weak<PlatformInputMethodEditableWin> _self;
     Weak<PlatformInputMethodTextStoreWin> _textStore;
     PlatformTextInputState _state;
     Rect<Dp> _layoutRect;

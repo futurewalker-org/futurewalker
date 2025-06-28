@@ -5,6 +5,7 @@
 #include "Futurewalker.Application.Win.PlatformInputMethodEditableWin.hpp"
 #include "Futurewalker.Application.PlatformInputMethodEditable.hpp"
 #include "Futurewalker.Application.PlatformTextInputState.hpp"
+#include "Futurewalker.Application.Key.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -197,7 +198,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::SetSelection(ULONG 
         if (auto editable = _owner.GetEditable())
         {
             auto const& selection = pSelection[0];
-            editable->SetU16SelectedRange({selection.acpStart, selection.acpEnd});
+            editable->SetU16SelectedRange({selection.acpStart, selection.acpEnd}, true);
         }
     }
     return S_OK;
@@ -264,8 +265,8 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::SetText(DWORD dwFla
         auto text = std::u16string(cch, 0);
         std::memcpy(text.data(), pchText, text.size() * sizeof(char16_t));
 
-        editable->SetU16SelectedRange({acpStart, acpEnd});
-        editable->InsertU16Text(text, 1);
+        editable->SetU16SelectedRange({acpStart, acpEnd}, true);
+        editable->InsertU16Text(text, 1, true);
         pChange->acpStart = acpStart;
         pChange->acpOldEnd = acpEnd;
         pChange->acpNewEnd = acpStart + static_cast<LONG>(text.size());
@@ -322,7 +323,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::InsertTextAtSelecti
         }
         else
         {
-            editable->InsertU16Text(text, 1);
+            editable->InsertU16Text(text, 1, true);
             pChange->acpStart = static_cast<LONG>(selection.GetBegin());
             pChange->acpOldEnd = static_cast<LONG>(selection.GetEnd());
             pChange->acpNewEnd = pChange->acpStart + static_cast<LONG>(text.size());
@@ -545,9 +546,9 @@ auto PlatformInputMethodTextStoreWin::TextStoreImpl::NotifyTextChange(CodeUnit b
     if (_sink)
     {
         auto const textChange = TS_TEXTCHANGE {
-            .acpStart = static_cast<LONG>(begin),
-            .acpOldEnd = static_cast<LONG>(oldEnd),
-            .acpNewEnd = static_cast<LONG>(newEnd),
+          .acpStart = static_cast<LONG>(begin),
+          .acpOldEnd = static_cast<LONG>(oldEnd),
+          .acpNewEnd = static_cast<LONG>(newEnd),
         };
         _sink->OnTextChange(0, &textChange);
     }
@@ -640,10 +641,36 @@ auto PlatformInputMethodTextStoreWin::InsertTextFromKeyEvent(String const& text)
 {
     if (auto const editable = GetEditable())
     {
-        auto const selection = editable->GetU16SelectedRange();
         editable->InsertText(text, 1);
-        NotifyTextChange(selection.GetBegin(), selection.GetEnd(), editable->GetU16SelectedRange().GetEnd());
-        NotifySelectionChange();
+    }
+}
+
+///
+/// @brief Emit input event from key event.
+///
+auto PlatformInputMethodTextStoreWin::InputKeyFromKeyEvent(String const& key) -> void
+{
+    if (auto const editable = GetEditable())
+    {
+        auto const selection = editable->GetU16SelectedRange();
+        if (key == Key::Backspace || key == Key::Delete)
+        {
+            if (selection.GetLength() == 0)
+            {
+                if (key == Key::Backspace)
+                {
+                    editable->DeleteSurroundingText(1, 0);
+                }
+                else
+                {
+                    editable->DeleteSurroundingText(0, 1);
+                }
+            }
+            else
+            {
+                editable->InsertText({}, 0);
+            }
+        }
     }
 }
 

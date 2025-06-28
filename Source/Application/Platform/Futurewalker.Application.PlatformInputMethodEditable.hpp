@@ -27,7 +27,7 @@ public:
     {
         EventFunction sendInputevent;
     };
-    PlatformInputMethodEditable(Delegate const& delegate);
+    PlatformInputMethodEditable(PassKey<PlatformInputMethodEditable>, Delegate const& delegate);
 
     virtual ~PlatformInputMethodEditable() = 0;
 
@@ -51,11 +51,41 @@ public:
     virtual auto InsertText(String const& text, CodePoint caretPosition) -> void = 0;
     virtual auto DeleteSurroundingText(CodePoint before, CodePoint after) -> void = 0;
 
+
 protected:
     auto SendInputEvent(Event<>& event) -> Async<Bool>;
+    auto SendInputEventDetached(Event<>& event) -> Bool;
+
+    template <class Self>
+    auto GetSelf(this Self& self) -> Shared<Self>;
+
+    template <class Derived, class... Args>
+    static auto MakeDerived(Args&&... args) -> Shared<Derived>;
 
 private:
+    Weak<PlatformInputMethodEditable> _self;
     Delegate _delegate;
 };
+
+///
+/// @brief Get self.
+///
+template <class Self>
+auto PlatformInputMethodEditable::GetSelf(this Self& self) -> Shared<Self>
+{
+    return static_cast<TypeTraits::PropagateCVRef<Self&, PlatformInputMethodEditable>>(self)._self.Lock().template Assume<Self>();
+}
+
+///
+/// @brief Get derived instance.
+///
+template <class Derived, class... Args>
+auto PlatformInputMethodEditable::MakeDerived(Args&&... args) -> Shared<Derived>
+{
+    auto key = PassKey<PlatformInputMethodEditable>();
+    auto view = Shared<Derived>::Make(key, std::forward<Args>(args)...);
+    static_cast<PlatformInputMethodEditable&>(*view)._self = view;
+    return view;
+}
 }
 }

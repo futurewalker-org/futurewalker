@@ -28,22 +28,30 @@ public:
 class PlatformInputEvent::InsertText final : public PlatformInputEvent
 {
 public:
+    auto GetCancel() const -> Bool;
+    auto SetCancel(Bool cancel) -> void;
+
     auto GetText() const -> String;
     auto SetText(String const& text) -> void;
 
 private:
+    Bool _cancel = false;
     String _text;
 };
 
 class PlatformInputEvent::DeleteSurroundingText final : public PlatformInputEvent
 {
 public:
+    auto GetCancel() const -> Bool;
+    auto SetCancel(Bool cancel) -> void;
+
     auto GetBefore() const -> CodePoint;
     auto SetBefore(CodePoint before) -> void;
     auto GetAfter() const -> CodePoint;
     auto SetAfter(CodePoint after) -> void;
 
 private:
+    Bool _cancel = false;
     CodePoint _before = 0;
     CodePoint _after = 0;
 };
