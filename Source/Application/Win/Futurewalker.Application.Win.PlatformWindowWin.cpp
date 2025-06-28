@@ -224,8 +224,8 @@ auto PlatformWindowWin::GetSize() -> Size<Dp>
         auto rect = RECT();
         if (::GetWindowRect(_hwnd, &rect))
         {
-            const auto size = Size<Sp>(rect.right - rect.left, rect.bottom - rect.top);
-            return UnitFunction::ConvertSpToDp(size, GetDisplayScale());
+            const auto size = Size<Vp>(rect.right - rect.left, rect.bottom - rect.top);
+            return UnitFunction::ConvertVpToDp(size, GetDisplayScale());
         }
     }
     return {};
@@ -240,9 +240,9 @@ auto PlatformWindowWin::SetSize(Size<Dp> const& size) -> void
 {
     if (!IsClosed())
     {
-        const auto spSize = UnitFunction::ConvertDpToSp(size, GetDisplayScale());
-        const auto w = static_cast<int>(Sp::Round(spSize.GetWidth()));
-        const auto h = static_cast<int>(Sp::Round(spSize.GetHeight()));
+        const auto spSize = UnitFunction::ConvertDpToVp(size, GetDisplayScale());
+        const auto w = static_cast<int>(Vp::Round(spSize.GetWidth()));
+        const auto h = static_cast<int>(Vp::Round(spSize.GetHeight()));
         ::SetWindowPos(_hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE);
     }
 }
@@ -257,8 +257,8 @@ auto PlatformWindowWin::GetPosition() -> Point<Dp>
         auto rect = RECT();
         if (::GetWindowRect(_hwnd, &rect))
         {
-            const auto position = Point<Sp>(rect.left, rect.right);
-            return UnitFunction::ConvertSpToDp(position, GetDisplayScale());
+            const auto position = Point<Vp>(rect.left, rect.right);
+            return UnitFunction::ConvertVpToDp(position, GetDisplayScale());
         }
     }
     return {};
@@ -273,9 +273,9 @@ auto PlatformWindowWin::SetPosition(Point<Dp> const& position) -> void
 {
     if (!IsClosed())
     {
-        const auto spPosition = UnitFunction::ConvertDpToSp(position, GetDisplayScale());
-        const auto x = static_cast<int>(Sp::Round(spPosition.GetX()));
-        const auto y = static_cast<int>(Sp::Round(spPosition.GetY()));
+        const auto spPosition = UnitFunction::ConvertDpToVp(position, GetDisplayScale());
+        const auto x = static_cast<int>(Vp::Round(spPosition.GetX()));
+        const auto y = static_cast<int>(Vp::Round(spPosition.GetY()));
         ::SetWindowPos(_hwnd, NULL, x, y, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSIZE);
     }
 }
@@ -290,8 +290,8 @@ auto PlatformWindowWin::GetFrameRect()  -> Rect<Dp>
         auto rect = RECT();
         if (::GetWindowRect(_hwnd, &rect))
         {
-            const auto frameRect = Rect<Sp>(rect.left, rect.top, rect.right, rect.bottom);
-            return UnitFunction::ConvertSpToDp(frameRect, GetDisplayScale());
+            const auto frameRect = Rect<Vp>(rect.left, rect.top, rect.right, rect.bottom);
+            return UnitFunction::ConvertVpToDp(frameRect, GetDisplayScale());
         }
     }
     return {};
@@ -315,8 +315,8 @@ auto PlatformWindowWin::GetContentRect() -> Rect<Dp>
                 {
                     const auto x = origin.x - windowRect.left;
                     const auto y = origin.y - windowRect.top;
-                    const auto contentRect = Rect<Sp>(x, y, x + rect.right - rect.left, y + rect.bottom - rect.top);
-                    return UnitFunction::ConvertSpToDp(contentRect, GetDisplayScale());
+                    const auto contentRect = Rect<Vp>(x, y, x + rect.right - rect.left, y + rect.bottom - rect.top);
+                    return UnitFunction::ConvertVpToDp(contentRect, GetDisplayScale());
                 }
             }
         }
@@ -345,8 +345,8 @@ auto PlatformWindowWin::GetAreaRect(WindowArea const area) -> Rect<Dp>
             if (_options.hasTitleBar)
             {
                 const auto titleBarHeight = GetSystemTitleBarHeight();
-                const auto titleBarRect = Rect<Sp>(0, 0, width, titleBarHeight);
-                return UnitFunction::ConvertSpToDp(titleBarRect, GetDisplayScale());
+                const auto titleBarRect = Rect<Vp>(0, 0, width, titleBarHeight);
+                return UnitFunction::ConvertVpToDp(titleBarRect, GetDisplayScale());
             }
         }
         else if (area == WindowArea::TitleBarContent)
@@ -355,15 +355,15 @@ auto PlatformWindowWin::GetAreaRect(WindowArea const area) -> Rect<Dp>
             {
                 const auto titleBarHeight = GetSystemTitleBarHeight();
                 const auto controlRect = GetSystemControlRect();
-                const auto availableRect = Rect<Sp>(0, 0, controlRect.left, titleBarHeight);
-                return UnitFunction::ConvertSpToDp(availableRect, GetDisplayScale());
+                const auto availableRect = Rect<Vp>(0, 0, controlRect.left, titleBarHeight);
+                return UnitFunction::ConvertVpToDp(availableRect, GetDisplayScale());
             }
         }
         else if (area == WindowArea::Content)
         {
             const auto titleBarHeight = _options.hasTitleBar ? GetSystemTitleBarHeight() : 0;
-            const auto contentRect = Rect<Sp>(0, titleBarHeight, width, height);
-            return UnitFunction::ConvertSpToDp(contentRect, GetDisplayScale());
+            const auto contentRect = Rect<Vp>(0, titleBarHeight, width, height);
+            return UnitFunction::ConvertVpToDp(contentRect, GetDisplayScale());
         }
     }
     return {};
@@ -900,14 +900,14 @@ auto PlatformWindowWin::HandleGetMinMaxInfo(HWND hWnd, UINT msg, WPARAM wParam, 
         if (const auto info = reinterpret_cast<MINMAXINFO*>(lParam))
         {
             const auto displayScale = GetDisplayScale();
-            const auto minSize = Size<Sp>::Max(UnitFunction::ConvertDpToSp(_sizeConstraints.GetMinSize(), displayScale), GetSystemMinWindowSize());
-            const auto maxSize = Size<Sp>::Min(UnitFunction::ConvertDpToSp(_sizeConstraints.GetMaxSize(), displayScale), GetSystemMaxWindowSize());
+            const auto minSize = Size<Vp>::Max(UnitFunction::ConvertDpToVp(_sizeConstraints.GetMinSize(), displayScale), GetSystemMinWindowSize());
+            const auto maxSize = Size<Vp>::Min(UnitFunction::ConvertDpToVp(_sizeConstraints.GetMaxSize(), displayScale), GetSystemMaxWindowSize());
 
-            info->ptMinTrackSize.x = static_cast<LONG>(Sp::Ceil(minSize.GetWidth()));
-            info->ptMinTrackSize.y = static_cast<LONG>(Sp::Ceil(minSize.GetHeight()));
+            info->ptMinTrackSize.x = static_cast<LONG>(Vp::Ceil(minSize.GetWidth()));
+            info->ptMinTrackSize.y = static_cast<LONG>(Vp::Ceil(minSize.GetHeight()));
 
-            info->ptMaxTrackSize.x = static_cast<LONG>(Sp::Floor(maxSize.GetWidth()));
-            info->ptMaxTrackSize.y = static_cast<LONG>(Sp::Floor(maxSize.GetHeight()));
+            info->ptMaxTrackSize.x = static_cast<LONG>(Vp::Floor(maxSize.GetWidth()));
+            info->ptMaxTrackSize.y = static_cast<LONG>(Vp::Floor(maxSize.GetHeight()));
         }
         return 0;
     }
@@ -1198,7 +1198,7 @@ static void SetPointerInfoParams(PlatformPointerEvent& parameter, POINTER_INFO c
         {
             const auto displayScale = ::GetDpiForWindow(hwnd) / DisplayScale(USER_DEFAULT_SCREEN_DPI);
             const auto pos = info.ptPixelLocation;
-            parameter.SetPosition(UnitFunction::ConvertSpToDp(Point<Sp>(pos.x - rect.left, pos.y - rect.top), displayScale));
+            parameter.SetPosition(UnitFunction::ConvertVpToDp(Point<Vp>(pos.x - rect.left, pos.y - rect.top), displayScale));
         }
     }
 }
@@ -1589,21 +1589,21 @@ auto PlatformWindowWin::HandleFrameSwap(MonotonicTime const& targetTimestamp) ->
 ///
 /// @brief
 ///
-auto PlatformWindowWin::GetSystemMinWindowSize() const -> Size<Sp>
+auto PlatformWindowWin::GetSystemMinWindowSize() const -> Size<Vp>
 {
     const auto w = ::GetSystemMetricsForDpi(SM_CXMINTRACK, _dpi);
     const auto h = ::GetSystemMetricsForDpi(SM_CYMINTRACK, _dpi);
-    return Size<Sp>(w, h);
+    return Size<Vp>(w, h);
 }
 
 ///
 /// @brief
 ///
-auto PlatformWindowWin::GetSystemMaxWindowSize() const -> Size<Sp>
+auto PlatformWindowWin::GetSystemMaxWindowSize() const -> Size<Vp>
 {
     const auto w = ::GetSystemMetricsForDpi(SM_CXMAXTRACK, _dpi);
     const auto h = ::GetSystemMetricsForDpi(SM_CYMAXTRACK, _dpi);
-    return Size<Sp>(w, h);
+    return Size<Vp>(w, h);
 }
 
 ///

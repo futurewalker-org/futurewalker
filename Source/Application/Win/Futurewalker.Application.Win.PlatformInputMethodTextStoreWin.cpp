@@ -457,7 +457,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetTextExt(TsViewCo
             layoutRect.SetRight(right);
 
             auto const displayScale = static_cast<DisplayScale>(GetDpiForWindow(hwnd)) / USER_DEFAULT_SCREEN_DPI;
-            auto const textRect = UnitFunction::ConvertDpToSp(layoutRect, displayScale);
+            auto const textRect = UnitFunction::ConvertDpToVp(layoutRect, displayScale);
 
             prc->left = windowRect.left + static_cast<LONG>(textRect.GetLeft());
             prc->top = windowRect.top + static_cast<LONG>(textRect.GetTop());

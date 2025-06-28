@@ -16,9 +16,9 @@ namespace FW_EXPORT
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertPxToSp(Px const& dp, BackingScale const& scale) -> Sp
+auto UnitFunction::ConvertPxToVp(Px const& dp, BackingScale const& scale) -> Vp
 {
-    return Sp(static_cast<float64_t>(dp) / static_cast<float64_t>(scale));
+    return Vp(static_cast<float64_t>(dp) / static_cast<float64_t>(scale));
 }
 
 ///
@@ -29,9 +29,9 @@ auto UnitFunction::ConvertPxToSp(Px const& dp, BackingScale const& scale) -> Sp
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertPxToSp(Size<Px> const& dp, BackingScale const& scale) -> Size<Sp>
+auto UnitFunction::ConvertPxToVp(Size<Px> const& dp, BackingScale const& scale) -> Size<Vp>
 {
-    return Size<Sp>(ConvertPxToSp(dp.GetWidth(), scale), ConvertPxToSp(dp.GetHeight(), scale));
+    return Size<Vp>(ConvertPxToVp(dp.GetWidth(), scale), ConvertPxToVp(dp.GetHeight(), scale));
 }
 
 ///
@@ -42,9 +42,9 @@ auto UnitFunction::ConvertPxToSp(Size<Px> const& dp, BackingScale const& scale) 
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertPxToSp(Point<Px> const& dp, BackingScale const& scale) -> Point<Sp>
+auto UnitFunction::ConvertPxToVp(Point<Px> const& dp, BackingScale const& scale) -> Point<Vp>
 {
-    return Point<Sp>(ConvertPxToSp(dp.GetX(), scale), ConvertPxToSp(dp.GetY(), scale));
+    return Point<Vp>(ConvertPxToVp(dp.GetX(), scale), ConvertPxToVp(dp.GetY(), scale));
 }
 
 ///
@@ -55,20 +55,20 @@ auto UnitFunction::ConvertPxToSp(Point<Px> const& dp, BackingScale const& scale)
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertPxToSp(Rect<Px> const& dp, BackingScale const& scale) -> Rect<Sp>
+auto UnitFunction::ConvertPxToVp(Rect<Px> const& dp, BackingScale const& scale) -> Rect<Vp>
 {
-    return Rect<Sp>(ConvertPxToSp(dp.GetLeft(), scale), ConvertPxToSp(dp.GetTop(), scale), ConvertPxToSp(dp.GetRight(), scale), ConvertPxToSp(dp.GetBottom(), scale));
+    return Rect<Vp>(ConvertPxToVp(dp.GetLeft(), scale), ConvertPxToVp(dp.GetTop(), scale), ConvertPxToVp(dp.GetRight(), scale), ConvertPxToVp(dp.GetBottom(), scale));
 }
 
 ///
 /// @brief 
 ///
-/// @param sp 
+/// @param vp 
 /// @param scale 
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertSpToPx(Sp const& sp, BackingScale const& scale) -> Px
+auto UnitFunction::ConvertVpToPx(Vp const& sp, BackingScale const& scale) -> Px
 {
     return Px(static_cast<float64_t>(sp) * static_cast<float64_t>(scale));
 }
@@ -76,40 +76,40 @@ auto UnitFunction::ConvertSpToPx(Sp const& sp, BackingScale const& scale) -> Px
 ///
 /// @brief 
 ///
-/// @param sp 
+/// @param vp 
 /// @param scale 
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertSpToPx(Size<Sp> const& sp, BackingScale const& scale) -> Size<Px>
+auto UnitFunction::ConvertVpToPx(Size<Vp> const& sp, BackingScale const& scale) -> Size<Px>
 {
-    return Size<Px>(ConvertSpToPx(sp.GetWidth(), scale), ConvertSpToPx(sp.GetHeight(), scale));
+    return Size<Px>(ConvertVpToPx(sp.GetWidth(), scale), ConvertVpToPx(sp.GetHeight(), scale));
 }
 
 ///
 /// @brief 
 ///
-/// @param sp 
+/// @param vp 
 /// @param scale 
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertSpToPx(Point<Sp> const& sp, BackingScale const& scale) -> Point<Px>
+auto UnitFunction::ConvertVpToPx(Point<Vp> const& sp, BackingScale const& scale) -> Point<Px>
 {
-    return Point<Px>(ConvertSpToPx(sp.GetX(), scale), ConvertSpToPx(sp.GetY(), scale));
+    return Point<Px>(ConvertVpToPx(sp.GetX(), scale), ConvertVpToPx(sp.GetY(), scale));
 }
 
 ///
 /// @brief 
 ///
-/// @param sp 
+/// @param vp 
 /// @param scale 
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertSpToPx(Rect<Sp> const& sp, BackingScale const& scale) -> Rect<Px>
+auto UnitFunction::ConvertVpToPx(Rect<Vp> const& sp, BackingScale const& scale) -> Rect<Px>
 {
-    return Rect<Px>(ConvertSpToPx(sp.GetTopLeft(), scale), ConvertSpToPx(sp.GetSize(), scale));
+    return Rect<Px>(ConvertVpToPx(sp.GetTopLeft(), scale), ConvertVpToPx(sp.GetSize(), scale));
 }
 
 ///
@@ -120,7 +120,7 @@ auto UnitFunction::ConvertSpToPx(Rect<Sp> const& sp, BackingScale const& scale) 
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertSpToDp(Sp const& sp, DisplayScale const& scale) -> Dp
+auto UnitFunction::ConvertVpToDp(Vp const& sp, DisplayScale const& scale) -> Dp
 {
     return Dp(static_cast<float64_t>(sp) / static_cast<float64_t>(scale));
 }
@@ -133,9 +133,9 @@ auto UnitFunction::ConvertSpToDp(Sp const& sp, DisplayScale const& scale) -> Dp
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertSpToDp(Size<Sp> const& sp, DisplayScale const& scale) -> Size<Dp>
+auto UnitFunction::ConvertVpToDp(Size<Vp> const& sp, DisplayScale const& scale) -> Size<Dp>
 {
-    return Size<Dp>(ConvertSpToDp(sp.GetWidth(), scale), ConvertSpToDp(sp.GetHeight(), scale));
+    return Size<Dp>(ConvertVpToDp(sp.GetWidth(), scale), ConvertVpToDp(sp.GetHeight(), scale));
 }
 
 ///
@@ -146,9 +146,9 @@ auto UnitFunction::ConvertSpToDp(Size<Sp> const& sp, DisplayScale const& scale) 
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertSpToDp(Point<Sp> const& sp, DisplayScale const& scale) -> Point<Dp>
+auto UnitFunction::ConvertVpToDp(Point<Vp> const& sp, DisplayScale const& scale) -> Point<Dp>
 {
-    return Point<Dp>(ConvertSpToDp(sp.GetX(), scale), ConvertSpToDp(sp.GetY(), scale));
+    return Point<Dp>(ConvertVpToDp(sp.GetX(), scale), ConvertVpToDp(sp.GetY(), scale));
 }
 
 ///
@@ -159,9 +159,9 @@ auto UnitFunction::ConvertSpToDp(Point<Sp> const& sp, DisplayScale const& scale)
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertSpToDp(Rect<Sp> const& sp, DisplayScale const& scale) -> Rect<Dp>
+auto UnitFunction::ConvertVpToDp(Rect<Vp> const& sp, DisplayScale const& scale) -> Rect<Dp>
 {
-    return Rect<Dp>(ConvertSpToDp(sp.GetLeft(), scale), ConvertSpToDp(sp.GetTop(), scale), ConvertSpToDp(sp.GetRight(), scale), ConvertSpToDp(sp.GetBottom(), scale));
+    return Rect<Dp>(ConvertVpToDp(sp.GetLeft(), scale), ConvertVpToDp(sp.GetTop(), scale), ConvertVpToDp(sp.GetRight(), scale), ConvertVpToDp(sp.GetBottom(), scale));
 }
 
 ///
@@ -172,9 +172,9 @@ auto UnitFunction::ConvertSpToDp(Rect<Sp> const& sp, DisplayScale const& scale) 
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertDpToSp(Dp const& dp, DisplayScale const& scale) -> Sp
+auto UnitFunction::ConvertDpToVp(Dp const& dp, DisplayScale const& scale) -> Vp
 {
-    return Sp(static_cast<float64_t>(dp) * static_cast<float64_t>(scale));
+    return Vp(static_cast<float64_t>(dp) * static_cast<float64_t>(scale));
 }
 
 ///
@@ -185,9 +185,9 @@ auto UnitFunction::ConvertDpToSp(Dp const& dp, DisplayScale const& scale) -> Sp
 ///
 /// @return
 ///
-auto UnitFunction::ConvertDpToSp(Size<Dp> const& dp, DisplayScale const& scale) -> Size<Sp>
+auto UnitFunction::ConvertDpToVp(Size<Dp> const& dp, DisplayScale const& scale) -> Size<Vp>
 {
-    return Size<Sp>(ConvertDpToSp(dp.GetWidth(), scale), ConvertDpToSp(dp.GetHeight(), scale));
+    return Size<Vp>(ConvertDpToVp(dp.GetWidth(), scale), ConvertDpToVp(dp.GetHeight(), scale));
 }
 
 ///
@@ -198,9 +198,9 @@ auto UnitFunction::ConvertDpToSp(Size<Dp> const& dp, DisplayScale const& scale) 
 ///
 /// @return 
 ///
-auto UnitFunction::ConvertDpToSp(Point<Dp> const& dp, DisplayScale const& scale) -> Point<Sp>
+auto UnitFunction::ConvertDpToVp(Point<Dp> const& dp, DisplayScale const& scale) -> Point<Vp>
 {
-    return Point<Sp>(ConvertDpToSp(dp.GetX(), scale), ConvertDpToSp(dp.GetY(), scale));
+    return Point<Vp>(ConvertDpToVp(dp.GetX(), scale), ConvertDpToVp(dp.GetY(), scale));
 }
 
 ///
@@ -211,9 +211,9 @@ auto UnitFunction::ConvertDpToSp(Point<Dp> const& dp, DisplayScale const& scale)
 ///
 /// @return
 ///
-auto UnitFunction::ConvertDpToSp(Rect<Dp> const& dp, DisplayScale const& scale) -> Rect<Sp>
+auto UnitFunction::ConvertDpToVp(Rect<Dp> const& dp, DisplayScale const& scale) -> Rect<Vp>
 {
-    return Rect<Sp>(ConvertDpToSp(dp.GetLeft(), scale), ConvertDpToSp(dp.GetTop(), scale), ConvertDpToSp(dp.GetRight(), scale), ConvertDpToSp(dp.GetBottom(), scale));
+    return Rect<Vp>(ConvertDpToVp(dp.GetLeft(), scale), ConvertDpToVp(dp.GetTop(), scale), ConvertDpToVp(dp.GetRight(), scale), ConvertDpToVp(dp.GetBottom(), scale));
 }
 
 ///
@@ -227,7 +227,7 @@ auto UnitFunction::ConvertDpToSp(Rect<Dp> const& dp, DisplayScale const& scale) 
 ///
 auto UnitFunction::ConvertDpToPx(Dp const& dp, DisplayScale const& displayScale, BackingScale const& backingScale) -> Px
 {
-    return ConvertSpToPx(ConvertDpToSp(dp, displayScale), backingScale);
+    return ConvertVpToPx(ConvertDpToVp(dp, displayScale), backingScale);
 }
 
 ///
@@ -241,7 +241,7 @@ auto UnitFunction::ConvertDpToPx(Dp const& dp, DisplayScale const& displayScale,
 ///
 auto UnitFunction::ConvertDpToPx(Size<Dp> const& dp, DisplayScale const& displayScale, BackingScale const& backingScale) -> Size<Px>
 {
-    return ConvertSpToPx(ConvertDpToSp(dp, displayScale), backingScale);
+    return ConvertVpToPx(ConvertDpToVp(dp, displayScale), backingScale);
 }
 
 ///
@@ -255,7 +255,7 @@ auto UnitFunction::ConvertDpToPx(Size<Dp> const& dp, DisplayScale const& display
 ///
 auto UnitFunction::ConvertDpToPx(Point<Dp> const& dp, DisplayScale const& displayScale, BackingScale const& backingScale) -> Point<Px>
 {
-    return ConvertSpToPx(ConvertDpToSp(dp, displayScale), backingScale);
+    return ConvertVpToPx(ConvertDpToVp(dp, displayScale), backingScale);
 }
 
 ///
@@ -269,7 +269,7 @@ auto UnitFunction::ConvertDpToPx(Point<Dp> const& dp, DisplayScale const& displa
 ///
 auto UnitFunction::ConvertDpToPx(Rect<Dp> const& dp, DisplayScale const& displayScale, BackingScale const& backingScale) -> Rect<Px>
 {
-    return ConvertSpToPx(ConvertDpToSp(dp, displayScale), backingScale);
+    return ConvertVpToPx(ConvertDpToVp(dp, displayScale), backingScale);
 }
 
 ///
@@ -283,7 +283,7 @@ auto UnitFunction::ConvertDpToPx(Rect<Dp> const& dp, DisplayScale const& display
 ///
 auto UnitFunction::ConvertPxToDp(Px const& px, BackingScale const& backingScale, DisplayScale const& displayScale) -> Dp
 {
-    return ConvertSpToDp(ConvertPxToSp(px, backingScale), displayScale);
+    return ConvertVpToDp(ConvertPxToVp(px, backingScale), displayScale);
 }
 
 ///
@@ -297,7 +297,7 @@ auto UnitFunction::ConvertPxToDp(Px const& px, BackingScale const& backingScale,
 ///
 auto UnitFunction::ConvertPxToDp(Size<Px> const& px, BackingScale const& backingScale, DisplayScale const& displayScale) -> Size<Dp>
 {
-    return ConvertSpToDp(ConvertPxToSp(px, backingScale), displayScale);
+    return ConvertVpToDp(ConvertPxToVp(px, backingScale), displayScale);
 }
 
 ///
@@ -311,7 +311,7 @@ auto UnitFunction::ConvertPxToDp(Size<Px> const& px, BackingScale const& backing
 ///
 auto UnitFunction::ConvertPxToDp(Point<Px> const& px, BackingScale const& backingScale, DisplayScale const& displayScale) -> Point<Dp>
 {
-    return ConvertSpToDp(ConvertPxToSp(px, backingScale), displayScale);
+    return ConvertVpToDp(ConvertPxToVp(px, backingScale), displayScale);
 }
 
 ///
@@ -325,7 +325,7 @@ auto UnitFunction::ConvertPxToDp(Point<Px> const& px, BackingScale const& backin
 ///
 auto UnitFunction::ConvertPxToDp(Rect<Px> const& px, BackingScale const& backingScale, DisplayScale const& displayScale) -> Rect<Dp>
 {
-    return ConvertSpToDp(ConvertPxToSp(px, backingScale), displayScale);
+    return ConvertVpToDp(ConvertPxToVp(px, backingScale), displayScale);
 }
 
 ///

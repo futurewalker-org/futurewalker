@@ -12,7 +12,7 @@ namespace FW_EXPORT
 ///
 /// Represents DPI independent pixel coordinate values.
 ///
-/// Relation with Vp: Dp = Sp / DisplayScale.
+/// Relation with Vp: Dp = Vp / DisplayScale.
 ///
 /// Mainly used for view layout and rendering coordinates.
 ///
@@ -21,21 +21,21 @@ using Dp = Float<float64_t, class UnitTagDp>;
 ///
 /// @brief Tagged float type for virtual pixels.
 ///
-/// Represents DPI scaled pixel coordinate values.
+/// Represents virtual screen pixel coordinate values.
 ///
-/// Relation with Dp: Sp = Dp * DisplayScale.
-/// Relation with Px: Sp = Px / BackingScale.
+/// Relation with Dp: Vp = Dp * DisplayScale.
+/// Relation with Px: Vp = Px / BackingScale.
 ///
-/// Mainly used for platform window coordinates.
+/// Mainly used for platform screen coordinates.
 ///
-using Sp = Float<float64_t, class UnitTagSp>;
+using Vp = Float<float64_t, class UnitTagVp>;
 
 ///
 /// @brief Tagged float type for raw pixels.
 ///
 /// Represents pixel coordinate of rendering buffer.
 ///
-/// Relation with Vp: Px = Sp * BackingScale.
+/// Relation with Vp: Px = Vp * BackingScale.
 ///
 /// Mainly used for platform window rendering and bitmap cache.
 ///
@@ -47,9 +47,9 @@ using Px = Float<float64_t, class UnitTagPx>;
 using IntDp = Integer<int64_t, class UnitTagDp>;
 
 ///
-/// @brief Integer variant of Sp.
+/// @brief Integer variant of Vp.
 ///
-using IntSp = Integer<int64_t, class UnitTagSp>;
+using IntVp = Integer<int64_t, class UnitTagVp>;
 
 ///
 /// @brief Integer variant of Px.

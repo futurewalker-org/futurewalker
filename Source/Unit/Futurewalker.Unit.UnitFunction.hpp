@@ -17,25 +17,25 @@ namespace FW_EXPORT
 class UnitFunction : NonConstructible
 {
 public:
-    static auto ConvertPxToSp(Px const& dp, BackingScale const& scale) -> Sp;
-    static auto ConvertPxToSp(Size<Px> const& dp, BackingScale const& scale) -> Size<Sp>;
-    static auto ConvertPxToSp(Point<Px> const& dp, BackingScale const& scale) -> Point<Sp>;
-    static auto ConvertPxToSp(Rect<Px> const& dp, BackingScale const& scale) -> Rect<Sp>;
+    static auto ConvertPxToVp(Px const& dp, BackingScale const& scale) -> Vp;
+    static auto ConvertPxToVp(Size<Px> const& dp, BackingScale const& scale) -> Size<Vp>;
+    static auto ConvertPxToVp(Point<Px> const& dp, BackingScale const& scale) -> Point<Vp>;
+    static auto ConvertPxToVp(Rect<Px> const& dp, BackingScale const& scale) -> Rect<Vp>;
 
-    static auto ConvertSpToPx(Sp const& sp, BackingScale const& scale) -> Px;
-    static auto ConvertSpToPx(Size<Sp> const& sp, BackingScale const& scale) -> Size<Px>;
-    static auto ConvertSpToPx(Point<Sp> const& sp, BackingScale const& scale) -> Point<Px>;
-    static auto ConvertSpToPx(Rect<Sp> const& sp, BackingScale const& scale) -> Rect<Px>;
+    static auto ConvertVpToPx(Vp const& vp, BackingScale const& scale) -> Px;
+    static auto ConvertVpToPx(Size<Vp> const& vp, BackingScale const& scale) -> Size<Px>;
+    static auto ConvertVpToPx(Point<Vp> const& vp, BackingScale const& scale) -> Point<Px>;
+    static auto ConvertVpToPx(Rect<Vp> const& vp, BackingScale const& scale) -> Rect<Px>;
 
-    static auto ConvertSpToDp(Sp const& sp, DisplayScale const& scale) -> Dp;
-    static auto ConvertSpToDp(Size<Sp> const& sp, DisplayScale const& scale) -> Size<Dp>;
-    static auto ConvertSpToDp(Point<Sp> const& sp, DisplayScale const& scale) -> Point<Dp>;
-    static auto ConvertSpToDp(Rect<Sp> const& sp, DisplayScale const& scale) -> Rect<Dp>;
+    static auto ConvertVpToDp(Vp const& vp, DisplayScale const& scale) -> Dp;
+    static auto ConvertVpToDp(Size<Vp> const& vp, DisplayScale const& scale) -> Size<Dp>;
+    static auto ConvertVpToDp(Point<Vp> const& vp, DisplayScale const& scale) -> Point<Dp>;
+    static auto ConvertVpToDp(Rect<Vp> const& vp, DisplayScale const& scale) -> Rect<Dp>;
 
-    static auto ConvertDpToSp(Dp const& dp, DisplayScale const& scale) -> Sp;
-    static auto ConvertDpToSp(Size<Dp> const& dp, DisplayScale const& scale) -> Size<Sp>;
-    static auto ConvertDpToSp(Point<Dp> const& dp, DisplayScale const& scale) -> Point<Sp>;
-    static auto ConvertDpToSp(Rect<Dp> const& dp, DisplayScale const& scale) -> Rect<Sp>;
+    static auto ConvertDpToVp(Dp const& dp, DisplayScale const& scale) -> Vp;
+    static auto ConvertDpToVp(Size<Dp> const& dp, DisplayScale const& scale) -> Size<Vp>;
+    static auto ConvertDpToVp(Point<Dp> const& dp, DisplayScale const& scale) -> Point<Vp>;
+    static auto ConvertDpToVp(Rect<Dp> const& dp, DisplayScale const& scale) -> Rect<Vp>;
 
     static auto ConvertDpToPx(Dp const& dp, DisplayScale const& displayScale, BackingScale const& backingScale) -> Px;
     static auto ConvertDpToPx(Size<Dp> const& dp, DisplayScale const& displayScale, BackingScale const& backingScale) -> Size<Px>;

@@ -102,8 +102,8 @@ private:
     auto HandleInputLangChange(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleFrameSwap(MonotonicTime const& targetTimestamp) -> void;
 
-    auto GetSystemMinWindowSize() const -> Size<Sp>;
-    auto GetSystemMaxWindowSize() const -> Size<Sp>;
+    auto GetSystemMinWindowSize() const -> Size<Vp>;
+    auto GetSystemMaxWindowSize() const -> Size<Vp>;
     
     auto GetSystemFrameThicknessX() -> int;
     auto GetSystemFrameThicknessY() -> int;

@@ -62,16 +62,16 @@ auto PlatformScreenWin::Refresh() -> void
         if (::GetMonitorInfoW(_monitor, &info))
         {
             auto const frameRect = info.rcMonitor;
-            auto const spFrameRect = Rect<Sp>(frameRect.left, frameRect.top, frameRect.right, frameRect.bottom);
+            auto const spFrameRect = Rect<Vp>(frameRect.left, frameRect.top, frameRect.right, frameRect.bottom);
 
             auto const workRect = info.rcWork;
-            auto const spWorkRect = Rect<Sp>(0, 0, workRect.right - workRect.left, workRect.bottom - workRect.top);
+            auto const spWorkRect = Rect<Vp>(0, 0, workRect.right - workRect.left, workRect.bottom - workRect.top);
 
             auto const displayScale = GetMonitorDisplayScale(info);
             auto const backingScale = BackingScale(1.0);
 
-            auto const dpFrameRect = UnitFunction::ConvertSpToDp(spFrameRect, displayScale);
-            auto const dpWorkRect = UnitFunction::ConvertSpToDp(spWorkRect, displayScale);
+            auto const dpFrameRect = UnitFunction::ConvertVpToDp(spFrameRect, displayScale);
+            auto const dpWorkRect = UnitFunction::ConvertVpToDp(spWorkRect, displayScale);
 
             auto const displayName = GetMonitorDisplayName(info);
 
