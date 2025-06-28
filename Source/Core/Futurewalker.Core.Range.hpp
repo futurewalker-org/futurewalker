@@ -23,6 +23,22 @@ public:
     using ValueType = Integer<T, Tag>;
     using TagType = Tag;
 
+    ///
+    /// @brief Normalize range.
+    ///
+    /// @param[in] range Range to normalize
+    ///
+    /// @return Normalized range (begin <= end).
+    ///
+    static constexpr auto Normalize(Range const& range) -> Range
+    {
+        if (range._b > range._e)
+        {
+            return Range(range._e, range._b);
+        }
+        return range;
+    }
+
     inline constexpr Range() = default;
     inline constexpr Range(Range const&) = default;
     inline constexpr auto operator=(Range const&) -> Range& = default;
