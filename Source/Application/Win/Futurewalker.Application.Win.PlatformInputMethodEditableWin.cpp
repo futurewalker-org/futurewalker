@@ -169,7 +169,7 @@ auto PlatformInputMethodEditableWin::InternalBeforeInsertText(String const& text
         if (event.Is<PlatformInputEvent::InsertText>())
         {
             parameter = event.As<PlatformInputEvent::InsertText>();
-            return parameter->GetCancel();
+            return !parameter->GetCancel();
         }
         return false;
     }
@@ -187,7 +187,7 @@ auto PlatformInputMethodEditableWin::InternalBeforeDeleteSurroundingText(CodePoi
         if (event.Is<PlatformInputEvent::DeleteSurroundingText>())
         {
             parameter = event.As<PlatformInputEvent::DeleteSurroundingText>();
-            return parameter->GetCancel();
+            return !parameter->GetCancel();
         }
         return false;
     }
