@@ -11,6 +11,7 @@
 #include "Futurewalker.Core.String.hpp"
 
 #include <include/core/SkFontMgr.h>
+#include <include/core/SkFontStyle.h>
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
@@ -25,6 +26,10 @@ public:
     virtual ~PlatformSkiaFontManager() = 0;
     virtual auto FindTypefaceByFamilyNameAndStyle(String const& familyName, FontStyle const& style) -> Shared<Typeface> = 0;
     virtual auto GetSkFontMgr() -> sk_sp<SkFontMgr> = 0;
+
+protected:
+    static auto FontSlantToSkFontSlant(FontSlant const slant) -> SkFontStyle::Slant;
+    static auto FontStyleToSkFontStyle(FontStyle const& fontStyle) -> SkFontStyle;
 };
 }
 }
