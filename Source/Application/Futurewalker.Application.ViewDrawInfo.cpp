@@ -8,11 +8,28 @@
 
 #include "Futurewalker.Graphics.DisplayList.hpp"
 
+#include "Futurewalker.Unit.UnitFunction.hpp"
+
 #include "Futurewalker.Base.Locator.hpp"
 #include "Futurewalker.Base.Debug.hpp"
 
 namespace FW_DETAIL_NS
 {
+namespace
+{
+///
+/// @brief Expand bounds to align to pixel grid.
+///
+auto AlignBoundsToPixelGridByExpand(Rect<Dp> const& bounds, DisplayScale const displayScale, BackingScale const backingScale) -> Rect<Dp>
+{
+    auto const l = Px::Floor(UnitFunction::ConvertDpToPx(bounds.GetLeft(), displayScale, backingScale));
+    auto const t = Px::Floor(UnitFunction::ConvertDpToPx(bounds.GetTop(), displayScale, backingScale));
+    auto const r = Px::Ceil(UnitFunction::ConvertDpToPx(bounds.GetRight(), displayScale, backingScale));
+    auto const b = Px::Ceil(UnitFunction::ConvertDpToPx(bounds.GetBottom(), displayScale, backingScale));
+    return UnitFunction::ConvertPxToDp(Rect<Px>(l, t, r, b), backingScale, displayScale);
+}
+}
+
 ///
 /// @brief
 ///
@@ -153,9 +170,11 @@ auto ViewDrawInfo::UpdateLayers(ViewLayer& layer) -> void
     {
         if (_displayList)
         {
-            const auto bounds = _displayList->GetBounds();
-            const auto offset = bounds.GetPosition().As<Offset>();
-            const auto scale = static_cast<Float64>(_displayScale) * static_cast<Float64>(_backingScale);
+            // We assume origin of the bounds is properly aligned by layout algorithm.
+            auto const bounds = AlignBoundsToPixelGridByExpand(_displayList->GetBounds(), _displayScale, _backingScale);
+            auto const offset = bounds.GetPosition().As<Offset>();
+            auto const scale = static_cast<Float64>(_displayScale) * static_cast<Float64>(_backingScale);
+
             drawableLayer->SetOffset(offset);
             drawableLayer->SetSize(bounds.GetSize());
             drawableLayer.As<DrawableViewLayer>()->Draw(_displayList, -offset, scale);
