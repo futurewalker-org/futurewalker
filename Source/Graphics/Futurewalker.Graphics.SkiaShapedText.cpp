@@ -4,9 +4,10 @@
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
-SkiaShapedText::SkiaShapedText(const sk_sp<SkTextBlob>& textBlob)
+SkiaShapedText::SkiaShapedText(sk_sp<SkTextBlob> const& textBlob, Shared<TextLayoutInfo> const& textLayoutInfo)
   : ShapedText()
   , _textBlob {textBlob}
+  , _textLayoutInfo {textLayoutInfo}
 {
 }
 
@@ -18,6 +19,11 @@ auto SkiaShapedText::GetBounds() const -> Rect<Dp>
         return Rect<Dp>(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom);
     }
     return {};
+}
+
+auto SkiaShapedText::GetLayoutInfo() const -> TextLayoutInfo const&
+{
+    return *_textLayoutInfo;
 }
 
 auto SkiaShapedText::GetTextBlob() const -> sk_sp<SkTextBlob>

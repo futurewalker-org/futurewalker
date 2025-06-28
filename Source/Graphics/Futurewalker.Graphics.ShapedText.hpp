@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Graphics.ShapedTextType.hpp"
+#include "Futurewalker.Graphics.TextLayoutInfoType.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -23,6 +24,7 @@ class ShapedText : NonCopyable
 public:
     virtual ~ShapedText() = 0;
     virtual auto GetBounds() const -> Rect<Dp> = 0;
+    virtual auto GetLayoutInfo() const -> TextLayoutInfo const& = 0;
 };
 }
 }

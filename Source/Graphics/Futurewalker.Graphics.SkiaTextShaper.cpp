@@ -169,6 +169,6 @@ auto SkiaTextShaper::Shape(String const& text, Shared<Typeface> const& typeface,
     shaper->shape(utf8Chars, utf8Bytes, *fontRunIterator, *bidiRunIterator, *scriptRunIterator, *languageRunIterator, nullptr, 0, width, &runHandler);
 
     auto const [textBlob, layoutInfo] = std::move(runHandler).Finalize();
-    return Shared<SkiaShapedText>::Make(textBlob/*, layoutInfo*/);
+    return Shared<SkiaShapedText>::Make(textBlob, layoutInfo);
 }
 }
