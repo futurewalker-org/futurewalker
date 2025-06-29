@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MPL-2.0
+﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
 #include "Futurewalker.Graphics.Win.PlatformSkiaFontManagerWinType.hpp"
