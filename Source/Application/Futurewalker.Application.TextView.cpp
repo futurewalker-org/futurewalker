@@ -98,7 +98,7 @@ auto TextView::Draw(DrawScope& scope) -> void
         const auto hAlign = _horizontalAlignment.GetValueOr(TextViewHorizontalAlignment::Center);
         const auto vAlign = _verticalAlignment.GetValueOr(TextViewVerticalAlignment::Middle);
 
-        const auto size = _shapedText->GetBounds().GetSize();
+        const auto size = _shapedText->GetLayoutInfo().GetSize();
 
         auto x = Dp(0);
         if ((hAlign == TextViewHorizontalAlignment::Leading && isRTL) || (hAlign == TextViewHorizontalAlignment::Trailing && !isRTL))
