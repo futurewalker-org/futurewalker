@@ -127,11 +127,11 @@ private:
 class ViewEvent::Notify : public ViewEvent
 {
 public:
-    auto GetSenderView() const -> Shared<View>;
-    auto SetSenderView(Shared<View> const& senderView) -> void;
+    auto GetSender() const -> Shared<View>;
+    auto SetSender(Shared<View> const& sender) -> void;
 
 private:
-    Weak<View> _senderView;
+    Weak<View> _sender;
 };
 }
 }

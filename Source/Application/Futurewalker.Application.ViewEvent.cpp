@@ -23,16 +23,16 @@ auto ViewEvent::ChildRemoved::SetRemovedView(Shared<View> const& view) -> void
 ///
 /// @brief
 ///
-auto ViewEvent::Notify::GetSenderView() const -> Shared<View>
+auto ViewEvent::Notify::GetSender() const -> Shared<View>
 {
-    return _senderView.Lock();
+    return _sender.Lock();
 }
 
 ///
 /// @brief
 ///
-auto ViewEvent::Notify::SetSenderView(Shared<View> const& senderView) -> void
+auto ViewEvent::Notify::SetSender(Shared<View> const& sender) -> void
 {
-    _senderView = senderView;
+    _sender = sender;
 }
 }

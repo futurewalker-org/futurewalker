@@ -1732,26 +1732,34 @@ auto View::DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async
 ///
 auto View::DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>
 {
-    try
+    auto notifyEventParameter = event.As<ViewEvent::Notify>();
+    notifyEventParameter->SetSender(GetSelf());
+    auto notifyEvent = Event<>(notifyEventParameter);
+
+    if (co_await dispatch(notifyEvent))
     {
-        auto parameter = event.As<ViewEvent::Notify>();
-        parameter->SetSenderView(GetSelf());
-        auto notifyEvent = Event<>(parameter);
-        if (co_await dispatch(notifyEvent))
+        if (notifyEvent.Is<ViewEvent::Notify>())
         {
-            event = notifyEvent;
-            co_return true;
+            notifyEventParameter = notifyEvent.As<ViewEvent::Notify>();
+            notifyEventParameter->SetSender(nullptr);
+            event = notifyEventParameter;
         }
-    }
-    catch (...)
-    {
-        FW_DEBUG_ASSERT(false);
+        co_return true;
     }
 
     if (auto parent = GetParent())
     {
-        auto bubbleEvent = Event<>(Event<ViewEventNotifyBubble>::Make(event));
-        co_return co_await parent->SendEvent(bubbleEvent);
+        auto bubbleEvent = Event<>(Event<ViewEventNotifyBubble>::Make(notifyEvent));
+        if (co_await parent->SendEvent(bubbleEvent))
+        {
+            if (notifyEvent.Is<ViewEvent::Notify>())
+            {
+                notifyEventParameter = notifyEvent.As<ViewEvent::Notify>();
+                notifyEventParameter->SetSender(nullptr);
+                event = notifyEventParameter;
+            }
+            co_return true;
+        }
     }
     co_return false;
 }
@@ -1764,16 +1772,9 @@ auto View::DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) ->
 ///
 auto View::DispatchNotifyBubbleEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>
 {
-    try
+    if (co_await dispatch(event.As<ViewEventNotifyBubble>()->GetEvent()))
     {
-        if (co_await dispatch(event.As<ViewEventNotifyBubble>()->GetEvent()))
-        {
-            co_return true;
-        }
-    }
-    catch (...)
-    {
-        FW_DEBUG_ASSERT(false);
+        co_return true;
     }
 
     if (auto parent = GetParent())
