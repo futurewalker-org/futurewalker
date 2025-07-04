@@ -4,8 +4,6 @@
 
 namespace FW_DETAIL_NS
 {
-namespace FW_EXPORT
-{
 ///
 /// @brief 
 ///
@@ -343,5 +341,24 @@ auto PointerEvent::Gesture::Scroll::SetDeltaY(Dp const deltaY) -> void
 {
     _deltaY = deltaY;
 }
+
+auto PointerEvent::HitTest::GetPointerEvent() const -> Event<PointerEvent> const&
+{
+    return _event;
+}
+
+auto PointerEvent::HitTest::SetPointerEvent(Event<PointerEvent> const& event) -> void
+{
+    _event = event;
+}
+
+auto PointerEvent::HitTest::GetHit() const -> Bool
+{
+    return _hit;
+}
+
+auto PointerEvent::HitTest::SetHit(Bool const hit) -> void
+{
+    _hit = hit;
 }
 }

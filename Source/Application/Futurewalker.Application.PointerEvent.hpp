@@ -8,6 +8,8 @@
 
 #include "Futurewalker.Unit.hpp"
 
+#include "Futurewalker.Event.Event.hpp"
+
 #include "Futurewalker.Core.MonotonicTime.hpp"
 
 namespace FW_DETAIL_NS
@@ -39,6 +41,7 @@ public:
     class Wheel;
     class Motion;
     class Gesture;
+    class HitTest;
 
 private:
     PointerId _id = 0U;
@@ -217,6 +220,20 @@ public:
 private:
     Dp _deltaX = 0.0;
     Dp _deltaY = 0.0;
+};
+
+class PointerEvent::HitTest final : public PointerEvent
+{
+public:
+    auto GetPointerEvent() const -> Event<PointerEvent> const&;
+    auto SetPointerEvent(Event<PointerEvent> const& event) -> void;
+
+    auto GetHit() const -> Bool;
+    auto SetHit(Bool const hit) -> void;
+
+private:
+    Event<PointerEvent> _event;
+    Bool _hit = false;
 };
 }
 }
