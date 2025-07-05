@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.ViewType.hpp"
+#include "Futurewalker.Application.RootViewType.hpp"
 #include "Futurewalker.Application.MeasureScopeType.hpp"
 #include "Futurewalker.Application.MeasureParameterType.hpp"
 #include "Futurewalker.Application.ArrangeScopeType.hpp"
@@ -9,8 +10,7 @@
 #include "Futurewalker.Application.DrawScopeType.hpp"
 #include "Futurewalker.Application.DrawParameterType.hpp"
 #include "Futurewalker.Application.HitTestScope.hpp"
-#include "Futurewalker.Application.PointerScope.hpp"
-#include "Futurewalker.Application.PointerEventType.hpp"
+#include "Futurewalker.Application.PointerEvent.hpp"
 #include "Futurewalker.Application.ViewLayoutInfo.hpp"
 #include "Futurewalker.Application.ViewDrawInfo.hpp"
 #include "Futurewalker.Application.LayoutDirection.hpp"
@@ -135,7 +135,6 @@ public:
     auto EnterArrangeScope(PassKey<ArrangeScope>, ArrangeParameter const& parameter) -> void;
     auto EnterDrawScope(PassKey<DrawScope>) -> void;
     auto EnterHitTestScope(PassKey<HitTestScope>, HitTestParameter const& parameter) -> Shared<View>;
-    auto EnterPointerScope(PassKey<PointerScope>, PointerParameter const& parameter) -> Shared<View>;
 
     auto GetMeasuredSize(PassKey<MeasureScope>) const -> Size<Dp>;
     auto GetMeasuredSize(PassKey<ArrangeScope>) const -> Size<Dp>;
@@ -147,8 +146,6 @@ protected:
     virtual auto Arrange(ArrangeScope& scope) -> void;
     virtual auto Draw(DrawScope& scope) -> void;
     virtual auto HitTest(HitTestScope& scope) -> void;
-    virtual auto PointerIntercept(PointerScope& scope) -> void;
-    virtual auto Pointer(PointerScope& scope) -> void;
 
     auto InvalidateLayout() -> void;
     auto InvalidateVisual() -> void;
@@ -182,6 +179,8 @@ protected:
     auto ReleasePointer(PointerId const id) -> void;
 
     auto CancelInput() -> void;
+
+    auto DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, PointerPhase const phase) -> Shared<View>;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;
@@ -241,6 +240,7 @@ private:
     auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
     auto DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
     auto DispatchNotifyBubbleEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
+    auto DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, PointerPhase const phase) -> Shared<View>;
 
     auto Attach() -> void;
     auto Detach() -> void;

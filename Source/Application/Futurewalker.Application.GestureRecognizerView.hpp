@@ -32,8 +32,7 @@ public:
 
 protected:
     auto Initialize() -> void override;
-    auto PointerIntercept(PointerScope& scope) -> void override;
-    auto Pointer(PointerScope& scope) -> void override;
+    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
 
 private:
     Shared<ContainerView> _containerView;

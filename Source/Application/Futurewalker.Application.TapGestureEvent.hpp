@@ -16,13 +16,26 @@ namespace FW_EXPORT
 class TapGestureEvent : public GestureEvent
 {
 public:
-    explicit TapGestureEvent(const TapGestureEventType eventType);
+    class Down;
+    class Up;
+    class Cancel;
+    class Tap;
+};
 
-    auto GetEventType() const -> TapGestureEventType;
-    auto SetEventType(const TapGestureEventType eventType) -> void;
+class TapGestureEvent::Down final : public TapGestureEvent
+{
+};
 
-private:
-    TapGestureEventType _eventType;
+class TapGestureEvent::Up final : public TapGestureEvent
+{
+};
+
+class TapGestureEvent::Cancel final : public TapGestureEvent
+{
+};
+
+class TapGestureEvent::Tap final : public TapGestureEvent
+{
 };
 }
 }

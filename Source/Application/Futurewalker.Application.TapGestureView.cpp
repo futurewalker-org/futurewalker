@@ -13,7 +13,7 @@ auto TapGestureView::Make() -> Shared<TapGestureView>
     return View::MakeDerived<TapGestureView>();
 }
 
-auto TapGestureView::MakeWithContent(const Shared<TapGestureView>& contentView) -> Shared<TapGestureView>
+auto TapGestureView::MakeWithContent(const Shared<View>& contentView) -> Shared<TapGestureView>
 {
     auto view = Make();
     view->SetContent(contentView);
@@ -46,7 +46,6 @@ auto TapGestureView::SetContent(const Shared<View>& view) -> void
 auto TapGestureView::Initialize() -> void
 {
     _gestureRecognizer = Shared<TapGestureRecognizer>::Make();
-
     _gestureRecognizerView = GestureRecognizerView::Make();
     _gestureRecognizerView->SetGestureRecognizer(_gestureRecognizer);
     AddChildBack(_gestureRecognizerView);
@@ -58,10 +57,26 @@ auto TapGestureView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<TapGestureEvent>())
     {
-        const auto type = event.As<TapGestureEvent>()->GetEventType();
-        auto tapEvent = Event<>(Event<TapGestureViewEvent>::Make(type));
-        co_await SendEvent(tapEvent);
-        co_return true;
+        if (event.Is<TapGestureEvent::Down>())
+        {
+            auto viewEvent = Event<>(Event<TapGestureViewEvent::Down>::Make());
+            co_await SendEvent(viewEvent);
+        }
+        else if (event.Is<TapGestureEvent::Up>())
+        {
+            auto viewEvent = Event<>(Event<TapGestureViewEvent::Up>::Make());
+            co_await SendEvent(viewEvent);
+        }
+        else if (event.Is<TapGestureEvent::Cancel>())
+        {
+            auto viewEvent = Event<>(Event<TapGestureViewEvent::Cancel>::Make());
+            co_await SendEvent(viewEvent);
+        }
+        else if (event.Is<TapGestureEvent::Tap>())
+        {
+            auto viewEvent = Event<>(Event<TapGestureViewEvent::Tap>::Make());
+            co_await SendEvent(viewEvent);
+        }
     }
     co_return false;
 }

@@ -15,7 +15,7 @@ class TapGestureView : public View
 {
 public:
     static auto Make() -> Shared<TapGestureView>;
-    static auto MakeWithContent(const Shared<TapGestureView>& contentView) -> Shared<TapGestureView>;
+    static auto MakeWithContent(const Shared<View>& contentView) -> Shared<TapGestureView>;
 
     TapGestureView(PassKey<View> key);
 

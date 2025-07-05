@@ -5,7 +5,21 @@
 namespace FW_DETAIL_NS
 {
 ///
-/// @brief 
+/// @brief Copy parameter of PointerEvent.
+///
+/// @note This function will not copy parameters of derived classes.
+///
+void PointerEvent::Copy(PointerEvent& dst, PointerEvent const& src)
+{
+    dst._id = src._id;
+    dst._type = src._type;
+    dst._timestamp = src._timestamp;
+    dst._isPrimaryPointer = src._isPrimaryPointer;
+    dst._position = src._position;
+}
+
+///
+/// @brief
 ///
 auto PointerEvent::GetPointerId() const -> PointerId
 {
@@ -342,23 +356,23 @@ auto PointerEvent::Gesture::Scroll::SetDeltaY(Dp const deltaY) -> void
     _deltaY = deltaY;
 }
 
-auto PointerEvent::HitTest::GetPointerEvent() const -> Event<PointerEvent> const&
+auto PointerEvent::Intercept::GetPointerEvent() const -> Event<PointerEvent> const&
 {
     return _event;
 }
 
-auto PointerEvent::HitTest::SetPointerEvent(Event<PointerEvent> const& event) -> void
+auto PointerEvent::Intercept::SetPointerEvent(Event<PointerEvent> const& event) -> void
 {
     _event = event;
 }
 
-auto PointerEvent::HitTest::GetHit() const -> Bool
+auto PointerEvent::Intercept::GetShouldIntercept() const -> Bool
 {
-    return _hit;
+    return _intercept;
 }
 
-auto PointerEvent::HitTest::SetHit(Bool const hit) -> void
+auto PointerEvent::Intercept::SetShouldIntercept(Bool const intercept) -> void
 {
-    _hit = hit;
+    _intercept = intercept;
 }
 }

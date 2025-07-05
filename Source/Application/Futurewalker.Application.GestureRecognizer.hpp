@@ -33,8 +33,7 @@ public:
         Function<void(PointerId)> releasePointer;
     };
     virtual ~GestureRecognizer() = 0;
-    virtual auto PointerIntercept(Delegate const& delegate, Event<PointerEvent> const& event, Rect<Dp> const& area) -> Bool = 0;
-    virtual auto Pointer(Delegate const& delegate, Event<PointerEvent> const& event, Rect<Dp> const& area) -> Bool = 0;
+    virtual auto Recognize(Delegate const& delegate, Event<PointerEvent> const& event, Rect<Dp> const& area) -> Bool = 0;
 
     auto SendEvent(Event<>& event) -> Async<Bool>;
     auto SendEventDetached(Event<>& event) -> Bool;

@@ -10,8 +10,6 @@
 #include "Futurewalker.Application.HitTestScope.hpp"
 #include "Futurewalker.Application.HitTestParameter.hpp"
 #include "Futurewalker.Application.HitTestEvent.hpp"
-#include "Futurewalker.Application.PointerScope.hpp"
-#include "Futurewalker.Application.PointerParameter.hpp"
 #include "Futurewalker.Application.PointerEvent.hpp"
 #include "Futurewalker.Application.AxisConstraints.hpp"
 #include "Futurewalker.Application.ViewLayer.hpp"
@@ -831,41 +829,37 @@ auto View::EnterHitTestScope(PassKey<HitTestScope> key, HitTestParameter const& 
 }
 
 ///
-/// @brief 
+/// @brief Dispatch pointer event.
 ///
-/// @param parameter 
+/// @param pointerEvent Pointer event to dispatch.
+/// @param target Target view.
+/// @param phase Phase of the pointer event.
 ///
-/// @return 
+/// @return The view that consumed the event.
 ///
-auto View::EnterPointerScope(PassKey<PointerScope> key, PointerParameter const& parameter) -> Shared<View>
+auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, PointerPhase const phase) -> Shared<View>
 {
     try
     {
         auto const self = GetSelf();
-        auto const target = parameter.GetTargetView({});
-        auto const phaseFlags = parameter.GetPhaseFlags({});
 
         if (self != target && !IsAncestorOf(target))
         {
             return {};
         }
 
-        auto dispatch = [&](View& view, PointerParameter const& parameter, Event<PointerEvent> pointerEvent) {
+        auto dispatch = [](View& view, Event<PointerEvent> pointerEvent, Shared<View> const& target, PointerPhase const phase) {
             auto const offset = view.GetFrameRect().GetPosition().As<Offset>();
             pointerEvent->SetPosition(pointerEvent->GetPosition() - offset);
-            auto pointerParameter = parameter;
-            pointerParameter.SetPointerEvent(pointerEvent);
-            return view.EnterPointerScope(key, pointerParameter);
+            return view.DispatchPointerEvent(pointerEvent, target, phase);
         };
 
         if (target == self)
         {
-            if (((phaseFlags & PointerPhaseFlags::Target) != PointerPhaseFlags::None))
+            if (phase == PointerPhase::Target)
             {
-                auto scope = PointerScope({}, *this, parameter);
-                Pointer(scope);
-
-                if (scope.GetResult({}))
+                auto targetEvent = Event<>(pointerEvent);
+                if (SendEventDetached(targetEvent))
                 {
                     return GetSelf();
                 }
@@ -873,20 +867,26 @@ auto View::EnterPointerScope(PassKey<PointerScope> key, PointerParameter const& 
         }
         else
         {
-            if ((phaseFlags & PointerPhaseFlags::Capture) != PointerPhaseFlags::None)
+            if (phase == PointerPhase::Capture)
             {
-                auto scope = PointerScope({}, *this, parameter);
-                PointerIntercept(scope);
-
-                if (scope.GetResult({}))
+                auto pointerInterceptEventParameter = Event<PointerEvent::Intercept>::Make();
+                PointerEvent::Copy(*pointerInterceptEventParameter, *pointerEvent);
+                pointerInterceptEventParameter->SetPointerEvent(pointerEvent);
+                pointerInterceptEventParameter->SetShouldIntercept(false);
+                auto pointerInterceptEvent = Event<>(pointerInterceptEventParameter);
+                if (SendEventDetached(pointerInterceptEvent))
                 {
-                    auto cancelEvent = Event<PointerEvent::Motion::Cancel>();
-                    cancelEvent->SetPointerId(parameter.GetPointerEvent()->GetPointerId());
-                    cancelEvent->SetPointerType(parameter.GetPointerEvent()->GetPointerType());
-                    cancelEvent->SetTimestamp(parameter.GetPointerEvent()->GetTimestamp());
-                    cancelEvent->SetPrimaryPointer(parameter.GetPointerEvent()->IsPrimaryPointer());
-                    cancelEvent->SetPosition(parameter.GetPointerEvent()->GetPosition());
-                    ForEachVisibleChild([&](auto& view) { dispatch(view, parameter, cancelEvent); });
+                    if (pointerInterceptEvent.Is<PointerEvent::Intercept>())
+                    {
+                        pointerInterceptEventParameter = pointerInterceptEvent.As<PointerEvent::Intercept>();
+                    }
+                }
+
+                if (pointerInterceptEventParameter->GetShouldIntercept())
+                {
+                    auto cancelEvent = Event<PointerEvent::Motion::Cancel>::Make();
+                    PointerEvent::Copy(*cancelEvent, *pointerEvent);
+                    ForEachVisibleChild([&](auto& view) { dispatch(view, cancelEvent, target, phase); });
                     return GetSelf();
                 }
             }
@@ -896,7 +896,7 @@ auto View::EnterPointerScope(PassKey<PointerScope> key, PointerParameter const& 
         {
             if (auto const view = *it)
             {
-                if (auto const result = dispatch(*view, parameter, parameter.GetPointerEvent()))
+                if (auto const result = dispatch(*view, pointerEvent, target, phase))
                 {
                     return result;
                 }
@@ -905,12 +905,10 @@ auto View::EnterPointerScope(PassKey<PointerScope> key, PointerParameter const& 
 
         if (target != self)
         {
-            if (((phaseFlags & PointerPhaseFlags::Bubble) != PointerPhaseFlags::None))
+            if (phase == PointerPhase::Bubble)
             {
-                auto scope = PointerScope({}, *this, parameter);
-                Pointer(scope);
-
-                if (scope.GetResult({}))
+                auto targetEvent = Event<>(pointerEvent);
+                if (SendEventDetached(targetEvent))
                 {
                     return GetSelf();
                 }
@@ -925,7 +923,7 @@ auto View::EnterPointerScope(PassKey<PointerScope> key, PointerParameter const& 
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto View::GetMeasuredSize(PassKey<MeasureScope>) const -> Size<Dp>
 {
@@ -1068,29 +1066,6 @@ auto View::HitTest(HitTestScope& scope) -> void
         }
     }
     scope.SetHit(hitTestParameter->GetHit());
-}
-
-///
-/// @brief Intercepts pointer events.
-///
-/// @param scope Scope of the operation
-///
-auto View::PointerIntercept(PointerScope& scope) -> void
-{
-    scope.SetResult(false);
-}
-
-///
-/// @brief Dispatches pointer events. 
-///
-/// @param scope Scope of the operation
-///
-auto View::Pointer(PointerScope& scope) -> void
-{
-    auto const& parameter = scope.GetParameter();
-    auto const& eventParameter = parameter.GetPointerEvent();
-    auto event = Event<>(eventParameter);
-    scope.SetResult(SendEventDetached(event));
 }
 
 ///
@@ -1353,6 +1328,20 @@ auto View::CancelInput() -> void
     {
         root->RootCancelInput(GetSelf());
     }
+}
+
+///
+/// @brief Dispatch pointer event from root view.
+///
+/// @param event Pointer event to dispatch.
+/// @param target Target view.
+/// @param phase Phase of the pointer event propagation.
+///
+/// @return The view that consumed the event.
+///
+auto View::DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, PointerPhase const phase) -> Shared<View>
+{
+    return DispatchPointerEvent(event, target, phase);
 }
 
 ///

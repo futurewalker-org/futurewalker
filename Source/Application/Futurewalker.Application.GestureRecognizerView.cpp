@@ -3,7 +3,6 @@
 #include "Futurewalker.Application.GestureRecognizerView.hpp"
 #include "Futurewalker.Application.GestureRecognizer.hpp"
 #include "Futurewalker.Application.ContainerView.hpp"
-#include "Futurewalker.Application.PointerScope.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -107,43 +106,23 @@ auto GestureRecognizerView::Initialize() -> void
 
     _containerView = ContainerView::Make();
     AddChildBack(_containerView);
+
+    EventReceiver::Connect(*this, *this, &GestureRecognizerView::ReceiveEvent);
 }
 
 ///
-/// @brief
+/// @brief Receive event.
 ///
-auto GestureRecognizerView::PointerIntercept(PointerScope& scope) -> void
+auto GestureRecognizerView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
-    if (_gestureRecognizer)
+    if (event.Is<PointerEvent>())
     {
         auto const delegate = GestureRecognizer::Delegate {
           .capturePointer = [&](auto id) { CapturePointer(id); },
           .releasePointer = [&](auto id) { ReleasePointer(id); },
         };
-        auto const& event = scope.GetParameter().GetPointerEvent();
-        auto const area = GetContentRect();
-        scope.SetResult(_gestureRecognizer->PointerIntercept(delegate, event, area));
-        return;
+        co_return _gestureRecognizer->Recognize(delegate, event.As<PointerEvent>(), GetContentRect());
     }
-    View::PointerIntercept(scope);
-}
-
-///
-/// @brief
-///
-auto GestureRecognizerView::Pointer(PointerScope& scope) -> void
-{
-    if (_gestureRecognizer)
-    {
-        auto const delegate = GestureRecognizer::Delegate {
-          .capturePointer = [&](auto id) { CapturePointer(id); },
-          .releasePointer = [&](auto id) { ReleasePointer(id); },
-        };
-        auto const& event = scope.GetParameter().GetPointerEvent();
-        auto const area = GetContentRect();
-        scope.SetResult(_gestureRecognizer->Pointer(delegate, event, area));
-        return;
-    }
-    View::Pointer(scope);
+    co_return false;
 }
 }

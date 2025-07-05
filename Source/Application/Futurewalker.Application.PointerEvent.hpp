@@ -22,6 +22,8 @@ namespace FW_EXPORT
 class PointerEvent : public EventParameter
 {
 public:
+    static void Copy(PointerEvent& dst, PointerEvent const& src);
+
     auto GetPointerId() const -> PointerId;
     auto SetPointerId(PointerId const id) -> void;
 
@@ -41,7 +43,7 @@ public:
     class Wheel;
     class Motion;
     class Gesture;
-    class HitTest;
+    class Intercept;
 
 private:
     PointerId _id = 0U;
@@ -222,18 +224,18 @@ private:
     Dp _deltaY = 0.0;
 };
 
-class PointerEvent::HitTest final : public PointerEvent
+class PointerEvent::Intercept final : public PointerEvent
 {
 public:
     auto GetPointerEvent() const -> Event<PointerEvent> const&;
     auto SetPointerEvent(Event<PointerEvent> const& event) -> void;
 
-    auto GetHit() const -> Bool;
-    auto SetHit(Bool const hit) -> void;
+    auto GetShouldIntercept() const -> Bool;
+    auto SetShouldIntercept(Bool const intercept) -> void;
 
 private:
     Event<PointerEvent> _event;
-    Bool _hit = false;
+    Bool _intercept = false;
 };
 }
 }

@@ -12,21 +12,7 @@ namespace FW_DETAIL_NS
 /// @param event
 /// @param area
 ///
-auto TapGestureRecognizer::PointerIntercept(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool
-{
-    (void)delegate;
-    (void)event;
-    (void)area;
-    return false;
-}
-
-///
-/// @brief
-///
-/// @param event
-/// @param area
-///
-auto TapGestureRecognizer::Pointer(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool
+auto TapGestureRecognizer::Recognize(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool
 {
     const auto pointerId = event->GetPointerId();
     const auto pos = event->GetPosition();
@@ -39,8 +25,7 @@ auto TapGestureRecognizer::Pointer(const Delegate& delegate, const Event<Pointer
             {
                 delegate.capturePointer(pointerId);
             }
-
-            SetPressed(true);
+            SetPressed(true, false);
         }
     }
     else if (event.Is<PointerEvent::Motion::Up>())
@@ -52,11 +37,11 @@ auto TapGestureRecognizer::Pointer(const Delegate& delegate, const Event<Pointer
                 delegate.releasePointer(pointerId);
             }
 
-            SetPressed(false);
+            SetPressed(false, false);
 
             if (Rect<Dp>::Intersect(area, pos))
             {
-                auto gestureEvent = Event<>(Event<TapGestureEvent>::Make(TapGestureEventType::Tap));
+                auto gestureEvent = Event<>(Event<TapGestureEvent::Tap>::Make());
                 SendEventDetached(gestureEvent);
             }
         }
@@ -67,17 +52,18 @@ auto TapGestureRecognizer::Pointer(const Delegate& delegate, const Event<Pointer
         {
             delegate.releasePointer(pointerId);
         }
-        SetPressed(false);
+        SetPressed(false, true);
     }
     return true;
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param pressed 
+/// @param pressed
+/// @param cancel
 ///
-auto TapGestureRecognizer::SetPressed(const Bool pressed) -> void
+auto TapGestureRecognizer::SetPressed(Bool const pressed, Bool const cancel) -> void
 {
     if (_pressed != pressed)
     {
@@ -85,13 +71,21 @@ auto TapGestureRecognizer::SetPressed(const Bool pressed) -> void
 
         if (_pressed)
         {
-            auto event = Event<>(Event<TapGestureEvent>::Make(TapGestureEventType::Down));
+            auto event = Event<>(Event<TapGestureEvent::Down>::Make());
             SendEventDetached(event);
         }
         else
         {
-            auto event = Event<>(Event<TapGestureEvent>::Make(TapGestureEventType::Up));
-            SendEventDetached(event);
+            if (cancel)
+            {
+                auto event = Event<>(Event<TapGestureEvent::Cancel>::Make());
+                SendEventDetached(event);
+            }
+            else
+            {
+                auto event = Event<>(Event<TapGestureEvent::Up>::Make());
+                SendEventDetached(event);
+            }
         }
     }
 }

@@ -6,6 +6,8 @@
 
 #include "Futurewalker.Event.EventReceiver.hpp"
 
+#include <set>
+
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -16,11 +18,10 @@ namespace FW_EXPORT
 class TapGestureRecognizer final : public GestureRecognizer
 {
 public:
-    auto PointerIntercept(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool override;
-    auto Pointer(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool override;
+    auto Recognize(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool override;
 
 private:
-    auto SetPressed(const Bool pressed) -> void;
+    auto SetPressed(const Bool pressed, const Bool cancel) -> void;
 
 private:
     Bool _pressed = false;

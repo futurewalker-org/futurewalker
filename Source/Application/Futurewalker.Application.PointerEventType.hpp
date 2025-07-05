@@ -13,6 +13,9 @@ namespace FW_EXPORT
 class PointerEvent;
 using PointerId = Identifier<UInt64, PointerEvent>;
 
+///
+/// @brief Type of pointer device.
+///
 enum class PointerType
 {
     Other = 0,
@@ -22,33 +25,56 @@ enum class PointerType
     TouchPad,
 };
 
+///
+/// @brief Phase of pointer event propagation.
+///
+enum class PointerPhase
+{
+    Unknown = 0,
+    Capture, ///< Event being sent during propagation from root to target.
+    Bubble,  //!< Event being sent during propagation from target to root.
+    Target,  //!< Event being sent to target.
+};
+
+///
+/// @brief Phase of pointer gesture.
+///
 enum class PointerGesturePhase
 {
     None = 0,
-    Begin,
-    Update,
-    End,
-    Cancel,
+    Begin,  //!< Gesture started.
+    Update, //!< Gesture updated.
+    End,    //!< Gesture ended.
+    Cancel, //!< Gesture canceled.
 };
 
+///
+/// @brief Precision of pointer wheel.
+///
 enum class PointerWheelPrecision
 {
-    Coarse,
-    Precise,
+    Coarse,  //!< Coarse wheel precision, e.g. mouse wheel.
+    Precise, //!< Precise wheel precision, e.g. touchpad or trackpad.
 };
 
+///
+/// @brief Pointer button.
+///
 enum class PointerButton
 {
     Unknown = 0,
-    Button1, // Primary button.
-    Button2, // Secondary button.
-    Button3, // Tertiary button.
-    ButtonX1,
-    ButtonX2,
-    Barrel,
-    Eraser,
+    Button1,  // Primary button.
+    Button2,  // Secondary button.
+    Button3,  // Tertiary button.
+    ButtonX1, // Mouse extended button 1.
+    ButtonX2, // Mouse extended button 2.
+    Barrel,   // Pen barrel button.
+    Eraser,   // Pen eraser button.
 };
 
+///
+/// @brief Flags for pointer buttons.
+///
 enum class PointerButtonFlags : uint32_t
 {
     None = 0,
@@ -61,14 +87,5 @@ enum class PointerButtonFlags : uint32_t
     Eraser = 1 << 7,   // Pen eraser button.
 };
 FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(PointerButtonFlags);
-
-enum class PointerPhaseFlags : uint32_t
-{
-    None = 0,
-    Capture = 1 << 0, //
-    Bubble = 1 << 1,  //
-    Target = 1 << 2,  //
-};
-FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(PointerPhaseFlags);
 }
 }
