@@ -255,33 +255,38 @@ auto InputMethodEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool
     {
         if (event.Is<PlatformInputEvent::InsertText>())
         {
+            auto platformInputEventParameter = event.As<PlatformInputEvent::InsertText>();
             auto inputEventParameter = Event<InputEvent::InsertText>::Make();
-            inputEventParameter->SetText(event.As<PlatformInputEvent::InsertText>()->GetText());
+            inputEventParameter->SetText(platformInputEventParameter->GetText());
+            inputEventParameter->SetCancel(platformInputEventParameter->GetCancel());
             auto inputEvent = Event<>(inputEventParameter);
             if (co_await _eventReceiver->SendEvent(inputEvent))
             {
-                inputEventParameter = inputEvent.As<InputEvent::InsertText>();
-                auto result = event.As<PlatformInputEvent::InsertText>();
-                result->SetText(inputEventParameter->GetText());
-                result->SetCancel(inputEventParameter->GetCancel());
-                event = result;
+                if (inputEvent.Is<InputEvent::InsertText>())
+                {
+                    inputEventParameter = inputEvent.As<InputEvent::InsertText>();
+                    platformInputEventParameter->SetCancel(inputEventParameter->GetCancel());
+                    event = platformInputEventParameter;
+                }
                 co_return true;
             }
         }
         else if (event.Is<PlatformInputEvent::DeleteSurroundingText>())
         {
+            auto platformInputEventParameter = event.As<PlatformInputEvent::DeleteSurroundingText>();
             auto inputEventParameter = Event<InputEvent::DeleteSurroundingText>::Make();
-            inputEventParameter->SetBefore(event.As<PlatformInputEvent::DeleteSurroundingText>()->GetBefore());
-            inputEventParameter->SetAfter(event.As<PlatformInputEvent::DeleteSurroundingText>()->GetAfter());
+            inputEventParameter->SetBefore(platformInputEventParameter->GetBefore());
+            inputEventParameter->SetAfter(platformInputEventParameter->GetAfter());
+            inputEventParameter->SetCancel(platformInputEventParameter->GetCancel());
             auto inputEvent = Event<>(inputEventParameter);
             if (co_await _eventReceiver->SendEvent(inputEvent))
             {
-                inputEventParameter = inputEvent.As<InputEvent::DeleteSurroundingText>();
-                auto result = event.As<PlatformInputEvent::DeleteSurroundingText>();
-                result->SetCancel(inputEventParameter->GetCancel());
-                result->SetBefore(inputEventParameter->GetBefore());
-                result->SetAfter(inputEventParameter->GetAfter());
-                event = result;
+                if (inputEvent.Is<InputEvent::DeleteSurroundingText>())
+                {
+                    inputEventParameter = inputEvent.As<InputEvent::DeleteSurroundingText>();
+                    platformInputEventParameter->SetCancel(inputEventParameter->GetCancel());
+                    event = platformInputEventParameter;
+                }
                 co_return true;
             }
         }
