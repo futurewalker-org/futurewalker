@@ -11,6 +11,7 @@
 #include "Futurewalker.Graphics.TextShaper.hpp"
 #include "Futurewalker.Graphics.ShapedText.hpp"
 #include "Futurewalker.Graphics.Scene.hpp"
+#include "Futurewalker.Graphics.TextLayoutInfo.hpp"
 
 namespace FW_DETAIL_NS
 {
