@@ -116,6 +116,7 @@ private:
     auto PointerDown(Bool const down, WPARAM const wParam) -> void;
     auto PointerEnter(Bool const enter, WPARAM const wParam) -> void;
     auto PointerUpdate(WPARAM const wParam) -> void;
+    auto PointerWheel(Bool const vertical, WPARAM const wParam) -> void;
 
     auto PostWindowEvent(Event<> const& event) -> void;
 

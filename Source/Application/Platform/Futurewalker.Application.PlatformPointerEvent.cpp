@@ -206,91 +206,58 @@ auto PlatformPointerEvent::SetModifiers(ModifierKeyFlags const modifiers) -> voi
     _modifierState = modifiers;
 }
 
-auto PlatformPointerEvent::Wheel::GetDeltaX() const -> Float64
+auto PlatformPointerEvent::Motion::Down::GetTiltX() const -> Degree
 {
-    return _deltaX;
-}
-auto PlatformPointerEvent::Wheel::SetDeltaX(Float64 const deltaX) -> void
-{
-    _deltaX = deltaX;
+    return _state.tiltX;
 }
 
-auto PlatformPointerEvent::Wheel::GetDeltaY() const -> Float64
+auto PlatformPointerEvent::Motion::Down::SetTiltX(Degree const& tiltX) -> void
 {
-    return _deltaY;
-}
-auto PlatformPointerEvent::Wheel::SetDeltaY(Float64 const deltaY) -> void
-{
-    _deltaY = deltaY;
+    _state.tiltX = tiltX;
 }
 
-auto PlatformPointerEvent::Wheel::GetPrecision() const -> PointerWheelPrecision
+auto PlatformPointerEvent::Motion::Down::GetTiltY() const -> Degree
 {
-    return _precision;
+    return _state.tiltY;
 }
 
-auto PlatformPointerEvent::Wheel::SetPrecision(PointerWheelPrecision const precision) -> void
+auto PlatformPointerEvent::Motion::Down::SetTiltY(Degree const& tiltY) -> void
 {
-    _precision = precision;
-}
-
-///
-/// @brief
-///
-/// @return
-///
-auto PlatformPointerEvent::Motion::GetTiltX() const -> Degree
-{
-    return _tiltX;
-}
-
-auto PlatformPointerEvent::Motion::SetTiltX(Degree const& tiltX) -> void
-{
-    _tiltX = tiltX;
-}
-
-auto PlatformPointerEvent::Motion::GetTiltY() const -> Degree
-{
-    return _tiltY;
-}
-
-auto PlatformPointerEvent::Motion::SetTiltY(Degree const& tiltY) -> void
-{
-    _tiltY = tiltY;
+    _state.tiltY = tiltY;
 }
 
 ///
 /// @brief Get azimuth of pointer.
 ///
-auto PlatformPointerEvent::Motion::GetAzimuth() const -> Degree
+auto PlatformPointerEvent::Motion::Down::GetAzimuth() const -> Degree
 {
-    return _azimuth;
+    return _state.azimuth;
 }
 
-auto PlatformPointerEvent::Motion::SetAzimuth(Degree const& azimuth) -> void
+auto PlatformPointerEvent::Motion::Down::SetAzimuth(Degree const& azimuth) -> void
 {
-    _azimuth = azimuth;
+    _state.azimuth = azimuth;
 }
 
 ///
 /// @brief Get altitude of pointer.
 ///
-auto PlatformPointerEvent::Motion::GetAltitude() const -> Degree
+auto PlatformPointerEvent::Motion::Down::GetAltitude() const -> Degree
 {
-    return _altitude;
+    return _state.altitude;
 }
 
-auto PlatformPointerEvent::Motion::SetAltitude(Degree const& altitude) -> void
+auto PlatformPointerEvent::Motion::Down::SetAltitude(Degree const& altitude) -> void
 {
-    _altitude = altitude;
+    _state.altitude = altitude;
 }
 
 ///
 /// @brief Get twist of pointer.
 ///
-auto PlatformPointerEvent::Motion::GetTwist() const -> Degree
+auto PlatformPointerEvent::Motion::Down::GetTwist() const -> Degree
 {
-    return _twist;
+    return _state.twist;
 }
 
 ///
@@ -300,9 +267,9 @@ auto PlatformPointerEvent::Motion::GetTwist() const -> Degree
 ///
 /// @return
 ///
-auto PlatformPointerEvent::Motion::SetTwist(Degree const& twist) -> void
+auto PlatformPointerEvent::Motion::Down::SetTwist(Degree const& twist) -> void
 {
-    _twist = twist;
+    _state.twist = twist;
 }
 
 ///
@@ -310,9 +277,9 @@ auto PlatformPointerEvent::Motion::SetTwist(Degree const& twist) -> void
 ///
 /// @return
 ///
-auto PlatformPointerEvent::Motion::GetPressure() const -> Float64
+auto PlatformPointerEvent::Motion::Down::GetPressure() const -> Float64
 {
-    return _pressure;
+    return _state.pressure;
 }
 
 ///
@@ -322,104 +289,314 @@ auto PlatformPointerEvent::Motion::GetPressure() const -> Float64
 ///
 /// @return
 ///
-auto PlatformPointerEvent::Motion::SetPressure(Float64 const pressure) -> void
+auto PlatformPointerEvent::Motion::Down::SetPressure(Float64 const pressure) -> void
 {
-    _pressure = pressure;
+    _state.pressure = pressure;
 }
 
-auto PlatformPointerEvent::Motion::GetTangentialPressure() const -> Float64
+auto PlatformPointerEvent::Motion::Down::GetTangentialPressure() const -> Float64
 {
-    return _tangentialPressure;
+    return _state.tangentialPressure;
 }
 
-auto PlatformPointerEvent::Motion::SetTangentialPressure(Float64 const pressure) -> void
+auto PlatformPointerEvent::Motion::Down::SetTangentialPressure(Float64 const pressure) -> void
 {
-    _tangentialPressure = pressure;
+    _state.tangentialPressure = pressure;
 }
 
-auto PlatformPointerEvent::Motion::GetButton() const -> PointerButton
+auto PlatformPointerEvent::Motion::Down::GetButton() const -> PointerButton
 {
-    return _button;
+    return _state.button;
 }
 
-auto PlatformPointerEvent::Motion::SetButton(PointerButton const button) -> void
+auto PlatformPointerEvent::Motion::Down::SetButton(PointerButton const button) -> void
 {
-    _button = button;
+    _state.button = button;
 }
 
-auto PlatformPointerEvent::Gesture::GetPhase() const -> PointerGesturePhase
+auto PlatformPointerEvent::Motion::Up::GetTiltX() const -> Degree
+{
+    return _state.tiltX;
+}
+
+auto PlatformPointerEvent::Motion::Up::SetTiltX(Degree const& tiltX) -> void
+{
+    _state.tiltX = tiltX;
+}
+
+auto PlatformPointerEvent::Motion::Up::GetTiltY() const -> Degree
+{
+    return _state.tiltY;
+}
+
+auto PlatformPointerEvent::Motion::Up::SetTiltY(Degree const& tiltY) -> void
+{
+    _state.tiltY = tiltY;
+}
+
+auto PlatformPointerEvent::Motion::Up::GetAzimuth() const -> Degree
+{
+    return _state.azimuth;
+}
+
+auto PlatformPointerEvent::Motion::Up::SetAzimuth(Degree const& azimuth) -> void
+{
+    _state.azimuth = azimuth;
+}
+
+auto PlatformPointerEvent::Motion::Up::GetAltitude() const -> Degree
+{
+    return _state.altitude;
+}
+
+auto PlatformPointerEvent::Motion::Up::SetAltitude(Degree const& altitude) -> void
+{
+    _state.altitude = altitude;
+}
+
+auto PlatformPointerEvent::Motion::Up::GetTwist() const -> Degree
+{
+    return _state.twist;
+}
+
+auto PlatformPointerEvent::Motion::Up::SetTwist(Degree const& twist) -> void
+{
+    _state.twist = twist;
+}
+
+auto PlatformPointerEvent::Motion::Up::GetPressure() const -> Float64
+{
+    return _state.pressure;
+}
+
+auto PlatformPointerEvent::Motion::Up::SetPressure(Float64 const pressure) -> void
+{
+    _state.pressure = pressure;
+}
+
+auto PlatformPointerEvent::Motion::Up::GetTangentialPressure() const -> Float64
+{
+    return _state.tangentialPressure;
+}
+
+auto PlatformPointerEvent::Motion::Up::SetTangentialPressure(Float64 const pressure) -> void
+{
+    _state.tangentialPressure = pressure;
+}
+
+auto PlatformPointerEvent::Motion::Up::GetButton() const -> PointerButton
+{
+    return _state.button;
+}
+
+auto PlatformPointerEvent::Motion::Up::SetButton(PointerButton const button) -> void
+{
+    _state.button = button;
+}
+
+auto PlatformPointerEvent::Motion::Move::GetTiltX() const -> Degree
+{
+    return _state.tiltX;
+}
+
+auto PlatformPointerEvent::Motion::Move::SetTiltX(Degree const& tiltX) -> void
+{
+    _state.tiltX = tiltX;
+}
+
+auto PlatformPointerEvent::Motion::Move::GetTiltY() const -> Degree
+{
+    return _state.tiltY;
+}
+
+auto PlatformPointerEvent::Motion::Move::SetTiltY(Degree const& tiltY) -> void
+{
+    _state.tiltY = tiltY;
+}
+
+auto PlatformPointerEvent::Motion::Move::GetAzimuth() const -> Degree
+{
+    return _state.azimuth;
+}
+
+auto PlatformPointerEvent::Motion::Move::SetAzimuth(Degree const& azimuth) -> void
+{
+    _state.azimuth = azimuth;
+}
+
+auto PlatformPointerEvent::Motion::Move::GetAltitude() const -> Degree
+{
+    return _state.altitude;
+}
+
+auto PlatformPointerEvent::Motion::Move::SetAltitude(Degree const& altitude) -> void
+{
+    _state.altitude = altitude;
+}
+
+auto PlatformPointerEvent::Motion::Move::GetTwist() const -> Degree
+{
+    return _state.twist;
+}
+
+auto PlatformPointerEvent::Motion::Move::SetTwist(Degree const& twist) -> void
+{
+    _state.twist = twist;
+}
+
+auto PlatformPointerEvent::Motion::Move::GetPressure() const -> Float64
+{
+    return _state.pressure;
+}
+
+auto PlatformPointerEvent::Motion::Move::SetPressure(Float64 const pressure) -> void
+{
+    _state.pressure = pressure;
+}
+
+auto PlatformPointerEvent::Motion::Move::GetTangentialPressure() const -> Float64
+{
+    return _state.tangentialPressure;
+}
+
+auto PlatformPointerEvent::Motion::Move::SetTangentialPressure(Float64 const pressure) -> void
+{
+    _state.tangentialPressure = pressure;
+}
+
+auto PlatformPointerEvent::Motion::Move::GetButton() const -> PointerButton
+{
+    return _state.button;
+}
+
+auto PlatformPointerEvent::Motion::Move::SetButton(PointerButton const button) -> void
+{
+    _state.button = button;
+}
+
+auto PlatformPointerEvent::Action::Magnify::GetPhase() const -> PointerActionPhase
 {
     return _phase;
 }
 
-auto PlatformPointerEvent::Gesture::SetPhase(PointerGesturePhase const phase) -> void
+auto PlatformPointerEvent::Action::Magnify::SetPhase(PointerActionPhase const phase) -> void
 {
     _phase = phase;
 }
 
-auto PlatformPointerEvent::Gesture::Magnify::GetScale() const -> Float64
+auto PlatformPointerEvent::Action::Magnify::GetScale() const -> Float64
 {
     return _scale;
 }
 
-auto PlatformPointerEvent::Gesture::Magnify::SetScale(Float64 const scale) -> void
+auto PlatformPointerEvent::Action::Magnify::SetScale(Float64 const scale) -> void
 {
     _scale = scale;
 }
 
-auto PlatformPointerEvent::Gesture::Rotate::GetRotation() const -> Degree
+auto PlatformPointerEvent::Action::Rotate::GetPhase() const -> PointerActionPhase
+{
+    return _phase;
+}
+
+auto PlatformPointerEvent::Action::Rotate::SetPhase(PointerActionPhase const phase) -> void
+{
+    _phase = phase;
+}
+
+auto PlatformPointerEvent::Action::Rotate::GetRotation() const -> Degree
 {
     return _rotation;
 }
 
-auto PlatformPointerEvent::Gesture::Rotate::SetRotation(Degree const rotation) -> void
+auto PlatformPointerEvent::Action::Rotate::SetRotation(Degree const rotation) -> void
 {
     _rotation = rotation;
 }
 
-auto PlatformPointerEvent::Gesture::Swipe::GetDeltaX() const -> Dp
+auto PlatformPointerEvent::Action::Swipe::GetPhase() const -> PointerActionPhase
+{
+    return _phase;
+}
+
+auto PlatformPointerEvent::Action::Swipe::SetPhase(PointerActionPhase const phase) -> void
+{
+    _phase = phase;
+}
+
+auto PlatformPointerEvent::Action::Swipe::GetDeltaX() const -> Dp
 {
     return _deltaX;
 }
 
-auto PlatformPointerEvent::Gesture::Swipe::SetDeltaX(Dp const deltaX) -> void
+auto PlatformPointerEvent::Action::Swipe::SetDeltaX(Dp const deltaX) -> void
 {
     _deltaX = deltaX;
 }
 
-auto PlatformPointerEvent::Gesture::Swipe::GetDeltaY() const -> Dp
+auto PlatformPointerEvent::Action::Swipe::GetDeltaY() const -> Dp
 {
     return _deltaY;
 }
 
-auto PlatformPointerEvent::Gesture::Swipe::SetDeltaY(Dp const deltaY) -> void
+auto PlatformPointerEvent::Action::Swipe::SetDeltaY(Dp const deltaY) -> void
 {
     _deltaY = deltaY;
 }
 
-auto PlatformPointerEvent::Gesture::Scroll::GetDeltaX() const -> Dp
+auto PlatformPointerEvent::Action::Scroll::GetPhase() const -> PointerActionPhase
+{
+    return _phase;
+}
+
+auto PlatformPointerEvent::Action::Scroll::SetPhase(PointerActionPhase const phase) -> void
+{
+    _phase = phase;
+}
+
+auto PlatformPointerEvent::Action::Scroll::GetDeltaX() const -> Dp
 {
     return _deltaX;
 }
-auto PlatformPointerEvent::Gesture::Scroll::SetDeltaX(Dp const deltaX) -> void
+auto PlatformPointerEvent::Action::Scroll::SetDeltaX(Dp const deltaX) -> void
 {
     _deltaX = deltaX;
 }
 
-auto PlatformPointerEvent::Gesture::Scroll::GetDeltaY() const -> Dp
+auto PlatformPointerEvent::Action::Scroll::GetDeltaY() const -> Dp
 {
     return _deltaY;
 }
-auto PlatformPointerEvent::Gesture::Scroll::SetDeltaY(Dp const deltaY) -> void
+auto PlatformPointerEvent::Action::Scroll::SetDeltaY(Dp const deltaY) -> void
 {
     _deltaY = deltaY;
 }
 
-auto PlatformPointerEvent::Gesture::Scroll::IsInertial() const -> Bool
+auto PlatformPointerEvent::Action::Scroll::GetPrecision() const -> PointerScrollPrecision
+{
+    return _precision;
+}
+
+auto PlatformPointerEvent::Action::Scroll::SetPrecision(PointerScrollPrecision const precision) -> void
+{
+    _precision = precision;
+}
+
+auto PlatformPointerEvent::Action::Scroll::GetModifierState() const -> ModifierKeyFlags
+{
+    return _modifierState;
+}
+
+auto PlatformPointerEvent::Action::Scroll::SetModifierState(ModifierKeyFlags const modifierState) -> void
+{
+    _modifierState = modifierState;
+}
+
+auto PlatformPointerEvent::Action::Scroll::IsInertial() const -> Bool
 {
     return _inertial; 
 }
-auto PlatformPointerEvent::Gesture::Scroll::SetInertial(Bool const inertial) -> void
+auto PlatformPointerEvent::Action::Scroll::SetInertial(Bool const inertial) -> void
 {
     _inertial = inertial;
 }

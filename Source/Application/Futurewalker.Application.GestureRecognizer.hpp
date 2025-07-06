@@ -27,12 +27,23 @@ class GestureRecognizer : NonCopyable
 public:
     GestureRecognizer();
 
+    virtual ~GestureRecognizer() = 0;
+
     struct Delegate
     {
         Function<void(PointerId)> capturePointer;
         Function<void(PointerId)> releasePointer;
     };
-    virtual ~GestureRecognizer() = 0;
+
+    ///
+    /// @brief Process pointer event and recognize gesture.
+    ///
+    /// @param delegate Delegate for pointer capture and release.
+    /// @param event Pointer event to recognize.
+    /// @param area Detection area.
+    ///
+    /// @return True if pointer event was consumed by this recognizer.
+    ///
     virtual auto Recognize(Delegate const& delegate, Event<PointerEvent> const& event, Rect<Dp> const& area) -> Bool = 0;
 
     auto SendEvent(Event<>& event) -> Async<Bool>;

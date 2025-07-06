@@ -1157,8 +1157,15 @@ auto PlatformWindowWin::HandleDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 ///
 /// @brief
 ///
-static void SetPointerInfoParams(PlatformPointerEvent& parameter, POINTER_INFO const& info, HWND const hwnd)
+static void SetPointerEventParams(PlatformPointerEvent& parameter, UINT32 const pointerId, HWND const hwnd)
 {
+    auto info = POINTER_INFO();
+    if (!::GetPointerInfo(pointerId, &info))
+    {
+        FW_DEBUG_LOG_ERROR("PlatformWindowWin: GetPointerInfo failed");
+        return;
+    }
+
     parameter.SetPointerId(PointerId(info.pointerId));
     parameter.SetPrimaryPointer((info.pointerFlags & POINTER_FLAG_PRIMARY) != POINTER_FLAG_NONE);
 
@@ -1206,9 +1213,9 @@ static void SetPointerInfoParams(PlatformPointerEvent& parameter, POINTER_INFO c
 ///
 /// @brief
 ///
-static void SetPointerEventParams(PlatformPointerEvent::Motion& parameter, UINT32 const pointerId, HWND const hwnd)
+static void SetPointerMotionEventDetailParams(auto& parameter, UINT32 const pointerId)
 {
-    POINTER_INPUT_TYPE inputType = PT_POINTER;
+    auto inputType = POINTER_INPUT_TYPE();
     if (!::GetPointerType(pointerId, &inputType))
     {
         FW_DEBUG_LOG_ERROR("PlatformWindowWin: GetPointerType failed");
@@ -1217,39 +1224,54 @@ static void SetPointerEventParams(PlatformPointerEvent::Motion& parameter, UINT3
 
     if (inputType == PT_PEN)
     {
-        POINTER_PEN_INFO info {};
-        if (!::GetPointerPenInfo(pointerId, &info))
+        auto info = POINTER_PEN_INFO();
+        if (::GetPointerPenInfo(pointerId, &info))
+        {
+            if (info.penMask & PEN_MASK_PRESSURE)
+            {
+                // 0 to 1024.
+                parameter.SetPressure(info.pressure / 1024.0);
+            }
+
+            if (info.penMask & PEN_MASK_ROTATION)
+            {
+                parameter.SetTwist(info.rotation);
+            }
+
+            if ((info.penMask & PEN_MASK_TILT_X) && (info.penMask & PEN_MASK_TILT_Y))
+            {
+                const auto [azimuth, altitude] = PlatformPointerEvent::ConvertTiltToSpherical(info.tiltX, info.tiltY);
+                parameter.SetTiltX(info.tiltX);
+                parameter.SetTiltY(info.tiltY);
+                parameter.SetAzimuth(azimuth);
+                parameter.SetAltitude(altitude);
+            }
+        }
+        else
         {
             FW_DEBUG_LOG_ERROR("PlatformWindowWin: GetPointerPenInfo failed");
-            return;
         }
-        SetPointerInfoParams(parameter, info.pointerInfo, hwnd);
-        const auto [azimuth, altitude] = PlatformPointerEvent::ConvertTiltToSpherical(info.tiltX, info.tiltY);
-        parameter.SetTwist(info.rotation);
-        parameter.SetTiltX(info.tiltX);
-        parameter.SetTiltY(info.tiltY);
-        parameter.SetAzimuth(azimuth);
-        parameter.SetAltitude(altitude);
     }
     else if (inputType == PT_TOUCH)
     {
-        POINTER_TOUCH_INFO info {};
-        if (!::GetPointerTouchInfo(pointerId, &info))
+        auto info = POINTER_TOUCH_INFO();
+        if (::GetPointerTouchInfo(pointerId, &info))
+        {
+            if (info.touchMask & TOUCH_MASK_PRESSURE)
+            {
+                // 0 to 1024 where 512 represents normal touch pressure.
+                parameter.SetPressure(info.pressure / 512.0);
+            }
+
+            if (info.touchMask & TOUCH_MASK_ORIENTATION)
+            {
+                parameter.SetAzimuth(info.orientation);
+            }
+        }
+        else
         {
             FW_DEBUG_LOG_ERROR("PlatformWindowWin: GetPointerTouchInfo failed");
-            return;
         }
-        SetPointerInfoParams(parameter, info.pointerInfo, hwnd);
-    }
-    else
-    {
-        POINTER_INFO info {};
-        if (!::GetPointerInfo(pointerId, &info))
-        {
-            FW_DEBUG_LOG_ERROR("PlatformWindowWin: GetPointerInfo failed");
-            return;
-        }
-        SetPointerInfoParams(parameter, info, hwnd);
     }
 }
 
@@ -1296,11 +1318,11 @@ auto PlatformWindowWin::HandlePointer(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
         }
         else if (msg == WM_POINTERWHEEL)
         {
-            // TODO.
+            PointerWheel(true, wParam);
         }
         else if (msg == WM_POINTERHWHEEL)
         {
-            // TODO.
+            PointerWheel(false, wParam);
         }
         else if (msg == WM_POINTERCAPTURECHANGED)
         {
@@ -1697,6 +1719,7 @@ void PlatformWindowWin::PointerDown(Bool const down, WPARAM const wParam)
         {
             auto parameter = Event<PlatformPointerEvent::Motion::Down>();
             SetPointerEventParams(*parameter, pointerId, _hwnd);
+            SetPointerMotionEventDetailParams(*parameter, pointerId);
             auto event = Event(parameter);
             SendPointerEventDetached(event);
         }
@@ -1704,6 +1727,7 @@ void PlatformWindowWin::PointerDown(Bool const down, WPARAM const wParam)
         {
             auto parameter = Event<PlatformPointerEvent::Motion::Up>();
             SetPointerEventParams(*parameter, pointerId, _hwnd);
+            SetPointerMotionEventDetailParams(*parameter, pointerId);
             auto event = Event(parameter);
             SendPointerEventDetached(event);
         }
@@ -1781,8 +1805,37 @@ void PlatformWindowWin::PointerUpdate(WPARAM const wParam)
 
     auto parameter = Event<PlatformPointerEvent::Motion::Move>();
     SetPointerEventParams(*parameter, pointerId, _hwnd);
-    auto event = Event(parameter);
-    SendPointerEventDetached(event);
+    SendPointerEventDetached(parameter);
+}
+
+///
+/// @brief
+///
+/// @param vertical
+/// @param wParam
+///
+auto PlatformWindowWin::PointerWheel(Bool const vertical, WPARAM const wParam) -> void
+{
+    auto const delta = GET_WHEEL_DELTA_WPARAM(wParam);
+    auto const pointerId = GET_POINTERID_WPARAM(wParam);
+
+    auto pointerInfo = POINTER_INFO();
+    if (!::GetPointerInfo(pointerId, &pointerInfo))
+    {
+        FW_DEBUG_LOG_ERROR("PlatformWindowWin: GetPointerInfo failed");
+        return;
+    }
+
+    auto const precision = pointerInfo.pointerType == PT_TOUCHPAD ? PointerScrollPrecision::Precise : PointerScrollPrecision::Coarse;
+    auto const deltaX = vertical ? 0 : delta / WHEEL_DELTA;
+    auto const deltaY = vertical ? delta / WHEEL_DELTA : 0;
+
+    auto parameter = Event<PlatformPointerEvent::Action::Scroll>();
+    SetPointerEventParams(*parameter, pointerId, _hwnd);
+    parameter->SetPrecision(precision);
+    parameter->SetDeltaY(deltaY);
+    parameter->SetDeltaX(deltaX);
+    SendPointerEventDetached(parameter);
 }
 
 ///

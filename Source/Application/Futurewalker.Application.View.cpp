@@ -837,7 +837,7 @@ auto View::EnterHitTestScope(PassKey<HitTestScope> key, HitTestParameter const& 
 ///
 /// @return The view that consumed the event.
 ///
-auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, PointerPhase const phase) -> Shared<View>
+auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, PointerPhaseFlags const phase) -> Shared<View>
 {
     try
     {
@@ -848,7 +848,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
             return {};
         }
 
-        auto dispatch = [](View& view, Event<PointerEvent> pointerEvent, Shared<View> const& target, PointerPhase const phase) {
+        auto dispatch = [](View& view, Event<PointerEvent> pointerEvent, Shared<View> const& target, PointerPhaseFlags const phase) {
             auto const offset = view.GetFrameRect().GetPosition().As<Offset>();
             pointerEvent->SetPosition(pointerEvent->GetPosition() - offset);
             return view.DispatchPointerEvent(pointerEvent, target, phase);
@@ -856,7 +856,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
 
         if (target == self)
         {
-            if (phase == PointerPhase::Target)
+            if ((phase & PointerPhaseFlags::Target) != PointerPhaseFlags::None)
             {
                 auto targetEvent = Event<>(pointerEvent);
                 if (SendEventDetached(targetEvent))
@@ -867,22 +867,22 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
         }
         else
         {
-            if (phase == PointerPhase::Capture)
+            if ((phase & PointerPhaseFlags::Capture) != PointerPhaseFlags::None)
             {
-                auto pointerInterceptEventParameter = Event<PointerEvent::Intercept>::Make();
+                auto pointerInterceptEventParameter = Event<PointerEvent::Forecast>::Make();
                 PointerEvent::Copy(*pointerInterceptEventParameter, *pointerEvent);
                 pointerInterceptEventParameter->SetPointerEvent(pointerEvent);
-                pointerInterceptEventParameter->SetShouldIntercept(false);
+                pointerInterceptEventParameter->SetIntercepted(false);
                 auto pointerInterceptEvent = Event<>(pointerInterceptEventParameter);
                 if (SendEventDetached(pointerInterceptEvent))
                 {
-                    if (pointerInterceptEvent.Is<PointerEvent::Intercept>())
+                    if (pointerInterceptEvent.Is<PointerEvent::Forecast>())
                     {
-                        pointerInterceptEventParameter = pointerInterceptEvent.As<PointerEvent::Intercept>();
+                        pointerInterceptEventParameter = pointerInterceptEvent.As<PointerEvent::Forecast>();
                     }
                 }
 
-                if (pointerInterceptEventParameter->GetShouldIntercept())
+                if (pointerInterceptEventParameter->IsIntercepted())
                 {
                     auto cancelEvent = Event<PointerEvent::Motion::Cancel>::Make();
                     PointerEvent::Copy(*cancelEvent, *pointerEvent);
@@ -905,7 +905,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
 
         if (target != self)
         {
-            if (phase == PointerPhase::Bubble)
+            if ((phase & PointerPhaseFlags::Bubble) != PointerPhaseFlags::None)
             {
                 auto targetEvent = Event<>(pointerEvent);
                 if (SendEventDetached(targetEvent))
@@ -1339,7 +1339,7 @@ auto View::CancelInput() -> void
 ///
 /// @return The view that consumed the event.
 ///
-auto View::DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, PointerPhase const phase) -> Shared<View>
+auto View::DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, PointerPhaseFlags const phase) -> Shared<View>
 {
     return DispatchPointerEvent(event, target, phase);
 }

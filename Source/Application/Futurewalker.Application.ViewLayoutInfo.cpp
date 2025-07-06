@@ -72,6 +72,7 @@ auto ViewLayoutInfo::EndMeasure() -> void
     if (_measuring)
     {
         _measuring = false;
+        _measureRequired = false;
     }
 }
 
@@ -90,11 +91,12 @@ auto ViewLayoutInfo::BeginArrange(ArrangeParameter const& parameter) -> Bool
 {
     if (!_arranging)
     {
+        _frameRect = parameter.GetNewFrameRect();
+        _contentRect = Rect<Dp>({}, _frameRect.GetSize());
+
         if (IsArrangeRequired())
         {
             _arranging = true;
-            _frameRect = parameter.GetNewFrameRect();
-            _contentRect = Rect<Dp>(Point<Dp>(), parameter.GetNewFrameRect().GetSize());
             return true;
         }
     }
@@ -109,6 +111,7 @@ auto ViewLayoutInfo::EndArrange() -> void
     if (_arranging)
     {
         _arranging = false;
+        _arrangeRequired = false;
     }
 }
 

@@ -28,33 +28,34 @@ enum class PointerType
 ///
 /// @brief Phase of pointer event propagation.
 ///
-enum class PointerPhase
-{
-    Unknown = 0,
-    Capture, ///< Event being sent during propagation from root to target.
-    Bubble,  //!< Event being sent during propagation from target to root.
-    Target,  //!< Event being sent to target.
-};
-
-///
-/// @brief Phase of pointer gesture.
-///
-enum class PointerGesturePhase
+enum class PointerPhaseFlags
 {
     None = 0,
-    Begin,  //!< Gesture started.
-    Update, //!< Gesture updated.
-    End,    //!< Gesture ended.
-    Cancel, //!< Gesture canceled.
+    Capture = 1 << 0, ///< Event being sent during propagation from root to target.
+    Bubble = 1 << 1,  //!< Event being sent during propagation from target to root.
+    Target = 1 << 2,  //!< Event being sent to target.
+};
+FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(PointerPhaseFlags);
+
+///
+/// @brief Phase of pointer actions.
+///
+enum class PointerActionPhase
+{
+    None = 0, ///< Action does not have a phase, e.g. discrete actions like mouse wheel scroll.
+    Begin,    ///< Action started.
+    Update,   ///< Action updated.
+    End,      ///< Action ended.
+    Cancel,   ///< Action canceled.
 };
 
 ///
-/// @brief Precision of pointer wheel.
+/// @brief Precision of pointer scroll.
 ///
-enum class PointerWheelPrecision
+enum class PointerScrollPrecision
 {
-    Coarse,  //!< Coarse wheel precision, e.g. mouse wheel.
-    Precise, //!< Precise wheel precision, e.g. touchpad or trackpad.
+    Coarse,  ///< Coarse precision, e.g. mouse wheel.
+    Precise, ///< Precise precision, e.g. high precision touchpad or trackpad.
 };
 
 ///

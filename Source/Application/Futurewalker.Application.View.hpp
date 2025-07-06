@@ -180,7 +180,7 @@ protected:
 
     auto CancelInput() -> void;
 
-    auto DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, PointerPhase const phase) -> Shared<View>;
+    auto DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, PointerPhaseFlags const phase) -> Shared<View>;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;
@@ -240,7 +240,7 @@ private:
     auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
     auto DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
     auto DispatchNotifyBubbleEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
-    auto DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, PointerPhase const phase) -> Shared<View>;
+    auto DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, PointerPhaseFlags const phase) -> Shared<View>;
 
     auto Attach() -> void;
     auto Detach() -> void;

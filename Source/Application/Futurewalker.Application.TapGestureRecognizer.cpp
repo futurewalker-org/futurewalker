@@ -27,6 +27,7 @@ auto TapGestureRecognizer::Recognize(const Delegate& delegate, const Event<Point
             }
             SetPressed(true, false);
         }
+        return true;
     }
     else if (event.Is<PointerEvent::Motion::Up>())
     {
@@ -45,6 +46,7 @@ auto TapGestureRecognizer::Recognize(const Delegate& delegate, const Event<Point
                 SendEventDetached(gestureEvent);
             }
         }
+        return true;
     }
     else if (event.Is<PointerEvent::Motion::Cancel>())
     {
@@ -53,8 +55,9 @@ auto TapGestureRecognizer::Recognize(const Delegate& delegate, const Event<Point
             delegate.releasePointer(pointerId);
         }
         SetPressed(false, true);
+        return true;
     }
-    return true;
+    return false;
 }
 
 ///
