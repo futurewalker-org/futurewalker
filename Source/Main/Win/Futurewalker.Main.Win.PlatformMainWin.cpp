@@ -12,6 +12,7 @@
 #include "Futurewalker.Base.Locator.hpp"
 
 #include "Futurewalker.Application.Win.PlatformApplicationContextWin.hpp"
+#include "Futurewalker.Application.Win.PlatformApplicationThemeContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformWindowContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformMainThreadWin.hpp"
 #include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"
@@ -24,9 +25,6 @@
 #include "Futurewalker.Graphics.Win.PlatformSkiaFontManagerWin.hpp"
 
 #include "Futurewalker.Async.AsyncFunction.hpp"
-
-// test
-#include "Futurewalker.Application.Win.PlatformInputMethodContextWin.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -44,6 +42,7 @@ auto PlatformMainWin::Register(HINSTANCE instanceHandle) -> void
     Locator::Register<PlatformDebugWin>();
     Locator::Register<PlatformMainThreadWin>();
     Locator::Register<PlatformApplicationContextWin>();
+    Locator::Register<PlatformApplicationThemeContextWin>();
     Locator::Register<PlatformWindowContextWin>();
     Locator::Register<PlatformD3D11DeviceWin>();
     Locator::Register<PlatformD3D12DeviceWin>();
