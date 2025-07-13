@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MPL-2.0
+﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
 #include "Futurewalker.Base.Win.Prelude.hpp"
