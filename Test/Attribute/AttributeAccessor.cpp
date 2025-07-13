@@ -46,4 +46,27 @@ TEST_CASE("AttributeAccessor")
         REQUIRE(accessor.BindAttributeWithDefault(*node, Attribute1, Attribute2));
         REQUIRE(accessor.GetValueOr(0) == 24);
     }
+
+    SECTION("indirect update")
+    {
+        FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 0);
+        FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr2, Attr1);
+
+        auto parent = AttributeNode::Make();
+        AttributeNode::SetValue<&Attr1>(*parent, 24);
+        AttributeNode::SetValue<&Attr1>(*parent, 42);
+
+        auto child = AttributeNode::Make();
+
+        auto accessor = AttributeAccessor<SInt32>();
+        REQUIRE(accessor.BindAttribute(*child, Attr2));
+
+        parent->AddChild(child);
+
+        REQUIRE(accessor.GetValueOr(0) == 42);
+
+        parent->RemoveChild(child);
+
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*child) == 0);
+    }
 }

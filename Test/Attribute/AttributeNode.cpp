@@ -7,17 +7,16 @@
 
 using namespace Futurewalker;
 
-static auto const IntegerAttribute = StaticAttribute<SInt32>::MakeWithDefaultValue(42);
+FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, IntegerAttribute, 42);
 
 TEST_CASE("AttributeNode")
 {
     Locator::Register<UniqueIdentifierManager>();
     auto const uniqueIdManager = Locator::Resolve<UniqueIdentifierManager>();
 
-    auto node = AttributeNode::Make();
-
     SECTION("simple get/set")
     {
+        auto node = AttributeNode::Make();
         REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*node) == 42);
         AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
         REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*node) == 24);
@@ -25,6 +24,7 @@ TEST_CASE("AttributeNode")
 
     SECTION("simple get/set with observer")
     {
+        auto node = AttributeNode::Make();
         auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*node);
         REQUIRE(*observer->GetValue() == 42);
         observer->SetValue(24);
@@ -33,6 +33,7 @@ TEST_CASE("AttributeNode")
 
     SECTION("simple child get/set")
     {
+        auto node = AttributeNode::Make();
         auto child = AttributeNode::Make();
         node->AddChild(child);
 
@@ -44,6 +45,7 @@ TEST_CASE("AttributeNode")
 
     SECTION("simple child overloading")
     {
+        auto node = AttributeNode::Make();
         auto parentobserver = AttributeNode::GetObserver<&IntegerAttribute>(*node);
 
         auto child = AttributeNode::Make();
@@ -58,16 +60,18 @@ TEST_CASE("AttributeNode")
 
     SECTION("reference to same node")
     {
-        static auto const ReferencingAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference<&IntegerAttribute>();
-
         SECTION("get default value")
         {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
+            auto node = AttributeNode::Make();
             auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*node);
             REQUIRE(*observer->GetValue() == 42);
         }
 
         SECTION("get default value from other value")
         {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
+            auto node = AttributeNode::Make();
             {
                 auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*node);
                 observer->SetValue(24);
@@ -78,16 +82,30 @@ TEST_CASE("AttributeNode")
 
         SECTION("changing value")
         {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
+            auto node = AttributeNode::Make();
             REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*node) == 42);
             AttributeNode::SetValue<&ReferencingAttribute>(*node, 24);
             REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*node) == 24);
+        }
+
+        SECTION("indirect update")
+        {
+            auto node = AttributeNode::Make();
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 2);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr3, Attr1);
+            AttributeNode::SetReference<&Attr3>(*node, Attr2);
+            AttributeNode::SetValue<&Attr2>(*node, 42);
+            REQUIRE(*AttributeNode::GetValue<&Attr3>(*node) == 42);
         }
     }
 
     SECTION("reference to parent node")
     {
-        static auto const ReferencingAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference<&IntegerAttribute>();
+        FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
 
+        auto node = AttributeNode::Make();
         auto child = AttributeNode::Make();
         node->AddChild(child);
 
@@ -111,8 +129,9 @@ TEST_CASE("AttributeNode")
 
     SECTION("reference from child")
     {
-        static auto const ReferencingAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference<&IntegerAttribute>();
+        FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
 
+        auto node = AttributeNode::Make();
         auto child = AttributeNode::Make();
         node->AddChild(child);
 
@@ -164,6 +183,7 @@ TEST_CASE("AttributeNode")
     {
         SECTION("simple value")
         {
+            auto node = AttributeNode::Make();
             auto child = AttributeNode::Make();
 
             REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child) == 42);
@@ -179,6 +199,7 @@ TEST_CASE("AttributeNode")
         {
             static auto const TestAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference<&IntegerAttribute>();
 
+            auto node = AttributeNode::Make();
             auto child = AttributeNode::Make();
 
             REQUIRE(*AttributeNode::GetValue<&TestAttribute>(*child) == 42);
@@ -192,12 +213,36 @@ TEST_CASE("AttributeNode")
                 REQUIRE(*AttributeNode::GetValue<&TestAttribute>(*child) == 24);
             }
         }
+
+        SECTION("indirect update")
+        {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 0);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 0);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr3, Attr1);
+
+            auto parent = AttributeNode::Make();
+            AttributeNode::SetValue<&Attr1>(*parent, 42);
+            AttributeNode::SetValue<&Attr2>(*parent, 24);
+
+            auto child = AttributeNode::Make();
+
+            AttributeNode::SetReference<&Attr3>(*child, Attr2);
+
+            parent->AddChild(child);
+
+            REQUIRE(*AttributeNode::GetValue<&Attr3>(*child) == 24);
+
+            parent->RemoveChild(child);
+
+            REQUIRE(*AttributeNode::GetValue<&Attr3>(*child) == 0);
+        }
     }
 
     SECTION("remove child")
     {
         SECTION("simple value")
         {
+            auto node = AttributeNode::Make();
             auto const child = AttributeNode::Make();
 
             node->AddChild(child);
@@ -211,6 +256,7 @@ TEST_CASE("AttributeNode")
 
         SECTION("simple value")
         {
+            auto node = AttributeNode::Make();
             auto const child = AttributeNode::Make();
 
             node->AddChild(child);
@@ -232,6 +278,7 @@ TEST_CASE("AttributeNode")
             auto const child1 = AttributeNode::Make();
             auto const child2 = AttributeNode::Make();
 
+            auto node = AttributeNode::Make();
             node->AddChild(child1);
             child1->AddChild(child2);
 

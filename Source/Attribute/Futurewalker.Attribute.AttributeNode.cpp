@@ -549,16 +549,15 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
 
     if (auto const reference = slot.GetReference())
     {
-        if (slot.SetReferenceCache(*reference))
-        {
-            if (auto const resolved = ResolveValue(*reference))
-            {
-                slot.SetValueDependentSlot(*resolved);
+        slot.SetReferenceCache(*reference);
 
-                if (slot.SetValueCache(*resolved->GetValueCache()))
-                {
-                    valueChanged = true;
-                }
+        if (auto const resolved = ResolveValue(*reference))
+        {
+            slot.SetValueDependentSlot(*resolved);
+
+            if (slot.SetValueCache(*resolved->GetValueCache()))
+            {
+                valueChanged = true;
             }
         }
     }
