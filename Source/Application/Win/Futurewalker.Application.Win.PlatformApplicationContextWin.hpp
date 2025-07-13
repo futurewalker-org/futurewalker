@@ -3,6 +3,7 @@
 
 #include "Futurewalker.Application.Win.Prelude.hpp"
 #include "Futurewalker.Application.PlatformApplicationContext.hpp"
+#include "Futurewalker.Application.PlatformApplicationThemeContextType.hpp"
 #include "Futurewalker.Application.PlatformScreenContext.hpp"
 #include "Futurewalker.Application.PlatformWindowContext.hpp"
 #include "Futurewalker.Application.PlatformMainThread.hpp"
@@ -30,7 +31,8 @@ public:
       Shared<PlatformThreadRuntimeContextWin> mainThreadRuntimeContext,
       Shared<PlatformMainThread> mainThread,
       Shared<PlatformScreenContext> screenContext,
-      Shared<PlatformWindowContext> windowContext) -> Shared<PlatformApplicationContextWin>;
+      Shared<PlatformWindowContext> windowContext,
+      Shared<PlatformApplicationThemeContext> themeContext) -> Shared<PlatformApplicationContextWin>;
 
     PlatformApplicationContextWin(
       PassKey<PlatformApplicationContextWin>,
@@ -38,7 +40,8 @@ public:
       Shared<PlatformThreadRuntimeContextWin> mainThreadRuntimeContext,
       Shared<PlatformMainThread> mainThread,
       Shared<PlatformScreenContext> screenContext,
-      Shared<PlatformWindowContext> windowContext);
+      Shared<PlatformWindowContext> windowContext,
+      Shared<PlatformApplicationThemeContext> themeContext);
 
     ~PlatformApplicationContextWin() override;
 
@@ -59,6 +62,7 @@ private:
     Shared<PlatformMainThread> _mainThread;
     Shared<PlatformScreenContext> _screenContext;
     Shared<PlatformWindowContext> _windowContext;
+    Shared<PlatformApplicationThemeContext> _themeContext;
     Weak<PlatformApplicationWin> _currentApplication;
     ATOM _classAtom = 0;
 };

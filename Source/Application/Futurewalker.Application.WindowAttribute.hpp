@@ -6,6 +6,8 @@
 
 #include "Futurewalker.Attribute.StaticAttribute.hpp"
 
+#include "Futurewalker.Color.hpp"
+
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.NonConstructible.hpp"
 
@@ -19,7 +21,7 @@ namespace FW_EXPORT
 class WindowAttribute : NonConstructible
 {
 public:
-    static StaticAttribute<Shared<WindowAreaManager>> const AreaManager;
+    FW_STATIC_ATTRIBUTE(Shared<WindowAreaManager>, AreaManager);
 };
 }
 }

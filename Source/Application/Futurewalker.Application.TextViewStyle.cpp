@@ -5,12 +5,12 @@
 
 namespace FW_DETAIL_NS
 {
-StaticAttribute<RGBAColor> const TextViewStyle::Color = StaticAttribute<RGBAColor>::MakeWithDefaultReference<&ApplicationStyle::ColorOnSurface>();
-StaticAttribute<Graphics::FontSize> const TextViewStyle::FontSize = StaticAttribute<Graphics::FontSize>::MakeWithDefaultReference<&ApplicationStyle::FontSizeLabelMedium>();
-StaticAttribute<Graphics::FontWeight> const TextViewStyle::FontWeight = StaticAttribute<Graphics::FontWeight>::MakeWithDefaultReference<&ApplicationStyle::FontWeightLabelMedium>();
-StaticAttribute<Graphics::FontWidth> const TextViewStyle::FontWidth = StaticAttribute<Graphics::FontWidth>::MakeWithDefaultValue(Graphics::FontWidth::Normal());
-StaticAttribute<Graphics::FontSlant> const TextViewStyle::FontSlant = StaticAttribute<Graphics::FontSlant>::MakeWithDefaultValue(Graphics::FontSlant::Upright);
-StaticAttribute<Graphics::FontFamily> const TextViewStyle::FontFamily = StaticAttribute<Graphics::FontFamily>::MakeWithDefaultValue(Graphics::FontFamily());
-StaticAttribute<TextViewHorizontalAlignment> const TextViewStyle::HorizontalAlignment = StaticAttribute<TextViewHorizontalAlignment>::MakeWithDefaultValue(TextViewHorizontalAlignment::Center);
-StaticAttribute<TextViewVerticalAlignment> const TextViewStyle::VerticalAlignment = StaticAttribute<TextViewVerticalAlignment>::MakeWithDefaultValue(TextViewVerticalAlignment::Middle);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextViewStyle::Color, ApplicationStyle::ColorOnSurface);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextViewStyle::FontSize, ApplicationStyle::FontSizeLabelMedium);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextViewStyle::FontWeight, ApplicationStyle::FontWeightLabelMedium);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::FontWidth, Graphics::FontWidth::Normal());
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::FontSlant, Graphics::FontSlant::Upright);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::FontFamily, Graphics::FontFamily());
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::HorizontalAlignment, TextViewHorizontalAlignment::Center);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::VerticalAlignment, TextViewVerticalAlignment::Middle);
 }

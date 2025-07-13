@@ -24,14 +24,14 @@ namespace FW_EXPORT
 class TextViewStyle : NonConstructible
 {
 public:
-    static StaticAttribute<RGBAColor> const Color;
-    static StaticAttribute<Graphics::FontSize> const FontSize;
-    static StaticAttribute<Graphics::FontWeight> const FontWeight;
-    static StaticAttribute<Graphics::FontWidth> const FontWidth;
-    static StaticAttribute<Graphics::FontSlant> const FontSlant;
-    static StaticAttribute<Graphics::FontFamily> const FontFamily;
-    static StaticAttribute<TextViewHorizontalAlignment> const HorizontalAlignment;
-    static StaticAttribute<TextViewVerticalAlignment> const VerticalAlignment;
+    FW_STATIC_ATTRIBUTE(RGBAColor, Color);
+    FW_STATIC_ATTRIBUTE(Graphics::FontSize, FontSize);
+    FW_STATIC_ATTRIBUTE(Graphics::FontWeight, FontWeight);
+    FW_STATIC_ATTRIBUTE(Graphics::FontWidth, FontWidth);
+    FW_STATIC_ATTRIBUTE(Graphics::FontSlant, FontSlant);
+    FW_STATIC_ATTRIBUTE(Graphics::FontFamily, FontFamily);
+    FW_STATIC_ATTRIBUTE(TextViewHorizontalAlignment, HorizontalAlignment);
+    FW_STATIC_ATTRIBUTE(TextViewVerticalAlignment, VerticalAlignment);
 };
 }
 }

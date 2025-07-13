@@ -71,10 +71,11 @@ auto PlatformApplicationContextWin::Make(
   Shared<PlatformThreadRuntimeContextWin> mainThreadRuntimeContext,
   Shared<PlatformMainThread> mainThread,
   Shared<PlatformScreenContext> screenContext,
-  Shared<PlatformWindowContext> windowContext) -> Shared<PlatformApplicationContextWin>
+  Shared<PlatformWindowContext> windowContext,
+  Shared<PlatformApplicationThemeContext> themeContext) -> Shared<PlatformApplicationContextWin>
 {
     auto key = PassKey<PlatformApplicationContextWin>();
-    auto context = Shared<PlatformApplicationContextWin>::Make(key, instanceHandle, mainThreadRuntimeContext, mainThread, screenContext, windowContext);
+    auto context = Shared<PlatformApplicationContextWin>::Make(key, instanceHandle, mainThreadRuntimeContext, mainThread, screenContext, windowContext, themeContext);
     context->_self = context;
     return context;
 }
@@ -91,12 +92,14 @@ PlatformApplicationContextWin::PlatformApplicationContextWin(
   Shared<PlatformThreadRuntimeContextWin> mainThreadRuntimeContext,
   Shared<PlatformMainThread> mainThread,
   Shared<PlatformScreenContext> screenContext,
-  Shared<PlatformWindowContext> windowContext)
+  Shared<PlatformWindowContext> windowContext,
+  Shared<PlatformApplicationThemeContext> themeContext)
   : _instanceHandle {instanceHandle}
   , _mainThreadRuntimeContext {mainThreadRuntimeContext}
   , _mainThread {mainThread}
   , _screenContext {screenContext}
   , _windowContext {windowContext}
+  , _themeContext {themeContext}
 {
     if (!_mainThreadRuntimeContext || !_mainThread || !_instanceHandle || !_screenContext || !_windowContext)
     {
@@ -202,6 +205,7 @@ auto Locator::Resolver<PlatformApplicationContextWin>::Resolve() -> Shared<Platf
     auto instanceHandle = Locator::Resolve<PlatformInstanceHandleWin>();
     auto screenContext = Locator::Resolve<PlatformScreenContext>();
     auto windowContext = Locator::Resolve<PlatformWindowContext>();
-    return PlatformApplicationContextWin::Make(instanceHandle, mainThreadRuntimeContext, mainThread, screenContext, windowContext);
+    auto themeContext = Locator::Resolve<PlatformApplicationThemeContext>();
+    return PlatformApplicationContextWin::Make(instanceHandle, mainThreadRuntimeContext, mainThread, screenContext, windowContext, themeContext);
 }
 }

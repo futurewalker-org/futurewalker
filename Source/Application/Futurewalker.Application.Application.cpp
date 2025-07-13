@@ -2,6 +2,7 @@
 #include "Futurewalker.Application.Application.hpp"
 #include "Futurewalker.Application.ApplicationEvent.hpp"
 #include "Futurewalker.Application.ApplicationContext.hpp"
+#include "Futurewalker.Application.ApplicationTheme.hpp"
 #include "Futurewalker.Application.MainThread.hpp"
 #include "Futurewalker.Application.ViewLayerManager.hpp"
 
@@ -32,6 +33,7 @@ Application::Application(PassKey<Application>, ApplicationOptions const& options
     _platformContext = Locator::Resolve<PlatformApplicationContext>();
     _platformObject = _platformContext->MakePlatformApplication({.sendApplicationEvent = [&](Event<>& event) -> Async<Bool> { co_return co_await HandlePlatformApplicationEvent(event); }});
     _context = Locator::ResolveWithDefault<ApplicationContext>();
+    _theme = Locator::ResolveWithDefault<ApplicationTheme>();
     _threadPool = Locator::ResolveWithDefault<ThreadPool>();
     _viewLayerManager = Locator::ResolveWithDefault<ViewLayerManager>();
 }

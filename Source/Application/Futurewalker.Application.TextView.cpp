@@ -17,7 +17,7 @@ namespace FW_DETAIL_NS
 {
 namespace
 {
-auto const TextViewAttributeText = StaticAttribute<String>::MakeWithDefaultValue(String());
+FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(String, TextViewAttributeText, String());
 }
 
 auto TextView::Make() -> Shared<TextView>

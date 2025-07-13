@@ -4,5 +4,5 @@
 
 namespace FW_DETAIL_NS
 {
-StaticAttribute<Shared<WindowAreaManager>> const WindowAttribute::AreaManager = StaticAttribute<Shared<WindowAreaManager>>::MakeWithDefaultValue(nullptr);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(WindowAttribute::AreaManager, nullptr);
 }

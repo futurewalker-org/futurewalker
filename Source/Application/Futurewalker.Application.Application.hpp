@@ -3,6 +3,7 @@
 
 #include "Futurewalker.Application.ApplicationType.hpp"
 #include "Futurewalker.Application.ApplicationContextType.hpp"
+#include "Futurewalker.Application.ApplicationThemeType.hpp"
 #include "Futurewalker.Application.ViewLayerManagerType.hpp"
 
 #include "Futurewalker.Application.PlatformApplicationType.hpp"
@@ -81,6 +82,7 @@ private:
     Shared<PlatformApplicationContext> _platformContext;
     Shared<PlatformApplication> _platformObject;
     Shared<ApplicationContext> _context;
+    Shared<ApplicationTheme> _theme;
     Shared<ThreadPool> _threadPool;
     Shared<ViewLayerManager> _viewLayerManager;
     String _id;

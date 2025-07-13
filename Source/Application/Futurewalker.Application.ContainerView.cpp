@@ -12,7 +12,7 @@ namespace FW_DETAIL_NS
 {
 namespace
 {
-auto const AttributeBackgroundColor = StaticAttribute<RGBAColor>::MakeWithDefaultValue(RGBAColor());
+FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBackgroundColor, RGBAColor());
 }
 
 ///
