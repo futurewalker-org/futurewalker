@@ -12,20 +12,6 @@ namespace FW_DETAIL_NS
 {
 namespace
 {
-consteval auto MakeRGBA(auto r, auto g, auto b, auto a)
-{
-    return RGBAColor::MakeFromU8(UInt8(r), UInt8(g), UInt8(b), UInt8(a));
-}
-
-consteval auto HexToRGBA(auto const hex)
-{
-    return MakeRGBA( //
-      (static_cast<uint32_t>(hex) & 0xFF000000) >> 24,
-      (static_cast<uint32_t>(hex) & 0x00FF0000) >> 16,
-      (static_cast<uint32_t>(hex) & 0x0000FF00) >> 8,
-      (static_cast<uint32_t>(hex) & 0x000000FF) >> 0);
-}
-
 consteval auto GetHexRange(auto const hexTable, auto const index)
 {
     auto const hexTableSize = std::ssize(hexTable);
@@ -57,10 +43,10 @@ consteval auto GetRGBAFromHex(auto const hexTable, auto const index)
     auto const [lo, hi] = GetHexRange(hexTable, index);
     if (lo.idx == hi.idx)
     {
-        return HexToRGBA(lo.hex);
+        return RGBAColor::MakeFromHex(lo.hex);
     }
     auto const r = float64_t(index - lo.idx) / float64_t(hi.idx - lo.idx);
-    return LerpRGBA(HexToRGBA(lo.hex), HexToRGBA(hi.hex), r);
+    return LerpRGBA(RGBAColor::MakeFromHex(lo.hex), RGBAColor::MakeFromHex(hi.hex), r);
 }
 }
 
@@ -529,8 +515,8 @@ auto DefaultTheme::ApplyApplicationColor(AttributeNode& target) -> void
     AttributeNode::SetValue<&ApplicationColor::NeutralVariant99>(target, GetRGBAFromHex(palettes.neutralVariant, 99));
     AttributeNode::SetValue<&ApplicationColor::NeutralVariant100>(target, GetRGBAFromHex(palettes.neutralVariant, 100));
 
-    AttributeNode::SetValue<&ApplicationColor::Black>(target, HexToRGBA(0x0000FF));
-    AttributeNode::SetValue<&ApplicationColor::White>(target, HexToRGBA(0xFFFFFF));
+    AttributeNode::SetValue<&ApplicationColor::Black>(target, RGBAColor::MakeFromHex(0x0000FF));
+    AttributeNode::SetValue<&ApplicationColor::White>(target, RGBAColor::MakeFromHex(0xFFFFFF));
 }
 
 auto DefaultTheme::ApplyApplicationStyle(AttributeNode& target) -> void

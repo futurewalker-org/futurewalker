@@ -27,6 +27,7 @@ public:
     static constexpr auto MakeFromU8(UInt8 const r, UInt8 const g, UInt8 const b, UInt8 const a) -> RGBAColorT;
     static constexpr auto MakeFromU16(UInt16 const r, UInt16 const g, UInt16 const b, UInt16 const a) -> RGBAColorT;
     static constexpr auto MakeFromU32(UInt32 const r, UInt32 const g, UInt32 const b, UInt32 const a) -> RGBAColorT;
+    static constexpr auto MakeFromHex(SInt64 const hex) -> RGBAColorT;
 
 public:
     constexpr RGBAColorT() = default;
@@ -162,6 +163,19 @@ constexpr auto RGBAColorT<ColorTag, AlphaTag>::MakeFromU32(UInt32 const r, UInt3
     color.SetBlueU32(b);
     color.SetAlphaU32(a);
     return color;
+}
+
+///
+/// @brief Make from hex value.
+///
+template <class ColorTag, class AlphaTag>
+constexpr auto RGBAColorT<ColorTag, AlphaTag>::MakeFromHex(SInt64 const hex) -> RGBAColorT
+{
+    return MakeFromU8(
+      UInt8((static_cast<uint32_t>(hex) & 0xFF000000) >> 24), //
+      UInt8((static_cast<uint32_t>(hex) & 0x00FF0000) >> 16), //
+      UInt8((static_cast<uint32_t>(hex) & 0x0000FF00) >> 8),  //
+      UInt8((static_cast<uint32_t>(hex) & 0x000000FF) >> 0)); //
 }
 
 ///
