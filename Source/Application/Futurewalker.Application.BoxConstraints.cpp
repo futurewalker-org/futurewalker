@@ -11,7 +11,7 @@ namespace FW_DETAIL_NS
 ///
 auto BoxConstraints::MakeUnconstrained() -> BoxConstraints
 {
-    const auto unconstrained = AxisConstraints::MakeUnconstrained();
+    auto const unconstrained = AxisConstraints::MakeUnconstrained();
     return BoxConstraints(unconstrained, unconstrained);
 }
 

@@ -74,14 +74,14 @@ auto ApplicationTheme::ApplyThemes() -> void
 {
     if (_currentBrightness == ThemeBrightness::Dark)
     {
-        for (const auto& theme : _darkThemes)
+        for (auto const& theme : _darkThemes)
         {
             ApplyTheme(theme);
         }
     }
     else
     {
-        for (const auto& theme : _lightThemes)
+        for (auto const& theme : _lightThemes)
         {
             ApplyTheme(theme);
         }

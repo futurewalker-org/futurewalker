@@ -247,7 +247,7 @@ auto Application::HandlePlatformApplicationEvent(Event<>& event) -> Async<Bool>
     }
     else if (event.Is<PlatformApplicationEvent::ActiveChanged>())
     {
-        const auto parameter = event.As<PlatformApplicationEvent::ActiveChanged>();
+        auto const parameter = event.As<PlatformApplicationEvent::ActiveChanged>();
         auto applicationEventParameter = Event<ApplicationEvent::ActiveChanged>::Make();
         applicationEventParameter->SetActive(parameter->IsActive());
         auto applicationEvent = Event<>(applicationEventParameter);
@@ -255,7 +255,7 @@ auto Application::HandlePlatformApplicationEvent(Event<>& event) -> Async<Bool>
     }
     else if (event.Is<PlatformApplicationEvent::ForegroundChanged>())
     {
-        const auto parameter = event.As<PlatformApplicationEvent::ForegroundChanged>();
+        auto const parameter = event.As<PlatformApplicationEvent::ForegroundChanged>();
         auto applicationEventParameter = Event<ApplicationEvent::ForegroundChanged>::Make();
         applicationEventParameter->SetForeground(parameter->IsForeground());
         auto applicationEvent = Event<>(applicationEventParameter);

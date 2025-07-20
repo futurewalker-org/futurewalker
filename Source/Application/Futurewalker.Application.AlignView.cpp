@@ -99,9 +99,9 @@ auto AlignView::Initialize() -> void
 ///
 auto AlignView::Measure(MeasureScope& scope) -> void
 {
-    const auto& parameter = scope.GetParameter();
-    const auto& width = parameter.GetWidthConstraints();
-    const auto& height = parameter.GetHeightConstraints();
+    auto const& parameter = scope.GetParameter();
+    auto const& width = parameter.GetWidthConstraints();
+    auto const& height = parameter.GetHeightConstraints();
 
     Size<Dp> maxSize;
     ForEachVisibleChild([&](View& view) {
@@ -109,7 +109,7 @@ auto AlignView::Measure(MeasureScope& scope) -> void
         maxSize = Size<Dp>::Max(maxSize, scope.GetMeasuredSize(view));
     });
 
-    auto measureAxis = [](const auto& c, const auto& v) {
+    auto measureAxis = [](auto const& c, auto const& v) {
         if (c.IsBounded())
         {
             return c.GetMax();
@@ -117,8 +117,8 @@ auto AlignView::Measure(MeasureScope& scope) -> void
         return AxisConstraints::Constrain(c, v);
     };
 
-    const auto measuredWidth = measureAxis(width, maxSize.GetWidth());
-    const auto measuredHeight = measureAxis(height, maxSize.GetHeight());
+    auto const measuredWidth = measureAxis(width, maxSize.GetWidth());
+    auto const measuredHeight = measureAxis(height, maxSize.GetHeight());
     scope.SetMeasuredSize(measuredWidth, measuredHeight);
 }
 
@@ -130,17 +130,17 @@ auto AlignView::Measure(MeasureScope& scope) -> void
 auto AlignView::Arrange(ArrangeScope& scope) -> void
 {
     ForEachVisibleChild([&](View& view) {
-        const auto size = scope.GetMeasuredSize(view);
-        const auto alignment = GetAlignment();
-        const auto contentRect = GetContentRect();
+        auto const size = scope.GetMeasuredSize(view);
+        auto const alignment = GetAlignment();
+        auto const contentRect = GetContentRect();
 
-        const auto reverse = GetLayoutDirection() == LayoutDirection::RightToLeft ? -1.0 : 1.0;
-        const auto xRatio = (alignment.GetX() * reverse + 1) / 2;
-        const auto yRatio = (alignment.GetY() + 1) / 2;
+        auto const reverse = GetLayoutDirection() == LayoutDirection::RightToLeft ? -1.0 : 1.0;
+        auto const xRatio = (alignment.GetX() * reverse + 1) / 2;
+        auto const yRatio = (alignment.GetY() + 1) / 2;
 
-        const auto x = contentRect.GetLeft() + (contentRect.GetWidth() - size.GetWidth()) * Dp(xRatio);
-        const auto y = contentRect.GetTop() + (contentRect.GetHeight() - size.GetHeight()) * Dp(yRatio);
-        const auto pos = ViewLayoutFunction::AlignToPixelGridByRound(Point<Dp>(x, y), *this);
+        auto const x = contentRect.GetLeft() + (contentRect.GetWidth() - size.GetWidth()) * Dp(xRatio);
+        auto const y = contentRect.GetTop() + (contentRect.GetHeight() - size.GetHeight()) * Dp(yRatio);
+        auto const pos = ViewLayoutFunction::AlignToPixelGridByRound(Point<Dp>(x, y), *this);
         scope.ArrangeChild(view, pos);
     });
 }
