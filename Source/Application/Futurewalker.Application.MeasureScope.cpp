@@ -50,7 +50,7 @@ auto MeasureScope::MeasureChild(ReferenceArg<View> child) -> Size<Dp>
 ///
 auto MeasureScope::MeasureChild(ReferenceArg<View> child, AxisConstraints const& width, AxisConstraints const& height) -> Size<Dp>
 {
-    if (child)
+    if (child && child->IsChildOf(_view))
     {
         auto parameter = MeasureParameter();
         parameter.SetWidthConstraints(width);
@@ -58,6 +58,7 @@ auto MeasureScope::MeasureChild(ReferenceArg<View> child, AxisConstraints const&
         child->EnterMeasureScope(PassKey<MeasureScope>(), parameter);
         return GetMeasuredSize(*child);
     }
+    FW_DEBUG_ASSERT(false);
     return {};
 }
 

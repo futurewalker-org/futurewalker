@@ -32,13 +32,14 @@ auto ArrangeScope::GetParameter() -> ArrangeParameter const&
 ///
 auto ArrangeScope::ArrangeChild(ReferenceArg<View> view, Point<Dp> const& position) -> void
 {
-    if (view)
+    if (view && view->IsChildOf(_view))
     {
         auto parameter = ArrangeParameter();
         parameter.SetOldFrameRect(view->GetFrameRect());
         parameter.SetNewFrameRect(Rect<Dp>(position, GetMeasuredSize(*view)));
         view->EnterArrangeScope(PassKey<ArrangeScope>(), parameter);
     }
+    FW_DEBUG_ASSERT(false);
 }
 
 ///
