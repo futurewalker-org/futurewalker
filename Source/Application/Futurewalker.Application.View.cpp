@@ -301,6 +301,30 @@ auto View::IsDescendantOf(ReferenceArg<View const> view) const -> Bool
 }
 
 ///
+/// @brief Returns true if the view is parent of given view.
+///
+auto View::IsParentOf(ReferenceArg<View const> view) const -> Bool
+{
+    if (view)
+    {
+        return GetSelf() == view->GetParent();
+    }
+    return false;
+}
+
+///
+/// @brief Returns true if the view is child of given view.
+///
+auto View::IsChildOf(ReferenceArg<View const> view) const -> Bool
+{
+    if (view)
+    {
+        return view->IsParentOf(*this);
+    }
+    return false;
+}
+
+///
 /// @brief Get path from descendant to this view.
 ///
 /// @param descendant 

@@ -91,6 +91,9 @@ public:
     auto IsAncestorOf(ReferenceArg<View const> view) const -> Bool;
     auto IsDescendantOf(ReferenceArg<View const> view) const -> Bool;
 
+    auto IsParentOf(ReferenceArg<View const> view) const -> Bool;
+    auto IsChildOf(ReferenceArg<View const> view) const -> Bool;
+
     auto GetPathFromDescendant(ReferenceArg<View> descendant) -> ViewArray;
 
     auto IsVisible() const -> Bool;
