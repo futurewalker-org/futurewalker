@@ -38,6 +38,7 @@ auto ArrangeScope::ArrangeChild(ReferenceArg<View> view, Point<Dp> const& positi
         parameter.SetOldFrameRect(view->GetFrameRect());
         parameter.SetNewFrameRect(Rect<Dp>(position, GetMeasuredSize(*view)));
         view->EnterArrangeScope(PassKey<ArrangeScope>(), parameter);
+        return;
     }
     FW_DEBUG_ASSERT(false);
 }
