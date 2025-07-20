@@ -127,6 +127,40 @@ TEST_CASE("AttributeNode")
         }
     }
 
+    SECTION("reference to distant parent node")
+    {
+        FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 0);
+        FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr2, Attr1);
+        FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr3, Attr2);
+
+        auto node = AttributeNode::Make();
+        AttributeNode::SetValue<&Attr1>(*node, 12);
+
+        auto child = AttributeNode::Make();
+        AttributeNode::SetValue<&Attr2>(*child, 45);
+        REQUIRE((int)*AttributeNode::GetValue<&Attr3>(*child) == 45);
+        REQUIRE((int)*AttributeNode::GetValue<&Attr2>(*child) == 45);
+
+        node->AddChild(child);
+        REQUIRE(*AttributeNode::GetValue<&Attr3>(*child) == 45);
+
+        node->RemoveChild(child);
+        REQUIRE(*AttributeNode::GetValue<&Attr3>(*child) == 45);
+
+        node->AddChild(child);
+        REQUIRE(*AttributeNode::GetValue<&Attr3>(*child) == 45);
+
+        auto node2 = AttributeNode::Make();
+        node2->AddChild(node);
+        REQUIRE((int)*AttributeNode::GetValue<&Attr2>(*child) == 45);
+        REQUIRE((int)*AttributeNode::GetValue<&Attr3>(*child) == 45);
+
+        auto node3 = AttributeNode::Make();
+        node3->AddChild(node2);
+        REQUIRE((int)*AttributeNode::GetValue<&Attr2>(*child) == 45);
+        REQUIRE((int)*AttributeNode::GetValue<&Attr3>(*child) == 45);
+    }
+
     SECTION("reference from child")
     {
         FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);

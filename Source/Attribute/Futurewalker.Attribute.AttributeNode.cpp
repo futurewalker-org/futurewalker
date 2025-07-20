@@ -543,6 +543,8 @@ auto AttributeNode::ResolveValueCore(StaticAttributeBaseRef reference, SInt64 co
 ///
 auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
 {
+    FW_DEBUG_ASSERT(slot.GetOwner() == GetSelf());
+
     auto valueChanged = False;
 
     slot.DetachFromValueDependentSlot();
@@ -630,14 +632,20 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
 
     for (auto const& sourceDependantSlot : slot.GetSourceDependantSlots())
     {
-        UpdateSlotCacheRecursive(*sourceDependantSlot);
+        if (auto const node = sourceDependantSlot->GetOwner())
+        {
+            node->UpdateSlotCacheRecursive(*sourceDependantSlot);
+        }
     }
 
     if (valueChanged)
     {
         for (auto const& valueDependantSlot : slot.GetValueDependantSlots())
         {
-            UpdateSlotCacheRecursive(*valueDependantSlot);
+            if (auto const node = valueDependantSlot->GetOwner())
+            {
+                node->UpdateSlotCacheRecursive(*valueDependantSlot);
+            }
         }
 
         if (auto const valueCache = slot.GetValueCache())
