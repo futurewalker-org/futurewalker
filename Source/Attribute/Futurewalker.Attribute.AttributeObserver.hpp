@@ -137,8 +137,7 @@ private:
             auto const parameter = event.As<AttributeEvent::ValueChanged>();
             if (parameter->GetId() == _description.Get().GetId())
             {
-                GetEventReceiver().SendEventDetached(event);
-                co_return true;
+                co_return co_await GetEventReceiver().SendEvent(event);
             }
         }
         co_return false;

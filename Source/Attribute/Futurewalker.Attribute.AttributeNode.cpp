@@ -654,7 +654,6 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
             {
                 auto parameter = Event<AttributeEvent::ValueChanged>::Make();
                 parameter->SetId(slot.GetDescription().Get().GetId());
-                parameter->SetValue(*valueCache);
                 auto event = Event<>(parameter);
                 owner->_eventReceiver->SendEventDetached(event);
             }

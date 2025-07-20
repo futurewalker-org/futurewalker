@@ -202,18 +202,12 @@ private:
     {
         if (event.Is<AttributeEvent::ValueChanged>())
         {
-            Notify();
+            if (_eventReceiver)
+            {
+                co_return co_await _eventReceiver->SendEvent(event);
+            }
         }
         co_return false;
-    }
-
-    auto Notify() -> void
-    {
-        if (_eventReceiver)
-        {
-            auto event = Event<>(Event<AttributeEvent::ValueChanged>());
-            _eventReceiver->SendEventDetached(event);
-        }
     }
 
 private:

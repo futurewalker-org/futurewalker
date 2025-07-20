@@ -24,18 +24,14 @@ public:
 ///
 /// @brief Value of attribute changed.
 ///
-class AttributeEvent::ValueChanged : public AttributeEvent
+class AttributeEvent::ValueChanged final : public AttributeEvent
 {
 public:
     auto GetId() const -> AttributeId;
     auto SetId(AttributeId const& id) -> void;
 
-    auto GetValue() const -> Optional<AttributeValue>;
-    auto SetValue(AttributeValue const& value) -> void;
-
 private:
     AttributeId _id = 0U;
-    Optional<AttributeValue> _value;
 };
 }
 }
