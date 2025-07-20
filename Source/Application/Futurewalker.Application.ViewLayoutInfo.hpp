@@ -22,7 +22,6 @@ public:
     auto GetFrameRect() const -> Rect<Dp>;
     auto GetContentRect() const -> Rect<Dp>;
 
-    auto Invalidate() -> Bool;
     auto InvalidatePath() -> Bool;
 
     auto BeginMeasure(MeasureParameter const& parameter) -> Bool;
@@ -51,8 +50,8 @@ private:
     Rect<Dp> _frameRect;
     Rect<Dp> _contentRect;
     Point<Dp> _arrangedPosition;
-    Bool _measureRequired = false;
-    Bool _arrangeRequired = false;
+    Bool _measureRequired = true;
+    Bool _arrangeRequired = true;
     Bool _measuring = false;
     Bool _arranging = false;
     MeasureParameter _measureParameter;

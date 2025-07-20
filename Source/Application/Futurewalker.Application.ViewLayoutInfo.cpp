@@ -25,15 +25,6 @@ auto ViewLayoutInfo::GetContentRect() const -> Rect<Dp>
 ///
 /// @brief
 ///
-auto ViewLayoutInfo::Invalidate() -> Bool
-{
-    // All nodes in layout path needs relayout.
-    return true;
-}
-
-///
-/// @brief
-///
 auto ViewLayoutInfo::InvalidatePath() -> Bool
 {
     if (!_measureRequired && !_measuring && !_arranging)

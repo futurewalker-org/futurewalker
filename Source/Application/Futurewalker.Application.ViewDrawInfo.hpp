@@ -68,8 +68,8 @@ private:
         ViewLayerKind kind;
         Shared<ViewLayer> layer;
     };
-    Bool _invalidated = false;
-    Bool _invalidatedPath = false;
+    Bool _invalidated = true;
+    Bool _invalidatedPath = true;
     std::vector<SubLayerInfo> _subLayerInfo;
     ViewLayerId _drawableLayerId = ViewLayerId(0U);
     Shared<Graphics::DisplayList> _displayList;
