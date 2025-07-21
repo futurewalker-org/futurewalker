@@ -352,7 +352,7 @@ auto FlexLayout::Measure(MeasureScope& scope) -> void
 
             auto const flexibility = GetChildMainAxisFlexibility(view);
             auto const max = childMain + diff;
-            auto const min = (flexibility == FlexLayoutChildMainAxisFlexibility::Expand) ? max : childMain;
+            auto const min = (flexibility == FlexLayoutChildMainAxisFlexibility::Expand) ? max : Dp::Min(max, childMain);
             auto const newChildMain = AxisConstraints::MakeMinMax(min, max);
             auto const newChildCross = AxisConstraints::MakeMinMax(0, crossConstraints.GetMax());
             MeasureChild(scope, view, newChildMain, newChildCross);
