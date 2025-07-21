@@ -29,6 +29,7 @@ public:
     static auto IsNearlyEqual(AxisConstraints const& lhs, AxisConstraints const& rhs, Float64 const tolerance = 1e-6) noexcept -> Bool;
     static auto IsNearlyEqualRelative(AxisConstraints const& lhs, AxisConstraints const& rhs, Float64 const precision = 1e-6, Float64 const minTolerance = 1e-6) noexcept -> Bool;
     static auto Constrain(AxisConstraints const& cs, Dp const value) -> Dp;
+    static auto Offset(AxisConstraints const& cs, Dp const offset) -> AxisConstraints;
 
 public:
     AxisConstraints() = default;

@@ -38,6 +38,22 @@ public:
         return EdgeInsets(value, value, value, value);
     }
 
+    ///
+    /// @brief Choose larger insets from two EdgeInsets objects.
+    ///
+    static constexpr auto Max(EdgeInsets const& lhs, EdgeInsets const& rhs) -> EdgeInsets
+    {
+        return EdgeInsets(Dp::Max(lhs._leading, rhs._leading), Dp::Max(lhs._top, rhs._top), Dp::Max(lhs._trailing, rhs._trailing), Dp::Max(lhs._bottom, rhs._bottom));
+    }
+
+    ///
+    /// @brief Choose smaller insets from two EdgeInsets objects.
+    ///
+    static constexpr auto Min(EdgeInsets const& lhs, EdgeInsets const& rhs) -> EdgeInsets
+    {
+        return EdgeInsets(Dp::Min(lhs._leading, rhs._leading), Dp::Min(lhs._top, rhs._top), Dp::Min(lhs._trailing, rhs._trailing), Dp::Min(lhs._bottom, rhs._bottom));
+    }
+
 public:
     constexpr EdgeInsets() noexcept = default;
     constexpr EdgeInsets(EdgeInsets const&) = default;

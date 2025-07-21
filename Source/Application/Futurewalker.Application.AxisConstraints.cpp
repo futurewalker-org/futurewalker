@@ -74,6 +74,25 @@ auto AxisConstraints::Constrain(AxisConstraints const& cs, Dp const value) -> Dp
 }
 
 ///
+/// @brief Offset constraints by a value.
+///
+/// @param cs Constraints to offset.
+/// @param offset Offset value.
+///
+/// @return New constraints with offset applied.
+///
+auto AxisConstraints::Offset(AxisConstraints const& cs, Dp const offset) -> AxisConstraints
+{
+    if (Dp::IsFinite(offset))
+    {
+        auto const min = cs._min + offset;
+        auto const max = cs._max + offset;
+        return AxisConstraints::MakeMinMax(min, max);
+    }
+    return cs;
+}
+
+///
 /// @brief
 ///
 auto AxisConstraints::GetMin() const -> Dp
