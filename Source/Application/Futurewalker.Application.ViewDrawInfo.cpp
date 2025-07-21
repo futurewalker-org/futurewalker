@@ -208,11 +208,12 @@ auto ViewDrawInfo::GetSubLayer(ViewLayerId const id) -> Shared<ViewLayer>
 ///
 auto ViewDrawInfo::AddSubLayerInfo(ViewLayerKind const kind) -> ViewLayerId
 {
-    const auto& info = _subLayerInfo.emplace_back(SubLayerInfo {
-      .id = Unique<UniqueViewLayerId>::Make(),
-      .kind = kind,
-      .layer = {},
-    });
+    const auto& info = _subLayerInfo.emplace_back(
+      SubLayerInfo {
+          .id = Unique<UniqueViewLayerId>::Make(),
+          .kind = kind,
+          .layer = {},
+      });
     return *info.id;
 }
 

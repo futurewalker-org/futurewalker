@@ -7,7 +7,7 @@
 namespace FW_DETAIL_NS
 {
 ///
-/// @brief 
+/// @brief
 ///
 auto ViewLayoutInfo::GetFrameRect() const -> Rect<Dp>
 {
@@ -147,9 +147,9 @@ auto ViewLayoutInfo::SetMeasuredSize(MeasureParameter const& parameter, Size<Dp>
     const auto height = forceConstraints(parameter.GetHeightConstraints(), size.GetHeight());
 
     _measuredSize = {
-      .widthConstraints = parameter.GetWidthConstraints(),
-      .heightConstraints = parameter.GetHeightConstraints(),
-      .size = Size<Dp>(width, height),
+        .widthConstraints = parameter.GetWidthConstraints(),
+        .heightConstraints = parameter.GetHeightConstraints(),
+        .size = Size<Dp>(width, height),
     };
     _measuredSizeSet = true;
 }

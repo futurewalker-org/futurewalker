@@ -64,9 +64,9 @@ auto MakeWindowClassName(StringView className) -> std::wstring
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param options 
+/// @param options
 ///
 auto GetWindowStyle(PlatformWindowOptions const& options) -> DWORD
 {
@@ -111,11 +111,11 @@ auto GetWindowStyle(PlatformWindowOptions const& options) -> DWORD
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param options 
+/// @param options
 ///
-/// @return 
+/// @return
 ///
 auto GetWindowExStyle(PlatformWindowOptions const& options) -> DWORD
 {
@@ -129,23 +129,23 @@ auto GetWindowExStyle(PlatformWindowOptions const& options) -> DWORD
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto RegisterWindowClass(LPCWSTR className, WNDPROC windowProc, HINSTANCE instance) -> ATOM
 {
     const auto wndClass = WNDCLASSEXW {
-      .cbSize = sizeof(WNDCLASSEX),
-      .style = CS_HREDRAW | CS_VREDRAW,
-      .lpfnWndProc = windowProc,
-      .cbClsExtra = 0,
-      .cbWndExtra = 0,
-      .hInstance = instance,
-      .hIcon = ::LoadIconW(NULL, IDI_APPLICATION),
-      .hCursor = ::LoadCursorW(NULL, IDC_ARROW),
-      .hbrBackground = ::GetSysColorBrush(COLOR_WINDOW),
-      .lpszMenuName = NULL,
-      .lpszClassName = className,
-      .hIconSm = NULL,
+        .cbSize = sizeof(WNDCLASSEX),
+        .style = CS_HREDRAW | CS_VREDRAW,
+        .lpfnWndProc = windowProc,
+        .cbClsExtra = 0,
+        .cbWndExtra = 0,
+        .hInstance = instance,
+        .hIcon = ::LoadIconW(NULL, IDI_APPLICATION),
+        .hCursor = ::LoadCursorW(NULL, IDC_ARROW),
+        .hbrBackground = ::GetSysColorBrush(COLOR_WINDOW),
+        .lpszMenuName = NULL,
+        .lpszClassName = className,
+        .hIconSm = NULL,
     };
 
     if (auto atom = ::RegisterClassExW(&wndClass))
@@ -273,10 +273,10 @@ auto PlatformWindowContextWin::MakePlatformWindow(PlatformWindowOptions const& o
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param window 
-/// @param options 
+/// @param window
+/// @param options
 ///
 auto PlatformWindowContextWin::InitializeWindow(Shared<PlatformWindowWin> const& window, PlatformWindowOptions const& options) -> void
 {
@@ -287,7 +287,7 @@ auto PlatformWindowContextWin::InitializeWindow(Shared<PlatformWindowWin> const&
     const auto title = PlatformStringFunctionWin::Utf8ToWide(options.title);
 
     auto createParams = PlatformToplevelWindowCreateParams {
-      .window = *window,
+        .window = *window,
     };
 
     if (owner && !::IsWindowEnabled(owner))
@@ -334,7 +334,7 @@ auto PlatformWindowContextWin::RequestFrame(Weak<PlatformWindowWin> window, Plat
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto PlatformWindowContextWin::GetFrameTime(PlatformWindowWin const& window) const -> MonotonicTime
 {

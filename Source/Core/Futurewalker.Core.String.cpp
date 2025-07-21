@@ -259,11 +259,11 @@ auto String::GetSubstring(IndexType const begin, IndexType const end) const noex
         ret._small.~SmallString();
         auto const newData = _large.data.get() + static_cast<ptrdiff_t>(begin);
         new (&ret._large) LargeString {
-          .data = std::shared_ptr<ValueType[]>(_large.data, newData),
-          .capacity = static_cast<int64_t>(newCapacity),
-          .size = static_cast<int64_t>(newSize),
-          .padding = {},
-          .flags = Internal::largeStringFlag,
+            .data = std::shared_ptr<ValueType[]>(_large.data, newData),
+            .capacity = static_cast<int64_t>(newCapacity),
+            .size = static_cast<int64_t>(newSize),
+            .padding = {},
+            .flags = Internal::largeStringFlag,
         };
         return ret;
     }
@@ -315,11 +315,11 @@ void String::Reserve(SizeType const capacity)
             auto const data = AllocateSharedString(GetConstData(), size, capacity);
             _small.~SmallString();
             new (&_large) LargeString {
-              .data = data,
-              .capacity = static_cast<int64_t>(capacity),
-              .size = static_cast<int64_t>(size),
-              .padding = {},
-              .flags = Internal::largeStringFlag,
+                .data = data,
+                .capacity = static_cast<int64_t>(capacity),
+                .size = static_cast<int64_t>(size),
+                .padding = {},
+                .flags = Internal::largeStringFlag,
             };
         }
     }

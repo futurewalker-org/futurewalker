@@ -50,16 +50,16 @@ auto TextEdit::Draw(DrawScope& scope) -> void
     auto& scene = scope.GetScene();
 
     scene.AddRect({
-      .rect = GetContentRect(),
-      .color = RGBAColor(1, 1, 1, 1),
-      .drawStyle = Graphics::DrawStyle::Fill,
+        .rect = GetContentRect(),
+        .color = RGBAColor(1, 1, 1, 1),
+        .drawStyle = Graphics::DrawStyle::Fill,
     });
 
     scene.AddRect({
-      .rect = GetContentRect(),
-      .color = IsFocused() ? RGBAColor(1, 0, 0, 1) : RGBAColor(0, 0, 1, 1),
-      .drawStyle = Graphics::DrawStyle::Stroke,
-      .strokeWidth = IsFocused() ? 2.0 : 1.0,
+        .rect = GetContentRect(),
+        .color = IsFocused() ? RGBAColor(1, 0, 0, 1) : RGBAColor(0, 0, 1, 1),
+        .drawStyle = Graphics::DrawStyle::Stroke,
+        .strokeWidth = IsFocused() ? 2.0 : 1.0,
     });
 
     if (_inputMethodEditable)

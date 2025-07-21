@@ -56,17 +56,17 @@ struct ScreenRefreshInfo
 auto GetRefreshInfo(PlatformScreenArray screens) -> ScreenRefreshInfo
 {
     auto data = MonitorEnumProcData {
-      .screens = screens,
-      .unchanged = {},
-      .connected = {},
+        .screens = screens,
+        .unchanged = {},
+        .connected = {},
     };
 
     if (::EnumDisplayMonitors(nullptr, nullptr, static_cast<MONITORENUMPROC>(MonitorEnumProc), reinterpret_cast<LPARAM>(&data)))
     {
         return {
-          .disconnected = data.screens,
-          .unchanged = data.unchanged,
-          .connected = data.connected,
+            .disconnected = data.screens,
+            .unchanged = data.unchanged,
+            .connected = data.connected,
         };
     }
     return {};

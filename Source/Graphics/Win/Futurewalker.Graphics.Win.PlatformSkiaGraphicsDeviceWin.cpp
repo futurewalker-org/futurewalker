@@ -37,7 +37,7 @@ auto PlatformSkiaGraphicsDeviceWin::Make(Shared<PlatformD3D12DeviceWin> const& d
 ///
 /// @brief Constructor.
 ///
-/// @param d3d12Device 
+/// @param d3d12Device
 ///
 PlatformSkiaGraphicsDeviceWin::PlatformSkiaGraphicsDeviceWin(PassKey<PlatformSkiaGraphicsDeviceWin>, Shared<PlatformD3D12DeviceWin> const& d3d12Device)
   : _d3d12Device {d3d12Device}
@@ -138,17 +138,17 @@ auto PlatformSkiaGraphicsDeviceWin::CreateSwapChain(IntPx const width, IntPx con
     }
 
     auto const desc = DXGI_SWAP_CHAIN_DESC1 {
-      .Width = static_cast<UINT>(width),
-      .Height = static_cast<UINT>(height),
-      .Format = SwapChainFormat,
-      .Stereo = FALSE,
-      .SampleDesc = SwapChainSampleDesc,
-      .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
-      .BufferCount = 2,
-      .Scaling = DXGI_SCALING_STRETCH,
-      .SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,
-      .AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED,
-      .Flags = 0,
+        .Width = static_cast<UINT>(width),
+        .Height = static_cast<UINT>(height),
+        .Format = SwapChainFormat,
+        .Stereo = FALSE,
+        .SampleDesc = SwapChainSampleDesc,
+        .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
+        .BufferCount = 2,
+        .Scaling = DXGI_SCALING_STRETCH,
+        .SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,
+        .AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED,
+        .Flags = 0,
     };
 
     auto swapChain = Microsoft::WRL::ComPtr<IDXGISwapChain1>();
@@ -206,9 +206,9 @@ auto PlatformSkiaGraphicsDeviceWin::CreateBackendTextureSurface(GrBackendTexture
 ///
 /// @brief Flus and submit with explicit surface.
 ///
-/// @param surface 
-/// @param access 
-/// @param sync 
+/// @param surface
+/// @param access
+/// @param sync
 ///
 auto PlatformSkiaGraphicsDeviceWin::FlushAndSubmitSurface(SkSurface* surface, SkSurfaces::BackendSurfaceAccess access, GrSyncCpu sync) -> Bool
 {
@@ -223,7 +223,7 @@ auto PlatformSkiaGraphicsDeviceWin::FlushAndSubmitSurface(SkSurface* surface, Sk
 ///
 /// @brief Flush and submit.
 ///
-/// @param sync 
+/// @param sync
 ///
 auto PlatformSkiaGraphicsDeviceWin::FlushAndSubmit(GrSyncCpu sync) -> Bool
 {
@@ -238,8 +238,8 @@ auto PlatformSkiaGraphicsDeviceWin::FlushAndSubmit(GrSyncCpu sync) -> Bool
 ///
 /// @brief Signals fence object.
 ///
-/// @param fence 
-/// @param nextValue 
+/// @param fence
+/// @param nextValue
 ///
 auto PlatformSkiaGraphicsDeviceWin::SignalFence(ID3D12Fence* fence, UINT64 nextValue) -> Bool
 {
@@ -260,10 +260,10 @@ auto PlatformSkiaGraphicsDeviceWin::BuildCommandQueue() -> Bool
         if (auto const device = _d3d12Device->GetDevice())
         {
             auto const commandQueueDesc = D3D12_COMMAND_QUEUE_DESC {
-              .Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
-              .Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
-              .Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
-              .NodeMask = 0,
+                .Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
+                .Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
+                .Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
+                .NodeMask = 0,
             };
             return SUCCEEDED(device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(_commandQueue.GetAddressOf())));
         }
@@ -272,7 +272,7 @@ auto PlatformSkiaGraphicsDeviceWin::BuildCommandQueue() -> Bool
 }
 
 ///
-/// @brief Build GrContext. 
+/// @brief Build GrContext.
 ///
 auto PlatformSkiaGraphicsDeviceWin::BuildGrContext() -> Bool
 {

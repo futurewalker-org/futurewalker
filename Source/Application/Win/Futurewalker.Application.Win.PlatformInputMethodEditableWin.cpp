@@ -18,10 +18,10 @@ auto PlatformInputMethodEditableWin::Make(Delegate const& delegate) -> Shared<Pl
 PlatformInputMethodEditableWin::PlatformInputMethodEditableWin(PassKey<PlatformInputMethodEditable> key, Delegate const& delegate)
   : PlatformInputMethodEditable(key, delegate)
   , _state {{
-      .beforeInsertText = [&](String const& text) { return InternalBeforeInsertText(text); },
-      .beforeDeleteSurroundingText = [&](CodePoint before, CodePoint after) { return InternalBeforeDeleteSurroundingText(before, after); },
-      .onTextChange = [&](CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) { return InternalOnTextChange(u16OldBegin, u16OldEnd, u16NewEnd); },
-      .onSelectionChange = [&]() { return InternalOnSelectionChange(); },
+        .beforeInsertText = [&](String const& text) { return InternalBeforeInsertText(text); },
+        .beforeDeleteSurroundingText = [&](CodePoint before, CodePoint after) { return InternalBeforeDeleteSurroundingText(before, after); },
+        .onTextChange = [&](CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) { return InternalOnTextChange(u16OldBegin, u16OldEnd, u16NewEnd); },
+        .onSelectionChange = [&]() { return InternalOnSelectionChange(); },
     }}
 {
 }

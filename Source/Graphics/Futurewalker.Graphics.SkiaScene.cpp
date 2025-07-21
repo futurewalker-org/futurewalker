@@ -14,26 +14,26 @@ namespace
 auto PointToSkPoint(Point<Dp> const& point) -> SkPoint
 {
     return SkPoint {
-      .fX = static_cast<SkScalar>(point.GetX()),
-      .fY = static_cast<SkScalar>(point.GetY()),
+        .fX = static_cast<SkScalar>(point.GetX()),
+        .fY = static_cast<SkScalar>(point.GetY()),
     };
 }
 
 auto RectToSkRect(Rect<Dp> const& rect)
 {
     return SkRect {
-      .fLeft = static_cast<SkScalar>(rect.GetLeft()),
-      .fTop = static_cast<SkScalar>(rect.GetTop()),
-      .fRight = static_cast<SkScalar>(rect.GetRight()),
-      .fBottom = static_cast<SkScalar>(rect.GetBottom()),
+        .fLeft = static_cast<SkScalar>(rect.GetLeft()),
+        .fTop = static_cast<SkScalar>(rect.GetTop()),
+        .fRight = static_cast<SkScalar>(rect.GetRight()),
+        .fBottom = static_cast<SkScalar>(rect.GetBottom()),
     };
 }
 
 auto RadiusToSkVector(Radius<Dp> const& radius) -> SkVector
 {
     return SkVector {
-      .fX = static_cast<SkScalar>(radius.GetX()),
-      .fY = static_cast<SkScalar>(radius.GetY()),
+        .fX = static_cast<SkScalar>(radius.GetX()),
+        .fY = static_cast<SkScalar>(radius.GetY()),
     };
 }
 
@@ -41,10 +41,10 @@ auto RoundRectToSkRRect(RoundRect<Dp> const& roundRect) -> SkRRect
 {
     auto rr = SkRRect();
     auto radii = std::array<SkVector, 4> {
-      RadiusToSkVector(roundRect.GetTopLeftRadius()),
-      RadiusToSkVector(roundRect.GetTopRightRadius()),
-      RadiusToSkVector(roundRect.GetBottomRightRadius()),
-      RadiusToSkVector(roundRect.GetBottomLeftRadius()),
+        RadiusToSkVector(roundRect.GetTopLeftRadius()),
+        RadiusToSkVector(roundRect.GetTopRightRadius()),
+        RadiusToSkVector(roundRect.GetBottomRightRadius()),
+        RadiusToSkVector(roundRect.GetBottomLeftRadius()),
     };
     rr.setRectRadii(RectToSkRect(roundRect.GetRect()), radii.data());
     return rr;
@@ -53,10 +53,10 @@ auto RoundRectToSkRRect(RoundRect<Dp> const& roundRect) -> SkRRect
 auto RGBAColorToSkColor4f(RGBAColor const& color)
 {
     return SkColor4f {
-      .fR = static_cast<SkScalar>(color.GetRedF64()),
-      .fG = static_cast<SkScalar>(color.GetGreenF64()),
-      .fB = static_cast<SkScalar>(color.GetBlueF64()),
-      .fA = static_cast<SkScalar>(color.GetAlphaF64()),
+        .fR = static_cast<SkScalar>(color.GetRedF64()),
+        .fG = static_cast<SkScalar>(color.GetGreenF64()),
+        .fB = static_cast<SkScalar>(color.GetBlueF64()),
+        .fA = static_cast<SkScalar>(color.GetAlphaF64()),
     };
 }
 
@@ -124,7 +124,7 @@ auto SceneParamToSkPaint(auto const& param) -> SkPaint
 ///
 /// @brief
 ///
-/// @param canvas 
+/// @param canvas
 ///
 auto SkiaScene::SetCanvas(Pointer<SkCanvas> const canvas) -> void
 {
@@ -257,9 +257,9 @@ auto SkiaScene::AddLine(LineParam param) -> void
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param param 
+/// @param param
 ///
 auto SkiaScene::AddRect(RectParam param) -> void
 {

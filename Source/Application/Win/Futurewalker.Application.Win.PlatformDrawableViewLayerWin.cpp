@@ -104,7 +104,7 @@ auto PlatformDrawableViewLayerWin::Initialize() -> void
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto PlatformDrawableViewLayerWin::ResizeSurface() -> Bool
 {
@@ -134,8 +134,8 @@ auto PlatformDrawableViewLayerWin::ResizeSurface() -> Bool
                 _visual->SetContent(_surface->GetSwapChain().Get());
 
                 _surface->SetDelegate({
-                  .deviceLost = [this](auto&) { ChangeSwapChain(nullptr); },
-                  .deviceRestored = [this](auto& surface) { ChangeSwapChain(surface.GetSwapChain().Get()); },
+                    .deviceLost = [this](auto&) { ChangeSwapChain(nullptr); },
+                    .deviceRestored = [this](auto& surface) { ChangeSwapChain(surface.GetSwapChain().Get()); },
                 });
 
                 return true;
@@ -183,7 +183,7 @@ auto PlatformDrawableViewLayerWin::DestroyVisual(Microsoft::WRL::ComPtr<IDCompos
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto PlatformDrawableViewLayerWin::DestroySurface() -> void
 {
@@ -192,7 +192,7 @@ auto PlatformDrawableViewLayerWin::DestroySurface() -> void
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto PlatformDrawableViewLayerWin::GetSurfaceWidth() const -> IntPx
 {

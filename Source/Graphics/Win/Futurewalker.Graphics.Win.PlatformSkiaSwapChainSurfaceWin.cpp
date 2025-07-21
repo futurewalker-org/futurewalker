@@ -63,7 +63,7 @@ PlatformSkiaSwapChainSurfaceWin::PlatformSkiaSwapChainSurfaceWin(Shared<Platform
 /// @param width New width of swap chain. Should be >= 1.
 /// @param height New height of swap chain. Should be >= 1.
 ///
-/// @return Returns true when successfully resized surface. 
+/// @return Returns true when successfully resized surface.
 ///
 auto PlatformSkiaSwapChainSurfaceWin::Resize(IntPx const width, IntPx const height) -> Bool
 {
@@ -156,7 +156,7 @@ auto PlatformSkiaSwapChainSurfaceWin::Draw(Function<void(Scene& scene)> func) ->
 ///
 auto PlatformSkiaSwapChainSurfaceWin::NotifyDeviceLost() -> void
 {
-    ReleaseResources();  
+    ReleaseResources();
 
     if (_delegate.deviceLost)
     {
@@ -210,7 +210,7 @@ auto PlatformSkiaSwapChainSurfaceWin::GetSwapChain() -> Microsoft::WRL::ComPtr<I
 ///
 /// @brief Set delegate.
 ///
-/// @param delegate 
+/// @param delegate
 ///
 auto PlatformSkiaSwapChainSurfaceWin::SetDelegate(Delegate delegate) -> void
 {
@@ -233,7 +233,7 @@ auto PlatformSkiaSwapChainSurfaceWin::Rebuild() -> Bool
 }
 
 ///
-/// @brief Returns true if swap chain is available. 
+/// @brief Returns true if swap chain is available.
 ///
 auto PlatformSkiaSwapChainSurfaceWin::HasSwapChain() const -> Bool
 {
@@ -352,10 +352,11 @@ auto PlatformSkiaSwapChainSurfaceWin::RebuildSurfaces() -> Bool
                 auto surface = _device->CreateBackendTextureSurface(backendTexture);
                 ThrowOnFalse(surface);
 
-                _swapChainSurfaces.push_back(SwapChainSurface {
-                  .resource = resource,
-                  .surface = surface,
-                });
+                _swapChainSurfaces.push_back(
+                  SwapChainSurface {
+                      .resource = resource,
+                      .surface = surface,
+                  });
             }
             return true;
         }

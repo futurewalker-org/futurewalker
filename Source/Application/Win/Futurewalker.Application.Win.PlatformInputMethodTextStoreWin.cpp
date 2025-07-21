@@ -419,7 +419,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetActiveView(TsVie
 
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetACPFromPoint(TsViewCookie vcView, const POINT* ptScreen, DWORD dwFlags, LONG* pacp)
 {
-    (void)vcView;;
+    (void)vcView;
     (void)ptScreen;
     (void)dwFlags;
     (void)pacp;
@@ -546,9 +546,9 @@ auto PlatformInputMethodTextStoreWin::TextStoreImpl::NotifyTextChange(CodeUnit b
     if (_sink)
     {
         auto const textChange = TS_TEXTCHANGE {
-          .acpStart = static_cast<LONG>(begin),
-          .acpOldEnd = static_cast<LONG>(oldEnd),
-          .acpNewEnd = static_cast<LONG>(newEnd),
+            .acpStart = static_cast<LONG>(begin),
+            .acpOldEnd = static_cast<LONG>(oldEnd),
+            .acpNewEnd = static_cast<LONG>(newEnd),
         };
         _sink->OnTextChange(0, &textChange);
     }

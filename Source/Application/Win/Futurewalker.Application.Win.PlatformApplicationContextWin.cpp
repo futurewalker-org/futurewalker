@@ -33,10 +33,10 @@ auto SetWindowPointer(HWND wnd, Pointer<PlatformApplicationWin> ptr) -> void
 auto RegisterMessageWindowClass(HINSTANCE instance, WNDPROC windowProcedure) -> ATOM
 {
     const auto wndClass = WNDCLASSEXW {
-      .cbSize = sizeof(WNDCLASSEXW),
-      .lpfnWndProc = windowProcedure,
-      .hInstance = instance,
-      .lpszClassName = windowClassName,
+        .cbSize = sizeof(WNDCLASSEXW),
+        .lpfnWndProc = windowProcedure,
+        .hInstance = instance,
+        .lpszClassName = windowClassName,
     };
 
     if (auto atom = ::RegisterClassExW(&wndClass))
@@ -151,7 +151,7 @@ auto PlatformApplicationContextWin::GetCurrentApplication() -> Shared<PlatformAp
 auto PlatformApplicationContextWin::CreateMessageWindow(PassKey<PlatformApplicationWin>, PlatformApplicationWin& application) -> HWND
 {
     auto createParams = MessageWindowCreateParams {
-      .application = application,
+        .application = application,
     };
     auto const hwnd = CreateMessageWindowHandle(_classAtom, _instanceHandle->GetInstanceHandle(), createParams);
     application.SetNativeHandle({}, hwnd);

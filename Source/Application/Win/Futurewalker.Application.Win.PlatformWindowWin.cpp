@@ -96,7 +96,7 @@ auto PlatformWindowWin::GetContext() -> Shared<PlatformWindowContextWin>
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto PlatformWindowWin::GetNativeHandle() const -> HWND
 {
@@ -144,7 +144,7 @@ auto PlatformWindowWin::GetOwnedWindows() -> const std::vector<Weak<PlatformWind
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto PlatformWindowWin::IsVisible() -> Bool
 {
@@ -232,9 +232,9 @@ auto PlatformWindowWin::GetSize() -> Size<Dp>
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param frameRect 
+/// @param frameRect
 ///
 auto PlatformWindowWin::SetSize(Size<Dp> const& size) -> void
 {
@@ -248,7 +248,7 @@ auto PlatformWindowWin::SetSize(Size<Dp> const& size) -> void
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto PlatformWindowWin::GetPosition() -> Point<Dp>
 {
@@ -265,9 +265,9 @@ auto PlatformWindowWin::GetPosition() -> Point<Dp>
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param contentRect 
+/// @param contentRect
 ///
 auto PlatformWindowWin::SetPosition(Point<Dp> const& position) -> void
 {
@@ -283,7 +283,7 @@ auto PlatformWindowWin::SetPosition(Point<Dp> const& position) -> void
 ///
 /// @brief
 ///
-auto PlatformWindowWin::GetFrameRect()  -> Rect<Dp>
+auto PlatformWindowWin::GetFrameRect() -> Rect<Dp>
 {
     if (!IsClosed())
     {
@@ -390,7 +390,7 @@ auto PlatformWindowWin::GetBackingScale() -> BackingScale
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto PlatformWindowWin::GetSizeConstraints() -> BoxConstraints
 {
@@ -398,9 +398,9 @@ auto PlatformWindowWin::GetSizeConstraints() -> BoxConstraints
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @return 
+/// @return
 ///
 auto PlatformWindowWin::SetSizeConstraints(BoxConstraints const& constraints) -> void
 {
@@ -450,7 +450,7 @@ auto PlatformWindowWin::Minimize() -> void
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto PlatformWindowWin::Maximize() -> void
 {
@@ -926,7 +926,7 @@ auto PlatformWindowWin::HandleActivate(HWND hWnd, UINT msg, WPARAM wParam, LPARA
             auto event = Event<>(Event<PlatformWindowEvent::ActiveChanged>());
             SendWindowEventDetached(event);
         }
-        catch(...)
+        catch (...)
         {
             FW_DEBUG_ASSERT(false);
         }
@@ -1110,7 +1110,7 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto PlatformWindowWin::HandleDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
@@ -1496,20 +1496,20 @@ auto PlatformWindowWin::HandleEraseBackground(HWND hWnd, UINT msg, WPARAM wParam
             if (titleBarHeight > 0)
             {
                 const auto rect = RECT {
-                  .left = clientRect.left,
-                  .top = clientRect.top,
-                  .right = clientRect.right,
-                  .bottom = clientRect.top + titleBarHeight,
+                    .left = clientRect.left,
+                    .top = clientRect.top,
+                    .right = clientRect.right,
+                    .bottom = clientRect.top + titleBarHeight,
                 };
                 const auto brush = static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
                 ::FillRect(dc, &rect, brush);
             }
             {
                 const auto rect = RECT {
-                  .left = clientRect.left,
-                  .top = clientRect.top + titleBarHeight,
-                  .right = clientRect.right,
-                  .bottom = clientRect.bottom,
+                    .left = clientRect.left,
+                    .top = clientRect.top + titleBarHeight,
+                    .right = clientRect.right,
+                    .bottom = clientRect.bottom,
                 };
                 const auto r = static_cast<BYTE>(_options.backgroundColor.GetRedU8());
                 const auto g = static_cast<BYTE>(_options.backgroundColor.GetGreenU8());
@@ -1705,7 +1705,7 @@ void PlatformWindowWin::PointerDown(Bool const down, WPARAM const wParam)
         it = _pointerStates.insert(
           _pointerStates.end(),
           PointerState {
-            .id = pointerId,
+              .id = pointerId,
           });
     }
 
@@ -1750,7 +1750,7 @@ void PlatformWindowWin::PointerEnter(Bool const enter, WPARAM const wParam)
         it = _pointerStates.insert(
           _pointerStates.end(),
           PointerState {
-            .id = pointerId,
+              .id = pointerId,
           });
     }
 

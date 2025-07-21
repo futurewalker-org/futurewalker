@@ -219,7 +219,7 @@ auto Window::RootViewToLocalPoint(Point<Dp> const& point) const -> Point<Dp>
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto Window::LocalToRootViewRect(Rect<Dp> const& rect) const -> Rect<Dp>
 {
@@ -229,7 +229,7 @@ auto Window::LocalToRootViewRect(Rect<Dp> const& rect) const -> Rect<Dp>
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto Window::RootViewToLocalRect(Rect<Dp> const& rect) const -> Rect<Dp>
 {
@@ -239,7 +239,7 @@ auto Window::RootViewToLocalRect(Rect<Dp> const& rect) const -> Rect<Dp>
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto Window::LocalToOwnerPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) const -> Point<Dp>
 {
@@ -248,7 +248,7 @@ auto Window::LocalToOwnerPoint(Point<Dp> const& point, ReferenceArg<Window const
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto Window::OwnerToLocalPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) const -> Point<Dp>
 {
@@ -257,7 +257,7 @@ auto Window::OwnerToLocalPoint(Point<Dp> const& point, ReferenceArg<Window const
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto Window::LocalToOwnerRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) const -> Rect<Dp>
 {
@@ -266,7 +266,7 @@ auto Window::LocalToOwnerRect(Rect<Dp> const& rect, ReferenceArg<Window const> o
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto Window::OwnerToLocalRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) const -> Rect<Dp>
 {
@@ -520,7 +520,7 @@ auto Window::Initialize() -> void
 }
 
 ///
-/// @brief Get attribute node of the window.  
+/// @brief Get attribute node of the window.
 ///
 auto Window::GetAttributeNode() -> AttributeNode&
 {
@@ -556,7 +556,7 @@ auto Window::ReceiveWindowEvent(Event<>& event) -> Async<Bool>
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto Window::ReceiveFrameEvent(Event<>& event) -> Async<Bool>
 {
@@ -646,23 +646,23 @@ auto Window::Realize(WindowOptions const& options) -> void
     }
 
     const auto platformOptions = PlatformWindowOptions {
-      .behavior = options.behavior,
-      .backgroundStyle = options.backgroundStyle,
-      .backgroundColor = options.backgroundColor,
-      .owner = owner,
-      .closable = options.closable,
-      .resizable = options.resizable,
-      .minimizable = options.minimizable,
-      .hasFrame = options.hasFrame,
-      .hasTitleBar = options.hasTitleBar,
+        .behavior = options.behavior,
+        .backgroundStyle = options.backgroundStyle,
+        .backgroundColor = options.backgroundColor,
+        .owner = owner,
+        .closable = options.closable,
+        .resizable = options.resizable,
+        .minimizable = options.minimizable,
+        .hasFrame = options.hasFrame,
+        .hasTitleBar = options.hasTitleBar,
     };
 
     const auto delegate = PlatformWindow::Delegate {
-      .sendPointerEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformPointerEvent(e); },
-      .sendKeyEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformKeyEvent(e); },
-      .sendInputEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformInputEvent(e); },
-      .sendFrameEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformFrameEvent(e); },
-      .sendWindowEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformWindowEvent(e); },
+        .sendPointerEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformPointerEvent(e); },
+        .sendKeyEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformKeyEvent(e); },
+        .sendInputEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformInputEvent(e); },
+        .sendFrameEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformFrameEvent(e); },
+        .sendWindowEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformWindowEvent(e); },
     };
 
     _platformObject = _platformContext->MakePlatformWindow(platformOptions, delegate);
@@ -681,7 +681,7 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
     _platformContext = Locator::Resolve<PlatformWindowContext>();
 
     _eventReceiver = EventReceiver::Make({
-      .dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); },
+        .dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); },
     });
 
     if (const auto applicationContext = Locator::GetInstance<ApplicationContext>())
@@ -707,8 +707,8 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
 
     _rootView = RootView::MakeWithContent(
       {
-        .requestFrame = [&] { return RequestFrame(); },
-        .getFrameTime = [&] { return GetFrameTime(); },
+          .requestFrame = [&] { return RequestFrame(); },
+          .getFrameTime = [&] { return GetFrameTime(); },
       },
       _frameView);
 

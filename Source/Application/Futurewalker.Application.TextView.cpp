@@ -141,12 +141,12 @@ auto TextView::Draw(DrawScope& scope) -> void
         const auto alignedY = ViewLayoutFunction::AlignToPixelGridByRound(y, *this);
 
         scene.PushTranslate({
-          .x = alignedX,
-          .y = alignedY,
+            .x = alignedX,
+            .y = alignedY,
         });
         scene.AddText({
-          .shaped = _shapedText,
-          .color = color,
+            .shaped = _shapedText,
+            .color = color,
         });
         scene.Pop({});
     }
