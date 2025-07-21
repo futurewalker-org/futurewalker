@@ -25,7 +25,8 @@ class TextView final : public View
 public:
     static auto Make() -> Shared<TextView>;
 
-    auto SetText(AttributeArg<String> text) -> void;
+    auto GetText() const -> String;
+    auto SetText(AttributeArg<String> const& text) -> void;
 
     TextView(PassKey<View> key);
 

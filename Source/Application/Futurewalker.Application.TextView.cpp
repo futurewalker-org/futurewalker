@@ -20,12 +20,28 @@ namespace
 FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(String, TextViewAttributeText, String());
 }
 
+///
+/// @brief Create a new TextView instance.
+///
 auto TextView::Make() -> Shared<TextView>
 {
     return View::MakeDerived<TextView>();
 }
 
-void TextView::SetText(AttributeArg<String> text)
+///
+/// @brief Get text.
+///
+auto TextView::GetText() const -> String
+{
+    return _text.GetValueOrDefault();
+}
+
+///
+/// @brief Set text.
+///
+/// @param text The text to set.
+///
+void TextView::SetText(AttributeArg<String> const& text)
 {
     _text.SetAttributeArg(text);
 }
