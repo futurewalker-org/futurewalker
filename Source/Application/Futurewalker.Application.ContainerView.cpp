@@ -2,6 +2,7 @@
 
 #include "Futurewalker.Application.ContainerView.hpp"
 #include "Futurewalker.Application.ViewEvent.hpp"
+#include "Futurewalker.Application.ViewDrawFunction.hpp"
 #include "Futurewalker.Application.DrawScope.hpp"
 
 #include "Futurewalker.Graphics.Scene.hpp"
@@ -12,7 +13,8 @@ namespace FW_DETAIL_NS
 {
 namespace
 {
-FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBackgroundColor, RGBAColor());
+FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBackgroundColor, {});
+FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
 }
 
 ///
@@ -89,14 +91,26 @@ auto ContainerView::SetBackgroundColor(AttributeArg<RGBAColor> color) -> void
 }
 
 ///
+/// @brief Set corner radius.
+///
+/// @param[in] radius Corner radius.
+///
+auto ContainerView::SetCornerRadius(AttributeArg<CornerRadius> radius) -> void
+{
+    _cornerRadius.SetAttributeArg(radius);
+}
+
+///
 /// @brief Initialize.
 ///
 auto ContainerView::Initialize() -> void
 {
     _backgroundColor.BindAttributeWithDefault(*this, AttributeBackgroundColor, RGBAColor());
+    _cornerRadius.BindAttributeWithDefault(*this, AttributeCornerRadius, CornerRadius());
 
     EventReceiver::Connect(*this, *this, &ContainerView::ReceiveEvent);
     EventReceiver::Connect(_backgroundColor, *this, &ContainerView::ReceiveEvent);
+    EventReceiver::Connect(_cornerRadius, *this, &ContainerView::ReceiveEvent);
 }
 
 ///
@@ -107,11 +121,8 @@ auto ContainerView::Draw(DrawScope& scope) -> void
     auto& scene = scope.GetScene();
 
     auto const backgroundColor = _backgroundColor.GetValueOrDefault();
-
-    scene.AddRect({
-      .rect = GetContentRect(),
-      .color = backgroundColor,
-    });
+    auto const cornerRadius = _cornerRadius.GetValueOrDefault();
+    ViewDrawFunction::DrawRoundRect(scene, GetContentRect(), cornerRadius, backgroundColor, GetLayoutDirection());
 }
 
 ///

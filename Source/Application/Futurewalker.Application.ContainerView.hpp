@@ -3,6 +3,7 @@
 
 #include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.View.hpp"
+#include "Futurewalker.Application.CornerRadius.hpp"
 
 #include "Futurewalker.Attribute.AttributeArg.hpp"
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
@@ -29,6 +30,7 @@ public:
     auto SetContent(Shared<View> const& view) -> void;
 
     auto SetBackgroundColor(AttributeArg<RGBAColor> color) -> void;
+    auto SetCornerRadius(AttributeArg<CornerRadius> radius) -> void;
 
 protected:
     auto Initialize() -> void override;
@@ -38,6 +40,7 @@ protected:
 private:
     Weak<View> _content;
     AttributeAccessor<RGBAColor> _backgroundColor;
+    AttributeAccessor<CornerRadius> _cornerRadius;
 };
 }
 }

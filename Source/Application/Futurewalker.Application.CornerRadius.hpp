@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.CornerRadiusType.hpp"
+#include "Futurewalker.Application.LayoutDirection.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -20,11 +21,22 @@ public:
     ///
     /// @brief Make uniform corner radius.
     ///
-    /// @param radius Uniform radius
+    /// @param[in] radius Uniform radius
     ///
     static constexpr auto MakeUniform(Dp const radius) noexcept -> CornerRadius
     {
         return CornerRadius(radius, radius, radius, radius);
+    }
+
+    ///
+    /// @brief Offset corner radius by a given value.
+    ///
+    /// @param[in] radius The original corner radius
+    /// @param[in] offset The offset value to add
+    ///
+    static constexpr auto Offset(CornerRadius const& radius, Dp const offset) noexcept -> CornerRadius
+    {
+        return CornerRadius(radius._tl + offset, radius._tt + offset, radius._bt + offset, radius._bl + offset);
     }
 
 public:
@@ -45,6 +57,10 @@ public:
       , _bt {bt}
       , _bl {bl}
     {
+        _tl = Dp::Max(_tl, 0);
+        _tt = Dp::Max(_tt, 0);
+        _bt = Dp::Max(_bt, 0);
+        _bl = Dp::Max(_bl, 0);
     }
 
     constexpr auto operator=(CornerRadius const&) -> CornerRadius& = default;
@@ -120,6 +136,61 @@ public:
     constexpr auto SetBottomTrailing(Dp const bt) -> void
     {
         _bt = bt;
+    }
+
+    ///
+    /// @brief Get top left radius.
+    ///
+    /// @param[in] direction Layout direction.
+    ///
+    constexpr auto GetTopLeft(LayoutDirection const& direction) const -> Dp
+    {
+        return direction == LayoutDirection::RightToLeft ? _tt : _tl;
+    }
+
+    ///
+    /// @brief Get top right radius.
+    ///
+    /// @param[in] direction Layout direction.
+    ///
+    constexpr auto GetTopRight(LayoutDirection const& direction) const -> Dp
+    {
+        return direction == LayoutDirection::RightToLeft ? _tl : _tt;
+    }
+
+    ///
+    /// @brief Get top left radius.
+    ///
+    /// @param[in] direction Layout direction.
+    ///
+    constexpr auto GetBottomLeft(LayoutDirection const& direction) const -> Dp
+    {
+        return direction == LayoutDirection::RightToLeft ? _bt : _bl;
+    }
+
+    ///
+    /// @brief Get top right radius.
+    ///
+    /// @param[in] direction Layout direction.
+    ///
+    constexpr auto GetBottomRight(LayoutDirection const& direction) const -> Dp
+    {
+        return direction == LayoutDirection::RightToLeft ? _bl : _bt;
+    }
+
+    ///
+    /// @brief Get round rectangle.
+    ///
+    /// @param[in] rect Rectangle to create round rectangle from.
+    /// @param[in] direction Layout direction.
+    ///
+    constexpr auto GetRoundRect(Rect<Dp> const& rect, LayoutDirection const& direction) const -> RoundRect<Dp>
+    {
+        auto const tl = GetTopLeft(direction);
+        auto const tr = GetTopRight(direction);
+        auto const br = GetBottomRight(direction);
+        auto const bl = GetBottomLeft(direction);
+        return RoundRect<Dp>(rect, {tl, tl}, {tr, tr}, {br, br}, {bl, bl});
     }
 
 private:
