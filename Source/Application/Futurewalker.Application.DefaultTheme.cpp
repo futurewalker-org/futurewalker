@@ -586,6 +586,9 @@ auto DefaultTheme::ApplyApplicationStyle(AttributeNode& target) -> void
         AttributeNode::SetReference<&ApplicationStyle::ColorOnErrorContainer>(target, ApplicationColor::Error90);
     }
 
+    AttributeNode::SetValue<&ApplicationStyle::AlphaHighlightHover>(target, 0.08);
+    AttributeNode::SetValue<&ApplicationStyle::AlphaHighlightPress>(target, 0.10);
+
     AttributeNode::SetValue<&ApplicationStyle::FontSizeBodySmall>(target, 11);
     AttributeNode::SetValue<&ApplicationStyle::FontSizeBodyMedium>(target, 14);
     AttributeNode::SetValue<&ApplicationStyle::FontSizeBodyLarge>(target, 16);
@@ -617,5 +620,14 @@ auto DefaultTheme::ApplyApplicationStyle(AttributeNode& target) -> void
     AttributeNode::SetValue<&ApplicationStyle::FontWeightDisplaySmall>(target, 400);
     AttributeNode::SetValue<&ApplicationStyle::FontWeightDisplayMedium>(target, 400);
     AttributeNode::SetValue<&ApplicationStyle::FontWeightDisplayLarge>(target, 400);
+
+    AttributeNode::SetValue<&ApplicationStyle::CornerRadiusNone>(target, CornerRadius::MakeUniform(0));
+    AttributeNode::SetValue<&ApplicationStyle::CornerRadiusExtraSmall>(target, CornerRadius::MakeUniform(4));
+    AttributeNode::SetValue<&ApplicationStyle::CornerRadiusSmall>(target, CornerRadius::MakeUniform(8));
+    AttributeNode::SetValue<&ApplicationStyle::CornerRadiusMedium>(target, CornerRadius::MakeUniform(12));
+    AttributeNode::SetValue<&ApplicationStyle::CornerRadiusLarge>(target, CornerRadius::MakeUniform(16));
+    AttributeNode::SetValue<&ApplicationStyle::CornerRadiusLargeIncreased>(target, CornerRadius::MakeUniform(20));
+    AttributeNode::SetValue<&ApplicationStyle::CornerRadiusExtraLarge>(target, CornerRadius::MakeUniform(28));
+    AttributeNode::SetValue<&ApplicationStyle::CornerRadiusExtraLargeIncreased>(target, CornerRadius::MakeUniform(32));
 }
 }

@@ -35,6 +35,9 @@ FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::ColorErrorContainer, {});
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::ColorOnError, {});
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::ColorOnErrorContainer, {});
 
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::AlphaHighlightHover, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::AlphaHighlightPress, 0);
+
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::FontSizeBodySmall, 0);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::FontSizeBodyMedium, 0);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::FontSizeBodyLarge, 0);
@@ -66,4 +69,13 @@ FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::FontWeightHeadlineLarge, 0);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::FontWeightDisplaySmall, 0);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::FontWeightDisplayMedium, 0);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::FontWeightDisplayLarge, 0);
+
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusNone, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusExtraSmall, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusSmall, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusMedium, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusLarge, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusLargeIncreased, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusExtraLarge, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusExtraLargeIncreased, {});
 }

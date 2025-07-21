@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.Prelude.hpp"
+#include "Futurewalker.Application.CornerRadius.hpp"
 
 #include "Futurewalker.Attribute.StaticAttribute.hpp"
 
@@ -52,6 +53,9 @@ public:
     FW_STATIC_ATTRIBUTE(RGBAColor, ColorOnError);
     FW_STATIC_ATTRIBUTE(RGBAColor, ColorOnErrorContainer);
 
+    FW_STATIC_ATTRIBUTE(AlphaChannel, AlphaHighlightHover);
+    FW_STATIC_ATTRIBUTE(AlphaChannel, AlphaHighlightPress);
+
     FW_STATIC_ATTRIBUTE(Graphics::FontSize, FontSizeBodySmall);
     FW_STATIC_ATTRIBUTE(Graphics::FontSize, FontSizeBodyMedium);
     FW_STATIC_ATTRIBUTE(Graphics::FontSize, FontSizeBodyLarge);
@@ -83,6 +87,15 @@ public:
     FW_STATIC_ATTRIBUTE(Graphics::FontWeight, FontWeightDisplaySmall);
     FW_STATIC_ATTRIBUTE(Graphics::FontWeight, FontWeightDisplayMedium);
     FW_STATIC_ATTRIBUTE(Graphics::FontWeight, FontWeightDisplayLarge);
+
+    FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusNone);
+    FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusExtraSmall);
+    FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusSmall);
+    FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusMedium);
+    FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusLarge);
+    FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusLargeIncreased);
+    FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusExtraLarge);
+    FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusExtraLargeIncreased);
 };
 }
 }
