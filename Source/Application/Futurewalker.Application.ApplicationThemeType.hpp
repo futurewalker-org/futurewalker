@@ -11,9 +11,9 @@ class ApplicationTheme;
 
 enum class ApplicationThemeBrightness
 {
-    kSystem,
-    kLight,
-    kDark,
+    System,
+    Light,
+    Dark,
 };
 }
 }

@@ -92,15 +92,15 @@ auto ApplicationTheme::UpdateCurrentBrightness() -> void
 {
     auto newBrightness = _currentBrightness;
 
-    if (_brightness == ApplicationThemeBrightness::kSystem)
+    if (_brightness == ApplicationThemeBrightness::System)
     {
         newBrightness = _platformObject->GetSystemBrightness();
     }
-    else if (_brightness == ApplicationThemeBrightness::kDark)
+    else if (_brightness == ApplicationThemeBrightness::Dark)
     {
         newBrightness = ThemeBrightness::Dark;
     }
-    else if (_brightness == ApplicationThemeBrightness::kLight)
+    else if (_brightness == ApplicationThemeBrightness::Light)
     {
         newBrightness = ThemeBrightness::Light;
     }

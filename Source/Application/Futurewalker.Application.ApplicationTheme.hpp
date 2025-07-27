@@ -39,7 +39,7 @@ private:
     Shared<PlatformApplicationTheme> _platformObject;
     Shared<ApplicationContext> _applicationContext;
     ThemeBrightness _currentBrightness = ThemeBrightness::Light;
-    ApplicationThemeBrightness _brightness = ApplicationThemeBrightness::kSystem;
+    ApplicationThemeBrightness _brightness = ApplicationThemeBrightness::System;
     std::vector<Shared<Theme>> _darkThemes;
     std::vector<Shared<Theme>> _lightThemes;
 };
