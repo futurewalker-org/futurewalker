@@ -39,6 +39,12 @@ public:
 ///
 class PlatformWindowEvent::CloseRequested final : public PlatformWindowEvent
 {
+public:
+    auto IsCancelled() const -> Bool;
+    auto SetCancelled(Bool const cancelled) -> void;
+
+private:
+    Bool _cancelled = false;
 };
 
 ///

@@ -879,7 +879,19 @@ auto Window::HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>
     }
     else if (event.Is<PlatformWindowEvent::CloseRequested>())
     {
-        co_await Close();
+        auto platformParameter = event.As<PlatformWindowEvent::CloseRequested>();
+        auto windowEventParameter = Event<WindowEvent::CloseRequested>();
+        windowEventParameter->SetCancelled(platformParameter->IsCancelled());
+        auto windowEvent = Event<>(windowEventParameter);
+        if (co_await SendEvent(windowEvent))
+        {
+            if (windowEvent.Is<WindowEvent::CloseRequested>())
+            {
+                auto const cancelled = windowEvent.As<WindowEvent::CloseRequested>()->IsCancelled();
+                platformParameter->SetCancelled(cancelled);
+                event = platformParameter;
+            }
+        }
         co_return true;
     }
     else if (event.Is<PlatformWindowEvent::Closed>())
