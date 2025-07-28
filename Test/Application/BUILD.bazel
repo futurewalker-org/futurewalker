@@ -8,5 +8,7 @@ fw_test_suite(
         "CornerRadius",
         "EdgeInsets",
         "View",
+        "Menu",
+        "MenuItem",
     ],
 )
