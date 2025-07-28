@@ -1074,6 +1074,7 @@ auto Window::ConvertPointerEvent(Event<> const& from) const noexcept -> Event<>
             swipeEvent->SetPhase(platformSwipe->GetPhase());
             swipeEvent->SetDeltaX(platformSwipe->GetDeltaX());
             swipeEvent->SetDeltaY(platformSwipe->GetDeltaY());
+            swipeEvent->SetInertial(platformSwipe->IsInertial());
             to = swipeEvent;
         }
         else if (from.Is<PlatformPointerEvent::Action::Scroll>())
@@ -1081,11 +1082,10 @@ auto Window::ConvertPointerEvent(Event<> const& from) const noexcept -> Event<>
             auto scrollEvent = Event<PointerEvent::Action::Scroll>();
             auto const platformScroll = from.As<PlatformPointerEvent::Action::Scroll>();
             copyPointerEventParameter(*scrollEvent, *platformScroll);
-            scrollEvent->SetPhase(platformScroll->GetPhase());
             scrollEvent->SetDeltaX(platformScroll->GetDeltaX());
             scrollEvent->SetDeltaY(platformScroll->GetDeltaY());
             scrollEvent->SetPrecision(platformScroll->GetPrecision());
-            scrollEvent->SetModifierState(platformScroll->GetModifierState());
+            scrollEvent->SetModifiers(platformScroll->GetModifiers());
             to = scrollEvent;
         }
     }

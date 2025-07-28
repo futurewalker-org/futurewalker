@@ -325,10 +325,14 @@ public:
     auto GetDeltaY() const -> Dp;
     auto SetDeltaY(Dp const deltaY) -> void;
 
+    auto IsInertial() const -> Bool;
+    auto SetInertial(Bool const inertial) -> void;
+
 private:
     PointerActionPhase _phase = PointerActionPhase::None;
     Dp _deltaX = 0.0;
     Dp _deltaY = 0.0;
+    Bool _inertial = false;
 };
 
 ///
@@ -351,15 +355,15 @@ public:
     auto GetPrecision() const -> PointerScrollPrecision;
     auto SetPrecision(PointerScrollPrecision const precision) -> void;
 
-    auto GetModifierState() const -> ModifierKeyFlags;
-    auto SetModifierState(ModifierKeyFlags const modifierState) -> void;
+    auto GetModifiers() const -> ModifierKeyFlags;
+    auto SetModifiers(ModifierKeyFlags const modifiers) -> void;
 
 private:
     PointerActionPhase _phase = PointerActionPhase::None;
     Dp _deltaX = 0.0;
     Dp _deltaY = 0.0;
     PointerScrollPrecision _precision = PointerScrollPrecision::Coarse;
-    ModifierKeyFlags _modifierState = ModifierKeyFlags::None;
+    ModifierKeyFlags _modifiers = ModifierKeyFlags::None;
 };
 
 ///

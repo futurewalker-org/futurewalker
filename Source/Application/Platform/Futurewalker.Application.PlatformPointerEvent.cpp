@@ -544,14 +544,14 @@ auto PlatformPointerEvent::Action::Swipe::SetDeltaY(Dp const deltaY) -> void
     _deltaY = deltaY;
 }
 
-auto PlatformPointerEvent::Action::Scroll::GetPhase() const -> PointerActionPhase
+auto PlatformPointerEvent::Action::Swipe::IsInertial() const -> Bool
 {
-    return _phase;
+    return _inertial;
 }
 
-auto PlatformPointerEvent::Action::Scroll::SetPhase(PointerActionPhase const phase) -> void
+auto PlatformPointerEvent::Action::Swipe::SetInertial(Bool const inertial) -> void
 {
-    _phase = phase;
+    _inertial = inertial;
 }
 
 auto PlatformPointerEvent::Action::Scroll::GetDeltaX() const -> Dp
@@ -582,22 +582,13 @@ auto PlatformPointerEvent::Action::Scroll::SetPrecision(PointerScrollPrecision c
     _precision = precision;
 }
 
-auto PlatformPointerEvent::Action::Scroll::GetModifierState() const -> ModifierKeyFlags
+auto PlatformPointerEvent::Action::Scroll::GetModifiers() const -> ModifierKeyFlags
 {
-    return _modifierState;
+    return _modifiers;
 }
 
-auto PlatformPointerEvent::Action::Scroll::SetModifierState(ModifierKeyFlags const modifierState) -> void
+auto PlatformPointerEvent::Action::Scroll::SetModifiers(ModifierKeyFlags const modifiers) -> void
 {
-    _modifierState = modifierState;
-}
-
-auto PlatformPointerEvent::Action::Scroll::IsInertial() const -> Bool
-{
-    return _inertial; 
-}
-auto PlatformPointerEvent::Action::Scroll::SetInertial(Bool const inertial) -> void
-{
-    _inertial = inertial;
+    _modifiers = modifiers;
 }
 }

@@ -240,18 +240,19 @@ public:
     auto GetDeltaY() const -> Dp;
     auto SetDeltaY(Dp const deltaY) -> void;
 
+    auto IsInertial() const -> Bool;
+    auto SetInertial(Bool const inertial) -> void;
+
 private:
     PointerActionPhase _phase = PointerActionPhase::None;
     Dp _deltaX = 0.0;
     Dp _deltaY = 0.0;
+    Bool _inertial = false;
 };
 
 class PlatformPointerEvent::Action::Scroll final : public PlatformPointerEvent::Action
 {
 public:
-    auto GetPhase() const -> PointerActionPhase;
-    auto SetPhase(PointerActionPhase const phase) -> void;
-
     auto GetDeltaX() const -> Dp;
     auto SetDeltaX(Dp const deltaX) -> void;
 
@@ -261,19 +262,14 @@ public:
     auto GetPrecision() const -> PointerScrollPrecision;
     auto SetPrecision(PointerScrollPrecision const precision) -> void;
 
-    auto GetModifierState() const -> ModifierKeyFlags;
-    auto SetModifierState(ModifierKeyFlags const modifierState) -> void;
-
-    auto IsInertial() const -> Bool;
-    auto SetInertial(Bool const inertial) -> void;
+    auto GetModifiers() const -> ModifierKeyFlags;
+    auto SetModifiers(ModifierKeyFlags const modifiers) -> void;
 
 private:
-    PointerActionPhase _phase = PointerActionPhase::None;
     Dp _deltaX = 0.0;
     Dp _deltaY = 0.0;
     PointerScrollPrecision _precision = PointerScrollPrecision::Coarse;
-    ModifierKeyFlags _modifierState = ModifierKeyFlags::None;
-    Bool _inertial = false;
+    ModifierKeyFlags _modifiers = ModifierKeyFlags::None;
 };
 }
 }

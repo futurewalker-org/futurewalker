@@ -774,6 +774,16 @@ auto PointerEvent::Action::Swipe::SetDeltaY(Dp const deltaY) -> void
     _deltaY = deltaY;
 }
 
+auto PointerEvent::Action::Swipe::IsInertial() const -> Bool
+{
+    return _inertial;
+}
+
+auto PointerEvent::Action::Swipe::SetInertial(Bool const inertial) -> void
+{
+    _inertial = inertial;
+}
+
 ///
 /// @brief Get scroll phase.
 ///
@@ -849,9 +859,9 @@ auto PointerEvent::Action::Scroll::SetPrecision(PointerScrollPrecision const pre
 ///
 /// @brief Get modifier state.
 ///
-auto PointerEvent::Action::Scroll::GetModifierState() const -> ModifierKeyFlags
+auto PointerEvent::Action::Scroll::GetModifiers() const -> ModifierKeyFlags
 {
-    return _modifierState;
+    return _modifiers;
 }
 
 ///
@@ -859,9 +869,9 @@ auto PointerEvent::Action::Scroll::GetModifierState() const -> ModifierKeyFlags
 ///
 /// @param modifierState Modifier state flags.
 ///
-auto PointerEvent::Action::Scroll::SetModifierState(ModifierKeyFlags const modifierState) -> void
+auto PointerEvent::Action::Scroll::SetModifiers(ModifierKeyFlags const modifiers) -> void
 {
-    _modifierState = modifierState;
+    _modifiers = modifiers;
 }
 
 ///
