@@ -17,6 +17,8 @@
 #include <modules/skshaper/include/SkShaper.h>
 #include <include/ports/SkTypeface_win.h>
 
+#include <unicode/utf8.h>
+
 namespace FW_GRAPHICS_DETAIL_NS
 {
 namespace
@@ -142,7 +144,7 @@ public:
 ///
 /// @brief Shape text.
 ///
-auto SkiaTextShaper::Shape(String const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> Shared<ShapedText>
+auto SkiaTextShaper::ShapeText(String const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> Shared<ShapedText>
 {
     auto const width = static_cast<SkScalar>(maxWidth);
     auto const font = SkFont(GetSkTypeface(typeface), static_cast<SkScalar>(size));
@@ -170,5 +172,13 @@ auto SkiaTextShaper::Shape(String const& text, Shared<Typeface> const& typeface,
 
     auto const [textBlob, layoutInfo] = std::move(runHandler).Finalize();
     return Shared<SkiaShapedText>::Make(textBlob, layoutInfo);
+}
+
+auto SkiaTextShaper::ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size) -> Shared<ShapedText>
+{
+    auto buffer = std::array<char8_t, U8_MAX_LENGTH>();
+    auto offset = 0;
+    U8_APPEND_UNSAFE(buffer.data(), offset, codePoint);
+    return ShapeText(String(buffer.data(), offset), typeface, size, Dp::Infinity());
 }
 }

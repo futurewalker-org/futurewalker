@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Graphics.TextLayoutInfoType.hpp"
+#include "Futurewalker.Graphics.Glyph.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
