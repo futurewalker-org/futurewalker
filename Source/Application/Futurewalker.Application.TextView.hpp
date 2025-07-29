@@ -24,6 +24,7 @@ class TextView final : public View
 {
 public:
     static auto Make() -> Shared<TextView>;
+    static auto MakeWithText(AttributeArg<String> const& text) -> Shared<TextView>;
 
     auto GetText() const -> String;
     auto SetText(AttributeArg<String> const& text) -> void;
@@ -34,9 +35,9 @@ protected:
     auto Initialize() -> void override;
     auto Measure(MeasureScope& scope) -> void override;
     auto Draw(DrawScope& scope) -> void override;
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
 
 private:
+    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
     auto GetTypeface() const -> Shared<Graphics::Typeface>;
     auto GetFontSize() const -> Graphics::FontSize;
     auto InvalidateLayoutCache() -> void;

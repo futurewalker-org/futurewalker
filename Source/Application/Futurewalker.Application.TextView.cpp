@@ -4,6 +4,7 @@
 #include "Futurewalker.Application.MeasureScope.hpp"
 #include "Futurewalker.Application.DrawScope.hpp"
 #include "Futurewalker.Application.ViewLayoutFunction.hpp"
+#include "Futurewalker.Application.ApplicationStyle.hpp"
 
 #include "Futurewalker.Attribute.AttributeObserver.hpp"
 
@@ -15,17 +16,24 @@
 
 namespace FW_DETAIL_NS
 {
-namespace
-{
-FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(String, TextViewAttributeText, String());
-}
-
 ///
 /// @brief Create a new TextView instance.
 ///
 auto TextView::Make() -> Shared<TextView>
 {
     return View::MakeDerived<TextView>();
+}
+
+///
+/// @brief Create a new TextView instance with specified text.
+///
+/// @param text
+///
+auto TextView::MakeWithText(AttributeArg<String> const& text) -> Shared<TextView>
+{
+    auto textView = TextView::Make();
+    textView->SetText(text);
+    return textView;
 }
 
 ///
@@ -53,9 +61,11 @@ TextView::TextView(PassKey<View> key)
 
 auto TextView::Initialize() -> void
 {
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(String, TextAttribute, String());
+
     _shaper = Graphics::TextShaper::Make();
 
-    _text.BindAttribute(*this, TextViewAttributeText);
+    _text.BindAttribute(*this, TextAttribute);
     _color.BindAttribute(*this, TextViewStyle::Color);
     _fontSize.BindAttribute(*this, TextViewStyle::FontSize);
     _fontWeight.BindAttribute(*this, TextViewStyle::FontWeight);
@@ -63,15 +73,15 @@ auto TextView::Initialize() -> void
     _fontSlant.BindAttribute(*this, TextViewStyle::FontSlant);
     _fontFamily.BindAttribute(*this, TextViewStyle::FontFamily);
 
-    EventReceiver::Connect(_text, *this, &TextView::ReceiveEvent);
-    EventReceiver::Connect(_color, *this, &TextView::ReceiveEvent);
-    EventReceiver::Connect(_fontSize, *this, &TextView::ReceiveEvent);
-    EventReceiver::Connect(_fontWeight, *this, &TextView::ReceiveEvent);
-    EventReceiver::Connect(_fontWidth, *this, &TextView::ReceiveEvent);
-    EventReceiver::Connect(_fontSlant, *this, &TextView::ReceiveEvent);
-    EventReceiver::Connect(_fontFamily, *this, &TextView::ReceiveEvent);
-    EventReceiver::Connect(_horizontalAlignment, *this, &TextView::ReceiveEvent);
-    EventReceiver::Connect(_verticalAlignment, *this, &TextView::ReceiveEvent);
+    EventReceiver::Connect(_text, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_color, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_fontSize, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_fontWeight, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_fontWidth, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_fontSlant, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_fontFamily, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_horizontalAlignment, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_verticalAlignment, *this, &TextView::ReceiveAttributeEvent);
 }
 
 auto TextView::Measure(MeasureScope& scope) -> void
@@ -85,7 +95,7 @@ auto TextView::Measure(MeasureScope& scope) -> void
         auto const text = _text.GetValueOrDefault();
         auto const typeface = GetTypeface();
         auto const size = GetFontSize();
-        _shapedText = _shaper->Shape(text, typeface, size, widthConstraints.GetMax());
+        _shapedText = _shaper->ShapeText(text, typeface, size, widthConstraints.GetMax());
     }
 
     if (_shapedText)
@@ -152,7 +162,7 @@ auto TextView::Draw(DrawScope& scope) -> void
     }
 }
 
-auto TextView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto TextView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
