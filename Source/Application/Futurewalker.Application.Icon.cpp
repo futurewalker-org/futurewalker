@@ -1,0 +1,92 @@
+﻿// SPDX-License-Identifier: MPL-2.0
+
+#include "Futurewalker.Application.Icon.hpp"
+
+#include "Futurewalker.Graphics.FontManager.hpp"
+#include "Futurewalker.Graphics.Typeface.hpp"
+#include "Futurewalker.Graphics.TextShaper.hpp"
+#include "Futurewalker.Graphics.TextLayoutInfo.hpp"
+#include "Futurewalker.Graphics.ShapedText.hpp"
+#include "Futurewalker.Graphics.Scene.hpp"
+
+#include "Futurewalker.Base.Locator.hpp"
+
+namespace FW_DETAIL_NS
+{
+class Icon::Impl : NonCopyable
+{
+public:
+    virtual ~Impl() = default;
+    virtual auto Draw(Graphics::Scene& scene,  Rect<Dp> const& rect, RGBAColor const& color) const -> void = 0;
+};
+
+auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& codePoint) -> Icon
+{
+    struct FontIconDrawable final : public Icon::Impl
+    {
+        FontIconDrawable(Shared<Graphics::Typeface> typeface, char32_t codePoint)
+          : _typeface(typeface)
+          , _codePoint(codePoint)
+        {
+        }
+
+        auto Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color) const -> void override
+        {
+            scene.PushTranslate({.x = rect.GetLeft(), .y = rect.GetTop()});
+            {
+                auto const shaper = Graphics::TextShaper::Make();
+                auto const shapedGlyph = shaper->ShapeGlyph(_codePoint, _typeface, 16);
+                auto const size = shapedGlyph->GetLayoutInfo().GetSize();
+                auto const glyphAspectRatio = Float64(size.GetWidth() / size.GetHeight());
+                auto const sizeAspectRatio = Float64(rect.GetWidth() / rect.GetHeight());
+                if (glyphAspectRatio > sizeAspectRatio)
+                {
+                    auto const scale = Float64(rect.GetWidth() / size.GetWidth());
+                    auto const offset = (rect.GetHeight() - size.GetHeight() * Dp(scale)) / 2.0;
+                    scene.PushTranslate({.x = 0, .y = offset});
+                    scene.PushScale({.x = scale, .y = scale});
+                    scene.AddText({.shaped = shapedGlyph, .color = color});
+                    scene.Pop({});
+                    scene.Pop({});
+                }
+                else
+                {
+                    auto const scale = Float64(rect.GetHeight() / size.GetHeight());
+                    auto const offset = (rect.GetWidth() - size.GetWidth() * Dp(scale)) / 2.0;
+                    scene.PushTranslate({.x = offset, .y = 0});
+                    scene.PushScale({.x = scale, .y = scale});
+                    scene.AddText({.shaped = shapedGlyph, .color = color});
+                    scene.Pop({});
+                    scene.Pop({});
+                }
+            }
+            scene.Pop({});
+        }
+
+        Shared<Graphics::Typeface> _typeface;
+        char32_t _codePoint = 0;
+    };
+
+    if (auto const fontManager = Locator::GetInstance<Graphics::FontManager>())
+    {
+        if (auto const typeface = fontManager->FindTypefaceByFamilyAndStyle(family, Graphics::FontStyle(Graphics::FontWeight::Normal(), Graphics::FontWidth::Normal(), Graphics::FontSlant::Upright)))
+        {
+            return Icon(Shared<FontIconDrawable>::Make(typeface, codePoint));
+        }
+    }
+    return Icon(nullptr);
+}
+
+auto Icon::Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color) const -> void
+{
+    if (_impl)
+    {
+        _impl->Draw(scene, rect, color);
+    }
+}
+
+Icon::Icon(Shared<Impl const> const& impl)
+  : _impl {impl}
+{
+}
+}
