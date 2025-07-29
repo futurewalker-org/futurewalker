@@ -96,6 +96,11 @@ public:
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusLargeIncreased);
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusExtraLarge);
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusExtraLargeIncreased);
+
+    FW_STATIC_ATTRIBUTE(Dp, IconSizeSmall);
+    FW_STATIC_ATTRIBUTE(Dp, IconSizeMedium);
+    FW_STATIC_ATTRIBUTE(Dp, IconSizeLarge);
+    FW_STATIC_ATTRIBUTE(Dp, IconSizeExtraLarge);
 };
 }
 }

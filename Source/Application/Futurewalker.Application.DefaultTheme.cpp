@@ -629,5 +629,10 @@ auto DefaultTheme::ApplyApplicationStyle(AttributeNode& target) -> void
     AttributeNode::SetValue<&ApplicationStyle::CornerRadiusLargeIncreased>(target, CornerRadius::MakeUniform(20));
     AttributeNode::SetValue<&ApplicationStyle::CornerRadiusExtraLarge>(target, CornerRadius::MakeUniform(28));
     AttributeNode::SetValue<&ApplicationStyle::CornerRadiusExtraLargeIncreased>(target, CornerRadius::MakeUniform(32));
+
+    AttributeNode::SetValue<&ApplicationStyle::IconSizeSmall>(target, 20);
+    AttributeNode::SetValue<&ApplicationStyle::IconSizeMedium>(target, 24);
+    AttributeNode::SetValue<&ApplicationStyle::IconSizeLarge>(target, 40);
+    AttributeNode::SetValue<&ApplicationStyle::IconSizeExtraLarge>(target, 48);
 }
 }

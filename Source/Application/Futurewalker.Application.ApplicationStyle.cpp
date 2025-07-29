@@ -78,4 +78,9 @@ FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusLarge, {});
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusLargeIncreased, {});
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusExtraLarge, {});
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::CornerRadiusExtraLargeIncreased, {});
+
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::IconSizeSmall, {0});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::IconSizeMedium, {0});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::IconSizeLarge, {0});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ApplicationStyle::IconSizeExtraLarge, {0});
 }
