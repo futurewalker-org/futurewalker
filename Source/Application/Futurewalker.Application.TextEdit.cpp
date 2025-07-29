@@ -66,7 +66,7 @@ auto TextEdit::Draw(DrawScope& scope) -> void
     {
         auto const text = _inputMethodEditable->GetText();
         auto shaper = Graphics::TextShaper::Make();
-        auto shaped = shaper->Shape(text, nullptr, 96, Dp::Infinity());
+        auto shaped = shaper->ShapeText(text, nullptr, 96, Dp::Infinity());
 
         scene.AddText({
             .shaped = shaped,
