@@ -12,7 +12,7 @@ auto PaddingView::Make() -> Shared<PaddingView>
     return View::MakeDerived<PaddingView>();
 }
 
-auto PaddingView::MakeWithPadding(EdgeInsets const& padding) -> Shared<PaddingView>
+auto PaddingView::MakeWithPadding(AttributeArg<EdgeInsets> const& padding) -> Shared<PaddingView>
 {
     auto view = Make();
     view->SetPadding(padding);
@@ -26,7 +26,7 @@ auto PaddingView::MakeWithContent(Shared<View> const& content) -> Shared<Padding
     return view;
 }
 
-auto PaddingView::MakeWithPaddingAndContent(EdgeInsets const& padding, Shared<View> const& content) -> Shared<PaddingView>
+auto PaddingView::MakeWithPaddingAndContent(AttributeArg<EdgeInsets> const& padding, Shared<View> const& content) -> Shared<PaddingView>
 {
     auto view = Make();
     view->SetPadding(padding);
@@ -36,17 +36,12 @@ auto PaddingView::MakeWithPaddingAndContent(EdgeInsets const& padding, Shared<Vi
 
 auto PaddingView::GetPadding() const -> EdgeInsets
 {
-    return _padding;
+    return _padding.GetValueOrDefault();
 }
 
-auto PaddingView::SetPadding(EdgeInsets const& padding) -> void
+auto PaddingView::SetPadding(AttributeArg<EdgeInsets> const& padding) -> void
 {
-    auto const normalizedPadding = EdgeInsets::Max(padding, EdgeInsets());
-    if (_padding != normalizedPadding)
-    {
-        _padding = normalizedPadding;
-        InvalidateLayout();
-    }
+    _padding.SetAttributeArg(padding);
 }
 
 auto PaddingView::GetContent() -> Shared<View>
@@ -71,8 +66,13 @@ PaddingView::PaddingView(PassKey<View> key)
 
 auto PaddingView::Initialize() -> void
 {
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(EdgeInsets, PaddingAttribute, {});
+
+    _padding.BindAttribute(*this, PaddingAttribute);
     _container = ContainerView::Make();
     AddChildBack(_container);
+
+    EventReceiver::Connect(_padding, *this, &PaddingView::ReceiveAttributeEvent);
 }
 
 auto PaddingView::Measure(MeasureScope& scope) -> void
@@ -81,8 +81,9 @@ auto PaddingView::Measure(MeasureScope& scope) -> void
     auto const& widthConstraints = parameter.GetWidthConstraints();
     auto const& heightConstraints = parameter.GetHeightConstraints();
 
-    auto const horizontal = _padding.GetLeading() + _padding.GetTrailing();
-    auto const vertical = _padding.GetTop() + _padding.GetBottom();
+    auto const padding = GetNormalizedPadding();
+    auto const horizontal = padding.GetLeading() + padding.GetTrailing();
+    auto const vertical = padding.GetTop() + padding.GetBottom();
     auto const adjustedWidth = AxisConstraints::Offset(widthConstraints, -horizontal);
     auto const adjustedHeight = AxisConstraints::Offset(heightConstraints, -vertical);
     auto const childSize = scope.MeasureChild(_container, adjustedWidth, adjustedHeight);
@@ -95,8 +96,23 @@ auto PaddingView::Measure(MeasureScope& scope) -> void
 auto PaddingView::Arrange(ArrangeScope& scope) -> void
 {
     auto const layoutDirection = GetLayoutDirection();
-    auto const left = (layoutDirection == LayoutDirection::LeftToRight) ? _padding.GetLeading() : _padding.GetTrailing();
-    auto const top = _padding.GetTop();
+    auto const padding = GetNormalizedPadding();
+    auto const left = (layoutDirection == LayoutDirection::LeftToRight) ? padding.GetLeading() : padding.GetTrailing();
+    auto const top = padding.GetTop();
     scope.ArrangeChild(_container, {left, top});
+}
+
+auto PaddingView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<AttributeEvent::ValueChanged>())
+    {
+        InvalidateLayout();
+    }
+    co_return false;
+}
+
+auto PaddingView::GetNormalizedPadding() const -> EdgeInsets
+{
+    return EdgeInsets::Max(_padding.GetValueOrDefault(), EdgeInsets());
 }
 }

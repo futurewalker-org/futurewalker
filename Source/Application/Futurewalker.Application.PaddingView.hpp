@@ -6,6 +6,8 @@
 #include "Futurewalker.Application.EdgeInsets.hpp"
 #include "Futurewalker.Application.ContainerViewType.hpp"
 
+#include "Futurewalker.Attribute.AttributeAccessor.hpp"
+
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -17,12 +19,12 @@ class PaddingView : public View
 {
 public:
     static auto Make() -> Shared<PaddingView>;
-    static auto MakeWithPadding(EdgeInsets const& padding) -> Shared<PaddingView>;
+    static auto MakeWithPadding(AttributeArg<EdgeInsets> const& padding) -> Shared<PaddingView>;
     static auto MakeWithContent(Shared<View> const& content) -> Shared<PaddingView>;
-    static auto MakeWithPaddingAndContent(EdgeInsets const& padding, Shared<View> const& content) -> Shared<PaddingView>;
+    static auto MakeWithPaddingAndContent(AttributeArg<EdgeInsets> const& padding, Shared<View> const& content) -> Shared<PaddingView>;
 
     auto GetPadding() const -> EdgeInsets;
-    auto SetPadding(EdgeInsets const& padding) -> void;
+    auto SetPadding(AttributeArg<EdgeInsets> const& padding) -> void;
 
     auto GetContent() -> Shared<View>;
     auto GetContent() const -> Shared<View const>;
@@ -36,8 +38,12 @@ protected:
     auto Arrange(ArrangeScope& scope) -> void override;
 
 private:
+    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto GetNormalizedPadding() const -> EdgeInsets;
+
+private:
     Shared<ContainerView> _container;
-    EdgeInsets _padding;
+    AttributeAccessor<EdgeInsets> _padding;
 };
 }
 }
