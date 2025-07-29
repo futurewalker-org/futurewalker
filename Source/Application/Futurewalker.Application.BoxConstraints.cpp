@@ -29,34 +29,44 @@ auto BoxConstraints::MakeExact(Dp const width, Dp const height) -> BoxConstraint
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param horizontal 
-/// @param vertical 
+/// @param min
+/// @param max
 ///
-/// @return 
-///
-auto BoxConstraints::MakeMinMax(AxisConstraints const& horizontal, AxisConstraints const& vertical) -> BoxConstraints
+auto BoxConstraints::MakeMinMax(Dp const min, Dp const max) -> BoxConstraints
 {
-    return BoxConstraints(horizontal, vertical);
+    auto const cs = AxisConstraints::MakeMinMax(min, max);
+    return BoxConstraints(cs, cs);
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @return 
+/// @param cs
+/// @param size
 ///
-auto BoxConstraints::GetWidthConstraints() const -> AxisConstraints
+auto BoxConstraints::Constrain(BoxConstraints const& cs, Size<Dp> const& size) -> Size<Dp>
+{
+    return Size<Dp>(AxisConstraints::Constrain(cs._width, size.GetWidth()), AxisConstraints::Constrain(cs._height, size.GetHeight()));
+}
+
+///
+/// @brief
+///
+/// @return
+///
+auto BoxConstraints::GetWidthConstraints() const -> AxisConstraints const&
 {
     return _width;
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param width 
+/// @param width
 ///
-/// @return 
+/// @return
 ///
 auto BoxConstraints::SetWidthConstraints(AxisConstraints const& width) -> void
 {
@@ -64,21 +74,21 @@ auto BoxConstraints::SetWidthConstraints(AxisConstraints const& width) -> void
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @return 
+/// @return
 ///
-auto BoxConstraints::GetHeightConstraints() const -> AxisConstraints
+auto BoxConstraints::GetHeightConstraints() const -> AxisConstraints const&
 {
     return _height;
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param height 
+/// @param height
 ///
-/// @return 
+/// @return
 ///
 auto BoxConstraints::SetHeightConstraints(AxisConstraints const& height) -> void
 {
@@ -86,9 +96,9 @@ auto BoxConstraints::SetHeightConstraints(AxisConstraints const& height) -> void
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @return 
+/// @return
 ///
 auto BoxConstraints::GetMaxSize() const -> Size<Dp>
 {
@@ -96,9 +106,9 @@ auto BoxConstraints::GetMaxSize() const -> Size<Dp>
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @return 
+/// @return
 ///
 auto BoxConstraints::GetMinSize() const -> Size<Dp>
 {
@@ -106,22 +116,10 @@ auto BoxConstraints::GetMinSize() const -> Size<Dp>
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param size 
-///
-/// @return 
-///
-auto BoxConstraints::ConstrainSize(Size<Dp> const& size) const -> Size<Dp>
-{
-    return size; //TODO.
-}
-
-///
-/// @brief 
-///
-/// @param width 
-/// @param height 
+/// @param width
+/// @param height
 ///
 BoxConstraints::BoxConstraints(AxisConstraints const& width, AxisConstraints const& height)
   : _width {width}

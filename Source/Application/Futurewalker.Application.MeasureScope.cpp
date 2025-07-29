@@ -41,22 +41,36 @@ auto MeasureScope::MeasureChild(ReferenceArg<View> child) -> Size<Dp>
 }
 
 ///
-/// @brief Measure child with constraints. 
+/// @brief Measure child view with given constraints.
 ///
-/// @param width
-/// @param height
+/// @param child Child view
+/// @param constraints Constraints to apply
 ///
-/// @return Measure size of child view
-///
-auto MeasureScope::MeasureChild(ReferenceArg<View> child, AxisConstraints const& width, AxisConstraints const& height) -> Size<Dp>
+auto MeasureScope::MeasureChild(ReferenceArg<View> child, BoxConstraints const& constraints) -> Size<Dp>
 {
     if (child && child->IsChildOf(_view))
     {
         auto parameter = MeasureParameter();
-        parameter.SetWidthConstraints(width);
-        parameter.SetHeightConstraints(height);
+        parameter.SetConstraints(constraints);
         child->EnterMeasureScope(PassKey<MeasureScope>(), parameter);
         return GetMeasuredSize(*child);
+    }
+    FW_DEBUG_ASSERT(false);
+    return {};
+}
+
+///
+/// @brief Measure child view with given constraints.
+///
+/// @param child Child view
+/// @param widthConstraints Width constraints to apply
+/// @param heightConstraints Height constraints to apply
+///
+auto MeasureScope::MeasureChild(ReferenceArg<View> child, AxisConstraints const& widthConstraints, AxisConstraints const& heightConstraints) -> Size<Dp>
+{
+    if (child)
+    {
+        return MeasureChild(*child, BoxConstraints(widthConstraints, heightConstraints));
     }
     FW_DEBUG_ASSERT(false);
     return {};
@@ -110,8 +124,9 @@ auto MeasureScope::SetMeasuredSize(Dp const width, Dp const height) -> void
 auto MeasureScope::MeasureRootView(PassKey<RootView>, View& view, Size<Dp> const& size) -> void
 {
     auto parameter = MeasureParameter();
-    parameter.SetWidthConstraints(AxisConstraints::MakeExact(size.GetWidth()));
-    parameter.SetHeightConstraints(AxisConstraints::MakeExact(size.GetHeight()));
+    auto const width = AxisConstraints::MakeExact(size.GetWidth());
+    auto const height = AxisConstraints::MakeExact(size.GetHeight());
+    parameter.SetConstraints(BoxConstraints(width, height));
     view.EnterMeasureScope({}, parameter);
 }
 }

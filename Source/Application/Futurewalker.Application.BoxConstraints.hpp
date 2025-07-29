@@ -20,24 +20,24 @@ class BoxConstraints
 public:
     static auto MakeUnconstrained() -> BoxConstraints;
     static auto MakeExact(Dp const width, Dp const height) -> BoxConstraints;
-    static auto MakeMinMax(AxisConstraints const& horizontal, AxisConstraints const& vertical) -> BoxConstraints;
+    static auto MakeMinMax(Dp const min, Dp const max) -> BoxConstraints;
+
+    static auto Constrain(BoxConstraints const& cs, Size<Dp> const& size) -> Size<Dp>;
 
 public:
+    BoxConstraints() = default;
+    BoxConstraints(AxisConstraints const& width, AxisConstraints const& height);
+
     auto operator<=>(BoxConstraints const&) const = default;
 
-    auto GetWidthConstraints() const -> AxisConstraints;
+    auto GetWidthConstraints() const -> AxisConstraints const&;
     auto SetWidthConstraints(AxisConstraints const& width) -> void;
 
-    auto GetHeightConstraints() const -> AxisConstraints;
+    auto GetHeightConstraints() const -> AxisConstraints const&;
     auto SetHeightConstraints(AxisConstraints const& height) -> void;
 
     auto GetMaxSize() const -> Size<Dp>;
     auto GetMinSize() const -> Size<Dp>;
-
-    auto ConstrainSize(Size<Dp> const& size) const -> Size<Dp>;
-
-private:
-    BoxConstraints(AxisConstraints const& width, AxisConstraints const& height);
 
 private:
     AxisConstraints _width;

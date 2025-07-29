@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.MeasureParameterType.hpp"
-#include "Futurewalker.Application.AxisConstraints.hpp"
+#include "Futurewalker.Application.BoxConstraints.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -14,15 +14,14 @@ namespace FW_EXPORT
 class MeasureParameter
 {
 public:
-    auto GetWidthConstraints() const -> AxisConstraints const&;
-    auto SetWidthConstraints(AxisConstraints const& width) -> void;
+    auto GetConstraints() const -> BoxConstraints const&;
+    auto SetConstraints(BoxConstraints const& constraints) -> void;
 
+    auto GetWidthConstraints() const -> AxisConstraints const&;
     auto GetHeightConstraints() const -> AxisConstraints const&;
-    auto SetHeightConstraints(AxisConstraints const& height) -> void;
 
 private:
-    AxisConstraints _widthConstraints;
-    AxisConstraints _heightConstraints;
+    BoxConstraints _constraints;
 };
 }
 }

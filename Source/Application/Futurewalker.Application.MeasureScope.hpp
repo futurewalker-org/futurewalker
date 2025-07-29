@@ -28,7 +28,8 @@ public:
     auto GetParameter() const -> MeasureParameter const&;
 
     auto MeasureChild(ReferenceArg<View> child) -> Size<Dp>;
-    auto MeasureChild(ReferenceArg<View> child, AxisConstraints const& width, AxisConstraints const& height) -> Size<Dp>;
+    auto MeasureChild(ReferenceArg<View> child, BoxConstraints const& constraints) -> Size<Dp>;
+    auto MeasureChild(ReferenceArg<View> child, AxisConstraints const& widthConstraints, AxisConstraints const& heightConstraints) -> Size<Dp>;
 
     auto GetMeasuredSize(ReferenceArg<View const> view) -> Size<Dp>;
 

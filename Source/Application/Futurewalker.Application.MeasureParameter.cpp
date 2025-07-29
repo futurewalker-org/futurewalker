@@ -4,20 +4,22 @@
 
 namespace FW_DETAIL_NS
 {
-///
-/// @brief
-///
-auto MeasureParameter::GetWidthConstraints() const -> AxisConstraints const&
+auto MeasureParameter::GetConstraints() const -> BoxConstraints const&
 {
-    return _widthConstraints;
+    return _constraints;
+}
+
+auto MeasureParameter::SetConstraints(BoxConstraints const& constraints) -> void
+{
+    _constraints = constraints;
 }
 
 ///
 /// @brief
 ///
-auto MeasureParameter::SetWidthConstraints(AxisConstraints const& width) -> void
+auto MeasureParameter::GetWidthConstraints() const -> AxisConstraints const&
 {
-    _widthConstraints = width;
+    return _constraints.GetWidthConstraints();
 }
 
 ///
@@ -25,14 +27,6 @@ auto MeasureParameter::SetWidthConstraints(AxisConstraints const& width) -> void
 ///
 auto MeasureParameter::GetHeightConstraints() const -> AxisConstraints const&
 {
-    return _heightConstraints;
-}
-
-///
-/// @brief
-///
-auto MeasureParameter::SetHeightConstraints(AxisConstraints const& height) -> void
-{
-    _heightConstraints = height;
+    return _constraints.GetHeightConstraints();
 }
 }
