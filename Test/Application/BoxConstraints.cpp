@@ -28,7 +28,7 @@ TEST_CASE("BoxConstraints")
 
     SECTION("MinMax")
     {
-        auto const c = BoxConstraints::MakeMinMax(AxisConstraints::MakeMinMax(50, 100), AxisConstraints::MakeMinMax(75, 150));
+        auto const c = BoxConstraints(AxisConstraints::MakeMinMax(50, 100), AxisConstraints::MakeMinMax(75, 150));
         REQUIRE(c.GetMaxSize() == Size<Dp>(100, 150));
         REQUIRE(c.GetMinSize() == Size<Dp>(50, 75));
         REQUIRE(c.GetWidthConstraints() == AxisConstraints::MakeMinMax(50, 100));
