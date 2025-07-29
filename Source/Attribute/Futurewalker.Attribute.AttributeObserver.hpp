@@ -50,11 +50,11 @@ public:
     }
 
     ///
-    /// @brief Get description of the attribute being observed.
+    /// @brief Get ID of the attribute being observed.
     ///
-    auto GetDescription() const -> StaticAttributeRef<T>
+    auto GetAttributeId() const -> AttributeId
     {
-        return _description;
+        return _description.Get().GetId();
     }
 
     ///

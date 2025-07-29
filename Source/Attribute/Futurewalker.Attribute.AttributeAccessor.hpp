@@ -187,6 +187,18 @@ public:
         return T();
     }
 
+    ///
+    /// @brief Get id of currently binding attribute.
+    ///
+    auto GetAttributeId() const -> AttributeId
+    {
+        if (_observer)
+        {
+            return _observer->GetAttributeId();
+        }
+        return 0U;
+    }
+
     auto GetEventReceiver() -> EventReceiver&
     {
         return *_eventReceiver;
