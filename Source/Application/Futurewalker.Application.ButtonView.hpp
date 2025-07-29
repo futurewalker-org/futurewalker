@@ -31,9 +31,11 @@ public:
 protected:
     auto Initialize() -> void override;
     auto Draw(DrawScope& scope) -> void override;
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
 
 private:
+    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+
     auto SetDown(const Bool down) -> void;
     auto SetEnter(const Bool enter) -> void;
 

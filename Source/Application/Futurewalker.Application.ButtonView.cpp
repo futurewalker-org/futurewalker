@@ -64,8 +64,6 @@ ButtonView::ButtonView(PassKey<View> key)
 ///
 auto ButtonView::Initialize() -> void
 {
-    SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
-
     _tapGestureView = TapGestureView::Make();
     _hoverGestureView = HoverGestureView::MakeWithContent(_tapGestureView);
     _backgroundColor.BindAttribute(*this, ButtonViewStyle::BackgroundColor);
@@ -79,6 +77,13 @@ auto ButtonView::Initialize() -> void
     AddChildBack(_hoverGestureView);
 
     EventReceiver::Connect(*this, *this, &ButtonView::ReceiveEvent);
+    EventReceiver::Connect(_backgroundColor, *this, &ButtonView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_highlightColor, *this, &ButtonView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_borderColor, *this, &ButtonView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_hoverHighlightAlpha, *this, &ButtonView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_pressHighlightAlpha, *this, &ButtonView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_cornerRadius, *this, &ButtonView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_borderWidth, *this, &ButtonView::ReceiveAttributeEvent);
 }
 
 ///
@@ -153,6 +158,18 @@ auto ButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                 co_return true;
             }
         }
+    }
+    co_return false;
+}
+
+///
+/// @brief Receive attribute events.
+///
+auto ButtonView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<AttributeEvent::ValueChanged>())
+    {
+        InvalidateVisual();
     }
     co_return false;
 }
