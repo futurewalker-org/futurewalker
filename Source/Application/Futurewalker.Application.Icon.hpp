@@ -8,7 +8,7 @@
 
 #include "Futurewalker.Unit.hpp"
 
-#include "Futurewalker.Color.RGB.hpp"
+#include "Futurewalker.Color.RGBAColor.hpp"
 
 namespace FW_DETAIL_NS
 {

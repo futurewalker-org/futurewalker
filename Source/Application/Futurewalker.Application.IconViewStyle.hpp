@@ -3,7 +3,7 @@
 
 #include "Futurewalker.Application.Prelude.hpp"
 
-#include "Futurewalker.Color.RGB.hpp"
+#include "Futurewalker.Color.RGBAColor.hpp"
 
 #include "Futurewalker.Unit.hpp"
 

@@ -10,9 +10,12 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 ///
-/// @brief Value type of color channels.
+/// @brief Color or alpha channel type.
 ///
-/// @tparam Tag color space tag type.
+/// @tparam Tag Color space tag type.
+///
+/// Channel value is represented as 64-bit floating point value to maintain precision for any quantization of its color space.
+/// It does not apply any clamping so it can be used for extended color spaces which can have values outside of [0.0, 1.0].
 ///
 template <class Tag>
 class ChannelT

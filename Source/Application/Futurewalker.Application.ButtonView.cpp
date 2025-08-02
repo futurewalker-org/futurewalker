@@ -106,7 +106,7 @@ auto ButtonView::Draw(DrawScope& scope) -> void
     ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, backgroundColor, layoutDirection);
     ViewDrawFunction::DrawRoundRectBorder(scene, rect, cornerRadius, borderColor, borderWidth, layoutDirection);
 
-    auto highlightAlpha = AlphaChannel();
+    auto highlightAlpha = Channel();
     if (_down)
     {
         highlightAlpha = _pressHighlightAlpha.GetValueOrDefault();

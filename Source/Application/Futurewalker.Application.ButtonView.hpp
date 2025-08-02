@@ -45,8 +45,8 @@ private:
     AttributeAccessor<RGBAColor> _backgroundColor;
     AttributeAccessor<RGBAColor> _highlightColor;
     AttributeAccessor<RGBAColor> _borderColor;
-    AttributeAccessor<AlphaChannel> _hoverHighlightAlpha;
-    AttributeAccessor<AlphaChannel> _pressHighlightAlpha;
+    AttributeAccessor<Channel> _hoverHighlightAlpha;
+    AttributeAccessor<Channel> _pressHighlightAlpha;
     AttributeAccessor<CornerRadius> _cornerRadius;
     AttributeAccessor<Dp> _borderWidth;
     Bool _down = false;

@@ -19,7 +19,7 @@ TEST_CASE("RGBColor")
     c.GetRedU32();
     c.GetRedF32();
     c.GetRedF64();
-    c.SetRed(RGBChannel(0.0));
+    c.SetRed(Channel(0.0));
     c.SetRedU8(UInt8(0));
     c.SetRedU16(UInt16(0));
     c.SetRedU32(UInt32(0));
@@ -32,7 +32,7 @@ TEST_CASE("RGBColor")
     c.GetGreenU32();
     c.GetGreenF32();
     c.GetGreenF64();
-    c.SetGreen(RGBChannel(0.0));
+    c.SetGreen(Channel(0.0));
     c.SetGreenU8(UInt8(0));
     c.SetGreenU16(UInt16(0));
     c.SetGreenU32(UInt32(0));
@@ -45,7 +45,7 @@ TEST_CASE("RGBColor")
     c.GetBlueU32();
     c.GetBlueF32();
     c.GetBlueF64();
-    c.SetBlue(RGBChannel(0.0));
+    c.SetBlue(Channel(0.0));
     c.SetBlueU8(UInt8(0));
     c.SetBlueU16(UInt16(0));
     c.SetBlueU32(UInt32(0));

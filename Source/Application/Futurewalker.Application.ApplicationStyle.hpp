@@ -53,8 +53,8 @@ public:
     FW_STATIC_ATTRIBUTE(RGBAColor, ColorOnError);
     FW_STATIC_ATTRIBUTE(RGBAColor, ColorOnErrorContainer);
 
-    FW_STATIC_ATTRIBUTE(AlphaChannel, AlphaHighlightHover);
-    FW_STATIC_ATTRIBUTE(AlphaChannel, AlphaHighlightPress);
+    FW_STATIC_ATTRIBUTE(Channel, AlphaHighlightHover);
+    FW_STATIC_ATTRIBUTE(Channel, AlphaHighlightPress);
 
     FW_STATIC_ATTRIBUTE(Graphics::FontSize, FontSizeBodySmall);
     FW_STATIC_ATTRIBUTE(Graphics::FontSize, FontSizeBodyMedium);

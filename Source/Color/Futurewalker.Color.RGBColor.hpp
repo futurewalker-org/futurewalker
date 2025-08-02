@@ -11,12 +11,14 @@ namespace FW_EXPORT
 ///
 /// @brief RGB color value.
 ///
-/// @tparam Tag Tag type
+/// Represents a color which consists of red, green, and blue channels.
 ///
-template <class ColorTag>
+/// @note This class does not carry information about the color space in which the channels are encoded.
+///
+template <class Tag>
 class RGBColorT
 {
-    using ColorChannelType = ChannelT<ColorTag>;
+    using ChannelType = ChannelT<Tag>;
 
 public:
     static constexpr auto MakeFromU8(UInt8 const& r, UInt8 const& g, UInt8 const& b) -> RGBColorT;
@@ -25,44 +27,44 @@ public:
 
 public:
     constexpr RGBColorT() = default;
-    constexpr RGBColorT(ColorChannelType const& r, ColorChannelType const& g, ColorChannelType const& b);
+    constexpr RGBColorT(ChannelType const& r, ChannelType const& g, ChannelType const& b);
 
-    constexpr auto GetRed() const -> ColorChannelType;
+    constexpr auto GetRed() const -> ChannelType;
     constexpr auto GetRedU8() const -> UInt8;
     constexpr auto GetRedU16() const -> UInt16;
     constexpr auto GetRedU32() const -> UInt32;
     constexpr auto GetRedF32() const -> Float32;
     constexpr auto GetRedF64() const -> Float64;
 
-    constexpr auto GetGreen() const -> ColorChannelType;
+    constexpr auto GetGreen() const -> ChannelType;
     constexpr auto GetGreenU8() const -> UInt8;
     constexpr auto GetGreenU16() const -> UInt16;
     constexpr auto GetGreenU32() const -> UInt32;
     constexpr auto GetGreenF32() const -> Float32;
     constexpr auto GetGreenF64() const -> Float64;
 
-    constexpr auto GetBlue() const -> ColorChannelType;
+    constexpr auto GetBlue() const -> ChannelType;
     constexpr auto GetBlueU8() const -> UInt8;
     constexpr auto GetBlueU16() const -> UInt16;
     constexpr auto GetBlueU32() const -> UInt32;
     constexpr auto GetBlueF32() const -> Float32;
     constexpr auto GetBlueF64() const -> Float64;
 
-    constexpr auto SetRed(ColorChannelType const& r) -> void;
+    constexpr auto SetRed(ChannelType const& r) -> void;
     constexpr auto SetRedU8(UInt8 const& r) -> void;
     constexpr auto SetRedU16(UInt16 const& r) -> void;
     constexpr auto SetRedU32(UInt32 const& r) -> void;
     constexpr auto SetRedF32(Float32 const& r) -> void;
     constexpr auto SetRedF64(Float64 const& r) -> void;
 
-    constexpr auto SetGreen(ColorChannelType const& g) -> void;
+    constexpr auto SetGreen(ChannelType const& g) -> void;
     constexpr auto SetGreenU8(UInt8 const& g) -> void;
     constexpr auto SetGreenU16(UInt16 const& g) -> void;
     constexpr auto SetGreenU32(UInt32 const& g) -> void;
     constexpr auto SetGreenF32(Float32 const& g) -> void;
     constexpr auto SetGreenF64(Float64 const& g) -> void;
 
-    constexpr auto SetBlue(ColorChannelType const& b) -> void;
+    constexpr auto SetBlue(ChannelType const& b) -> void;
     constexpr auto SetBlueU8(UInt8 const& b) -> void;
     constexpr auto SetBlueU16(UInt16 const& b) -> void;
     constexpr auto SetBlueU32(UInt32 const& b) -> void;
@@ -73,9 +75,9 @@ public:
     friend inline constexpr bool operator!=(RGBColorT const&, RGBColorT const&) = default;
 
 private:
-    ColorChannelType _r;
-    ColorChannelType _g;
-    ColorChannelType _b;
+    ChannelType _r;
+    ChannelType _g;
+    ChannelType _b;
 };
 
 ///
@@ -121,7 +123,7 @@ constexpr auto RGBColorT<Tag>::MakeFromU32(UInt32 const& r, UInt32 const& g, UIn
 /// @brief Construct from RGB channels.
 ///
 template <class Tag>
-constexpr RGBColorT<Tag>::RGBColorT(ColorChannelType const& r, ColorChannelType const& g, ColorChannelType const& b)
+constexpr RGBColorT<Tag>::RGBColorT(ChannelType const& r, ChannelType const& g, ChannelType const& b)
   : _r {r}
   , _g {g}
   , _b {b}
@@ -132,7 +134,7 @@ constexpr RGBColorT<Tag>::RGBColorT(ColorChannelType const& r, ColorChannelType 
 /// @brief Get red channel.
 ///
 template <class Tag>
-constexpr auto RGBColorT<Tag>::GetRed() const -> ColorChannelType
+constexpr auto RGBColorT<Tag>::GetRed() const -> ChannelType
 {
     return _r;
 }
@@ -186,7 +188,7 @@ constexpr auto RGBColorT<Tag>::GetRedF64() const -> Float64
 /// @brief Get green channel.
 ///
 template <class Tag>
-constexpr auto RGBColorT<Tag>::GetGreen() const -> ColorChannelType
+constexpr auto RGBColorT<Tag>::GetGreen() const -> ChannelType
 {
     return _g; 
 }
@@ -240,7 +242,7 @@ constexpr auto RGBColorT<Tag>::GetGreenF64() const -> Float64
 /// @brief Get blue channel.
 ///
 template <class Tag>
-constexpr auto RGBColorT<Tag>::GetBlue() const -> ColorChannelType
+constexpr auto RGBColorT<Tag>::GetBlue() const -> ChannelType
 {
     return _b;
 }
@@ -294,7 +296,7 @@ constexpr auto RGBColorT<Tag>::GetBlueF64() const -> Float64
 /// @brief Set red channel.
 ///
 template <class Tag>
-constexpr auto RGBColorT<Tag>::SetRed(ColorChannelType const& r) -> void
+constexpr auto RGBColorT<Tag>::SetRed(ChannelType const& r) -> void
 {
     _r = r;
 }
@@ -348,7 +350,7 @@ constexpr auto RGBColorT<Tag>::SetRedF64(Float64 const& r) -> void
 /// @brief Set green channel.
 ///
 template <class Tag>
-constexpr auto RGBColorT<Tag>::SetGreen(ColorChannelType const& g) -> void
+constexpr auto RGBColorT<Tag>::SetGreen(ChannelType const& g) -> void
 {
     _g = g;
 }
@@ -402,7 +404,7 @@ constexpr auto RGBColorT<Tag>::SetGreenF64(Float64 const& g) -> void
 /// @brief Set green channel.
 ///
 template <class Tag>
-constexpr auto RGBColorT<Tag>::SetBlue(ColorChannelType const& b) -> void
+constexpr auto RGBColorT<Tag>::SetBlue(ChannelType const& b) -> void
 {
     _b = b;
 }

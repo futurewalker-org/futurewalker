@@ -10,13 +10,13 @@ TEST_CASE("Channel")
     {
         SECTION("")
         {
-            auto ch = AlphaChannel();
+            auto ch = Channel();
             REQUIRE(ch == 0.0);
         }
 
         SECTION("")
         {
-            auto ch = AlphaChannel(0);
+            auto ch = Channel(0);
             REQUIRE(ch == 0.0);
             ch = 42;
             REQUIRE(ch == 42);
@@ -24,7 +24,7 @@ TEST_CASE("Channel")
 
         SECTION("")
         {
-            auto ch = AlphaChannel(0.0);
+            auto ch = Channel(0.0);
             REQUIRE(ch == 0.0);
             ch = 3.14;
             REQUIRE(ch == 3.14);
@@ -33,31 +33,31 @@ TEST_CASE("Channel")
 
     SECTION("u8")
     {
-        auto ch = AlphaChannel::MakeFromU8(UInt8(255));
+        auto ch = Channel::MakeFromU8(UInt8(255));
         REQUIRE(ch == 1.0);
-        ch = AlphaChannel::MakeFromU8(UInt8(0));
+        ch = Channel::MakeFromU8(UInt8(0));
         REQUIRE(ch == 0.0);
     }
 
     SECTION("u16")
     {
-        auto ch = AlphaChannel::MakeFromU16(std::numeric_limits<uint16_t>::max());
+        auto ch = Channel::MakeFromU16(std::numeric_limits<uint16_t>::max());
         REQUIRE(ch == 1.0);
-        ch = AlphaChannel::MakeFromU16(UInt16(0));
+        ch = Channel::MakeFromU16(UInt16(0));
         REQUIRE(ch == 0.0);
     }
 
     SECTION("u32")
     {
-        auto ch = AlphaChannel::MakeFromU32(std::numeric_limits<uint32_t>::max());
+        auto ch = Channel::MakeFromU32(std::numeric_limits<uint32_t>::max());
         REQUIRE(ch == 1.0);
-        ch = AlphaChannel::MakeFromU32(UInt32(0));
+        ch = Channel::MakeFromU32(UInt32(0));
         REQUIRE(ch == 0.0);
     }
 
     SECTION("get/set")
     {
-        auto ch = AlphaChannel(0.0);
+        auto ch = Channel(0.0);
         ch.GetValue();
         ch.GetU8();
         ch.GetU16();

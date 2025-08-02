@@ -7,7 +7,12 @@ namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-template <class ColorTag, class AlphaTag>
+template <class Tag>
 class RGBAColorT;
+
+///
+/// @brief Generic RGBA color.
+///
+using RGBAColor = RGBAColorT<void>;
 }
 }

@@ -19,8 +19,8 @@ struct ButtonViewStyle : NonConstructible
     FW_STATIC_ATTRIBUTE(RGBAColor, BackgroundColor);
     FW_STATIC_ATTRIBUTE(RGBAColor, HighlightColor);
     FW_STATIC_ATTRIBUTE(RGBAColor, BorderColor);
-    FW_STATIC_ATTRIBUTE(AlphaChannel, HoverHighlightAlpha);
-    FW_STATIC_ATTRIBUTE(AlphaChannel, PressHighlightAlpha);
+    FW_STATIC_ATTRIBUTE(Channel, HoverHighlightAlpha);
+    FW_STATIC_ATTRIBUTE(Channel, PressHighlightAlpha);
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadius);
     FW_STATIC_ATTRIBUTE(Dp, BorderWidth);
 };

@@ -9,5 +9,10 @@ namespace FW_EXPORT
 {
 template <class Tag>
 class ChannelT;
+
+///
+/// @brief Generic channel type.
+///
+using Channel = ChannelT<void>;
 }
 }
