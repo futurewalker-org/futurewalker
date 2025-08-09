@@ -39,6 +39,18 @@ public:
         return range;
     }
 
+    ///
+    /// @brief Reverse range.
+    ///
+    /// @param[in] range Range to reverse
+    ///
+    /// @return Reversed range (end, begin).
+    ///
+    static constexpr auto Reverse(Range const& range) -> Range
+    {
+        return Range(range._e, range._b);
+    }
+
     inline constexpr Range() = default;
     inline constexpr Range(Range const&) = default;
     inline constexpr auto operator=(Range const&) -> Range& = default;
