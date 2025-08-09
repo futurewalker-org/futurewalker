@@ -9,11 +9,14 @@ namespace FW_EXPORT
 {
 class ApplicationTheme;
 
+///
+/// @brief Brightness type of application theme.
+///
 enum class ApplicationThemeBrightness
 {
-    System,
-    Light,
-    Dark,
+    System, ///< System theme brightness.
+    Light,  ///< Light theme.
+    Dark,   ///< Dark theme.
 };
 }
 }
