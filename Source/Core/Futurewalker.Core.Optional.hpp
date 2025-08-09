@@ -37,6 +37,18 @@ public:
         return Base::has_value();
     }
 
+    template <class Self, class U>
+    auto GetValueOr(this Self&& self, U&& v)
+    {
+        return std::forward<Self>(self).value_or(std::forward<U>(v));
+    }
+
+    template <class Self>
+    auto GetValueOrDefault(this Self&& self)
+    {
+        return std::forward<Self>(self).value_or(T());
+    }
+
     ///
     /// @brief Access value.
     ///
