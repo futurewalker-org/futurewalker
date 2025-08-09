@@ -2,7 +2,7 @@
 
 #include "Futurewalker.Graphics.SkiaScene.hpp"
 #include "Futurewalker.Graphics.SkiaDisplayList.hpp"
-#include "Futurewalker.Graphics.SkiaShapedText.hpp"
+#include "Futurewalker.Graphics.SkiaGlyphRun.hpp"
 
 #include <include/core/SkPaint.h>
 #include <include/core/SkRRect.h>
@@ -291,18 +291,11 @@ auto SkiaScene::AddRoundRect(RoundRectParam param) -> void
 ///
 /// @param param
 ///
-auto SkiaScene::AddText(TextParam param) -> void
+auto SkiaScene::AddGlyphRun(GlyphRunParam param) -> void
 {
-    if (auto const skiaShapedText = param.shaped.Maybe<SkiaShapedText>())
+    if (auto const skiaGlyphRun = param.run.Maybe<SkiaGlyphRun>())
     {
-        if (auto const textBlob = skiaShapedText->GetTextBlob())
-        {
-            if (_canvas)
-            {
-                auto const paint = SceneParamToSkPaint(param);
-                _canvas->drawTextBlob(textBlob, 0, 0, paint);
-            }
-        }
+        skiaGlyphRun->Draw(static_cast<SkCanvas*>(_canvas), SceneParamToSkPaint(param));
     }
 }
 

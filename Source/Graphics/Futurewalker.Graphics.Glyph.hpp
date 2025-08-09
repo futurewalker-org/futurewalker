@@ -16,7 +16,7 @@ namespace FW_EXPORT
 using GlyphIndex = Integer<int64_t, class UnitTagGlyphIndex>;
 
 ///
-/// @brief Glyph ID .
+/// @brief Identifier of glyphs.
 ///
 using GlyphId = Identifier<UInt32, class UnitTagGlyphId>;
 }

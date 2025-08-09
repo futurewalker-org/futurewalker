@@ -436,11 +436,13 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetTextExt(TsViewCo
     if (auto editable = _owner.GetEditable())
     {
         auto const& layoutInfo = editable->GetLayoutInfo();
-        auto const range = editable->GetRangeFromU16Range(Range<CodeUnit>(acpStart, acpEnd));
+
+        // TODO: Should use UTF-8 or CodePoint range instead.
+        auto const range = Range<CodeUnit>(acpStart, acpEnd);
         auto const glyphBegin = layoutInfo.GetGlyphIndex(range.GetBegin());
         auto const glyphEnd = layoutInfo.GetGlyphIndex(range.GetEnd());
-        auto const posBegin = layoutInfo.GetGlyphPosition(glyphBegin);
-        auto const posEnd = layoutInfo.GetGlyphPosition(glyphEnd);
+        auto const posBegin = layoutInfo.GetGlyphPosition(glyphBegin).GetValueOrDefault();
+        auto const posEnd = layoutInfo.GetGlyphPosition(glyphEnd).GetValueOrDefault();
 
         if (prc)
         {

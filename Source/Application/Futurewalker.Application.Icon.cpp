@@ -5,7 +5,7 @@
 #include "Futurewalker.Graphics.FontManager.hpp"
 #include "Futurewalker.Graphics.Typeface.hpp"
 #include "Futurewalker.Graphics.TextShaper.hpp"
-#include "Futurewalker.Graphics.TextLayoutInfo.hpp"
+#include "Futurewalker.Graphics.GlyphRun.hpp"
 #include "Futurewalker.Graphics.ShapedText.hpp"
 #include "Futurewalker.Graphics.Scene.hpp"
 
@@ -30,13 +30,47 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
         {
         }
 
+        auto GetGlyphSize(Graphics::ShapedText const& glyph) const -> Size<Dp>
+        {
+            if (glyph.GetLineCount() > 0)
+            {
+                auto const line = glyph.GetLines()[0];
+                if (line.GetRunCount() > 0)
+                {
+                    if (auto const run = line.GetRuns()[0])
+                    {
+                        auto const runMetrics = run->GetMetrics();
+                        auto const width = line.GetAdvance();
+                        auto const height = runMetrics.GetAscent() + runMetrics.GetDescent() + runMetrics.GetLeading();
+                        return {width, height};
+                    }
+                }
+            }
+            return {};
+        }
+
+        auto DrawGlyph(Graphics::Scene& scene, Graphics::ShapedText const& glyph, RGBAColor const& color) const -> void
+        {
+            if (glyph.GetLineCount() > 0)
+            {
+                auto const line = glyph.GetLines()[0];
+                if (line.GetRunCount() > 0)
+                {
+                    if (auto const run = line.GetRuns()[0])
+                    {
+                        scene.AddGlyphRun({.run = run, .color = color});
+                    }
+                }
+            }
+        }
+
         auto Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color) const -> void override
         {
             scene.PushTranslate({.x = rect.GetLeft(), .y = rect.GetTop()});
             {
                 auto const shaper = Graphics::TextShaper::Make();
                 auto const shapedGlyph = shaper->ShapeGlyph(_codePoint, _typeface, 16);
-                auto const size = shapedGlyph->GetLayoutInfo().GetSize();
+                auto const size = GetGlyphSize(shapedGlyph);
                 auto const glyphAspectRatio = Float64(size.GetWidth() / size.GetHeight());
                 auto const sizeAspectRatio = Float64(rect.GetWidth() / rect.GetHeight());
                 if (glyphAspectRatio > sizeAspectRatio)
@@ -45,7 +79,7 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
                     auto const offset = (rect.GetHeight() - size.GetHeight() * Dp(scale)) / 2.0;
                     scene.PushTranslate({.x = 0, .y = offset});
                     scene.PushScale({.x = scale, .y = scale});
-                    scene.AddText({.shaped = shapedGlyph, .color = color});
+                    DrawGlyph(scene, shapedGlyph, color);
                     scene.Pop({});
                     scene.Pop({});
                 }
@@ -55,7 +89,7 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
                     auto const offset = (rect.GetWidth() - size.GetWidth() * Dp(scale)) / 2.0;
                     scene.PushTranslate({.x = offset, .y = 0});
                     scene.PushScale({.x = scale, .y = scale});
-                    scene.AddText({.shaped = shapedGlyph, .color = color});
+                    DrawGlyph(scene, shapedGlyph, color);
                     scene.Pop({});
                     scene.Pop({});
                 }

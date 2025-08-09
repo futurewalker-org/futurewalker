@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Application.TextViewStyleType.hpp"
+#include "Futurewalker.Application.Prelude.hpp"
 
 #include "Futurewalker.Attribute.StaticAttribute.hpp"
 
@@ -13,24 +13,21 @@
 
 #include "Futurewalker.Color.hpp"
 
-#include "Futurewalker.Unit.hpp"
-
 #include "Futurewalker.Core.NonConstructible.hpp"
 
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-struct TextViewStyle : NonConstructible
+struct TextEditStyle : NonConstructible
 {
-    FW_STATIC_ATTRIBUTE(RGBAColor, Color);
+    FW_STATIC_ATTRIBUTE(RGBAColor, BackgroundColor);
+    FW_STATIC_ATTRIBUTE(RGBAColor, TextColor);
     FW_STATIC_ATTRIBUTE(Graphics::FontSize, FontSize);
     FW_STATIC_ATTRIBUTE(Graphics::FontWeight, FontWeight);
     FW_STATIC_ATTRIBUTE(Graphics::FontWidth, FontWidth);
     FW_STATIC_ATTRIBUTE(Graphics::FontSlant, FontSlant);
     FW_STATIC_ATTRIBUTE(Graphics::FontFamily, FontFamily);
-    FW_STATIC_ATTRIBUTE(TextViewHorizontalAlignment, HorizontalAlignment);
-    FW_STATIC_ATTRIBUTE(TextViewVerticalAlignment, VerticalAlignment);
 };
 }
 }

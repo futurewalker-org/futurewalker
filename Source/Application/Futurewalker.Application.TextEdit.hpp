@@ -2,9 +2,22 @@
 #pragma once
 
 #include "Futurewalker.Application.TextEditType.hpp"
+#include "Futurewalker.Application.TextEditStyle.hpp"
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.InputMethodType.hpp"
 #include "Futurewalker.Application.InputMethodEditableType.hpp"
+
+#include "Futurewalker.Graphics.TextShaperType.hpp"
+#include "Futurewalker.Graphics.ShapedTextType.hpp"
+#include "Futurewalker.Graphics.FontSize.hpp"
+#include "Futurewalker.Graphics.FontFamily.hpp"
+#include "Futurewalker.Graphics.FontWidth.hpp"
+#include "Futurewalker.Graphics.FontWeight.hpp"
+#include "Futurewalker.Graphics.FontStyleType.hpp"
+
+#include "Futurewalker.Attribute.AttributeAccessor.hpp"
+
+#include "Futurewalker.Color.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -23,12 +36,14 @@ public:
 
     TextEdit(PassKey<View>);
 
+    auto GetText() const -> String;
+
 protected:
     auto Initialize() -> void override;
     auto Draw(DrawScope& scope) -> void override;
     auto Measure(MeasureScope& scope) -> void override;
     auto Arrange(ArrangeScope& scope) -> void override;
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
     auto ReceiveInputEvent(Event<>& event) -> Async<Bool>;
     auto ReceiveKeyEvent(Event<>& event) -> Async<Bool>;
     auto ReceivePointerEvent(Event<>& event) -> Async<Bool>;
@@ -46,10 +61,22 @@ private:
     auto InternalDeleteBackward() -> void;
     auto InternalDeleteForward() -> void;
 
+    auto InternalInvalidateLayoutCache() -> void;
+    auto InternalUpdateLayoutCache() -> void;
+    auto InternalMeasureText() -> Size<Dp>;
+
 private:
-    class Impl;
     Shared<InputMethod> _inputMethod;
     Shared<InputMethodEditable> _inputMethodEditable;
+    AttributeAccessor<RGBAColor> _backgroundColor;
+    AttributeAccessor<RGBAColor> _textColor;
+    AttributeAccessor<Graphics::FontSize> _fontSize;
+    AttributeAccessor<Graphics::FontWeight> _fontWeight;
+    AttributeAccessor<Graphics::FontWidth> _fontWidth;
+    AttributeAccessor<Graphics::FontSlant> _fontSlant;
+    AttributeAccessor<Graphics::FontFamily> _fontFamily;
+    Shared<Graphics::TextShaper> _textShaper;
+    Shared<Graphics::ShapedText> _shapedText;
 };
 }
 }

@@ -5,6 +5,7 @@
 #include "Futurewalker.Graphics.ShapedTextType.hpp"
 #include "Futurewalker.Graphics.FontSize.hpp"
 #include "Futurewalker.Graphics.Typeface.hpp"
+#include "Futurewalker.Graphics.ShapedText.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -35,7 +36,7 @@ public:
     /// @param size Font size.
     /// @param maxWidth Maximum width for the text layout.
     ///
-    virtual auto ShapeText(String const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> Shared<ShapedText> = 0;
+    virtual auto ShapeText(String const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> ShapedText = 0;
 
     ///
     /// @brief Shape a glyph.
@@ -44,7 +45,7 @@ public:
     /// @param typeface Typeface to use for shaping.
     /// @param size Font size.
     ///
-    virtual auto ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size) -> Shared<ShapedText> = 0;
+    virtual auto ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size) -> ShapedText = 0;
 };
 }
 }

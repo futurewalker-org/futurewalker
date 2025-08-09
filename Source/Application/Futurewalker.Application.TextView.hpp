@@ -9,6 +9,7 @@
 
 #include "Futurewalker.Attribute.AttributeArg.hpp"
 
+#include "Futurewalker.Graphics.SceneType.hpp"
 #include "Futurewalker.Graphics.ShapedTextType.hpp"
 #include "Futurewalker.Graphics.TextShaperType.hpp"
 #include "Futurewalker.Graphics.TypefaceType.hpp"
@@ -41,6 +42,12 @@ private:
     auto GetTypeface() const -> Shared<Graphics::Typeface>;
     auto GetFontSize() const -> Graphics::FontSize;
     auto InvalidateLayoutCache() -> void;
+    auto UpdateLayoutCache(Dp const maxWidth) -> void;
+    auto MeasureText(Dp const maxWidth) -> Size<Dp>;
+    auto GetCachedTextSize() const -> Size<Dp>;
+    auto GetCachedTextLineCount() const -> SInt64;
+    auto GetCachedTextLineSize(SInt64 const index) const -> Size<Dp>;
+    auto DrawCachedTextLine(Graphics::Scene& scene, SInt64 const index, RGBAColor const& color) -> void;
 
 private:
     AttributeAccessor<String> _text;
@@ -53,7 +60,8 @@ private:
     AttributeAccessor<TextViewHorizontalAlignment> _horizontalAlignment;
     AttributeAccessor<TextViewVerticalAlignment> _verticalAlignment;
     Shared<Graphics::TextShaper> _shaper;
-    Shared<Graphics::ShapedText> _shapedText;
+    Unique<Graphics::ShapedText> _shapedText;
+    Dp _shapedTextMaxWidth = Dp::Infinity();
 };
 }
 }

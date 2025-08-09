@@ -8,6 +8,8 @@
 
 #include "Futurewalker.Geometry.hpp"
 
+#include "Futurewalker.Core.Optional.hpp"
+
 namespace FW_GRAPHICS_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -21,21 +23,13 @@ public:
     auto GetSize() const -> Size<Dp>;
     auto SetSize(Size<Dp> const& size) -> void;
 
-    struct GlyphInfo
-    {
-        CodePoint codePoint;
-        Point<Dp> position;
-    };
-    auto SetGlyphInfo(std::vector<GlyphInfo> glyphInfo) -> void;
-
     auto GetGlyphCount() const -> GlyphIndex;
-    auto GetGlyphPosition(GlyphIndex index) const -> Point<Dp>;
-    auto GetGlyphIndex(CodePoint codePoint) const -> GlyphIndex;
-    auto GetCodePoint(GlyphIndex glyphIndex) const -> CodePoint;
+    auto GetGlyphPosition(GlyphIndex const glyphIndex) const -> Optional<Point<Dp>>;
+    auto GetCodePoint(GlyphIndex const glyphIndex) const -> Optional<CodeUnit>;
+    auto GetGlyphIndex(CodeUnit const textPosition) const -> GlyphIndex;
 
 private:
     Size<Dp> _size;
-    std::vector<GlyphInfo> _glyphInfo;
 };
 }
 }

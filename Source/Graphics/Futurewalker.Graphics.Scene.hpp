@@ -4,7 +4,7 @@
 #include "Futurewalker.Graphics.SceneType.hpp"
 
 #include "Futurewalker.Graphics.DisplayListType.hpp"
-#include "Futurewalker.Graphics.ShapedTextType.hpp"
+#include "Futurewalker.Graphics.GlyphRunType.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -96,9 +96,9 @@ public:
         Dp strokeWidth = 1.0;
     };
 
-    struct TextParam
+    struct GlyphRunParam
     {
-        Shared<ShapedText> shaped;
+        Shared<GlyphRun> run;
         RGBAColor color;
     };
 
@@ -118,7 +118,7 @@ public:
     virtual auto AddLine(LineParam param) -> void = 0;
     virtual auto AddRect(RectParam param) -> void = 0;
     virtual auto AddRoundRect(RoundRectParam param) -> void = 0;
-    virtual auto AddText(TextParam param) -> void = 0;
+    virtual auto AddGlyphRun(GlyphRunParam param) -> void = 0;
     virtual auto AddDisplayList(DisplayListParam param) -> void = 0;
 };
 }

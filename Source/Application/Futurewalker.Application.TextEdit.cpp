@@ -13,6 +13,8 @@
 
 #include "Futurewalker.Graphics.Scene.hpp"
 #include "Futurewalker.Graphics.TextShaper.hpp"
+#include "Futurewalker.Graphics.GlyphRun.hpp"
+#include "Futurewalker.Graphics.FontManager.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 #include "Futurewalker.Base.Debug.hpp"
@@ -31,14 +33,39 @@ TextEdit::TextEdit(PassKey<View> key)
 {
 }
 
+auto TextEdit::GetText() const -> String
+{
+    if (_inputMethodEditable)
+    {
+        return _inputMethodEditable->GetText();
+    }
+    return {};
+}
+
 auto TextEdit::Initialize() -> void
 {
     SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
     SetFocusTrackingFlags(ViewFocusTrackingFlags::All);
 
+    _textShaper = Graphics::TextShaper::Make();
     _inputMethodEditable = InputMethodEditable::Make();
 
+    _backgroundColor.BindAttribute(*this, TextEditStyle::BackgroundColor);
+    _textColor.BindAttribute(*this, TextEditStyle::TextColor);
+    _fontSize.BindAttribute(*this, TextEditStyle::FontSize);
+    _fontWeight.BindAttribute(*this, TextEditStyle::FontWeight);
+    _fontWidth.BindAttribute(*this, TextEditStyle::FontWidth);
+    _fontSlant.BindAttribute(*this, TextEditStyle::FontSlant);
+    _fontFamily.BindAttribute(*this, TextEditStyle::FontFamily);
+
     EventReceiver::Connect(*_inputMethodEditable, *this, &TextEdit::ReceiveInputEvent);
+    EventReceiver::Connect(_backgroundColor, *this, &TextEdit::ReceiveAttributeEvent);
+    EventReceiver::Connect(_textColor, *this, &TextEdit::ReceiveAttributeEvent);
+    EventReceiver::Connect(_fontSize, *this, &TextEdit::ReceiveAttributeEvent);
+    EventReceiver::Connect(_fontWeight, *this, &TextEdit::ReceiveAttributeEvent);
+    EventReceiver::Connect(_fontWidth, *this, &TextEdit::ReceiveAttributeEvent);
+    EventReceiver::Connect(_fontSlant, *this, &TextEdit::ReceiveAttributeEvent);
+    EventReceiver::Connect(_fontFamily, *this, &TextEdit::ReceiveAttributeEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveInputEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveKeyEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveFocusEvent);
@@ -49,9 +76,12 @@ auto TextEdit::Draw(DrawScope& scope) -> void
 {
     auto& scene = scope.GetScene();
 
+    auto const backgroundColor = _backgroundColor.GetValueOrDefault();
+    auto const textColor = _textColor.GetValueOrDefault();
+
     scene.AddRect({
         .rect = GetContentRect(),
-        .color = RGBAColor(1, 1, 1, 1),
+        .color = backgroundColor,
         .drawStyle = Graphics::DrawStyle::Fill,
     });
 
@@ -62,21 +92,33 @@ auto TextEdit::Draw(DrawScope& scope) -> void
         .strokeWidth = IsFocused() ? 2.0 : 1.0,
     });
 
-    if (_inputMethodEditable)
+    if (_shapedText)
     {
-        auto const text = _inputMethodEditable->GetText();
-        auto shaper = Graphics::TextShaper::Make();
-        auto shaped = shaper->ShapeText(text, nullptr, 96, Dp::Infinity());
-
-        scene.AddText({
-            .shaped = shaped,
-            .color = RGBAColor(0, 0, 0, 1),
-        });
+        auto offset = Dp(0);
+        for (auto const& line : _shapedText->GetLines())
+        {
+            auto const lineMetrics = line.GetMetrics();
+            for (auto const& run : line.GetRuns())
+            {
+                auto const runMetrics = run->GetMetrics();
+                scene.PushTranslate({
+                    .x = offset,
+                    .y = lineMetrics.GetAscent() - runMetrics.GetAscent(),
+                });
+                scene.AddGlyphRun({
+                    .run = run,
+                    .color = textColor,
+                });
+                scene.Pop({});
+                offset += run->GetAdvance();
+            }
+        }
     }
 }
 
 auto TextEdit::Measure(MeasureScope& scope) -> void
 {
+    InternalUpdateLayoutCache();
     View::Measure(scope);
 }
 
@@ -89,9 +131,14 @@ auto TextEdit::Arrange(ArrangeScope& scope) -> void
     View::Arrange(scope);
 }
 
-auto TextEdit::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto TextEdit::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
 {
-    (void)event;
+    if (event.Is<AttributeEvent::ValueChanged>())
+    {
+        InternalInvalidateLayoutCache();
+        InvalidateLayout();
+        InvalidateVisual();
+    }
     co_return false;
 }
 
@@ -128,12 +175,16 @@ auto TextEdit::ReceiveInputEvent(Event<>& event) -> Async<Bool>
     else if (event.Is<InputEvent::InsertText>())
     {
         FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent InsertText");
+        InternalInvalidateLayoutCache();
+        InvalidateLayout();
         InvalidateVisual();
         co_return false;
     }
     else if (event.Is<InputEvent::DeleteSurroundingText>())
     {
         FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent DeleteSurroundgText");
+        InternalInvalidateLayoutCache();
+        InvalidateLayout();
         InvalidateVisual();
         co_return false;
     }
@@ -274,6 +325,38 @@ auto TextEdit::InternalDeleteForward() -> void
     {
         _inputMethodEditable->DeleteSurroundingText(0, 1);
         InvalidateVisual();
+    }
+}
+
+auto TextEdit::InternalInvalidateLayoutCache() -> void
+{
+    _shapedText = nullptr;
+}
+
+auto TextEdit::InternalUpdateLayoutCache() -> void
+{
+    if (!_inputMethodEditable || !_textShaper)
+    {
+        FW_DEBUG_ASSERT(false);
+        return;
+    }
+
+    if (_shapedText)
+    {
+        return;
+    }
+
+    auto const fontSize = _fontSize.GetValueOr(16);
+    auto const fontWidth = _fontWidth.GetValueOr(Graphics::FontWidth::Normal());
+    auto const fontWeight = _fontWeight.GetValueOr(Graphics::FontWeight::Normal());
+    auto const fontSlant = _fontSlant.GetValueOrDefault();
+    auto fontStyle = Graphics::FontStyle(fontWeight, fontWidth, fontSlant);
+
+    if (auto const fontManager = Locator::GetInstance<Graphics::FontManager>())
+    {
+        auto const typeface = fontManager->FindTypefaceByFamilyAndStyle(_fontFamily.GetValueOrDefault(), fontStyle);
+        auto const text = _inputMethodEditable->GetText();
+        _shapedText = Shared<Graphics::ShapedText>::Make(_textShaper->ShapeText(text, typeface, fontSize, Dp::Infinity()));
     }
 }
 }

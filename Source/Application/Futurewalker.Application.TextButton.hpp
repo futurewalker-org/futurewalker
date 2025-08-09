@@ -5,6 +5,7 @@
 #include "Futurewalker.Application.TextButtonStyle.hpp"
 #include "Futurewalker.Application.ButtonViewType.hpp"
 #include "Futurewalker.Application.View.hpp"
+#include "Futurewalker.Application.IconType.hpp"
 
 #include "Futurewalker.Attribute.AttributeArg.hpp"
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
@@ -20,7 +21,9 @@ class TextButton : public View
 {
 public:
     static auto Make() -> Shared<TextButton>;
-    static auto MakeWithText(AttributeArg<String> const& arg) -> Shared<TextButton>;
+    static auto MakeWithContent(Shared<View> content) -> Shared<TextButton>;
+    static auto MakeWithText(AttributeArg<String> const& text) -> Shared<TextButton>;
+    static auto MakeWithTextAndIcon(AttributeArg<String> const& text, AttributeArg<Icon> const& icon) -> Shared<TextButton>;
 
     auto SetContent(Shared<View> content) -> void;
     auto GetContent() -> Shared<View>;

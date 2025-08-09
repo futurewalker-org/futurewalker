@@ -2,7 +2,10 @@
 
 #include "Futurewalker.Application.TextButton.hpp"
 #include "Futurewalker.Application.TextView.hpp"
+#include "Futurewalker.Application.IconView.hpp"
 #include "Futurewalker.Application.ButtonView.hpp"
+#include "Futurewalker.Application.FlexLayout.hpp"
+#include "Futurewalker.Application.PaddingView.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -11,13 +14,36 @@ auto TextButton::Make() -> Shared<TextButton>
     return View::MakeDerived<TextButton>();
 }
 
-auto TextButton::MakeWithText(AttributeArg<String> const& arg) -> Shared<TextButton>
+auto TextButton::MakeWithContent(Shared<View> content) -> Shared<TextButton>
 {
     auto button = Make();
-    auto text = TextView::Make();
-    text->SetText(arg);
-    button->SetContent(text);
+    button->SetContent(content);
     return button;
+}
+
+auto TextButton::MakeWithText(AttributeArg<String> const& text) -> Shared<TextButton>
+{
+    auto textView = TextView::MakeWithText(text);
+    auto padding = PaddingView::MakeWithPaddingAndContent(TextButtonStyle::Padding, textView);
+    return MakeWithContent(padding);
+}
+
+auto TextButton::MakeWithTextAndIcon(AttributeArg<String> const& text, AttributeArg<Icon> const& icon) -> Shared<TextButton>
+{
+    auto textView = TextView::MakeWithText(text);
+    auto iconView = IconView::MakeWithIcon(icon);
+    auto flex = FlexLayout::Make();
+    flex->SetDirection(FlexLayoutDirection::Row);
+    flex->SetMainAxisAlignment(FlexLayoutMainAxisAlignment::Start);
+    flex->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Stretch);
+    flex->SetMainAxisSize(FlexLayoutMainAxisSize::Min);
+    flex->SetCrossAxisSize(FlexLayoutCrossAxisSize::Min);
+    flex->AddChild(iconView);
+    flex->AddChild(textView);
+    FlexLayout::SetChildGrowFactor(textView, 1.0);
+    FlexLayout::SetChildShrinkFactor(textView, 1.0);
+    auto padding = PaddingView::MakeWithPaddingAndContent(TextButtonStyle::Padding, flex);
+    return MakeWithContent(padding);
 }
 
 auto TextButton::SetContent(Shared<View> content) -> void

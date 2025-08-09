@@ -1,12 +1,12 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Graphics.SkiaTextShaper.hpp"
-#include "Futurewalker.Graphics.SkiaShapedText.hpp"
+#include "Futurewalker.Graphics.SkiaGlyphRun.hpp"
+#include "Futurewalker.Graphics.ShapedText.hpp"
 
 #include "Futurewalker.Core.StringFunction.hpp"
 
 #include "Futurewalker.Graphics.SkiaTypeface.hpp"
-#include "Futurewalker.Graphics.TextLayoutInfo.hpp"
 #include "Futurewalker.Graphics.PlatformSkiaFontManager.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
@@ -47,16 +47,10 @@ class SkiaRunHandler final : public SkShaper::RunHandler
     SkScalar _maxRunAscent = 0;
     SkScalar _maxRunDescent = 0;
     SkScalar _maxRunLeading = 0;
-    SkScalar _minAdvance = 0;
-    SkScalar _maxAdvance = 0;
-    SkPoint _currentPosition = {};
-    SkPoint _offset = {};
-    SkTextBlobBuilder _builder;
-    uint32_t* _clusters = nullptr;
-    SkPoint* _points = nullptr;
-    int _clusterOffset = 0;
-    int _glyphCount = 0;
-    std::vector<Graphics::TextLayoutInfo::GlyphInfo> _glyphInfo;
+    SkScalar _advance = 0;
+    SkiaGlyphRun::Buffer _buffer;
+    std::vector<Shared<GlyphRun>> _runs;
+    std::vector<ShapedText::Line> _lines;
 
 public:
     explicit SkiaRunHandler(String const& text)
@@ -64,79 +58,76 @@ public:
     {
     }
 
-    /** Called when beginning a line. */
+    // Called when beginning a line.
     auto beginLine() -> void override
     {
-        _currentPosition = _offset;
         _maxRunAscent = 0;
         _maxRunDescent = 0;
         _maxRunLeading = 0;
+        _advance = 0;
     }
 
-    /** Called once for each run in a line. Can compute baselines and offsets. */
+    // Called once for each run in a line. Can compute baselines and offsets.
     auto runInfo(const RunInfo& info) -> void override
     {
         auto metrics = SkFontMetrics();
         info.fFont.getMetrics(&metrics);
-        _maxRunAscent = std::min(_maxRunAscent, metrics.fAscent);
+        _maxRunAscent = std::max(_maxRunAscent, -metrics.fAscent);
         _maxRunDescent = std::max(_maxRunDescent, metrics.fDescent);
         _maxRunLeading = std::max(_maxRunLeading, metrics.fLeading);
+        _advance += info.fAdvance.fX;
     }
 
-    /** Called after all runInfo calls for a line. */
+    // Called after all runInfo calls for a line.
     auto commitRunInfo() -> void override
     {
-        _currentPosition.fY -= _maxRunAscent;
     }
 
-    /** Called for each run in a line after commitRunInfo. The buffer will be filled out. */
+    // Called for each run in a line after commitRunInfo. The buffer will be filled out.
     auto runBuffer(const RunInfo& info) -> Buffer override
     {
-        auto const glyphCount = SkTFitsIn<int>(info.glyphCount) ? static_cast<int>(info.glyphCount) : INT_MAX;
-        auto const utf8RangeSize = SkTFitsIn<int>(info.utf8Range.size()) ? static_cast<int>(info.utf8Range.size()) : INT_MAX;
+        auto const run = Shared<SkiaGlyphRun>::Make();
+        _buffer = run->AllocBuffer(SInt64(info.glyphCount));
+        _runs.push_back(run);
 
-        auto const utf8Data = _text.GetView().GetData();
-
-        auto const& runBuffer = _builder.allocRunTextPos(info.fFont, glyphCount, utf8RangeSize);
-        if (runBuffer.utf8text && utf8Data)
-        {
-            std::memcpy(runBuffer.utf8text, static_cast<char8_t const*>(utf8Data) + info.utf8Range.begin(), utf8RangeSize);
-        }
-        _clusters = runBuffer.clusters;
-        _points = runBuffer.points();
-        _glyphCount = glyphCount;
-        _clusterOffset = static_cast<int>(info.utf8Range.begin());
-
-        return {runBuffer.glyphs, runBuffer.points(), nullptr, runBuffer.clusters, _currentPosition};
+        return {_buffer.glyphs, _buffer.positions, nullptr, _buffer.clusters, SkPoint()};
     }
 
-    /** Called after each runBuffer is filled out. */
+    // Called after each runBuffer is filled out.
     auto commitRunBuffer(const RunInfo& info) -> void override
     {
-        SkASSERT(0 <= _clusterOffset);
-        for (int i = 0; i < _glyphCount; ++i)
+        auto run = _runs.back().Assume<SkiaGlyphRun>();
+        run->SetFont(info.fFont);
+        run->SetAdvance(info.fAdvance.fX);
+        run->SetText(_text.GetSubstring(SInt64(info.utf8Range.begin()), SInt64(info.utf8Range.end())));
+
+        auto const clusterOffset = static_cast<uint32_t>(info.utf8Range.fBegin);
+        SkASSERT(0 <= clusterOffset);
+        for (auto i = 0uz; i < info.glyphCount; ++i)
         {
-            SkASSERT(_clusters[i] >= (unsigned)_clusterOffset);
-            _clusters[i] -= _clusterOffset;
-            _glyphInfo.push_back({.codePoint = _clusters[i], .position = Point<Dp>(_points[i].fX, _points[i].fY)});
+            SkASSERT(_buffer.clusters[i] >= static_cast<uint32_t>(clusterOffset));
+            _buffer.clusters[i] -= clusterOffset;
         }
-        _currentPosition += info.fAdvance;
     }
 
-    /** Called when ending a line. */
+    // Called when ending a line.
     auto commitLine() -> void override
     {
-        _offset += {0, _maxRunDescent + _maxRunLeading - _maxRunAscent};
-        _minAdvance = std::min(_minAdvance, _currentPosition.fX);
-        _maxAdvance = std::max(_maxAdvance, _currentPosition.fX);
+        auto lineMetrics = FontMetrics();
+        lineMetrics.SetAscent(_maxRunAscent);
+        lineMetrics.SetDescent(_maxRunDescent);
+        lineMetrics.SetLeading(_maxRunLeading);
+
+        auto& line = _lines.emplace_back();
+        line.SetRuns(std::exchange(_runs, {}));
+        line.SetMetrics(lineMetrics);
+        line.SetAdvance(_advance);
     }
 
     auto Finalize() &&
     {
-        auto layoutInfo = Shared<Graphics::TextLayoutInfo>::Make();
-        layoutInfo->SetSize(Size<Dp>(_maxAdvance - _minAdvance, _offset.fY));
-        layoutInfo->SetGlyphInfo(std::move(_glyphInfo));
-        return std::make_tuple(_builder.make(), layoutInfo);
+        // TODO: CoW + eliminate copy.
+        return ShapedText(_lines);
     }
 };
 }
@@ -144,7 +135,7 @@ public:
 ///
 /// @brief Shape text.
 ///
-auto SkiaTextShaper::ShapeText(String const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> Shared<ShapedText>
+auto SkiaTextShaper::ShapeText(String const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> ShapedText
 {
     auto const width = static_cast<SkScalar>(maxWidth);
     auto const font = SkFont(GetSkTypeface(typeface), static_cast<SkScalar>(size));
@@ -170,11 +161,10 @@ auto SkiaTextShaper::ShapeText(String const& text, Shared<Typeface> const& typef
     auto runHandler = SkiaRunHandler(text);
     shaper->shape(utf8Chars, utf8Bytes, *fontRunIterator, *bidiRunIterator, *scriptRunIterator, *languageRunIterator, nullptr, 0, width, &runHandler);
 
-    auto const [textBlob, layoutInfo] = std::move(runHandler).Finalize();
-    return Shared<SkiaShapedText>::Make(textBlob, layoutInfo);
+    return std::move(runHandler).Finalize();
 }
 
-auto SkiaTextShaper::ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size) -> Shared<ShapedText>
+auto SkiaTextShaper::ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size) -> ShapedText
 {
     auto buffer = std::array<char8_t, U8_MAX_LENGTH>();
     auto offset = 0;

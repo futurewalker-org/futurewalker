@@ -5,5 +5,5 @@
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
-class SkiaShapedText;
+class SkiaGlyphRun;
 }

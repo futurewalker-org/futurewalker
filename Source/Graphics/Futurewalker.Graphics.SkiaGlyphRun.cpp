@@ -1,0 +1,142 @@
+﻿// SPDX-License-Identifier: MPL-2.0
+
+#include "Futurewalker.Graphics.SkiaGlyphRun.hpp"
+
+#include <include/core/SkFontMetrics.h>
+
+namespace FW_GRAPHICS_DETAIL_NS
+{
+SkiaGlyphRun::~SkiaGlyphRun()
+{
+    ReleaseBuffer();
+}
+
+auto SkiaGlyphRun::GetText() const -> String
+{
+    return _text;
+}
+
+auto SkiaGlyphRun::GetGlyphCount() const -> GlyphIndex
+{
+    return _glyphCount;
+}
+
+auto SkiaGlyphRun::GetGlyph(GlyphIndex const glyphIndex) const -> Optional<GlyphId>
+{
+    if (0 <= glyphIndex && glyphIndex < _glyphCount)
+    {
+        return GlyphId(_buffer.glyphs[static_cast<size_t>(glyphIndex)]);
+    }
+    return {};
+}
+
+auto SkiaGlyphRun::GetGlyphPosition(GlyphIndex const glyphIndex) const -> Optional<Point<Dp>>
+{
+    if (0 <= glyphIndex && glyphIndex < _glyphCount)
+    {
+        auto const position = _buffer.positions[static_cast<size_t>(glyphIndex)];
+        return Point<Dp>(position.fX, position.fY);
+    }
+    return {};
+}
+
+auto SkiaGlyphRun::GetClusterIndex(GlyphIndex const glyphIndex) const -> Optional<CodeUnit>
+{
+    if (0 <= glyphIndex && glyphIndex < _glyphCount)
+    {
+        auto const cluster = _buffer.clusters[static_cast<size_t>(glyphIndex)];
+        return CodeUnit(cluster);
+    }
+    return {};
+}
+
+auto SkiaGlyphRun::GetGlyphIndex(CodeUnit const textPosition) const -> GlyphIndex
+{
+    for (auto i = GlyphIndex(0); i < _glyphCount; ++i)
+    {
+        if (textPosition < _buffer.clusters[static_cast<size_t>(i)])
+        {
+            return GlyphIndex::Max(0, GlyphIndex(i - 1));
+        }
+    }
+    return GlyphIndex(_glyphCount - 1);
+}
+
+auto SkiaGlyphRun::GetMetrics() const -> FontMetrics
+{
+    auto skFontMetrics = SkFontMetrics();
+    _font.getMetrics(&skFontMetrics);
+
+    auto metrics = FontMetrics();
+    metrics.SetAscent(-skFontMetrics.fAscent);
+    metrics.SetDescent(skFontMetrics.fDescent);
+    metrics.SetLeading(skFontMetrics.fLeading);
+    return metrics;
+}
+
+auto SkiaGlyphRun::GetAdvance() const -> Dp
+{
+    return Dp(_advance);
+}
+
+auto SkiaGlyphRun::AllocBuffer(SInt64 glyphCount) -> Buffer
+{
+    ReleaseBuffer();
+    _glyphCount = GlyphIndex(glyphCount);
+    _buffer.glyphs = new SkGlyphID[static_cast<size_t>(glyphCount)];
+    _buffer.positions = new SkPoint[static_cast<size_t>(glyphCount)];
+    _buffer.clusters = new uint32_t[static_cast<size_t>(glyphCount)];
+    return _buffer;
+}
+
+auto SkiaGlyphRun::SetFont(SkFont const& font) -> void
+{
+    _font = font;
+}
+
+auto SkiaGlyphRun::SetAdvance(SkScalar const& advance) -> void
+{
+    _advance = advance;
+}
+
+auto SkiaGlyphRun::SetText(String const& text) -> void
+{
+    _text = text;
+}
+
+auto SkiaGlyphRun::Draw(SkCanvas* canvas, SkPaint const& paint) const -> void
+{
+    if (canvas)
+    {
+        canvas->drawGlyphs(
+          static_cast<int>(_glyphCount),
+          _buffer.glyphs,
+          _buffer.positions,
+          _buffer.clusters,
+          static_cast<int>(_text.GetView().GetSize()),
+          reinterpret_cast<char const*>(static_cast<char8_t const*>(_text.GetView().GetData())),
+          SkPoint(),
+          _font,
+          paint);
+    }
+}
+auto SkiaGlyphRun::ReleaseBuffer() -> void
+{
+    if (_buffer.glyphs)
+    {
+        delete[] _buffer.glyphs;
+        _buffer.glyphs = nullptr;
+    }
+    if (_buffer.positions)
+    {
+        delete[] _buffer.positions;
+        _buffer.positions = nullptr;
+    }
+    if (_buffer.clusters)
+    {
+        delete[] _buffer.clusters;
+        _buffer.clusters = nullptr;
+    }
+    _glyphCount = 0;
+}
+}

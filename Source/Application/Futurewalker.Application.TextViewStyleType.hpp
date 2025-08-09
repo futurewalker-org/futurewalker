@@ -7,8 +7,6 @@ namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-class TextViewStyle;
-
 ///
 /// @brief Horizontal alignment of text.
 ///

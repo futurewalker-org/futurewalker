@@ -24,7 +24,7 @@ public:
     auto AddLine(LineParam param) -> void override;
     auto AddRect(RectParam param) -> void override;
     auto AddRoundRect(RoundRectParam param) -> void override;
-    auto AddText(TextParam param) -> void override;
+    auto AddGlyphRun(GlyphRunParam param) -> void override;
     auto AddDisplayList(DisplayListParam param) -> void override;
 };
 }
