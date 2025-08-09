@@ -10,71 +10,27 @@
 
 namespace FW_DETAIL_NS
 {
-struct EventParameterHolder
-{
-    virtual ~EventParameterHolder() noexcept = 0;
-    virtual auto GetEvent() -> EventParameter& = 0;
-    virtual auto Clone() -> std::unique_ptr<EventParameterHolder> = 0;
-};
-
 namespace FW_EXPORT
 {
-///
-/// @brief Polymorphic value holder for events.
-///
-template <Concepts::DerivedFrom<EventParameter> Parameter>
-class Event
+template <>
+class Event<EventParameter>
 {
-    template <Concepts::DerivedFrom<EventParameter> U>
-    friend class Event;
-
 public:
-    ///
-    /// @brief Construct event.
-    ///
-    /// @param[in] args Parameters for constructor of Parameter.
-    ///
-    template <class... Args>
-    static auto Make(Args&&... args) -> Event<Parameter>
-    {
-        return Event(std::make_unique<EventTypeHolder<Parameter>>(std::in_place, std::forward<Args>(args)...));
-    }
+    using ParameterType = EventParameter;
 
     ///
     /// @brief Default constructor.
     ///
     Event()
-      : _holder(std::make_unique<EventTypeHolder<Parameter>>())
+      : Event(std::make_unique<HolderT<EventParameter>>())
     {
-    }
-
-    ///
-    /// @brief Construct event from another event type.
-    ///
-    template <Concepts::DerivedFrom<Parameter> T>
-    Event(Event<T> const& other)
-      : _holder(other._holder->Clone())
-      , _propertyStore(other._propertyStore)
-    {
-    }
-
-    ///
-    /// @brief Assign from another event type.
-    ///
-    template <Concepts::DerivedFrom<Parameter> T>
-    Event& operator=(Event<T> const& other)
-    {
-        _holder = other._holder->Clone();
-        _propertyStore = other._propertyStore;
-        return *this;
     }
 
     ///
     /// @brief Copy constructor.
     ///
     Event(Event const& other)
-      : _holder(other._holder->Clone())
-      , _propertyStore(other._propertyStore)
+      : Event(other._holder->Clone())
     {
     }
 
@@ -87,7 +43,6 @@ public:
         {
             _holder.reset();
             _holder = other._holder->Clone();
-            _propertyStore = other._propertyStore;
         }
         return *this;
     }
@@ -98,7 +53,7 @@ public:
     template <Concepts::DerivedFrom<EventParameter> T>
     auto Is() const noexcept -> Bool
     {
-        return DynamicCastFunction::Is<T>(_holder->GetEvent());
+        return DynamicCastFunction::Is<T>(_holder->Get());
     }
 
     ///
@@ -115,94 +70,171 @@ public:
     }
 
     ///
-    /// @brief Get property store.
+    /// @brief Access contained event value.
     ///
-    auto GetPropertySore() -> PropertyStore&
+    template <class Parameter>
+    auto operator->(this const Event<Parameter>& self) noexcept -> Parameter const*
     {
-        return _propertyStore;
-    }
-
-    ///
-    /// @brief Get property store.
-    ///
-    auto GetPropertySore() const -> PropertyStore const&
-    {
-        return _propertyStore;
+        return static_cast<Parameter const*>(&self._holder->Get());
     }
 
     ///
     /// @brief Access contained event value.
     ///
-    auto operator->() const noexcept -> Parameter const*
+    template <class Parameter>
+    auto operator->(this const Event<Parameter>&& self) noexcept -> Parameter const*
     {
-        return static_cast<Parameter const*>(&_holder->GetEvent());
+        return static_cast<Parameter const*>(&self._holder->Get());
     }
 
     ///
     /// @brief Access contained event value.
     ///
-    auto operator->() noexcept -> Parameter*
+    template <class Parameter>
+    auto operator->(this Event<Parameter>& self) noexcept -> Parameter*
     {
-        return static_cast<Parameter*>(&_holder->GetEvent());
+        return static_cast<Parameter*>(&self._holder->Get());
     }
 
     ///
     /// @brief Access contained event value.
     ///
-    auto operator*() const noexcept -> Parameter const&
+    template <class Parameter>
+    auto operator->(this Event<Parameter>&& self) noexcept -> Parameter*
     {
-        return static_cast<Parameter const&>(_holder->GetEvent());
+        return static_cast<Parameter*>(&self._holder->Get());
     }
 
     ///
     /// @brief Access contained event value.
     ///
-    auto operator*() noexcept -> Parameter&
+    template <class Parameter>
+    auto operator*(this const Event<Parameter>& self) noexcept -> Parameter const&
     {
-        return static_cast<Parameter&>(_holder->GetEvent());
+        return static_cast<Parameter const&>(self._holder->Get());
     }
 
-private:
+    ///
+    /// @brief Access contained event value.
+    ///
+    template <class Parameter>
+    auto operator*(this const Event<Parameter>&& self) noexcept -> Parameter const&
+    {
+        return static_cast<Parameter const&>(self._holder->Get());
+    }
+
+    ///
+    /// @brief Access contained event value.
+    ///
+    template <class Parameter>
+    auto operator*(this Event<Parameter>& self) noexcept -> Parameter&
+    {
+        return static_cast<Parameter&>(self._holder->Get());
+    }
+
+    ///
+    /// @brief Access contained event value.
+    ///
+    template <class Parameter>
+    auto operator*(this Event<Parameter>&& self) noexcept -> Parameter&
+    {
+        return static_cast<Parameter&>(self._holder->Get());
+    }
+
+protected:
+    struct Holder
+    {
+        virtual ~Holder() noexcept = 0;
+        virtual auto Get() -> EventParameter& = 0;
+        virtual auto Clone() -> std::unique_ptr<Holder> = 0;
+    };
+
     template <class EventType>
-    struct EventTypeHolder final : EventParameterHolder
+    struct HolderT final : Holder
     {
         EventType event;
 
         template <class... Args>
-        EventTypeHolder(std::in_place_t, Args&&... args)
+        HolderT(std::in_place_t, Args&&... args)
           : event {std::forward<Args>(args)...}
         {
         }
 
-        EventTypeHolder()
+        HolderT()
           : event {}
         {
         }
 
-        EventTypeHolder(EventType const& event)
+        HolderT(EventType const& event)
           : event {event}
         {
         }
 
-        auto GetEvent() -> EventParameter& override
+        auto Get() -> EventParameter& override
         {
             return event;
         }
 
-        auto Clone() -> std::unique_ptr<EventParameterHolder> override
+        auto Clone() -> std::unique_ptr<Holder> override
         {
-            return std::make_unique<EventTypeHolder>(*this);
+            return std::make_unique<HolderT>(*this);
         }
     };
 
-    explicit Event(std::unique_ptr<EventParameterHolder> holder)
+    explicit Event(std::unique_ptr<Holder> holder)
       : _holder(std::move(holder))
     {
     }
 
 private:
-    std::unique_ptr<EventParameterHolder> _holder;
-    PropertyStore _propertyStore;
+    std::unique_ptr<Holder> _holder;
+};
+
+///
+/// @brief Polymorphic value holder for events.
+///
+template <Concepts::DerivedFrom<EventParameter> Parameter>
+class Event final : public Event<EventParameter>
+{
+    friend class Event<EventParameter>;
+
+public:
+    using ParameterType = Parameter;
+
+    ///
+    /// @brief Construct event.
+    ///
+    /// @param[in] args Parameters for constructor of Parameter.
+    ///
+    template <class... Args>
+    static auto Make(Args&&... args) -> Event<Parameter>
+    {
+        return Event(std::make_unique<HolderT<Parameter>>(std::in_place, std::forward<Args>(args)...));
+    }
+
+    ///
+    /// @brief Default constructor.
+    ///
+    Event()
+      : Event<>(std::make_unique<HolderT<Parameter>>())
+    {
+    }
+
+    Event(Event<> const& other)
+      : Event<>(other)
+    {
+    }
+
+    Event& operator=(Event<> const& other)
+    {
+        return static_cast<Event&>(Event<>::operator=(other));
+    }
+
+protected:
+    explicit Event(std::unique_ptr<Holder> holder)
+      : Event<>(std::move(holder))
+    {
+    }
 };
 }
 }
