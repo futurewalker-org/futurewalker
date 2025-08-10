@@ -90,7 +90,10 @@ public:
         _buffer = run->AllocBuffer(SInt64(info.glyphCount));
         _runs.push_back(run);
 
-        return {_buffer.glyphs, _buffer.positions, nullptr, _buffer.clusters, SkPoint()};
+        auto runMetrics = SkFontMetrics();
+        info.fFont.getMetrics(&runMetrics);
+
+        return {_buffer.glyphs, _buffer.positions, nullptr, _buffer.clusters, SkPoint(0, -runMetrics.fAscent)};
     }
 
     // Called after each runBuffer is filled out.
