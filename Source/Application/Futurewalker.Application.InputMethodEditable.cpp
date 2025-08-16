@@ -45,11 +45,36 @@ InputMethodEditable::InputMethodEditable(PassKey<InputMethodEditable>)
 ///
 /// @return Copy of UTF-8 text.
 ///
-auto InputMethodEditable::GetText() const -> String
+auto InputMethodEditable::GetText() const -> Text
 {
     if (_platform)
     {
         return _platform->GetText();
+    }
+    return {};
+}
+
+///
+/// @brief Set new text.
+///
+/// @param[in] text New text value.
+///
+auto InputMethodEditable::SetText(Text const& text) -> void
+{
+    if (_platform)
+    {
+        _platform->SetText(text);
+    }
+}
+
+///
+/// @brief Get whole text as string.
+///
+auto InputMethodEditable::GetString() const -> String
+{
+    if (_platform)
+    {
+        return _platform->GetString(_platform->GetStringRange());
     }
     return {};
 }
@@ -61,11 +86,11 @@ auto InputMethodEditable::GetText() const -> String
 ///
 /// @return Copy of the part of the string.
 ///
-auto InputMethodEditable::GetText(Range<CodePoint> range) const -> String
+auto InputMethodEditable::GetString(Range<CodePoint> range) const -> String
 {
     if (_platform)
     {
-        return _platform->GetText(range);
+        return _platform->GetString(range);
     }
     return {};
 }
@@ -75,26 +100,13 @@ auto InputMethodEditable::GetText(Range<CodePoint> range) const -> String
 ///
 /// @return Range of (0, length of text in code points).
 ///
-auto InputMethodEditable::GetTextRange() const -> Range<CodePoint>
+auto InputMethodEditable::GetStringRange() const -> Range<CodePoint>
 {
     if (_platform)
     {
-        return _platform->GetTextRange();
+        return _platform->GetStringRange();
     }
     return {};
-}
-
-///
-/// @brief Set new text.
-///
-/// @param[in] text New text value.
-///
-auto InputMethodEditable::SetText(String const& text) -> void
-{
-    if (_platform)
-    {
-        _platform->SetText(text);
-    }
 }
 
 ///

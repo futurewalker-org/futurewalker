@@ -15,8 +15,6 @@ class SkiaTypeface final : public Typeface
 public:
     explicit SkiaTypeface(sk_sp<SkTypeface> const& typeface);
 
-    auto GetGlyphs(std::span<char32_t const> codePoints) -> std::vector<GlyphId> override;
-
     auto GetTypeface() const -> sk_sp<SkTypeface>;
 
 private:

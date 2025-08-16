@@ -5,7 +5,10 @@
 
 #include "Futurewalker.Unit.hpp"
 
+#include "Futurewalker.Text.Text.hpp"
+
 #include "Futurewalker.Core.String.hpp"
+#include "Futurewalker.Core.U16String.hpp"
 #include "Futurewalker.Core.Range.hpp"
 #include "Futurewalker.Core.Function.hpp"
 
@@ -32,10 +35,12 @@ public:
     };
     PlatformTextInputState(Delegate const& delegate);
 
-    auto GetText() const -> String;
-    auto GetText(Range<CodePoint> range) const -> String;
-    auto GetTextRange() const -> Range<CodePoint>;
-    auto SetText(String const& text) -> Bool;
+    auto GetText() const -> Text;
+    auto SetText(Text const& text) -> void;
+
+    auto GetString() const -> String;
+    auto GetString(Range<CodePoint> range) const -> String;
+    auto GetStringRange() const -> Range<CodePoint>;
 
     auto GetSelectedRange() const -> Range<CodePoint>;
     auto GetNormalizedSelectedRange() const -> Range<CodePoint>;
@@ -47,16 +52,17 @@ public:
     auto InsertText(String const& text, CodePoint caretPosition, Bool anticipated) -> void;
     auto DeleteSurroundingText(CodePoint before, CodePoint after, Bool anticipated) -> void;
 
-    auto GetU16Text() const -> std::u16string_view;
-    auto GetU16Text(Range<CodeUnit> range) const -> std::u16string_view;
-    auto GetU16TextRange() const -> Range<CodeUnit>;
+public:
+    auto GetU16String() const -> U16String;
+    auto GetU16String(Range<CodeUnit> range) const -> U16String;
+    auto GetU16StringRange() const -> Range<CodeUnit>;
     auto GetU16SelectedRange() const -> Range<CodeUnit>;
     auto GetU16NormalizedSelectedRange() const -> Range<CodeUnit>;
     auto SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void;
     auto GetU16ComposingRange() const -> Range<CodeUnit>;
     auto SetU16ComposingRange(Range<CodeUnit> range) -> void;
 
-    auto InsertU16Text(std::u16string_view text, CodePoint caretPosition, Bool anticipated) -> void;
+    auto InsertU16Text(U16StringView text, CodePoint caretPosition, Bool anticipated) -> void;
 
     auto GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>;
     auto GetRangeFromU8Range(Range<CodeUnit> range) const -> Range<CodePoint>;
@@ -72,12 +78,7 @@ private:
     auto FindU16IndexFromCodePoint(CodePoint codePoint) const -> CodeUnit;
     auto FindU16RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>;
 
-    auto InsertTextData(CodePoint caretPosition, Bool anticipated, StringView utf8Text, std::span<CodeUnit const> utf8Bounds, std::u16string_view utf16Text, std::span<CodeUnit const> utf16Bounds, CodePoint codePoints) -> void;
-    auto InsertTextCore(StringView utf8Text, std::span<CodeUnit const> utf8Bounds, std::u16string_view utf16Text, std::span<CodeUnit const> utf16Bounds, Range<CodePoint> range) -> void;
-    auto InsertU8TextCore(StringView utf8Text, std::span<CodeUnit const> utf8Bounds, Range<CodePoint> range) -> void;
-    auto InsertU16TextCore(std::u16string_view utf16String, std::span<CodeUnit const> utf16Bounds, Range<CodePoint> range) -> void;
-
-    auto DeleteTextCore(Range<CodePoint> range) -> void;
+    auto InsertTextCore(CodePoint caretPosition, Bool anticipated, Text const& text) -> void;
 
 private:
     auto BeforeInsertText(String const& text) -> Bool;
@@ -87,11 +88,7 @@ private:
 
 private:
     Delegate _delegate;
-    String _utf8Text;
-    std::u16string _utf16Text;
-    // Code point boundaries.
-    std::vector<CodeUnit> _utf8Bounds;
-    std::vector<CodeUnit> _utf16Bounds;
+    Text _text;
     // NOTE: Bad IMEs might set cursor between surrogate pairs but we currently cannot handle that.
     Range<CodePoint> _selectedRange;
     Range<CodePoint> _composingRange;

@@ -7,6 +7,8 @@
 
 #include "Futurewalker.Graphics.TextLayoutInfo.hpp"
 
+#include "Futurewalker.Text.Text.hpp"
+
 #include "Futurewalker.Geometry.Rect.hpp"
 
 #include "Futurewalker.Unit.Unit.hpp" 
@@ -31,10 +33,11 @@ public:
 
     virtual ~PlatformInputMethodEditable() = 0;
 
-    virtual auto GetText() const -> String = 0;
-    virtual auto GetText(Range<CodePoint> range) const -> String = 0;
-    virtual auto GetTextRange() const -> Range<CodePoint> = 0;
-    virtual auto SetText(String const& text) -> void = 0;
+    virtual auto GetText() const -> Text = 0;
+    virtual auto SetText(Text const& text) -> void = 0;
+
+    virtual auto GetString(Range<CodePoint> range) const -> String = 0;
+    virtual auto GetStringRange() const -> Range<CodePoint> = 0;
 
     virtual auto GetSelectedRange() const -> Range<CodePoint> = 0;
     virtual auto SetSelectedRange(Range<CodePoint> const& range) -> void = 0;

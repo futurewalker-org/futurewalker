@@ -5,6 +5,8 @@
 
 #include "Futurewalker.Core.NonCopyable.hpp"
 
+#include "Futurewalker.Text.Text.hpp"
+
 #include "Futurewalker.Graphics.FontMetrics.hpp"
 #include "Futurewalker.Graphics.Glyph.hpp"
 #include "Futurewalker.Graphics.Scene.hpp"
@@ -16,7 +18,6 @@
 #include "Futurewalker.Color.RGBAColor.hpp"
 
 #include "Futurewalker.Core.Optional.hpp"
-#include "Futurewalker.Core.String.hpp"
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
@@ -33,7 +34,7 @@ public:
     ///
     /// @brief Get text of the run.
     ///
-    virtual auto GetText() const -> String = 0;
+    virtual auto GetText() const -> Text = 0;
 
     ///
     /// @brief Get metrics of the run.
@@ -69,13 +70,13 @@ public:
     virtual auto GetGlyphPosition(GlyphIndex const glyphIndex) const -> Optional<Point<Dp>> = 0;
 
     ///
-    /// @brief Get the text position of the glyph by its index.
+    /// @brief Get the UTF-8 code point index of the glyph by its index.
     ///
     /// @param[in] glyphIndex Index of the glyph in the run.
     ///
     /// @return Text position of the glyph, or an empty optional if the index is out of bounds.
     ///
-    virtual auto GetClusterIndex(GlyphIndex const glyphIndex) const -> Optional<CodeUnit> = 0;
+    virtual auto GetCharacterIndex(GlyphIndex const glyphIndex) const -> Optional<CodePoint> = 0;
 
     ///
     /// @brief Get the index of a glyph by its position in the text.
@@ -86,7 +87,7 @@ public:
     ///
     /// @note If the run does not contain a glyph for the given text position, it returns closest index of a glyph.
     ///
-    virtual auto GetGlyphIndex(CodeUnit const textPosition) const -> GlyphIndex = 0;
+    virtual auto GetGlyphIndex(CodePoint const textPosition) const -> GlyphIndex = 0;
 };
 }
 }

@@ -9,6 +9,7 @@ fw_library(
         "//Source/Color",
         "//Source/Geometry",
         "//Source/Unit",
+        "//Source/Text",
         "@skia//:skia",
     ],
     linkopts_win = [

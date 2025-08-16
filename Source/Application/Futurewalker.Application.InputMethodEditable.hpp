@@ -17,6 +17,8 @@
 
 #include "Futurewalker.Graphics.TextLayoutInfo.hpp"
 
+#include "Futurewalker.Text.Text.hpp"
+
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.String.hpp"
@@ -38,10 +40,12 @@ public:
 
     InputMethodEditable(PassKey<InputMethodEditable>);
 
-    auto GetText() const -> String;
-    auto GetText(Range<CodePoint> range) const -> String;
-    auto GetTextRange() const -> Range<CodePoint>;
-    auto SetText(String const& text) -> void;
+    auto GetText() const -> Text;
+    auto SetText(Text const& text) -> void;
+
+    auto GetString() const -> String;
+    auto GetString(Range<CodePoint> range) const -> String;
+    auto GetStringRange() const -> Range<CodePoint>;
 
     auto GetSelectedRange() const -> Range<CodePoint>;
     auto SetSelectedRange(Range<CodePoint> const& range) -> void;

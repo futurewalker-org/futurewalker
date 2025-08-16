@@ -95,9 +95,9 @@ auto TextView::Initialize() -> void
 ///
 auto TextView::Measure(MeasureScope& scope) -> void
 {
-    const auto& parameter = scope.GetParameter();
-    const auto& widthConstraints = parameter.GetWidthConstraints();
-    const auto& heightConstraints = parameter.GetHeightConstraints();
+    auto const& parameter = scope.GetParameter();
+    auto const& widthConstraints = parameter.GetWidthConstraints();
+    auto const& heightConstraints = parameter.GetHeightConstraints();
 
     auto const textSize = MeasureText(widthConstraints.GetMax());
     auto const measuredWidth = AxisConstraints::Constrain(widthConstraints, textSize.GetWidth());
@@ -112,7 +112,7 @@ auto TextView::Draw(DrawScope& scope) -> void
 {
     auto& scene = scope.GetScene();
 
-    const auto rect = GetContentRect();
+    auto const rect = GetContentRect();
 
     auto const color = _color.GetValueOrDefault();
     auto const isRTL = GetLayoutDirection() == LayoutDirection::RightToLeft;
@@ -134,7 +134,7 @@ auto TextView::Draw(DrawScope& scope) -> void
 
     for (auto i = SInt64(0); i < GetCachedTextLineCount(); ++i)
     {
-        const auto lineSize = GetCachedTextLineSize(i);
+        auto const lineSize = GetCachedTextLineSize(i);
 
         auto x = Dp(0);
         if ((hAlign == TextViewHorizontalAlignment::Leading && isRTL) || (hAlign == TextViewHorizontalAlignment::Trailing && !isRTL))
@@ -146,8 +146,8 @@ auto TextView::Draw(DrawScope& scope) -> void
             x = rect.GetLeft() + (rect.GetWidth() - lineSize.GetWidth()) / 2;
         }
 
-        const auto alignedX = ViewLayoutFunction::AlignToPixelGridByRound(x, *this);
-        const auto alignedY = ViewLayoutFunction::AlignToPixelGridByRound(y, *this);
+        auto const alignedX = ViewLayoutFunction::AlignToPixelGridByRound(x, *this);
+        auto const alignedY = ViewLayoutFunction::AlignToPixelGridByRound(y, *this);
 
         scene.PushTranslate({
             .x = alignedX,
@@ -222,7 +222,7 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
     auto const matchesWidth = Dp::IsNearlyEqual(GetCachedTextSize().GetWidth(), maxWidth);
     if (!_shapedText || (!matchesMaxWidth && !matchesWidth))
     {
-        auto const text = _text.GetValueOrDefault();
+        auto const text = Text(_text.GetValueOrDefault());
         auto const typeface = GetTypeface();
         auto const size = GetFontSize();
         _shapedText = Unique<Graphics::ShapedText>::Make(_shaper->ShapeText(text, typeface, size, maxWidth));

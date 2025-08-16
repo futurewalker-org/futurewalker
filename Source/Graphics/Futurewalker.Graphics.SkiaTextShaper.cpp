@@ -10,7 +10,6 @@
 #include "Futurewalker.Graphics.PlatformSkiaFontManager.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
-#include "Futurewalker.Base.Debug.hpp"
 
 #include <include/core/SkFontMetrics.h>
 #include <include/core/SkTextBlob.h>
@@ -43,7 +42,7 @@ auto GetSkFontMgr() -> sk_sp<SkFontMgr>
 
 class SkiaRunHandler final : public SkShaper::RunHandler
 {
-    String _text;
+    Text _text;
     SkScalar _maxRunAscent = 0;
     SkScalar _maxRunDescent = 0;
     SkScalar _maxRunLeading = 0;
@@ -53,7 +52,7 @@ class SkiaRunHandler final : public SkShaper::RunHandler
     std::vector<ShapedText::Line> _lines;
 
 public:
-    explicit SkiaRunHandler(String const& text)
+    explicit SkiaRunHandler(Text const& text)
       : _text {text}
     {
     }
@@ -102,7 +101,7 @@ public:
         auto run = _runs.back().Assume<SkiaGlyphRun>();
         run->SetFont(info.fFont);
         run->SetAdvance(info.fAdvance.fX);
-        run->SetText(_text.GetSubstring(SInt64(info.utf8Range.begin()), SInt64(info.utf8Range.end())));
+        run->SetText(_text.GetSubTextByU8Range({info.utf8Range.begin(), info.utf8Range.end()}));
 
         auto const clusterOffset = static_cast<uint32_t>(info.utf8Range.fBegin);
         SkASSERT(0 <= clusterOffset);
@@ -138,18 +137,12 @@ public:
 ///
 /// @brief Shape text.
 ///
-auto SkiaTextShaper::ShapeText(String const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> ShapedText
+auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> ShapedText
 {
     auto const width = static_cast<SkScalar>(maxWidth);
     auto const font = SkFont(GetSkTypeface(typeface), static_cast<SkScalar>(size));
 
-    auto utf8 = String();
-    if (!StringFunction::ValidateString(utf8, text))
-    {
-        FW_DEBUG_ASSERT(false);
-    }
-
-    auto const utf8Str = StringFunction::ConvertStringToStdString(utf8);
+    auto const utf8Str = StringFunction::ConvertStringToStdString(text.GetString());
     auto const utf8Chars = utf8Str.c_str();
     auto const utf8Bytes = utf8Str.size();
 
@@ -172,6 +165,6 @@ auto SkiaTextShaper::ShapeGlyph(char32_t const codePoint, Shared<Typeface> const
     auto buffer = std::array<char8_t, U8_MAX_LENGTH>();
     auto offset = 0;
     U8_APPEND_UNSAFE(buffer.data(), offset, codePoint);
-    return ShapeText(String(buffer.data(), offset), typeface, size, Dp::Infinity());
+    return ShapeText(Text(String(buffer.data(), offset)), typeface, size, Dp::Infinity());
 }
 }

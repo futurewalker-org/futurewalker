@@ -7,11 +7,12 @@
 #include "Futurewalker.Graphics.Typeface.hpp"
 #include "Futurewalker.Graphics.ShapedText.hpp"
 
+#include "Futurewalker.Text.Text.hpp" 
+
 #include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Memory.hpp"
-#include "Futurewalker.Core.String.hpp"
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
@@ -36,7 +37,7 @@ public:
     /// @param size Font size.
     /// @param maxWidth Maximum width for the text layout.
     ///
-    virtual auto ShapeText(String const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> ShapedText = 0;
+    virtual auto ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> ShapedText = 0;
 
     ///
     /// @brief Shape a glyph.

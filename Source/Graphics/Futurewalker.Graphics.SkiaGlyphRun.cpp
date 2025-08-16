@@ -11,7 +11,7 @@ SkiaGlyphRun::~SkiaGlyphRun()
     ReleaseBuffer();
 }
 
-auto SkiaGlyphRun::GetText() const -> String
+auto SkiaGlyphRun::GetText() const -> Text
 {
     return _text;
 }
@@ -40,21 +40,23 @@ auto SkiaGlyphRun::GetGlyphPosition(GlyphIndex const glyphIndex) const -> Option
     return {};
 }
 
-auto SkiaGlyphRun::GetClusterIndex(GlyphIndex const glyphIndex) const -> Optional<CodeUnit>
+auto SkiaGlyphRun::GetCharacterIndex(GlyphIndex const glyphIndex) const -> Optional<CodePoint>
 {
     if (0 <= glyphIndex && glyphIndex < _glyphCount)
     {
-        auto const cluster = _buffer.clusters[static_cast<size_t>(glyphIndex)];
-        return CodeUnit(cluster);
+        auto const clusterIndex = CodeUnit(_buffer.clusters[static_cast<size_t>(glyphIndex)]);
+        return _text.GetCodePointIndexByU8Index(clusterIndex);
     }
     return {};
 }
 
-auto SkiaGlyphRun::GetGlyphIndex(CodeUnit const textPosition) const -> GlyphIndex
+auto SkiaGlyphRun::GetGlyphIndex(CodePoint const textPosition) const -> GlyphIndex
 {
+    auto const u8TextPosition = _text.GetU8IndexByCodePointIndex(textPosition);
     for (auto i = GlyphIndex(0); i < _glyphCount; ++i)
     {
-        if (textPosition < _buffer.clusters[static_cast<size_t>(i)])
+        auto const clusterIndex = CodeUnit(_buffer.clusters[static_cast<size_t>(i)]);
+        if (u8TextPosition < clusterIndex)
         {
             return GlyphIndex::Max(0, GlyphIndex(i - 1));
         }
@@ -99,7 +101,7 @@ auto SkiaGlyphRun::SetAdvance(SkScalar const& advance) -> void
     _advance = advance;
 }
 
-auto SkiaGlyphRun::SetText(String const& text) -> void
+auto SkiaGlyphRun::SetText(Text const& text) -> void
 {
     _text = text;
 }
@@ -113,8 +115,8 @@ auto SkiaGlyphRun::Draw(SkCanvas* canvas, SkPaint const& paint) const -> void
           _buffer.glyphs,
           _buffer.positions,
           _buffer.clusters,
-          static_cast<int>(_text.GetView().GetSize()),
-          reinterpret_cast<char const*>(static_cast<char8_t const*>(_text.GetView().GetData())),
+          static_cast<int>(_text.GetU8CodeUnitCount()),
+          reinterpret_cast<char const*>(static_cast<char8_t const*>(_text.GetString().GetView().GetData())),
           SkPoint(),
           _font,
           paint);

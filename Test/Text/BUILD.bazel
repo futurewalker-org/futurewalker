@@ -1,0 +1,9 @@
+load("//:defs.bzl", "fw_test_suite")
+
+fw_test_suite(
+    deps = ["@futurewalker//:Text"],
+    tags = ["Text"],
+    names = [
+        "Text",
+    ],
+)

@@ -37,6 +37,7 @@ public:
     TextEdit(PassKey<View>);
 
     auto GetText() const -> String;
+    auto SetText(String const& text) -> void;
 
 protected:
     auto Initialize() -> void override;
@@ -56,7 +57,9 @@ private:
     auto InternalSetSelectedRange(Range<CodePoint> range) -> void;
     auto InternalGetComposingRange() -> Range<CodePoint>;
     auto InternalSetComposingRange(Range<CodePoint> range) -> void;
+    auto InternalGetText() const -> String;
     auto InternalGetText(Range<CodePoint> range) -> String;
+    auto InternalSetText(String const& text) -> void;
     auto InternalGetTextRange() const -> Range<CodePoint>;
     auto InternalDeleteBackward() -> void;
     auto InternalDeleteForward() -> void;

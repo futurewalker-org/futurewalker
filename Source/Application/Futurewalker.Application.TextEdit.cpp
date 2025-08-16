@@ -35,11 +35,12 @@ TextEdit::TextEdit(PassKey<View> key)
 
 auto TextEdit::GetText() const -> String
 {
-    if (_inputMethodEditable)
-    {
-        return _inputMethodEditable->GetText();
-    }
-    return {};
+    return InternalGetText();
+}
+
+auto TextEdit::SetText(String const& text) -> void
+{
+    InternalSetText(text);
 }
 
 auto TextEdit::Initialize() -> void
@@ -292,20 +293,37 @@ auto TextEdit::InternalSetComposingRange(Range<CodePoint> range) -> void
     }
 }
 
+auto TextEdit::InternalGetText() const -> String
+{
+    if (_inputMethodEditable)
+    {
+        return _inputMethodEditable->GetString();
+    }
+    return {};
+}
+
 auto TextEdit::InternalGetText(Range<CodePoint> range) -> String
 {
     if (_inputMethodEditable)
     {
-        return _inputMethodEditable->GetText(range);
+        return _inputMethodEditable->GetString(range);
     }
     return {};
+}
+
+auto TextEdit::InternalSetText(String const& text) -> void
+{
+    if (_inputMethodEditable)
+    {
+        _inputMethodEditable->SetText(Text(text));
+    }
 }
 
 auto TextEdit::InternalGetTextRange() const -> Range<CodePoint>
 {
     if (_inputMethodEditable)
     {
-        return _inputMethodEditable->GetTextRange();
+        return _inputMethodEditable->GetStringRange();
     }
     return {};
 }

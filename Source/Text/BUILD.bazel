@@ -1,0 +1,11 @@
+load("//:defs.bzl", "fw_library")
+
+fw_library(
+    name = "Text",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//Source/Core",
+        "//Source/Unit",
+        "@icu//:icu",
+    ],
+)
