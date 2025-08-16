@@ -1,6 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
-#include "Futurewalker.Application.PlatformTextInputState.hpp"
+#include "Futurewalker.Text.TextInputState.hpp"
 
 #include "Futurewalker.Core.StringFunction.hpp"
 
@@ -9,17 +9,17 @@
 
 namespace FW_DETAIL_NS
 {
-PlatformTextInputState::PlatformTextInputState(Delegate const& delegate)
+TextInputState::TextInputState(Delegate const& delegate)
   : _delegate {delegate}
 {
 }
 
-auto PlatformTextInputState::GetText() const -> Text
+auto TextInputState::GetText() const -> Text
 {
     return _text;
 }
 
-auto PlatformTextInputState::SetText(Text const& text) -> void
+auto TextInputState::SetText(Text const& text) -> void
 {
     auto const textRange = GetU16StringRange();
     auto const selectedRange = GetSelectedRange();
@@ -37,32 +37,32 @@ auto PlatformTextInputState::SetText(Text const& text) -> void
     }
 }
 
-auto PlatformTextInputState::GetString() const -> String
+auto TextInputState::GetString() const -> String
 {
     return _text.GetString();
 }
 
-auto PlatformTextInputState::GetString(Range<CodePoint> range) const -> String
+auto TextInputState::GetString(Range<CodePoint> range) const -> String
 {
     return _text.GetString(range);
 }
 
-auto PlatformTextInputState::GetStringRange() const -> Range<CodePoint>
+auto TextInputState::GetStringRange() const -> Range<CodePoint>
 {
     return {0, _text.GetCodePointCount()};
 }
 
-auto PlatformTextInputState::GetSelectedRange() const -> Range<CodePoint>
+auto TextInputState::GetSelectedRange() const -> Range<CodePoint>
 {
     return _selectedRange;
 }
 
-auto PlatformTextInputState::GetNormalizedSelectedRange() const -> Range<CodePoint>
+auto TextInputState::GetNormalizedSelectedRange() const -> Range<CodePoint>
 {
     return Range<CodePoint>::Normalize(_selectedRange);
 }
 
-auto PlatformTextInputState::SetSelectedRange(Range<CodePoint> const& range) -> Bool
+auto TextInputState::SetSelectedRange(Range<CodePoint> const& range) -> Bool
 {
     auto const textRange = GetStringRange();
     auto const selectedRange = _selectedRange;
@@ -86,12 +86,12 @@ auto PlatformTextInputState::SetSelectedRange(Range<CodePoint> const& range) -> 
     return true;
 }
 
-auto PlatformTextInputState::GetComposingRange() const -> Range<CodePoint>
+auto TextInputState::GetComposingRange() const -> Range<CodePoint>
 {
     return _composingRange;
 }
 
-auto PlatformTextInputState::SetComposingRange(Range<CodePoint> const& range) -> Bool
+auto TextInputState::SetComposingRange(Range<CodePoint> const& range) -> Bool
 {
     auto const textRange = GetStringRange();
     _composingRange.SetBegin(Range<CodePoint>::Clamp(range.GetBegin(), textRange));
@@ -104,12 +104,12 @@ auto PlatformTextInputState::SetComposingRange(Range<CodePoint> const& range) ->
     return true;
 }
 
-auto PlatformTextInputState::InsertText(String const& text, CodePoint caretPosition, Bool anticipated) -> void
+auto TextInputState::InsertText(String const& text, CodePoint caretPosition, Bool anticipated) -> void
 {
     InsertTextCore(caretPosition, anticipated, Text(text));
 }
 
-auto PlatformTextInputState::DeleteSurroundingText(CodePoint before, CodePoint after, Bool anticipated) -> void
+auto TextInputState::DeleteSurroundingText(CodePoint before, CodePoint after, Bool anticipated) -> void
 {
     if (BeforeDeleteSurroundingText(before, after))
     {
@@ -168,24 +168,24 @@ auto PlatformTextInputState::DeleteSurroundingText(CodePoint before, CodePoint a
     }
 }
 
-auto PlatformTextInputState::GetU16String() const -> U16String
+auto TextInputState::GetU16String() const -> U16String
 {
     return _text.GetU16String();
 }
 
-auto PlatformTextInputState::GetU16String(Range<CodeUnit> range) const -> U16String
+auto TextInputState::GetU16String(Range<CodeUnit> range) const -> U16String
 {
     auto const b = _text.GetCodePointIndexByU16Index(range.GetBegin());
     auto const e = _text.GetCodePointIndexByU16Index(range.GetEnd());
     return _text.GetU16String({b, e});
 }
 
-auto PlatformTextInputState::GetU16StringRange() const -> Range<CodeUnit>
+auto TextInputState::GetU16StringRange() const -> Range<CodeUnit>
 {
     return {0, _text.GetU16CodeUnitCount()};
 }
 
-auto PlatformTextInputState::GetU16SelectedRange() const -> Range<CodeUnit>
+auto TextInputState::GetU16SelectedRange() const -> Range<CodeUnit>
 {
     auto const range = GetSelectedRange();
     auto const b = _text.GetU16IndexByCodePointIndex(range.GetBegin());
@@ -193,13 +193,13 @@ auto PlatformTextInputState::GetU16SelectedRange() const -> Range<CodeUnit>
     return {b, e};
 }
 
-auto PlatformTextInputState::GetU16NormalizedSelectedRange() const -> Range<CodeUnit>
+auto TextInputState::GetU16NormalizedSelectedRange() const -> Range<CodeUnit>
 {
     auto const selectedRange = GetU16SelectedRange();
     return Range<CodeUnit>::Normalize(selectedRange);
 }
 
-auto PlatformTextInputState::SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void
+auto TextInputState::SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void
 {
     auto const selectedRange = _selectedRange;
     auto const b = FindCodePointFromU16Index(range.GetBegin());
@@ -217,7 +217,7 @@ auto PlatformTextInputState::SetU16SelectedRange(Range<CodeUnit> range, Bool ant
     }
 }
 
-auto PlatformTextInputState::GetU16ComposingRange() const -> Range<CodeUnit>
+auto TextInputState::GetU16ComposingRange() const -> Range<CodeUnit>
 {
     auto const range = GetComposingRange();
     auto const b = _text.GetU16IndexByCodePointIndex(range.GetBegin());
@@ -225,77 +225,77 @@ auto PlatformTextInputState::GetU16ComposingRange() const -> Range<CodeUnit>
     return {b, e};
 }
 
-auto PlatformTextInputState::SetU16ComposingRange(Range<CodeUnit> range) -> void
+auto TextInputState::SetU16ComposingRange(Range<CodeUnit> range) -> void
 {
     auto const b = FindCodePointFromU16Index(range.GetBegin());
     auto const e = FindCodePointFromU16Index(range.GetEnd());
     _composingRange = {b, e};
 }
 
-auto PlatformTextInputState::InsertU16Text(U16StringView text, CodePoint caretPosition, Bool anticipated) -> void
+auto TextInputState::InsertU16Text(U16StringView text, CodePoint caretPosition, Bool anticipated) -> void
 {
     InsertTextCore(caretPosition, anticipated, Text(text));
 }
 
-auto PlatformTextInputState::GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>
+auto TextInputState::GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>
 {
     auto const begin = FindCodePointFromU16Index(range.GetBegin());
     auto const end = FindCodePointFromU16Index(range.GetEnd());
     return {begin, end};
 }
 
-auto PlatformTextInputState::GetRangeFromU8Range(Range<CodeUnit> range) const -> Range<CodePoint>
+auto TextInputState::GetRangeFromU8Range(Range<CodeUnit> range) const -> Range<CodePoint>
 {
     auto const begin = FindCodePointFromU8Index(range.GetBegin());
     auto const end = FindCodePointFromU8Index(range.GetEnd());
     return {begin, end};
 }
 
-auto PlatformTextInputState::GetU16RangeFromRange(Range<CodePoint> range) const -> Range<CodeUnit>
+auto TextInputState::GetU16RangeFromRange(Range<CodePoint> range) const -> Range<CodeUnit>
 {
     return FindU16RangeFromCodePointRange(range);
 }
 
-auto PlatformTextInputState::GetU8RangeFromRange(Range<CodePoint> range) const -> Range<CodeUnit>
+auto TextInputState::GetU8RangeFromRange(Range<CodePoint> range) const -> Range<CodeUnit>
 {
     return FindU8RangeFromCodePointRange(range);
 }
 
-auto PlatformTextInputState::FindCodePointFromU8Index(CodeUnit index) const -> CodePoint
+auto TextInputState::FindCodePointFromU8Index(CodeUnit index) const -> CodePoint
 {
     return _text.GetCodePointIndexByU8Index(index);
 }
 
-auto PlatformTextInputState::FindCodePointFromU16Index(CodeUnit index) const -> CodePoint
+auto TextInputState::FindCodePointFromU16Index(CodeUnit index) const -> CodePoint
 {
     return _text.GetCodePointIndexByU16Index(index);
 }
 
-auto PlatformTextInputState::FindU8IndexFromCodePoint(CodePoint codePoint) const -> CodeUnit
+auto TextInputState::FindU8IndexFromCodePoint(CodePoint codePoint) const -> CodeUnit
 {
     return _text.GetU8IndexByCodePointIndex(codePoint);
 }
 
-auto PlatformTextInputState::FindU8RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>
+auto TextInputState::FindU8RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>
 {
     auto const b = _text.GetU8IndexByCodePointIndex(range.GetBegin());
     auto const e = _text.GetU8IndexByCodePointIndex(range.GetEnd());
     return Range<CodeUnit>(b, e);
 }
 
-auto PlatformTextInputState::FindU16IndexFromCodePoint(CodePoint codePoint) const -> CodeUnit
+auto TextInputState::FindU16IndexFromCodePoint(CodePoint codePoint) const -> CodeUnit
 {
     return _text.GetU16IndexByCodePointIndex(codePoint);
 }
 
-auto PlatformTextInputState::FindU16RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>
+auto TextInputState::FindU16RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>
 {
     auto const b = _text.GetU16IndexByCodePointIndex(range.GetBegin());
     auto const e = _text.GetU16IndexByCodePointIndex(range.GetEnd());
     return Range<CodeUnit>(b, e);
 }
 
-auto PlatformTextInputState::InsertTextCore(CodePoint caretPosition, Bool anticipated, Text const& text) -> void
+auto TextInputState::InsertTextCore(CodePoint caretPosition, Bool anticipated, Text const& text) -> void
 {
     if (BeforeInsertText(text.GetString()))
     {
@@ -327,7 +327,7 @@ auto PlatformTextInputState::InsertTextCore(CodePoint caretPosition, Bool antici
     }
 }
 
-auto PlatformTextInputState::BeforeInsertText(String const& text) -> Bool
+auto TextInputState::BeforeInsertText(String const& text) -> Bool
 {
     if (_delegate.beforeInsertText)
     {
@@ -336,7 +336,7 @@ auto PlatformTextInputState::BeforeInsertText(String const& text) -> Bool
     return true;
 }
 
-auto PlatformTextInputState::BeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool
+auto TextInputState::BeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool
 {
     if (_delegate.beforeDeleteSurroundingText)
     {
@@ -345,7 +345,7 @@ auto PlatformTextInputState::BeforeDeleteSurroundingText(CodePoint before, CodeP
     return true;
 }
 
-auto PlatformTextInputState::OnTextChange(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End) -> void
+auto TextInputState::OnTextChange(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End) -> void
 {
     if (_delegate.onTextChange)
     {
@@ -353,7 +353,7 @@ auto PlatformTextInputState::OnTextChange(CodeUnit u16Begin, CodeUnit oldU16End,
     }
 }
 
-auto PlatformTextInputState::OnSelectionChange() -> void
+auto TextInputState::OnSelectionChange() -> void
 {
     if (_delegate.onSelectionChange)
     {

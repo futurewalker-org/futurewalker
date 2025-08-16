@@ -3,9 +3,9 @@
 
 #include "Futurewalker.Application.Win.PlatformInputMethodEditableWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWinType.hpp"
-
-#include "Futurewalker.Application.PlatformTextInputState.hpp"
 #include "Futurewalker.Application.PlatformInputMethodEditable.hpp"
+
+#include "Futurewalker.Text.TextInputState.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -65,7 +65,7 @@ private:
 
 private:
     Weak<PlatformInputMethodTextStoreWin> _textStore;
-    PlatformTextInputState _state;
+    TextInputState _state;
     Rect<Dp> _layoutRect;
     Graphics::TextLayoutInfo _layoutInfo;
 };

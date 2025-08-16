@@ -4,7 +4,6 @@
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodEditableWin.hpp"
 #include "Futurewalker.Application.PlatformInputMethodEditable.hpp"
-#include "Futurewalker.Application.PlatformTextInputState.hpp"
 #include "Futurewalker.Application.Key.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"

@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Application.PlatformTextInputStateType.hpp"
+#include "Futurewalker.Text.TextInputStateType.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -23,7 +23,7 @@ namespace FW_EXPORT
 ///
 /// @brief Text input state.
 ///
-class PlatformTextInputState final
+class TextInputState final
 {
 public:
     struct Delegate
@@ -33,7 +33,7 @@ public:
         Function<void(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End)> onTextChange;
         Function<void()> onSelectionChange;
     };
-    PlatformTextInputState(Delegate const& delegate);
+    TextInputState(Delegate const& delegate);
 
     auto GetText() const -> Text;
     auto SetText(Text const& text) -> void;
