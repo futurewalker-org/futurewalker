@@ -81,3 +81,9 @@ alias(
     actual = "//Source/Main",
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "Text",
+    actual = "//Source/Text",
+    visibility = ["//visibility:public"],
+)
