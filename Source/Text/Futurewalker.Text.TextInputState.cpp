@@ -60,21 +60,17 @@ auto TextInputState::GetNormalizedSelectedRange() const -> Range<CodePoint>
 auto TextInputState::SetSelectedRange(Range<CodePoint> const& range) -> Bool
 {
     auto const textRange = GetStringRange();
-    auto const selectedRange = _selectedRange;
-
     auto const newBegin = Range<CodePoint>::Clamp(range.GetBegin(), textRange);
     auto const newEnd = Range<CodePoint>::Clamp(range.GetEnd(), textRange);
     auto const newSelectedRange = Range<CodePoint>(newBegin, newEnd);
 
-    auto const selectionChanged = (newSelectedRange != selectedRange);
-    auto const rangeChanged = range != newSelectedRange;
-
-    if (selectionChanged)
+    if (_selectedRange != newSelectedRange)
     {
+        _selectedRange = newSelectedRange;
         OnSelectionChange();
     }
 
-    if (rangeChanged)
+    if (range != newSelectedRange)
     {
         return false;
     }
@@ -89,10 +85,16 @@ auto TextInputState::GetComposingRange() const -> Range<CodePoint>
 auto TextInputState::SetComposingRange(Range<CodePoint> const& range) -> Bool
 {
     auto const textRange = GetStringRange();
-    _composingRange.SetBegin(Range<CodePoint>::Clamp(range.GetBegin(), textRange));
-    _composingRange.SetEnd(Range<CodePoint>::Clamp(range.GetEnd(), textRange));
+    auto const newBegin = Range<CodePoint>::Clamp(range.GetBegin(), textRange);
+    auto const newEnd = Range<CodePoint>::Clamp(range.GetEnd(), textRange);
+    auto const newComposingRange = Range<CodePoint>(newBegin, newEnd);
 
-    if (range != _selectedRange)
+    if (_composingRange != newComposingRange)
+    {
+        _composingRange = newComposingRange;
+    }
+
+    if (range != newComposingRange)
     {
         return false;
     }
@@ -196,12 +198,11 @@ auto TextInputState::GetU16NormalizedSelectedRange() const -> Range<CodeUnit>
 
 auto TextInputState::SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void
 {
-    auto const selectedRange = _selectedRange;
     auto const b = FindCodePointFromU16Index(range.GetBegin());
     auto const e = FindCodePointFromU16Index(range.GetEnd());
     auto const newSelectedRange = Range<CodePoint>(b, e);
 
-    if (newSelectedRange != selectedRange)
+    if (_selectedRange != newSelectedRange)
     {
         _selectedRange = newSelectedRange;
 
@@ -224,7 +225,12 @@ auto TextInputState::SetU16ComposingRange(Range<CodeUnit> range) -> void
 {
     auto const b = FindCodePointFromU16Index(range.GetBegin());
     auto const e = FindCodePointFromU16Index(range.GetEnd());
-    _composingRange = {b, e};
+    auto const newComposingRange = Range<CodePoint>(b, e);
+
+    if (_composingRange != newComposingRange)
+    {
+        _composingRange = newComposingRange;
+    }
 }
 
 auto TextInputState::InsertU16Text(U16StringView text, CodePoint caretPosition, Bool anticipated) -> void
