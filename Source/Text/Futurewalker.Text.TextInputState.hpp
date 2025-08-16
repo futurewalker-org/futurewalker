@@ -12,10 +12,6 @@
 #include "Futurewalker.Core.Range.hpp"
 #include "Futurewalker.Core.Function.hpp"
 
-#include <string>
-#include <vector>
-#include <utility>
-
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT

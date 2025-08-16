@@ -2,11 +2,6 @@
 
 #include "Futurewalker.Text.TextInputState.hpp"
 
-#include "Futurewalker.Core.StringFunction.hpp"
-
-#include <unicode/utf8.h>
-#include <unicode/utf16.h>
-
 namespace FW_DETAIL_NS
 {
 TextInputState::TextInputState(Delegate const& delegate)
