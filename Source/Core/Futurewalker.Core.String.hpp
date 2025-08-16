@@ -66,7 +66,7 @@ public:
     [[nodiscard]] auto IsEmpty() const noexcept -> Bool;
     [[nodiscard]] auto GetView() const noexcept -> StringView;
     [[nodiscard]] auto GetChar(ValueType& value, IndexType pos) const noexcept -> Bool;
-    [[nodiscard]] auto GetSubstring(IndexType begin, IndexType end) const noexcept -> String;
+    [[nodiscard]] auto GetSubString(IndexType begin, IndexType end) const noexcept -> String;
 
     auto Resize(SizeType size) -> void;
     auto Reserve(SizeType capacity) -> void;
@@ -81,23 +81,23 @@ private:
     auto SetSize(SizeType size) -> void;
     auto GetSize() const noexcept -> SizeType;
     auto GetCapacity() const noexcept -> SizeType;
-    auto GetConstData() const -> Pointer<const char8_t>;
-    auto GetMutableData() -> Pointer<char8_t>;
+    auto GetConstData() const -> Pointer<const ValueType>;
+    auto GetMutableData() -> Pointer<ValueType>;
 
 private:
     struct LargeString
     {
-        std::shared_ptr<char8_t[]> data; ///< Large string buffer.
-        int64_t capacity = 0;            ///< Capacity.
-        int64_t size = 0;                ///< Size.
-        uint8_t padding[7];              ///< Padding (unused).
-        uint8_t flags = 0;               ///< Flag bits.
+        std::shared_ptr<ValueType[]> data; ///< Large string buffer.
+        int64_t capacity = 0; ///< Capacity.
+        int64_t size = 0; ///< Size.
+        uint8_t padding[7]; ///< Padding (unused).
+        uint8_t flags = 0; ///< Flag bits.
     };
 
     struct SmallString
     {
-        char8_t data[sizeof(LargeString) - 1]; ///< Small string buffer.
-        uint8_t size = 0;                      ///< Flag and size bits.
+        ValueType data[sizeof(LargeString) - 1]; ///< Small string buffer.
+        uint8_t size = 0; ///< Flag and size bits.
     };
 
     struct Internal;

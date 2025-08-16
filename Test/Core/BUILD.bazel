@@ -19,5 +19,6 @@ fw_test_suite(
         "TimePoint",
         "TypeId",
         "TypeTraits",
+        "U16String",
     ],
 )

@@ -39,7 +39,7 @@ TEST_CASE("StringView")
 
         SECTION("0,0")
         {
-            auto const sv2 = sv.GetSubstring(0, 0);
+            auto const sv2 = sv.GetSubString(0, 0);
             REQUIRE(sv2.IsEmpty());
             REQUIRE(sv2.GetSize() == 0);
             REQUIRE(sv2.GetData() != nullptr);
@@ -47,7 +47,7 @@ TEST_CASE("StringView")
 
         SECTION("0,100")
         {
-            auto const sv2 = sv.GetSubstring(0, 100);
+            auto const sv2 = sv.GetSubString(0, 100);
             REQUIRE(!sv2.IsEmpty());
             REQUIRE(sv2.GetSize() == 6);
             REQUIRE(sv2.GetData() != nullptr);
@@ -55,7 +55,7 @@ TEST_CASE("StringView")
 
         SECTION("5,100")
         {
-            auto const sv2 = sv.GetSubstring(5, 100);
+            auto const sv2 = sv.GetSubString(5, 100);
             REQUIRE(!sv2.IsEmpty());
             REQUIRE(sv2.GetSize() == 1);
             REQUIRE(sv2.GetData() != nullptr);
@@ -63,7 +63,7 @@ TEST_CASE("StringView")
 
         SECTION("100, 5")
         {
-            auto const sv2 = sv.GetSubstring(100, 5);
+            auto const sv2 = sv.GetSubString(100, 5);
             REQUIRE(sv2.IsEmpty());
             REQUIRE(sv2.GetSize() == 0);
             REQUIRE(sv2.GetData() != nullptr);
@@ -71,7 +71,7 @@ TEST_CASE("StringView")
 
         SECTION("-100,100")
         {
-            auto const sv2 = sv.GetSubstring(-100, 100);
+            auto const sv2 = sv.GetSubString(-100, 100);
             REQUIRE(!sv2.IsEmpty());
             REQUIRE(sv2.GetSize() == 6);
             REQUIRE(sv2.GetData() != nullptr);
@@ -79,7 +79,7 @@ TEST_CASE("StringView")
 
         SECTION("-100,0")
         {
-            auto const sv2 = sv.GetSubstring(-100, 0);
+            auto const sv2 = sv.GetSubString(-100, 0);
             REQUIRE(sv2.IsEmpty());
             REQUIRE(sv2.GetSize() == 0);
             REQUIRE(sv2.GetData() != nullptr);
@@ -87,7 +87,7 @@ TEST_CASE("StringView")
 
         SECTION("1,3")
         {
-            auto const sv2 = sv.GetSubstring(1, 3);
+            auto const sv2 = sv.GetSubString(1, 3);
             REQUIRE(sv2.GetSize() == 2);
             REQUIRE(sv2.GetData() != nullptr);
             REQUIRE(sv2[0] == u8'B');
@@ -96,7 +96,7 @@ TEST_CASE("StringView")
 
         SECTION("3,1")
         {
-            auto const sv2 = sv.GetSubstring(3, 1);
+            auto const sv2 = sv.GetSubString(3, 1);
             REQUIRE(sv2.IsEmpty());
             REQUIRE(sv2.GetSize() == 0);
             REQUIRE(sv2.GetData() != nullptr);
@@ -105,7 +105,7 @@ TEST_CASE("StringView")
 
         SECTION("6,6")
         {
-            auto const sv2 = sv.GetSubstring(6, 6);
+            auto const sv2 = sv.GetSubString(6, 6);
             REQUIRE(sv2.IsEmpty());
             REQUIRE(sv2.GetSize() == 0);
             REQUIRE(sv2.GetData() != nullptr);

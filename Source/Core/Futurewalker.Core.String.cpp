@@ -236,7 +236,7 @@ auto String::GetChar(ValueType& value, IndexType const pos) const noexcept -> Bo
 /// @param[in] begin Index of beginning of range.
 /// @param[in] end Index of end of range.
 ///
-auto String::GetSubstring(IndexType const begin, IndexType const end) const noexcept -> String
+auto String::GetSubString(IndexType const begin, IndexType const end) const noexcept -> String
 {
     if (begin < 0 || begin > end || end > GetSize())
     {
@@ -379,11 +379,6 @@ auto String::Erase(IndexType const begin, IndexType const end) -> void
 auto String::Replace(IndexType const begin, IndexType const end, StringView const str) -> void
 {
     if (begin < 0 || begin > end || end > GetSize())
-    {
-        return;
-    }
-
-    if (IsEmpty())
     {
         return;
     }

@@ -14,9 +14,9 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 ///
-/// @brief View on array of UTF8 code units.
+/// @brief View on array of unicode code units.
 ///
-/// Lightweight non-owning view for UTF8 strings.
+/// Lightweight non-owning view for unicode span.
 /// Contains pair of (usually non null-terminated) buffer and its length.
 ///
 /// ### Recommendations
@@ -27,10 +27,11 @@ namespace FW_EXPORT
 /// StringView should only be used for transient objects like function arguments.
 /// Returning StringView from functions can lead to dangling pointers thus considered unsafe.
 ///
-class StringView final
+template <class Char>
+class StringViewT
 {
 public:
-    using ValueType = char8_t;
+    using ValueType = Char;
     using SizeType = SInt64;
     using IndexType = SInt64;
     using Pointer = FW_NS::Pointer<ValueType>;
@@ -41,24 +42,24 @@ public:
     using Iterator = ConstIterator;
 
 public:
-    constexpr StringView() noexcept = default;
-    constexpr StringView(StringView const&) noexcept = default;
-    constexpr StringView(ConstPointer str) noexcept;
-    constexpr StringView(ConstPointer str, SizeType len) noexcept;
-    constexpr StringView(ValueType const* str) noexcept;
-    constexpr StringView(ValueType const* str, SizeType len) noexcept;
+    constexpr StringViewT() noexcept = default;
+    constexpr StringViewT(StringViewT const&) noexcept = default;
+    constexpr StringViewT(ConstPointer str) noexcept;
+    constexpr StringViewT(ConstPointer str, SizeType len) noexcept;
+    constexpr StringViewT(ValueType const* str) noexcept;
+    constexpr StringViewT(ValueType const* str, SizeType len) noexcept;
 
     template <Concepts::Integral T>
-    StringView(T const&) = delete;
+    StringViewT(T const&) = delete;
 
-    StringView(std::nullptr_t) = delete;
+    StringViewT(std::nullptr_t) = delete;
 
     template <Concepts::ContiguousIterator It>
-    constexpr StringView(It begin, It end);
+    constexpr StringViewT(It begin, It end);
 
     [[nodiscard]] constexpr auto operator[](IndexType index) const -> ConstReference;
-    [[nodiscard]] constexpr auto operator==(StringView const& other) const noexcept -> bool;
-    [[nodiscard]] constexpr auto operator<=>(StringView const& other) const noexcept -> std::strong_ordering;
+    [[nodiscard]] constexpr auto operator==(StringViewT const& other) const noexcept -> bool;
+    [[nodiscard]] constexpr auto operator<=>(StringViewT const& other) const noexcept -> std::strong_ordering;
 
     [[nodiscard]] constexpr auto begin() const noexcept -> Iterator;
     [[nodiscard]] constexpr auto cbegin() const noexcept -> ConstIterator;
@@ -69,11 +70,11 @@ public:
     [[nodiscard]] constexpr auto GetSize() const noexcept -> SizeType;
     [[nodiscard]] constexpr auto GetData() const noexcept -> ConstPointer;
 
-    [[nodiscard]] constexpr auto GetSubstring(IndexType begin, IndexType end) const noexcept -> StringView;
-    [[nodiscard]] constexpr auto Contains(StringView const& str) const noexcept -> Bool;
-    [[nodiscard]] constexpr auto Count(StringView const& str) const noexcept -> SizeType;
-    [[nodiscard]] constexpr auto StartsWith(StringView const& str) const noexcept -> Bool;
-    [[nodiscard]] constexpr auto EndsWith(StringView const& str) const noexcept -> Bool;
+    [[nodiscard]] constexpr auto GetSubString(IndexType begin, IndexType end) const noexcept -> StringViewT;
+    [[nodiscard]] constexpr auto Contains(StringViewT const& str) const noexcept -> Bool;
+    [[nodiscard]] constexpr auto Count(StringViewT const& str) const noexcept -> SizeType;
+    [[nodiscard]] constexpr auto StartsWith(StringViewT const& str) const noexcept -> Bool;
+    [[nodiscard]] constexpr auto EndsWith(StringViewT const& str) const noexcept -> Bool;
 
 private:
     ConstPointer _data = nullptr;
@@ -83,16 +84,18 @@ private:
 ///
 /// @brief Construct StringView from null-terminated string.
 ///
-constexpr StringView::StringView(ConstPointer str) noexcept
+template <class Char>
+constexpr StringViewT<Char>::StringViewT(ConstPointer str) noexcept
   : _data {str}
-  , _size {std::char_traits<char8_t>::length(static_cast<const char8_t*>(str))}
+  , _size {std::char_traits<ValueType>::length(static_cast<ValueType const*>(str))}
 {
 }
 
 ///
 /// @brief Construct StringView from char span.
 ///
-constexpr StringView::StringView(ConstPointer str, SizeType len) noexcept
+template <class Char>
+constexpr StringViewT<Char>::StringViewT(ConstPointer str, SizeType len) noexcept
   : _data {str}
   , _size {len}
 {
@@ -101,24 +104,27 @@ constexpr StringView::StringView(ConstPointer str, SizeType len) noexcept
 ///
 /// @brief Construct StringView from null-terminated string.
 ///
-constexpr StringView::StringView(ValueType const* str) noexcept
-  : StringView(FW_NS::Pointer<ValueType const>(str))
+template <class Char>
+constexpr StringViewT<Char>::StringViewT(ValueType const* str) noexcept
+  : StringViewT(FW_NS::Pointer<ValueType const>(str))
 {
 }
 
 ///
 /// @brief Construct StringView from char span.
 ///
-constexpr StringView::StringView(ValueType const* str, SizeType len) noexcept
-  : StringView(FW_NS::Pointer<ValueType const>(str), len)
+template <class Char>
+constexpr StringViewT<Char>::StringViewT(ValueType const* str, SizeType len) noexcept
+  : StringViewT(FW_NS::Pointer<ValueType const>(str), len)
 {
 }
 
 ///
 /// @brief Construct StringView from pair of iterators.
 ///
+template <class Char>
 template <Concepts::ContiguousIterator It>
-constexpr StringView::StringView(It begin, It end)
+constexpr StringViewT<Char>::StringViewT(It begin, It end)
   : _data {std::to_address(begin)}
   , _size {std::distance(begin, end)}
 {
@@ -129,7 +135,8 @@ constexpr StringView::StringView(It begin, It end)
 ///
 /// @param[in] index Index of character.
 ///
-constexpr auto StringView::operator[](IndexType index) const -> ConstReference
+template <class Char>
+constexpr auto StringViewT<Char>::operator[](IndexType index) const -> ConstReference
 {
     return _data[index];
 }
@@ -137,7 +144,8 @@ constexpr auto StringView::operator[](IndexType index) const -> ConstReference
 ///
 /// @brief operator==
 ///
-constexpr auto StringView::operator==(StringView const& other) const noexcept -> bool
+template <class Char>
+constexpr auto StringViewT<Char>::operator==(StringViewT const& other) const noexcept -> bool
 {
     return operator<=>(other) == std::strong_ordering::equal;
 }
@@ -145,14 +153,15 @@ constexpr auto StringView::operator==(StringView const& other) const noexcept ->
 ///
 /// @brief operator<=>
 ///
-constexpr auto StringView::operator<=>(StringView const& other) const noexcept -> std::strong_ordering
+template <class Char>
+constexpr auto StringViewT<Char>::operator<=>(StringViewT const& other) const noexcept -> std::strong_ordering
 {
     auto const ord = (GetSize() <=> other.GetSize());
     if (ord == std::strong_ordering::equal)
     {
-        auto const data = static_cast<const char8_t*>(GetData());
-        auto const otherData = static_cast<const char8_t*>(other.GetData());
-        auto const r = std::char_traits<char8_t>::compare(data, otherData, static_cast<size_t>(GetSize()));
+        auto const data = static_cast<ValueType const*>(GetData());
+        auto const otherData = static_cast<ValueType const*>(other.GetData());
+        auto const r = std::char_traits<ValueType>::compare(data, otherData, static_cast<size_t>(GetSize()));
         return (r == 0) ? std::strong_ordering::equal : ((r < 0) ? std::strong_ordering::less : std::strong_ordering::greater);
     }
     return ord;
@@ -161,7 +170,8 @@ constexpr auto StringView::operator<=>(StringView const& other) const noexcept -
 ///
 /// @brief Get begin iterator.
 ///
-constexpr auto StringView::begin() const noexcept -> Iterator
+template <class Char>
+constexpr auto StringViewT<Char>::begin() const noexcept -> Iterator
 {
     return cbegin();
 }
@@ -169,7 +179,8 @@ constexpr auto StringView::begin() const noexcept -> Iterator
 ///
 /// @brief Get begin iterator.
 ///
-constexpr auto StringView::cbegin() const noexcept -> ConstIterator
+template <class Char>
+constexpr auto StringViewT<Char>::cbegin() const noexcept -> ConstIterator
 {
     return _data;
 }
@@ -177,7 +188,8 @@ constexpr auto StringView::cbegin() const noexcept -> ConstIterator
 ///
 /// @brief Get end iterator.
 ///
-constexpr auto StringView::end() const noexcept -> Iterator
+template <class Char>
+constexpr auto StringViewT<Char>::end() const noexcept -> Iterator
 {
     return cend();
 }
@@ -185,7 +197,8 @@ constexpr auto StringView::end() const noexcept -> Iterator
 ///
 /// @brief Get end iterator.
 ///
-constexpr auto StringView::cend() const noexcept -> ConstIterator
+template <class Char>
+constexpr auto StringViewT<Char>::cend() const noexcept -> ConstIterator
 {
     return _data + _size;
 }
@@ -193,7 +206,8 @@ constexpr auto StringView::cend() const noexcept -> ConstIterator
 ///
 /// @brief Get length of string.
 ///
-constexpr auto StringView::GetSize() const noexcept -> SizeType
+template <class Char>
+constexpr auto StringViewT<Char>::GetSize() const noexcept -> SizeType
 {
     return _size;
 }
@@ -201,7 +215,8 @@ constexpr auto StringView::GetSize() const noexcept -> SizeType
 ///
 /// @brief Empty string?
 ///
-constexpr auto StringView::IsEmpty() const noexcept -> Bool
+template <class Char>
+constexpr auto StringViewT<Char>::IsEmpty() const noexcept -> Bool
 {
     return GetSize() <= 0;
 }
@@ -209,7 +224,8 @@ constexpr auto StringView::IsEmpty() const noexcept -> Bool
 ///
 /// @brief Get data.
 ///
-constexpr auto StringView::GetData() const noexcept -> ConstPointer
+template <class Char>
+constexpr auto StringViewT<Char>::GetData() const noexcept -> ConstPointer
 {
     return _data;
 }
@@ -220,7 +236,8 @@ constexpr auto StringView::GetData() const noexcept -> ConstPointer
 /// @param begin Index of beginning of the substring.
 /// @param end Index of one past the end of the substring.
 ///
-constexpr auto StringView::GetSubstring(IndexType begin, IndexType end) const noexcept -> StringView
+template <class Char>
+constexpr auto StringViewT<Char>::GetSubString(IndexType begin, IndexType end) const noexcept -> StringViewT
 {
     auto const b = Utility::Clamp(begin, IndexType(0), GetSize());
     auto const e = Utility::Clamp(end, IndexType(0), GetSize());
@@ -230,7 +247,8 @@ constexpr auto StringView::GetSubstring(IndexType begin, IndexType end) const no
 ///
 /// @brief Returns true if the string contains the specified string.
 ///
-constexpr auto StringView::Contains(StringView const& str) const noexcept -> Bool
+template <class Char>
+constexpr auto StringViewT<Char>::Contains(StringViewT const& str) const noexcept -> Bool
 {
     auto i1 = SizeType(0);
     auto i2 = SizeType(0);
@@ -255,7 +273,8 @@ constexpr auto StringView::Contains(StringView const& str) const noexcept -> Boo
 ///
 /// @brief Count string.
 ///
-constexpr auto StringView::Count(StringView const& str) const noexcept -> SizeType
+template <class Char>
+constexpr auto StringViewT<Char>::Count(StringViewT const& str) const noexcept -> SizeType
 {
     auto i1 = SizeType(0);
     auto i2 = SizeType(0);
@@ -282,7 +301,8 @@ constexpr auto StringView::Count(StringView const& str) const noexcept -> SizeTy
 ///
 /// @brief Starts with string?
 ///
-constexpr auto StringView::StartsWith(StringView const& str) const noexcept -> Bool
+template <class Char>
+constexpr auto StringViewT<Char>::StartsWith(StringViewT const& str) const noexcept -> Bool
 {
     if (GetSize() < str.GetSize())
     {
@@ -302,7 +322,8 @@ constexpr auto StringView::StartsWith(StringView const& str) const noexcept -> B
 ///
 /// @brief Ends with string?
 ///
-constexpr auto StringView::EndsWith(StringView const& str) const noexcept -> Bool
+template <class Char>
+constexpr auto StringViewT<Char>::EndsWith(StringViewT const& str) const noexcept -> Bool
 {
     if (GetSize() < str.GetSize())
     {

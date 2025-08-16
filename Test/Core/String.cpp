@@ -179,6 +179,11 @@ TEST_CASE("String")
     {
         const char8_t* s = nullptr;
 
+        SECTION("Empty")
+        {
+            s = u8"";
+        }
+
         SECTION("Small")
         {
             s = u8"012345678901234567890";
@@ -194,33 +199,47 @@ TEST_CASE("String")
 
         auto testEquality = [&] { return str1 == String(StringView(str2.data(), SInt64(str2.size()))); };
 
-        str1.Replace(0, 0, u8" ");
-        str2.replace(0, 0, u8" ");
+        REQUIRE_NOTHROW(str1.Replace(0, 0, u8" "));
+        REQUIRE_NOTHROW(str2.replace(0, 0, u8" "));
         REQUIRE(testEquality());
 
-        str1.Replace(0, 1, u8" ");
-        str2.replace(0, 1, u8" ");
+        REQUIRE_NOTHROW(str1.Replace(0, 1, u8" "));
+        REQUIRE_NOTHROW(str2.replace(0, 1, u8" "));
         REQUIRE(testEquality());
 
-        str1.Replace(str1.GetView().GetSize() - 1, str1.GetView().GetSize(), u8" ");
-        str2.replace(str2.length() - 1, 1, u8" ");
+        REQUIRE_NOTHROW(str1.Replace(str1.GetView().GetSize() - 1, str1.GetView().GetSize(), u8" "));
+        REQUIRE_NOTHROW(str2.replace(str2.length() - 1, 1, u8" "));
         REQUIRE(testEquality());
 
-        str1.Replace(3, 5, u8"12345");
-        str2.replace(3, 2, u8"12345");
+        REQUIRE_NOTHROW(str1.Replace(str1.GetView().GetSize(), str1.GetView().GetSize(), u8"a"));
+        REQUIRE_NOTHROW(str2.replace(str2.end(), str2.end(), u8"a"));
         REQUIRE(testEquality());
 
-        str1.Replace(3, 5, u8"x");
-        str2.replace(3, 2, u8"x");
+        REQUIRE_NOTHROW(str1.Replace(0, str1.GetView().GetSize(), u8""));
+        REQUIRE_NOTHROW(str2.replace(str2.begin(), str2.end(), u8""));
         REQUIRE(testEquality());
 
-        str1.Replace(str1.GetView().GetSize() - 1, str1.GetView().GetSize(), u8"");
-        str2.replace(str2.length() - 1, 1, u8"");
-        REQUIRE(testEquality());
+        if (str1.GetView().GetSize() >= 5)
+        {
+            REQUIRE_NOTHROW(str1.Replace(3, 5, u8"12345"));
+            REQUIRE_NOTHROW(str2.replace(3, 2, u8"12345"));
+            REQUIRE(testEquality());
 
-        str1.Replace(str1.GetView().GetSize() - 1, str1.GetView().GetSize(), s);
-        str2.replace(str2.length() - 1, 1, s);
-        REQUIRE(testEquality());
+            REQUIRE_NOTHROW(str1.Replace(3, 5, u8"x"));
+            REQUIRE_NOTHROW(str2.replace(3, 2, u8"x"));
+            REQUIRE(testEquality());
+        }
+
+        if (str1.GetView().GetSize() >= 1)
+        {
+            REQUIRE_NOTHROW(str1.Replace(str1.GetView().GetSize() - 1, str1.GetView().GetSize(), u8""));
+            REQUIRE_NOTHROW(str2.replace(str2.length() - 1, 1, u8""));
+            REQUIRE(testEquality());
+
+            REQUIRE_NOTHROW(str1.Replace(str1.GetView().GetSize() - 1, str1.GetView().GetSize(), s));
+            REQUIRE_NOTHROW(str2.replace(str2.length() - 1, 1, s));
+            REQUIRE(testEquality());
+        }
     }
 
     SECTION("Insert")
@@ -239,10 +258,10 @@ TEST_CASE("String")
     SECTION("Substring")
     {
         auto str = String(u8"abc123");
-        REQUIRE(str.GetSubstring(0, 3) == String(u8"abc"));
-        REQUIRE(str.GetSubstring(3, 6) == String(u8"123"));
-        REQUIRE(str.GetSubstring(0, 0) == String(u8""));
-        REQUIRE(str.GetSubstring(str.GetView().GetSize(), str.GetView().GetSize()).IsEmpty());
+        REQUIRE(str.GetSubString(0, 3) == String(u8"abc"));
+        REQUIRE(str.GetSubString(3, 6) == String(u8"123"));
+        REQUIRE(str.GetSubString(0, 0) == String(u8""));
+        REQUIRE(str.GetSubString(str.GetView().GetSize(), str.GetView().GetSize()).IsEmpty());
     }
 
     SECTION("Swap")
