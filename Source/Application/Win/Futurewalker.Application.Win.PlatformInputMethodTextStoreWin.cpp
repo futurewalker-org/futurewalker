@@ -219,7 +219,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetText(
     {
         auto queryRange = Range<CodeUnit>(acpStart, acpEnd);
 
-        auto const textRange = editable->GetU16TextRange();
+        auto const textRange = editable->GetU16StringRange();
 
         if (queryRange.GetEnd() == -1)
         {
@@ -236,12 +236,12 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetText(
             return TS_E_INVALIDPOS;
         }
 
-        auto const text = editable->GetU16Text(queryRange);
+        auto const text = editable->GetU16String(queryRange);
 
         if (cchPlainReq > 0)
         {
-            auto const length = std::min<size_t>(cchPlainReq, text.size());
-            std::copy(text.begin(), text.end(), pchPlain);
+            auto const length = std::min<size_t>(cchPlainReq, static_cast<size_t>(text.GetView().GetSize()));
+            std::copy(text.GetView().begin(), text.GetView().end(), pchPlain);
             *pcchPlainRet = static_cast<ULONG>(length);
         }
 
@@ -266,7 +266,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::SetText(DWORD dwFla
         std::memcpy(text.data(), pchText, text.size() * sizeof(char16_t));
 
         editable->SetU16SelectedRange({acpStart, acpEnd}, true);
-        editable->InsertU16Text(text, 1, true);
+        editable->InsertU16String({text.begin(), text.end()}, 1, true);
         pChange->acpStart = acpStart;
         pChange->acpOldEnd = acpEnd;
         pChange->acpNewEnd = acpStart + static_cast<LONG>(text.size());
@@ -323,7 +323,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::InsertTextAtSelecti
         }
         else
         {
-            editable->InsertU16Text(text, 1, true);
+            editable->InsertU16String({text.begin(), text.end()}, 1, true);
             pChange->acpStart = static_cast<LONG>(selection.GetBegin());
             pChange->acpOldEnd = static_cast<LONG>(selection.GetEnd());
             pChange->acpNewEnd = pChange->acpStart + static_cast<LONG>(text.size());
@@ -405,7 +405,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetEndACP(LONG* pac
 {
     if (auto const editable = _owner.GetEditable())
     {
-        auto const range = editable->GetU16TextRange();
+        auto const range = editable->GetU16StringRange();
         *pacp = static_cast<LONG>(range.GetEnd());
     }
     return S_OK;
@@ -435,12 +435,13 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetTextExt(TsViewCo
 
     if (auto editable = _owner.GetEditable())
     {
+        auto const& text = editable->GetText();
         auto const& layoutInfo = editable->GetLayoutInfo();
 
-        // TODO: Should use UTF-8 or CodePoint range instead.
-        auto const range = Range<CodeUnit>(acpStart, acpEnd);
-        auto const glyphBegin = layoutInfo.GetGlyphIndex(range.GetBegin());
-        auto const glyphEnd = layoutInfo.GetGlyphIndex(range.GetEnd());
+        auto const begin = text.GetCodePointIndexByU16Index(acpStart);
+        auto const end = text.GetCodePointIndexByU16Index(acpEnd);
+        auto const glyphBegin = layoutInfo.GetGlyphIndex(begin);
+        auto const glyphEnd = layoutInfo.GetGlyphIndex(end);
         auto const posBegin = layoutInfo.GetGlyphPosition(glyphBegin).GetValueOrDefault();
         auto const posEnd = layoutInfo.GetGlyphPosition(glyphEnd).GetValueOrDefault();
 
@@ -700,7 +701,7 @@ auto PlatformInputMethodTextStoreWin::SetEditable(Weak<PlatformInputMethodEditab
         auto oldTextRange = Range<CodeUnit>();
         if (oldEditable)
         {
-            oldTextRange = oldEditable->GetU16TextRange();
+            oldTextRange = oldEditable->GetU16StringRange();
             oldEditable->SetTextStore(nullptr);
         }
 
@@ -708,7 +709,7 @@ auto PlatformInputMethodTextStoreWin::SetEditable(Weak<PlatformInputMethodEditab
         if (newEditable)
         {
             newEditable->SetTextStore(GetSelf());
-            newTextRange = newEditable->GetU16TextRange();
+            newTextRange = newEditable->GetU16StringRange();
         }
         NotifyTextChange(oldTextRange.GetBegin(), oldTextRange.GetEnd(), newTextRange.GetEnd());
         NotifySelectionChange();

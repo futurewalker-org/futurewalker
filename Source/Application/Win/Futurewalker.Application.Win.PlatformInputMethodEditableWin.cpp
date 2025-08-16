@@ -31,24 +31,24 @@ auto PlatformInputMethodEditableWin::SetTextStore(Shared<PlatformInputMethodText
     _textStore = textStore;
 }
 
-auto PlatformInputMethodEditableWin::GetText() const -> String
+auto PlatformInputMethodEditableWin::GetText() const -> Text
 {
     return _state.GetText();
 }
 
-auto PlatformInputMethodEditableWin::GetText(Range<CodePoint> range) const -> String
-{
-    return _state.GetText(range);
-}
-
-auto PlatformInputMethodEditableWin::GetTextRange() const -> Range<CodePoint>
-{
-    return _state.GetTextRange();
-}
-
-auto PlatformInputMethodEditableWin::SetText(String const& text) -> void
+auto PlatformInputMethodEditableWin::SetText(Text const& text) -> void
 {
     _state.SetText(text);
+}
+
+auto PlatformInputMethodEditableWin::GetString(Range<CodePoint> range) const -> String
+{
+    return _state.GetString(range);
+}
+
+auto PlatformInputMethodEditableWin::GetStringRange() const -> Range<CodePoint>
+{
+    return _state.GetStringRange();
 }
 
 auto PlatformInputMethodEditableWin::GetSelectedRange() const -> Range<CodePoint>
@@ -114,19 +114,19 @@ auto PlatformInputMethodEditableWin::DeleteSurroundingText(CodePoint before, Cod
     _state.DeleteSurroundingText(before, after, false);
 }
 
-auto PlatformInputMethodEditableWin::GetU16Text() const -> std::u16string_view
+auto PlatformInputMethodEditableWin::GetU16String() const -> U16String
 {
-    return _state.GetU16Text();
+    return _state.GetU16String();
 }
 
-auto PlatformInputMethodEditableWin::GetU16Text(Range<CodeUnit> range) const -> std::u16string_view
+auto PlatformInputMethodEditableWin::GetU16String(Range<CodeUnit> range) const -> U16String
 {
-    return _state.GetU16Text(range);
+    return _state.GetU16String(range);
 }
 
-auto PlatformInputMethodEditableWin::GetU16TextRange() const -> Range<CodeUnit>
+auto PlatformInputMethodEditableWin::GetU16StringRange() const -> Range<CodeUnit>
 {
-    return _state.GetU16TextRange();
+    return _state.GetU16StringRange();
 }
 
 auto PlatformInputMethodEditableWin::GetU16SelectedRange() const -> Range<CodeUnit>
@@ -149,7 +149,7 @@ auto PlatformInputMethodEditableWin::SetU16ComposingRange(Range<CodeUnit> range)
     _state.SetU16ComposingRange(range);
 }
 
-auto PlatformInputMethodEditableWin::InsertU16Text(std::u16string_view const text, CodePoint caretPosition, Bool anticipated) -> void
+auto PlatformInputMethodEditableWin::InsertU16String(U16StringView const text, CodePoint caretPosition, Bool anticipated) -> void
 {
     _state.InsertU16Text(text, caretPosition, anticipated);
 }

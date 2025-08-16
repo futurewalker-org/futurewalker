@@ -22,10 +22,11 @@ public:
 
     auto SetTextStore(Shared<PlatformInputMethodTextStoreWin> textStore) -> void;
 
-    auto GetText() const -> String override;
-    auto GetText(Range<CodePoint> range) const -> String override;
-    auto GetTextRange() const -> Range<CodePoint> override;
-    auto SetText(String const& text) -> void override;
+    auto GetText() const -> Text override;
+    auto SetText(Text const& text) -> void override;
+
+    auto GetString(Range<CodePoint> range) const -> String override;
+    auto GetStringRange() const -> Range<CodePoint> override;
 
     auto GetSelectedRange() const -> Range<CodePoint> override;
     auto SetSelectedRange(Range<CodePoint> const& range) -> void override;
@@ -42,15 +43,15 @@ public:
     auto InsertText(String const& text, CodePoint caretPosition) -> void override;
     auto DeleteSurroundingText(CodePoint before, CodePoint after) -> void override;
 
-    auto GetU16Text() const -> std::u16string_view;
-    auto GetU16Text(Range<CodeUnit> range) const -> std::u16string_view;
-    auto GetU16TextRange() const -> Range<CodeUnit>;
+    auto GetU16String() const -> U16String;
+    auto GetU16String(Range<CodeUnit> range) const -> U16String;
+    auto GetU16StringRange() const -> Range<CodeUnit>;
     auto GetU16SelectedRange() const -> Range<CodeUnit>;
     auto SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void;
     auto GetU16ComposingRange() const -> Range<CodeUnit>;
     auto SetU16ComposingRange(Range<CodeUnit> range) -> void;
 
-    auto InsertU16Text(std::u16string_view const text, CodePoint caretPosition, Bool anticipated) -> void;
+    auto InsertU16String(U16StringView const text, CodePoint caretPosition, Bool anticipated) -> void;
 
     auto GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>;
 
