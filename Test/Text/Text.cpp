@@ -124,7 +124,14 @@ TEST_CASE("Text")
                 {
                     for (auto y = 0; y < 2; ++y)
                     {
-                        text.Replace({x, y}, Text(u8""));
+                        SECTION("")
+                        {
+                            text.Replace({x, y}, Text(u8""));
+                        }
+                        SECTION("")
+                        {
+                            text.Replace({x, y}, Text());
+                        }
                     }
                 }
                 REQUIRE(text.GetString().IsEmpty());
@@ -140,6 +147,16 @@ TEST_CASE("Text")
                 REQUIRE(text.GetString() == replaceText.GetString());
                 REQUIRE(text.GetU16String() == replaceText.GetU16String());
             }
+
+            SECTION("With normal text")
+            {
+                auto text = Text();
+                text.Replace({0, 0}, Text(u8"a"));
+                text.Replace({1, 1}, Text());
+                text.Replace({0,1}, Text());
+                REQUIRE(text.GetString().IsEmpty());
+                REQUIRE(text.GetU16String().IsEmpty());
+            }
         }
 
         SECTION("On normal text")
@@ -152,46 +169,55 @@ TEST_CASE("Text")
                 {
                     text.Replace({0, 1}, Text(u8"B"));
                     REQUIRE(text.GetString() == u8"B");
+                    REQUIRE(text.GetU16String() == u"B");
                 }
                 SECTION("")
                 {
                     text.Replace({1, 0}, Text(u8"B"));
                     REQUIRE(text.GetString() == u8"A");
+                    REQUIRE(text.GetU16String() == u"A");
                 }
                 SECTION("")
                 {
                     text.Replace({0, 0}, Text(u8"B"));
                     REQUIRE(text.GetString() == u8"BA");
+                    REQUIRE(text.GetU16String() == u"BA");
                 }
                 SECTION("")
                 {
                     text.Replace({-1, 0}, Text(u8"B"));
                     REQUIRE(text.GetString() == u8"A");
+                    REQUIRE(text.GetU16String() == u"A");
                 }
                 SECTION("")
                 {
                     text.Replace({0, -1}, Text(u8"B"));
                     REQUIRE(text.GetString() == u8"A");
+                    REQUIRE(text.GetU16String() == u"A");
                 }
                 SECTION("")
                 {
                     text.Replace({1, 1}, Text(u8"B"));
                     REQUIRE(text.GetString() == u8"AB");
+                    REQUIRE(text.GetU16String() == u"AB");
                 }
                 SECTION("")
                 {
                     text.Replace({1, 2}, Text(u8"B"));
                     REQUIRE(text.GetString() == u8"A");
+                    REQUIRE(text.GetU16String() == u"A");
                 }
                 SECTION("")
                 {
                     text.Replace({2, 1}, Text(u8"B"));
                     REQUIRE(text.GetString() == u8"A");
+                    REQUIRE(text.GetU16String() == u"A");
                 }
                 SECTION("")
                 {
                     text.Replace({0, 2}, Text(u8"B"));
                     REQUIRE(text.GetString() == u8"A");
+                    REQUIRE(text.GetU16String() == u"A");
                 }
             }
 
@@ -203,36 +229,43 @@ TEST_CASE("Text")
                 {
                     text.Replace({0, 0}, Text(u8"C"));
                     REQUIRE(text.GetString() == u8"CAB");
+                    REQUIRE(text.GetU16String() == u"CAB");
                 }
                 SECTION("")
                 {
                     text.Replace({0, 1}, Text(u8"C"));
                     REQUIRE(text.GetString() == u8"CB");
+                    REQUIRE(text.GetU16String() == u"CB");
                 }
                 SECTION("")
                 {
                     text.Replace({1, 1}, Text(u8"C"));
                     REQUIRE(text.GetString() == u8"ACB");
+                    REQUIRE(text.GetU16String() == u"ACB");
                 }
                 SECTION("")
                 {
                     text.Replace({1, 2}, Text(u8"C"));
                     REQUIRE(text.GetString() == u8"AC");
+                    REQUIRE(text.GetU16String() == u"AC");
                 }
                 SECTION("")
                 {
                     text.Replace({2, 2}, Text(u8"C"));
                     REQUIRE(text.GetString() == u8"ABC");
+                    REQUIRE(text.GetU16String() == u"ABC");
                 }
                 SECTION("")
                 {
                     text.Replace({0, 2}, Text(u8"C"));
                     REQUIRE(text.GetString() == u8"C");
+                    REQUIRE(text.GetU16String() == u"C");
                 }
                 SECTION("")
                 {
                     text.Replace({2, 3}, Text(u8"C"));
                     REQUIRE(text.GetString() == u8"AB");
+                    REQUIRE(text.GetU16String() == u"AB");
                 }
             }
         }

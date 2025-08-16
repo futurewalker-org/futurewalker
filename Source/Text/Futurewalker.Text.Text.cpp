@@ -61,7 +61,7 @@ auto MakeStringDataU8(String& utf8String, U16String& utf16String, std::vector<Co
     auto i = int32_t();
     while (i < utf8Length)
     {
-        auto c = char32_t();
+        auto c = UChar32();
         auto next = i;
         U8_NEXT(utf8Str, next, utf8Length, c);
         if (0 <= c)
@@ -448,18 +448,14 @@ auto Text::Replace(Range<CodePoint> const& range, Text const& text) -> void
     {
         auto const otherState = text.GetImmutableState();
         {
-            auto const u8Begin = GetU8IndexByCodePointIndex(range.GetBegin());
-            auto const u8End = GetU8IndexByCodePointIndex(range.GetEnd());
             auto const& u8String = otherState ? otherState->u8String : String();
-            auto const& u8Bounds = otherState ? otherState->utf8Bounds : std::vector<CodeUnit>();
-            ReplaceU8Core({u8Begin, u8End}, u8String, u8Bounds);
+            auto const& u8Bounds = otherState ? otherState->utf8Bounds : std::vector<CodeUnit>(1, 0);
+            ReplaceU8Core(range, u8String, u8Bounds);
         }
         {
-            auto const u16Begin = GetU16IndexByCodePointIndex(range.GetBegin());
-            auto const u16End = GetU16IndexByCodePointIndex(range.GetEnd());
             auto const& u16String = otherState ? otherState->u16String : U16String();
-            auto const& u16Bounds = otherState ? otherState->utf16Bounds : std::vector<CodeUnit>();
-            ReplaceU16Core({u16Begin, u16End}, u16String, u16Bounds);
+            auto const& u16Bounds = otherState ? otherState->utf16Bounds : std::vector<CodeUnit>(1, 0);
+            ReplaceU16Core(range, u16String, u16Bounds);
         }
         auto const codePointCountDifference = text.GetCodePointCount() - range.GetLength();
         selfState->codePoints += codePointCountDifference;
@@ -470,15 +466,16 @@ auto Text::Replace(Range<CodePoint> const& range, Text const& text) -> void
     }
 }
 
-auto Text::ReplaceU8Core(Range<CodeUnit> const& u8Range, String const& u8String, std::vector<CodeUnit> const& u8Bounds) -> void
+auto Text::ReplaceU8Core(Range<CodePoint> const& range, String const& u8String, std::vector<CodeUnit> const& u8Bounds) -> void
 {
     if (auto const selfState = GetMutableState())
     {
+        auto const u8Range = Range<CodeUnit>(GetU8IndexByCodePointIndex(range.GetBegin()), GetU8IndexByCodePointIndex(range.GetEnd()));
         selfState->u8String.Replace(static_cast<SInt64>(u8Range.GetBegin()), static_cast<SInt64>(u8Range.GetEnd()), u8String);
 
-        auto const replaceBegin = IteratorAt(selfState->utf8Bounds, u8Range.GetBegin());
+        auto const replaceBegin = IteratorAt(selfState->utf8Bounds, range.GetBegin());
         auto const replaceBeginValue = *replaceBegin;
-        auto const replaceEnd = IteratorAt(selfState->utf8Bounds, u8Range.GetEnd());
+        auto const replaceEnd = IteratorAt(selfState->utf8Bounds, range.GetEnd() + 1);
         auto const replacedRange = InsertRange(selfState->utf8Bounds, replaceBegin, replaceEnd, u8Bounds.begin(), u8Bounds.end());
 
         for (auto& idx : replacedRange)
@@ -495,15 +492,16 @@ auto Text::ReplaceU8Core(Range<CodeUnit> const& u8Range, String const& u8String,
     }
 }
 
-auto Text::ReplaceU16Core(Range<CodeUnit> const& u16Range, U16String const& u16String, std::vector<CodeUnit> const& u16Bounds) -> void
+auto Text::ReplaceU16Core(Range<CodePoint> const& range, U16String const& u16String, std::vector<CodeUnit> const& u16Bounds) -> void
 {
     if (auto const selfState = GetMutableState())
     {
-        selfState->u16String.Replace(static_cast<SInt64>(u16Range.GetBegin()), static_cast<SInt64>(u16Range.GetLength()), u16String);
+        auto const u16Range = Range<CodeUnit>(GetU16IndexByCodePointIndex(range.GetBegin()), GetU16IndexByCodePointIndex(range.GetEnd()));
+        selfState->u16String.Replace(static_cast<SInt64>(u16Range.GetBegin()), static_cast<SInt64>(u16Range.GetEnd()), u16String);
 
-        auto const replaceBegin = IteratorAt(selfState->utf16Bounds, u16Range.GetBegin());
+        auto const replaceBegin = IteratorAt(selfState->utf16Bounds, range.GetBegin());
         auto const replaceBeginValue = *replaceBegin;
-        auto const replaceEnd = IteratorAt(selfState->utf16Bounds, u16Range.GetEnd());
+        auto const replaceEnd = IteratorAt(selfState->utf16Bounds, range.GetEnd() + 1);
         auto const replacedRange = InsertRange(selfState->utf16Bounds, replaceBegin, replaceEnd, u16Bounds.begin(), u16Bounds.end());
 
         for (auto& idx : replacedRange)

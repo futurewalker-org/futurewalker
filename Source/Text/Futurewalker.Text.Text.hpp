@@ -53,8 +53,8 @@ public:
     auto Replace(Range<CodePoint> const& range, Text const& text) -> void;
 
 private:
-    auto ReplaceU8Core(Range<CodeUnit> const& u8Range, String const& u8String, std::vector<CodeUnit> const& u8Bounds) -> void;
-    auto ReplaceU16Core(Range<CodeUnit> const& u16Range, U16String const& u16String, std::vector<CodeUnit> const& u16Bounds) -> void;
+    auto ReplaceU8Core(Range<CodePoint> const& range, String const& u8String, std::vector<CodeUnit> const& u8Bounds) -> void;
+    auto ReplaceU16Core(Range<CodePoint> const& range, U16String const& u16String, std::vector<CodeUnit> const& u16Bounds) -> void;
 
 private:
     struct State

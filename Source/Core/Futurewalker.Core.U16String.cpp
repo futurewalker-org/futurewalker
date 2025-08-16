@@ -161,8 +161,10 @@ auto U16String::Reserve(SizeType const capacity) -> void
 
 auto U16String::Replace(IndexType begin, IndexType end, U16StringView str) -> void
 {
-    begin = IndexType::Clamp(begin, 0, GetSize());
-    end = IndexType::Clamp(end, begin, GetSize());
+    if (begin < 0 || begin > end || end > GetSize())
+    {
+        return;
+    }
 
     auto const oldSize = GetSize();
     auto const newSize = oldSize - (end - begin) + str.GetSize();
