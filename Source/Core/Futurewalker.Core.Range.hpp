@@ -51,6 +51,35 @@ public:
         return Range(range._e, range._b);
     }
 
+    ///
+    /// @brief Clamp value to range.
+    ///
+    /// @param[in] range Range.
+    /// @param[in] value Value to clamp.
+    ///
+    /// @return value clamped to range.
+    ///
+    /// @note This function only works with forward ranges (begin<=end). You may want to normalize the range first to work on backward ranges.
+    ///
+    static constexpr auto Clamp(ValueType const& value, Range const& range) -> ValueType
+    {
+        return Utility::Clamp(value, range._b, range._e);
+    }
+
+    ///
+    /// @brief Clamp value to normalized range.
+    ///
+    /// @param[in] range Range.
+    /// @param[in] value Value to clamp.
+    ///
+    /// @return value clamped to normalized range.
+    ///
+    static constexpr auto NormalizedClamp(ValueType const& value, Range const& range) -> ValueType
+    {
+        auto const normalized = Normalize(range);
+        return Clamp(value, normalized);
+    }
+
     inline constexpr Range() = default;
     inline constexpr Range(Range const&) = default;
     inline constexpr auto operator=(Range const&) -> Range& = default;
@@ -85,6 +114,11 @@ public:
     inline constexpr auto GetLength() const noexcept -> ValueType
     {
         return _e - _b;
+    }
+
+    inline constexpr auto IsNormalized() const noexcept -> Bool
+    {
+        return _b <= _e;
     }
 
     friend inline constexpr bool operator==(Range const& l, Range const& r) noexcept
