@@ -1,6 +1,7 @@
 ﻿#include <catch2/catch_all.hpp>
 
 #include <Futurewalker.Application.Menu.hpp>
+#include <Futurewalker.Application.MenuItem.hpp>
 
 using namespace Futurewalker;
 
@@ -123,10 +124,13 @@ TEST_CASE("Menu")
             subMenuItems[2].SetTitle(u8"Open");
             subMenuItems[2].SetId(MenuItemId(102u));
 
+            auto subMenu = Menu();
+            subMenu.SetItems(subMenuItems);
+
             auto fileMenuItem = MenuItem(MenuItemType::SubMenu);
             fileMenuItem.SetTitle(u8"File");
             fileMenuItem.SetId(MenuItemId(100u));
-            fileMenuItem.SetSubMenu(subMenuItems);
+            fileMenuItem.SetSubMenu(subMenu);
 
             auto editMenuItem = MenuItem(MenuItemType::Item);
             editMenuItem.SetTitle(u8"Edit");
@@ -143,13 +147,13 @@ TEST_CASE("Menu")
             REQUIRE(items[0].GetTitle() == u8"File");
             REQUIRE(items[0].GetId() == MenuItemId(100u));
 
-            auto const& subMenu = items[0].GetSubMenu();
-            REQUIRE(subMenu.size() == 3);
-            REQUIRE(subMenu[0].GetTitle() == u8"New");
-            REQUIRE(subMenu[0].GetId() == MenuItemId(101u));
-            REQUIRE(subMenu[1].GetType() == MenuItemType::Separator);
-            REQUIRE(subMenu[2].GetTitle() == u8"Open");
-            REQUIRE(subMenu[2].GetId() == MenuItemId(102u));
+            subMenu = items[0].GetSubMenu();
+            REQUIRE(subMenu.GetItems().size() == 3);
+            REQUIRE(subMenu.GetItems()[0].GetTitle() == u8"New");
+            REQUIRE(subMenu.GetItems()[0].GetId() == MenuItemId(101u));
+            REQUIRE(subMenu.GetItems()[1].GetType() == MenuItemType::Separator);
+            REQUIRE(subMenu.GetItems()[2].GetTitle() == u8"Open");
+            REQUIRE(subMenu.GetItems()[2].GetId() == MenuItemId(102u));
 
             // Verify Edit item
             REQUIRE(items[1].GetType() == MenuItemType::Item);

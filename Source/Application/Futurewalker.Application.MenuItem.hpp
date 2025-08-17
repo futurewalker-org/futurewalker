@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.MenuItemType.hpp"
+#include "Futurewalker.Application.Menu.hpp"
 
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.Memory.hpp"
@@ -24,8 +25,8 @@ public:
     auto GetId() const -> MenuItemId;
     auto SetId(MenuItemId const id) -> void;
 
-    auto GetSubMenu() const -> MenuItemArray;
-    auto SetSubMenu(MenuItemArray const& subMenu) -> void;
+    auto GetSubMenu() const -> Menu;
+    auto SetSubMenu(Menu const& subMenu) -> void;
 
     auto GetTitle() const -> String;
     auto SetTitle(String const& title) -> void;
@@ -38,7 +39,7 @@ private:
     {
         MenuItemType type = MenuItemType::Item;
         MenuItemId id = 0u;
-        MenuItemArray subMenu;
+        Menu subMenu;
         String title;
         String subtitle;
     };

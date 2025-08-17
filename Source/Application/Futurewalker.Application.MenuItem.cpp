@@ -37,7 +37,7 @@ auto MenuItem::SetId(MenuItemId const id) -> void
     GetMutableState().id = id;
 }
 
-auto MenuItem::GetSubMenu() const -> MenuItemArray
+auto MenuItem::GetSubMenu() const -> Menu
 {
     if (auto const state = GetImmutableState())
     {
@@ -46,7 +46,7 @@ auto MenuItem::GetSubMenu() const -> MenuItemArray
     return {};
 }
 
-auto MenuItem::SetSubMenu(MenuItemArray const& subMenu) -> void
+auto MenuItem::SetSubMenu(Menu const& subMenu) -> void
 {
     GetMutableState().subMenu = subMenu;
 }

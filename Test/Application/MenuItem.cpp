@@ -15,7 +15,7 @@ TEST_CASE("MenuItem")
             REQUIRE(item.GetId() == 0u);
             REQUIRE(item.GetTitle().IsEmpty());
             REQUIRE(item.GetSubtitle().IsEmpty());
-            REQUIRE(item.GetSubMenu().empty());
+            REQUIRE(item.GetSubMenu().GetItems().empty());
 
             auto const separator = MenuItem(MenuItemType::Separator);
             REQUIRE(separator.GetType() == MenuItemType::Separator);
@@ -67,51 +67,58 @@ TEST_CASE("MenuItem")
 
         SECTION("Default submenu is empty")
         {
-            REQUIRE(parentItem.GetSubMenu().empty());
+            REQUIRE(parentItem.GetSubMenu().GetItems().empty());
         }
-        
+
         SECTION("Set and get submenu")
         {
-            auto subMenu = MenuItemArray();
-            subMenu.emplace_back(MenuItemType::Item);
-            subMenu.emplace_back(MenuItemType::Separator);
-            subMenu.emplace_back(MenuItemType::Item);
+            auto subMenuItems = MenuItemArray();
+            subMenuItems.emplace_back(MenuItemType::Item);
+            subMenuItems.emplace_back(MenuItemType::Separator);
+            subMenuItems.emplace_back(MenuItemType::Item);
             
-            subMenu[0].SetTitle(u8"First Item");
-            subMenu[2].SetTitle(u8"Second Item");
-            
+            subMenuItems[0].SetTitle(u8"First Item");
+            subMenuItems[2].SetTitle(u8"Second Item");
+
+            auto subMenu = Menu();
+            subMenu.SetItems(subMenuItems);
             parentItem.SetSubMenu(subMenu);
-            
+
             auto const& retrievedSubMenu = parentItem.GetSubMenu();
-            REQUIRE(retrievedSubMenu.size() == 3);
-            REQUIRE(retrievedSubMenu[0].GetType() == MenuItemType::Item);
-            REQUIRE(retrievedSubMenu[0].GetTitle() == u8"First Item");
-            REQUIRE(retrievedSubMenu[1].GetType() == MenuItemType::Separator);
-            REQUIRE(retrievedSubMenu[2].GetType() == MenuItemType::Item);
-            REQUIRE(retrievedSubMenu[2].GetTitle() == u8"Second Item");
+            REQUIRE(retrievedSubMenu.GetItems().size() == 3);
+            REQUIRE(retrievedSubMenu.GetItems()[0].GetType() == MenuItemType::Item);
+            REQUIRE(retrievedSubMenu.GetItems()[0].GetTitle() == u8"First Item");
+            REQUIRE(retrievedSubMenu.GetItems()[1].GetType() == MenuItemType::Separator);
+            REQUIRE(retrievedSubMenu.GetItems()[2].GetType() == MenuItemType::Item);
+            REQUIRE(retrievedSubMenu.GetItems()[2].GetTitle() == u8"Second Item");
         }
 
         SECTION("Nested submenus")
         {
-            auto nestedSubMenu = MenuItemArray();
-            nestedSubMenu.emplace_back(MenuItemType::Item);
-            nestedSubMenu[0].SetTitle(u8"Nested Item");
+            auto nestedSubMenuItems = MenuItemArray();
+            nestedSubMenuItems.emplace_back(MenuItemType::Item);
+            nestedSubMenuItems[0].SetTitle(u8"Nested Item");
+
+            auto nestedSubMenu = Menu();
+            nestedSubMenu.SetItems(nestedSubMenuItems);
 
             auto nestedParent = MenuItem(MenuItemType::SubMenu);
             nestedParent.SetTitle(u8"Nested Parent");
             nestedParent.SetSubMenu(nestedSubMenu);
 
-            auto topLevelSubMenu = MenuItemArray();
-            topLevelSubMenu.push_back(nestedParent);
-            
+            auto topLevelSubMenuItems = MenuItemArray();
+            topLevelSubMenuItems.push_back(nestedParent);
+
+            auto topLevelSubMenu = Menu();
+            topLevelSubMenu.SetItems(topLevelSubMenuItems);
             parentItem.SetSubMenu(topLevelSubMenu);
-            
+
             auto const& retrievedSubMenu = parentItem.GetSubMenu();
-            REQUIRE(retrievedSubMenu.size() == 1);
-            REQUIRE(retrievedSubMenu[0].GetType() == MenuItemType::SubMenu);
-            REQUIRE(retrievedSubMenu[0].GetTitle() == u8"Nested Parent");
-            REQUIRE(retrievedSubMenu[0].GetSubMenu().size() == 1);
-            REQUIRE(retrievedSubMenu[0].GetSubMenu()[0].GetTitle() == u8"Nested Item");
+            REQUIRE(retrievedSubMenu.GetItems().size() == 1);
+            REQUIRE(retrievedSubMenu.GetItems()[0].GetType() == MenuItemType::SubMenu);
+            REQUIRE(retrievedSubMenu.GetItems()[0].GetTitle() == u8"Nested Parent");
+            REQUIRE(retrievedSubMenu.GetItems()[0].GetSubMenu().GetItems().size() == 1);
+            REQUIRE(retrievedSubMenu.GetItems()[0].GetSubMenu().GetItems()[0].GetTitle() == u8"Nested Item");
         }
     }
 

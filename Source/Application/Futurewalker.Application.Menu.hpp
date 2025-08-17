@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.MenuType.hpp"
-#include "Futurewalker.Application.MenuItem.hpp"
+#include "Futurewalker.Application.MenuItemType.hpp"
 
 #include "Futurewalker.Core.Memory.hpp"
 
