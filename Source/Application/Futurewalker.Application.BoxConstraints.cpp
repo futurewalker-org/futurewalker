@@ -52,6 +52,20 @@ auto BoxConstraints::Constrain(BoxConstraints const& cs, Size<Dp> const& size) -
 }
 
 ///
+/// @brief Offset the box constraints by the given horizontal and vertical insets.
+///
+/// @param cs The box constraints to offset.
+/// @param horizontal The horizontal offset.
+/// @param vertical The vertical offset.
+///
+/// @return The offset box constraints.
+///
+auto BoxConstraints::Offset(BoxConstraints const& cs, Dp const horizontal, Dp const vertical) -> BoxConstraints
+{
+    return BoxConstraints(AxisConstraints::Offset(cs._width, horizontal), AxisConstraints::Offset(cs._height, vertical));
+}
+
+///
 /// @brief
 ///
 /// @return

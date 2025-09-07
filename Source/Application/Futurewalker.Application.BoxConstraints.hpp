@@ -23,6 +23,7 @@ public:
     static auto MakeMinMax(Dp const min, Dp const max) -> BoxConstraints;
 
     static auto Constrain(BoxConstraints const& cs, Size<Dp> const& size) -> Size<Dp>;
+    static auto Offset(BoxConstraints const& cs, Dp const horizontal, Dp const vertical) -> BoxConstraints;
 
 public:
     BoxConstraints() = default;
