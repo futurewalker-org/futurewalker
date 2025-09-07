@@ -74,7 +74,7 @@ auto PlatformInputMethodContextWin::AssociateFocus(HWND hwnd, Pointer<ITfDocumen
 {
     Microsoft::WRL::ComPtr<ITfDocumentMgr> previousDocumentMgr;
     auto const hr = _threadMgr->AssociateFocus(hwnd, static_cast<ITfDocumentMgr*>(documentMgr), previousDocumentMgr.GetAddressOf());
-    if (FAILED(hr) || !previousDocumentMgr)
+    if (FAILED(hr))
     {
         FW_DEBUG_LOG_ERROR("Failed to associate focus with ITfDocumentMgr");
     }
