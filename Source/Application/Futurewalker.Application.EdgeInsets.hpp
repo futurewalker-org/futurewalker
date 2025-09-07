@@ -146,6 +146,22 @@ public:
         _bottom = bottom;
     }
 
+    ///
+    /// @brief Get total horizontal insets.
+    ///
+    constexpr auto GetHorizontal() const -> Dp
+    {
+        return _leading + _trailing;
+    }
+
+    ///
+    /// @brief Get total vertical insets.
+    ///
+    constexpr auto GetVertical() const -> Dp
+    {
+        return _top + _bottom;
+    }
+
     auto operator=(EdgeInsets const&) -> EdgeInsets& = default;
     auto operator==(EdgeInsets const&) const -> bool = default;
 
