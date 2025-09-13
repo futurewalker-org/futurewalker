@@ -125,6 +125,27 @@ auto PlatformScreenContextWin::GetScreenFromWindow(Shared<PlatformWindow> window
 }
 
 ///
+/// @brief Get screen from rect.
+///
+auto PlatformScreenContextWin::GetScreenFromRect(Rect<Vp> const& rect) -> Shared<PlatformScreen>
+{
+    auto const l = static_cast<LONG>(Vp::Floor(rect.GetLeft()));
+    auto const t = static_cast<LONG>(Vp::Floor(rect.GetTop()));
+    auto const r = static_cast<LONG>(Vp::Floor(rect.GetRight()));
+    auto const b = static_cast<LONG>(Vp::Floor(rect.GetBottom()));
+    auto const targetRect = RECT {.left = l, .top = t, .right = r, .bottom = b};
+    auto const monitor = ::MonitorFromRect(&targetRect, MONITOR_DEFAULTTONEAREST);
+    for (auto const& screen : _screens)
+    {
+        if (screen.As<PlatformScreenWin>()->GetNativeHandle() == monitor)
+        {
+            return screen;
+        }
+    }
+    return {};
+}
+
+///
 /// @brief Refresh screen info.
 ///
 auto PlatformScreenContextWin::Refresh() -> void

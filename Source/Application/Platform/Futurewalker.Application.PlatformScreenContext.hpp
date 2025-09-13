@@ -21,6 +21,7 @@ public:
     virtual auto GetScreens() -> PlatformScreenArray = 0;
     virtual auto GetPrimaryScreen() -> Shared<PlatformScreen> = 0;
     virtual auto GetScreenFromWindow(Shared<PlatformWindow> window) -> Shared<PlatformScreen> = 0;
+    virtual auto GetScreenFromRect(Rect<Vp> const& rect) -> Shared<PlatformScreen> = 0;
     virtual auto Refresh() -> void = 0;
 };
 }

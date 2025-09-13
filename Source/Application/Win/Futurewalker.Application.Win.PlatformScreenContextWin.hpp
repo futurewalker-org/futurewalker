@@ -19,6 +19,7 @@ public:
     auto GetScreens() -> PlatformScreenArray override;
     auto GetPrimaryScreen() -> Shared<PlatformScreen> override;
     auto GetScreenFromWindow(Shared<PlatformWindow> window) -> Shared<PlatformScreen> override;
+    auto GetScreenFromRect(Rect<Vp> const& rect) -> Shared<PlatformScreen> override;
     auto Refresh() -> void override;
 
 private:

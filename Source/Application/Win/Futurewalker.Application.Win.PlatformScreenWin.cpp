@@ -5,6 +5,8 @@
 
 #include "Futurewalker.Unit.hpp"
 
+#include "Futurewalker.Base.Debug.hpp"
+
 #include "Futurewalker.Core.Win.PlatformStringFunctionWin.hpp"
 
 #include <shellscalingapi.h>
@@ -13,21 +15,28 @@ namespace FW_DETAIL_NS
 {
 namespace
 {
-auto GetMonitorDisplayScale(MONITORINFOEXW const& info) -> DisplayScale
+auto GetMonitorDisplayScale(HMONITOR const monitor) -> DisplayScale
 {
-    // GetDpiForMonitor() does not support per-monitor DPI atm.
-    // Use EnumDisplaySettingsW() instead.
-    auto devMode = DEVMODEW {};
-    if (::EnumDisplaySettingsW(info.szDevice, ENUM_CURRENT_SETTINGS, &devMode))
+    auto xDpi = UINT(USER_DEFAULT_SCREEN_DPI);
+    auto yDpi = UINT(USER_DEFAULT_SCREEN_DPI);
+    auto const hr = ::GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &xDpi, &yDpi);
+    if (SUCCEEDED(hr))
     {
-        return static_cast<float64_t>(devMode.dmPelsWidth) / (info.rcMonitor.right - info.rcMonitor.left);
+        FW_DEBUG_ASSERT(xDpi == yDpi);
+        return DisplayScale(static_cast<float64_t>(yDpi) / USER_DEFAULT_SCREEN_DPI);
     }
+    FW_DEBUG_ASSERT(false);
     return 1.0;
 }
 
 auto GetMonitorDisplayName(MONITORINFOEXW const& info) -> String
 {
     return PlatformStringFunctionWin::WideToUtf8(info.szDevice);
+}
+
+auto RectToVpRect(RECT const& rect) -> Rect<Vp>
+{
+    return Rect<Vp>(rect.left, rect.top, rect.right, rect.bottom);
 }
 }
 
@@ -61,27 +70,22 @@ auto PlatformScreenWin::Refresh() -> void
         auto info = MONITORINFOEXW {MONITORINFO {.cbSize = sizeof(MONITORINFOEXW)}};
         if (::GetMonitorInfoW(_monitor, &info))
         {
-            auto const frameRect = info.rcMonitor;
-            auto const spFrameRect = Rect<Vp>(frameRect.left, frameRect.top, frameRect.right, frameRect.bottom);
+            auto const bounds = RectToVpRect(info.rcMonitor);
+            auto const workArea = RectToVpRect(info.rcWork);
+            auto const safeArea = RectToVpRect(info.rcWork);
 
-            auto const workRect = info.rcWork;
-            auto const spWorkRect = Rect<Vp>(0, 0, workRect.right - workRect.left, workRect.bottom - workRect.top);
-
-            auto const displayScale = GetMonitorDisplayScale(info);
+            auto const displayScale = GetMonitorDisplayScale(_monitor);
             auto const backingScale = BackingScale(1.0);
-
-            auto const dpFrameRect = UnitFunction::ConvertVpToDp(spFrameRect, displayScale);
-            auto const dpWorkRect = UnitFunction::ConvertVpToDp(spWorkRect, displayScale);
 
             auto const displayName = GetMonitorDisplayName(info);
 
             _info = ScreenInfo {
-              .frameRect = dpFrameRect,
-              .workAreaRect = dpWorkRect,
-              .safeAreaRect = dpWorkRect,
-              .displayScale = displayScale,
-              .backingScale = backingScale,
-              .displayName = displayName,
+                .bounds = bounds,
+                .workArea = workArea,
+                .safeArea = safeArea,
+                .displayScale = displayScale,
+                .backingScale = backingScale,
+                .displayName = displayName,
             };
         }
     }

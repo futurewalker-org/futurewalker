@@ -61,6 +61,26 @@ auto Screen::GetScreenFromWindow(Shared<PlatformWindow> window) -> Shared<Screen
 }
 
 ///
+/// @brief Get screen from rectangle.
+///
+/// @param[in] rect Rectangle in virtual screen coordinate.
+///
+/// @return The closest screen to the given rectangle.
+///
+auto Screen::GetScreenFromRect(Rect<Vp> const& rect) -> Shared<Screen>
+{
+    if (auto const context = Locator::GetInstance<PlatformScreenContext>())
+    {
+        if (auto const platformObject = context->GetScreenFromRect(rect))
+        {
+            return Shared<Screen>::Make(PassKey<Screen>(), platformObject);
+        }
+    }
+    FW_DEBUG_LOG_ERROR("Screen::GetScreenFromRect(): Failed to obtain PlatformScreen object");
+    return {};
+}
+
+///
 /// @brief Equality comparison.
 ///
 auto Screen::IsEqual(const Screen& lhs, const Screen& rhs) -> Bool
