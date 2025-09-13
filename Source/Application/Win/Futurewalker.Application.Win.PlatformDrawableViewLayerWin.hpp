@@ -37,10 +37,9 @@ public:
 
     PlatformDrawableViewLayerWin(PassKey<PlatformViewLayer> key, Shared<PlatformDrawableViewLayerContextWin> context, Shared<PlatformDCompositionDeviceWin> dcompDevice);
 
-    auto SetSize(Size<Dp> const& size) -> void override;
     auto GetControl() -> Shared<PlatformViewLayerControl> override;
 
-    auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset, Float64 const scale) -> Bool;
+    auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset) -> Bool;
 
 protected:
     auto Initialize() -> void override;
@@ -52,6 +51,8 @@ private:
 private:
     auto CreateVisual() -> Microsoft::WRL::ComPtr<IDCompositionVisual3> override;
     auto DestroyVisual(Microsoft::WRL::ComPtr<IDCompositionVisual3> visual) -> void override;
+    auto OnDisplayScaleChange() -> void override;
+    auto DrawSurface() -> Bool;
     auto DestroySurface() -> void;
     auto GetSurfaceWidth() const -> IntPx;
     auto GetSurfaceHeight() const -> IntPx; 
@@ -61,7 +62,8 @@ private:
     Shared<PlatformDrawableViewLayerControlWin> _control;
     Microsoft::WRL::ComPtr<IDCompositionVisual3> _visual;
     Shared<Graphics::PlatformSwapChainSurfaceWin> _surface;
-    Size<Dp> _size;
+    Shared<Graphics::DisplayList> _displayList;
+    Offset<Dp> _offset;
 };
 }
 }

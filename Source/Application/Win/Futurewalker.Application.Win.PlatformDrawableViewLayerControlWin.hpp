@@ -17,7 +17,7 @@ class PlatformDrawableViewLayerControlWin : public PlatformDrawableViewLayerCont
 public:
     PlatformDrawableViewLayerControlWin(Shared<PlatformDrawableViewLayerWin> owner);
 
-    auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset, Float64 const scale) -> Bool override;
+    auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset) -> Bool override;
 
 private:
     auto GetLayer() -> Shared<PlatformDrawableViewLayerWin>;

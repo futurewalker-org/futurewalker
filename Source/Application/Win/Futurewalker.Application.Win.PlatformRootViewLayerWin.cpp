@@ -79,6 +79,19 @@ auto PlatformRootViewLayerWin::RootGetVisual() const -> Microsoft::WRL::ComPtr<I
 }
 
 ///
+/// @brief
+///
+auto PlatformRootViewLayerWin::RootGetDisplayScale() const -> DisplayScale
+{
+    if (_hwnd)
+    {
+        auto const dpi = ::GetDpiForWindow(_hwnd);
+        return DisplayScale(dpi) / DisplayScale(USER_DEFAULT_SCREEN_DPI);
+    }
+    return 1.0;
+}
+
+///
 /// @brief 
 ///
 /// @param hwnd 

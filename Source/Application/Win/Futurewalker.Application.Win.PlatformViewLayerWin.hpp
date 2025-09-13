@@ -37,15 +37,20 @@ class PlatformViewLayerWin : public PlatformViewLayer
 public:
     PlatformViewLayerWin(PassKey<PlatformViewLayer> key, Shared<PlatformDCompositionDeviceWin> const& dcompDevice);
 
-    auto AddChild(Shared<PlatformViewLayer> child, Shared<PlatformViewLayer> after) -> void override;
-    auto RemoveFromParent() -> void override;
-    auto GetChildren() -> PlatformViewLayerArray override;
-    auto SetOffset(Offset<Dp> const& offset) -> void override;
-    auto SetSize(Size<Dp> const& size) -> void override;
-    auto SetClipMode(ViewClipMode const clipMode) -> void override;
-    auto SetOpacity(Float64 const opacity) -> void override;
+    auto AddChild(Shared<PlatformViewLayer> child, Shared<PlatformViewLayer> after) -> void final override;
+    auto RemoveFromParent() -> void final override;
+    auto GetChildren() -> PlatformViewLayerArray final override;
+    auto SetOffset(Offset<Dp> const& offset) -> void final override;
+    auto SetSize(Size<Dp> const& size) -> void final override;
+    auto SetClipMode(ViewClipMode const clipMode) -> void final override;
+    auto SetOpacity(Float64 const opacity) -> void final override;
 
 protected:
+    auto Initialize() -> void override;
+
+    auto GetSize() const -> Size<Dp>;
+    auto GetOffset() const -> Offset<Dp>;
+
     auto GetDisplayScale() const -> DisplayScale;
     auto GetBackingScale() const -> BackingScale;
 
@@ -57,12 +62,14 @@ protected:
 
     auto IsRoot() const -> Bool;
     auto NotifyRootChanged() -> void;
+    auto NotifyDisplayScaleChanged() -> void;
 
     auto GetDCompositionDevice() -> Shared<PlatformDCompositionDeviceWin>;
 
 private:
     auto NotifyRootWindowHandleChanged(HWND const rootHwnd) -> void;
     auto NotifyRootVisualChanged(Microsoft::WRL::ComPtr<IDCompositionVisual3> rootVisual) -> void;
+    auto NotifyRootDisplayScaleChanged(DisplayScale const rootDisplayScale) -> void;
 
     auto GetBelowWindowHandle() const -> HWND;
     auto GetBelowWindowHandleCore(Shared<PlatformViewLayerWin const> child) const -> HWND;
@@ -87,14 +94,17 @@ private:
 private:
     virtual auto CreateWindowHandle(HWND parent) -> HWND;
     virtual auto DestroyWindowHandle(HWND handle) -> void;
+    virtual auto OnDisplayScaleChange() -> void;
 
 private:
     virtual auto RootGetVisual() const -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
     virtual auto RootGetWindowHandle() const -> HWND;
+    virtual auto RootGetDisplayScale() const -> DisplayScale;
 
 private:
     auto InternalGetVisual() const -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
     auto InternalGetWindowHandle() const -> HWND;
+    auto InternalGetDisplayScale() const -> DisplayScale;
     auto InternalGetParentVisual() const -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
     auto InternalGetParentWindowHandle() const -> HWND;
     auto InternalAttach() -> void;
@@ -114,8 +124,10 @@ private:
     Float64 _opacity = 1.0;
     Microsoft::WRL::ComPtr<IDCompositionVisual3> _rootVisual;
     HWND _rootHwnd = NULL;
+    DisplayScale _rootDisplayScale = 1.0;
     Microsoft::WRL::ComPtr<IDCompositionVisual3> _visual;
     HWND _hwnd = NULL;
+    DisplayScale _displayScale = 1.0;
 };
 }
 }

@@ -993,12 +993,17 @@ auto PlatformWindowWin::HandleDpiChanged(HWND hWnd, UINT msg, WPARAM wParam, LPA
 {
     if (msg == WM_DPICHANGED)
     {
-        if (_dpi != HIWORD(wParam))
+        auto const yDpi = HIWORD(wParam);
+        if (_dpi != yDpi)
         {
-            _dpi = HIWORD(wParam);
+            _dpi = yDpi;
 
             try
             {
+                if (_rootViewLayer)
+                {
+                    _rootViewLayer->NotifyDisplayScaleChanged();
+                }
                 auto event = Event<>(Event<PlatformWindowEvent::DisplayScaleChanged>());
                 SendWindowEventDetached(event);
             }
@@ -1010,7 +1015,11 @@ auto PlatformWindowWin::HandleDpiChanged(HWND hWnd, UINT msg, WPARAM wParam, LPA
 
         if (const auto rect = reinterpret_cast<RECT const*>(lParam))
         {
-            ::SetWindowPos(hWnd, NULL, rect->left, rect->top, rect->right, rect->bottom, SWP_NOOWNERZORDER | SWP_NOACTIVATE);
+            auto const x = rect->left;
+            auto const y = rect->top;
+            auto const w = rect->right - rect->left;
+            auto const h = rect->bottom - rect->top;
+            ::SetWindowPos(hWnd, NULL, x, y, w, h, SWP_NOOWNERZORDER | SWP_NOACTIVATE);
         }
         return 0;
     }

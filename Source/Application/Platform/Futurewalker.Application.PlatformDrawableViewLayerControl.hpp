@@ -27,11 +27,10 @@ public:
     ///
     /// @param[in] displayList Display list containing new content of composition view
     /// @param[in] offset Offset of content
-    /// @param[in] scale Scale of content
     ///
     /// @note Renders content of DisplayList into underlying buffer, then presents new content to screen.
     ///
-    virtual auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset, Float64 const scale) -> Bool = 0;
+    virtual auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset) -> Bool = 0;
 };
 }
 }

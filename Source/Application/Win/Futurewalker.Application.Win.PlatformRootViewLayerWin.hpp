@@ -29,6 +29,8 @@ public:
 
     auto GetControl() -> Shared<PlatformViewLayerControl> override;
 
+    using PlatformViewLayerWin::NotifyDisplayScaleChanged;
+
 private:
     auto CreateVisual() -> Microsoft::WRL::ComPtr<IDCompositionVisual3> override;
     auto DestroyVisual(Microsoft::WRL::ComPtr<IDCompositionVisual3> visual) -> void override;
@@ -36,6 +38,7 @@ private:
 private:
     auto RootGetWindowHandle() const -> HWND override;
     auto RootGetVisual() const -> Microsoft::WRL::ComPtr<IDCompositionVisual3> override;
+    auto RootGetDisplayScale() const -> DisplayScale override;
 
 private:
     auto MakeTarget(HWND hwnd) -> Microsoft::WRL::ComPtr<IDCompositionTarget>;

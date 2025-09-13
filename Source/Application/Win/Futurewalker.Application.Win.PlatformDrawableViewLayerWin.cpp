@@ -45,54 +45,21 @@ PlatformDrawableViewLayerWin::PlatformDrawableViewLayerWin(PassKey<PlatformViewL
 ///
 /// @brief
 ///
-/// @param size
-///
-auto PlatformDrawableViewLayerWin::SetSize(Size<Dp> const& size) -> void
-{
-    if (_size != size)
-    {
-        _size = size;
-    }
-    PlatformViewLayerWin::SetSize(size);
-}
-
-///
-/// @brief
-///
 auto PlatformDrawableViewLayerWin::GetControl() -> Shared<PlatformViewLayerControl>
 {
     return _control;
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param displayList 
+/// @param displayList
 ///
-auto PlatformDrawableViewLayerWin::Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset, Float64 const scale) -> Bool
+auto PlatformDrawableViewLayerWin::Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset) -> Bool
 {
-    if (displayList)
-    {
-        if (ResizeSurface())
-        {
-            if (_surface)
-            {
-                return _surface->Draw([&](Graphics::Scene& scene) {
-                    scene.PushTranslate({.x = offset.GetDeltaX(), .y = offset.GetDeltaY()});
-                    scene.PushScale({.x = scale, .y = scale});
-                    scene.AddDisplayList({.displayList = displayList});
-                    scene.Pop({});
-                    scene.Pop({});
-                });
-            }
-        }
-    }
-    else
-    {
-        DestroySurface();
-        return true;
-    }
-    return false;
+    _displayList = displayList;
+    _offset = offset;
+    return DrawSurface();
 }
 
 ///
@@ -100,6 +67,7 @@ auto PlatformDrawableViewLayerWin::Draw(Shared<Graphics::DisplayList> const& dis
 ///
 auto PlatformDrawableViewLayerWin::Initialize() -> void
 {
+    PlatformViewLayerWin::Initialize();
     _control = Shared<PlatformDrawableViewLayerControlWin>::Make(GetSelf());
 }
 
@@ -185,6 +153,46 @@ auto PlatformDrawableViewLayerWin::DestroyVisual(Microsoft::WRL::ComPtr<IDCompos
 ///
 /// @brief
 ///
+auto PlatformDrawableViewLayerWin::OnDisplayScaleChange() -> void
+{
+    DrawSurface();
+}
+
+///
+/// @brief
+///
+auto PlatformDrawableViewLayerWin::DrawSurface() -> Bool
+{
+    if (_displayList)
+    {
+        if (ResizeSurface())
+        {
+            if (_surface)
+            {
+                auto const displayScale = GetDisplayScale();
+                auto const backingScale = GetBackingScale();
+                auto const scale = static_cast<Float64>(displayScale) * static_cast<Float64>(backingScale);
+                return _surface->Draw([&](Graphics::Scene& scene) {
+                    scene.PushTranslate({.x = _offset.GetDeltaX(), .y = _offset.GetDeltaY()});
+                    scene.PushScale({.x = scale, .y = scale});
+                    scene.AddDisplayList({.displayList = _displayList});
+                    scene.Pop({});
+                    scene.Pop({});
+                });
+            }
+        }
+    }
+    else
+    {
+        DestroySurface();
+        return true;
+    }
+    return false;
+}
+
+///
+/// @brief
+///
 auto PlatformDrawableViewLayerWin::DestroySurface() -> void
 {
     ChangeSwapChain(nullptr);
@@ -198,7 +206,7 @@ auto PlatformDrawableViewLayerWin::GetSurfaceWidth() const -> IntPx
 {
     DisplayScale const displayScale = GetDisplayScale();
     BackingScale const backingScale = GetBackingScale();
-    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.GetWidth(), displayScale, backingScale)));
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(GetSize().GetWidth(), displayScale, backingScale)));
 }
 
 ///
@@ -208,6 +216,6 @@ auto PlatformDrawableViewLayerWin::GetSurfaceHeight() const -> IntPx
 {
     DisplayScale const displayScale = GetDisplayScale();
     BackingScale const backingScale = GetBackingScale();
-    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.GetHeight(), displayScale, backingScale)));
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(GetSize().GetHeight(), displayScale, backingScale)));
 }
 }

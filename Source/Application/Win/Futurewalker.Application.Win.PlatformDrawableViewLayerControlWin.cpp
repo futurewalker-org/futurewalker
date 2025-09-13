@@ -19,11 +19,11 @@ PlatformDrawableViewLayerControlWin::PlatformDrawableViewLayerControlWin(Shared<
 ///
 /// @param displayList
 ///
-auto PlatformDrawableViewLayerControlWin::Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset, Float64 const scale) -> Bool
+auto PlatformDrawableViewLayerControlWin::Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset) -> Bool
 {
     if (auto layer = GetLayer())
     {
-        return layer->Draw(displayList, offset, scale);
+        return layer->Draw(displayList, offset);
     }
     return false;
 }
