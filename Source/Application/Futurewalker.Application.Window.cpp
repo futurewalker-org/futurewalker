@@ -12,7 +12,9 @@
 #include "Futurewalker.Application.PlatformPointerEvent.hpp"
 #include "Futurewalker.Application.PlatformKeyEvent.hpp"
 #include "Futurewalker.Application.PlatformInputEvent.hpp"
+#include "Futurewalker.Application.PlatformViewLayerContext.hpp"
 #include "Futurewalker.Application.ApplicationContext.hpp"
+#include "Futurewalker.Application.ApplicationStyle.hpp"
 #include "Futurewalker.Application.FrameEvent.hpp"
 #include "Futurewalker.Application.PointerEvent.hpp"
 #include "Futurewalker.Application.KeyEvent.hpp"
@@ -22,6 +24,7 @@
 #include "Futurewalker.Application.RootViewEvent.hpp"
 #include "Futurewalker.Application.ViewLayer.hpp"
 #include "Futurewalker.Application.Screen.hpp"
+#include "Futurewalker.Application.MeasureScope.hpp"
 
 #include "Futurewalker.Event.EventReceiver.hpp"
 
@@ -125,7 +128,7 @@ auto Window::IsFocused() const -> Bool
 ///
 /// @brief Get size of window.
 ///
-auto Window::GetSize() const -> Size<Dp>
+auto Window::GetSize() const -> Size<Vp>
 {
     if (!IsClosed())
     {
@@ -139,7 +142,7 @@ auto Window::GetSize() const -> Size<Dp>
 ///
 /// @param size New size of the window.
 ///
-auto Window::SetSize(Size<Dp> const& size) -> void
+auto Window::SetSize(Size<Vp> const& size) -> void
 {
     if (!IsClosed())
     {
@@ -150,7 +153,7 @@ auto Window::SetSize(Size<Dp> const& size) -> void
 ///
 /// @brief Get position of window.
 ///
-auto Window::GetPosition() const -> Point<Dp>
+auto Window::GetPosition() const -> Point<Vp>
 {
     if (!IsClosed())
     {
@@ -164,7 +167,7 @@ auto Window::GetPosition() const -> Point<Dp>
 ///
 /// @param position New position of the window.
 ///
-auto Window::SetPosition(Point<Dp> const& position) -> void
+auto Window::SetPosition(Point<Vp> const& position) -> void
 {
     if (!IsClosed())
     {
@@ -173,31 +176,41 @@ auto Window::SetPosition(Point<Dp> const& position) -> void
 }
 
 ///
-/// @brief Get frame rectangle of the window.
+/// @brief Convert local point to global point.
 ///
-/// @return Frame rectangle of the window in global coordinate.
-///
-auto Window::GetFrameRect() const -> Rect<Dp>
+auto Window::LocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>
 {
-    if (!IsClosed())
-    {
-        return _platformObject->GetFrameRect();
-    }
-    return {};
+    auto const position = GetPosition();
+    return position + UnitFunction::ConvertDpToVp(point, GetDisplayScale()).As<Offset>();
 }
 
 ///
-/// @brief Get content rectangle of the window.
+/// @brief Convert global point to local point.
 ///
-/// @return Content rectangle of the window in local coordinate.
-///
-auto Window::GetContentRect() const -> Rect<Dp>
+auto Window::GlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>
 {
-    if (!IsClosed())
-    {
-        return _platformObject->GetContentRect();
-    }
-    return {};
+    auto const position = GetPosition();
+    return UnitFunction::ConvertVpToDp(point - position.As<Offset>(), GetDisplayScale());
+}
+
+///
+/// @brief Convert local rect to global rect.
+///
+auto Window::LocalToGlobalRect(Rect<Dp> const& rect) const -> Rect<Vp>
+{
+    auto const lt = LocalToGlobalPoint(rect.GetTopLeft());
+    auto const rb = LocalToGlobalPoint(rect.GetBottomRight());
+    return Rect<Vp>(lt.GetX(), lt.GetY(), rb.GetX(), rb.GetY());
+}
+
+///
+/// @brief Convert global rect to local rect.
+///
+auto Window::GlobalToLocalRect(Rect<Vp> const& rect) const -> Rect<Dp>
+{
+    auto const lt = GlobalToLocalPoint(rect.GetTopLeft());
+    auto const rb = GlobalToLocalPoint(rect.GetBottomRight());
+    return Rect<Dp>(lt.GetX(), lt.GetY(), rb.GetX(), rb.GetY());
 }
 
 ///
@@ -205,8 +218,8 @@ auto Window::GetContentRect() const -> Rect<Dp>
 ///
 auto Window::LocalToRootViewPoint(Point<Dp> const& point) const -> Point<Dp>
 {
-    const auto contentRect = GetContentRect();
-    return Point<Dp>(point.GetX() - contentRect.GetLeft(), point.GetY() - contentRect.GetTop());
+    const auto clientRect = GetClientRect();
+    return Point<Dp>(point.GetX() - clientRect.GetLeft(), point.GetY() - clientRect.GetTop());
 }
 
 ///
@@ -214,8 +227,8 @@ auto Window::LocalToRootViewPoint(Point<Dp> const& point) const -> Point<Dp>
 ///
 auto Window::RootViewToLocalPoint(Point<Dp> const& point) const -> Point<Dp>
 {
-    const auto contentRect = GetContentRect();
-    return Point<Dp>(point.GetX() + contentRect.GetLeft(), point.GetY() + contentRect.GetTop());
+    const auto clientRect = GetClientRect();
+    return Point<Dp>(point.GetX() + clientRect.GetLeft(), point.GetY() + clientRect.GetTop());
 }
 
 ///
@@ -236,42 +249,6 @@ auto Window::RootViewToLocalRect(Rect<Dp> const& rect) const -> Rect<Dp>
     const auto lt = RootViewToLocalPoint(rect.GetTopLeft());
     const auto rb = RootViewToLocalPoint(rect.GetBottomRight());
     return Rect<Dp>(lt.GetX(), lt.GetY(), rb.GetX(), rb.GetY());
-}
-
-///
-/// @brief
-///
-auto Window::LocalToOwnerPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) const -> Point<Dp>
-{
-    (void)owner;
-    return point;
-}
-
-///
-/// @brief
-///
-auto Window::OwnerToLocalPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) const -> Point<Dp>
-{
-    (void)owner;
-    return point;
-}
-
-///
-/// @brief
-///
-auto Window::LocalToOwnerRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) const -> Rect<Dp>
-{
-    (void)owner;
-    return rect;
-}
-
-///
-/// @brief
-///
-auto Window::OwnerToLocalRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) const -> Rect<Dp>
-{
-    (void)owner;
-    return rect;
 }
 
 ///
@@ -333,7 +310,7 @@ auto Window::GetDisplayScale() const -> DisplayScale
     {
         return _platformObject->GetDisplayScale();
     }
-    return 0.0;
+    return 1.0;
 }
 
 ///
@@ -345,7 +322,7 @@ auto Window::GetBackingScale() const -> BackingScale
     {
         return _platformObject->GetBackingScale();
     }
-    return 0.0;
+    return 1.0;
 }
 
 ///
@@ -424,6 +401,34 @@ auto Window::SetContent(Shared<View> contentView) -> void
     {
         _frameView->SetContent(contentView);
     }
+}
+
+///
+/// @brief
+///
+auto Window::MeasureSize(BoxConstraints const& constraints) -> Size<Dp>
+{
+    if (!IsClosed())
+    {
+        // We cannot directly measure root view since WindowFrameView expects window area rects to be set.
+        auto const insets = _platformObject->GetClientAreaInsets();
+        auto clientSize = Size<Dp>();
+        if (auto content = _frameView->GetContent())
+        {
+            auto const cs = BoxConstraints::Offset(constraints, -insets.GetTotalWidth(), -insets.GetTotalHeight());
+            clientSize = MeasureScope::MeasureView(*content, cs);
+        }
+        return Size<Dp>(clientSize.GetWidth() + insets.GetTotalWidth(), clientSize.GetHeight() + insets.GetTotalHeight());
+    }
+    return {};
+}
+
+///
+/// @brief
+///
+auto Window::SetBackgroundColor(AttributeArg<RGBAColor> color) -> void
+{
+    _backgroundColor.SetAttributeArg(color);
 }
 
 ///
@@ -544,7 +549,7 @@ auto Window::ReceiveWindowEvent(Event<>& event) -> Async<Bool>
     {
         if (_rootView && _platformObject)
         {
-            ResizeRootView(GetContentRect().GetSize());
+            ResizeRootView(GetClientRect().GetSize());
             UpdateRootView();
         }
     }
@@ -599,6 +604,9 @@ auto Window::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
     co_return false;
 }
 
+///
+/// @brief
+///
 auto Window::ReceiveInputEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<InputEvent>())
@@ -607,6 +615,21 @@ auto Window::ReceiveInputEvent(Event<>& event) -> Async<Bool>
         {
             auto rootViewEvent = Event<>(Event<RootViewEvent::Input>::Make(event));
             co_await _rootView->SendEvent(rootViewEvent);
+        }
+    }
+    co_return false;
+}
+
+///
+/// @brief
+///
+auto Window::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<AttributeEvent::ValueChanged>())
+    {
+        if (event.As<AttributeEvent::ValueChanged>()->GetId() == _backgroundColor.GetAttributeId())
+        {
+            UpdateBackgroundColor();
         }
     }
     co_return false;
@@ -648,7 +671,6 @@ auto Window::Realize(WindowOptions const& options) -> void
     const auto platformOptions = PlatformWindowOptions {
         .behavior = options.behavior,
         .backgroundStyle = options.backgroundStyle,
-        .backgroundColor = options.backgroundColor,
         .owner = owner,
         .closable = options.closable,
         .resizable = options.resizable,
@@ -679,6 +701,7 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
     _behavior = options.behavior;
 
     _platformContext = Locator::Resolve<PlatformWindowContext>();
+    _platformViewLayerContext = Locator::Resolve<PlatformViewLayerContext>();
 
     _eventReceiver = EventReceiver::Make({
         .dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); },
@@ -709,15 +732,24 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
       {
           .requestFrame = [&] { return RequestFrame(); },
           .getFrameTime = [&] { return GetFrameTime(); },
+          .localToGlobalPoint = [&](Point<Dp> const& point) { return LocalToGlobalPoint(RootViewToLocalPoint(point)); },
+          .globalToLocalPoint = [&](Point<Vp> const& point) { return RootViewToLocalPoint(GlobalToLocalPoint(point)); },
+          .makeOwnedWindow = [&](WindowOptions const& options) { return MakeOwnedWindow(options); },
       },
       _frameView);
 
     AttributeNode::SetValue<&WindowAttribute::AreaManager>(*this, _areaManager);
 
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(RGBAColor, BackgroundColor, ApplicationStyle::ColorSurface);
+    _backgroundColor.BindAttribute(*this, BackgroundColor);
+
+    EventReceiver::Connect(_backgroundColor, *this, &Window::ReceiveAttributeEvent);
+
+    UpdateBackgroundColor();
     UpdateAreaRects();
 
     AttachRootView();
-    ResizeRootView(GetContentRect().GetSize());
+    ResizeRootView(GetClientRect().GetSize());
 }
 
 ///
@@ -829,13 +861,37 @@ auto Window::UpdateRootView() -> void
 ///
 /// @brief
 ///
+auto Window::GetClientRect() const -> Rect<Dp>
+{
+    if (_platformObject)
+    {
+        return _platformObject->GetAreaRect(WindowArea::Client);
+    }
+    return {};
+}
+
+///
+/// @brief
+///
+auto Window::UpdateBackgroundColor() -> void
+{
+    if (!IsClosed())
+    {
+        _platformObject->SetBackgroundColor(_backgroundColor.GetValueOrDefault().GetRGBColor());
+    }
+}
+
+///
+/// @brief
+///
 auto Window::UpdateAreaRects() -> void
 {
-    if (_areaManager && _platformObject)
+    if (!IsClosed() && _areaManager)
     {
-        _areaManager->SetTitleBarAreaRect(_platformObject->GetAreaRect(WindowArea::TitleBar));
-        _areaManager->SetTitleBarAvailableAreaRect(_platformObject->GetAreaRect(WindowArea::TitleBarContent));
-        _areaManager->SetContentAreaRect(_platformObject->GetAreaRect(WindowArea::Content));
+        auto const clientOffset = _platformObject->GetAreaRect(WindowArea::Client).GetPosition().As<Offset>();
+        _areaManager->SetTitleBarAreaRect(Rect<Dp>::Offset(_platformObject->GetAreaRect(WindowArea::TitleBar), -clientOffset));
+        _areaManager->SetTitleBarAvailableAreaRect(Rect<Dp>::Offset(_platformObject->GetAreaRect(WindowArea::TitleBarContent), -clientOffset));
+        _areaManager->SetContentAreaRect(Rect<Dp>::Offset(_platformObject->GetAreaRect(WindowArea::Content), -clientOffset));
     }
 }
 
@@ -1107,5 +1163,17 @@ auto Window::ConvertPointerEvent(Event<> const& from) const noexcept -> Event<>
         }
     }
     return to;
+}
+
+///
+/// @brief Make owned window.
+///
+/// @param options Base window options.
+///
+auto Window::MakeOwnedWindow(WindowOptions const& options) -> Shared<Window>
+{
+    auto ownedOptions = options;
+    ownedOptions.owner = GetSelf();
+    return Window::Make(ownedOptions);
 }
 }

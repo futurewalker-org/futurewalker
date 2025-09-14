@@ -119,13 +119,15 @@ auto GetWindowStyle(PlatformWindowOptions const& options) -> DWORD
 ///
 auto GetWindowExStyle(PlatformWindowOptions const& options) -> DWORD
 {
+    auto exStyle = DWORD(0);
+
     if (options.backgroundStyle == WindowBackgroundStyle::System || options.backgroundStyle == WindowBackgroundStyle::Transparent)
     {
         // Remove redirection bitmap for DGI rendering.
         // hbrBackground in WNDCLASSEX is ignored when WS_EX_NOREDIRECTIONBITMAP is set.
-        return WS_EX_NOREDIRECTIONBITMAP;
+        exStyle |= WS_EX_NOREDIRECTIONBITMAP;
     }
-    return 0;
+    return exStyle;
 }
 
 ///

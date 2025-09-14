@@ -25,7 +25,6 @@ struct PlatformWindowOptions
 {
     WindowBehavior behavior = WindowBehavior::Normal;
     WindowBackgroundStyle backgroundStyle = WindowBackgroundStyle::System;
-    RGBAColor backgroundColor = RGBAColor(0, 0, 0, 1);
     Shared<PlatformWindow> owner = nullptr;
     String title = String();
     Bool closable = true;

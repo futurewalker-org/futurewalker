@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.WindowType.hpp"
+#include "Futurewalker.Application.WindowEvent.hpp"
 #include "Futurewalker.Application.WindowAreaManagerType.hpp"
 #include "Futurewalker.Application.WindowFrameViewType.hpp"
 #include "Futurewalker.Application.ViewType.hpp"
@@ -14,6 +15,7 @@
 #include "Futurewalker.Application.PlatformWindowType.hpp"
 #include "Futurewalker.Application.PlatformWindowContextType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
+#include "Futurewalker.Application.PlatformViewLayerContextType.hpp"
 
 #include "Futurewalker.Signal.TrackerType.hpp"
 
@@ -25,6 +27,8 @@
 #include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Attribute.AttributeNode.hpp"
+#include "Futurewalker.Attribute.AttributeArg.hpp"
+#include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.PassKey.hpp"
@@ -46,8 +50,8 @@ namespace FW_EXPORT
 ///
 /// ### Window creation
 ///
-/// Use `Window::Make()` to create window instance.  
-/// `WindowOptions` provides various customization options.  
+/// Use `Window::Make()` to create window instance.
+/// `WindowOptions` provides various customization options.
 ///
 /// ```cpp
 /// auto window = Window::Make(WindowOptions {
@@ -60,10 +64,11 @@ namespace FW_EXPORT
 ///
 /// While you can manage lifetime of `Window` itself, underlying representation of `Window` has its own lifecycle.  
 ///
-/// `WindowEvent::CloseRequested` is used to query whether the window is closable or not before closing window.
-/// In some cases, windows must be closed . In those cases `WindowEvent::CloseRequested` will not be called.
+/// `WindowEvent::CloseRequested` will be sent to check whether the window is closable or not before closing window.  
+/// In some cases, `WindowEvent::CloseRequested` will not be sent and the window will be closed immediately.  
 ///
-/// When a `Window` is closed, it will receive `WindowEvent::Closed`. After receiving this event, `IsClosed()` will return `true`.  
+/// When a `Window` is closed, it will receive `WindowEvent::Closed`.  
+/// After receiving this event, `IsClosed()` will return `true`.  
 ///
 /// After closed event, further window operations (including `SetVisible()`) will be ignored and have not effect.  
 /// There's no way to restore closed window to non-closed state.  
@@ -113,26 +118,21 @@ public:
     auto IsActive() const -> Bool;
     auto IsFocused() const -> Bool;
 
-    auto GetSize() const -> Size<Dp>;
-    auto SetSize(Size<Dp> const& size) -> void;
+    auto GetSize() const -> Size<Vp>;
+    auto SetSize(Size<Vp> const& size) -> void;
 
-    auto GetPosition() const -> Point<Dp>;
-    auto SetPosition(Point<Dp> const& position) -> void;
+    auto GetPosition() const -> Point<Vp>;
+    auto SetPosition(Point<Vp> const& position) -> void;
 
-    auto GetFrameRect() const -> Rect<Dp>;
-    auto GetContentRect() const -> Rect<Dp>;
+    auto LocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>;
+    auto GlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>;
+    auto LocalToGlobalRect(Rect<Dp> const& rect) const -> Rect<Vp>;
+    auto GlobalToLocalRect(Rect<Vp> const& rect) const -> Rect<Dp>;
 
     auto LocalToRootViewPoint(Point<Dp> const& point) const -> Point<Dp>;
     auto RootViewToLocalPoint(Point<Dp> const& point) const -> Point<Dp>;
-
     auto LocalToRootViewRect(Rect<Dp> const& rect) const -> Rect<Dp>;
     auto RootViewToLocalRect(Rect<Dp> const& rect) const -> Rect<Dp>;
-
-    auto LocalToOwnerPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) const -> Point<Dp>;
-    auto OwnerToLocalPoint(Point<Dp> const& point, ReferenceArg<Window const> owner) const -> Point<Dp>;
-
-    auto LocalToOwnerRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) const -> Rect<Dp>;
-    auto OwnerToLocalRect(Rect<Dp> const& rect, ReferenceArg<Window const> owner) const -> Rect<Dp>;
 
     auto GetTitle() const -> String;
     auto SetTitle(String const& title) -> void;
@@ -156,6 +156,10 @@ public:
 
     auto GetContent() -> Shared<View>;
     auto SetContent(Shared<View> content) -> void;
+
+    auto MeasureSize(BoxConstraints const& constraints) -> Size<Dp>;
+
+    auto SetBackgroundColor(AttributeArg<RGBAColor> color) -> void;
 
     auto GetTracker() -> Tracker&;
     auto GetTracker() const -> Tracker const&;
@@ -184,6 +188,7 @@ private:
     auto ReceivePointerEvent(Event<>& event) -> Async<Bool>;
     auto ReceiveKeyEvent(Event<>& event) -> Async<Bool>;
     auto ReceiveInputEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 
 private:
     auto GetSelfBase() -> Shared<Window>;
@@ -202,6 +207,9 @@ private:
     auto ResizeRootView(Size<Dp> const& size) -> void;
     auto UpdateRootView() -> void;
 
+    auto GetClientRect() const -> Rect<Dp>;
+
+    auto UpdateBackgroundColor() -> void;
     auto UpdateAreaRects() -> void;
 
     auto GetPlatformViewLayer() -> Shared<PlatformViewLayer>;
@@ -214,6 +222,8 @@ private:
 
     auto ConvertPointerEvent(Event<> const& from) const noexcept -> Event<>;
 
+    auto MakeOwnedWindow(WindowOptions const& options) -> Shared<Window>;
+
 private:
     Weak<Window> _self;
     Weak<Window> _owner;
@@ -222,12 +232,14 @@ private:
     Shared<AttributeNode> _attributeNode;
     Shared<PlatformWindowContext> _platformContext;
     Shared<PlatformWindow> _platformObject;
+    Shared<PlatformViewLayerContext> _platformViewLayerContext;
     Unique<EventReceiver> _eventReceiver;
     Shared<ViewLayer> _rootViewLayer;
     Shared<InputMethod> _inputMethod;
     Shared<RootView> _rootView;
     Shared<WindowFrameView> _frameView;
     Shared<WindowAreaManager> _areaManager;
+    AttributeAccessor<RGBAColor> _backgroundColor;
 };
 
 ///

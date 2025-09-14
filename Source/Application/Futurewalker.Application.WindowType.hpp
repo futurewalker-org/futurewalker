@@ -48,6 +48,13 @@ enum class WindowArea
     None = 0,
 
     ///
+    /// @brief Client area of the window.
+    ///
+    /// This is the area where the framework draws the content of the window, including client rendered title bar.
+    ///
+    Client,
+
+    ///
     /// @brief Total area of title bar.
     ///
     TitleBar,
@@ -125,11 +132,6 @@ struct WindowOptions
     /// Determines how window's background will be drawn.
     ///
     WindowBackgroundStyle backgroundStyle = WindowBackgroundStyle::System;
-
-    ///
-    /// @brief Background color of window.
-    ///
-    RGBAColor backgroundColor = RGBAColor(0, 0, 0, 1);
 
     ///
     /// @brief Owner of this window.

@@ -30,7 +30,7 @@ public:
 
     auto GetMeasuredSize(ReferenceArg<View> view) -> Size<Dp>;
 
-    static auto ArrangeRootView(PassKey<RootView>, View& view)  -> void;
+    static auto ArrangeView(PassKey<RootView>, View& view)  -> void;
     
 private:
     View& _view;

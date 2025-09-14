@@ -226,8 +226,9 @@ auto RootView::UpdateLayout() -> void
 {
     try
     {
-        MeasureScope::MeasureRootView({}, *this, _layoutInfo.GetSize());
-        ArrangeScope::ArrangeRootView({}, *this);
+        auto const size = _layoutInfo.GetSize();
+        MeasureScope::MeasureView(*this, BoxConstraints::MakeExact(size.GetWidth(), size.GetHeight()));
+        ArrangeScope::ArrangeView({}, *this);
     }
     catch (...)
     {
@@ -599,6 +600,30 @@ auto RootView::RootInvalidateVisual() -> void
 ///
 /// @brief
 ///
+auto RootView::RootLocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>
+{
+    if (_delegate.localToGlobalPoint)
+    {
+        return _delegate.localToGlobalPoint(point);
+    }
+    return UnitFunction::ConvertDpToVp(point, GetDisplayScale());
+}
+
+///
+/// @brief
+///
+auto RootView::RootGlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>
+{
+    if (_delegate.globalToLocalPoint)
+    {
+        return _delegate.globalToLocalPoint(point);
+    }
+    return UnitFunction::ConvertVpToDp(point, GetDisplayScale());
+}
+
+///
+/// @brief
+///
 auto RootView::RootCapturePointer(PointerId const id, Shared<View> const& view) -> void
 {
     SetPointerCaptureView(id, view);
@@ -624,5 +649,17 @@ auto RootView::RootCancelInput(Shared<View> const& view) -> void
     {
         // TODO: send events.
     }
+}
+
+///
+/// @brief
+///
+auto RootView::RootMakeOwnedWindow(WindowOptions const& options) -> Shared<Window>
+{
+    if (_delegate.makeOwnedWindow)
+    {
+        return _delegate.makeOwnedWindow(options);
+    }
+    return {};
 }
 }

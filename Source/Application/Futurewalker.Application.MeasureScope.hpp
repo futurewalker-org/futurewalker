@@ -36,7 +36,7 @@ public:
     auto SetMeasuredSize(Size<Dp> const& size) -> void;
     auto SetMeasuredSize(Dp const width, Dp const height) -> void;
 
-    static auto MeasureRootView(PassKey<RootView>, View& view, Size<Dp> const& size) -> void;
+    static auto MeasureView(View& view, BoxConstraints const& constraints) -> Size<Dp>;
 
 private:
     View& _view;

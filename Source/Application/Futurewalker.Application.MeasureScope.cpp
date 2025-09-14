@@ -116,17 +116,20 @@ auto MeasureScope::SetMeasuredSize(Dp const width, Dp const height) -> void
 }
 
 ///
-/// @brief Measure from RootView.
+/// @brief Measures given view and returns measured size.
 ///
-/// @param view
-/// @param size
+/// @param view View to measure
+/// @param constraints Constraints to apply
 ///
-auto MeasureScope::MeasureRootView(PassKey<RootView>, View& view, Size<Dp> const& size) -> void
+/// @return Measured size of the view
+///
+/// @note When the view is already being measured or arranged, this function will not return correct result.
+///
+auto MeasureScope::MeasureView(View& view, BoxConstraints const& constraints) -> Size<Dp>
 {
     auto parameter = MeasureParameter();
-    auto const width = AxisConstraints::MakeExact(size.GetWidth());
-    auto const height = AxisConstraints::MakeExact(size.GetHeight());
-    parameter.SetConstraints(BoxConstraints(width, height));
+    parameter.SetConstraints(constraints);
     view.EnterMeasureScope({}, parameter);
+    return view.GetMeasuredSize(PassKey<MeasureScope>());
 }
 }

@@ -3,6 +3,7 @@
 
 #include "Futurewalker.Application.ViewType.hpp"
 #include "Futurewalker.Application.RootViewType.hpp"
+#include "Futurewalker.Application.WindowType.hpp"
 #include "Futurewalker.Application.MeasureScopeType.hpp"
 #include "Futurewalker.Application.MeasureParameterType.hpp"
 #include "Futurewalker.Application.ArrangeScopeType.hpp"
@@ -22,6 +23,8 @@
 #include "Futurewalker.Attribute.AttributeNode.hpp"
 
 #include "Futurewalker.Geometry.hpp"
+
+#include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.PassKey.hpp"
@@ -76,6 +79,12 @@ public:
 
     auto FindPointerTrackingView(Event<PointerEvent> const& event) -> Shared<View>;
 
+    auto LocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>;
+    auto GlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>;
+
+    auto LocalToGlobalRect(Rect<Dp> const& rect) const -> Rect<Vp>;
+    auto GlobalToLocalRect(Rect<Vp> const& rect) const -> Rect<Dp>;
+
     auto LocalToRootPoint(Point<Dp> const& point) const -> Point<Dp>;
     auto RootToLocalPoint(Point<Dp> const& point) const -> Point<Dp>;
 
@@ -121,6 +130,8 @@ public:
     auto GetLayoutDirection() const -> LayoutDirection;
     auto GetRawLayoutDirection() const -> ViewLayoutDirection;
     auto SetRawLayoutDirection(ViewLayoutDirection const layoutDirection) -> void;
+
+    auto MakeOwnedWindow(WindowOptions const& options) -> Shared<Window>;
 
     auto GetTracker() -> Tracker&;
     auto GetTracker() const -> Tracker const&;
@@ -212,9 +223,12 @@ private:
     virtual auto RootGetLayer() const -> ViewLayer const&;
     virtual auto RootInvalidateLayout() -> void;
     virtual auto RootInvalidateVisual() -> void;
+    virtual auto RootLocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>;
+    virtual auto RootGlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>;
     virtual auto RootCapturePointer(PointerId const id, Shared<View> const& view) -> void;
     virtual auto RootReleasePointer(PointerId const id, Shared<View> const& view) -> void;
     virtual auto RootCancelInput(Shared<View> const& view) -> void;
+    virtual auto RootMakeOwnedWindow(WindowOptions const& options) -> Shared<Window>;
 
 private:
     auto GetSelfBase() -> Shared<View>;

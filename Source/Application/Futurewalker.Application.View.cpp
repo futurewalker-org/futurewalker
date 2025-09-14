@@ -152,6 +152,44 @@ auto View::FindPointerTrackingView(Event<PointerEvent> const& event) -> Shared<V
 }
 
 ///
+/// @brief Convert local point to global point.
+///
+auto View::LocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>
+{
+    auto const rootPoint = LocalToRootPoint(point);
+    return GetRoot()->RootLocalToGlobalPoint(rootPoint);
+}
+
+///
+/// @brief Convert global point to local point.
+///
+auto View::GlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>
+{
+    auto const rootPoint = GetRoot()->RootGlobalToLocalPoint(point);
+    return RootToLocalPoint(rootPoint);
+}
+
+///
+/// @brief Convert local rect to global rect.
+///
+auto View::LocalToGlobalRect(Rect<Dp> const& rect) const -> Rect<Vp>
+{
+    auto const tl = LocalToGlobalPoint(rect.GetTopLeft());
+    auto const br = LocalToGlobalPoint(rect.GetBottomRight());
+    return Rect<Vp>(tl.GetX(), tl.GetY(), br.GetX(), br.GetY());
+}
+
+///
+/// @brief Convert global rect to local rect.
+//
+auto View::GlobalToLocalRect(Rect<Vp> const& rect) const -> Rect<Dp>
+{
+    auto const tl = GlobalToLocalPoint(rect.GetTopLeft());
+    auto const br = GlobalToLocalPoint(rect.GetBottomRight());
+    return Rect<Dp>(tl.GetX(), tl.GetY(), br.GetX(), br.GetY());
+}
+
+///
 /// @brief Convert local position to root position.
 ///
 /// @param point
@@ -619,6 +657,18 @@ auto View::SetRawLayoutDirection(ViewLayoutDirection const layoutDirection) -> v
 }
 
 ///
+/// @brief
+///
+auto View::MakeOwnedWindow(WindowOptions const& options) -> Shared<Window>
+{
+    if (auto root = GetRoot())
+    {
+        return root->RootMakeOwnedWindow(options);
+    }
+    return {};
+}
+
+///
 /// @brief 
 ///
 auto View::GetTracker() -> Tracker&
@@ -699,6 +749,12 @@ auto View::EnterMeasureScope(PassKey<MeasureScope>, MeasureParameter const& para
 {
     try
     {
+        if (_layoutInfo.IsMeasuring() || _layoutInfo.IsArranging())
+        {
+            FW_DEBUG_LOG_ERROR("View::EnterMeasureScope: Re-entrant measure/arrange detected.");
+            FW_DEBUG_ASSERT(false);
+        }
+
         if (_layoutInfo.BeginMeasure(parameter))
         {
             auto scope = MeasureScope(PassKey<View>(), *this, parameter);
@@ -722,6 +778,12 @@ auto View::EnterArrangeScope(PassKey<ArrangeScope>, ArrangeParameter const& para
 {
     try
     {
+        if (_layoutInfo.IsMeasuring() || _layoutInfo.IsArranging())
+        {
+            FW_DEBUG_LOG_ERROR("View::EnterArrangeScope: Re-entrant measure/arrange detected.");
+            FW_DEBUG_ASSERT(false);
+        }
+
         if (_layoutInfo.BeginArrange(parameter))
         {
             try
@@ -1479,10 +1541,26 @@ auto View::RootInvalidateVisual() -> void
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param id 
-/// @param view 
+auto View::RootLocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>
+{
+    return UnitFunction::ConvertDpToVp(point, GetDisplayScale());
+}
+
+///
+/// @brief
+///
+auto View::RootGlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>
+{
+    return UnitFunction::ConvertVpToDp(point, GetDisplayScale());
+}
+
+///
+/// @brief
+///
+/// @param id
+/// @param view
 ///
 auto View::RootCapturePointer(PointerId const id, Shared<View> const& view) -> void
 {
@@ -1508,6 +1586,15 @@ auto View::RootReleasePointer(PointerId const id, Shared<View> const& view) -> v
 auto View::RootCancelInput(Shared<View> const& view) -> void
 {
     (void)view;
+}
+
+///
+/// @brief
+///
+auto View::RootMakeOwnedWindow(WindowOptions const& options) -> Shared<Window>
+{
+    (void)options;
+    return {};
 }
 
 ///
@@ -1996,6 +2083,8 @@ auto View::NotifyEnabledChanged(Bool const enabled) -> void
 ///
 auto View::NotifyDisplayScaleChanged(DisplayScale const displayScale) -> void
 {
+    FW_DEBUG_ASSERT(displayScale > 0);
+
     try
     {
         if (_displayScale != displayScale)
@@ -2029,6 +2118,8 @@ auto View::NotifyDisplayScaleChanged(DisplayScale const displayScale) -> void
 ///
 auto View::NotifyBackingScaleChanged(BackingScale const backingScale) -> void
 {
+    FW_DEBUG_ASSERT(backingScale > 0);
+
     try
     {
         if (_backingScale != backingScale)

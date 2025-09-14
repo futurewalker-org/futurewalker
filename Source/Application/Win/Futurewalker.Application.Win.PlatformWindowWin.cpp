@@ -217,15 +217,14 @@ auto PlatformWindowWin::SetFocus() -> void
 ///
 /// @brief
 ///
-auto PlatformWindowWin::GetSize() -> Size<Dp>
+auto PlatformWindowWin::GetSize() -> Size<Vp>
 {
     if (!IsClosed())
     {
         auto rect = RECT();
         if (::GetWindowRect(_hwnd, &rect))
         {
-            const auto size = Size<Vp>(rect.right - rect.left, rect.bottom - rect.top);
-            return UnitFunction::ConvertVpToDp(size, GetDisplayScale());
+            return Size<Vp>(rect.right - rect.left, rect.bottom - rect.top);
         }
     }
     return {};
@@ -236,13 +235,12 @@ auto PlatformWindowWin::GetSize() -> Size<Dp>
 ///
 /// @param frameRect
 ///
-auto PlatformWindowWin::SetSize(Size<Dp> const& size) -> void
+auto PlatformWindowWin::SetSize(Size<Vp> const& size) -> void
 {
     if (!IsClosed())
     {
-        const auto spSize = UnitFunction::ConvertDpToVp(size, GetDisplayScale());
-        const auto w = static_cast<int>(Vp::Round(spSize.GetWidth()));
-        const auto h = static_cast<int>(Vp::Round(spSize.GetHeight()));
+        const auto w = static_cast<int>(Vp::Round(size.GetWidth()));
+        const auto h = static_cast<int>(Vp::Round(size.GetHeight()));
         ::SetWindowPos(_hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE);
     }
 }
@@ -250,15 +248,14 @@ auto PlatformWindowWin::SetSize(Size<Dp> const& size) -> void
 ///
 /// @brief
 ///
-auto PlatformWindowWin::GetPosition() -> Point<Dp>
+auto PlatformWindowWin::GetPosition() -> Point<Vp>
 {
     if (!IsClosed())
     {
         auto rect = RECT();
         if (::GetWindowRect(_hwnd, &rect))
         {
-            const auto position = Point<Vp>(rect.left, rect.right);
-            return UnitFunction::ConvertVpToDp(position, GetDisplayScale());
+            return Point<Vp>(rect.left, rect.top);
         }
     }
     return {};
@@ -269,59 +266,14 @@ auto PlatformWindowWin::GetPosition() -> Point<Dp>
 ///
 /// @param contentRect
 ///
-auto PlatformWindowWin::SetPosition(Point<Dp> const& position) -> void
+auto PlatformWindowWin::SetPosition(Point<Vp> const& position) -> void
 {
     if (!IsClosed())
     {
-        const auto spPosition = UnitFunction::ConvertDpToVp(position, GetDisplayScale());
-        const auto x = static_cast<int>(Vp::Round(spPosition.GetX()));
-        const auto y = static_cast<int>(Vp::Round(spPosition.GetY()));
+        const auto x = static_cast<int>(Vp::Round(position.GetX()));
+        const auto y = static_cast<int>(Vp::Round(position.GetY()));
         ::SetWindowPos(_hwnd, NULL, x, y, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSIZE);
     }
-}
-
-///
-/// @brief
-///
-auto PlatformWindowWin::GetFrameRect() -> Rect<Dp>
-{
-    if (!IsClosed())
-    {
-        auto rect = RECT();
-        if (::GetWindowRect(_hwnd, &rect))
-        {
-            const auto frameRect = Rect<Vp>(rect.left, rect.top, rect.right, rect.bottom);
-            return UnitFunction::ConvertVpToDp(frameRect, GetDisplayScale());
-        }
-    }
-    return {};
-}
-
-///
-/// @brief
-///
-auto PlatformWindowWin::GetContentRect() -> Rect<Dp>
-{
-    if (!IsClosed())
-    {
-        auto windowRect = RECT();
-        if (::GetWindowRect(_hwnd, &windowRect))
-        {
-            auto origin = POINT();
-            if (::ClientToScreen(_hwnd, &origin))
-            {
-                auto rect = RECT();
-                if (::GetClientRect(_hwnd, &rect))
-                {
-                    const auto x = origin.x - windowRect.left;
-                    const auto y = origin.y - windowRect.top;
-                    const auto contentRect = Rect<Vp>(x, y, x + rect.right - rect.left, y + rect.bottom - rect.top);
-                    return UnitFunction::ConvertVpToDp(contentRect, GetDisplayScale());
-                }
-            }
-        }
-    }
-    return {};
 }
 
 ///
@@ -331,21 +283,29 @@ auto PlatformWindowWin::GetAreaRect(WindowArea const area) -> Rect<Dp>
 {
     if (!IsClosed())
     {
-        auto rect = RECT();
-        if (!::GetClientRect(_hwnd, &rect))
+        auto clientRect = RECT();
+        ::GetClientRect(_hwnd, &clientRect);
+
+        auto windowRect = RECT();
+        ::GetWindowRect(_hwnd, &windowRect);
+
         {
-            return {};
+            auto clientPosition = POINT {clientRect.left, clientRect.top};
+            ::ClientToScreen(_hwnd, &clientPosition);
+            ::OffsetRect(&clientRect, clientPosition.x - windowRect.left, clientPosition.y - windowRect.top);
         }
 
-        const auto width = rect.right - rect.left;
-        const auto height = rect.bottom - rect.top;
-
-        if (area == WindowArea::TitleBar)
+        if (area == WindowArea::Client)
+        {
+            auto const rect = Rect<Vp>(clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
+            return UnitFunction::ConvertVpToDp(rect, GetDisplayScale());
+        }
+        else if (area == WindowArea::TitleBar)
         {
             if (_options.hasTitleBar)
             {
                 const auto titleBarHeight = GetSystemTitleBarHeight();
-                const auto titleBarRect = Rect<Vp>(0, 0, width, titleBarHeight);
+                const auto titleBarRect = Rect<Vp>(0, 0, windowRect.right - windowRect.left, titleBarHeight);
                 return UnitFunction::ConvertVpToDp(titleBarRect, GetDisplayScale());
             }
         }
@@ -355,14 +315,14 @@ auto PlatformWindowWin::GetAreaRect(WindowArea const area) -> Rect<Dp>
             {
                 const auto titleBarHeight = GetSystemTitleBarHeight();
                 const auto controlRect = GetSystemControlRect();
-                const auto availableRect = Rect<Vp>(0, 0, controlRect.left, titleBarHeight);
+                const auto availableRect = Rect<Vp>(clientRect.left, clientRect.top, controlRect.left, titleBarHeight);
                 return UnitFunction::ConvertVpToDp(availableRect, GetDisplayScale());
             }
         }
         else if (area == WindowArea::Content)
         {
             const auto titleBarHeight = _options.hasTitleBar ? GetSystemTitleBarHeight() : 0;
-            const auto contentRect = Rect<Vp>(0, titleBarHeight, width, height);
+            const auto contentRect = Rect<Vp>(clientRect.left, Vp::Max(titleBarHeight, clientRect.top), clientRect.right, clientRect.bottom);
             return UnitFunction::ConvertVpToDp(contentRect, GetDisplayScale());
         }
     }
@@ -416,7 +376,7 @@ auto PlatformWindowWin::SetSizeConstraints(BoxConstraints const& constraints) ->
 ///
 /// @brief
 ///
-auto PlatformWindowWin::GetTitle() const -> String
+auto PlatformWindowWin::GetTitle() -> String
 {
     return _title;
 }
@@ -517,7 +477,7 @@ auto PlatformWindowWin::RequestFrame() -> void
 ///
 /// @brief
 ///
-auto PlatformWindowWin::GetFrameTime() const -> MonotonicTime
+auto PlatformWindowWin::GetFrameTime() -> MonotonicTime
 {
     if (_context)
     {
@@ -541,6 +501,58 @@ auto PlatformWindowWin::GetViewLayer() -> Shared<PlatformViewLayer>
 auto PlatformWindowWin::GetInputMethod() -> Shared<PlatformInputMethod>
 {
     return _inputMethod;
+}
+
+///
+/// @brief
+///
+auto PlatformWindowWin::GetClientAreaInsets() -> EdgeInsets
+{
+    // This should match WM_NCCALCSIZE handling.
+    if (_options.hasFrame)
+    {
+        if (_options.hasTitleBar || !HasWindowStyle(WS_POPUP))
+        {
+            const auto marginX = GetSystemFrameThicknessX();
+            const auto marginTop = 0;
+            const auto marginBottom = GetSystemFrameThicknessY();
+            return EdgeInsets(
+              UnitFunction::ConvertVpToDp(marginX, GetDisplayScale()),
+              UnitFunction::ConvertVpToDp(marginTop, GetDisplayScale()),
+              UnitFunction::ConvertVpToDp(marginX, GetDisplayScale()),
+              UnitFunction::ConvertVpToDp(marginBottom, GetDisplayScale()));
+        }
+        else
+        {
+            return EdgeInsets::MakeUniform(1);
+        }
+    }
+    return {};
+}
+
+///
+/// @brief
+///
+auto PlatformWindowWin::SetBackgroundColor(RGBColor const& backgroundColor) -> void
+{
+    if (_backgroundColor != backgroundColor)
+    {
+        _backgroundColor = backgroundColor;
+
+        if (_options.backgroundStyle == WindowBackgroundStyle::Solid)
+        {
+            const auto r = static_cast<BYTE>(_backgroundColor.GetRedU8());
+            const auto g = static_cast<BYTE>(_backgroundColor.GetGreenU8());
+            const auto b = static_cast<BYTE>(_backgroundColor.GetBlueU8());
+            const auto color = RGB(r, g, b);
+            if (FAILED(::DwmSetWindowAttribute(_hwnd, DWMWA_CAPTION_COLOR, &color, sizeof(color))))
+            {
+                FW_DEBUG_LOG_ERROR("PlatformWindowWin: Failed to set DWMWA_CAPTION_COLOR");
+            }
+            // Trigger WM_ERASEBKGND.
+            ::InvalidateRect(_hwnd, nullptr, TRUE);
+        }
+    }
 }
 
 ///
@@ -718,9 +730,9 @@ auto PlatformWindowWin::HandleCreate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
         else if (_options.backgroundStyle == WindowBackgroundStyle::Solid)
         {
             // Make color of title bar match background.
-            const auto r = static_cast<BYTE>(_options.backgroundColor.GetRedU8());
-            const auto g = static_cast<BYTE>(_options.backgroundColor.GetGreenU8());
-            const auto b = static_cast<BYTE>(_options.backgroundColor.GetBlueU8());
+            const auto r = static_cast<BYTE>(_backgroundColor.GetRedU8());
+            const auto g = static_cast<BYTE>(_backgroundColor.GetGreenU8());
+            const auto b = static_cast<BYTE>(_backgroundColor.GetBlueU8());
             const auto color = RGB(r, g, b);
             if (FAILED(::DwmSetWindowAttribute(hWnd, DWMWA_CAPTION_COLOR, &color, sizeof(color))))
             {
@@ -728,7 +740,19 @@ auto PlatformWindowWin::HandleCreate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
             }
         }
 
-        if (!_options.hasFrame)
+        if (_options.hasFrame)
+        {
+            // Popups are not eligible to automatic rounding when not resizable.
+            if (HasWindowStyle(WS_POPUP))
+            {
+                const auto cornerRadius = DWMWCP_ROUNDSMALL;
+                if (FAILED(::DwmSetWindowAttribute(hWnd, DWMWA_WINDOW_CORNER_PREFERENCE, &cornerRadius, sizeof(cornerRadius))))
+                {
+                    FW_DEBUG_LOG_ERROR("PlatformWindowWin: Failed to set DWMWA_WINDOW_CORNER_PREFERENCE");
+                }
+            }
+        }
+        else
         {
             const auto borderColor = DWMWA_COLOR_NONE;
             if (FAILED(::DwmSetWindowAttribute(hWnd, DWMWA_BORDER_COLOR, &borderColor, sizeof(borderColor))))
@@ -738,7 +762,7 @@ auto PlatformWindowWin::HandleCreate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
             const auto cornerRadius = DWMWCP_DONOTROUND;
             if (FAILED(::DwmSetWindowAttribute(hWnd, DWMWA_WINDOW_CORNER_PREFERENCE, &cornerRadius, sizeof(cornerRadius))))
             {
-                FW_DEBUG_LOG_ERROR("PlatformWindowWin: Failed to set DWMWA_WINDOW_CORNER_REFERENCE");
+                FW_DEBUG_LOG_ERROR("PlatformWindowWin: Failed to set DWMWA_WINDOW_CORNER_PREFERENCE");
             }
         }
 
@@ -767,17 +791,31 @@ auto PlatformWindowWin::HandleNcCalcSize(HWND hWnd, UINT msg, WPARAM wParam, LPA
 
         if (wParam == TRUE)
         {
-            const auto x = GetSystemFrameThicknessX();
-            const auto y = GetSystemFrameThicknessY();
-            if (auto ncSizeParams = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam))
+            if (_options.hasFrame)
             {
-                // Set minimum amount of insets to make window border visible.
-                auto& rect = ncSizeParams->rgrc[0];
-                rect.left += x;
-                rect.right -= x;
-                rect.bottom -= y;
+                if (auto ncSizeParams = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam))
+                {
+                    auto& rect = ncSizeParams->rgrc[0];
+
+                    // Set minimum amount of insets to make window border visible.
+                    if (_options.hasTitleBar || !HasWindowStyle(WS_POPUP))
+                    {
+                        // Adding top inset breaks system controls in title bar.
+                        const auto x = GetSystemFrameThicknessX();
+                        const auto y = GetSystemFrameThicknessY();
+                        rect.left += x;
+                        rect.right -= x;
+                        rect.bottom -= y;
+                    }
+                    else
+                    {
+                        auto const length = static_cast<int>(Vp::Round(UnitFunction::ConvertDpToVp(1, GetDisplayScale())));
+                        ::InflateRect(&rect, -length, -length);
+                    }
+                }
+                return WVR_REDRAW;
             }
-            return WVR_REDRAW;
+            return 0;
         }
         return 0;
     }
@@ -789,6 +827,7 @@ auto PlatformWindowWin::HandleNcCalcSize(HWND hWnd, UINT msg, WPARAM wParam, LPA
 ///
 auto PlatformWindowWin::HandleNcActivate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
+    FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleNcActivate(): {}", wParam);
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
@@ -923,8 +962,18 @@ auto PlatformWindowWin::HandleActivate(HWND hWnd, UINT msg, WPARAM wParam, LPARA
     {
         try
         {
+            FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleActivate(): {} {:x}", LOWORD(wParam), lParam);
+
             auto event = Event<>(Event<PlatformWindowEvent::ActiveChanged>());
             SendWindowEventDetached(event);
+
+            auto const activated = LOWORD(wParam) != WA_INACTIVE;
+            if (!activated && _options.behavior == WindowBehavior::Popup)
+            {
+                // Destroy popup window when it become inactive.
+                // NOTE: Usually this prevents lParam window to be actually activated.
+                ::DestroyWindow(hWnd);
+            }
         }
         catch (...)
         {
@@ -1500,9 +1549,9 @@ auto PlatformWindowWin::HandleEraseBackground(HWND hWnd, UINT msg, WPARAM wParam
                     .right = clientRect.right,
                     .bottom = clientRect.bottom,
                 };
-                const auto r = static_cast<BYTE>(_options.backgroundColor.GetRedU8());
-                const auto g = static_cast<BYTE>(_options.backgroundColor.GetGreenU8());
-                const auto b = static_cast<BYTE>(_options.backgroundColor.GetBlueU8());
+                const auto r = static_cast<BYTE>(_backgroundColor.GetRedU8());
+                const auto g = static_cast<BYTE>(_backgroundColor.GetGreenU8());
+                const auto b = static_cast<BYTE>(_backgroundColor.GetBlueU8());
                 const auto color = RGB(r, g, b);
                 const auto brush = ::CreateSolidBrush(color);
                 ::FillRect(dc, &rect, brush);
@@ -1617,7 +1666,7 @@ auto PlatformWindowWin::GetSystemMaxWindowSize() const -> Size<Vp>
 ///
 /// @note Does not include padding thickness (SM_CXPADDEDBORDER).
 ///
-auto PlatformWindowWin::GetSystemFrameThicknessX() -> int
+auto PlatformWindowWin::GetSystemFrameThicknessX() const -> int
 {
     return ::GetSystemMetricsForDpi(SM_CXFRAME, _dpi);
 }
@@ -1627,7 +1676,7 @@ auto PlatformWindowWin::GetSystemFrameThicknessX() -> int
 ///
 /// @note Does not include padding thickness (SM_CYPADDEDBORDER).
 ///
-auto PlatformWindowWin::GetSystemFrameThicknessY() -> int
+auto PlatformWindowWin::GetSystemFrameThicknessY() const -> int
 {
     return ::GetSystemMetricsForDpi(SM_CYFRAME, _dpi);
 }
@@ -1635,7 +1684,7 @@ auto PlatformWindowWin::GetSystemFrameThicknessY() -> int
 ///
 /// @brief Get rectangle of system control buttons.
 ///
-auto PlatformWindowWin::GetSystemControlRect() -> RECT
+auto PlatformWindowWin::GetSystemControlRect() const -> RECT
 {
     auto systemControlRect = RECT();
     if (SUCCEEDED(::DwmGetWindowAttribute(_hwnd, DWMWA_CAPTION_BUTTON_BOUNDS, &systemControlRect, sizeof(systemControlRect))))
@@ -1650,9 +1699,18 @@ auto PlatformWindowWin::GetSystemControlRect() -> RECT
 ///
 /// @return
 ///
-auto PlatformWindowWin::GetSystemTitleBarHeight() -> int
+auto PlatformWindowWin::GetSystemTitleBarHeight() const -> int
 {
     return ::GetSystemMetricsForDpi(SM_CYFRAME, _dpi) + ::GetSystemMetricsForDpi(SM_CYCAPTION, _dpi) + ::GetSystemMetricsForDpi(SM_CXPADDEDBORDER, _dpi);
+}
+
+///
+/// @brief
+///
+auto PlatformWindowWin::HasWindowStyle(DWORD style) const -> Bool
+{
+    auto const styles = static_cast<DWORD>(::GetWindowLongW(_hwnd, GWL_STYLE));
+    return (style & styles) == style;
 }
 
 ///
@@ -1864,6 +1922,7 @@ auto PlatformWindowWin::DisableWindow(Shared<PlatformWindowWin> const& source) -
         }
     }
 
+    FW_DEBUG_LOG_INFO("PlatformWindowWin::DisableWindow()");
     ::EnableWindow(_hwnd, FALSE);
 
     if (_options.behavior != WindowBehavior::Dialog)
@@ -1892,6 +1951,7 @@ auto PlatformWindowWin::EnableWindow(Shared<PlatformWindowWin> const& source) ->
         }
     }
 
+    FW_DEBUG_LOG_INFO("PlatformWindowWin::EnableWindow()");
     ::EnableWindow(_hwnd, TRUE);
 
     for (const auto& owned : _ownedWindows)

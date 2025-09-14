@@ -31,6 +31,9 @@ public:
     {
         Function<void()> requestFrame;
         Function<MonotonicTime()> getFrameTime;
+        Function<Point<Vp>(Point<Dp> const& point)> localToGlobalPoint;
+        Function<Point<Dp>(Point<Vp> const& point)> globalToLocalPoint;
+        Function<Shared<Window>(WindowOptions const&)> makeOwnedWindow;
     };
     static auto Make(Delegate const& delegate) -> Shared<RootView>;
     static auto MakeWithContent(Delegate const& delegate, Shared<View> const& content) -> Shared<RootView>;
@@ -78,9 +81,12 @@ private:
     auto RootGetLayer() const -> ViewLayer const& override;
     auto RootInvalidateLayout() -> void override;
     auto RootInvalidateVisual() -> void override;
+    auto RootLocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp> override;
+    auto RootGlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp> override;
     auto RootCapturePointer(PointerId const id, Shared<View> const& view) -> void override;
     auto RootReleasePointer(PointerId const id, Shared<View> const& view) -> void override;
     auto RootCancelInput(Shared<View> const& view) -> void override;
+    auto RootMakeOwnedWindow(WindowOptions const& options) -> Shared<Window> override;
 
 private:
     Bool _attached = false;

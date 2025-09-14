@@ -47,18 +47,16 @@ public:
     auto SetActive() -> void override;
     auto IsFocused() -> Bool override;
     auto SetFocus() -> void override;
-    auto GetSize() -> Size<Dp> override;
-    auto SetSize(Size<Dp> const& size) -> void override;
-    auto GetPosition() -> Point<Dp> override;
-    auto SetPosition(Point<Dp> const& position) -> void override;
-    auto GetFrameRect() -> Rect<Dp> override;
-    auto GetContentRect() -> Rect<Dp> override;
+    auto GetSize() -> Size<Vp> override;
+    auto SetSize(Size<Vp> const& size) -> void override;
+    auto GetPosition() -> Point<Vp> override;
+    auto SetPosition(Point<Vp> const& position) -> void override;
     auto GetAreaRect(WindowArea const area) -> Rect<Dp> override;
     auto GetDisplayScale() -> DisplayScale override;
     auto GetBackingScale() -> BackingScale override;
     auto GetSizeConstraints() -> BoxConstraints override;
     auto SetSizeConstraints(BoxConstraints const& constraints) -> void override;
-    auto GetTitle() const -> String override;
+    auto GetTitle() -> String override;
     auto SetTitle(String const& title) -> void override;
     auto Minimize() -> void override;
     auto Maximize() -> void override;
@@ -66,9 +64,11 @@ public:
     auto IsClosed() -> Bool override;
     auto Close() -> void override;
     auto RequestFrame() -> void override;
-    auto GetFrameTime() const -> MonotonicTime override;
+    auto GetFrameTime() -> MonotonicTime override;
     auto GetViewLayer() -> Shared<PlatformViewLayer> override;
     auto GetInputMethod() -> Shared<PlatformInputMethod> override;
+    auto GetClientAreaInsets() -> EdgeInsets override;
+    auto SetBackgroundColor(RGBColor const& backgroundColor) -> void override;
 
 public:
     auto SetNativeHandle(PassKey<PlatformWindowContextWin>, HWND hwnd) -> void;
@@ -104,10 +104,12 @@ private:
     auto GetSystemMinWindowSize() const -> Size<Vp>;
     auto GetSystemMaxWindowSize() const -> Size<Vp>;
     
-    auto GetSystemFrameThicknessX() -> int;
-    auto GetSystemFrameThicknessY() -> int;
-    auto GetSystemTitleBarHeight() -> int;
-    auto GetSystemControlRect() -> RECT;
+    auto GetSystemFrameThicknessX() const -> int;
+    auto GetSystemFrameThicknessY() const -> int;
+    auto GetSystemTitleBarHeight() const -> int;
+    auto GetSystemControlRect() const -> RECT;
+
+    auto HasWindowStyle(DWORD style) const -> Bool;
 
     auto GetSelf() -> Shared<PlatformWindowWin>;
     auto SetSelf(Shared<PlatformWindowWin> const& self) -> void;
@@ -136,6 +138,7 @@ private:
     HWND _hwnd = NULL;
     UINT _dpi = USER_DEFAULT_SCREEN_DPI;
     String _title;
+    RGBColor _backgroundColor;
     BoxConstraints _sizeConstraints = BoxConstraints::MakeUnconstrained();
     Bool _destructing = false;
     Bool _closing = false;

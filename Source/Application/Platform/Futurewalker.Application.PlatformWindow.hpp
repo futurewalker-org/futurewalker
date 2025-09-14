@@ -5,6 +5,7 @@
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 #include "Futurewalker.Application.PlatformInputMethodType.hpp"
 #include "Futurewalker.Application.BoxConstraints.hpp"
+#include "Futurewalker.Application.EdgeInsets.hpp"
 
 #include "Futurewalker.Event.hpp"
 
@@ -45,18 +46,16 @@ public:
     virtual auto SetActive() -> void = 0;
     virtual auto IsFocused() -> Bool = 0;
     virtual auto SetFocus() -> void = 0;
-    virtual auto GetSize() -> Size<Dp> = 0;
-    virtual auto SetSize(Size<Dp> const& size) -> void = 0;
-    virtual auto GetPosition() -> Point<Dp> = 0;
-    virtual auto SetPosition(Point<Dp> const& position) -> void = 0;
-    virtual auto GetFrameRect() -> Rect<Dp> = 0;
-    virtual auto GetContentRect() -> Rect<Dp> = 0;
+    virtual auto GetSize() -> Size<Vp> = 0;
+    virtual auto SetSize(Size<Vp> const& size) -> void = 0;
+    virtual auto GetPosition() -> Point<Vp> = 0;
+    virtual auto SetPosition(Point<Vp> const& position) -> void = 0;
     virtual auto GetAreaRect(WindowArea const area) -> Rect<Dp> = 0;
     virtual auto GetDisplayScale() -> DisplayScale = 0;
     virtual auto GetBackingScale() -> BackingScale = 0;
     virtual auto GetSizeConstraints() -> BoxConstraints = 0;
     virtual auto SetSizeConstraints(BoxConstraints const& constraints) -> void = 0;
-    virtual auto GetTitle() const -> String = 0;
+    virtual auto GetTitle() -> String = 0;
     virtual auto SetTitle(String const& title) -> void = 0;
     virtual auto Minimize() -> void = 0;
     virtual auto Maximize() -> void = 0;
@@ -64,9 +63,11 @@ public:
     virtual auto IsClosed() -> Bool = 0;
     virtual auto Close() -> void = 0;
     virtual auto RequestFrame() -> void = 0;
-    virtual auto GetFrameTime() const -> MonotonicTime = 0;
+    virtual auto GetFrameTime() -> MonotonicTime = 0;
     virtual auto GetViewLayer() -> Shared<PlatformViewLayer> = 0;
     virtual auto GetInputMethod() -> Shared<PlatformInputMethod> = 0;
+    virtual auto GetClientAreaInsets() -> EdgeInsets = 0;
+    virtual auto SetBackgroundColor(RGBColor const& color) -> void = 0;
 
 protected:
     virtual auto Initialize() -> void = 0;

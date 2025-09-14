@@ -55,7 +55,7 @@ auto WindowEvent::FocusedChanged::SetFocused(Bool const focused) -> void
 ///
 /// @brief
 ///
-auto WindowEvent::SizeChanged::GetSize() const -> Size<Dp>
+auto WindowEvent::SizeChanged::GetSize() const -> Size<Vp>
 {
     return _size;
 }
@@ -63,7 +63,7 @@ auto WindowEvent::SizeChanged::GetSize() const -> Size<Dp>
 ///
 /// @brief
 ///
-auto WindowEvent::SizeChanged::SetSize(Size<Dp> const& size) -> void
+auto WindowEvent::SizeChanged::SetSize(Size<Vp> const& size) -> void
 {
     _size = size;
 }
@@ -71,7 +71,7 @@ auto WindowEvent::SizeChanged::SetSize(Size<Dp> const& size) -> void
 ///
 /// @brief
 ///
-auto WindowEvent::PositionChanged::GetPosition() const -> Point<Dp>
+auto WindowEvent::PositionChanged::GetPosition() const -> Point<Vp>
 {
     return _position;
 }
@@ -79,7 +79,7 @@ auto WindowEvent::PositionChanged::GetPosition() const -> Point<Dp>
 ///
 /// @brief
 ///
-auto WindowEvent::PositionChanged::SetPosition(Point<Dp> const& position) -> void
+auto WindowEvent::PositionChanged::SetPosition(Point<Vp> const& position) -> void
 {
     _position = position;
 }

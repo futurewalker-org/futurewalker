@@ -80,11 +80,11 @@ private:
 class WindowEvent::SizeChanged final : public WindowEvent
 {
 public:
-    auto GetSize() const -> Size<Dp>;
-    auto SetSize(Size<Dp> const& size) -> void;
+    auto GetSize() const -> Size<Vp>;
+    auto SetSize(Size<Vp> const& size) -> void;
 
 private:
-    Size<Dp> _size;
+    Size<Vp> _size;
 };
 
 ///
@@ -93,11 +93,11 @@ private:
 class WindowEvent::PositionChanged final : public WindowEvent
 {
 public:
-    auto GetPosition() const -> Point<Dp>;
-    auto SetPosition(Point<Dp> const& position) -> void;
+    auto GetPosition() const -> Point<Vp>;
+    auto SetPosition(Point<Vp> const& position) -> void;
 
 private:
-    Point<Dp> _position;
+    Point<Vp> _position;
 };
 
 ///

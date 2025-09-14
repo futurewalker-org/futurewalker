@@ -62,7 +62,7 @@ auto ArrangeScope::GetMeasuredSize(ReferenceArg<View> view) -> Size<Dp>
 ///
 /// @param view
 ///
-auto ArrangeScope::ArrangeRootView(PassKey<RootView>, View& view) -> void
+auto ArrangeScope::ArrangeView(PassKey<RootView>, View& view) -> void
 {
     auto parameter = ArrangeParameter();
     parameter.SetOldFrameRect(view.GetFrameRect());
