@@ -51,14 +51,16 @@ public:
     auto RequestFrame(Weak<PlatformWindowWin> window, PlatformVsyncCallbackFunction callback) -> void;
     auto GetFrameTime(PlatformWindowWin const& window) const -> MonotonicTime;
 
-    auto RefreshScreens() -> void;
-
     auto GetKeyboardLayout() -> PlatformKeyboardLayoutWin&;
     auto GetInputMethodContext() -> PlatformInputMethodContextWin&;
 
 private:
+    auto CreateMessageWindow() -> void;
+    auto DestroyMessageWindow() -> void;
+
     static auto CALLBACK ToplevelWindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
-    static auto CALLBACK LevelWindowProcedure(HWND hWnd, UINT msg, WPARAM wPAram, LPARAM lParam) -> LRESULT;
+    static auto CALLBACK LevelWindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
+    static auto CALLBACK MessageWindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
 
 private:
     Weak<PlatformWindowContextWin> _self;
@@ -70,7 +72,9 @@ private:
     Shared<PlatformKeyboardLayoutWin> _keyboardLayout;
     ATOM _toplevelWindowClass = 0;
     ATOM _levelWindowClass = 0;
+    ATOM _messageWindowClass = 0;
     std::vector<HWND> _levelWindows;
+    HWND _messageWindow = NULL;
 };
 
 ///

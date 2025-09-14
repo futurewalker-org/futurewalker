@@ -1472,21 +1472,6 @@ auto PlatformWindowWin::HandleInputMethod(HWND hWnd, UINT msg, WPARAM wParam, LP
 }
 
 ///
-/// @brief Handle WM_DISPLAYCHANGE
-///
-auto PlatformWindowWin::HandleDisplayChange(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
-{
-    if (msg == WM_DISPLAYCHANGE)
-    {
-        if (_context)
-        {
-            _context->RefreshScreens();
-        }
-    }
-    return ::DefWindowProcW(hWnd, msg, wParam, lParam);
-}
-
-///
 /// @brief Handle WM_ERASEBKGND
 ///
 auto PlatformWindowWin::HandleEraseBackground(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT

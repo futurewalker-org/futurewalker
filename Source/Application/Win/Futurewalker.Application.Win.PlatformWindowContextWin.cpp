@@ -29,24 +29,24 @@ struct PlatformLevelWindowCreateParams
 {
 };
 
-///
-/// @brief
-///
-/// @param wnd
-///
 auto GetWindowPointer(HWND wnd) -> PlatformWindowWin*
 {
     const auto data = ::GetWindowLongPtrW(wnd, GWLP_USERDATA);
     return reinterpret_cast<PlatformWindowWin*>(data);
 }
 
-///
-/// @brief
-///
-/// @param wnd
-/// @param ptr
-///
-void SetWindowPointer(HWND wnd, PlatformWindowWin* ptr)
+auto GetWindowContextPointer(HWND wnd) -> PlatformWindowContextWin*
+{
+    const auto data = ::GetWindowLongPtrW(wnd, GWLP_USERDATA);
+    return reinterpret_cast<PlatformWindowContextWin*>(data);
+}
+
+auto SetWindowPointer(HWND wnd, PlatformWindowWin* ptr) -> void
+{
+    ::SetWindowLongPtrW(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(ptr));
+}
+
+auto SetWindowContextPointer(HWND wnd, PlatformWindowContextWin* ptr) -> void
 {
     ::SetWindowLongPtrW(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(ptr));
 }
@@ -239,15 +239,20 @@ PlatformWindowContextWin::PlatformWindowContextWin(
 {
     const auto instance = _instanceHandle->GetInstanceHandle();
 
-    const auto toplevelWindowClassName = MakeWindowClassName(u8"Futurewalker.Toplevel_Window_Class");
+    const auto toplevelWindowClassName = MakeWindowClassName(u8"Futurewalker_ToplevelWindowClass");
     _toplevelWindowClass = RegisterWindowClass(toplevelWindowClassName.c_str(), &PlatformWindowContextWin::ToplevelWindowProcedure, instance);
 
-    const auto levelWindowClassName = MakeWindowClassName(u8"Futurewalker.Level_Window_Class");
+    const auto levelWindowClassName = MakeWindowClassName(u8"Futurewalker_LevelWindowClass");
     _levelWindowClass = RegisterWindowClass(levelWindowClassName.c_str(), &PlatformWindowContextWin::LevelWindowProcedure, instance);
+
+    const auto messageWindowClass = MakeWindowClassName(u8"Futurewalker_MessageWindowClass");
+    _messageWindowClass = RegisterWindowClass(messageWindowClass.c_str(), &PlatformWindowContextWin::MessageWindowProcedure, instance);
+
+    _keyboardLayout = Shared<PlatformKeyboardLayoutWin>::Make();
 
     ::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
-    _keyboardLayout = Shared<PlatformKeyboardLayoutWin>::Make();
+    CreateMessageWindow();
 }
 
 ///
@@ -256,8 +261,10 @@ PlatformWindowContextWin::PlatformWindowContextWin(
 PlatformWindowContextWin::~PlatformWindowContextWin()
 {
     const auto instance = _instanceHandle->GetInstanceHandle();
+    DestroyMessageWindow();
     UnregisterWindowClass(_toplevelWindowClass, instance);
     UnregisterWindowClass(_levelWindowClass, instance);
+    UnregisterWindowClass(_messageWindowClass, instance);
 }
 
 ///
@@ -351,17 +358,6 @@ auto PlatformWindowContextWin::GetFrameTime(PlatformWindowWin const& window) con
 ///
 /// @brief
 ///
-auto PlatformWindowContextWin::RefreshScreens() -> void
-{
-    if (_screenContext)
-    {
-        _screenContext->Refresh();
-    }
-}
-
-///
-/// @brief
-///
 auto PlatformWindowContextWin::GetKeyboardLayout() -> PlatformKeyboardLayoutWin&
 {
     return *_keyboardLayout;
@@ -373,6 +369,28 @@ auto PlatformWindowContextWin::GetKeyboardLayout() -> PlatformKeyboardLayoutWin&
 auto PlatformWindowContextWin::GetInputMethodContext() -> PlatformInputMethodContextWin&
 {
     return *_inputMethodContext;
+}
+
+///
+/// @brief Create window for desktop message handling.
+///
+auto PlatformWindowContextWin::CreateMessageWindow() -> void
+{
+    // Use hidden toplevel window to receive WM_DISPLAYCHANGE, etc.
+    auto const instance = _instanceHandle->GetInstanceHandle();
+    _messageWindow = ::CreateWindowExW(0, MAKEINTATOM(_messageWindowClass), L"", 0, 0, 0, 0, 0, HWND_DESKTOP, NULL, instance, this);
+    FW_DEBUG_ASSERT(::IsWindow(_messageWindow));
+}
+
+///
+/// @brief Destroy message window.
+///
+auto PlatformWindowContextWin::DestroyMessageWindow() -> void
+{
+    if (IsWindow(_messageWindow))
+    {
+        ::DestroyWindow(_messageWindow);
+    }
 }
 
 ///
@@ -408,6 +426,41 @@ auto CALLBACK PlatformWindowContextWin::LevelWindowProcedure(HWND hWnd, UINT msg
     if (msg == WM_NCHITTEST)
     {
         return HTNOWHERE;
+    }
+    return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+
+///
+/// @brief Window procedure of message window.
+///
+auto CALLBACK PlatformWindowContextWin::MessageWindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
+{
+    auto refreshScreenContext = [](HWND hWnd) {
+        if (auto const context = GetWindowContextPointer(hWnd))
+        {
+            if (auto const& screenContext = context->_screenContext)
+            {
+                screenContext->Refresh();
+            }
+        }
+    };
+
+    if (msg == WM_NCCREATE)
+    {
+        const auto createStruct = reinterpret_cast<CREATESTRUCTW const*>(lParam);
+        const auto windowContext = reinterpret_cast<PlatformWindowContextWin*>(createStruct->lpCreateParams);
+        SetWindowContextPointer(hWnd, windowContext);
+    }
+    else if (msg == WM_DISPLAYCHANGE)
+    {
+        refreshScreenContext(hWnd);
+    }
+    else if (msg == WM_SETTINGCHANGE)
+    {
+        if (wParam == SPI_SETWORKAREA)
+        {
+            refreshScreenContext(hWnd);
+        }
     }
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
