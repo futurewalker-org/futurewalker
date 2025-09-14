@@ -13,11 +13,10 @@ namespace FW_EXPORT
 {
 class TestPlatformDrawableViewLayerControl : public PlatformDrawableViewLayerControl
 {
-    auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset, Float64 const scale) -> Bool override
+    auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset) -> Bool override
     {
         (void)displayList;
         (void)offset;
-        (void)scale;
         FW_DEBUG_LOG_INFO("TestPlatformDrawableViewLayerControl::Draw() called");
         return true;
     }
