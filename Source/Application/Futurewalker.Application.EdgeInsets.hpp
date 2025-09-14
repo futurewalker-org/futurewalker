@@ -147,17 +147,33 @@ public:
     }
 
     ///
-    /// @brief Get total horizontal insets.
+    /// @brief Extract horizontal insets (leading and trailing).
     ///
-    constexpr auto GetHorizontal() const -> Dp
+    constexpr auto GetHorizontal() const -> EdgeInsets
+    {
+        return EdgeInsets(_leading, 0.0, _trailing, 0.0);
+    }
+
+    ///
+    /// @brief Extract vertical insets (top and bottom).
+    ///
+    constexpr auto GetVertical() const -> EdgeInsets
+    {
+        return EdgeInsets(0.0, _top, 0.0, _bottom);
+    }
+
+    ///
+    /// @brief Get total horizontal width.
+    ///
+    constexpr auto GetTotalWidth() const -> Dp
     {
         return _leading + _trailing;
     }
 
     ///
-    /// @brief Get total vertical insets.
+    /// @brief Get total vertical height.
     ///
-    constexpr auto GetVertical() const -> Dp
+    constexpr auto GetTotalHeight() const -> Dp
     {
         return _top + _bottom;
     }
