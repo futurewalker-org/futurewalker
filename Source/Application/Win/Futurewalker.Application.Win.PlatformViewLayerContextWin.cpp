@@ -63,6 +63,14 @@ auto PlatformViewLayerContextWin::MakeViewLayer() -> Shared<PlatformViewLayer>
     return ViewLayerWin::Make(GetSelf(), _dcompDevice);
 }
 
+auto PlatformViewLayerContextWin::CommitChanges() -> void
+{
+    if (_dcompDevice)
+    {
+        _dcompDevice->Commit();
+    }
+}
+
 auto PlatformViewLayerContextWin::GetSelf() -> Shared<PlatformViewLayerContextWin>
 {
     return _self.Lock();

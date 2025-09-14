@@ -15,6 +15,7 @@ class PlatformViewLayerContext : NonCopyable
 public:
     virtual ~PlatformViewLayerContext() = 0;
     virtual auto MakeViewLayer() -> Shared<PlatformViewLayer> = 0;
+    virtual auto CommitChanges() -> void = 0;
 };
 }
 }

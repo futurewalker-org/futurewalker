@@ -23,6 +23,7 @@ public:
     PlatformViewLayerContextWin(PassKey<PlatformViewLayerContextWin>, Shared<PlatformDCompositionDeviceWin> const& dcompDevice);
 
     auto MakeViewLayer() -> Shared<PlatformViewLayer> override;
+    auto CommitChanges() -> void override;
 
 private:
     auto GetSelf() -> Shared<PlatformViewLayerContextWin>;

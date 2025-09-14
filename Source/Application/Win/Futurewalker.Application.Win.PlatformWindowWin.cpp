@@ -1081,11 +1081,6 @@ auto PlatformWindowWin::HandlePosChanged(HWND hWnd, UINT msg, WPARAM wParam, LPA
                     auto event = Event<>(Event<PlatformWindowEvent::SizeChanged>());
                     SendWindowEventDetached(event);
                 }
-
-                if (_compositionDevice)
-                {
-                    _compositionDevice->Commit();
-                }
             }
             catch (...)
             {
@@ -1590,11 +1585,6 @@ auto PlatformWindowWin::HandleFrameSwap(MonotonicTime const& targetTimestamp) ->
         parameter->SetTargetTimestamp(targetTimestamp);
         auto event = Event(parameter);
         SendFrameEventDetached(event);
-
-        if (_compositionDevice)
-        {
-            _compositionDevice->Commit();
-        }
     }
     catch (...)
     {

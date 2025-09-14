@@ -818,6 +818,11 @@ auto Window::UpdateRootView() -> void
         auto parameter = Event<RootViewEvent::Frame>();
         auto event = Event<>(parameter);
         _rootView->SendEventDetached(event);
+
+        if (_platformViewLayerContext)
+        {
+            _platformViewLayerContext->CommitChanges();
+        }
     }
 }
 

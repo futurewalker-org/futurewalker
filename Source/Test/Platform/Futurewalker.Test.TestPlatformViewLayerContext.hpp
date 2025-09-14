@@ -17,6 +17,10 @@ public:
     {
         return TestPlatformViewLayer::Make();
     }
+
+    auto CommitChanges() -> void override
+    {
+    }
 };
 
 template <>
