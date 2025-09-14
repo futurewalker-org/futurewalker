@@ -40,7 +40,7 @@ auto ViewLayoutInfo::InvalidatePath() -> Bool
 ///
 auto ViewLayoutInfo::BeginMeasure(MeasureParameter const& parameter) -> Bool
 {
-    if (!_measuring)
+    if (!_measuring && !_arranging)
     {
         _measureParameter = parameter;
 
@@ -80,7 +80,7 @@ auto ViewLayoutInfo::IsMeasuring() const -> Bool
 ///
 auto ViewLayoutInfo::BeginArrange(ArrangeParameter const& parameter) -> Bool
 {
-    if (!_arranging)
+    if (!_arranging && !_measuring)
     {
         _frameRect = parameter.GetNewFrameRect();
         _contentRect = Rect<Dp>({}, _frameRect.GetSize());
