@@ -21,13 +21,12 @@ auto DrawableViewLayer::Make(Shared<PlatformViewLayer> const& platformLayer) -> 
 ///
 /// @param displayList
 /// @param offset
-/// @param scale
 ///
-auto DrawableViewLayer::Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset, Float64 const scale) -> Bool
+auto DrawableViewLayer::Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset) -> Bool
 {
     if (_control)
     {
-        return _control->Draw(displayList, offset, scale);
+        return _control->Draw(displayList, offset);
     }
     return false;
 }

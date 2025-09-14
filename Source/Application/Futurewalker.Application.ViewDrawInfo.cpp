@@ -173,15 +173,14 @@ auto ViewDrawInfo::UpdateLayers(ViewLayer& layer) -> void
             // We assume origin of the bounds is properly aligned by layout algorithm.
             auto const bounds = AlignBoundsToPixelGridByExpand(_displayList->GetBounds(), _displayScale, _backingScale);
             auto const offset = bounds.GetPosition().As<Offset>();
-            auto const scale = static_cast<Float64>(_displayScale) * static_cast<Float64>(_backingScale);
 
             drawableLayer->SetOffset(offset);
             drawableLayer->SetSize(bounds.GetSize());
-            drawableLayer.As<DrawableViewLayer>()->Draw(_displayList, -offset, scale);
+            drawableLayer.As<DrawableViewLayer>()->Draw(_displayList, -offset);
         }
         else
         {
-            drawableLayer.As<DrawableViewLayer>()->Draw(nullptr, {}, 1.0);
+            drawableLayer.As<DrawableViewLayer>()->Draw(nullptr, {});
         }
     }
 }

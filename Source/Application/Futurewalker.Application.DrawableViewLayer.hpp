@@ -17,7 +17,7 @@ class DrawableViewLayer : public ViewLayer
 public:
     static auto Make(Shared<PlatformViewLayer> const& platformLayer) -> Shared<DrawableViewLayer>;
 
-    auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset, Float64 const scale) -> Bool;
+    auto Draw(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& offset) -> Bool;
 
     DrawableViewLayer(PassKey<ViewLayer> key, Shared<PlatformViewLayer> const& platformLayer);
 
