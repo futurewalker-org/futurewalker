@@ -25,25 +25,25 @@ using ScreenArray = std::vector<Shared<Screen>>;
 struct ScreenInfo
 {
     ///
-    /// @brief Frame rectangle of the screen.
+    /// @brief Bounds rectangle of the screen.
     ///
     /// @note Relative to origin of global screen space.
     ///
-    Rect<Dp> frameRect;
+    Rect<Vp> bounds;
 
     ///
-    /// @brief Work are rectangle of the screen.
+    /// @brief Work area rectangle of the screen.
     ///
-    /// @note Relative to top-left corner of the screen.
+    /// @note Relative to origin of global screen space.
     ///
-    Rect<Dp> workAreaRect;
+    Rect<Vp> workArea;
 
     ///
     /// @brief Safe area rectangle of the screen.
     ///
-    /// @note Relative to top-left corner of the screen.
+    /// @note Relative to origin of global screen space.
     ///
-    Rect<Dp> safeAreaRect;
+    Rect<Vp> safeArea;
 
     ///
     /// @brief Display scale of the screen.
