@@ -105,7 +105,7 @@ auto PlatformWindow::SendWindowEventDetached(Event<> const& event) -> void
         {
             FW_DEBUG_ASSERT(false);
         }
-    });
+    }).Detach();
 }
 
 ///
@@ -122,7 +122,7 @@ auto PlatformWindow::SendFrameEventDetached(Event<> const& event) -> void
         {
             FW_DEBUG_ASSERT(false);
         }
-    });
+    }).Detach();
 }
 
 ///
@@ -139,7 +139,7 @@ auto PlatformWindow::SendPointerEventDetached(Event<> const& event) -> void
         {
             FW_DEBUG_ASSERT(false);
         }
-    });
+    }).Detach();
 }
 
 ///
@@ -156,7 +156,7 @@ auto PlatformWindow::SendKeyEventDetached(Event<> const& event) -> void
         {
             FW_DEBUG_ASSERT(false);
         }
-    });
+    }).Detach();
 }
 
 ///
@@ -173,6 +173,6 @@ auto PlatformWindow::SendInputEventDetached(Event<> const& event) -> void
         {
             FW_DEBUG_ASSERT(false);
         }
-    });
+    }).Detach();
 }
 }

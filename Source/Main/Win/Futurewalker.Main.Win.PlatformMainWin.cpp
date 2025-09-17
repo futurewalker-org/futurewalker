@@ -61,7 +61,7 @@ auto PlatformMainWin::Main() -> ExitCode
     // On Windows, we just synchronously call Main() without creating event loop.
     // This is because Application::Run() will create its own event loop there.
     auto const main = []() -> Async<ExitCode> { co_return co_await FW_NS::Main(); };
-    if (auto const exitCode = AsyncFunction::SpawnFn(main).Wait())
+    if (auto const exitCode = AsyncFunction::SpawnFn(main).SyncWait())
     {
         return *exitCode;
     }

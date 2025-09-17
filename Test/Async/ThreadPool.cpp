@@ -36,6 +36,6 @@ TEST_CASE("ThreadPool")
     {
         auto h = AsyncFunction::SpawnFn([=]() -> LazyTask<void> { co_await pool->ScheduleAfter(std::chrono::seconds(1000)); });
         h.Cancel();
-        REQUIRE(!h.WaitFor(std::chrono::seconds(1)));
+        REQUIRE(!h.SyncWaitFor(std::chrono::seconds(1)));
     }
 }

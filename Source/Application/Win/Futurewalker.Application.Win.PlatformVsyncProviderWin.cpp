@@ -56,7 +56,7 @@ PlatformVsyncProviderWin::PlatformVsyncProviderWin()
                 auto callbacks = this->GetCallbacks();
                 if (!callbacks.empty())
                 {
-                    AsyncFunction::Spawn(DispatchCallbacks(frameInfo, std::move(callbacks)));
+                    AsyncFunction::Spawn(DispatchCallbacks(frameInfo, std::move(callbacks))).Detach();
                 }
             }
             else if (result == WAIT_TIMEOUT || result == WAIT_FAILED)

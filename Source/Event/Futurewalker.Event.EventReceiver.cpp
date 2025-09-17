@@ -53,7 +53,7 @@ auto EventReceiver::SendEventDetached(Event<>& event) -> Bool
 {
     auto const r = Shared<Bool>::Make(false);
     auto const e = Shared<Event<>>::Make(event);
-    AsyncFunction::SpawnFn([=, this]() -> Async<void> { *r = co_await SendEvent(*e); });
+    AsyncFunction::SpawnFn([=, this]() -> Async<void> { *r = co_await SendEvent(*e); }).Detach();
     event = *e;
     return *r;
 }

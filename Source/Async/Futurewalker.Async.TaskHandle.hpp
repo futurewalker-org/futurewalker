@@ -2,15 +2,12 @@
 #pragma once
 
 #include "Futurewalker.Async.TaskHandleType.hpp"
-#include "Futurewalker.Async.Concepts.hpp"
-#include "Futurewalker.Async.TypeTraits.hpp" 
 
 #include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Optional.hpp"
 
 #include <coroutine>
-#include <semaphore>
 #include <future>
 #include <stop_token>
 #include <optional> 
@@ -55,7 +52,7 @@ namespace FW_EXPORT
 /// @note This class is just a handle to a spawned task, and does not own the task itself.
 ///
 template <class T>
-class TaskHandle : NonCopyable
+class [[nodiscard]] TaskHandle : NonCopyable
 {
     using ResultType = std::optional<T>;
 
@@ -100,15 +97,48 @@ public:
     };
 
     ///
+    /// @brief Move constructor.
+    ///
+    TaskHandle(TaskHandle&& other) noexcept
+      : _stopSource(std::move(other._stopSource))
+      , _future(std::move(other._future))
+    {
+    }
+
+    ///
+    /// @brief Destructor.
+    ///
+    ~TaskHandle() noexcept
+    {
+        Cancel();
+    }
+
+    ///
+    /// @brief Move assignment operator.
+    ///
+    auto operator=(TaskHandle&& other) noexcept -> TaskHandle&
+    {
+        if (this != &other)
+        {
+            _stopSource = std::move(other._stopSource);
+            _future = std::move(other._future);
+        }
+        return *this;
+    }
+
+    ///
     /// @brief Waits for the task to complete.
     ///
     /// @return The result of the task if it completed successfully, otherwise empty.
     ///
-    auto Wait() const -> Optional<T>
+    auto SyncWait() const -> Optional<T>
     {
-        if (auto const& result = _future.get())
+        if (_future.valid())
         {
-            return *result;
+            if (auto const& result = _future.get())
+            {
+                return *result;
+            }
         }
         return {};
     }
@@ -121,13 +151,16 @@ public:
     /// @return The result of the task if it completed successfully within the specified duration, otherwise empty.
     ///
     template <class Rep, class Period>
-    auto WaitFor(std::chrono::duration<Rep, Period> duration) const -> Optional<T>
+    auto SyncWaitFor(std::chrono::duration<Rep, Period> duration) const -> Optional<T>
     {
-        if (_future.wait_for(duration) == std::future_status::ready)
+        if (_future.valid())
         {
-            if (auto const& result = _future.get())
+            if (_future.wait_for(duration) == std::future_status::ready)
             {
-                return *result;
+                if (auto const& result = _future.get())
+                {
+                    return *result;
+                }
             }
         }
         return {};
@@ -140,7 +173,19 @@ public:
     ///
     auto Cancel() -> void
     {
-        _stopSource.request_stop();
+        if (_future.valid())
+        {
+            _stopSource.request_stop();
+        }
+    }
+
+    ///
+    /// @brief Detaches the task handle.
+    ///
+    auto Detach() -> void
+    {
+        _future = {};
+        _stopSource = {};
     }
 
 private:
@@ -158,7 +203,7 @@ private:
 /// @brief Handle to a spawned task with no result.
 ///
 template <>
-class TaskHandle<void> : NonCopyable
+class [[nodiscard]] TaskHandle<void> : NonCopyable
 {
     using ResultType = std::optional<std::monostate>;
 
@@ -203,13 +248,47 @@ public:
     };
 
     ///
+    /// @brief Move constructor.
+    ///
+    TaskHandle(TaskHandle&& other) noexcept
+      : _stopSource(std::move(other._stopSource))
+      , _future(std::move(other._future))
+    {
+    }
+
+    ///
+    /// @brief
+    ///
+    ~TaskHandle() noexcept
+    {
+        Cancel();
+    }
+
+    ///
+    /// @brief Move assignment operator.
+    ///
+    auto operator=(TaskHandle&& other) noexcept -> TaskHandle&
+    {
+        if (this != &other)
+        {
+            _stopSource = std::move(other._stopSource);
+            _future = std::move(other._future);
+        }
+        return *this;
+    }
+
+    ///
     /// @brief Wait for the task to complete.
     ///
     /// @return True if the task completed successfully, otherwise false.
     ///
-    auto Wait() const -> Bool
+    auto SyncWait() const -> Bool
     {
-        return _future.get().has_value();
+        if (_future.valid())
+        {
+            return _future.get().has_value();
+        }
+        return false;
     }
 
     ///
@@ -220,11 +299,14 @@ public:
     /// @return True if the task completed successfully within the specified duration, otherwise false.
     ///
     template <class Rep, class Period>
-    auto WaitFor(std::chrono::duration<Rep, Period> duration) const -> Bool
+    auto SyncWaitFor(std::chrono::duration<Rep, Period> duration) const -> Bool
     {
-        if (_future.wait_for(duration) == std::future_status::ready)
+        if (_future.valid())
         {
-            return _future.get().has_value();
+            if (_future.wait_for(duration) == std::future_status::ready)
+            {
+                return _future.get().has_value();
+            }
         }
         return false;
     }
@@ -236,7 +318,19 @@ public:
     ///
     auto Cancel() -> void
     {
-        _stopSource.request_stop();
+        if (_future.valid())
+        {
+            _stopSource.request_stop();
+        }
+    }
+
+    ///
+    /// @brief Detach the task handle.
+    ///
+    auto Detach() -> void
+    {
+        _future = {};
+        _stopSource = {};
     }
 
 private:

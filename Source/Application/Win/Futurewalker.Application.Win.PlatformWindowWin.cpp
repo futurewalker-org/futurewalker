@@ -1901,7 +1901,7 @@ auto PlatformWindowWin::PostWindowEvent(Event<> const& event) -> void
         {
             FW_DEBUG_ASSERT(false);
         }
-    });
+    }).Detach();
 }
 
 ///

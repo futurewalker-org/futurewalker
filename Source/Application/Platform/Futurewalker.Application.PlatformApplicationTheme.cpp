@@ -44,6 +44,6 @@ auto PlatformApplicationTheme::SendThemeEventDetached(Event<> const& event) -> v
         {
             FW_DEBUG_ASSERT(false);
         }
-    });
+    }).Detach();
 }
 }

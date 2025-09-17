@@ -59,18 +59,18 @@ struct SyncWaitTaskPromiseBase
     {
         struct Awaitable
         {
-            auto await_ready() const noexcept
+            auto await_ready() const noexcept -> bool
             {
                 return false;
             }
 
-            auto await_suspend(std::coroutine_handle<>) noexcept
+            auto await_suspend(std::coroutine_handle<>) noexcept -> void
             {
                 // We have to notify after all local variables and temporaries are destroyed.
                 promise.Set();
             }
 
-            auto await_resume() noexcept
+            auto await_resume() noexcept -> void
             {
             }
 

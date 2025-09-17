@@ -25,7 +25,7 @@ auto PlatformInputMethodEditable::SendInputEventDetached(Event<>& event) -> Bool
     auto const self = GetSelf();
     auto const e = Shared<Event<>>::Make(event);
     auto const r = Shared<Bool>::Make(false);
-    AsyncFunction::SpawnFn([=] -> Lazy<void> { *r = co_await self->SendInputEvent(*e); });
+    AsyncFunction::SpawnFn([=] -> Lazy<void> { *r = co_await self->SendInputEvent(*e); }).Detach();
     if (*r)
     {
         event = *e;

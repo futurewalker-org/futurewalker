@@ -52,6 +52,6 @@ auto PlatformApplication::SendApplicationEventDetached(Event<> const& event) -> 
         {
             FW_DEBUG_ASSERT(false);
         }
-    });
+    }).Detach();
 }
 }

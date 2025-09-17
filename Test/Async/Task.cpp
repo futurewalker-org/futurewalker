@@ -64,6 +64,6 @@ TEST_CASE("Task")
     {
         auto handle = AsyncFunction::SpawnFn([]() -> Task<SInt32> { co_return 42; });
         handle.Cancel();
-        REQUIRE(*(handle.Wait()) == 42);
+        REQUIRE(*(handle.SyncWait()) == 42);
     }
 }

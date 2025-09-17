@@ -63,7 +63,7 @@ auto PlatformApplicationWin::Run() -> Async<void>
         AsyncFunction::SpawnFn([&]() -> Async<void> {
             auto e = Event<>(Event<PlatformApplicationEvent::Started>());
             co_await SendApplicationEvent(e);
-        });
+        }).Detach();
 
         while (true)
         {
@@ -85,7 +85,7 @@ auto PlatformApplicationWin::Run() -> Async<void>
         AsyncFunction::SpawnFn([&]() -> Async<void> {
             auto e = Event<>(Event<PlatformApplicationEvent::Exited>());
             co_await SendApplicationEvent(e);
-        });
+        }).Detach();
 
         FW_DEBUG_LOG_INFO("Exiting event loop on thread {}", std::this_thread::get_id());
     }
@@ -160,12 +160,12 @@ auto PlatformApplicationWin::Schedule() -> AsyncTask<void>
     {
         Weak<PlatformApplicationWin> application;
 
-        bool await_ready()
+        auto await_ready() const noexcept -> bool
         {
             return false;
         }
 
-        void await_suspend(std::coroutine_handle<> c)
+        auto await_suspend(std::coroutine_handle<> c) -> void
         {
             if (auto app = application.Lock())
             {
@@ -174,7 +174,7 @@ auto PlatformApplicationWin::Schedule() -> AsyncTask<void>
             throw Exception(ErrorCode::Failure);
         }
 
-        void await_resume()
+        auto await_resume() -> void
         {
         }
     };
@@ -287,7 +287,7 @@ auto PlatformApplicationWin::HandlePostedEvent(bool& callDefaultProcedure, WPARA
     (void)lParam;
     if (auto task = PopTask())
     {
-        AsyncFunction::Spawn(std::move(*task));
+        AsyncFunction::Spawn(std::move(*task)).Detach();
     }
     callDefaultProcedure = false;
     return 0;
