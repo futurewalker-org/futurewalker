@@ -332,7 +332,7 @@ auto FlexLayout::Measure(MeasureScope& scope) -> void
         auto const childMain = GetMainAxisLength(childSize);
         auto const childMargin = GetChildMargin(view);
 
-        if (totalGrowFactor > 0 || totalShrinkFactor > 0)
+        if (growFactor > 0 || shrinkFactor > 0)
         {
             auto diff = Dp(0);
             if (mainSpace > 0)
