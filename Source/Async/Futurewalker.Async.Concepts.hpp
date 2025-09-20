@@ -17,7 +17,7 @@ struct AwaitTransformCheckerHelper { void await_transform() {} };
 template <class Promise>
 struct AwaitTransformChecker : AwaitTransformCheckerHelper, Promise {};
 template <class T>
-concept AwaitResumeResult = SameAs<T ,void> || ImplicitlyConvertibleTo<T, bool> || SpecializationOf<T, std::coroutine_handle>;
+concept AwaitSuspendResult = SameAs<T ,void> || ImplicitlyConvertibleTo<T, bool> || SpecializationOf<T, std::coroutine_handle>;
 // clang-format on
 
 namespace FW_EXPORT
@@ -42,8 +42,8 @@ template <class A, class P>
 concept Awaiter =  requires(A&& a, P& p) {
     // TODO: test return type of these functions.
     { std::forward<A>(a).await_ready() } -> ImplicitlyConvertibleTo<bool>; // must be convertible to bool.
-    { std::forward<A>(a).await_resume() } -> AwaitResumeResult; // -> void or bool or std::coroutine_handle<Z>
-    { std::forward<A>(a).await_suspend(std::declval<std::coroutine_handle<P>>()) };
+    { std::forward<A>(a).await_suspend(std::declval<std::coroutine_handle<P>>()) } -> AwaitSuspendResult; // -> void or bool or std::coroutine_handle<Z>
+    { std::forward<A>(a).await_resume() };
 };
 
 ///
