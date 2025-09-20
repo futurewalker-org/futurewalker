@@ -26,10 +26,10 @@ public:
     static auto Schedule() -> AsyncTask<void>;
 
     template <class Rep, class Period>
-    static auto ScheduleAfter(const std::chrono::duration<Rep, Period>& delay) -> AsyncTask<void>;
+    static auto ScheduleAfter(std::chrono::duration<Rep, Period> const& delay) -> AsyncTask<void>;
 
 private:
-    static auto ScheduleAfterNanos(const std::chrono::nanoseconds& delay) -> AsyncTask<void>;
+    static auto ScheduleAfterNanos(std::chrono::nanoseconds const& delay) -> AsyncTask<void>;
 };
 
 ///
@@ -38,7 +38,7 @@ private:
 /// @param delay 
 ///
 template <class Rep, class Period>
-auto MainThread::ScheduleAfter(const std::chrono::duration<Rep, Period>& delay) -> AsyncTask<void>
+auto MainThread::ScheduleAfter(std::chrono::duration<Rep, Period> const& delay) -> AsyncTask<void>
 {
     co_await ScheduleAfterNanos(std::chrono::duration_cast<std::chrono::nanoseconds>(delay));
 }

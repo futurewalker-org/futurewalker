@@ -41,7 +41,7 @@ auto MainThread::Schedule() -> AsyncTask<void>
 ///
 /// @param delay
 ///
-auto MainThread::ScheduleAfterNanos(const std::chrono::nanoseconds& delay) -> AsyncTask<void>
+auto MainThread::ScheduleAfterNanos(std::chrono::nanoseconds const& delay) -> AsyncTask<void>
 {
     if (auto const platform = Locator::GetInstance<PlatformMainThread>())
     {
