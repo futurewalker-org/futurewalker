@@ -168,7 +168,7 @@ auto ViewDrawInfo::UpdateLayers(ViewLayer& layer) -> void
 
     if (const auto drawableLayer = GetSubLayer(_drawableLayerId))
     {
-        if (_displayList)
+        if (_displayList && !_displayList->GetBounds().IsEmpty())
         {
             // We assume origin of the bounds is properly aligned by layout algorithm.
             auto const bounds = AlignBoundsToPixelGridByExpand(_displayList->GetBounds(), _displayScale, _backingScale);
