@@ -16,7 +16,7 @@
 #include <dxgi1_4.h>
 #include <wrl/client.h>
 
-#include <include/gpu/GrDirectContext.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
 
 namespace FW_DETAIL_NS
 {

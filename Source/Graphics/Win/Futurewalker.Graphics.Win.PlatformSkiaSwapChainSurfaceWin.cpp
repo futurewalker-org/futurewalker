@@ -9,9 +9,9 @@
 #include "Futurewalker.Core.Exception.hpp"
 
 #include <include/core/SkColorSpace.h>
-#include <include/gpu/GrDirectContext.h>
-#include <include/gpu/GrBackendSurface.h>
-#include <include/gpu/d3d/GrD3DTypes.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+#include <include/gpu/ganesh/GrBackendSurface.h>
+#include <include/gpu/ganesh/d3d/GrD3DTypes.h>
 
 namespace FW_GRAPHICS_DETAIL_NS
 {

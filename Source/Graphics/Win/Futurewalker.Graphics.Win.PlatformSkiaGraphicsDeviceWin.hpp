@@ -12,7 +12,7 @@
 #include "Futurewalker.Core.Function.hpp"
 
 #include <include/core/SkSurface.h>
-#include <include/gpu/GrDirectContext.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
 
 #include <dxgi1_4.h>
 #include <d3d12.h>

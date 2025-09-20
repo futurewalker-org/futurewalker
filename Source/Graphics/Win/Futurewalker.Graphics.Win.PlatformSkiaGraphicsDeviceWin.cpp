@@ -8,8 +8,8 @@
 
 #include "Futurewalker.Core.Exception.hpp"
 
-#include <include/gpu/GrBackendSurface.h>
-#include <include/gpu/d3d/GrD3DBackendContext.h>
+#include <include/gpu/ganesh/GrBackendSurface.h>
+#include <include/gpu/ganesh/d3d/GrD3DBackendContext.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <include/core/SkColorSpace.h>
 
