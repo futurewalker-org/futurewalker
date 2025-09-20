@@ -2152,7 +2152,7 @@ auto View::NotifyLayoutDirectionChanged(LayoutDirection const layoutDirection) -
 {
     try
     {
-        auto changed = Bool(false);
+        auto changed = False;
         auto const rawLayoutDirection = _layoutInfo.GetRawLayoutDirection();
         if (rawLayoutDirection == ViewLayoutDirection::Inherited)
         {

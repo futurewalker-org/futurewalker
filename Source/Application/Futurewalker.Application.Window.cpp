@@ -450,7 +450,7 @@ auto Window::Close() -> Async<Bool>
 {
     if (!IsClosed())
     {
-        auto cancelled = Bool(false);
+        auto cancelled = False;
         auto event = Event<>(Event<WindowEvent::CloseRequested>());
         if (co_await SendEvent(event))
         {
