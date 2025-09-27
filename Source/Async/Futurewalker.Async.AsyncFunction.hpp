@@ -7,6 +7,7 @@
 #include "Futurewalker.Async.TypeTraits.hpp"
 
 #include "Futurewalker.Core.NonConstructible.hpp"
+#include "Futurewalker.Core.Blank.hpp"
 
 #include <chrono>
 
@@ -30,8 +31,7 @@ public:
     template <class Awaitable>
     static auto SyncWait(Awaitable&& awaitable)
     {
-        struct DummyPromise {};
-        constexpr auto makeSyncWaitTask = []<class A>(A&& a) -> SyncWaitTask<TypeTraits::AwaitResultOf<A, DummyPromise>> { co_return co_await std::forward<A>(a); };
+        constexpr auto makeSyncWaitTask = []<class A>(A&& a) -> SyncWaitTask<TypeTraits::AwaitResultOf<A, Blank>> { co_return co_await std::forward<A>(a); };
         return makeSyncWaitTask(std::forward<Awaitable>(awaitable)).Get();
     }
 
@@ -47,8 +47,7 @@ public:
     template <class Invocable>
     static auto SyncWaitFn(Invocable&& invocable)
     {
-        struct DummyPromise {};
-        constexpr auto makeSyncWaitTask = []<class F>(F f) -> SyncWaitTask<TypeTraits::AwaitResultOf<std::invoke_result_t<F>, DummyPromise>> { co_return co_await std::invoke(f); };
+        constexpr auto makeSyncWaitTask = []<class F>(F f) -> SyncWaitTask<TypeTraits::AwaitResultOf<std::invoke_result_t<F>, Blank>> { co_return co_await std::invoke(f); };
         return makeSyncWaitTask(std::forward<Invocable>(invocable)).Get();
     }
 
@@ -62,8 +61,7 @@ public:
     template <class Awaitable>
     static auto Spawn(Awaitable&& awaitable)
     {
-        struct DummyPromise {};
-        constexpr auto makeAsyncSpawnTask = []<class A>(A a) -> TaskHandle<TypeTraits::AwaitResultOf<A, DummyPromise>> { co_return co_await std::move(a); };
+        constexpr auto makeAsyncSpawnTask = []<class A>(A a) -> TaskHandle<TypeTraits::AwaitResultOf<A, Blank>> { co_return co_await std::move(a); };
         return makeAsyncSpawnTask(std::forward<Awaitable>(awaitable));
     }
 
@@ -79,8 +77,7 @@ public:
     template <class Invocable>
     static auto SpawnFn(Invocable&& invocable)
     {
-        struct DummyPromise {};
-        constexpr auto makeAsyncSpawnTask = []<class F>(F f) -> TaskHandle<TypeTraits::AwaitResultOf<std::invoke_result_t<F>, DummyPromise>> { co_return co_await std::invoke(f); };
+        constexpr auto makeAsyncSpawnTask = []<class F>(F f) -> TaskHandle<TypeTraits::AwaitResultOf<std::invoke_result_t<F>, Blank>> { co_return co_await std::invoke(f); };
         return makeAsyncSpawnTask(std::forward<Invocable>(invocable));
     }
 
