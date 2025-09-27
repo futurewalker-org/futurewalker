@@ -28,7 +28,17 @@ PlatformApplicationWin::PlatformApplicationWin(PassKey<PlatformApplication>, Del
   , _context {context}
   , _threadPool {threadPool}
 {
-    _threadId = std::this_thread::get_id();
+}
+
+///
+/// @brief Destructor.
+///
+PlatformApplicationWin::~PlatformApplicationWin()
+{
+    if (ThisThread::GetScheduler() == _thisThreadScheduler)
+    {
+        ThisThread::SetScheduler(nullptr);
+    }
 }
 
 ///
@@ -254,6 +264,37 @@ auto PlatformApplicationWin::MessageWindowProcedure(PassKey<PlatformApplicationC
 ///
 auto PlatformApplicationWin::Initialize() -> void
 {
+    class ThisThreadScheduler final : public ThisThread::Scheduler
+    {
+        Weak<PlatformApplicationWin> _app;
+
+    public:
+        ThisThreadScheduler(Weak<PlatformApplicationWin> app)
+          : _app {app}
+        {
+        }
+
+        auto Schedule() -> AsyncTask<void> override
+        {
+            if (auto const app = _app.Lock())
+            {
+                co_return co_await app->Schedule();
+            }
+            throw Exception(ErrorCode::InvalidOperation);
+        }
+
+        auto ScheduleAfter(std::chrono::nanoseconds const delay) -> AsyncTask<void> override
+        {
+            if (auto const app = _app.Lock())
+            {
+                co_return co_await app->ScheduleAfter(delay);
+            }
+            throw Exception(ErrorCode::InvalidOperation);
+        }
+    };
+    _threadId = std::this_thread::get_id();
+    _thisThreadScheduler = Shared<ThisThreadScheduler>::Make(GetSelf());
+    ThisThread::SetScheduler(_thisThreadScheduler);
 }
 
 ///
