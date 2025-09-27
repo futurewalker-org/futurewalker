@@ -130,6 +130,18 @@ concept NarrowConvertibleTo =
 // clang-format on
 
 ///
+/// @brief movable concept.
+///
+template <class T>
+concept Movable = std::movable<T>;
+
+///
+/// @brief copyable concept.
+///
+template <class T>
+concept Copyable = std::copyable<T>;
+
+///
 /// @brief constructible_from concept.
 ///
 template <class To, class From>
