@@ -68,7 +68,7 @@ public:
     {
     }
 
-    auto await_ready() noexcept -> bool
+    auto await_ready() const noexcept -> bool
     {
         return false;
     }

@@ -69,7 +69,7 @@ auto Application::Exit() -> Async<Bool>
     {
         if (_platformObject->IsRunning())
         {
-            auto cancelled = Bool(false);
+            auto cancelled = False;
             auto event = Event<>(Event<ApplicationEvent::ExitRequested>());
             if (co_await SendEvent(event))
             {

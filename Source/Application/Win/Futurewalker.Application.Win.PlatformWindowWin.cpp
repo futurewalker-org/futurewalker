@@ -787,8 +787,6 @@ auto PlatformWindowWin::HandleNcCalcSize(HWND hWnd, UINT msg, WPARAM wParam, LPA
 {
     if (msg == WM_NCCALCSIZE)
     {
-        FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleNcCalcSize()");
-
         if (wParam == TRUE)
         {
             if (_options.hasFrame)
