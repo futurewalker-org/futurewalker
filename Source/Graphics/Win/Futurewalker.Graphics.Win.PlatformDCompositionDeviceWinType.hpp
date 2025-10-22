@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Application.Win.Prelude.hpp"
+#include "Futurewalker.Graphics.Win.Prelude.hpp"
 
 namespace FW_DETAIL_NS
 {

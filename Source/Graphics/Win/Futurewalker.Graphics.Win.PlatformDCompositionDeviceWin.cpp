@@ -1,6 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
-#include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 
 #include "Futurewalker.Graphics.Win.PlatformD3D11DeviceWin.hpp"
 
@@ -19,6 +19,7 @@ PlatformDCompositionDeviceWin::PlatformDCompositionDeviceWin(Shared<PlatformD3D1
     if (_d3d11Device)
     {
         _dcompDevice = CreateDCompositionDevice(_d3d11Device->GetDevice());
+        _presentationFactory = CreatePresentationFactory(_d3d11Device->GetDevice()); 
     }
 
     if (!_d3d11Device || !_dcompDevice)
@@ -36,6 +37,18 @@ auto PlatformDCompositionDeviceWin::Commit() -> void
     {
         _dcompDevice->Commit();
     }
+}
+
+///
+/// @brief Queries whether presentation API is supported.
+///
+auto PlatformDCompositionDeviceWin::IsPresentationSupported() const -> Bool
+{
+    if (_presentationFactory && _presentationFactory->IsPresentationSupported())
+    {
+        return true;
+    }
+    return false;
 }
 
 ///
@@ -79,6 +92,20 @@ auto PlatformDCompositionDeviceWin::CreateTargetForHwnd(HWND hwnd) -> Microsoft:
     return {};
 }
 
+auto PlatformDCompositionDeviceWin::CreateSurfaceFromHandle(HANDLE handle) -> Microsoft::WRL::ComPtr<IUnknown>
+{
+    if (_dcompDevice)
+    {
+        auto surface = Microsoft::WRL::ComPtr<IUnknown>();
+        auto hr = _dcompDevice->CreateSurfaceFromHandle(handle, &surface);
+        if (SUCCEEDED(hr) && surface)
+        {
+            return surface;
+        }
+    }
+    return {};
+}
+
 ///
 /// @brief Create rectangle clip.
 ///
@@ -97,6 +124,59 @@ auto PlatformDCompositionDeviceWin::CreateRectangleClip() -> Microsoft::WRL::Com
 }
 
 ///
+/// @brief
+///
+auto PlatformDCompositionDeviceWin::CreatePresentationManager() -> Microsoft::WRL::ComPtr<IPresentationManager>
+{
+    if (IsPresentationSupported())
+    {
+        Microsoft::WRL::ComPtr<IPresentationManager> presentationManager;
+        auto const hr = _presentationFactory->CreatePresentationManager(&presentationManager);
+        if (SUCCEEDED(hr) && presentationManager)
+        {
+            return presentationManager;
+        }
+    }
+    return {};
+}
+
+///
+/// @brief 
+///
+auto PlatformDCompositionDeviceWin::CreateSurfaceHandle() -> Microsoft::WRL::Wrappers::HandleT<Microsoft::WRL::Wrappers::HandleTraits::HANDLENullTraits>
+{
+    auto handle = HANDLE();
+    auto const hr = ::DCompositionCreateSurfaceHandle(COMPOSITIONOBJECT_ALL_ACCESS, nullptr, &handle);
+    if (SUCCEEDED(hr))
+    {
+        return Microsoft::WRL::Wrappers::HandleT<Microsoft::WRL::Wrappers::HandleTraits::HANDLENullTraits>(handle);
+    }
+    return Microsoft::WRL::Wrappers::HandleT<Microsoft::WRL::Wrappers::HandleTraits::HANDLENullTraits>();
+}
+
+///
+/// @brief Open resource from shared handle.
+///
+/// @param handle
+///
+auto PlatformDCompositionDeviceWin::CreateSharedResourceFromHandle(HANDLE handle) -> Microsoft::WRL::ComPtr<ID3D11Resource>
+{
+    if (_d3d11Device)
+    {
+        if (auto const device = _d3d11Device->GetDevice())
+        {
+            Microsoft::WRL::ComPtr<ID3D11Resource> sharedResource;
+            auto const hr = device->OpenSharedResource1(handle, IID_PPV_ARGS(&sharedResource));
+            if (SUCCEEDED(hr))
+            {
+                return sharedResource;
+            }
+        }
+    }
+    return {};
+}
+
+///
 /// @brief Get composition device.
 ///
 auto PlatformDCompositionDeviceWin::GetDevice() -> Microsoft::WRL::ComPtr<IDCompositionDesktopDevice>
@@ -109,7 +189,7 @@ auto PlatformDCompositionDeviceWin::GetDevice() -> Microsoft::WRL::ComPtr<IDComp
 ///
 /// @param d3d11Device
 ///
-auto PlatformDCompositionDeviceWin::CreateDCompositionDevice(Microsoft::WRL::ComPtr<ID3D11Device> d3d11Device) -> Microsoft::WRL::ComPtr<IDCompositionDesktopDevice>
+auto PlatformDCompositionDeviceWin::CreateDCompositionDevice(Microsoft::WRL::ComPtr<ID3D11Device> const& d3d11Device) -> Microsoft::WRL::ComPtr<IDCompositionDesktopDevice>
 {
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
     HRESULT hr = d3d11Device.As(&dxgiDevice);
@@ -125,6 +205,20 @@ auto PlatformDCompositionDeviceWin::CreateDCompositionDevice(Microsoft::WRL::Com
         return {};
     }
     return dcompDevice;
+}
+
+///
+/// @brief Create presentation factory.
+///
+auto PlatformDCompositionDeviceWin::CreatePresentationFactory(Microsoft::WRL::ComPtr<ID3D11Device> const& d3d11Device) -> Microsoft::WRL::ComPtr<IPresentationFactory>
+{
+    Microsoft::WRL::ComPtr<IPresentationFactory> presentationFactory;
+    auto const hr = ::CreatePresentationFactory(d3d11Device.Get(), IID_PPV_ARGS(&presentationFactory));
+    if (FAILED(hr) || !presentationFactory || !presentationFactory->IsPresentationSupported())
+    {
+        return {};
+    }
+    return presentationFactory;
 }
 
 ///
