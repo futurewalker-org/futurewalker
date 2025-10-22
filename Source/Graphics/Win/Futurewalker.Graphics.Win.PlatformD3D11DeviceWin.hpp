@@ -9,7 +9,7 @@
 #include "Futurewalker.Core.BuildConfig.hpp"
 
 #include <wrl/client.h>
-#include <d3d11.h>
+#include <d3d11_1.h>
 
 #include <array>
 
@@ -25,14 +25,14 @@ class PlatformD3D11DeviceWin : public NonCopyable
 public:
     PlatformD3D11DeviceWin();
 
-    auto GetDevice() -> Microsoft::WRL::ComPtr<ID3D11Device>;
+    auto GetDevice() -> Microsoft::WRL::ComPtr<ID3D11Device1>;
 
 private:
-    auto CreateDevice() -> Microsoft::WRL::ComPtr<ID3D11Device>;
-    auto CreateDeviceForType(D3D_DRIVER_TYPE const type) -> Microsoft::WRL::ComPtr<ID3D11Device>;
+    auto CreateDevice() -> Microsoft::WRL::ComPtr<ID3D11Device1>;
+    auto CreateDeviceForType(D3D_DRIVER_TYPE const type) -> Microsoft::WRL::ComPtr<ID3D11Device1>;
 
 private:
-    Microsoft::WRL::ComPtr<ID3D11Device> _device;
+    Microsoft::WRL::ComPtr<ID3D11Device1> _device;
 };
 
 template <>

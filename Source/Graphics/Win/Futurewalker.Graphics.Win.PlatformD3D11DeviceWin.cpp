@@ -20,7 +20,7 @@ PlatformD3D11DeviceWin::PlatformD3D11DeviceWin()
 ///
 /// @brief Get ID3D11Device instance.
 ///
-auto PlatformD3D11DeviceWin::GetDevice() -> Microsoft::WRL::ComPtr<ID3D11Device>
+auto PlatformD3D11DeviceWin::GetDevice() -> Microsoft::WRL::ComPtr<ID3D11Device1>
 {
     return _device;
 }
@@ -28,7 +28,7 @@ auto PlatformD3D11DeviceWin::GetDevice() -> Microsoft::WRL::ComPtr<ID3D11Device>
 ///
 /// @brief Create device.
 ///
-auto PlatformD3D11DeviceWin::CreateDevice() -> Microsoft::WRL::ComPtr<ID3D11Device>
+auto PlatformD3D11DeviceWin::CreateDevice() -> Microsoft::WRL::ComPtr<ID3D11Device1>
 {
     if (auto device = CreateDeviceForType(D3D_DRIVER_TYPE_HARDWARE))
     {
@@ -51,13 +51,16 @@ auto PlatformD3D11DeviceWin::CreateDevice() -> Microsoft::WRL::ComPtr<ID3D11Devi
 ///
 /// @param type Driver type
 ///
-auto PlatformD3D11DeviceWin::CreateDeviceForType(D3D_DRIVER_TYPE const type) -> Microsoft::WRL::ComPtr<ID3D11Device>
+auto PlatformD3D11DeviceWin::CreateDeviceForType(D3D_DRIVER_TYPE const type) -> Microsoft::WRL::ComPtr<ID3D11Device1>
 {
     auto flags = UINT(D3D11_CREATE_DEVICE_BGRA_SUPPORT);
     if constexpr (BuildConfig::IsDebug())
     {
         flags |= D3D11_CREATE_DEVICE_DEBUG;
     }
+
+    flags |=  D3D11_CREATE_DEVICE_SINGLETHREADED;
+    flags |=  D3D11_CREATE_DEVICE_PREVENT_INTERNAL_THREADING_OPTIMIZATIONS;
 
     auto constexpr featureLevels = std::array {
       D3D_FEATURE_LEVEL_11_0,
@@ -69,10 +72,15 @@ auto PlatformD3D11DeviceWin::CreateDeviceForType(D3D_DRIVER_TYPE const type) -> 
     };
 
     auto device = Microsoft::WRL::ComPtr<ID3D11Device>();
-    auto const hr = ::D3D11CreateDevice(nullptr, type, NULL, flags, featureLevels.data(), static_cast<UINT>(featureLevels.size()), D3D11_SDK_VERSION, device.GetAddressOf(), nullptr, nullptr);
+    auto hr = ::D3D11CreateDevice(nullptr, type, NULL, flags, featureLevels.data(), static_cast<UINT>(featureLevels.size()), D3D11_SDK_VERSION, device.GetAddressOf(), nullptr, nullptr);
     if (SUCCEEDED(hr) && device)
     {
-        return device;
+        auto device1 = Microsoft::WRL::ComPtr<ID3D11Device1>();
+        hr = device.As(&device1);
+        if (SUCCEEDED(hr) && device1)
+        {
+            return device1;
+        }
     }
     return nullptr;
 }
