@@ -4,7 +4,7 @@
 #include "Futurewalker.Application.RootViewDrawInfoType.hpp"
 #include "Futurewalker.Application.ViewLayerType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
-#include "Futurewalker.Application.PlatformDrawableViewLayerContextType.hpp"
+#include "Futurewalker.Application.PlatformViewLayerContextType.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -26,7 +26,7 @@ public:
     auto SetParentLayer(Shared<ViewLayer> parent) -> void;
 
 private:
-    Shared<PlatformDrawableViewLayerContext> _layerContext;
+    Shared<PlatformViewLayerContext> _layerContext;
     Shared<ViewLayer> _layer;
     Weak<ViewLayer> _parent;
 };

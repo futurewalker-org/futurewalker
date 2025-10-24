@@ -2,8 +2,7 @@
 
 #include "Futurewalker.Application.RootViewDrawInfo.hpp"
 #include "Futurewalker.Application.ViewLayer.hpp"
-#include "Futurewalker.Application.PlatformDrawableViewLayerContext.hpp"
-#include "Futurewalker.Application.PlatformDrawableViewLayerControl.hpp"
+#include "Futurewalker.Application.PlatformViewLayerContext.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 
@@ -11,8 +10,8 @@ namespace FW_DETAIL_NS
 {
 auto RootViewDrawInfo::Initialize() -> void
 {
-    _layerContext = Locator::Resolve<PlatformDrawableViewLayerContext>();
-    _layer = ViewLayer::Make(_layerContext->MakeDrawableLayer());
+    _layerContext = Locator::Resolve<PlatformViewLayerContext>();
+    _layer = ViewLayer::Make(_layerContext->MakeViewLayer());
 }
 
 auto RootViewDrawInfo::GetLayer() -> ViewLayer&
