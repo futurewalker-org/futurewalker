@@ -3,9 +3,16 @@
 
 #include "Futurewalker.Core.Identifier.hpp"
 #include "Futurewalker.Core.Primitive.hpp"
+#include "Futurewalker.Core.Blank.hpp"
 
 namespace FW_DETAIL_NS
 {
+template <class T>
+struct TypeIdImpl
+{
+    static constexpr auto dummy = Blank();
+};
+
 namespace FW_EXPORT
 {
 ///
@@ -24,8 +31,7 @@ public:
     template <class T>
     static auto Get() noexcept -> TypeId
     {
-        // HACK: Relying on uniqueness of address of template functions.
-        return TypeId(reinterpret_cast<std::uintptr_t>(Get<std::remove_cvref_t<T>>));
+        return TypeId(reinterpret_cast<std::uintptr_t>(&TypeIdImpl<std::remove_cvref_t<T>>::dummy));
     }
 };
 }
