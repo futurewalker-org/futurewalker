@@ -2,8 +2,6 @@
 
 #include "Futurewalker.Application.ViewLayer.hpp"
 #include "Futurewalker.Application.PlatformViewLayer.hpp"
-#include "Futurewalker.Application.PlatformDrawableViewLayerContext.hpp"
-#include "Futurewalker.Application.PlatformDrawableViewLayerControl.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 #include "Futurewalker.Base.Locator.hpp"
@@ -30,10 +28,6 @@ ViewLayer::ViewLayer(PassKey<ViewLayer>, Shared<PlatformViewLayer> const& platfo
   : _platformLayer {platformLayer}
 {
     FW_DEBUG_ASSERT(_platformLayer);
-    _platformLayer->SetOffset(_offset);
-    _platformLayer->SetSize(_size);
-    _platformLayer->SetOpacity(_opacity);
-    _platformLayer->SetClipMode(_clipMode);
 }
 
 ///
@@ -121,33 +115,19 @@ auto ViewLayer::GetChildAt(SInt64 const index) -> Shared<ViewLayer>
 }
 
 ///
-/// @brief 
-///
-auto ViewLayer::GetOffset() const -> Offset<Dp>
-{
-    return _offset;
-}
-
-///
 /// @brief Set origin of this layer.
 ///
 /// @param offset Offset of origin in parent's origin.
 ///
 auto ViewLayer::SetOffset(Offset<Dp> const& offset) -> void
 {
-    if (_offset != offset)
+    if (offset.IsFinite())
     {
-        _offset = offset;
-        _platformLayer->SetOffset(_offset);
+        if (_platformLayer)
+        {
+            _platformLayer->SetOffset(offset);
+        }
     }
-}
-
-///
-/// @brief 
-///
-auto ViewLayer::GetSize() const -> Size<Dp>
-{
-    return _size;
 }
 
 ///
@@ -159,20 +139,11 @@ auto ViewLayer::SetSize(Size<Dp> const& size) -> void
 {
     if (size.IsFinite())
     {
-        if (_size != size)
+        if (_platformLayer)
         {
-            _size = size;
-            _platformLayer->SetSize(_size);
+            _platformLayer->SetSize(size);
         }
     }
-}
-
-///
-/// @brief Returns true if contents of the layer will be clipped to bounds.
-///
-auto ViewLayer::GetClipMode() const -> ViewClipMode
-{
-    return _clipMode;
 }
 
 ///
@@ -182,19 +153,10 @@ auto ViewLayer::GetClipMode() const -> ViewClipMode
 ///
 auto ViewLayer::SetClipMode(ViewClipMode const clipMode) -> void
 {
-    if (_clipMode != clipMode)
+    if (_platformLayer)
     {
-        _clipMode = clipMode;
-        _platformLayer->SetClipMode(_clipMode);
+        _platformLayer->SetClipMode(clipMode);
     }
-}
-
-///
-/// @brief
-///
-auto ViewLayer::SetOpacity() const -> Float64
-{
-    return _opacity;
 }
 
 ///
@@ -206,10 +168,41 @@ auto ViewLayer::SetOpacity(Float64 const opacity) -> void
 {
     if (Float64::IsFinite(opacity))
     {
-        if (_opacity != opacity)
+        if (_platformLayer)
         {
-            _opacity = opacity;
-            _platformLayer->SetOpacity(_opacity);
+            _platformLayer->SetOpacity(opacity);
+        }
+    }
+}
+
+auto ViewLayer::SetShouldRasterize(Bool const shouldRasterize) -> void
+{
+    if (_platformLayer)
+    {
+        auto renderFlags = PlatformViewLayerRenderFlags::None;
+        if (shouldRasterize)
+        {
+            renderFlags |= PlatformViewLayerRenderFlags::Rasterize;
+        }
+        _platformLayer->SetRenderFlags(renderFlags);
+    }
+}
+
+auto ViewLayer::SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void
+{
+    if (_platformLayer)
+    {
+        _platformLayer->SetDisplayList(displayList);
+    }
+}
+
+auto ViewLayer::SetDisplayListOffset(Offset<Dp> const& offset) -> void
+{
+    if (offset.IsFinite())
+    {
+        if (_platformLayer)
+        {
+            _platformLayer->SetDisplayListOffset(offset);
         }
     }
 }

@@ -5,7 +5,6 @@
 #include "Futurewalker.Application.ViewType.hpp"
 #include "Futurewalker.Application.ViewLayerType.hpp"
 #include "Futurewalker.Application.ViewLayerManagerType.hpp"
-#include "Futurewalker.Application.PlatformDrawableViewLayerContextType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 
 #include "Futurewalker.Graphics.DisplayListType.hpp"

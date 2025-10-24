@@ -2,8 +2,6 @@
 
 #include "Futurewalker.Application.ViewLayerManager.hpp"
 #include "Futurewalker.Application.ViewLayer.hpp"
-#include "Futurewalker.Application.DrawableViewLayer.hpp"
-#include "Futurewalker.Application.PlatformDrawableViewLayerContext.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -19,12 +17,11 @@ UniqueViewLayerKind ViewLayerKindDrawable; // A kind of DrawableViewLayer instan
 /// @param viewLayerContext
 /// @param drawableViewLayerContext
 ///
-ViewLayerManager::ViewLayerManager(Shared<PlatformViewLayerContext> const& viewLayerContext, Shared<PlatformDrawableViewLayerContext> const& drawableViewLayerContext)
+ViewLayerManager::ViewLayerManager(Shared<PlatformViewLayerContext> const& viewLayerContext)
   : _viewLayerContext {viewLayerContext}
-  , _drawableViewLayerContext {drawableViewLayerContext}
 {
     Register(ViewLayerKindNormal, [&] { return ViewLayer::Make(_viewLayerContext->MakeViewLayer()); });
-    Register(ViewLayerKindDrawable, [&] { return DrawableViewLayer::Make(_drawableViewLayerContext->MakeDrawableLayer()); });
+    Register(ViewLayerKindDrawable, [&] { return ViewLayer::Make(_viewLayerContext->MakeViewLayer()); });
 }
 
 ///
@@ -59,7 +56,6 @@ auto ViewLayerManager::Register(ViewLayerKind const kind, ViewLayerManagerMakeFu
 auto Locator::Resolver<ViewLayerManager>::Resolve() -> Shared<ViewLayerManager>
 {
     auto viewLayerContext = Locator::Resolve<PlatformViewLayerContext>();
-    auto drawbleViewLayerContext = Locator::Resolve<PlatformDrawableViewLayerContext>();
-    return Shared<ViewLayerManager>::Make(viewLayerContext, drawbleViewLayerContext);
+    return Shared<ViewLayerManager>::Make(viewLayerContext);
 }
 }

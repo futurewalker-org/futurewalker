@@ -211,6 +211,7 @@ private:
 
     auto UpdateBackgroundColor() -> void;
     auto UpdateAreaRects() -> void;
+    auto UpdateRootViewLayer() -> void;
 
     auto GetPlatformViewLayer() -> Shared<PlatformViewLayer>;
 
@@ -232,7 +233,6 @@ private:
     Shared<AttributeNode> _attributeNode;
     Shared<PlatformWindowContext> _platformContext;
     Shared<PlatformWindow> _platformObject;
-    Shared<PlatformViewLayerContext> _platformViewLayerContext;
     Unique<EventReceiver> _eventReceiver;
     Shared<ViewLayer> _rootViewLayer;
     Shared<InputMethod> _inputMethod;

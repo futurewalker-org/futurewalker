@@ -5,8 +5,9 @@
 #include "Futurewalker.Application.ViewType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerControlType.hpp"
-#include "Futurewalker.Application.PlatformDrawableViewLayerContextType.hpp"
 #include "Futurewalker.Application.CornerRadius.hpp"
+
+#include "Futurewalker.Graphics.DisplayListType.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -55,17 +56,13 @@ public:
     auto GetChildIndex(ReferenceArg<ViewLayer const> layer) const -> Optional<SInt64>;
     auto GetChildAt(SInt64 const index) -> Shared<ViewLayer>;
 
-    auto GetOffset() const -> Offset<Dp>;
     auto SetOffset(Offset<Dp> const& offset) -> void;
-
-    auto GetSize() const -> Size<Dp>;
     auto SetSize(Size<Dp> const& size) -> void;
-
-    auto GetClipMode() const -> ViewClipMode;
     auto SetClipMode(ViewClipMode const clipMode) -> void;
-
-    auto SetOpacity() const -> Float64;
     auto SetOpacity(Float64 const opacity) -> void;
+    auto SetShouldRasterize(Bool const shouldRasterize) -> void;
+    auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void;
+    auto SetDisplayListOffset(Offset<Dp> const& offset) -> void;
 
 private:
     auto GetSelf() -> Shared<ViewLayer>;
@@ -95,10 +92,6 @@ private:
     Weak<ViewLayer> _parent;
     ViewLayerList _children;
     Shared<PlatformViewLayer> _platformLayer;
-    Offset<Dp> _offset;
-    Size<Dp> _size;
-    Float64 _opacity = 1.0;
-    ViewClipMode _clipMode = ViewClipMode::None;
 };
 
 }

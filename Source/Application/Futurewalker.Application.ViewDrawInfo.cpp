@@ -4,7 +4,6 @@
 #include "Futurewalker.Application.ViewLayer.hpp"
 #include "Futurewalker.Application.ViewLayerManager.hpp"
 #include "Futurewalker.Application.PlatformViewLayer.hpp"
-#include "Futurewalker.Application.DrawableViewLayer.hpp"
 
 #include "Futurewalker.Graphics.DisplayList.hpp"
 
@@ -176,11 +175,13 @@ auto ViewDrawInfo::UpdateLayers(ViewLayer& layer) -> void
 
             drawableLayer->SetOffset(offset);
             drawableLayer->SetSize(bounds.GetSize());
-            drawableLayer.As<DrawableViewLayer>()->Draw(_displayList, -offset);
+            drawableLayer->SetDisplayList(_displayList);
+            drawableLayer->SetDisplayListOffset(-offset);
         }
         else
         {
-            drawableLayer.As<DrawableViewLayer>()->Draw(nullptr, {});
+            drawableLayer->SetDisplayList(nullptr);
+            drawableLayer->SetDisplayListOffset({});
         }
     }
 }

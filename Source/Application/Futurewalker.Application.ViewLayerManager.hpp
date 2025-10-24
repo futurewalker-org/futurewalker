@@ -3,7 +3,6 @@
 
 #include "Futurewalker.Application.ViewLayerManagerType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerContext.hpp"
-#include "Futurewalker.Application.PlatformDrawableViewLayerContextType.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 
@@ -19,7 +18,7 @@ namespace FW_EXPORT
 class ViewLayerManager : public NonCopyable
 {
 public:
-    ViewLayerManager(Shared<PlatformViewLayerContext> const& viewLayerContext, Shared<PlatformDrawableViewLayerContext> const& drawableViewLayerContext);
+    ViewLayerManager(Shared<PlatformViewLayerContext> const& viewLayerContext);
 
     auto MakeLayer(ViewLayerKind const kind) -> Shared<ViewLayer>;
     auto Register(ViewLayerKind const kind, ViewLayerManagerMakeFunction const& function) -> void;
@@ -27,7 +26,6 @@ public:
 private:
     ViewLayerManagerMakeFunctionMap _map;
     Shared<PlatformViewLayerContext> _viewLayerContext;
-    Shared<PlatformDrawableViewLayerContext> _drawableViewLayerContext;
 };
 
 template <>

@@ -701,7 +701,6 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
     _behavior = options.behavior;
 
     _platformContext = Locator::Resolve<PlatformWindowContext>();
-    _platformViewLayerContext = Locator::Resolve<PlatformViewLayerContext>();
 
     _eventReceiver = EventReceiver::Make({
         .dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); },
@@ -747,6 +746,7 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
 
     UpdateBackgroundColor();
     UpdateAreaRects();
+    UpdateRootViewLayer();
 
     AttachRootView();
     ResizeRootView(GetClientRect().GetSize());
@@ -851,9 +851,9 @@ auto Window::UpdateRootView() -> void
         auto event = Event<>(parameter);
         _rootView->SendEventDetached(event);
 
-        if (_platformViewLayerContext)
+        if (_platformObject)
         {
-            _platformViewLayerContext->CommitChanges();
+            _platformObject->Render();
         }
     }
 }
@@ -892,6 +892,17 @@ auto Window::UpdateAreaRects() -> void
         _areaManager->SetTitleBarAreaRect(Rect<Dp>::Offset(_platformObject->GetAreaRect(WindowArea::TitleBar), -clientOffset));
         _areaManager->SetTitleBarAvailableAreaRect(Rect<Dp>::Offset(_platformObject->GetAreaRect(WindowArea::TitleBarContent), -clientOffset));
         _areaManager->SetContentAreaRect(Rect<Dp>::Offset(_platformObject->GetAreaRect(WindowArea::Content), -clientOffset));
+    }
+}
+
+///
+/// @brief
+///
+auto Window::UpdateRootViewLayer() -> void
+{
+    if (_rootViewLayer)
+    {
+        _rootViewLayer->SetSize(UnitFunction::ConvertVpToDp(GetSize(), GetDisplayScale()));
     }
 }
 
@@ -963,6 +974,7 @@ auto Window::HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>
     }
     else if (event.Is<PlatformWindowEvent::SizeChanged>())
     {
+        UpdateRootViewLayer();
         auto windowEventParameter = Event<WindowEvent::SizeChanged>();
         windowEventParameter->SetSize(GetSize());
         auto windowEvent = Event<>(windowEventParameter);
