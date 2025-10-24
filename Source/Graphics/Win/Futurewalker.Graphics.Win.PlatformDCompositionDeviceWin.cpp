@@ -9,17 +9,30 @@
 namespace FW_DETAIL_NS
 {
 ///
+/// @brief 
+///
+/// @param device 
+///
+auto PlatformDCompositionDeviceWin::Make(Shared<PlatformD3D11DeviceWin> const& device) -> Shared<PlatformDCompositionDeviceWin>
+{
+    auto dcompDevice = Shared<PlatformDCompositionDeviceWin>::Make(PassKey<PlatformDCompositionDeviceWin>(), device);
+    dcompDevice->_self = dcompDevice;
+    return dcompDevice;
+}
+
+///
 /// @brief Constructor.
 ///
 /// @param d3d11Device
 ///
-PlatformDCompositionDeviceWin::PlatformDCompositionDeviceWin(Shared<PlatformD3D11DeviceWin> d3d11Device)
+PlatformDCompositionDeviceWin::PlatformDCompositionDeviceWin(PassKey<PlatformDCompositionDeviceWin>, Shared<PlatformD3D11DeviceWin> d3d11Device)
   : _d3d11Device {d3d11Device}
 {
     if (_d3d11Device)
     {
         _dcompDevice = CreateDCompositionDevice(_d3d11Device->GetDevice());
-        _presentationFactory = CreatePresentationFactory(_d3d11Device->GetDevice()); 
+        _presentationFactory = CreatePresentationFactory(_d3d11Device->GetDevice());
+        _d3d11Device->AddDeviceObject(GetSelf());
     }
 
     if (!_d3d11Device || !_dcompDevice)
@@ -185,6 +198,52 @@ auto PlatformDCompositionDeviceWin::GetDevice() -> Microsoft::WRL::ComPtr<IDComp
 }
 
 ///
+/// @brief
+///
+auto PlatformDCompositionDeviceWin::NotifyDeviceLost() -> void
+{
+    if (_d3d11Device)
+    {
+        _d3d11Device->NotifyDeviceLost();
+    }
+}
+
+///
+/// @brief
+///
+auto PlatformDCompositionDeviceWin::HandleDeviceLost() -> void
+{
+    ClearResources();
+    BuildResources();
+
+    for (auto& weakDeviceObject : _deviceObjects)
+    {
+        if (auto deviceObject = weakDeviceObject.Lock())
+        {
+            deviceObject->HandleDeviceLost();
+        }
+    }
+}
+
+///
+/// @brief
+///
+/// @param deviceObject
+///
+auto PlatformDCompositionDeviceWin::AddDeviceObject(Shared<PlatformGraphicsDeviceObjectWin> const& deviceObject) -> void
+{
+    _deviceObjects.push_back(deviceObject);
+}
+
+///
+/// @brief
+///
+auto PlatformDCompositionDeviceWin::GetSelf() -> Shared<PlatformDCompositionDeviceWin>
+{
+    return _self.Lock();
+}
+
+///
 /// @brief Create IDCompositionDevice instance.
 ///
 /// @param d3d11Device
@@ -222,11 +281,32 @@ auto PlatformDCompositionDeviceWin::CreatePresentationFactory(Microsoft::WRL::Co
 }
 
 ///
+/// @brief 
+///
+auto PlatformDCompositionDeviceWin::ClearResources() -> void
+{
+    _presentationFactory = nullptr;
+    _dcompDevice = nullptr;
+}
+
+///
+/// @brief 
+///
+auto PlatformDCompositionDeviceWin::BuildResources() -> void
+{
+    if (_d3d11Device)
+    {
+        _dcompDevice = CreateDCompositionDevice(_d3d11Device->GetDevice());
+        _presentationFactory = CreatePresentationFactory(_d3d11Device->GetDevice());
+    }
+}
+
+///
 /// @brief
 ///
 auto Locator::Resolver<PlatformDCompositionDeviceWin>::Resolve() -> Shared<PlatformDCompositionDeviceWin>
 {
     auto d3d11Device = Locator::Resolve<PlatformD3D11DeviceWin>();
-    return Shared<PlatformDCompositionDeviceWin>::Make(d3d11Device);
+    return PlatformDCompositionDeviceWin::Make(d3d11Device);
 }
 }

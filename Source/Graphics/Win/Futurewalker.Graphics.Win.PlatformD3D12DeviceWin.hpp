@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Graphics.Win.PlatformD3D12DeviceWinType.hpp"
+#include "Futurewalker.Graphics.Win.PlatformGraphicsDeviceObjectWinType.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 
@@ -28,17 +29,20 @@ public:
     auto GetAdapter() -> Microsoft::WRL::ComPtr<IDXGIAdapter1>;
 
     auto NotifyDeviceLost() -> void;
+    auto AddDeviceObject(Shared<PlatformGraphicsDeviceObjectWin> const& deviceObject) -> void;
 
 private:
     auto ChooseAdapter(PlatformD3D12DevicePreference const preference) -> Microsoft::WRL::ComPtr<IDXGIAdapter1>;
     auto CreateDevice(Microsoft::WRL::ComPtr<IDXGIAdapter1> const& adapter) -> Microsoft::WRL::ComPtr<ID3D12Device>;
-
+    auto ClearResources() -> void;
+    auto BuildResources() -> void;
     auto HandleDeviceLost() -> void;
 
 private:
     PlatformD3D12DevicePreference _preference;
     Microsoft::WRL::ComPtr<IDXGIAdapter1> _adapter;
     Microsoft::WRL::ComPtr<ID3D12Device> _device;
+    std::vector<Weak<PlatformGraphicsDeviceObjectWin>> _deviceObjects;
 };
 
 template <>

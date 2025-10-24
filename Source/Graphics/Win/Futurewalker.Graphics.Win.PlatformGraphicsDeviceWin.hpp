@@ -4,6 +4,8 @@
 #include "Futurewalker.Graphics.Win.PlatformGraphicsDeviceWinType.hpp"
 #include "Futurewalker.Graphics.Win.PlatformSwapChainSurfaceWinType.hpp"
 #include "Futurewalker.Graphics.Win.PlatformD3D12DeviceWinType.hpp"
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWinType.hpp"
+#include "Futurewalker.Graphics.Win.PlatformGraphicsDeviceObjectWin.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -20,30 +22,21 @@ namespace FW_EXPORT
 ///
 /// @brief Graphics device.
 ///
-class PlatformGraphicsDeviceWin : NonCopyable
+class PlatformGraphicsDeviceWin : public PlatformGraphicsDeviceObjectWin
 {
 public:
-    static auto MakeForD3D12(Shared<PlatformD3D12DeviceWin> const& device) -> Shared<PlatformGraphicsDeviceWin>;
+    static auto MakeForD3D12(Shared<PlatformD3D12DeviceWin> const& d3d12Device) -> Shared<PlatformGraphicsDeviceWin>;
 
     ///
     /// @brief Make swap chain based surface.
     ///
+    /// @param dcompDevice DComposition device.
     /// @param width Width of surface. Should be >= 1.
     /// @param height Height of surface. Should be >= 1.
     ///
     /// @return New surface object, or nullptr on failure.
     ///
-    virtual auto MakeSwapChainSurface(IntPx const width, IntPx const height) -> Shared<PlatformSwapChainSurfaceWin> = 0;
-
-    ///
-    /// @brief Notify operation was failed due to device loss.
-    ///
-    virtual auto NotifyDeviceLost() -> void = 0;
-
-    ///
-    /// @brief Handle device loss.
-    ///
-    virtual auto HandleDeviceLost() -> void = 0;
+    virtual auto MakeSwapChainSurface(Shared<PlatformDCompositionDeviceWin> const& dcompDevice, IntPx const width, IntPx const height) -> Shared<PlatformSwapChainSurfaceWin> = 0;
 };
 }
 }

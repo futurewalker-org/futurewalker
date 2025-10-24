@@ -2,7 +2,9 @@
 
 #include "Futurewalker.Graphics.Win.PlatformSkiaGraphicsDeviceWin.hpp"
 #include "Futurewalker.Graphics.Win.PlatformSkiaSwapChainSurfaceWin.hpp"
+#include "Futurewalker.Graphics.Win.PlatformSkiaCompositionSwapChainSurfaceWin.hpp"
 #include "Futurewalker.Graphics.Win.PlatformD3D12DeviceWin.hpp"
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -59,18 +61,30 @@ PlatformSkiaGraphicsDeviceWin::PlatformSkiaGraphicsDeviceWin(PassKey<PlatformSki
     {
         throw Exception(ErrorCode::Failure);
     }
+
+    _d3d12Device->AddDeviceObject(GetSelf());
 }
 
 ///
 /// @brief Create swap chain based surface.
 ///
+/// @param[in] dcompDevice DComposition device.
 /// @param[in] width Width of surface.
 /// @param[in] height Height of surface.
 ///
-auto PlatformSkiaGraphicsDeviceWin::MakeSwapChainSurface(IntPx const width, IntPx const height) -> Shared<PlatformSwapChainSurfaceWin>
+auto PlatformSkiaGraphicsDeviceWin::MakeSwapChainSurface(Shared<PlatformDCompositionDeviceWin> const& dcompDevice, IntPx const width, IntPx const height) -> Shared<PlatformSwapChainSurfaceWin>
 {
-    auto surface = Shared<PlatformSkiaSwapChainSurfaceWin>::Make(_self.Lock(), width, height);
-    _surfaces.push_back(surface);
+    auto surface = Shared<PlatformSwapChainSurfaceWin>();
+    if (dcompDevice->IsPresentationSupported())
+    {
+        surface = PlatformSkiaCompositionSwapChainSurfaceWin::Make(GetSelf(), dcompDevice, width, height);
+    }
+
+    if (!surface)
+    {
+        FW_DEBUG_LOG_WARNING("PlatformSkiaGraphicsDeviceWin: DComposition swap chain surface is not supported. Falling back to regular swap chain surface.");
+        surface = PlatformSkiaSwapChainSurfaceWin::Make(GetSelf(), width, height);
+    }
     return surface;
 }
 
@@ -79,11 +93,6 @@ auto PlatformSkiaGraphicsDeviceWin::MakeSwapChainSurface(IntPx const width, IntP
 ///
 auto PlatformSkiaGraphicsDeviceWin::NotifyDeviceLost() -> void
 {
-    _grContext.reset();
-    _commandQueue.Reset();
-    _device.Reset();
-    _adapter.Reset();
-
     if (_d3d12Device)
     {
         _d3d12Device->NotifyDeviceLost();
@@ -95,26 +104,70 @@ auto PlatformSkiaGraphicsDeviceWin::NotifyDeviceLost() -> void
 ///
 auto PlatformSkiaGraphicsDeviceWin::HandleDeviceLost() -> void
 {
-    _adapter = _d3d12Device->GetAdapter();
-    _device = _d3d12Device->GetDevice();
+    ClearResources();
+    BuildResources();
 
-    if (!BuildCommandQueue())
+    for (auto& weakDeviceObject : _deviceObjects)
     {
-        return;
-    }
-
-    if (!BuildGrContext())
-    {
-        return;
-    }
-
-    for (auto const& weakSurface : _surfaces)
-    {
-        if (auto const surface = weakSurface.Lock())
+        if (auto deviceObject = weakDeviceObject.Lock())
         {
-            surface->HandleDeviceLost();
+            deviceObject->HandleDeviceLost();
         }
     }
+}
+
+///
+/// @brief 
+///
+/// @param deviceObject 
+///
+auto PlatformSkiaGraphicsDeviceWin::AddDeviceObject(Shared<PlatformGraphicsDeviceObjectWin> const& deviceObject) -> void
+{
+    _deviceObjects.push_back(deviceObject);
+}
+
+///
+/// @brief 
+///
+/// @param width 
+/// @param height 
+///
+auto PlatformSkiaGraphicsDeviceWin::CreateTexture(IntPx const width, IntPx const height) -> Microsoft::WRL::ComPtr<ID3D12Resource>
+{
+    if (_d3d12Device)
+    {
+        if (auto const device = _d3d12Device->GetDevice())
+        {
+            D3D12_RESOURCE_DESC desc {};
+            desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+            desc.Alignment = 0;
+            desc.Width = static_cast<UINT>(width);
+            desc.Height = static_cast<UINT>(height);
+            desc.DepthOrArraySize = 1;
+            desc.MipLevels = 1;
+            desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+            desc.SampleDesc.Count = 1;
+            desc.SampleDesc.Quality = 0;
+            desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+            desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+            D3D12_CLEAR_VALUE clearValue {};
+            clearValue.Format = desc.Format;
+            clearValue.Color[0] = 0.0f;
+            clearValue.Color[1] = 0.0f;
+            clearValue.Color[2] = 0.0f;
+            clearValue.Color[3] = 0.0f;
+
+            Microsoft::WRL::ComPtr<ID3D12Resource> texture;
+            auto defaultHeap = D3D12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+            auto const hr = device->CreateCommittedResource(&defaultHeap, D3D12_HEAP_FLAG_SHARED, &desc, D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue, IID_PPV_ARGS(&texture));
+            if (SUCCEEDED(hr) && texture)
+            {
+                return texture;
+            }
+        }
+    }
+    return {};
 }
 
 ///
@@ -144,7 +197,7 @@ auto PlatformSkiaGraphicsDeviceWin::CreateSwapChain(IntPx const width, IntPx con
         .Stereo = FALSE,
         .SampleDesc = SwapChainSampleDesc,
         .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
-        .BufferCount = 2,
+        .BufferCount = 3,
         .Scaling = DXGI_SCALING_STRETCH,
         .SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,
         .AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED,
@@ -177,6 +230,30 @@ auto PlatformSkiaGraphicsDeviceWin::CreateFence() -> Microsoft::WRL::ComPtr<ID3D
         return fence;
     }
     return {};
+}
+
+///
+/// @brief Create shared handle from resource.
+///
+/// @param resource 
+///
+auto PlatformSkiaGraphicsDeviceWin::CreateSharedHandle(Microsoft::WRL::ComPtr<ID3D12Resource> const& resource)
+  -> Microsoft::WRL::Wrappers::HandleT<Microsoft::WRL::Wrappers::HandleTraits::HANDLENullTraits>
+{
+    if (_d3d12Device)
+    {
+        if (auto const device = _d3d12Device->GetDevice())
+        {
+            auto handle = HANDLE();
+            auto hr = device->CreateSharedHandle(resource.Get(), nullptr, GENERIC_ALL, nullptr, &handle);
+            if (FAILED(hr))
+            {
+                handle = NULL;
+            }
+            return Microsoft::WRL::Wrappers::HandleT<Microsoft::WRL::Wrappers::HandleTraits::HANDLENullTraits>(handle);
+        }
+    }
+    return Microsoft::WRL::Wrappers::HandleT<Microsoft::WRL::Wrappers::HandleTraits::HANDLENullTraits>();
 }
 
 ///
@@ -251,6 +328,14 @@ auto PlatformSkiaGraphicsDeviceWin::SignalFence(ID3D12Fence* fence, UINT64 nextV
 }
 
 ///
+/// @brief
+///
+auto PlatformSkiaGraphicsDeviceWin::GetSelf() -> Shared<PlatformSkiaGraphicsDeviceWin>
+{
+    return _self.Lock();
+}
+
+///
 /// @brief Build command queue.
 ///
 auto PlatformSkiaGraphicsDeviceWin::BuildCommandQueue() -> Bool
@@ -286,5 +371,35 @@ auto PlatformSkiaGraphicsDeviceWin::BuildGrContext() -> Bool
         return _grContext != nullptr;
     }
     return false;
+}
+
+///
+/// @brief
+///
+auto PlatformSkiaGraphicsDeviceWin::ClearResources() -> void
+{
+    _grContext.reset();
+    _commandQueue.Reset();
+    _device.Reset();
+    _adapter.Reset();
+}
+
+///
+/// @brief
+///
+auto PlatformSkiaGraphicsDeviceWin::BuildResources() -> void
+{
+    _adapter = _d3d12Device->GetAdapter();
+    _device = _d3d12Device->GetDevice();
+
+    if (!BuildCommandQueue())
+    {
+        return;
+    }
+
+    if (!BuildGrContext())
+    {
+        return;
+    }
 }
 }

@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Graphics.Win.PlatformD3D11DeviceWin.hpp"
+#include "Futurewalker.Graphics.Win.PlatformGraphicsDeviceObjectWin.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -23,6 +24,24 @@ PlatformD3D11DeviceWin::PlatformD3D11DeviceWin()
 auto PlatformD3D11DeviceWin::GetDevice() -> Microsoft::WRL::ComPtr<ID3D11Device1>
 {
     return _device;
+}
+
+///
+/// @brief
+///
+auto PlatformD3D11DeviceWin::NotifyDeviceLost() -> void
+{
+    HandleDeviceLost();
+}
+
+///
+/// @brief 
+///
+/// @param deviceObject 
+///
+auto PlatformD3D11DeviceWin::AddDeviceObject(Shared<PlatformGraphicsDeviceObjectWin> const& deviceObject) -> void
+{
+    _deviceObjects.push_back(deviceObject);
 }
 
 ///
@@ -83,6 +102,39 @@ auto PlatformD3D11DeviceWin::CreateDeviceForType(D3D_DRIVER_TYPE const type) -> 
         }
     }
     return nullptr;
+}
+
+///
+/// @brief
+///
+auto PlatformD3D11DeviceWin::ClearResources() -> void
+{
+    _device.Reset();
+}
+
+///
+/// @brief
+///
+auto PlatformD3D11DeviceWin::BuildResources() -> void
+{
+    _device = CreateDevice();
+}
+
+///
+/// @brief
+///
+auto PlatformD3D11DeviceWin::HandleDeviceLost() -> void
+{
+    ClearResources();
+    BuildResources();
+
+    for (auto const& weakDeviceObject : _deviceObjects)
+    {
+        if (auto deviceObject = weakDeviceObject.Lock())
+        {
+            deviceObject->HandleDeviceLost();
+        }
+    }
 }
 
 ///

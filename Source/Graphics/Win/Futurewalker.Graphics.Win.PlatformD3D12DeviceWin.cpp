@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Graphics.Win.PlatformD3D12DeviceWin.hpp"
+#include "Futurewalker.Graphics.Win.PlatformGraphicsDeviceObjectWin.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -53,6 +54,16 @@ auto PlatformD3D12DeviceWin::GetAdapter() -> Microsoft::WRL::ComPtr<IDXGIAdapter
 auto PlatformD3D12DeviceWin::NotifyDeviceLost() -> void
 {
     HandleDeviceLost();
+}
+
+///
+/// @brief
+///
+/// @param deviceObject
+///
+auto PlatformD3D12DeviceWin::AddDeviceObject(Shared<PlatformGraphicsDeviceObjectWin> const& deviceObject) -> void
+{
+    _deviceObjects.push_back(deviceObject);
 }
 
 ///
@@ -166,12 +177,38 @@ auto PlatformD3D12DeviceWin::CreateDevice(Microsoft::WRL::ComPtr<IDXGIAdapter1> 
 }
 
 ///
+/// @brief 
+///
+auto PlatformD3D12DeviceWin::ClearResources() -> void
+{
+    _device.Reset();
+    _adapter.Reset();
+}
+
+///
+/// @brief
+///
+auto PlatformD3D12DeviceWin::BuildResources() -> void
+{
+    _adapter = ChooseAdapter(_preference);
+    _device = CreateDevice(_adapter);
+}
+
+///
 /// @brief Handle device lost event.
 ///
 auto PlatformD3D12DeviceWin::HandleDeviceLost() -> void
 {
-    _adapter = ChooseAdapter(_preference);
-    _device = CreateDevice(_adapter);
+    ClearResources();
+    BuildResources();
+
+    for (auto& weakDeviceObject : _deviceObjects)
+    {
+        if (auto deviceObject = weakDeviceObject.Lock())
+        {
+            deviceObject->HandleDeviceLost();
+        }
+    }
 }
 
 ///

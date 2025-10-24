@@ -34,13 +34,27 @@ void ThrowOnFalse(auto const& p)
 }
 
 ///
+/// @brief Make new instance.
+///
+/// @param device 
+/// @param width 
+/// @param height 
+///
+auto PlatformSkiaSwapChainSurfaceWin::Make(Shared<PlatformSkiaGraphicsDeviceWin> const& device, IntPx const width, IntPx const height) -> Shared<PlatformSkiaSwapChainSurfaceWin>
+{
+    auto surface = Shared<PlatformSkiaSwapChainSurfaceWin>::Make(PassKey<PlatformSkiaSwapChainSurfaceWin>(), device, width, height);
+    surface->_self = surface;
+    return surface;
+}
+
+///
 /// @brief Constructor.
 ///
 /// @param device Graphics device object. Should not be null.
 /// @param width Width of swap chain. Should be >= 1.
 /// @param height Height of swap chain. Should be >= 1.
 ///
-PlatformSkiaSwapChainSurfaceWin::PlatformSkiaSwapChainSurfaceWin(Shared<PlatformSkiaGraphicsDeviceWin> const& device, IntPx const width, IntPx const height)
+PlatformSkiaSwapChainSurfaceWin::PlatformSkiaSwapChainSurfaceWin(PassKey<PlatformSkiaSwapChainSurfaceWin>, Shared<PlatformSkiaGraphicsDeviceWin> const& device, IntPx const width, IntPx const height)
   : _device {device}
   , _width {width}
   , _height {height}
@@ -54,7 +68,11 @@ PlatformSkiaSwapChainSurfaceWin::PlatformSkiaSwapChainSurfaceWin(Shared<Platform
         _height = IntPx::Max(1, _height);
     }
 
-    Rebuild();
+    if (_device)
+    {
+        BuildResources();
+        _device->AddDeviceObject(GetSelf());
+    }
 }
 
 ///
@@ -77,7 +95,7 @@ auto PlatformSkiaSwapChainSurfaceWin::Resize(IntPx const width, IntPx const heig
     {
         _width = width;
         _height = height;
-        return Rebuild();
+        return BuildResources();
     }
     return true;
 }
@@ -122,9 +140,8 @@ auto PlatformSkiaSwapChainSurfaceWin::Draw(Function<void(Scene& scene)> func) ->
                 }
 
                 canvas->restore();
-
-                _device->FlushAndSubmitSurface(surface.get(), SkSurfaces::BackendSurfaceAccess::kPresent, GrSyncCpu::kNo);
             }
+            _device->FlushAndSubmitSurface(surface.get(), SkSurfaces::BackendSurfaceAccess::kPresent, GrSyncCpu::kNo);
         }
 
         auto const presentParams = DXGI_PRESENT_PARAMETERS();
@@ -156,8 +173,6 @@ auto PlatformSkiaSwapChainSurfaceWin::Draw(Function<void(Scene& scene)> func) ->
 ///
 auto PlatformSkiaSwapChainSurfaceWin::NotifyDeviceLost() -> void
 {
-    ReleaseResources();
-
     if (_delegate.deviceLost)
     {
         try
@@ -181,7 +196,9 @@ auto PlatformSkiaSwapChainSurfaceWin::NotifyDeviceLost() -> void
 ///
 auto PlatformSkiaSwapChainSurfaceWin::HandleDeviceLost() -> void
 {
-    if (!Rebuild())
+    ClearResources();
+
+    if (!BuildResources())
     {
         return;
     }
@@ -202,7 +219,7 @@ auto PlatformSkiaSwapChainSurfaceWin::HandleDeviceLost() -> void
 ///
 /// @brief Get swap chain.
 ///
-auto PlatformSkiaSwapChainSurfaceWin::GetSwapChain() -> Microsoft::WRL::ComPtr<IDXGISwapChain1>
+auto PlatformSkiaSwapChainSurfaceWin::GetSwapChain() -> Microsoft::WRL::ComPtr<IUnknown>
 {
     return _swapChain;
 }
@@ -218,18 +235,11 @@ auto PlatformSkiaSwapChainSurfaceWin::SetDelegate(Delegate delegate) -> void
 }
 
 ///
-/// @brief Rebuild swap chian surfaces.
+/// @brief Get self reference.
 ///
-auto PlatformSkiaSwapChainSurfaceWin::Rebuild() -> Bool
+auto PlatformSkiaSwapChainSurfaceWin::GetSelf() -> Shared<PlatformSkiaSwapChainSurfaceWin>
 {
-    if (HasSwapChain())
-    {
-        return ResizeBuffers();
-    }
-    else
-    {
-        return BuildSwapChain();
-    }
+    return _self.Lock();
 }
 
 ///
@@ -261,7 +271,7 @@ auto PlatformSkiaSwapChainSurfaceWin::BuildSwapChain() -> Bool
         }
         catch (...)
         {
-            ReleaseResources();
+            ClearResources();
         }
         return false;
     }
@@ -305,7 +315,7 @@ auto PlatformSkiaSwapChainSurfaceWin::ResizeBuffers() -> Bool
         }
         catch (...)
         {
-            ReleaseResources();
+            ClearResources();
         }
         return false;
     }
@@ -396,12 +406,27 @@ auto PlatformSkiaSwapChainSurfaceWin::WaitIdle() -> void
 }
 
 ///
-/// @brief Release resources.
+/// @brief 
 ///
-auto PlatformSkiaSwapChainSurfaceWin::ReleaseResources() -> void
+auto PlatformSkiaSwapChainSurfaceWin::ClearResources() -> void
 {
     _swapChainSurfaces.clear();
     _fence.Reset();
     _swapChain.Reset();
+}
+
+///
+/// @brief
+///
+auto PlatformSkiaSwapChainSurfaceWin::BuildResources() -> Bool
+{
+    if (HasSwapChain())
+    {
+        return ResizeBuffers();
+    }
+    else
+    {
+        return BuildSwapChain();
+    }
 }
 }

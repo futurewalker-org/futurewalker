@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Graphics.Win.PlatformSwapChainSurfaceWinType.hpp"
-
+#include "Futurewalker.Graphics.Win.PlatformGraphicsDeviceObjectWin.hpp"
 #include "Futurewalker.Graphics.SceneType.hpp"
 
 #include "Futurewalker.Geometry.hpp"
@@ -23,7 +23,7 @@ namespace FW_EXPORT
 ///
 /// @brief Base class for swap chain surface.
 ///
-class PlatformSwapChainSurfaceWin : NonCopyable
+class PlatformSwapChainSurfaceWin : public PlatformGraphicsDeviceObjectWin
 {
 public:
     struct Delegate
@@ -49,19 +49,9 @@ public:
     virtual auto Draw(Function<void(Scene& canvas)> func) -> Bool = 0;
 
     ///
-    /// @brief Notify operation was failed due to device loss.
+    /// @brief Get content of swap chain.
     ///
-    virtual auto NotifyDeviceLost() -> void = 0;
-
-    ///
-    /// @brief Handle device loss.
-    ///
-    virtual auto HandleDeviceLost() -> void = 0;
-
-    ///
-    /// @brief Get underlying swap chian object.
-    ///
-    virtual auto GetSwapChain() -> Microsoft::WRL::ComPtr<IDXGISwapChain1> = 0;
+    virtual auto GetSwapChain() -> Microsoft::WRL::ComPtr<IUnknown> = 0;
 
     ///
     /// @brief Set delegate object.
