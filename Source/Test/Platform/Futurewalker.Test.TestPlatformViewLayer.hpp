@@ -19,6 +19,12 @@ public:
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
 
+    auto GetId() const -> PlatformViewLayerId
+    {
+        static auto id = UInt64(0U);
+        return PlatformViewLayerId(++id);
+    }
+
     static auto Make() -> Shared<TestPlatformViewLayer>
     {
         return PlatformViewLayer::MakeDerived<TestPlatformViewLayer>();
@@ -84,6 +90,21 @@ public:
     auto SetOpacity(Float64 const opacity) -> void override
     {
         _opacity = opacity;
+    }
+
+    auto SetRenderFlags(PlatformViewLayerRenderFlags const flags) -> void override
+    {
+        (void)flags;
+    }
+
+    auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void override
+    {
+        (void)displayList;
+    }
+
+    auto SetDisplayListOffset(Offset<Dp> const& offset) -> void override
+    {
+        (void)offset;
     }
 };
 }

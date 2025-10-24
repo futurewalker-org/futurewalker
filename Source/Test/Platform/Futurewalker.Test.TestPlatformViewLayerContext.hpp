@@ -18,9 +18,18 @@ public:
         return TestPlatformViewLayer::Make();
     }
 
-    auto CommitChanges() -> void override
+    auto Commit() -> void override
     {
     }
+
+    auto GetNextId() -> PlatformViewLayerId override
+    {
+        _nextLayerId = PlatformViewLayerId(static_cast<UInt64>(_nextLayerId) + 1U);
+        return _nextLayerId;
+    }
+
+private:
+    PlatformViewLayerId _nextLayerId = PlatformViewLayerId(0U);
 };
 
 template <>
