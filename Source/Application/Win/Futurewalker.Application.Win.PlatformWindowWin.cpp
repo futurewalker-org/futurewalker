@@ -458,6 +458,22 @@ auto PlatformWindowWin::Close() -> void
 ///
 /// @brief
 ///
+auto PlatformWindowWin::Render() -> void
+{
+    if (_rootViewLayer)
+    {
+        _rootViewLayer->Render();
+    }
+
+    if (_compositionDevice)
+    {
+        _compositionDevice->Commit();
+    }
+}
+
+///
+/// @brief
+///
 auto PlatformWindowWin::RequestFrame() -> void
 {
     if (!IsClosed())

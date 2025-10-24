@@ -2,8 +2,9 @@
 #pragma once
 
 #include "Futurewalker.Application.Win.PlatformViewLayerContextWinType.hpp"
-#include "Futurewalker.Application.Win.PlatformDCompositionDeviceWinType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerContext.hpp"
+
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWinType.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 
@@ -22,13 +23,15 @@ public:
 
     PlatformViewLayerContextWin(PassKey<PlatformViewLayerContextWin>, Shared<PlatformDCompositionDeviceWin> const& dcompDevice);
 
+    auto GetNextId() -> PlatformViewLayerId override;
     auto MakeViewLayer() -> Shared<PlatformViewLayer> override;
-    auto CommitChanges() -> void override;
+    auto Commit() -> void override;
 
 private:
     auto GetSelf() -> Shared<PlatformViewLayerContextWin>;
 
 private:
+    PlatformViewLayerId _nextLayerId = PlatformViewLayerId(0U);
     Weak<PlatformViewLayerContextWin> _self;
     Shared<PlatformDCompositionDeviceWin> _dcompDevice;
 };

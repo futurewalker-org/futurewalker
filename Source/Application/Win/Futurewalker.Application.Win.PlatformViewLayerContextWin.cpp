@@ -1,50 +1,12 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.Win.PlatformViewLayerContextWin.hpp"
-#include "Futurewalker.Application.Win.PlatformDrawableViewLayerWin.hpp"
-#include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"
+#include "Futurewalker.Application.Win.PlatformViewLayerWin.hpp"
+
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 
 namespace FW_DETAIL_NS
 {
-namespace
-{
-class ViewLayerWin : public PlatformViewLayerWin
-{
-    Shared<PlatformViewLayerContextWin> _context;
-
-public:
-    static auto Make(Shared<PlatformViewLayerContextWin> const& context, Shared<PlatformDCompositionDeviceWin> const& dcompDevice)
-    {
-        return PlatformViewLayer::MakeDerived<ViewLayerWin>(context, dcompDevice);
-    }
-
-    ViewLayerWin(PassKey<PlatformViewLayer> key, Shared<PlatformViewLayerContextWin> const& context, Shared<PlatformDCompositionDeviceWin> const& dcompDevice)
-      : PlatformViewLayerWin(key, dcompDevice)
-      , _context {context}
-    {
-    }
-
-    auto GetControl() -> Shared<PlatformViewLayerControl> override
-    {
-        return nullptr;
-    }
-
-    auto CreateVisual() -> Microsoft::WRL::ComPtr<IDCompositionVisual3> override
-    {
-        if (const auto dcompDevice = GetDCompositionDevice())
-        {
-            return dcompDevice->CreateVisual();
-        }
-        return nullptr;
-    }
-
-    auto DestroyVisual(Microsoft::WRL::ComPtr<IDCompositionVisual3> visual) -> void override
-    {
-        (void)visual;
-    }
-};
-}
-
 auto PlatformViewLayerContextWin::Make(Shared<PlatformDCompositionDeviceWin> const& dcompDevice) -> Shared<PlatformViewLayerContextWin>
 {
     auto context = Shared<PlatformViewLayerContextWin>::Make(PassKey<PlatformViewLayerContextWin>(), dcompDevice);
@@ -58,12 +20,18 @@ PlatformViewLayerContextWin::PlatformViewLayerContextWin(PassKey<PlatformViewLay
 {
 }
 
-auto PlatformViewLayerContextWin::MakeViewLayer() -> Shared<PlatformViewLayer>
+auto PlatformViewLayerContextWin::GetNextId() -> PlatformViewLayerId
 {
-    return ViewLayerWin::Make(GetSelf(), _dcompDevice);
+    _nextLayerId = PlatformViewLayerId(static_cast<UInt64>(_nextLayerId) + 1U);
+    return _nextLayerId;
 }
 
-auto PlatformViewLayerContextWin::CommitChanges() -> void
+auto PlatformViewLayerContextWin::MakeViewLayer() -> Shared<PlatformViewLayer>
+{
+    return PlatformViewLayerWin::Make(_dcompDevice);
+}
+
+auto PlatformViewLayerContextWin::Commit() -> void
 {
     if (_dcompDevice)
     {

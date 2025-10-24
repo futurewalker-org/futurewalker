@@ -5,10 +5,11 @@
 #include "Futurewalker.Application.PlatformWindowContext.hpp"
 #include "Futurewalker.Application.PlatformScreenContext.hpp"
 #include "Futurewalker.Application.Win.PlatformWindowWinType.hpp"
-#include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"
 #include "Futurewalker.Application.Win.PlatformVsyncProviderWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformKeyboardLayoutWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWinType.hpp"
+
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 #include "Futurewalker.Base.Win.PlatformInstanceHandleWin.hpp"

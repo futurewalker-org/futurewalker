@@ -2,10 +2,16 @@
 #pragma once
 
 #include "Futurewalker.Application.Win.PlatformViewLayerWinType.hpp"
-#include "Futurewalker.Application.Win.PlatformDCompositionDeviceWinType.hpp"
+#include "Futurewalker.Application.Win.PlatformViewLayerSurfaceWin.hpp"
 #include "Futurewalker.Application.PlatformViewLayer.hpp"
 
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWinType.hpp"
+#include "Futurewalker.Graphics.Win.PlatformSwapChainSurfaceWinType.hpp"
+#include "Futurewalker.Graphics.SceneType.hpp"
+
+#include "Futurewalker.Core.Function.hpp"
 #include "Futurewalker.Core.PassKey.hpp"
+#include "Futurewalker.Core.ReferenceArg.hpp"
 
 #include <wrl/client.h>
 #include <dcomp.h>
@@ -35,21 +41,29 @@ namespace FW_EXPORT
 class PlatformViewLayerWin : public PlatformViewLayer
 {
 public:
+    static auto Make(Shared<PlatformDCompositionDeviceWin> const& dcompDevice) -> Shared<PlatformViewLayerWin>;
+
     PlatformViewLayerWin(PassKey<PlatformViewLayer> key, Shared<PlatformDCompositionDeviceWin> const& dcompDevice);
 
     auto AddChild(Shared<PlatformViewLayer> child, Shared<PlatformViewLayer> after) -> void final override;
     auto RemoveFromParent() -> void final override;
     auto GetChildren() -> PlatformViewLayerArray final override;
+    auto GetControl() -> Shared<PlatformViewLayerControl> override;
     auto SetOffset(Offset<Dp> const& offset) -> void final override;
     auto SetSize(Size<Dp> const& size) -> void final override;
     auto SetClipMode(ViewClipMode const clipMode) -> void final override;
     auto SetOpacity(Float64 const opacity) -> void final override;
-
-protected:
-    auto Initialize() -> void override;
+    auto SetRenderFlags(PlatformViewLayerRenderFlags const renderFlags) -> void override;
+    auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void override;
+    auto SetDisplayListOffset(Offset<Dp> const& offset) -> void override;
 
     auto GetSize() const -> Size<Dp>;
     auto GetOffset() const -> Offset<Dp>;
+    auto GetClipMode() const -> ViewClipMode;
+    auto GetOpacity() const -> Float64;
+    auto GetDisplayList() const -> Shared<Graphics::DisplayList>;
+    auto GetDisplayListOffset() const -> Offset<Dp>;
+    auto GetRenderFlags() const -> PlatformViewLayerRenderFlags;
 
     auto GetDisplayScale() const -> DisplayScale;
     auto GetBackingScale() const -> BackingScale;
@@ -57,77 +71,65 @@ protected:
     auto GetParent() -> Shared<PlatformViewLayerWin>;
     auto GetParent() const -> Shared<PlatformViewLayerWin const>;
 
+    auto IsRoot() const -> Bool;
     auto GetRoot() -> Shared<PlatformViewLayerWin>;
     auto GetRoot() const -> Shared<PlatformViewLayerWin const>;
 
-    auto IsRoot() const -> Bool;
+protected:
+    auto Initialize() -> void override;
     auto NotifyRootChanged() -> void;
     auto NotifyDisplayScaleChanged() -> void;
 
-    auto GetDCompositionDevice() -> Shared<PlatformDCompositionDeviceWin>;
+    auto GetCompositionDevice() const -> Shared<PlatformDCompositionDeviceWin>;
 
 private:
     auto NotifyRootWindowHandleChanged(HWND const rootHwnd) -> void;
-    auto NotifyRootVisualChanged(Microsoft::WRL::ComPtr<IDCompositionVisual3> rootVisual) -> void;
     auto NotifyRootDisplayScaleChanged(DisplayScale const rootDisplayScale) -> void;
 
     auto GetBelowWindowHandle() const -> HWND;
     auto GetBelowWindowHandleCore(Shared<PlatformViewLayerWin const> child) const -> HWND;
 
-    auto GetPrevChildVisual(Shared<PlatformViewLayer> child) -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
-
-private:
-    ///
-    /// @brief Create visual node for this layer.
-    ///
-    /// @return Newly created visual node. Should not be null.
-    ///
-    virtual auto CreateVisual() -> Microsoft::WRL::ComPtr<IDCompositionVisual3> = 0;
-
-    ///
-    /// @brief Destroy previously created visual.
-    ///
-    /// @param[in] visual Visual object created by CreateVisual().
-    ///
-    virtual auto DestroyVisual(Microsoft::WRL::ComPtr<IDCompositionVisual3> visual) -> void = 0;
-
 private:
     virtual auto CreateWindowHandle(HWND parent) -> HWND;
     virtual auto DestroyWindowHandle(HWND handle) -> void;
-    virtual auto OnDisplayScaleChange() -> void;
+    virtual auto CreateVisual() -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
+    virtual auto DestroyVisual(Microsoft::WRL::ComPtr<IDCompositionVisual3> visual) -> void;
 
 private:
-    virtual auto RootGetVisual() const -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
     virtual auto RootGetWindowHandle() const -> HWND;
     virtual auto RootGetDisplayScale() const -> DisplayScale;
+    virtual auto RootOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void;
+    virtual auto RootSizeChanged(Shared<PlatformViewLayerWin> const& layer) -> void;
+    virtual auto RootClipModeChanged(Shared<PlatformViewLayerWin> const& layer) -> void;
+    virtual auto RootOpacityChanged(Shared<PlatformViewLayerWin> const& layer) -> void;
+    virtual auto RootRenderFlagsChanged(Shared<PlatformViewLayerWin> const& layer) -> void;
+    virtual auto RootDisplayListChanged(Shared<PlatformViewLayerWin> const& layer) -> void;
+    virtual auto RootDisplayListOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void;
+    virtual auto RootChildAdded(Shared<PlatformViewLayerWin> const& child) -> void;
+    virtual auto RootChildRemoved(Shared<PlatformViewLayerWin> const& parent) -> void;
 
 private:
-    auto InternalGetVisual() const -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
     auto InternalGetWindowHandle() const -> HWND;
     auto InternalGetDisplayScale() const -> DisplayScale;
-    auto InternalGetParentVisual() const -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
     auto InternalGetParentWindowHandle() const -> HWND;
     auto InternalAttach() -> void;
     auto InternalDetach() -> void;
-
-    auto InternalUpdateClip() -> void;
-    auto InternalUpdateOffset() -> void;
-    auto InternalUpdateOpacity() -> void;
 
 private:
     Shared<PlatformDCompositionDeviceWin> _dcompDevice;
     Weak<PlatformViewLayerWin> _parent;
     PlatformViewLayerWinList _children;
+    PlatformViewLayerRenderFlags _renderFlags = PlatformViewLayerRenderFlags::None;
     Offset<Dp> _offset;
     Size<Dp> _size;
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
-    Microsoft::WRL::ComPtr<IDCompositionVisual3> _rootVisual;
     HWND _rootHwnd = NULL;
     DisplayScale _rootDisplayScale = 1.0;
-    Microsoft::WRL::ComPtr<IDCompositionVisual3> _visual;
     HWND _hwnd = NULL;
     DisplayScale _displayScale = 1.0;
+    Shared<Graphics::DisplayList> _displayList;
+    Offset<Dp> _displayListOffset;
 };
 }
 }

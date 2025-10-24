@@ -3,9 +3,10 @@
 #include "Futurewalker.Application.Win.PlatformWindowContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformWindowWin.hpp"
 #include "Futurewalker.Application.Win.PlatformVsyncProviderWin.hpp"
-#include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"
 #include "Futurewalker.Application.Win.PlatformKeyboardLayoutWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWin.hpp"
+
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 #include "Futurewalker.Base.Debug.hpp"

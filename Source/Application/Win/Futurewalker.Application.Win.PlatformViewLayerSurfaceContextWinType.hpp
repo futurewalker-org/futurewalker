@@ -7,6 +7,6 @@ namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-class PlatformDrawableViewLayerContextWin;
+class PlatformViewLayerSurfaceContextWin;
 }
 }

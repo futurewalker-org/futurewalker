@@ -6,9 +6,9 @@
 #include "Futurewalker.Application.Win.PlatformRootViewLayerWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodWinType.hpp"
-#include "Futurewalker.Application.Win.PlatformDCompositionDeviceWinType.hpp"
-
 #include "Futurewalker.Application.PlatformWindow.hpp"
+
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWinType.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -63,6 +63,7 @@ public:
     auto Restore() -> void override;
     auto IsClosed() -> Bool override;
     auto Close() -> void override;
+    auto Render() -> void override;
     auto RequestFrame() -> void override;
     auto GetFrameTime() -> MonotonicTime override;
     auto GetViewLayer() -> Shared<PlatformViewLayer> override;

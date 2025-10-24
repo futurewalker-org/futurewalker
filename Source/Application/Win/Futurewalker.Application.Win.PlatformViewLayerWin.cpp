@@ -1,8 +1,12 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
-#pragma once
 
 #include "Futurewalker.Application.Win.PlatformViewLayerWin.hpp"
-#include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"
+#include "Futurewalker.Application.Win.PlatformViewLayerSurfaceWin.hpp"
+#include "Futurewalker.Application.Win.PlatformViewLayerVisualWin.hpp"
+
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
+#include "Futurewalker.Graphics.Win.PlatformSwapChainSurfaceWin.hpp"
+#include "Futurewalker.Graphics.Scene.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 #include "Futurewalker.Base.Debug.hpp"
@@ -14,10 +18,21 @@ namespace FW_EXPORT
 ///
 /// @brief
 ///
+/// @param dcompDevice 
+///
+auto PlatformViewLayerWin::Make(Shared<PlatformDCompositionDeviceWin> const& dcompDevice) -> Shared<PlatformViewLayerWin>
+{
+    return PlatformViewLayer::MakeDerived<PlatformViewLayerWin>(dcompDevice);
+}
+
+///
+/// @brief
+///
 PlatformViewLayerWin::PlatformViewLayerWin(PassKey<PlatformViewLayer> key, Shared<PlatformDCompositionDeviceWin> const& dcompDevice)
   : PlatformViewLayer(key)
   , _dcompDevice {dcompDevice}
 {
+    FW_DEBUG_ASSERT(_dcompDevice);
 }
 
 ///
@@ -37,6 +52,8 @@ auto PlatformViewLayerWin::AddChild(Shared<PlatformViewLayer> child, Shared<Plat
 
         childWin->_parent = GetSelf();
         childWin->InternalAttach();
+
+        GetRoot()->RootChildAdded(childWin);
     }
 }
 
@@ -51,6 +68,8 @@ auto PlatformViewLayerWin::RemoveFromParent() -> void
         auto const it = std::remove(parent->_children.begin(), parent->_children.end(), GetSelf());
         parent->_children.erase(it, parent->_children.end());
         _parent = nullptr;
+
+        parent->GetRoot()->RootChildRemoved(parent);
     }
 }
 
@@ -60,6 +79,11 @@ auto PlatformViewLayerWin::RemoveFromParent() -> void
 auto PlatformViewLayerWin::GetChildren() -> PlatformViewLayerArray
 {
     return PlatformViewLayerArray(_children.begin(), _children.end());
+}
+
+auto PlatformViewLayerWin::GetControl() -> Shared<PlatformViewLayerControl>
+{
+    return {};
 }
 
 ///
@@ -72,7 +96,7 @@ auto PlatformViewLayerWin::SetOffset(Offset<Dp> const& offset) -> void
     if (_offset != offset)
     {
         _offset = offset;
-        InternalUpdateOffset();
+        GetRoot()->RootOffsetChanged(GetSelf());
     }
 }
 
@@ -86,7 +110,7 @@ auto PlatformViewLayerWin::SetSize(Size<Dp> const& size) -> void
     if (_size != size)
     {
         _size = size;
-        InternalUpdateClip();
+        GetRoot()->RootSizeChanged(GetSelf());
     }
 }
 
@@ -100,7 +124,7 @@ auto PlatformViewLayerWin::SetClipMode(ViewClipMode const clipMode) -> void
     if (_clipMode != clipMode)
     {
         _clipMode = clipMode;
-        InternalUpdateClip();
+        GetRoot()->RootClipModeChanged(GetSelf());
     }
 }
 
@@ -114,9 +138,44 @@ auto PlatformViewLayerWin::SetOpacity(Float64 const opacity) -> void
     if (_opacity != opacity)
     {
         _opacity = opacity;
-        InternalUpdateOpacity();
+        GetRoot()->RootOpacityChanged(GetSelf());
     }
+}
 
+///
+/// @brief
+///
+auto PlatformViewLayerWin::SetRenderFlags(PlatformViewLayerRenderFlags const renderFlags) -> void
+{
+    if (_renderFlags != renderFlags)
+    {
+        _renderFlags = renderFlags;
+        GetRoot()->RootRenderFlagsChanged(GetSelf());
+    }
+}
+
+///
+/// @brief
+///
+auto PlatformViewLayerWin::SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void
+{
+    if (_displayList != displayList)
+    {
+        _displayList = displayList;
+        GetRoot()->RootDisplayListChanged(GetSelf());
+    }
+}
+
+///
+/// @brief
+///
+auto PlatformViewLayerWin::SetDisplayListOffset(Offset<Dp> const& offset) -> void
+{
+    if (_displayListOffset != offset)
+    {
+        _displayListOffset = offset;
+        GetRoot()->RootDisplayListOffsetChanged(GetSelf());
+    }
 }
 
 ///
@@ -141,6 +200,46 @@ auto PlatformViewLayerWin::GetSize() const -> Size<Dp>
 auto PlatformViewLayerWin::GetOffset() const -> Offset<Dp>
 {
     return _offset;
+}
+
+///
+/// @brief 
+///
+auto PlatformViewLayerWin::GetClipMode() const -> ViewClipMode
+{
+    return _clipMode;
+}
+
+///
+/// @brief
+///
+auto PlatformViewLayerWin::GetOpacity() const -> Float64
+{
+    return _opacity;
+}
+
+///
+/// @brief
+///
+auto PlatformViewLayerWin::GetDisplayList() const -> Shared<Graphics::DisplayList>
+{
+    return _displayList;
+}
+
+///
+/// @brief
+///
+auto PlatformViewLayerWin::GetDisplayListOffset() const -> Offset<Dp>
+{
+    return _displayListOffset;
+}
+
+///
+/// @brief
+///
+auto PlatformViewLayerWin::GetRenderFlags() const -> PlatformViewLayerRenderFlags
+{
+    return _renderFlags;
 }
 
 ///
@@ -176,6 +275,14 @@ auto PlatformViewLayerWin::GetParent() const -> Shared<PlatformViewLayerWin cons
 }
 
 ///
+/// @brief 
+///
+auto PlatformViewLayerWin::IsRoot() const -> Bool
+{
+    return _parent.IsExpired();
+}
+
+///
 /// @brief
 ///
 auto PlatformViewLayerWin::GetRoot() -> Shared<PlatformViewLayerWin>
@@ -199,13 +306,6 @@ auto PlatformViewLayerWin::GetRoot() const -> Shared<PlatformViewLayerWin const>
     return GetSelf();
 }
 
-///
-/// @brief 
-///
-auto PlatformViewLayerWin::IsRoot() const -> Bool
-{
-    return _parent.IsExpired();
-}
 
 ///
 /// @brief
@@ -215,7 +315,6 @@ auto PlatformViewLayerWin::NotifyRootChanged() -> void
     if (IsRoot())
     {
         NotifyRootWindowHandleChanged(InternalGetWindowHandle());
-        NotifyRootVisualChanged(InternalGetVisual());
         NotifyRootDisplayScaleChanged(InternalGetDisplayScale());
     }
 }
@@ -234,7 +333,7 @@ auto PlatformViewLayerWin::NotifyDisplayScaleChanged() -> void
 ///
 /// @brief 
 ///
-auto PlatformViewLayerWin::GetDCompositionDevice() -> Shared<PlatformDCompositionDeviceWin>
+auto PlatformViewLayerWin::GetCompositionDevice() const -> Shared<PlatformDCompositionDeviceWin>
 {
     return _dcompDevice;
 }
@@ -280,54 +379,6 @@ auto PlatformViewLayerWin::NotifyRootWindowHandleChanged(HWND const rootHwnd) ->
 ///
 /// @brief
 ///
-/// @param rootVisual
-///
-auto PlatformViewLayerWin::NotifyRootVisualChanged(Microsoft::WRL::ComPtr<IDCompositionVisual3> rootVisual) -> void
-{
-    if (_rootVisual != rootVisual)
-    {
-        _rootVisual = rootVisual;
-
-        if (_rootVisual)
-        {
-            if (auto parent = GetParent())
-            {
-                if (auto parentVisual = parent->InternalGetVisual())
-                {
-                    _visual = CreateVisual();
-                    parentVisual->AddVisual(_visual.Get(), TRUE, parent->GetPrevChildVisual(GetSelf()).Get());
-                    InternalUpdateOffset();
-                    InternalUpdateOpacity();
-                    InternalUpdateClip();
-                }
-            }
-        }
-
-        for (auto const& child : _children)
-        {
-            child->NotifyRootVisualChanged(rootVisual);
-        }
-
-        if (!rootVisual)
-        {
-            if (auto parent = GetParent())
-            {
-                if (_visual)
-                {
-                    if (auto parentVisual = parent->InternalGetVisual())
-                    {
-                        parentVisual->RemoveVisual(_visual.Get());
-                        _visual.Reset();
-                    }
-                }
-            }
-        }
-    }
-}
-
-///
-/// @brief
-///
 auto PlatformViewLayerWin::NotifyRootDisplayScaleChanged(DisplayScale const rootDisplayScale) -> void
 {
     if (_rootDisplayScale != rootDisplayScale)
@@ -335,12 +386,6 @@ auto PlatformViewLayerWin::NotifyRootDisplayScaleChanged(DisplayScale const root
         _rootDisplayScale = rootDisplayScale;
 
         _displayScale = rootDisplayScale;
-
-        InternalUpdateOffset();
-        InternalUpdateOpacity();
-        InternalUpdateClip();
-
-        OnDisplayScaleChange();
 
         for (auto const& child : _children)
         {
@@ -411,29 +456,6 @@ auto PlatformViewLayerWin::GetBelowWindowHandleCore(Shared<PlatformViewLayerWin 
 }
 
 ///
-/// @brief Get visual of previous child layer.
-///
-auto PlatformViewLayerWin::GetPrevChildVisual(Shared<PlatformViewLayer> child) -> Microsoft::WRL::ComPtr<IDCompositionVisual3>
-{
-    for (auto it = _children.rbegin(); it != _children.rend(); ++it)
-    {
-        if (*it == child)
-        {
-            auto const next = std::next(it);
-            if (next != _children.rend())
-            {
-                if (auto const& layer = *next)
-                {
-                    return layer->InternalGetVisual();
-                }
-            }
-            return {};
-        }
-    }
-    return {};
-}
-
-///
 /// @brief Make window handle of this view.
 ///
 /// @param parent Window handle of parent window.
@@ -457,20 +479,23 @@ auto PlatformViewLayerWin::DestroyWindowHandle(HWND handle) -> void
 }
 
 ///
-/// @brief
+/// @brief Create visual node for this layer.
 ///
-auto PlatformViewLayerWin::OnDisplayScaleChange() -> void
+/// @return Newly created visual node. Should not be null.
+///
+auto PlatformViewLayerWin::CreateVisual() -> Microsoft::WRL::ComPtr<IDCompositionVisual3>
 {
+    return nullptr;
 }
 
 ///
-/// @brief Get visual of root view.
+/// @brief Destroy previously created visual.
 ///
-/// @note For internal use (PlatformRootViewWin).
+/// @param[in] visual Visual object created by CreateVisual().
 ///
-auto PlatformViewLayerWin::RootGetVisual() const -> Microsoft::WRL::ComPtr<IDCompositionVisual3>
+auto PlatformViewLayerWin::DestroyVisual(Microsoft::WRL::ComPtr<IDCompositionVisual3> visual) -> void
 {
-    return _visual;
+    (void)visual;
 }
 
 ///
@@ -492,15 +517,93 @@ auto PlatformViewLayerWin::RootGetDisplayScale() const -> DisplayScale
 }
 
 ///
+/// @brief 
+///
+/// @param layer 
+///
+auto PlatformViewLayerWin::RootOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+{
+    (void)layer;
+}
+
+///
+/// @brief 
+///
+/// @param layer 
+///
+auto PlatformViewLayerWin::RootSizeChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+{
+    (void)layer;
+}
+
+///
+/// @brief 
+///
+/// @param layer 
+///
+auto PlatformViewLayerWin::RootClipModeChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+{
+    (void)layer;
+}
+
+///
+/// @brief 
+///
+/// @param layer 
+///
+auto PlatformViewLayerWin::RootOpacityChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+{
+    (void)layer;
+}
+
+///
+/// @brief 
+///
+/// @param layer 
+///
+auto PlatformViewLayerWin::RootRenderFlagsChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+{
+    (void)layer;
+}
+
+///
+/// @brief 
+///
+/// @param layer 
+///
+auto PlatformViewLayerWin::RootDisplayListChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+{
+    (void)layer;
+}
+
+///
+/// @brief 
+///
+/// @param layer 
+///
+auto PlatformViewLayerWin::RootDisplayListOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+{
+    (void)layer;
+}
+
+///
 /// @brief
 ///
-auto PlatformViewLayerWin::InternalGetVisual() const -> Microsoft::WRL::ComPtr<IDCompositionVisual3>
+/// @param child
+///
+auto PlatformViewLayerWin::RootChildAdded(Shared<PlatformViewLayerWin> const& child) -> void
 {
-    if (IsRoot())
-    {
-        return RootGetVisual();
-    }
-    return _visual;
+    (void)child;
+}
+
+///
+/// @brief
+///
+/// @param parent
+///
+auto PlatformViewLayerWin::RootChildRemoved(Shared<PlatformViewLayerWin> const& parent) -> void
+{
+    (void)parent;
 }
 
 ///
@@ -528,14 +631,6 @@ auto PlatformViewLayerWin::InternalGetDisplayScale() const -> DisplayScale
 }
 
 ///
-/// @brief
-///
-auto PlatformViewLayerWin::InternalGetParentVisual() const -> Microsoft::WRL::ComPtr<IDCompositionVisual3>
-{
-    return InternalGetVisual();
-}
-
-///
 /// @brief 
 ///
 auto PlatformViewLayerWin::InternalGetParentWindowHandle() const -> HWND
@@ -550,7 +645,6 @@ auto PlatformViewLayerWin::InternalAttach() -> void
 {
     auto root = IsRoot() ? GetSelf() : GetRoot();
     NotifyRootWindowHandleChanged(root->InternalGetWindowHandle());
-    NotifyRootVisualChanged(root->InternalGetVisual());
     NotifyRootDisplayScaleChanged(root->InternalGetDisplayScale());
 }
 
@@ -560,65 +654,7 @@ auto PlatformViewLayerWin::InternalAttach() -> void
 auto PlatformViewLayerWin::InternalDetach() -> void
 {
     NotifyRootWindowHandleChanged(NULL);
-    NotifyRootVisualChanged(nullptr);
     NotifyRootDisplayScaleChanged(1.0);
-}
-
-///
-/// @brief 
-///
-auto PlatformViewLayerWin::InternalUpdateClip() -> void
-{
-    if (auto const visual = InternalGetVisual())
-    {
-        if (_clipMode == ViewClipMode::Bounds)
-        {
-            if (auto const device = GetDCompositionDevice())
-            {
-                auto const clip = device->CreateRectangleClip();
-                auto const width = UnitFunction::ConvertDpToVp(_size.GetWidth(), GetDisplayScale());
-                auto const height = UnitFunction::ConvertDpToVp(_size.GetHeight(), GetDisplayScale());
-                clip->SetLeft(0.f);
-                clip->SetTop(0.f);
-                clip->SetRight(static_cast<float>(width));
-                clip->SetBottom(static_cast<float>(height));
-                visual->SetClip(clip.Get());
-            }
-        }
-        else
-        {
-            visual->SetClip(nullptr);
-        }
-    }
-}
-
-///
-/// @brief 
-///
-auto PlatformViewLayerWin::InternalUpdateOffset() -> void
-{
-    if (auto const visual = InternalGetVisual())
-    {
-        auto const x = UnitFunction::ConvertDpToVp(_offset.GetDeltaX(), GetDisplayScale());
-        auto const y = UnitFunction::ConvertDpToVp(_offset.GetDeltaY(), GetDisplayScale());
-        visual->SetOffsetX(static_cast<float>(x));
-        visual->SetOffsetY(static_cast<float>(y));
-    }
-}
-
-///
-/// @brief 
-///
-auto PlatformViewLayerWin::InternalUpdateOpacity() -> void
-{
-    if (auto const visual = InternalGetVisual())
-    {
-        Microsoft::WRL::ComPtr<IDCompositionVisual3> visual3;
-        if (SUCCEEDED(visual.As(&visual3)) && visual3)
-        {
-            visual3->SetOpacity(static_cast<float>(_opacity));
-        }
-    }
 }
 }
 }

@@ -3,7 +3,10 @@
 
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerControlType.hpp"
+#include "Futurewalker.Application.PlatformViewLayerContextType.hpp"
 #include "Futurewalker.Application.ViewType.hpp"
+
+#include "Futurewalker.Graphics.DisplayListType.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -27,6 +30,8 @@ public:
     PlatformViewLayer(PassKey<PlatformViewLayer>);
 
     virtual ~PlatformViewLayer() = 0;
+
+    auto GetId() const -> PlatformViewLayerId;
 
     ///
     /// @brief Add child layer.
@@ -68,6 +73,21 @@ public:
     ///
     virtual auto SetOpacity(Float64 const opacity) -> void = 0;
 
+    ///
+    /// @brief Set render flags.
+    ///
+    virtual auto SetRenderFlags(PlatformViewLayerRenderFlags const renderFlags) -> void = 0;
+
+    ///
+    /// @brief Set display list to be rendered.
+    ///
+    virtual auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void = 0;
+
+    ///
+    /// @brief Set offset of display list content.
+    ///
+    virtual auto SetDisplayListOffset(Offset<Dp> const& offset) -> void = 0;
+
 protected:
     virtual auto Initialize() -> void;
 
@@ -78,7 +98,12 @@ protected:
     static auto MakeDerived(Args&&... args) -> Shared<Derived>;
 
 private:
+    auto InitializeSelf() -> void;
+
+private:
+    Shared<PlatformViewLayerContext> _context;
     Weak<PlatformViewLayer> _self;
+    PlatformViewLayerId _id = 0U;
 };
 
 ///
@@ -99,6 +124,7 @@ auto PlatformViewLayer::MakeDerived(Args&&... args) -> Shared<Derived>
     auto key = PassKey<PlatformViewLayer>();
     auto view = Shared<Derived>::Make(key, std::forward<Args>(args)...);
     static_cast<PlatformViewLayer&>(*view)._self = view;
+    static_cast<PlatformViewLayer&>(*view).InitializeSelf();
     static_cast<PlatformViewLayer&>(*view).Initialize();
     return view;
 }
