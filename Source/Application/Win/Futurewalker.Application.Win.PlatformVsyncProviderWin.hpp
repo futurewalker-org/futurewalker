@@ -11,6 +11,7 @@
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.Function.hpp"
 #include "Futurewalker.Core.MonotonicTime.hpp"
+#include "Futurewalker.Core.Blank.hpp"
 
 #include <thread>
 #include <mutex>
@@ -47,11 +48,12 @@ private:
     auto StopRequested() const -> Bool;
 
     static auto GetLastCompletedFrameTime(MonotonicTime& frameTime) -> Bool;
-    static auto DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, std::vector<CallbackData> const callbacks) -> Task<void>;
+    static auto DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, std::vector<CallbackData> const callbacks, std::weak_ptr<Blank> const tracker) -> Task<void>;
 
 private:
     mutable std::mutex _mutex;
     std::condition_variable _condVar;
+    std::shared_ptr<Blank> _tracker;
     std::vector<CallbackData> _callbacks;
     std::jthread _thread;
     Bool _stop = false;

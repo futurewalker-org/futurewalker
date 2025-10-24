@@ -4,7 +4,6 @@
 #include "Futurewalker.Application.MainThread.hpp" 
 
 #include "Futurewalker.Base.Debug.hpp"
-#include "Futurewalker.Base.Locator.hpp"
 
 #include "Futurewalker.Async.AsyncFunction.hpp"
 
@@ -19,6 +18,8 @@ namespace FW_DETAIL_NS
 ///
 PlatformVsyncProviderWin::PlatformVsyncProviderWin()
 {
+    _tracker = std::make_shared<Blank>();
+
     _event = ::CreateEventW(NULL, FALSE, FALSE, NULL);
     if (!_event)
     {
@@ -56,7 +57,7 @@ PlatformVsyncProviderWin::PlatformVsyncProviderWin()
                 auto callbacks = this->GetCallbacks();
                 if (!callbacks.empty())
                 {
-                    AsyncFunction::Spawn(DispatchCallbacks(frameInfo, std::move(callbacks))).Detach();
+                    AsyncFunction::Spawn(DispatchCallbacks(frameInfo, std::move(callbacks), _tracker)).Detach();
                 }
             }
             else if (result == WAIT_TIMEOUT || result == WAIT_FAILED)
@@ -205,17 +206,17 @@ auto PlatformVsyncProviderWin::GetLastCompletedFrameTime(MonotonicTime& frameTim
 ///
 /// @return A task.
 ///
-auto PlatformVsyncProviderWin::DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, std::vector<CallbackData> const callbacks) -> Task<void>
+auto PlatformVsyncProviderWin::DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, std::vector<CallbackData> const callbacks, std::weak_ptr<Blank> const tracker) -> Task<void>
 {
     try
     {
         co_await MainThread::Schedule();
 
-        if (auto provider = Locator::GetInstance<PlatformVsyncProviderWin>())
+        if (!tracker.expired())
         {
-            for (const auto& callback : callbacks)
+            for (auto const& callback : callbacks)
             {
-                if (auto data = callback.data.Lock())
+                if (auto const data = callback.data.Lock())
                 {
                     if (callback.callback)
                     {
