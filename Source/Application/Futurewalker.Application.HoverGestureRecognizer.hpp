@@ -16,7 +16,9 @@ namespace FW_EXPORT
 class HoverGestureRecognizer final : public GestureRecognizer
 {
 public:
-    auto Recognize(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool override;
+    auto Start(const Delegate& delegate) -> void override;
+    auto Stop() -> void override;
+    auto Recognize(const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool override;
 };
 }
 }

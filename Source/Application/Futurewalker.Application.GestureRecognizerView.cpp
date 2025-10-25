@@ -115,13 +115,21 @@ auto GestureRecognizerView::Initialize() -> void
 ///
 auto GestureRecognizerView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
-    if (event.Is<PointerEvent>())
+    if (event.Is<ViewEvent::Attached>())
     {
-        auto const delegate = GestureRecognizer::Delegate {
-          .capturePointer = [&](auto id) { CapturePointer(id); },
-          .releasePointer = [&](auto id) { ReleasePointer(id); },
-        };
-        co_return _gestureRecognizer->Recognize(delegate, event.As<PointerEvent>(), GetContentRect());
+        _gestureRecognizer->Start(
+          GestureRecognizer::Delegate {
+              .capturePointer = [&](auto id) { CapturePointer(id); },
+              .releasePointer = [&](auto id) { ReleasePointer(id); },
+          });
+    }
+    else if (event.Is<ViewEvent::Detached>())
+    {
+        _gestureRecognizer->Stop();
+    }
+    else if (event.Is<PointerEvent>())
+    {
+        co_return _gestureRecognizer->Recognize(event.As<PointerEvent>(), GetContentRect());
     }
     co_return false;
 }

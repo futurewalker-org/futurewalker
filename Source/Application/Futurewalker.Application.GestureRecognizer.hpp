@@ -36,15 +36,26 @@ public:
     };
 
     ///
-    /// @brief Process pointer event and recognize gesture.
+    /// @brief Start gesture recognition.
     ///
     /// @param delegate Delegate for pointer capture and release.
+    ///
+    virtual auto Start(Delegate const& delegate) -> void = 0;
+
+    ///
+    /// @brief Stop gesture recognition.
+    ///
+    virtual auto Stop() -> void = 0;
+
+    ///
+    /// @brief Process pointer event and recognize gesture.
+    ///
     /// @param event Pointer event to recognize.
     /// @param area Detection area.
     ///
     /// @return True if pointer event was consumed by this recognizer.
     ///
-    virtual auto Recognize(Delegate const& delegate, Event<PointerEvent> const& event, Rect<Dp> const& area) -> Bool = 0;
+    virtual auto Recognize(Event<PointerEvent> const& event, Rect<Dp> const& area) -> Bool = 0;
 
     auto SendEvent(Event<>& event) -> Async<Bool>;
     auto SendEventDetached(Event<>& event) -> Bool;

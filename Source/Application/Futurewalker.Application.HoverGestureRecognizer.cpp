@@ -9,13 +9,26 @@ namespace FW_DETAIL_NS
 ///
 /// @brief
 ///
-/// @param delegate
+auto HoverGestureRecognizer::Start(const Delegate& delegate) -> void
+{
+    (void)delegate;
+}
+
+///
+/// @brief
+///
+auto HoverGestureRecognizer::Stop() -> void
+{
+}
+
+///
+/// @brief
+///
 /// @param event
 /// @param area
 ///
-auto HoverGestureRecognizer::Recognize(const Delegate& delegate, const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool
+auto HoverGestureRecognizer::Recognize(const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool
 {
-    (void)delegate;
     (void)area;
 
     if (event.Is<PointerEvent::Motion::Enter>())

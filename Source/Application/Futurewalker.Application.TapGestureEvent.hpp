@@ -36,6 +36,19 @@ class TapGestureEvent::Cancel final : public TapGestureEvent
 
 class TapGestureEvent::Tap final : public TapGestureEvent
 {
+public:
+    auto GetTapCount() const -> SInt32
+    {
+        return _tapCount;
+    }
+
+    auto SetTapCount(SInt32 const count) -> void
+    {
+        _tapCount = count;
+    }
+
+private:
+    SInt32 _tapCount = 0;
 };
 }
 }
