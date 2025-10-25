@@ -194,29 +194,22 @@ auto TextView::Initialize() -> void
 
     _shaper = Graphics::TextShaper::Make();
 
-    _text.BindAttribute(*this, AttributeText);
-    _color.BindAttribute(*this, AttributeColor);
-    _alpha.BindAttribute(*this, AttributeAlpha);
-    _disabledColor.BindAttribute(*this, AttributeDisabledColor);
-    _disabledAlpha.BindAttribute(*this, AttributeDisabledAlpha);
-    _fontSize.BindAttribute(*this, AttributeFontSize);
-    _fontWeight.BindAttribute(*this, AttributeFontWeight);
-    _fontWidth.BindAttribute(*this, AttributeFontWidth);
-    _fontSlant.BindAttribute(*this, AttributeFontSlant);
-    _fontFamily.BindAttribute(*this, AttributeFontFamily);
-
-    EventReceiver::Connect(_text, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_color, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_alpha, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_disabledColor, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_disabledAlpha, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_fontSize, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_fontWeight, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_fontWidth, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_fontSlant, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_fontFamily, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_horizontalAlignment, *this, &TextView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_verticalAlignment, *this, &TextView::ReceiveAttributeEvent);
+    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute) {
+        accessor.BindAttribute(*this, attribute);
+        EventReceiver::Connect(accessor, *this, &TextView::ReceiveAttributeEvent);
+    };
+    bindAndConnectAttribute(_text, AttributeText);
+    bindAndConnectAttribute(_color, AttributeColor);
+    bindAndConnectAttribute(_disabledColor, AttributeDisabledColor);
+    bindAndConnectAttribute(_alpha, AttributeAlpha);
+    bindAndConnectAttribute(_disabledAlpha, AttributeDisabledAlpha);
+    bindAndConnectAttribute(_fontSize, AttributeFontSize);
+    bindAndConnectAttribute(_fontWeight, AttributeFontWeight);
+    bindAndConnectAttribute(_fontWidth, AttributeFontWidth);
+    bindAndConnectAttribute(_fontSlant, AttributeFontSlant);
+    bindAndConnectAttribute(_fontFamily, AttributeFontFamily);
+    bindAndConnectAttribute(_horizontalAlignment, AttributeHorizontalAlignment);
+    bindAndConnectAttribute(_verticalAlignment, AttributeVerticalAlignment);
 }
 
 ///
