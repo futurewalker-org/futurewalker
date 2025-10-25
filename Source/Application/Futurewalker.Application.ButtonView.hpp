@@ -70,7 +70,6 @@ private:
     AttributeAccessor<Channel> _borderAlpha;
     AttributeAccessor<RGBAColor> _disabledBorderColor;
     AttributeAccessor<Channel> _disabledBorderAlpha;
-    AttributeAccessor<Channel> _backgroundAlpha;
     AttributeAccessor<RGBAColor> _highlightColor;
     AttributeAccessor<Channel> _hoverHighlightAlpha;
     AttributeAccessor<Channel> _pressHighlightAlpha;
