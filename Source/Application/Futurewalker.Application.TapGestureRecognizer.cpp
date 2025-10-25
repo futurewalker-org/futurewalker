@@ -18,12 +18,6 @@ struct RecognizerEvent final : EventParameter
     Rect<Dp> area;
     Shared<Bool> result;
 };
-
-auto WaitNextRecognizerEvent(TapGestureRecognizer& receiver) -> Async<Event<RecognizerEvent>>
-{
-    auto waiter = EventWaiter(receiver);
-    co_return co_await waiter.Wait<RecognizerEvent>();
-}
 }
 
 ///
@@ -42,6 +36,11 @@ auto TapGestureRecognizer::SetAllowedActions(TapGestureActionFlags const actions
     _allowedActions = actions;
 }
 
+///
+/// @brief Start gesture recognition.
+///
+/// @param delegate 
+///
 auto TapGestureRecognizer::Start(Delegate const& delegate) -> void
 {
     if (!_taskHandle)
@@ -51,6 +50,9 @@ auto TapGestureRecognizer::Start(Delegate const& delegate) -> void
     }
 }
 
+///
+/// @brief Stop gesture recognition.
+///
 auto TapGestureRecognizer::Stop() -> void
 {
     if (_taskHandle)
@@ -64,6 +66,12 @@ auto TapGestureRecognizer::Stop() -> void
     }
 }
 
+///
+/// @brief Recognize tap gesture.
+///
+/// @param event
+/// @param area
+///
 auto TapGestureRecognizer::Recognize(const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool
 {
     if (_taskHandle)
@@ -78,11 +86,14 @@ auto TapGestureRecognizer::Recognize(const Event<PointerEvent>& event, const Rec
     return false;
 }
 
+///
+/// @brief Recognize first down event.
+///
 auto TapGestureRecognizer::InternalRecognizeFirstDown() -> Async<Bool>
 {
     while (true)
     {
-        auto event = co_await WaitNextRecognizerEvent(*this);
+        auto event = co_await EventWaiter(*this).Wait<RecognizerEvent>();
         auto const& pointerEvent = event->pointerEvent;
         auto const& area = event->area;
         auto const& result = event->result;
@@ -118,11 +129,14 @@ auto TapGestureRecognizer::InternalRecognizeFirstDown() -> Async<Bool>
     }
 }
 
+///
+/// @brief Recognize first up event.
+///
 auto TapGestureRecognizer::InternalRecognizeFirstUp() -> Async<Bool>
 {
     while (true)
     {
-        auto const event = co_await WaitNextRecognizerEvent(*this);
+        auto const event = co_await EventWaiter(*this).Wait<RecognizerEvent>();
 
         auto const& pointerEvent = event->pointerEvent;
         auto const& area = event->area;
@@ -166,6 +180,9 @@ auto TapGestureRecognizer::InternalRecognizeFirstUp() -> Async<Bool>
     }
 }
 
+///
+/// @brief Recognize tap gesture.
+///
 auto TapGestureRecognizer::InternalRecognize() -> Async<void>
 {
     while (true)

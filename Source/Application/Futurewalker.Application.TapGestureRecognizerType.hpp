@@ -11,6 +11,9 @@ namespace FW_EXPORT
 {
 class TapGestureRecognizer;
 
+///
+/// @brief Action flags for tap gesture recognizer.
+///
 enum class TapGestureActionFlags
 {
     None = 0,
