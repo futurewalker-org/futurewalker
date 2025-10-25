@@ -31,6 +31,14 @@ auto ButtonView::MakeWithContent(Shared<View> contentView) -> Shared<ButtonView>
 }
 
 ///
+/// @brief Constructor.
+///
+ButtonView::ButtonView(PassKey<View> key)
+  : View(key)
+{
+}
+
+///
 /// @brief Set content view.
 ///
 /// @param content 
@@ -52,11 +60,151 @@ auto ButtonView::GetContent() -> Shared<View>
 }
 
 ///
-/// @brief Constructor.
+/// @brief 
 ///
-ButtonView::ButtonView(PassKey<View> key)
-  : View(key)
+/// @param flags 
+///
+auto ButtonView::SetActionFlags(ButtonViewActionFlags const flags) -> void
 {
+    _actionFlags = flags;
+}
+
+///
+/// @brief
+///
+auto ButtonView::GetActionFlags() const -> ButtonViewActionFlags
+{
+    return _actionFlags;
+}
+
+///
+/// @brief
+///
+/// @param color
+///
+auto ButtonView::SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _backgroundColor.SetAttributeArg(color);
+}
+
+///
+/// @brief
+///
+/// @param alpha
+///
+auto ButtonView::SetBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _backgroundAlpha.SetAttributeArg(alpha);
+}
+
+///
+/// @brief
+///
+/// @param color
+///
+auto ButtonView::SetDisabledBackgroundColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _disabledBackgroundColor.SetAttributeArg(color);
+}
+
+///
+/// @brief
+///
+/// @param alpha
+///
+auto ButtonView::SetDisabledBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _disabledBackgroundAlpha.SetAttributeArg(alpha);
+}
+
+///
+/// @brief
+///
+/// @param color
+///
+auto ButtonView::SetBorderColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _borderColor.SetAttributeArg(color);
+}
+
+///
+/// @brief
+///
+/// @param alpha
+///
+auto ButtonView::SetBorderAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _borderAlpha.SetAttributeArg(alpha);
+}
+
+///
+/// @brief
+///
+/// @param color
+///
+auto ButtonView::SetDisabledBorderColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _disabledBorderColor.SetAttributeArg(color);
+}
+
+///
+/// @brief
+///
+/// @param alpha
+///
+auto ButtonView::SetDisabledBorderAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _disabledBorderAlpha.SetAttributeArg(alpha);
+}
+
+///
+/// @brief
+///
+/// @param color
+///
+auto ButtonView::SetHighlightColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _highlightColor.SetAttributeArg(color);
+}
+
+///
+/// @brief
+///
+/// @param alpha
+///
+auto ButtonView::SetHoverHighlightAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _hoverHighlightAlpha.SetAttributeArg(alpha);
+}
+
+///
+/// @brief
+///
+/// @param alpha
+///
+auto ButtonView::SetPressHighlightAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _pressHighlightAlpha.SetAttributeArg(alpha);
+}
+
+///
+/// @brief
+///
+/// @param radius
+///
+auto ButtonView::SetCornerRadius(AttributeArg<CornerRadius> const& radius) -> void
+{
+    _cornerRadius.SetAttributeArg(radius);
+}
+
+///
+/// @brief
+///
+/// @param width
+///
+auto ButtonView::SetBorderWidth(AttributeArg<Dp> const& width) -> void
+{
+    _borderWidth.SetAttributeArg(width);
 }
 
 ///
@@ -64,26 +212,44 @@ ButtonView::ButtonView(PassKey<View> key)
 ///
 auto ButtonView::Initialize() -> void
 {
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBackgroundColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBackgroundAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledBackgroundColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledBackgroundAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBorderColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBorderAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledBorderColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledBorderAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeHighlightColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeHoverHighlightAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributePressHighlightAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeBorderWidth, {0});
+
     _tapGestureView = TapGestureView::Make();
     _hoverGestureView = HoverGestureView::MakeWithContent(_tapGestureView);
-    _backgroundColor.BindAttribute(*this, ButtonViewStyle::BackgroundColor);
-    _highlightColor.BindAttribute(*this, ButtonViewStyle::HighlightColor);
-    _borderColor.BindAttribute(*this, ButtonViewStyle::BorderColor);
-    _hoverHighlightAlpha.BindAttribute(*this, ButtonViewStyle::HoverHighlightAlpha);
-    _pressHighlightAlpha.BindAttribute(*this, ButtonViewStyle::PressHighlightAlpha);
-    _cornerRadius.BindAttribute(*this, ButtonViewStyle::CornerRadius);
-    _borderWidth.BindAttribute(*this, ButtonViewStyle::BorderWidth);
+
+    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute) {
+        accessor.BindAttribute(*this, attribute);
+        EventReceiver::Connect(accessor, *this, &ButtonView::ReceiveAttributeEvent);
+    };
+    bindAndConnectAttribute(_backgroundColor, AttributeBackgroundColor);
+    bindAndConnectAttribute(_backgroundAlpha, AttributeBackgroundAlpha);
+    bindAndConnectAttribute(_disabledBackgroundColor, AttributeDisabledBackgroundColor);
+    bindAndConnectAttribute(_disabledBackgroundAlpha, AttributeDisabledBackgroundAlpha);
+    bindAndConnectAttribute(_borderColor, AttributeBorderColor);
+    bindAndConnectAttribute(_borderAlpha, AttributeBorderAlpha);
+    bindAndConnectAttribute(_disabledBorderColor, AttributeDisabledBorderColor);
+    bindAndConnectAttribute(_disabledBorderAlpha, AttributeDisabledBorderAlpha);
+    bindAndConnectAttribute(_highlightColor, AttributeHighlightColor);
+    bindAndConnectAttribute(_hoverHighlightAlpha, AttributeHoverHighlightAlpha);
+    bindAndConnectAttribute(_pressHighlightAlpha, AttributePressHighlightAlpha);
+    bindAndConnectAttribute(_cornerRadius, AttributeCornerRadius);
+    bindAndConnectAttribute(_borderWidth, AttributeBorderWidth);
 
     AddChildBack(_hoverGestureView);
 
     EventReceiver::Connect(*this, *this, &ButtonView::ReceiveEvent);
-    EventReceiver::Connect(_backgroundColor, *this, &ButtonView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_highlightColor, *this, &ButtonView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_borderColor, *this, &ButtonView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_hoverHighlightAlpha, *this, &ButtonView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_pressHighlightAlpha, *this, &ButtonView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_cornerRadius, *this, &ButtonView::ReceiveAttributeEvent);
-    EventReceiver::Connect(_borderWidth, *this, &ButtonView::ReceiveAttributeEvent);
 }
 
 ///

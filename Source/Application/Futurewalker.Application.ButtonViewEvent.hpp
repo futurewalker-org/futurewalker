@@ -17,23 +17,23 @@ public:
     class Press;
 };
 
-class ButtonViewEvent::Down : public ButtonViewEvent
+class ButtonViewEvent::Down final : public ButtonViewEvent
 {
 };
 
-class ButtonViewEvent::Up : public ButtonViewEvent
+class ButtonViewEvent::Up final : public ButtonViewEvent
 {
 };
 
-class ButtonViewEvent::Press : public ButtonViewEvent
+class ButtonViewEvent::Press final : public ButtonViewEvent
 {
 };
 
-class ButtonViewEvent::Enter : public ButtonViewEvent
+class ButtonViewEvent::Enter final : public ButtonViewEvent
 {
 };
 
-class ButtonViewEvent::Leave : public ButtonViewEvent
+class ButtonViewEvent::Leave final : public ButtonViewEvent
 {
 };
 }
