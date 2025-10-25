@@ -8,5 +8,25 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 class TextView;
+
+///
+/// @brief Horizontal alignment of text.
+///
+enum class TextViewHorizontalAlignment
+{
+    Leading,
+    Center,
+    Trailing,
+};
+
+///
+/// @brief Vertical alignment of text.
+///
+enum class TextViewVerticalAlignment
+{
+    Top,
+    Middle,
+    Bottom,
+};
 }
 }

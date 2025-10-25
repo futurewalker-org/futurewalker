@@ -5,6 +5,7 @@
 #include "Futurewalker.Application.DrawScope.hpp"
 #include "Futurewalker.Application.ViewLayoutFunction.hpp"
 #include "Futurewalker.Application.ApplicationStyle.hpp"
+#include "Futurewalker.Application.ViewDrawFunction.hpp"
 
 #include "Futurewalker.Attribute.AttributeObserver.hpp"
 
@@ -13,6 +14,7 @@
 #include "Futurewalker.Graphics.ShapedText.hpp"
 #include "Futurewalker.Graphics.GlyphRun.hpp"
 #include "Futurewalker.Graphics.Scene.hpp"
+#include "Futurewalker.Graphics.FontFamily.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -55,6 +57,116 @@ void TextView::SetText(AttributeArg<String> const& text)
 }
 
 ///
+/// @brief
+///
+/// @param color
+///
+auto TextView::SetColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _color.SetAttributeArg(color);
+}
+
+///
+/// @brief
+///
+/// @param color
+///
+auto TextView::SetDisabledColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _disabledColor.SetAttributeArg(color);
+}
+
+///
+/// @brief 
+///
+/// @param alpha 
+///
+auto TextView::SetAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _alpha.SetAttributeArg(alpha);
+}
+
+///
+/// @brief
+///
+/// @param alpha
+///
+auto TextView::SetDisabledAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _disabledAlpha.SetAttributeArg(alpha);
+}
+
+///
+/// @brief
+///
+/// @param size
+///
+auto TextView::SetFontSize(AttributeArg<Graphics::FontSize> const& size) -> void
+{
+    _fontSize.SetAttributeArg(size);
+}
+
+///
+/// @brief
+///
+/// @param weight
+///
+auto TextView::SetFontWeight(AttributeArg<Graphics::FontWeight> const& weight) -> void
+{
+    _fontWeight.SetAttributeArg(weight);
+}
+
+///
+/// @brief
+///
+/// @param width
+///
+auto TextView::SetFontWidth(AttributeArg<Graphics::FontWidth> const& width) -> void
+{
+    _fontWidth.SetAttributeArg(width);
+}
+
+///
+/// @brief
+///
+/// @param slant
+///
+auto TextView::SetFontSlant(AttributeArg<Graphics::FontSlant> const& slant) -> void
+{
+    _fontSlant.SetAttributeArg(slant);
+}
+
+///
+/// @brief
+///
+/// @param family
+///
+auto TextView::SetFontFamily(AttributeArg<Graphics::FontFamily> const& family) -> void
+{
+    _fontFamily.SetAttributeArg(family);
+}
+
+///
+/// @brief
+///
+/// @param alignment
+///
+auto TextView::SetHorizontalAlignment(AttributeArg<TextViewHorizontalAlignment> const& alignment) -> void
+{
+    _horizontalAlignment.SetAttributeArg(alignment);
+}
+
+///
+/// @brief
+///
+/// @param alignment
+///
+auto TextView::SetVerticalAlignment(AttributeArg<TextViewVerticalAlignment> const& alignment) -> void
+{
+    _verticalAlignment.SetAttributeArg(alignment);
+}
+
+///
 /// @brief Constructor.
 ///
 TextView::TextView(PassKey<View> key)
@@ -67,20 +179,37 @@ TextView::TextView(PassKey<View> key)
 ///
 auto TextView::Initialize() -> void
 {
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(String, TextAttribute, String());
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(String, AttributeText, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSize, AttributeFontSize, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWeight, AttributeFontWeight, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWidth, AttributeFontWidth, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSlant, AttributeFontSlant, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontFamily, AttributeFontFamily, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewHorizontalAlignment, AttributeHorizontalAlignment, TextViewHorizontalAlignment::Center);
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewVerticalAlignment, AttributeVerticalAlignment, TextViewVerticalAlignment::Middle);
 
     _shaper = Graphics::TextShaper::Make();
 
-    _text.BindAttribute(*this, TextAttribute);
-    _color.BindAttribute(*this, TextViewStyle::Color);
-    _fontSize.BindAttribute(*this, TextViewStyle::FontSize);
-    _fontWeight.BindAttribute(*this, TextViewStyle::FontWeight);
-    _fontWidth.BindAttribute(*this, TextViewStyle::FontWidth);
-    _fontSlant.BindAttribute(*this, TextViewStyle::FontSlant);
-    _fontFamily.BindAttribute(*this, TextViewStyle::FontFamily);
+    _text.BindAttribute(*this, AttributeText);
+    _color.BindAttribute(*this, AttributeColor);
+    _alpha.BindAttribute(*this, AttributeAlpha);
+    _disabledColor.BindAttribute(*this, AttributeDisabledColor);
+    _disabledAlpha.BindAttribute(*this, AttributeDisabledAlpha);
+    _fontSize.BindAttribute(*this, AttributeFontSize);
+    _fontWeight.BindAttribute(*this, AttributeFontWeight);
+    _fontWidth.BindAttribute(*this, AttributeFontWidth);
+    _fontSlant.BindAttribute(*this, AttributeFontSlant);
+    _fontFamily.BindAttribute(*this, AttributeFontFamily);
 
     EventReceiver::Connect(_text, *this, &TextView::ReceiveAttributeEvent);
     EventReceiver::Connect(_color, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_alpha, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_disabledColor, *this, &TextView::ReceiveAttributeEvent);
+    EventReceiver::Connect(_disabledAlpha, *this, &TextView::ReceiveAttributeEvent);
     EventReceiver::Connect(_fontSize, *this, &TextView::ReceiveAttributeEvent);
     EventReceiver::Connect(_fontWeight, *this, &TextView::ReceiveAttributeEvent);
     EventReceiver::Connect(_fontWidth, *this, &TextView::ReceiveAttributeEvent);
@@ -114,7 +243,7 @@ auto TextView::Draw(DrawScope& scope) -> void
 
     auto const rect = GetContentRect();
 
-    auto const color = _color.GetValueOrDefault();
+    auto const color = GetTextColor();
     auto const isRTL = GetLayoutDirection() == LayoutDirection::RightToLeft;
 
     const auto hAlign = _horizontalAlignment.GetValueOr(TextViewHorizontalAlignment::Center);
@@ -196,6 +325,25 @@ auto TextView::GetTypeface() const -> Shared<Graphics::Typeface>
 auto TextView::GetFontSize() const -> Graphics::FontSize
 {
     return _fontSize.GetValueOr(16);
+}
+
+///
+/// @brief Get current text color.
+///
+auto TextView::GetTextColor() const -> RGBAColor
+{
+    if (IsEnabledFromRoot())
+    {
+        auto const color = _color.GetValueOrDefault();
+        auto const alpha = _alpha.GetValueOrDefault();
+        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), alpha.GetF64() * color.GetAlpha().GetF64());
+    }
+    else
+    {
+        auto const color = _disabledColor.GetValueOrDefault();
+        auto const alpha = _disabledAlpha.GetValueOrDefault();
+        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), alpha.GetF64() * color.GetAlpha().GetF64());
+    }
 }
 
 ///
