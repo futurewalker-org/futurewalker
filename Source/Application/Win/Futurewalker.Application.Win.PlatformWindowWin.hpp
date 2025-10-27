@@ -62,7 +62,7 @@ public:
     auto Maximize() -> void override;
     auto Restore() -> void override;
     auto IsClosed() -> Bool override;
-    auto Close() -> void override;
+    auto Close() -> Async<Bool> override;
     auto Render() -> void override;
     auto RequestFrame() -> void override;
     auto GetFrameTime() -> MonotonicTime override;

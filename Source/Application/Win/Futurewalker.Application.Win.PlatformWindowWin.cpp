@@ -423,6 +423,17 @@ auto PlatformWindowWin::Maximize() -> void
 ///
 /// @brief
 ///
+auto PlatformWindowWin::Restore() -> void
+{
+    if (!IsClosed())
+    {
+        ::ShowWindow(_hwnd, SW_NORMAL);
+    }
+}
+
+///
+/// @brief
+///
 auto PlatformWindowWin::IsClosed() -> Bool
 {
     if (_hwnd)
@@ -435,24 +446,14 @@ auto PlatformWindowWin::IsClosed() -> Bool
 ///
 /// @brief
 ///
-auto PlatformWindowWin::Restore() -> void
+auto PlatformWindowWin::Close() -> Async<Bool>
 {
     if (!IsClosed())
     {
-        ::ShowWindow(_hwnd, SW_NORMAL);
+        HandleClose(_hwnd, WM_CLOSE, 0, 0);
+        co_return IsClosed();
     }
-}
-
-///
-/// @brief
-///
-auto PlatformWindowWin::Close() -> void
-{
-    if (!IsClosed())
-    {
-        auto resetter = ScopedResetter(_closing = true);
-        Destroy();
-    }
+    co_return true;
 }
 
 ///
@@ -1165,7 +1166,50 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         try
         {
             auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
-            SendWindowEventDetached(event);
+            auto result = Shared<Optional<Bool>>::Make();
+            AsyncFunction::SpawnFn([&event, result, self = GetSelf()]() mutable -> Task<void> {
+                try
+                {
+                    *result = co_await self->SendWindowEvent(event);
+                }
+                catch (...)
+                {
+                    FW_DEBUG_ASSERT(false);
+                }
+            }).Detach();
+
+            while (true)
+            {
+                if (*result)
+                {
+                    break;
+                }
+
+                auto msg = MSG();
+                if (::GetMessageW(&msg, NULL, 0, 0) == -1)
+                {
+                    break;
+                }
+
+                if (msg.message == WM_QUIT)
+                {
+                    ::PostQuitMessage(static_cast<int>(msg.wParam));
+                    break;
+                }
+                ::TranslateMessage(&msg);
+                ::DispatchMessageW(&msg);
+            }
+
+            if (*result && **result)
+            {
+                if (event.Is<PlatformWindowEvent::CloseRequested>())
+                {
+                    if (!event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
+                    {
+                        ::DestroyWindow(hWnd);
+                    }
+                }
+            }
         }
         catch (...)
         {

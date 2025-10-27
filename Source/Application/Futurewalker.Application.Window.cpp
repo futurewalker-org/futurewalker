@@ -450,21 +450,7 @@ auto Window::Close() -> Async<Bool>
 {
     if (!IsClosed())
     {
-        auto cancelled = False;
-        auto event = Event<>(Event<WindowEvent::CloseRequested>());
-        if (co_await SendEvent(event))
-        {
-            if (event.Is<WindowEvent::CloseRequested>())
-            {
-                cancelled = event.As<WindowEvent::CloseRequested>()->IsCancelled();
-            }
-        }
-
-        if (!cancelled)
-        {
-            _platformObject->Close();
-        }
-        co_return !cancelled;
+        co_return co_await _platformObject->Close();
     }
     co_return true;
 }
