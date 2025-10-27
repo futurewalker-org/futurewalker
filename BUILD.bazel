@@ -87,3 +87,10 @@ alias(
     actual = "//Source/Text",
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "Components/Lamp",
+    actual = "//Source/Component/Lamp",
+    visibility = ["//visibility:public"],
+)
+
