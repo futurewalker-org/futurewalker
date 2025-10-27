@@ -1,0 +1,96 @@
+﻿// SPDX-License-Identifier: MPL-2.0
+
+#include "Futurewalker.Component.Lamp.Style.hpp"
+#include "Futurewalker.Component.Lamp.Color.hpp"
+
+namespace FW_LAMP_DETAIL_NS
+{
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorPrimary, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorPrimaryContainer, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOnPrimary, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOnPrimaryContainer, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSecondary, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSecondaryContainer, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOnSecondary, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOnSecondaryContainer, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorTertiary, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorTertiaryContainer, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOnTertiary, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOnTertiaryContainer, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSurface, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSurfaceVariant, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSurfaceDim, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSurfaceBright, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSurfaceContainerLowest, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSurfaceContainerLow, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSurfaceContainer, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSurfaceContainerHigh, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorSurfaceContainerHighest, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOnSurface, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOnSurfaceVariant, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOutline, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOutlineVariant, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorError, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorErrorContainer, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOnError, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::ColorOnErrorContainer, {});
+
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::AlphaHighlightHover, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::AlphaHighlightPress, 0);
+
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::AlphaEnabled, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::AlphaDisabled, 0);
+
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeBodySmall, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeBodyMedium, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeBodyLarge, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeLabelSmall, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeLabelMedium, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeLabelLarge, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeTitleSmall, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeTitleMedium, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeTitleLarge, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeHeadlineSmall, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeHeadlineMedium, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeHeadlineLarge, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeDisplaySmall, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeDisplayMedium, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontSizeDisplayLarge, 0);
+
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightBodySmall, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightBodyMedium, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightBodyLarge, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightLabelSmall, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightLabelMedium, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightLabelLarge, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightTitleSmall, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightTitleMedium, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightTitleLarge, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightHeadlineSmall, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightHeadlineMedium, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightHeadlineLarge, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightDisplaySmall, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightDisplayMedium, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::FontWeightDisplayLarge, 0);
+
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusNone, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusExtraSmall, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusSmall, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusMedium, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusLarge, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusLargeIncreased, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusExtraLarge, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusExtraLargeIncreased, {});
+
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::IconSizeSmall, {0});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::IconSizeMedium, {0});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::IconSizeLarge, {0});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::IconSizeExtraLarge, {0});
+
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::PaddingNone, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::PaddingExtraSmall, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::PaddingSmall, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::PaddingMedium, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::PaddingLarge, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::PaddingExtraLarge, {});
+}
