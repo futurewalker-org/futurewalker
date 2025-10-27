@@ -12,6 +12,7 @@
 #include "Futurewalker.Graphics.ShapedTextType.hpp"
 #include "Futurewalker.Graphics.TextShaperType.hpp"
 #include "Futurewalker.Graphics.TypefaceType.hpp"
+#include "Futurewalker.Graphics.FontSize.hpp"
 #include "Futurewalker.Graphics.FontWeight.hpp"
 #include "Futurewalker.Graphics.FontWidth.hpp"
 #include "Futurewalker.Graphics.FontStyleType.hpp"

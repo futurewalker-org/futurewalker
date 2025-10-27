@@ -5,10 +5,6 @@
 #include "Futurewalker.Application.PlatformApplicationTheme.hpp"
 #include "Futurewalker.Application.PlatformApplicationThemeContext.hpp"
 #include "Futurewalker.Application.Theme.hpp"
-#include "Futurewalker.Application.DefaultTheme.hpp"
-
-#include "Futurewalker.Application.ApplicationColor.hpp"
-#include "Futurewalker.Application.ApplicationStyle.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -19,9 +15,6 @@ ApplicationTheme::ApplicationTheme(Shared<PlatformApplicationThemeContext> const
     _platformObject = _platformContext->MakeApplicationTheme({
       .sendThemeEvent = [this](Event<>& event) -> Async<Bool> { co_return co_await HandlePlatformThemeEvent(event); },
     });
-
-    PushTheme(ThemeBrightness::Dark, Shared<DefaultTheme>::Make(ThemeBrightness::Dark));
-    PushTheme(ThemeBrightness::Light, Shared<DefaultTheme>::Make(ThemeBrightness::Light));
 
     UpdateCurrentBrightness();
 }

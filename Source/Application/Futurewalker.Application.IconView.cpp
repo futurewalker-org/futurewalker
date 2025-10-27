@@ -63,23 +63,23 @@ auto IconView::SetDisabledAlpha(AttributeArg<Channel> const& alpha) -> void
 
 auto IconView::Initialize() -> void
 {
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Icon, AttributeIcon, Icon());
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeSize, Dp(0.0));
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Icon, AttributeIcon, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeSize, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledAlpha, {});
 
-    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute) {
-        accessor.BindAttribute(*this, attribute);
+    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute, typename Accessor::ValueType const& value) {
+        accessor.BindAttributeWithDefaultValue(*this, attribute, value);
         EventReceiver::Connect(accessor, *this, &IconView::ReceiveAttributeEvent);
     };
-    bindAndConnectAttribute(_icon, AttributeIcon);
-    bindAndConnectAttribute(_size, AttributeSize);
-    bindAndConnectAttribute(_color, AttributeColor);
-    bindAndConnectAttribute(_alpha, AttributeAlpha);
-    bindAndConnectAttribute(_disabledColor, AttributeDisabledColor);
-    bindAndConnectAttribute(_disabledAlpha, AttributeDisabledAlpha);
+    bindAndConnectAttribute(_icon, AttributeIcon, {});
+    bindAndConnectAttribute(_size, AttributeSize, {0});
+    bindAndConnectAttribute(_color, AttributeColor, {});
+    bindAndConnectAttribute(_alpha, AttributeAlpha, {});
+    bindAndConnectAttribute(_disabledColor, AttributeDisabledColor, {});
+    bindAndConnectAttribute(_disabledAlpha, AttributeDisabledAlpha, {});
 }
 
 auto IconView::Measure(MeasureScope& scope) -> void

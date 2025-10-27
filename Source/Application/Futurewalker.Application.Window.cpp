@@ -14,7 +14,6 @@
 #include "Futurewalker.Application.PlatformInputEvent.hpp"
 #include "Futurewalker.Application.PlatformViewLayerContext.hpp"
 #include "Futurewalker.Application.ApplicationContext.hpp"
-#include "Futurewalker.Application.ApplicationStyle.hpp"
 #include "Futurewalker.Application.FrameEvent.hpp"
 #include "Futurewalker.Application.PointerEvent.hpp"
 #include "Futurewalker.Application.KeyEvent.hpp"
@@ -725,7 +724,7 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
 
     AttributeNode::SetValue<&WindowAttribute::AreaManager>(*this, _areaManager);
 
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(RGBAColor, BackgroundColor, ApplicationStyle::ColorSurface);
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, BackgroundColor, {});
     _backgroundColor.BindAttribute(*this, BackgroundColor);
 
     EventReceiver::Connect(_backgroundColor, *this, &Window::ReceiveAttributeEvent);

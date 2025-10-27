@@ -2,7 +2,6 @@
 #pragma once
 
 #include "Futurewalker.Application.TextEditType.hpp"
-#include "Futurewalker.Application.TextEditStyle.hpp"
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.InputMethodType.hpp"
 #include "Futurewalker.Application.InputMethodEditableType.hpp"
@@ -39,6 +38,20 @@ public:
     auto GetText() const -> String;
     auto SetText(String const& text) -> void;
 
+    auto SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void;
+    auto SetBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void;
+    auto SetDisabledBackgroundColor(AttributeArg<RGBAColor> const& color) -> void;
+    auto SetDisabledBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void;
+    auto SetTextColor(AttributeArg<RGBAColor> const& color) -> void;
+    auto SetTextAlpha(AttributeArg<Channel> const& alpha) -> void;
+    auto SetDisabledTextColor(AttributeArg<RGBAColor> const& color) -> void;
+    auto SetDisabledTextAlpha(AttributeArg<Channel> const& alpha) -> void;
+    auto SetFontSize(AttributeArg<Graphics::FontSize> const& size) -> void;
+    auto SetFontWeight(AttributeArg<Graphics::FontWeight> const& weight) -> void;
+    auto SetFontWidth(AttributeArg<Graphics::FontWidth> const& width) -> void;
+    auto SetFontSlant(AttributeArg<Graphics::FontSlant> const& slant) -> void;
+    auto SetFontFamily(AttributeArg<Graphics::FontFamily> const& family) -> void;
+
 protected:
     auto Initialize() -> void override;
     auto Draw(DrawScope& scope) -> void override;
@@ -66,13 +79,18 @@ private:
 
     auto InternalInvalidateLayoutCache() -> void;
     auto InternalUpdateLayoutCache() -> void;
-    auto InternalMeasureText() -> Size<Dp>;
 
 private:
     Shared<InputMethod> _inputMethod;
     Shared<InputMethodEditable> _inputMethodEditable;
     AttributeAccessor<RGBAColor> _backgroundColor;
+    AttributeAccessor<Channel> _backgroundAlpha;
+    AttributeAccessor<RGBAColor> _disabledBackgroundColor;
+    AttributeAccessor<Channel> _disabledBackgroundAlpha;
     AttributeAccessor<RGBAColor> _textColor;
+    AttributeAccessor<Channel> _textAlpha;
+    AttributeAccessor<RGBAColor> _disabledTextColor;
+    AttributeAccessor<Channel> _disabledTextAlpha;
     AttributeAccessor<Graphics::FontSize> _fontSize;
     AttributeAccessor<Graphics::FontWeight> _fontWeight;
     AttributeAccessor<Graphics::FontWidth> _fontWidth;

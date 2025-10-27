@@ -43,6 +43,71 @@ auto TextEdit::SetText(String const& text) -> void
     InternalSetText(text);
 }
 
+auto TextEdit::SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _backgroundColor.SetAttributeArg(color);
+}
+
+auto TextEdit::SetBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _backgroundAlpha.SetAttributeArg(alpha);
+}
+
+auto TextEdit::SetDisabledBackgroundColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _disabledBackgroundColor.SetAttributeArg(color);
+}
+
+auto TextEdit::SetDisabledBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _disabledBackgroundAlpha.SetAttributeArg(alpha);
+}
+
+auto TextEdit::SetTextColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _textColor.SetAttributeArg(color);
+}
+
+auto TextEdit::SetTextAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _textAlpha.SetAttributeArg(alpha);
+}
+
+auto TextEdit::SetDisabledTextColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _disabledTextColor.SetAttributeArg(color);
+}
+
+auto TextEdit::SetDisabledTextAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _disabledTextAlpha.SetAttributeArg(alpha);
+}
+
+auto TextEdit::SetFontSize(AttributeArg<Graphics::FontSize> const& size) -> void
+{
+    _fontSize.SetAttributeArg(size);
+}
+
+auto TextEdit::SetFontWeight(AttributeArg<Graphics::FontWeight> const& weight) -> void
+{
+    _fontWeight.SetAttributeArg(weight);
+}
+
+auto TextEdit::SetFontWidth(AttributeArg<Graphics::FontWidth> const& width) -> void
+{
+    _fontWidth.SetAttributeArg(width);
+}
+
+auto TextEdit::SetFontSlant(AttributeArg<Graphics::FontSlant> const& slant) -> void
+{
+    _fontSlant.SetAttributeArg(slant);
+}
+
+auto TextEdit::SetFontFamily(AttributeArg<Graphics::FontFamily> const& family) -> void
+{
+    _fontFamily.SetAttributeArg(family);
+}
+
 auto TextEdit::Initialize() -> void
 {
     SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
@@ -51,22 +116,39 @@ auto TextEdit::Initialize() -> void
     _textShaper = Graphics::TextShaper::Make();
     _inputMethodEditable = InputMethodEditable::Make();
 
-    _backgroundColor.BindAttribute(*this, TextEditStyle::BackgroundColor);
-    _textColor.BindAttribute(*this, TextEditStyle::TextColor);
-    _fontSize.BindAttribute(*this, TextEditStyle::FontSize);
-    _fontWeight.BindAttribute(*this, TextEditStyle::FontWeight);
-    _fontWidth.BindAttribute(*this, TextEditStyle::FontWidth);
-    _fontSlant.BindAttribute(*this, TextEditStyle::FontSlant);
-    _fontFamily.BindAttribute(*this, TextEditStyle::FontFamily);
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBackgroundColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBackgroundAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledBackgroundColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledBackgroundAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeTextColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeTextAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledTextColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledTextAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSize, AttributeFontSize, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWeight, AttributeFontWeight, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWidth, AttributeFontWidth, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSlant, AttributeFontSlant, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontFamily, AttributeFontFamily, {});
+
+    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute, typename Accessor::ValueType const& value) {
+        accessor.BindAttributeWithDefaultValue(*this, attribute, value);
+        EventReceiver::Connect(accessor, *this, &TextEdit::ReceiveAttributeEvent);
+    };
+    bindAndConnectAttribute(_backgroundColor, AttributeBackgroundColor, {});
+    bindAndConnectAttribute(_backgroundAlpha, AttributeBackgroundAlpha, {});
+    bindAndConnectAttribute(_disabledBackgroundColor, AttributeDisabledBackgroundColor, {});
+    bindAndConnectAttribute(_disabledBackgroundAlpha, AttributeDisabledBackgroundAlpha, {});
+    bindAndConnectAttribute(_textColor, AttributeTextColor, {});
+    bindAndConnectAttribute(_textAlpha, AttributeTextAlpha, {});
+    bindAndConnectAttribute(_disabledTextColor, AttributeDisabledTextColor, {});
+    bindAndConnectAttribute(_disabledTextAlpha, AttributeDisabledTextAlpha, {});
+    bindAndConnectAttribute(_fontSize, AttributeFontSize, {0});
+    bindAndConnectAttribute(_fontWeight, AttributeFontWeight, {0});
+    bindAndConnectAttribute(_fontWidth, AttributeFontWidth, {0});
+    bindAndConnectAttribute(_fontSlant, AttributeFontSlant, {});
+    bindAndConnectAttribute(_fontFamily, AttributeFontFamily, {});
 
     EventReceiver::Connect(*_inputMethodEditable, *this, &TextEdit::ReceiveInputEvent);
-    EventReceiver::Connect(_backgroundColor, *this, &TextEdit::ReceiveAttributeEvent);
-    EventReceiver::Connect(_textColor, *this, &TextEdit::ReceiveAttributeEvent);
-    EventReceiver::Connect(_fontSize, *this, &TextEdit::ReceiveAttributeEvent);
-    EventReceiver::Connect(_fontWeight, *this, &TextEdit::ReceiveAttributeEvent);
-    EventReceiver::Connect(_fontWidth, *this, &TextEdit::ReceiveAttributeEvent);
-    EventReceiver::Connect(_fontSlant, *this, &TextEdit::ReceiveAttributeEvent);
-    EventReceiver::Connect(_fontFamily, *this, &TextEdit::ReceiveAttributeEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveInputEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveKeyEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveFocusEvent);

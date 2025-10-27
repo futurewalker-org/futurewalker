@@ -4,7 +4,6 @@
 #include "Futurewalker.Application.MeasureScope.hpp"
 #include "Futurewalker.Application.DrawScope.hpp"
 #include "Futurewalker.Application.ViewLayoutFunction.hpp"
-#include "Futurewalker.Application.ApplicationStyle.hpp"
 #include "Futurewalker.Application.ViewDrawFunction.hpp"
 
 #include "Futurewalker.Attribute.AttributeObserver.hpp"
@@ -189,27 +188,27 @@ auto TextView::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWidth, AttributeFontWidth, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSlant, AttributeFontSlant, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontFamily, AttributeFontFamily, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewHorizontalAlignment, AttributeHorizontalAlignment, TextViewHorizontalAlignment::Center);
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewVerticalAlignment, AttributeVerticalAlignment, TextViewVerticalAlignment::Middle);
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewHorizontalAlignment, AttributeHorizontalAlignment, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewVerticalAlignment, AttributeVerticalAlignment, {});
 
     _shaper = Graphics::TextShaper::Make();
 
-    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute) {
-        accessor.BindAttribute(*this, attribute);
+    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute, typename Accessor::ValueType const& value) {
+        accessor.BindAttributeWithDefaultValue(*this, attribute, value);
         EventReceiver::Connect(accessor, *this, &TextView::ReceiveAttributeEvent);
     };
-    bindAndConnectAttribute(_text, AttributeText);
-    bindAndConnectAttribute(_color, AttributeColor);
-    bindAndConnectAttribute(_disabledColor, AttributeDisabledColor);
-    bindAndConnectAttribute(_alpha, AttributeAlpha);
-    bindAndConnectAttribute(_disabledAlpha, AttributeDisabledAlpha);
-    bindAndConnectAttribute(_fontSize, AttributeFontSize);
-    bindAndConnectAttribute(_fontWeight, AttributeFontWeight);
-    bindAndConnectAttribute(_fontWidth, AttributeFontWidth);
-    bindAndConnectAttribute(_fontSlant, AttributeFontSlant);
-    bindAndConnectAttribute(_fontFamily, AttributeFontFamily);
-    bindAndConnectAttribute(_horizontalAlignment, AttributeHorizontalAlignment);
-    bindAndConnectAttribute(_verticalAlignment, AttributeVerticalAlignment);
+    bindAndConnectAttribute(_text, AttributeText, {});
+    bindAndConnectAttribute(_color, AttributeColor, {});
+    bindAndConnectAttribute(_disabledColor, AttributeDisabledColor, {});
+    bindAndConnectAttribute(_alpha, AttributeAlpha, {});
+    bindAndConnectAttribute(_disabledAlpha, AttributeDisabledAlpha, {});
+    bindAndConnectAttribute(_fontSize, AttributeFontSize, {0});
+    bindAndConnectAttribute(_fontWeight, AttributeFontWeight, {0});
+    bindAndConnectAttribute(_fontWidth, AttributeFontWidth, {0});
+    bindAndConnectAttribute(_fontSlant, AttributeFontSlant, {});
+    bindAndConnectAttribute(_fontFamily, AttributeFontFamily, {});
+    bindAndConnectAttribute(_horizontalAlignment, AttributeHorizontalAlignment, {TextViewHorizontalAlignment::Center});
+    bindAndConnectAttribute(_verticalAlignment, AttributeVerticalAlignment, {TextViewVerticalAlignment::Middle});
 }
 
 ///
