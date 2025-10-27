@@ -5,6 +5,7 @@
 
 #include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 #include "Futurewalker.Graphics.Scene.hpp"
+#include "Futurewalker.Graphics.DisplayList.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -44,6 +45,12 @@ auto PlatformViewLayerVisualWin::SetOffset(Offset<Dp> const& offset) -> void
 
 auto PlatformViewLayerVisualWin::SetClipRect(Rect<Dp> const& clipRect) -> void
 {
+    if (!clipRect.IsFinite())
+    {
+        FW_DEBUG_ASSERT(false);
+        return;
+    }
+
     if (_clipRect != clipRect)
     {
         _clipRect = clipRect;
@@ -53,6 +60,12 @@ auto PlatformViewLayerVisualWin::SetClipRect(Rect<Dp> const& clipRect) -> void
 
 auto PlatformViewLayerVisualWin::SetOpacity(Float64 const opacity) -> void
 {
+    if (!Float64::IsFinite(opacity))
+    {
+        FW_DEBUG_ASSERT(false);
+        return;
+    }
+
     if (_opacity != opacity)
     {
         _opacity = opacity;
@@ -60,22 +73,34 @@ auto PlatformViewLayerVisualWin::SetOpacity(Float64 const opacity) -> void
     }
 }
 
-auto PlatformViewLayerVisualWin::SetDisplayScale(DisplayScale const scale) -> void
+auto PlatformViewLayerVisualWin::SetDisplayScale(DisplayScale const displayScale) -> void
 {
-    if (_displayScale != scale)
+    if (!DisplayScale::IsFinite(displayScale))
     {
-        _displayScale = scale;
+        FW_DEBUG_ASSERT(false);
+        return;
+    }
+
+    if (_displayScale != displayScale)
+    {
+        _displayScale = displayScale;
         UpdateOffset();
         UpdateClipRect();
         Invalidate();
     }
 }
 
-auto PlatformViewLayerVisualWin::SetBackingScale(BackingScale const scale) -> void
+auto PlatformViewLayerVisualWin::SetBackingScale(BackingScale const backingScale) -> void
 {
-    if (_backingScale != scale)
+    if (!BackingScale::IsFinite(backingScale))
     {
-        _backingScale = scale;
+        FW_DEBUG_ASSERT(false);
+        return;
+    }
+
+    if (_backingScale != backingScale)
+    {
+        _backingScale = backingScale;
         UpdateOffset();
         UpdateClipRect();
         Invalidate();
@@ -158,10 +183,23 @@ auto PlatformViewLayerVisualWin::Render() -> void
     {
         if (fragment.displayList)
         {
+            if (fragment.clipRect.IsFinite())
+        {
             auto const rect = Rect<Dp>::Offset(fragment.clipRect, fragment.offset);
             unionRect = Rect<Dp>::Union(unionRect, rect);
         }
+            else if (fragment.displayList->GetBounds().IsFinite())
+            {
+                auto const rect = Rect<Dp>::Offset(fragment.displayList->GetBounds(), fragment.offset + fragment.displayListOffset);
+                unionRect = Rect<Dp>::Union(unionRect, rect);
+            }
+            else
+            {
+                unionRect = _clipRect;
+            }
+        }
     }
+    FW_DEBUG_ASSERT(unionRect.IsFinite());
 
     _surface->SetSize(unionRect.GetSize());
     _surface->SetDisplayScale(_displayScale);
@@ -172,7 +210,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
             if (fragment.displayList)
             {
                 auto const scale = static_cast<Float64>(_displayScale) * static_cast<Float64>(_backingScale);
-                scene.PushTranslate({.x = fragment.offset.GetDeltaX(), .y = fragment.offset.GetDeltaY()});
+                scene.PushTranslate({.x = fragment.offset.GetDeltaX() - unionRect.GetLeft(), .y = fragment.offset.GetDeltaY() - unionRect.GetTop()});
                 scene.PushScale({.x = scale, .y = scale});
                 scene.PushClipRect({.rect = fragment.clipRect});
                 scene.PushTranslate({.x = fragment.displayListOffset.GetDeltaX(), .y = fragment.displayListOffset.GetDeltaY()});

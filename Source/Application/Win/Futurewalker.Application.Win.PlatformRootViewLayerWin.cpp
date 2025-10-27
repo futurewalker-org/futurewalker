@@ -613,9 +613,9 @@ auto PlatformRootViewLayerWin::UpdateVisualCore(Shared<PlatformViewLayerWin> lay
     {
         if (auto const visual = FindVisualByBaseLayerId(layerId))
         {
-            visual->SetOffset(GetRelativeOffset(layer, GetSelf()));
-            visual->SetClipRect(GetRelativeClipRect(layer, GetSelf()));
-            visual->SetOpacity(GetRelativeOpacity(layer, GetSelf()));
+            visual->SetOffset(GetRelativeOffset(layer, nullptr));
+            visual->SetClipRect(GetRelativeClipRect(layer, nullptr));
+            visual->SetOpacity(GetRelativeOpacity(layer, nullptr));
         }
         else
         {
