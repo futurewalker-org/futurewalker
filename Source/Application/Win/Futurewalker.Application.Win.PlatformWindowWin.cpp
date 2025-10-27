@@ -1178,6 +1178,7 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
                 }
             }).Detach();
 
+            auto quit = Optional<WPARAM>();
             while (true)
             {
                 if (*result)
@@ -1188,16 +1189,22 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
                 auto msg = MSG();
                 if (::GetMessageW(&msg, NULL, 0, 0) == -1)
                 {
-                    break;
+                    FW_DEBUG_ASSERT(false);
+                    continue;
                 }
 
                 if (msg.message == WM_QUIT)
                 {
-                    ::PostQuitMessage(static_cast<int>(msg.wParam));
-                    break;
+                    quit = msg.wParam;
+                    continue;
                 }
                 ::TranslateMessage(&msg);
                 ::DispatchMessageW(&msg);
+            }
+
+            if (quit)
+            {
+                ::PostQuitMessage(*quit);
             }
 
             if (*result && **result)
