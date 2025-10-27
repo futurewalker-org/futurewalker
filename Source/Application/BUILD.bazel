@@ -15,5 +15,6 @@ fw_library(
         "/DEFAULTLIB:dcomp.lib",
         "/DEFAULTLIB:dxgi.lib",
         "/DEFAULTLIB:dwmapi.lib",
+        "/DEFAULTLIB:shcore.lib",
     ],
 )
