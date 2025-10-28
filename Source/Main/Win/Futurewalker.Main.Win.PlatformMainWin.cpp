@@ -15,11 +15,11 @@
 #include "Futurewalker.Application.Win.PlatformApplicationThemeContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformWindowContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformMainThreadWin.hpp"
-#include "Futurewalker.Application.Win.PlatformDCompositionDeviceWin.hpp"
-#include "Futurewalker.Application.Win.PlatformViewLayercontextWin.hpp"
-#include "Futurewalker.Application.Win.PlatformDrawableViewLayerContextWin.hpp"
+#include "Futurewalker.Application.Win.PlatformViewLayerContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformScreenContextWin.hpp"
+#include "Futurewalker.Application.Win.PlatformViewLayerSurfaceContextWin.hpp"
 
+#include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 #include "Futurewalker.Graphics.Win.PlatformD3D11DeviceWin.hpp"
 #include "Futurewalker.Graphics.Win.PlatformD3D12DeviceWin.hpp"
 #include "Futurewalker.Graphics.Win.PlatformSkiaFontManagerWin.hpp"
@@ -48,8 +48,8 @@ auto PlatformMainWin::Register(HINSTANCE instanceHandle) -> void
     Locator::Register<PlatformD3D12DeviceWin>();
     Locator::Register<PlatformDCompositionDeviceWin>();
     Locator::Register<PlatformViewLayerContextWin>();
-    Locator::Register<PlatformDrawableViewLayerContextWin>();
     Locator::Register<PlatformScreenContextWin>();
+    Locator::Register<PlatformViewLayerSurfaceContextWin>();
     Locator::Register<Graphics::PlatformSkiaFontManagerWin>();
 }
 
