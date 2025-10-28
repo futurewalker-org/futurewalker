@@ -21,12 +21,20 @@ class AttributeArg : NonCopyable
 {
 public:
     ///
-    /// @brief Construct from StaticAttributeRef.
+    /// @brief Construct from StaticAttribute.
     ///
     /// @param[in] reference Attribute reference.
     ///
     consteval AttributeArg(StaticAttribute<T> const& reference)
       : _variant {StaticAttributeRef(reference)}
+    {
+    }
+
+    ///
+    /// @brief Construct from StaticAttributeRef.
+    ///
+    AttributeArg(StaticAttributeRef<T> const& reference)
+      : _variant {reference}
     {
     }
 
