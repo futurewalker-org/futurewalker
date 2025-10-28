@@ -20,6 +20,8 @@ template <class T>
 class AttributeAccessor : NonCopyable
 {
 public:
+    using ValueType = T;
+
     AttributeAccessor()
     {
         _eventReceiver = EventReceiver::Make();
@@ -61,7 +63,7 @@ public:
     /// @note This function will not send event.
     ///
     template <class Owner>
-    auto BindAttributeWithDefault(Owner& owner, StaticAttributeRef<T> attribute, const T& value) -> Bool
+    auto BindAttributeWithDefaultValue(Owner& owner, StaticAttributeRef<T> attribute, const T& value) -> Bool
     {
         if (BindAttribute(owner, attribute))
         {
@@ -83,7 +85,7 @@ public:
     /// @note This function will not send event.
     ///
     template <class Owner>
-    auto BindAttributeWithDefault(Owner& owner, StaticAttributeRef<T> attribute, StaticAttributeRef<T> reference) -> Bool
+    auto BindAttributeWithDefaultReference(Owner& owner, StaticAttributeRef<T> attribute, StaticAttributeRef<T> reference) -> Bool
     {
         if (BindAttribute(owner, attribute))
         {
