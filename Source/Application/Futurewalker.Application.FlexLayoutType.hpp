@@ -68,7 +68,7 @@ enum class FlexLayoutCrossAxisAlignment
 ///
 /// @brief Main axis flexibility of FlexLayout child.
 ///
-enum class FlexLayoutChildMainAxisFlexibility
+enum class FlexLayoutMainAxisFlexibility
 {
     Flexible, // Use loose constraints.
     Expand,   // Use tight constraints to fill space.

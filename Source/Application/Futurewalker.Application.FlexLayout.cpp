@@ -258,16 +258,16 @@ auto FlexLayout::SetChildMargin(ReferenceArg<View> child, EdgeInsets const& marg
 ///
 /// @brief Get child main axis flexibility.
 ///
-auto FlexLayout::GetChildMainAxisFlexibility(ReferenceArg<View const> child) -> FlexLayoutChildMainAxisFlexibility
+auto FlexLayout::GetChildMainAxisFlexibility(ReferenceArg<View const> child) -> FlexLayoutMainAxisFlexibility
 {
     if (child)
     {
-        if (auto const flexibility = PropertyStore::GetValue<FlexLayoutChildMainAxisFlexibility>(*child, ViewPropertyIdMainAxisFlexibility))
+        if (auto const flexibility = PropertyStore::GetValue<FlexLayoutMainAxisFlexibility>(*child, ViewPropertyIdMainAxisFlexibility))
         {
             return *flexibility;
         }
     }
-    return FlexLayoutChildMainAxisFlexibility::Flexible;
+    return FlexLayoutMainAxisFlexibility::Flexible;
 }
 
 ///
@@ -276,7 +276,7 @@ auto FlexLayout::GetChildMainAxisFlexibility(ReferenceArg<View const> child) -> 
 /// @param[in] child Direct child of FlexLayout.
 /// @param[in] flexibility Main axis flexibility.
 ///
-auto FlexLayout::SetChildMainAxisFlexibility(ReferenceArg<View> child, FlexLayoutChildMainAxisFlexibility const flexibility) -> void
+auto FlexLayout::SetChildMainAxisFlexibility(ReferenceArg<View> child, FlexLayoutMainAxisFlexibility const flexibility) -> void
 {
     if (child)
     {
@@ -352,7 +352,7 @@ auto FlexLayout::Measure(MeasureScope& scope) -> void
 
             auto const flexibility = GetChildMainAxisFlexibility(view);
             auto const max = childMain + diff;
-            auto const min = (flexibility == FlexLayoutChildMainAxisFlexibility::Expand) ? max : Dp::Min(max, childMain);
+            auto const min = (flexibility == FlexLayoutMainAxisFlexibility::Expand) ? max : Dp::Min(max, childMain);
             auto const newChildMain = AxisConstraints::MakeMinMax(min, max);
             auto const newChildCross = AxisConstraints::MakeMinMax(0, crossConstraints.GetMax());
             MeasureChild(scope, view, newChildMain, newChildCross);

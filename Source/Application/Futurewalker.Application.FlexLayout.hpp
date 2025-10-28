@@ -47,8 +47,8 @@ public:
     static auto GetChildMargin(ReferenceArg<View const> child) -> EdgeInsets;
     static auto SetChildMargin(ReferenceArg<View> child, EdgeInsets const& margin) -> void;
 
-    static auto GetChildMainAxisFlexibility(ReferenceArg<View const> child) -> FlexLayoutChildMainAxisFlexibility;
-    static auto SetChildMainAxisFlexibility(ReferenceArg<View> child, FlexLayoutChildMainAxisFlexibility const flexibility) -> void;
+    static auto GetChildMainAxisFlexibility(ReferenceArg<View const> child) -> FlexLayoutMainAxisFlexibility;
+    static auto SetChildMainAxisFlexibility(ReferenceArg<View> child, FlexLayoutMainAxisFlexibility const flexibility) -> void;
 
 protected:
     auto Initialize() -> void override;
