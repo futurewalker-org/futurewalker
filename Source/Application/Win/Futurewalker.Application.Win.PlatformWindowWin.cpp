@@ -450,8 +450,19 @@ auto PlatformWindowWin::Close() -> Async<Bool>
 {
     if (!IsClosed())
     {
-        HandleClose(_hwnd, WM_CLOSE, 0, 0);
-        co_return IsClosed();
+        auto event = Event<PlatformWindowEvent::CloseRequested>();
+        if (co_await SendWindowEvent(event))
+        {
+            if (event.Is<PlatformWindowEvent::CloseRequested>())
+            {
+                if (!event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
+                {
+                    ::DestroyWindow(_hwnd);
+                    co_return true;
+                }
+            }
+        }
+        co_return false;
     }
     co_return true;
 }
