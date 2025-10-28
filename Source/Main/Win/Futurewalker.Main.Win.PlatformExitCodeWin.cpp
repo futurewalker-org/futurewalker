@@ -1,5 +1,4 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
-#pragma once
 
 #include "Futurewalker.Main.Win.PlatformExitCodeWin.hpp"
 
