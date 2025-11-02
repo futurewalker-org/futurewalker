@@ -75,6 +75,8 @@ public:
     auto GetRoot() -> Shared<PlatformViewLayerWin>;
     auto GetRoot() const -> Shared<PlatformViewLayerWin const>;
 
+    auto ShouldRasterize() const -> Bool;
+
 protected:
     auto Initialize() -> void override;
     auto NotifyRootChanged() -> void;

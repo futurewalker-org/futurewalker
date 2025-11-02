@@ -24,10 +24,22 @@ namespace FW_EXPORT
 ///
 /// @brief Visual object.
 ///
+/// Visual object stores contents of multiple view layers as fragments.
+/// Parent-child relationship is only for retaining information of original view layer hierarchy.
+///
+/// There are visuals those that correspond to rasterizing view layers and those that do not.
+/// A visual that correspond to rasterizing view layer includes a fragment for the base layer itself.
+///
 class PlatformViewLayerVisualWin : NonCopyable
 {
 public:
     explicit PlatformViewLayerVisualWin(Shared<PlatformDCompositionDeviceWin> const& device);
+
+    auto AddChild(Shared<PlatformViewLayerVisualWin> const& child) -> void;
+    auto RemoveChild(Shared<PlatformViewLayerVisualWin> const& child) -> void;
+
+    auto GetChildren() -> PlatformViewLayerVisualWinArray const&;
+    auto GetParent() -> Shared<PlatformViewLayerVisualWin>;
 
     auto GetVisual() -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
 
@@ -50,6 +62,7 @@ public:
     };
     auto InsertFragment(const SInt64 index, PlatformViewLayerId layerId, Fragment const& fragment) -> void;
     auto ReplaceFragment(const SInt64 index, PlatformViewLayerId layerId, Fragment const& fragment) -> void;
+    auto ReplaceFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void;
     auto RemoveFragment(const SInt64 index) -> void;
     auto ClearFragments() -> void;
     auto GetFragmentIndexByLayerId(PlatformViewLayerId const layerId) const -> Optional<SInt64>;
@@ -65,6 +78,8 @@ private:
     auto UpdateOpacity() -> void;
 
 private:
+    Weak<PlatformViewLayerVisualWin> _parent;
+    PlatformViewLayerVisualWinArray _children;
     Shared<PlatformDCompositionDeviceWin> _device;
     Shared<PlatformViewLayerSurfaceWin> _surface;
     Microsoft::WRL::ComPtr<IDCompositionVisual3> _visual;

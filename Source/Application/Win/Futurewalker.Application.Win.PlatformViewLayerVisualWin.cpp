@@ -19,6 +19,40 @@ PlatformViewLayerVisualWin::PlatformViewLayerVisualWin(Shared<PlatformDCompositi
     _surface->SetVisual(_visual);
 }
 
+auto PlatformViewLayerVisualWin::AddChild(Shared<PlatformViewLayerVisualWin> const& child) -> void
+{
+    if (child)
+    {
+        if (auto const& existingParent = child->GetParent())
+        {
+            existingParent->RemoveChild(child);
+        }
+        _children.push_back(child);
+    }
+}
+
+auto PlatformViewLayerVisualWin::RemoveChild(Shared<PlatformViewLayerVisualWin> const& child) -> void
+{
+    if (child)
+    {
+        auto const it = std::find(_children.begin(), _children.end(), child);
+        if (it != _children.end())
+        {
+            _children.erase(it);
+        }
+    }
+}
+
+auto PlatformViewLayerVisualWin::GetChildren() -> PlatformViewLayerVisualWinArray const&
+{
+    return _children;
+}
+
+auto PlatformViewLayerVisualWin::GetParent() -> Shared<PlatformViewLayerVisualWin>
+{
+    return _parent.Lock();
+}
+
 auto PlatformViewLayerVisualWin::GetVisual() -> Microsoft::WRL::ComPtr<IDCompositionVisual3>
 {
     return _visual;
@@ -126,6 +160,14 @@ auto PlatformViewLayerVisualWin::ReplaceFragment(const SInt64 index, PlatformVie
         {
             Invalidate();
         }
+    }
+}
+
+auto PlatformViewLayerVisualWin::ReplaceFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void
+{
+    if (auto const idx = _fragments.Find(layerId))
+    {
+        ReplaceFragment(*idx, layerId, fragment);
     }
 }
 

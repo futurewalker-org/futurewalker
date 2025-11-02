@@ -2,10 +2,14 @@
 
 #include "Futurewalker.Application.Win.PlatformRootViewLayerWin.hpp"
 #include "Futurewalker.Application.Win.PlatformViewLayerVisualWin.hpp"
+#include "Futurewalker.Application.Win.PlatformViewLayerVisualPropertyUpdaterWin.hpp"
+#include "Futurewalker.Application.Win.PlatformViewLayerVisualUpdaterWin.hpp"
 
 #include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
+
+#include <chrono>
 
 namespace FW_DETAIL_NS
 {
@@ -28,82 +32,12 @@ auto FindViewLayerById(PlatformViewLayerId const id, Shared<PlatformViewLayerWin
     return {};
 }
 
-auto GetVisualIndexByBaseLayerId(PlatformViewLayerId const id, PlatformViewLayerVisualWinArray const& visuals) -> Optional<SInt64>
+auto GetRasterizingLayer(Shared<PlatformViewLayerWin> const& layer) -> Shared<PlatformViewLayerWin>
 {
-    auto const visualCount = SInt64(std::ssize(visuals));
-    for (auto i = SInt64(0); i < visualCount; ++i)
-    {
-        auto const& visual = visuals[static_cast<size_t>(i)];
-        if (visual && visual->GetBaseLayerId() == id)
-        {
-            if (visual->GetFragmentIndexByLayerId(id))
-            {
-                return i;
-            }
-        }
-    }
-    return {};
-}
-
-auto GetRelativeOffset(Shared<PlatformViewLayerWin> const& target, Shared<PlatformViewLayerWin> const& ancestor)  -> Offset<Dp>
-{
-    auto offset = Offset<Dp>();
-    auto current = target;
-    while (current && current != ancestor)
-    {
-        offset += current->GetOffset();
-        current = current->GetParent();
-    }
-    return offset;
-}
-
-auto GetRelativeClipRect(Shared<PlatformViewLayerWin> const& target, Shared<PlatformViewLayerWin> const& ancestor) -> Rect<Dp>
-{
-    auto offset = Offset<Dp>();
-    auto clipRect = Rect<Dp>::Infinite();
-    auto current = target;
-    while (current && current != ancestor)
-    {
-        if (current->GetClipMode() == ViewClipMode::Bounds)
-        {
-            clipRect = Rect<Dp>::Intersect(Rect<Dp>({}, current->GetSize()), clipRect);
-        }
-        clipRect = Rect<Dp>::Offset(clipRect, current->GetOffset());
-        offset += current->GetOffset();
-        current = current->GetParent();
-    }
-    return Rect<Dp>::Offset(clipRect, -offset);
-}
-
-auto GetRelativeOpacity(Shared<PlatformViewLayerWin> const& target, Shared<PlatformViewLayerWin> const& ancestor) -> Float64
-{
-    auto opacity = Float64(1.0);
-    auto current = target;
-    while (current && current != ancestor)
-    {
-        opacity = opacity * current->GetOpacity();
-        current = current->GetParent();
-    }
-    return opacity;
-}
-
-auto ShouldRasterizeLayer(Shared<PlatformViewLayerWin> const& layer) -> Bool
-{
-    if (layer)
-    {
-        auto const renderFlags = layer->GetRenderFlags();
-        auto const shouldRasterize = (renderFlags & PlatformViewLayerRenderFlags::Rasterize) == PlatformViewLayerRenderFlags::Rasterize;
-        return layer->IsRoot() || shouldRasterize;
-    }
-    return false;
-}
-
-auto GetRasterizingBaseLayer(Shared<PlatformViewLayerWin> const& layer) -> Shared<PlatformViewLayerWin>
-{
-    auto current = layer->GetParent();
+    auto current = layer;
     while (current)
     {
-        if (ShouldRasterizeLayer(current))
+        if (current->ShouldRasterize())
         {
             return current;
         }
@@ -112,21 +46,13 @@ auto GetRasterizingBaseLayer(Shared<PlatformViewLayerWin> const& layer) -> Share
     return {};
 }
 
-auto HasRasterizingLayer(Shared<PlatformViewLayerWin> const& layer) -> Bool
+auto GetRasterizingBaseLayer(Shared<PlatformViewLayerWin> const& layer) -> Shared<PlatformViewLayerWin>
 {
-    if (ShouldRasterizeLayer(layer))
+    if (layer)
     {
-        return true;
+        return GetRasterizingLayer(layer->GetParent());
     }
-
-    for (auto const& child : layer->GetChildren())
-    {
-        if (HasRasterizingLayer(child.As<PlatformViewLayerWin>()))
-        {
-            return true;
-        }
-    }
-    return false;
+    return {};
 }
 }
 
@@ -152,12 +78,12 @@ PlatformRootViewLayerWin::PlatformRootViewLayerWin(PassKey<PlatformViewLayer> ke
   : PlatformViewLayerWin(key, dcompDevice)
   , _hwnd {hwnd}
 {
-    _target = MakeTarget(_hwnd);
-    _visual = dcompDevice->CreateVisual();
+    _dcompTarget = MakeTarget(_hwnd);
+    _dcompVisual = dcompDevice->CreateVisual();
 
-    if (_target && _visual)
+    if (_dcompTarget && _dcompVisual)
     {
-        _target->SetRoot(_visual.Get());
+        _dcompTarget->SetRoot(_dcompVisual.Get());
     }
 }
 
@@ -169,32 +95,71 @@ auto PlatformRootViewLayerWin::GetControl() -> Shared<PlatformViewLayerControl>
     return {};
 }
 
+///
+/// @brief Render all visuals.
+///
 auto PlatformRootViewLayerWin::Render() -> void
 {
-    _visual->RemoveAllVisuals();
+    auto bgn = std::chrono::high_resolution_clock::now();
 
-    for (auto visual : _visuals)
+    _dcompVisual->RemoveAllVisuals();
+
+    auto rebuildBgn = std::chrono::high_resolution_clock::now();
+    for (auto const& layerId : _layersToRebuild)
     {
-        if (visual && visual->GetFragmentCount() != 0)
+        // Check if the layer still exists.
+        // TODO: We can cache weak references to avoid tree traversal.
+        auto const layer = FindViewLayerById(layerId, GetSelf());
+        if (layer)
         {
-            _visual->AddVisual(visual->GetVisual().Get(), FALSE, nullptr);
+            RebuildVisual(layer);
         }
     }
+    _layersToRebuild.clear();
+    auto rebuildEnd = std::chrono::high_resolution_clock::now();
+    auto rebuildDur = std::chrono::duration_cast<std::chrono::milliseconds>(rebuildEnd - rebuildBgn).count();
 
-    for (auto const& visual : _visuals)
+    auto updateBgn = std::chrono::high_resolution_clock::now();
+    if (_shouldUpdateLayer)
     {
-        if (visual && visual->GetFragmentCount() != 0)
+        // TODO: Improve algo so that we don't need to O(n) traverse all layers.
+        UpdateVisual();
+        _shouldUpdateLayer = false;
+    }
+    auto updateEnd = std::chrono::high_resolution_clock::now();
+    auto updateDur = std::chrono::duration_cast<std::chrono::milliseconds>(updateEnd - updateBgn).count();
+
+    auto traverseVisual = [](this auto self, Shared<PlatformViewLayerVisualWin> const& visual, auto&& func) -> void {
+        if (visual)
         {
+            func(visual);
+            for (auto const& child : visual->GetChildren())
+            {
+                self(child, func);
+            }
+        }
+    };
+
+    traverseVisual(_visual, [&](auto const& visual) {
+        if (visual)
+        {
+            _dcompVisual->AddVisual(visual->GetVisual().Get(), FALSE, nullptr);
             visual->Render();
         }
-    }
+    });
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - bgn).count();
+    FW_DEBUG_LOG_INFO("PlatformRootViewLayerWin::Render: took {} ms, rebuild: {} ms, update: {} ms", dur, rebuildDur, updateDur);
 }
 
+///
+/// @brief Initialize.
+///
 auto PlatformRootViewLayerWin::Initialize() -> void
 {
-    auto const visual = Shared<PlatformViewLayerVisualWin>::Make(GetCompositionDevice());
-    visual->SetBaseLayerId(GetId());
-    _visuals = {visual};
+    _visual = Shared<PlatformViewLayerVisualWin>::Make(GetCompositionDevice());
+    _visual->SetBaseLayerId(GetId());
     RebuildVisual(GetSelf());
     SetClipMode(ViewClipMode::Bounds);
 }
@@ -220,284 +185,87 @@ auto PlatformRootViewLayerWin::RootGetDisplayScale() const -> DisplayScale
     return 1.0;
 }
 
+///
+/// @brief Notify offset change.
+///
 auto PlatformRootViewLayerWin::RootOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
-    UpdateVisual(layer);
+    QueueUpdateLayer();
 }
 
+///
+/// @brief Notify size change.
+///
 auto PlatformRootViewLayerWin::RootSizeChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
-    UpdateVisual(layer);
+    QueueUpdateLayer();
 }
 
+///
+/// @brief Notify clip mode change.
+///
 auto PlatformRootViewLayerWin::RootClipModeChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
-    UpdateVisual(layer);
+    QueueUpdateLayer();
 }
 
+///
+/// @brief Notify opacity change.
+///
 auto PlatformRootViewLayerWin::RootOpacityChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
-    UpdateVisual(layer);
+    QueueUpdateLayer();
 }
 
-class PlatformViewLayerVisualUpdater
-{
-    struct NodeInfo
-    {
-        PlatformViewLayerId id;
-        Offset<Dp> offset;
-        Rect<Dp> clipRect;
-        Float64 opacity = 1.0;
-    };
-    PlatformViewLayerVisualWinArray& _visuals;
-    Shared<PlatformDCompositionDeviceWin> _dcompDevice;
-    SInt64 _visualIndex = 0;
-    std::vector<NodeInfo> _nodeStack;
-    Shared<PlatformViewLayerVisualWin> _currentVisual;
-    std::vector<SInt64> _visualNodeIndexStack;
-
-    auto InternalInsertVisual(PlatformViewLayerId const id, SInt64 const base, SInt64 const target) -> Shared<PlatformViewLayerVisualWin>
-    {
-        auto const where = _visuals.begin() + static_cast<ptrdiff_t>(_visualIndex);
-        auto const visual = Shared<PlatformViewLayerVisualWin>::Make(_dcompDevice);
-        visual->SetBaseLayerId(id);
-        visual->SetClipRect(GetClipRect(base, target));
-        visual->SetOffset(GetOffset(base, target));
-        visual->SetOpacity(GetOpacity(base, target));
-        _visuals.emplace(where, visual);
-        return visual;
-    }
-
-    auto InternalGetCurrentVisual() -> Shared<PlatformViewLayerVisualWin>
-    {
-        return _currentVisual;
-    }
-
-    auto InternalSetCurrentVisual(Shared<PlatformViewLayerVisualWin> const& visual) -> void
-    {
-        _currentVisual = visual;
-    }
-
-    auto InternalPushVisualNodeIndex() -> void
-    {
-        _visualNodeIndexStack.push_back(std::ssize(_nodeStack) - 1);
-    }
-
-    auto InternalPopVisualNodeIndex() -> void
-    {
-        _visualNodeIndexStack.pop_back();
-    }
-
-    auto GetOffset(SInt64 const base, SInt64 const target) const -> Offset<Dp>
-    {
-        auto result = Offset<Dp>();
-        for (auto i = base + 1; i <= target; ++i)
-        {
-            result = result + _nodeStack[static_cast<size_t>(i)].offset;
-        }
-        return result;
-    }
-
-    auto GetClipRect(SInt64 const base, SInt64 const target) const -> Rect<Dp>
-    {
-        auto offset = Offset<Dp>();
-        auto clipRect = Rect<Dp>::Infinite();
-        for (auto i = base + 1; i <= target; ++i)
-        {
-            auto const& node = _nodeStack[static_cast<size_t>(i)];
-            offset = offset + node.offset;
-            clipRect = Rect<Dp>::Intersect(clipRect, Rect<Dp>::Offset(node.clipRect, offset));
-        }
-        return Rect<Dp>::Offset(clipRect, -offset);
-    }
-
-    auto GetOpacity(SInt64 const base, SInt64 const target) const -> Float64
-    {
-        auto result = Float64(1.0);
-        for (auto i = base + 1; i <= target; ++i)
-        {
-            result = result * _nodeStack[static_cast<size_t>(i)].opacity;
-        }
-        return result;
-    }
-
-    auto GetBaseNodeIndex() const -> SInt64
-    {
-        if (!_visualNodeIndexStack.empty())
-        {
-            return _visualNodeIndexStack.back();
-        }
-        return 0;
-    }
-
-    auto GetCurrentNodeIndex() const -> SInt64
-    {
-        return static_cast<SInt64>(std::ssize(_nodeStack)) - 1;
-    }
-
-    auto GetVisualCount() const -> SInt64
-    {
-        return static_cast<SInt64>(std::ssize(_visuals));
-    }
-
-    auto GetVisualAt(SInt64 const index) -> Shared<PlatformViewLayerVisualWin>
-    {
-        if (index >= 0 && index < GetVisualCount())
-        {
-            return _visuals[static_cast<size_t>(index)];
-        }
-        return {};
-    }
-
-    auto RemoveUntilNextVisual(SInt64 const index, PlatformViewLayerId const id) -> Shared<PlatformViewLayerVisualWin>
-    {
-        auto const visualCount = GetVisualCount();
-        if (0 <= index && index < visualCount)
-        {
-            auto found = visualCount;
-            for (auto i = index; i < visualCount; ++i)
-            {
-                if (GetVisualAt(i)->GetBaseLayerId() == id)
-                {
-                    found = i;
-                    break;
-                }
-            }
-
-            if (found < visualCount)
-            {
-                auto const visual = GetVisualAt(found);
-                _visuals.erase(_visuals.begin() + static_cast<ptrdiff_t>(index), _visuals.begin() + static_cast<ptrdiff_t>(found));
-                return visual;
-            }
-        }
-        return {};
-    }
-
-public:
-    PlatformViewLayerVisualUpdater(PlatformViewLayerVisualWinArray& visuals, Shared<PlatformDCompositionDeviceWin> const& dcompDevice, SInt64 const visualIndex)
-      : _visuals {visuals}
-      , _dcompDevice {dcompDevice}
-      , _visualIndex {visualIndex}
-    {
-    }
-
-    auto PushVisual(PlatformViewLayerId const id) -> void
-    {
-        if (auto const nextVisual = RemoveUntilNextVisual(_visualIndex++, id))
-        {
-            if (_visualNodeIndexStack.empty())
-            {
-                nextVisual->ClearFragments();
-                InternalSetCurrentVisual(nextVisual);
-                InternalPushVisualNodeIndex();
-            }
-            else
-            {
-                InternalSetCurrentVisual(nullptr);
-            }
-            return;
-        }
-        FW_DEBUG_ASSERT(!_nodeStack.empty());
-        InternalSetCurrentVisual(InternalInsertVisual(id, 0, GetCurrentNodeIndex()));
-        InternalPushVisualNodeIndex();
-    }
-
-    auto PopVisual() -> void
-    {
-        InternalPopVisualNodeIndex();
-        InternalSetCurrentVisual(nullptr);
-    }
-
-    auto PushNode(PlatformViewLayerId const& id, Offset<Dp> const& offset, Rect<Dp> const& clipRect, Float64 const& opacity) -> void
-    {
-        _nodeStack.push_back({
-            .id = id,
-            .offset = offset,
-            .clipRect = clipRect,
-            .opacity = opacity,
-        });
-    }
-
-    auto PopNode() -> void
-    {
-        FW_DEBUG_ASSERT(!_nodeStack.empty());
-        _nodeStack.pop_back();
-    }
-
-    auto AddFragment(PlatformViewLayerId const id, Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& displayListOffset) -> void
-    {
-        auto visual = InternalGetCurrentVisual();
-        if (!visual)
-        {
-            // When one of child nodes has its own visual, rest of siblings needs another visual for them.
-            visual = InternalInsertVisual(id, 0, GetBaseNodeIndex());
-            InternalSetCurrentVisual(visual);
-            InternalPushVisualNodeIndex();
-        }
-
-        // Append fragment.
-        auto const baseIndex = GetBaseNodeIndex();
-        visual->InsertFragment(
-          visual->GetFragmentCount(),
-          id,
-          {
-              .offset = GetOffset(baseIndex, GetCurrentNodeIndex()),
-              .clipRect = GetClipRect(baseIndex, GetCurrentNodeIndex()),
-              .opacity = GetOpacity(baseIndex, GetCurrentNodeIndex()),
-              .displayList = displayList,
-              .displayListOffset = displayListOffset,
-          });
-    }
-};
-
+///
+/// @brief Notify render flags change.
+///
 auto PlatformRootViewLayerWin::RootRenderFlagsChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
-    // Find closest base layer.
     if (auto const baseLayer = GetRasterizingBaseLayer(layer))
     {
-        RebuildVisual(baseLayer);
-    }
-    else
-    {
-        FW_DEBUG_ASSERT(false);
+        QueueRebuildLayer(baseLayer->GetId());
     }
 }
 
+///
+/// @brief Notify display list change.
+///
 auto PlatformRootViewLayerWin::RootDisplayListChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
-    UpdateVisual(layer);
+    // TODO: This should not require full update.
+    QueueUpdateLayer();
 }
 
+///
+/// @brief Notify display list offset change.
+///
 auto PlatformRootViewLayerWin::RootDisplayListOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
-    UpdateVisual(layer);
+    // TODO: This should not require full update.
+    QueueUpdateLayer();
 }
 
+///
+/// @brief Notify child added.
+///
 auto PlatformRootViewLayerWin::RootChildAdded(Shared<PlatformViewLayerWin> const& child) -> void
 {
     if (auto const baseLayer = GetRasterizingBaseLayer(child))
     {
-        RebuildVisual(baseLayer);
-    }
-    else
-    {
-        FW_DEBUG_ASSERT(false);
+        QueueRebuildLayer(baseLayer->GetId());
     }
 }
 
+///
+/// @brief Notify child removed.
+///
 auto PlatformRootViewLayerWin::RootChildRemoved(Shared<PlatformViewLayerWin> const& parent) -> void
 {
-    auto baseLayer = parent;
-    while (baseLayer)
+    if (auto const layer = GetRasterizingLayer(parent))
     {
-        if (ShouldRasterizeLayer(baseLayer))
-        {
-            break;
-        }
-        baseLayer = baseLayer->GetParent();
+        QueueRebuildLayer(layer->GetId());
     }
-    RebuildVisual(baseLayer);
 }
 
 ///
@@ -514,145 +282,80 @@ auto PlatformRootViewLayerWin::MakeTarget(HWND hwnd) -> Microsoft::WRL::ComPtr<I
     return {};
 }
 
-auto PlatformRootViewLayerWin::FindVisualByBaseLayerId(PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisualWin>
+///
+/// @brief 
+///
+/// @param layerId 
+///
+auto PlatformRootViewLayerWin::FindBaseVisualByBaseLayerId(PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisualWin>
 {
-    for (auto const& visual : _visuals)
-    {
-        if (!visual)
+    auto traverse = [](this auto self, Shared<PlatformViewLayerVisualWin> const& visual, PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisualWin> {
+        if (visual)
         {
-            FW_DEBUG_ASSERT(false);
-            continue;
-        }
+            if (visual->GetBaseLayerId() == layerId)
+            {
+                return visual;
+            }
 
-        if (visual->GetBaseLayerId() == layerId)
-        {
-            return visual;
+            for (auto const& child : visual->GetChildren())
+            {
+                if (auto const found = self(child, layerId))
+                {
+                    return found;
+                }
+            }
         }
-    }
-    return {};
+        return {};
+    };
+    return traverse(_visual, layerId);
 }
 
-auto PlatformRootViewLayerWin::FindVisualByLayerId(PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisualWin>
-{
-    for (auto const& visual : _visuals)
-    {
-        if (!visual)
-        {
-            FW_DEBUG_ASSERT(false);
-            continue;
-        }
-
-        if (visual->GetFragmentIndexByLayerId(layerId))
-        {
-            return visual;
-        }
-    }
-    return {};
-}
-
-
+///
+/// @brief 
+///
+/// @param baseLayer 
+///
 auto PlatformRootViewLayerWin::RebuildVisual(Shared<PlatformViewLayerWin> const& baseLayer) -> void
 {
     FW_DEBUG_LOG_INFO("Rebuilding visuals starting from layer ID {}", (uint64_t)(UInt64)baseLayer->GetId());
 
-    // find index of visual corresponding to base layer.
-    auto const visualIndex = GetVisualIndexByBaseLayerId(baseLayer->GetId(), _visuals);
+    // find visual corresponding to base layer.
+    auto const baseVisual = FindBaseVisualByBaseLayerId(baseLayer->GetId());
 
     // rebuild with builder.
-    auto builder = PlatformViewLayerVisualUpdater(_visuals, GetCompositionDevice(), visualIndex.GetValueOr(0));
-    RebuildVisualCore(builder, baseLayer);
+    auto builder = PlatformViewLayerVisualUpdaterWin(GetCompositionDevice());
+    builder.Update(baseVisual, baseLayer);
 }
 
-auto PlatformRootViewLayerWin::RebuildVisualCore(auto& builder, Shared<PlatformViewLayerWin> const& layer) -> void
+///
+/// @brief 
+///
+auto PlatformRootViewLayerWin::UpdateVisual() -> void
 {
-    auto const id = layer->GetId();
-    auto const offset = layer->GetOffset();
-    auto const opacity = layer->GetOpacity();
-    auto const clipMode = layer->GetClipMode() == ViewClipMode::Bounds ? Rect<Dp>({}, layer->GetSize()) : Rect<Dp>::Infinite();
-    builder.PushNode(id, offset, clipMode, opacity);
-
-    auto const needsSurface = (layer->IsRoot() || ShouldRasterizeLayer(layer));
-    if (needsSurface)
-    {
-        builder.PushVisual(id);
-    }
-
-    auto const displayList = layer->GetDisplayList();
-    auto const displayListOffset = layer->GetDisplayListOffset();
-    builder.AddFragment(id, displayList, displayListOffset);
-
-    for (auto const& child : layer->GetChildren())
-    {
-        RebuildVisualCore(builder, child.As<PlatformViewLayerWin>());
-    }
-
-    builder.PopNode();
-
-    if (needsSurface)
-    {
-        builder.PopVisual();
-    }
+    auto updater = PlatformViewLayerVisualPropertyUpdaterWin();
+    updater.Update(_visual, GetSelf());
 }
 
-auto PlatformRootViewLayerWin::UpdateVisual(Shared<PlatformViewLayerWin> const& layer) -> void
+///
+/// @brief Request rebuild.
+///
+auto PlatformRootViewLayerWin::QueueRebuildLayer(PlatformViewLayerId const layerId) -> void
 {
-    UpdateVisualCore(layer, {});
+    for (auto const& id : _layersToRebuild)
+    {
+        if (id == layerId)
+        {
+            return;
+        }
+    }
+    _layersToRebuild.push_back(layerId);
 }
 
-auto PlatformRootViewLayerWin::UpdateVisualCore(Shared<PlatformViewLayerWin> layer, Shared<PlatformViewLayerVisualWin> currentVisual) -> void
+///
+/// @brief Request update.
+///
+auto PlatformRootViewLayerWin::QueueUpdateLayer() -> void
 {
-    if (!layer)
-    {
-        FW_DEBUG_ASSERT(false);
-        return;
-    }
-
-    auto const layerId = layer->GetId();
-
-    if (ShouldRasterizeLayer(layer))
-    {
-        if (auto const visual = FindVisualByBaseLayerId(layerId))
-        {
-            visual->SetOffset(GetRelativeOffset(layer, nullptr));
-            visual->SetClipRect(GetRelativeClipRect(layer, nullptr));
-            visual->SetOpacity(GetRelativeOpacity(layer, nullptr));
-        }
-        else
-        {
-            FW_DEBUG_ASSERT(false);
-        }
-    }
-    else
-    {
-        if (!currentVisual)
-        {
-            currentVisual = FindVisualByLayerId(layer->GetId());
-            if (!currentVisual)
-            {
-                FW_DEBUG_ASSERT(currentVisual);
-                return;
-            }
-        }
-
-        if (auto const index = currentVisual->GetFragmentIndexByLayerId(layerId))
-        {
-            auto const baseLayer = FindViewLayerById(currentVisual->GetBaseLayerId(), GetSelf());
-            currentVisual->ReplaceFragment(
-              *index,
-              layerId,
-              {
-                  .offset = GetRelativeOffset(layer, baseLayer),
-                  .clipRect = GetRelativeClipRect(layer, baseLayer),
-                  .opacity = GetRelativeOpacity(layer, baseLayer),
-                  .displayList = layer->GetDisplayList(),
-                  .displayListOffset = layer->GetDisplayListOffset(),
-              });
-
-            for (auto const& child : layer->GetChildren())
-            {
-                UpdateVisualCore(child.As<PlatformViewLayerWin>(), currentVisual);
-            }
-        }
-    }
+    _shouldUpdateLayer = true;
 }
 }

@@ -306,6 +306,15 @@ auto PlatformViewLayerWin::GetRoot() const -> Shared<PlatformViewLayerWin const>
     return GetSelf();
 }
 
+///
+/// @brief 
+///
+auto PlatformViewLayerWin::ShouldRasterize() const -> Bool
+{
+    auto const renderFlags = GetRenderFlags();
+    auto const shouldRasterize = (renderFlags & PlatformViewLayerRenderFlags::Rasterize) == PlatformViewLayerRenderFlags::Rasterize;
+    return IsRoot() || shouldRasterize;
+}
 
 ///
 /// @brief

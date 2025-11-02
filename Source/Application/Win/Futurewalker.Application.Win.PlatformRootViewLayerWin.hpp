@@ -55,20 +55,21 @@ private:
 private:
     auto MakeTarget(HWND hwnd) -> Microsoft::WRL::ComPtr<IDCompositionTarget>;
 
-    auto FindVisualByBaseLayerId(PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisualWin>;
-    auto FindVisualByLayerId(PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisualWin>;
+    auto FindBaseVisualByBaseLayerId(PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisualWin>;
 
     auto RebuildVisual(Shared<PlatformViewLayerWin> const& baseLayer) -> void;
-    auto RebuildVisualCore(auto& builder, Shared<PlatformViewLayerWin> const& layer) -> void;
+    auto UpdateVisual() -> void;
 
-    auto UpdateVisual(Shared<PlatformViewLayerWin> const& layer) -> void;
-    auto UpdateVisualCore(Shared<PlatformViewLayerWin> layer, Shared<PlatformViewLayerVisualWin> currentVisual) -> void;
+    auto QueueRebuildLayer(PlatformViewLayerId const layerId) -> void;
+    auto QueueUpdateLayer() -> void;
 
 private:
     HWND _hwnd = NULL;
-    Microsoft::WRL::ComPtr<IDCompositionTarget> _target;
-    Microsoft::WRL::ComPtr<IDCompositionVisual3> _visual;
-    PlatformViewLayerVisualWinArray _visuals;
+    Microsoft::WRL::ComPtr<IDCompositionTarget> _dcompTarget;
+    Microsoft::WRL::ComPtr<IDCompositionVisual3> _dcompVisual;
+    Shared<PlatformViewLayerVisualWin> _visual;
+    std::vector<PlatformViewLayerId> _layersToRebuild;
+    Bool _shouldUpdateLayer = false;
 };
 }
 }
