@@ -123,7 +123,7 @@ auto PlatformSkiaCompositionSwapChainSurfaceWin::Draw(Function<void(Scene& scene
 
             canvas->restore();
         }
-        _device->FlushAndSubmitSurface(surface.get(), SkSurfaces::BackendSurfaceAccess::kPresent, GrSyncCpu::kNo);
+        _device->FlushAndSubmitSurface(surface.get(), SkSurfaces::BackendSurfaceAccess::kPresent, GrSyncCpu::kYes);
     }
 
     auto hr = _presentationSurface->SetBuffer(_presentationBuffers[index].buffer.Get());
