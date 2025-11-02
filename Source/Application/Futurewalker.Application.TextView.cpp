@@ -343,7 +343,7 @@ auto TextView::GetTextColor() const -> RGBAColor
 ///
 auto TextView::InvalidateLayoutCache() -> void
 {
-    _shapedText = nullptr;
+    _shapedText.Reset();
     _shapedTextMaxWidth = Dp::Infinity();
 }
 
@@ -362,11 +362,13 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
     auto const matchesWidth = Dp::IsNearlyEqual(GetCachedTextSize().GetWidth(), maxWidth);
     if (!_shapedText || (!matchesMaxWidth && !matchesWidth))
     {
-        auto const text = Text(_text.GetValueOrDefault());
-        auto const typeface = GetTypeface();
         auto const size = GetFontSize();
-        _shapedText = Unique<Graphics::ShapedText>::Make(_shaper->ShapeText(text, typeface, size, maxWidth));
-        _shapedTextMaxWidth = maxWidth;
+        auto const text = GetText();
+        if (size > 0 && !text.IsEmpty())
+        {
+            _shapedText = _shaper->ShapeText(Text(text), GetTypeface(), size, maxWidth);
+            _shapedTextMaxWidth = maxWidth;
+        }
     }
 }
 

@@ -9,7 +9,7 @@
 #include "Futurewalker.Attribute.AttributeArg.hpp"
 
 #include "Futurewalker.Graphics.SceneType.hpp"
-#include "Futurewalker.Graphics.ShapedTextType.hpp"
+#include "Futurewalker.Graphics.ShapedText.hpp"
 #include "Futurewalker.Graphics.TextShaperType.hpp"
 #include "Futurewalker.Graphics.TypefaceType.hpp"
 #include "Futurewalker.Graphics.FontSize.hpp"
@@ -17,6 +17,8 @@
 #include "Futurewalker.Graphics.FontWidth.hpp"
 #include "Futurewalker.Graphics.FontStyleType.hpp"
 #include "Futurewalker.Graphics.FontFamilyType.hpp"
+
+#include "Futurewalker.Core.Optional.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -80,7 +82,7 @@ private:
     AttributeAccessor<TextViewHorizontalAlignment> _horizontalAlignment;
     AttributeAccessor<TextViewVerticalAlignment> _verticalAlignment;
     Shared<Graphics::TextShaper> _shaper;
-    Unique<Graphics::ShapedText> _shapedText;
+    Optional<Graphics::ShapedText> _shapedText;
     Dp _shapedTextMaxWidth = Dp::Infinity();
 };
 }
