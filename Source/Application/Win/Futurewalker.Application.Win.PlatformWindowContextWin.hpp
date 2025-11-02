@@ -4,6 +4,7 @@
 #include "Futurewalker.Application.Win.PlatformWindowContextWin.hpp"
 #include "Futurewalker.Application.PlatformWindowContext.hpp"
 #include "Futurewalker.Application.PlatformScreenContext.hpp"
+#include "Futurewalker.Application.PlatformApplicationThemeContext.hpp"
 #include "Futurewalker.Application.Win.PlatformWindowWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformVsyncProviderWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformKeyboardLayoutWinType.hpp"
@@ -33,7 +34,8 @@ public:
       Shared<PlatformInputMethodContextWin> inputMethodContext,
       Shared<PlatformDCompositionDeviceWin> compositionDevice,
       Shared<PlatformVsyncProviderWin> vsyncProvider,
-      Shared<PlatformScreenContext> screenContext) -> Shared<PlatformWindowContextWin>;
+      Shared<PlatformScreenContext> screenContext,
+      Shared<PlatformApplicationThemeContext> themeContext) -> Shared<PlatformWindowContextWin>;
 
     PlatformWindowContextWin(
       PassKey<PlatformWindowContextWin>,
@@ -41,7 +43,8 @@ public:
       Shared<PlatformInputMethodContextWin> inputMethodContext,
       Shared<PlatformDCompositionDeviceWin> compositionDevice,
       Shared<PlatformVsyncProviderWin> vsyncProvider,
-      Shared<PlatformScreenContext> screenContext);
+      Shared<PlatformScreenContext> screenContext,
+      Shared<PlatformApplicationThemeContext> themeContext);
 
     ~PlatformWindowContextWin();
 
@@ -70,6 +73,7 @@ private:
     Shared<PlatformDCompositionDeviceWin> _compositionDevice;
     Shared<PlatformVsyncProviderWin> _vsyncProvider;
     Shared<PlatformScreenContext> _screenContext;
+    Shared<PlatformApplicationThemeContext> _themeContext;
     Shared<PlatformKeyboardLayoutWin> _keyboardLayout;
     ATOM _toplevelWindowClass = 0;
     ATOM _levelWindowClass = 0;

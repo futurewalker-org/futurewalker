@@ -7,6 +7,8 @@
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodWinType.hpp"
 #include "Futurewalker.Application.PlatformWindow.hpp"
+#include "Futurewalker.Application.PlatformApplicationThemeContextType.hpp"
+#include "Futurewalker.Application.PlatformApplicationThemeType.hpp"
 
 #include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWinType.hpp"
 
@@ -20,12 +22,17 @@ namespace FW_EXPORT
 class PlatformWindowWin : public PlatformWindow
 {
 public:
-    static auto Make(Shared<PlatformWindowContextWin> context, Shared<PlatformDCompositionDeviceWin> compositionDevice, PlatformWindowOptions const& options, Delegate const& delegate)
-      -> Shared<PlatformWindowWin>;
+    static auto Make(
+      Shared<PlatformWindowContextWin> context,
+      Shared<PlatformApplicationThemeContext> themeContext,
+      Shared<PlatformDCompositionDeviceWin> compositionDevice,
+      PlatformWindowOptions const& options,
+      Delegate const& delegate) -> Shared<PlatformWindowWin>;
 
     PlatformWindowWin(
       PassKey<PlatformWindow> key,
       Shared<PlatformWindowContextWin> context,
+      Shared<PlatformApplicationThemeContext> themeContext,
       Shared<PlatformDCompositionDeviceWin> compositionDevice,
       PlatformWindowOptions const& options,
       Delegate const& delegate);
@@ -77,6 +84,7 @@ public:
 
 protected:
     auto Initialize() -> void override;
+    auto ReceiveThemeEvent(Event<>& event) -> Async<Bool>;
 
 private:
     auto HandleCreate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
@@ -127,9 +135,12 @@ private:
 
     auto Destroy() -> void;
 
+    auto UpdateThemeColor() -> void;
+
 private:
     Weak<PlatformWindowWin> _self;
     Shared<PlatformWindowContextWin> _context;
+    Shared<PlatformApplicationTheme> _theme;
     Shared<PlatformDCompositionDeviceWin> _compositionDevice;
     Shared<PlatformRootViewLayerWin> _rootViewLayer;
     Shared<PlatformInputMethodTextStoreWin> _textStore;

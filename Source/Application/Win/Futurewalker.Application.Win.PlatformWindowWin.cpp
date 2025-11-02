@@ -45,10 +45,14 @@ namespace FW_DETAIL_NS
 ///
 /// @return
 ///
-auto PlatformWindowWin::Make(Shared<PlatformWindowContextWin> context, Shared<PlatformDCompositionDeviceWin> compositionDevice, PlatformWindowOptions const& options, Delegate const& delegate)
-  -> Shared<PlatformWindowWin>
+auto PlatformWindowWin::Make(
+  Shared<PlatformWindowContextWin> context,
+  Shared < PlatformApplicationThemeContext> themeContext,
+  Shared<PlatformDCompositionDeviceWin> compositionDevice,
+  PlatformWindowOptions const& options,
+  Delegate const& delegate) -> Shared<PlatformWindowWin>
 {
-    auto window = PlatformWindow::MakeDerived<PlatformWindowWin>(context, compositionDevice, options, delegate);
+    auto window = PlatformWindow::MakeDerived<PlatformWindowWin>(context, themeContext, compositionDevice, options, delegate);
     window->SetSelf(window);
     context->InitializeWindow(window, options);
     return window;
@@ -64,6 +68,7 @@ auto PlatformWindowWin::Make(Shared<PlatformWindowContextWin> context, Shared<Pl
 PlatformWindowWin::PlatformWindowWin(
   PassKey<PlatformWindow> key,
   Shared<PlatformWindowContextWin> context,
+  Shared<PlatformApplicationThemeContext> themeContext,
   Shared<PlatformDCompositionDeviceWin> compositionDevice,
   PlatformWindowOptions const& options,
   Delegate const& delegate)
@@ -72,6 +77,7 @@ PlatformWindowWin::PlatformWindowWin(
   , _compositionDevice {compositionDevice}
   , _options {options}
 {
+    _theme = themeContext->MakeApplicationTheme({.sendThemeEvent = [&](Event<>& event) -> Async<Bool> { co_return co_await ReceiveThemeEvent(event); }});
 }
 
 ///
@@ -605,6 +611,18 @@ auto PlatformWindowWin::Initialize() -> void
 {
 }
 
+//!
+//! @brief
+//!
+auto PlatformWindowWin::ReceiveThemeEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<PlatformApplicationThemeEvent::SystemBrightnessChanged>())
+    {
+        UpdateThemeColor();
+    }
+    co_return false;
+}
+
 ///
 /// @brief
 ///
@@ -738,13 +756,6 @@ auto PlatformWindowWin::HandleCreate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
 {
     if (msg == WM_CREATE)
     {
-        // Change color of titlebar based on user settings.
-        const auto useImmersiveDarkMode = TRUE;
-        if (FAILED(::DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &useImmersiveDarkMode, sizeof(useImmersiveDarkMode))))
-        {
-            FW_DEBUG_LOG_ERROR("PlatformWindowWin: Failed to enable DWMA_USE_IMMERSIVE_DARK_MODE");
-        }
-
         if (_options.backgroundStyle == WindowBackgroundStyle::System)
         {
             // Enable Win11 Mica effect.
@@ -793,6 +804,9 @@ auto PlatformWindowWin::HandleCreate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
                 FW_DEBUG_LOG_ERROR("PlatformWindowWin: Failed to set DWMWA_WINDOW_CORNER_PREFERENCE");
             }
         }
+
+        // Set initial theme color.
+        UpdateThemeColor();
 
         // Force WM_NCCALCSIZE to be sent right away.
         // Sending WM_ACTIVATE here will cause WM_SETFOCUS before first WM_SHOWWINDOW, which breaks TSF based IME handling.
@@ -2060,6 +2074,22 @@ auto PlatformWindowWin::Destroy() -> void
         if (!::DestroyWindow(_hwnd))
         {
             FW_DEBUG_LOG_ERROR("PlatformWindowWin: DestroyWindow failed");
+        }
+    }
+}
+
+///
+/// @brief 
+///
+auto PlatformWindowWin::UpdateThemeColor() -> void
+{
+    if (_theme)
+    {
+        auto const isDarkMode = _theme->GetSystemBrightness() == ThemeBrightness::Dark;
+        const auto useImmersiveDarkMode = BOOL(isDarkMode);
+        if (FAILED(::DwmSetWindowAttribute(_hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &useImmersiveDarkMode, sizeof(useImmersiveDarkMode))))
+        {
+            FW_DEBUG_LOG_ERROR("PlatformWindowWin: Failed to enable DWMA_USE_IMMERSIVE_DARK_MODE");
         }
     }
 }

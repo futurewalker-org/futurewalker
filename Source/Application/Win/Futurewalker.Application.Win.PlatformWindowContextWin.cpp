@@ -5,6 +5,7 @@
 #include "Futurewalker.Application.Win.PlatformVsyncProviderWin.hpp"
 #include "Futurewalker.Application.Win.PlatformKeyboardLayoutWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWin.hpp"
+#include "Futurewalker.Application.Win.PlatformApplicationThemeContextWin.hpp"
 
 #include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 
@@ -213,10 +214,11 @@ auto PlatformWindowContextWin::Make(
   Shared<PlatformInputMethodContextWin> inputMethodContext,
   Shared<PlatformDCompositionDeviceWin> compositionDevice,
   Shared<PlatformVsyncProviderWin> vsyncProvider,
-  Shared<PlatformScreenContext> screenContext) -> Shared<PlatformWindowContextWin>
+  Shared<PlatformScreenContext> screenContext,
+  Shared<PlatformApplicationThemeContext> themeContext) -> Shared<PlatformWindowContextWin>
 {
     auto key = PassKey<PlatformWindowContextWin>();
-    auto context = Shared<PlatformWindowContextWin>::Make(key, instanceHandle, inputMethodContext, compositionDevice, vsyncProvider, screenContext);
+    auto context = Shared<PlatformWindowContextWin>::Make(key, instanceHandle, inputMethodContext, compositionDevice, vsyncProvider, screenContext, themeContext);
     context->_self = context;
     return context;
 }
@@ -232,13 +234,15 @@ PlatformWindowContextWin::PlatformWindowContextWin(
   Shared<PlatformInputMethodContextWin> inputMethodContext,
   Shared<PlatformDCompositionDeviceWin> compositionDevice,
   Shared<PlatformVsyncProviderWin> vsyncProvider,
-  Shared<PlatformScreenContext> screenContext)
+  Shared<PlatformScreenContext> screenContext,
+  Shared<PlatformApplicationThemeContext> themeContext)
   : PlatformWindowContext()
   , _instanceHandle {instanceHandle}
   , _inputMethodContext {inputMethodContext}
   , _compositionDevice {compositionDevice}
   , _vsyncProvider {vsyncProvider}
   , _screenContext {screenContext}
+  , _themeContext {themeContext}
 {
     const auto instance = _instanceHandle->GetInstanceHandle();
 
@@ -279,7 +283,7 @@ PlatformWindowContextWin::~PlatformWindowContextWin()
 //
 auto PlatformWindowContextWin::MakePlatformWindow(PlatformWindowOptions const& options, PlatformWindow::Delegate const& delegate) -> Shared<PlatformWindow>
 {
-    return PlatformWindowWin::Make(_self.Lock(), _compositionDevice, options, delegate);
+    return PlatformWindowWin::Make(_self.Lock(), _themeContext, _compositionDevice, options, delegate);
 }
 
 ///
@@ -478,6 +482,7 @@ auto Locator::Resolver<PlatformWindowContextWin>::Resolve() -> Shared<PlatformWi
     auto compositionDevice = Locator::ResolveWithDefault<PlatformDCompositionDeviceWin>();
     auto vsyncProvider = Locator::ResolveWithDefault<PlatformVsyncProviderWin>();
     auto screenContext = Locator::Resolve<PlatformScreenContext>();
-    return PlatformWindowContextWin::Make(instanceHandle, inputMethodContext, compositionDevice, vsyncProvider, screenContext);
+    auto themeContext = Locator::Resolve<PlatformApplicationThemeContext>();
+    return PlatformWindowContextWin::Make(instanceHandle, inputMethodContext, compositionDevice, vsyncProvider, screenContext, themeContext);
 }
 }
