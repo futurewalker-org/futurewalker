@@ -21,37 +21,26 @@ ApplicationTheme::ApplicationTheme(Shared<PlatformApplicationThemeContext> const
 
 auto ApplicationTheme::GetBrightness() -> ApplicationThemeBrightness
 {
-    return _brightness;
+    if (auto const theme = Locator::GetInstance<ApplicationTheme>())
+    {
+        return theme->InternalGetBrightness();
+    }
+    return ApplicationThemeBrightness::System;
 }
 
 auto ApplicationTheme::SetBrightness(ApplicationThemeBrightness const brightness) -> void
 {
-    if (_brightness != brightness)
+    if (auto const theme = Locator::GetInstance<ApplicationTheme>())
     {
-        _brightness = brightness;
-        UpdateCurrentBrightness();
+        theme->InternalSetBrightness(brightness);
     }
 }
 
 auto ApplicationTheme::PushTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void
 {
-    if (!theme)
+    if (auto const themeInstance = Locator::GetInstance<ApplicationTheme>())
     {
-        return;
-    }
-
-    if (brightness == ThemeBrightness::Dark)
-    {
-        _darkThemes.push_back(theme);
-    }
-    else
-    {
-        _lightThemes.push_back(theme);
-    }
-
-    if (brightness == _currentBrightness)
-    {
-        ApplyTheme(theme);
+        themeInstance->InternalPushTheme(brightness, theme);
     }
 }
 
@@ -112,6 +101,42 @@ auto ApplicationTheme::HandlePlatformThemeEvent(Event<>& event) -> Async<Bool>
         UpdateCurrentBrightness();
     }
     co_return false;
+}
+
+auto ApplicationTheme::InternalGetBrightness() const -> ApplicationThemeBrightness
+{
+    return _brightness;
+}
+
+auto ApplicationTheme::InternalSetBrightness(ApplicationThemeBrightness const brightness) -> void
+{
+    if (_brightness != brightness)
+    {
+        _brightness = brightness;
+        UpdateCurrentBrightness();
+    }
+}
+
+auto ApplicationTheme::InternalPushTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void
+{
+    if (!theme)
+    {
+        return;
+    }
+
+    if (brightness == ThemeBrightness::Dark)
+    {
+        _darkThemes.push_back(theme);
+    }
+    else
+    {
+        _lightThemes.push_back(theme);
+    }
+
+    if (brightness == _currentBrightness)
+    {
+        ApplyTheme(theme);
+    }
 }
 
 auto Locator::Resolver<ApplicationTheme>::Resolve() -> Shared<ApplicationTheme>
