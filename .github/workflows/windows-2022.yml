@@ -3,8 +3,7 @@ run-name: windows-2022
 on: [push]
 jobs:
   build:
-    runs-on: windows-2022
-    steps:
-      - uses: ./.github/workflows/main.yml
-        with:
-          profile: ./conan/vs2022_x86_64_Debug.profile
+    uses: ./.github/workflows/main.yml
+    with:
+      runs-on: windows-2022
+      profile: ./conan/vs2022_x86_64_Debug.profile
