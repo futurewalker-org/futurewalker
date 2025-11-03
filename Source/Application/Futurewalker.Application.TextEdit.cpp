@@ -10,6 +10,7 @@
 #include "Futurewalker.Application.Key.hpp"
 #include "Futurewalker.Application.InputMethod.hpp"
 #include "Futurewalker.Application.InputMethodEditable.hpp"
+#include "Futurewalker.Application.ViewDrawFunction.hpp" 
 
 #include "Futurewalker.Graphics.Scene.hpp"
 #include "Futurewalker.Graphics.TextShaper.hpp"
@@ -20,8 +21,6 @@
 #include "Futurewalker.Base.Debug.hpp"
 
 namespace FW_DETAIL_NS
-{
-namespace FW_EXPORT
 {
 auto TextEdit::Make() -> Shared<TextEdit>
 {
@@ -83,6 +82,36 @@ auto TextEdit::SetDisabledTextAlpha(AttributeArg<Channel> const& alpha) -> void
     _disabledTextAlpha.SetAttributeArg(alpha);
 }
 
+auto TextEdit::SetBorderColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _borderColor.SetAttributeArg(color);
+}
+
+auto TextEdit::SetBorderAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _borderAlpha.SetAttributeArg(alpha);
+}
+
+auto TextEdit::SetDisabledBorderColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _disabledBorderColor.SetAttributeArg(color);
+}
+
+auto TextEdit::SetDisabledBorderAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _disabledBorderAlpha.SetAttributeArg(alpha);
+}
+
+auto TextEdit::SetBorderWidth(AttributeArg<Dp> const& width) -> void
+{
+    _borderWidth.SetAttributeArg(width);
+}
+
+auto TextEdit::SetCornerRadius(AttributeArg<CornerRadius> const& radius) -> void
+{
+    _cornerRadius.SetAttributeArg(radius);
+}
+
 auto TextEdit::SetFontSize(AttributeArg<Graphics::FontSize> const& size) -> void
 {
     _fontSize.SetAttributeArg(size);
@@ -124,6 +153,12 @@ auto TextEdit::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeTextAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledTextColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledTextAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBorderColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBorderAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledBorderColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledBorderAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeBorderWidth, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSize, AttributeFontSize, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWeight, AttributeFontWeight, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWidth, AttributeFontWidth, {0});
@@ -142,6 +177,12 @@ auto TextEdit::Initialize() -> void
     bindAndConnectAttribute(_textAlpha, AttributeTextAlpha, {});
     bindAndConnectAttribute(_disabledTextColor, AttributeDisabledTextColor, {});
     bindAndConnectAttribute(_disabledTextAlpha, AttributeDisabledTextAlpha, {});
+    bindAndConnectAttribute(_borderColor, AttributeBorderColor, {});
+    bindAndConnectAttribute(_borderAlpha, AttributeBorderAlpha, {});
+    bindAndConnectAttribute(_disabledBorderColor, AttributeDisabledBorderColor, {});
+    bindAndConnectAttribute(_disabledBorderAlpha, AttributeDisabledBorderAlpha, {});
+    bindAndConnectAttribute(_borderWidth, AttributeBorderWidth, {0});
+    bindAndConnectAttribute(_cornerRadius, AttributeCornerRadius, {});
     bindAndConnectAttribute(_fontSize, AttributeFontSize, {0});
     bindAndConnectAttribute(_fontWeight, AttributeFontWeight, {0});
     bindAndConnectAttribute(_fontWidth, AttributeFontWidth, {0});
@@ -157,23 +198,15 @@ auto TextEdit::Initialize() -> void
 
 auto TextEdit::Draw(DrawScope& scope) -> void
 {
+    auto const backgroundColor = InternalGetBackgroundCololr();
+    auto const textColor = InternalGetTextColor();
+    auto const borderColor = InternalGetBorderColor();
+    auto const borderWidth = _borderWidth.GetValueOr(0);
+    auto const cornerRadius = _cornerRadius.GetValueOrDefault();
+
     auto& scene = scope.GetScene();
 
-    auto const backgroundColor = _backgroundColor.GetValueOrDefault();
-    auto const textColor = _textColor.GetValueOrDefault();
-
-    scene.AddRect({
-        .rect = GetContentRect(),
-        .color = backgroundColor,
-        .drawStyle = Graphics::DrawStyle::Fill,
-    });
-
-    scene.AddRect({
-        .rect = GetContentRect(),
-        .color = IsFocused() ? RGBAColor(1, 0, 0, 1) : RGBAColor(0, 0, 1, 1),
-        .drawStyle = Graphics::DrawStyle::Stroke,
-        .strokeWidth = IsFocused() ? 2.0 : 1.0,
-    });
+    ViewDrawFunction::DrawRoundRect(scene, GetContentRect(), cornerRadius, backgroundColor, GetLayoutDirection());
 
     if (_shapedText)
     {
@@ -197,6 +230,8 @@ auto TextEdit::Draw(DrawScope& scope) -> void
             }
         }
     }
+
+    ViewDrawFunction::DrawRoundRectBorder(scene, GetContentRect(), cornerRadius, borderColor, borderWidth, GetLayoutDirection());
 }
 
 auto TextEdit::Measure(MeasureScope& scope) -> void
@@ -459,5 +494,52 @@ auto TextEdit::InternalUpdateLayoutCache() -> void
         _shapedText = Shared<Graphics::ShapedText>::Make(_textShaper->ShapeText(text, typeface, fontSize, Dp::Infinity()));
     }
 }
+
+auto TextEdit::InternalGetBackgroundCololr() const -> RGBAColor
+{
+    if (IsEnabled())
+    {
+        auto const color = _backgroundColor.GetValueOrDefault();
+        auto const alpha = _backgroundAlpha.GetValueOrDefault();
+        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
+    }
+    else
+    {
+        auto const color = _disabledBackgroundColor.GetValueOrDefault();
+        auto const alpha = _disabledBackgroundAlpha.GetValueOrDefault();
+        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
+    }
+}
+
+auto TextEdit::InternalGetTextColor() const -> RGBAColor
+{
+    if (IsEnabled())
+    {
+        auto const color = _textColor.GetValueOrDefault();
+        auto const alpha = _textAlpha.GetValueOrDefault();
+        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
+    }
+    else
+    {
+        auto const color = _disabledTextColor.GetValueOrDefault();
+        auto const alpha = _disabledTextAlpha.GetValueOrDefault();
+        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
+    }
+}
+
+auto TextEdit::InternalGetBorderColor() const -> RGBAColor
+{
+    if (IsEnabled())
+    {
+        auto const color = _borderColor.GetValueOrDefault();
+        auto const alpha = _borderAlpha.GetValueOrDefault();
+        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
+    }
+    else
+    {
+        auto const color = _disabledBorderColor.GetValueOrDefault();
+        auto const alpha = _disabledBorderAlpha.GetValueOrDefault();
+        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
+    }
 }
 }

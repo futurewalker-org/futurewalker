@@ -5,6 +5,7 @@
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.InputMethodType.hpp"
 #include "Futurewalker.Application.InputMethodEditableType.hpp"
+#include "Futurewalker.Application.CornerRadius.hpp"
 
 #include "Futurewalker.Graphics.TextShaperType.hpp"
 #include "Futurewalker.Graphics.ShapedTextType.hpp"
@@ -46,6 +47,12 @@ public:
     auto SetTextAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetDisabledTextColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetDisabledTextAlpha(AttributeArg<Channel> const& alpha) -> void;
+    auto SetBorderColor(AttributeArg<RGBAColor> const& color) -> void;
+    auto SetBorderAlpha(AttributeArg<Channel> const& alpha) -> void;
+    auto SetDisabledBorderColor(AttributeArg<RGBAColor> const& color) -> void;
+    auto SetDisabledBorderAlpha(AttributeArg<Channel> const& alpha) -> void;
+    auto SetBorderWidth(AttributeArg<Dp> const& width) -> void;
+    auto SetCornerRadius(AttributeArg<CornerRadius> const& radius) -> void;
     auto SetFontSize(AttributeArg<Graphics::FontSize> const& size) -> void;
     auto SetFontWeight(AttributeArg<Graphics::FontWeight> const& weight) -> void;
     auto SetFontWidth(AttributeArg<Graphics::FontWidth> const& width) -> void;
@@ -76,9 +83,11 @@ private:
     auto InternalGetTextRange() const -> Range<CodePoint>;
     auto InternalDeleteBackward() -> void;
     auto InternalDeleteForward() -> void;
-
     auto InternalInvalidateLayoutCache() -> void;
     auto InternalUpdateLayoutCache() -> void;
+    auto InternalGetBackgroundCololr() const -> RGBAColor;
+    auto InternalGetTextColor() const -> RGBAColor;
+    auto InternalGetBorderColor() const -> RGBAColor;
 
 private:
     Shared<InputMethod> _inputMethod;
@@ -91,6 +100,12 @@ private:
     AttributeAccessor<Channel> _textAlpha;
     AttributeAccessor<RGBAColor> _disabledTextColor;
     AttributeAccessor<Channel> _disabledTextAlpha;
+    AttributeAccessor<RGBAColor> _borderColor;
+    AttributeAccessor<Channel> _borderAlpha;
+    AttributeAccessor<RGBAColor> _disabledBorderColor;
+    AttributeAccessor<Channel> _disabledBorderAlpha;
+    AttributeAccessor<Dp> _borderWidth;
+    AttributeAccessor<CornerRadius> _cornerRadius;
     AttributeAccessor<Graphics::FontSize> _fontSize;
     AttributeAccessor<Graphics::FontWeight> _fontWeight;
     AttributeAccessor<Graphics::FontWidth> _fontWidth;
