@@ -103,7 +103,7 @@ auto AlignView::Measure(MeasureScope& scope) -> void
     auto const& width = parameter.GetWidthConstraints();
     auto const& height = parameter.GetHeightConstraints();
 
-    Size<Dp> maxSize;
+    auto maxSize = Size<Dp>();
     ForEachVisibleChild([&](View& view) {
         scope.MeasureChild(view, AxisConstraints::MakeMinMax(0, width.GetMax()), AxisConstraints::MakeMinMax(0, height.GetMax()));
         maxSize = Size<Dp>::Max(maxSize, scope.GetMeasuredSize(view));
