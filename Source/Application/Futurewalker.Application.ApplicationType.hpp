@@ -19,7 +19,7 @@ struct ApplicationOptions
     ///
     /// @brief An application identifier in reverse-DNS format.
     ///
-    String identifier = u8"com.example.Futurewalker.Application";
+    String identifier = u8"com.example.futurewalker.application";
 };
 }
 }
