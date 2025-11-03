@@ -1,0 +1,49 @@
+﻿// SPDX-License-Identifier: MPL-2.0
+#pragma once
+
+#include "Futurewalker.Component.Lamp.Prelude.hpp"
+
+#include "Futurewalker.Application.CornerRadius.hpp"
+
+#include "Futurewalker.Attribute.StaticAttribute.hpp"
+
+#include "Futurewalker.Graphics.FontWeight.hpp"
+#include "Futurewalker.Graphics.FontWidth.hpp"
+#include "Futurewalker.Graphics.FontSize.hpp"
+#include "Futurewalker.Graphics.FontFamily.hpp"
+#include "Futurewalker.Graphics.FontStyleType.hpp"
+
+#include "Futurewalker.Color.RGBAColor.hpp"
+
+#include "Futurewalker.Core.NonConstructible.hpp"
+
+#include "Futurewalker.Unit.hpp"
+
+namespace FW_LAMP_DETAIL_NS
+{
+namespace FW_EXPORT
+{
+struct TextEditStyle : NonConstructible
+{
+    FW_STATIC_ATTRIBUTE(RGBAColor, BackgroundColor);
+    FW_STATIC_ATTRIBUTE(Channel, BackgroundAlpha);
+    FW_STATIC_ATTRIBUTE(RGBAColor, DisabledBackgroundColor);
+    FW_STATIC_ATTRIBUTE(Channel, DisabledBackgroundAlpha);
+    FW_STATIC_ATTRIBUTE(RGBAColor, TextColor);
+    FW_STATIC_ATTRIBUTE(Channel, TextAlpha);
+    FW_STATIC_ATTRIBUTE(RGBAColor, DisabledTextColor);
+    FW_STATIC_ATTRIBUTE(Channel, DisabledTextAlpha);
+    FW_STATIC_ATTRIBUTE(RGBAColor, BorderColor);
+    FW_STATIC_ATTRIBUTE(Channel, BorderAlpha);
+    FW_STATIC_ATTRIBUTE(RGBAColor, DisabledBorderColor);
+    FW_STATIC_ATTRIBUTE(Channel, DisabledBorderAlpha);
+    FW_STATIC_ATTRIBUTE(Dp, BorderWidth);
+    FW_STATIC_ATTRIBUTE(CornerRadius, BorderRadius);
+    FW_STATIC_ATTRIBUTE(Graphics::FontSize, FontSize);
+    FW_STATIC_ATTRIBUTE(Graphics::FontWeight, FontWeight);
+    FW_STATIC_ATTRIBUTE(Graphics::FontWidth, FontWidth);
+    FW_STATIC_ATTRIBUTE(Graphics::FontSlant, FontSlant);
+    FW_STATIC_ATTRIBUTE(Graphics::FontFamily, FontFamily);
+};
+}
+}
