@@ -2,8 +2,10 @@ name: windows-latest
 run-name: windows-latest
 on: [push]
 jobs:
-  conan-create:
-    uses: ./.github/workflows/main.yml
-    with:
-        runs-on: windows-latest
-        profile: ./conan/vs2022_x86_64_Debug.profile
+  build:
+    runs-on: windows-latest
+    steps:
+      - run: winget install --source winget --exact --id Microsoft.WindowsSDK.10.0.22621.0
+      - uses: ./.github/workflows/main.yml
+        with:
+          profile: ./conan/vs2022_x86_64_Debug.profile

@@ -3,15 +3,11 @@ run-name: main
 on:
   workflow_call:
     inputs:
-      runs-on:
-        required: true
-        type: string
       profile:
         required: true
         type: string
 jobs:
   build-main:
-    runs-on: ${{ inputs.runs-on }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
