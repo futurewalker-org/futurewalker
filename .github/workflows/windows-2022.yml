@@ -5,7 +5,7 @@ jobs:
   build:
     runs-on: windows-2022
     steps:
-      - run: winget install --source winget --exact --id Bazel.Bazel.8.4.2 --silent
+      - run: choco install bazel
       - uses: ./.github/workflows/main.yml
         with:
           profile: ./conan/vs2022_x86_64_Debug.profile
