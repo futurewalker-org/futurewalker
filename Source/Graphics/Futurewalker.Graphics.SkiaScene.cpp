@@ -141,8 +141,7 @@ auto SkiaScene::PushLayer(LayerParam param) -> void
     if (_canvas)
     {
         auto const p = SceneParamToSkPaint(param);
-        auto const r = RectToSkRect(param.rect);
-        _canvas->saveLayer(&r, &p);
+        _canvas->saveLayer(nullptr, &p);
     }
 }
 
@@ -232,11 +231,12 @@ auto SkiaScene::PushScale(ScaleParam param) -> void
 ///
 auto SkiaScene::Pop(PopParam param) -> void
 {
-    (void)param;
-
     if (_canvas)
     {
-        _canvas->restore();
+        for (auto i = SInt64(0); i < param.count; ++i)
+        {
+            _canvas->restore();
+        }
     }
 }
 
@@ -249,6 +249,11 @@ auto SkiaScene::AddLine(LineParam param) -> void
 {
     if (_canvas)
     {
+        if (param.drawStyle == DrawStyle::Stroke && param.strokeWidth <= 0)
+        {
+            // Skip drawing hairline stroke.
+            return;
+        }
         auto const p1 = PointToSkPoint(param.p1);
         auto const p2 = PointToSkPoint(param.p2);
         auto const p = SceneParamToSkPaint(param);
@@ -265,6 +270,11 @@ auto SkiaScene::AddRect(RectParam param) -> void
 {
     if (_canvas)
     {
+        if (param.drawStyle == DrawStyle::Stroke && param.strokeWidth <= 0)
+        {
+            // Skip drawing hairline stroke.
+            return;
+        }
         auto const r = RectToSkRect(param.rect);
         auto const p = SceneParamToSkPaint(param);
         _canvas->drawRect(r, p);
@@ -280,6 +290,11 @@ auto SkiaScene::AddRoundRect(RoundRectParam param) -> void
 {
     if (_canvas)
     {
+        if (param.drawStyle == DrawStyle::Stroke && param.strokeWidth <= 0)
+        {
+            // Skip drawing hairline stroke.
+            return;
+        }
         auto const rr = RoundRectToSkRRect(param.roundRect);
         auto const p = SceneParamToSkPaint(param);
         _canvas->drawRRect(rr, p);

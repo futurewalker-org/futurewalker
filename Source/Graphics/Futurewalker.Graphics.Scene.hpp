@@ -27,7 +27,6 @@ class Scene : NonCopyable
 public:
     struct LayerParam
     {
-        Rect<Dp> rect;
         RGBAColor color = RGBAColor(0, 0, 0, 1);
         BlendMode blendMode = BlendMode::SrcOver;
     };
@@ -63,6 +62,7 @@ public:
 
     struct PopParam
     {
+        SInt64 count = 1;
     };
 
     struct LineParam
