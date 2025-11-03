@@ -30,6 +30,8 @@ public:
     auto SetContent(Shared<View> const& view) -> void;
 
     auto SetBackgroundColor(AttributeArg<RGBAColor> color) -> void;
+    auto SetBorderColor(AttributeArg<RGBAColor> color) -> void;
+    auto SetBorderWidth(AttributeArg<Dp> width) -> void;
     auto SetCornerRadius(AttributeArg<CornerRadius> radius) -> void;
 
 protected:
@@ -40,6 +42,8 @@ protected:
 private:
     Weak<View> _content;
     AttributeAccessor<RGBAColor> _backgroundColor;
+    AttributeAccessor<RGBAColor> _borderColor;
+    AttributeAccessor<Dp> _borderWidth;
     AttributeAccessor<CornerRadius> _cornerRadius;
 };
 }

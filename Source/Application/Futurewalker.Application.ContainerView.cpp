@@ -11,12 +11,6 @@
 
 namespace FW_DETAIL_NS
 {
-namespace
-{
-FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBackgroundColor, {});
-FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
-}
-
 ///
 /// @brief Make ContainerView instance.
 ///
@@ -91,6 +85,26 @@ auto ContainerView::SetBackgroundColor(AttributeArg<RGBAColor> color) -> void
 }
 
 ///
+/// @brief Set border color.
+///
+/// @param[in] color Border color.
+///
+auto ContainerView::SetBorderColor(AttributeArg<RGBAColor> color) -> void
+{
+    _borderColor.SetAttributeArg(color);
+}
+
+///
+/// @brief Set border width.
+///
+/// @param[in] width Border width.
+///
+auto ContainerView::SetBorderWidth(AttributeArg<Dp> width) -> void
+{
+    _borderWidth.SetAttributeArg(width);
+}
+
+///
 /// @brief Set corner radius.
 ///
 /// @param[in] radius Corner radius.
@@ -105,12 +119,22 @@ auto ContainerView::SetCornerRadius(AttributeArg<CornerRadius> radius) -> void
 ///
 auto ContainerView::Initialize() -> void
 {
-    _backgroundColor.BindAttributeWithDefault(*this, AttributeBackgroundColor, RGBAColor());
-    _cornerRadius.BindAttributeWithDefault(*this, AttributeCornerRadius, CornerRadius());
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBackgroundColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBorderColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeBorderWidth, {0});
+
+    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute, typename Accessor::ValueType const& defaultValue) {
+        accessor.BindAttributeWithDefaultValue(*this, attribute, defaultValue);
+        EventReceiver::Connect(accessor, *this, &ContainerView::ReceiveEvent);
+    };
+
+    bindAndConnectAttribute(_backgroundColor, AttributeBackgroundColor, {});
+    bindAndConnectAttribute(_borderColor, AttributeBorderColor, {});
+    bindAndConnectAttribute(_borderWidth, AttributeBorderWidth, {0});
+    bindAndConnectAttribute(_cornerRadius, AttributeCornerRadius, {});
 
     EventReceiver::Connect(*this, *this, &ContainerView::ReceiveEvent);
-    EventReceiver::Connect(_backgroundColor, *this, &ContainerView::ReceiveEvent);
-    EventReceiver::Connect(_cornerRadius, *this, &ContainerView::ReceiveEvent);
 }
 
 ///
@@ -121,8 +145,12 @@ auto ContainerView::Draw(DrawScope& scope) -> void
     auto& scene = scope.GetScene();
 
     auto const backgroundColor = _backgroundColor.GetValueOrDefault();
+    auto const borderColor = _borderColor.GetValueOrDefault();
+    auto const borderWidth = _borderWidth.GetValueOr(0);
     auto const cornerRadius = _cornerRadius.GetValueOrDefault();
+
     ViewDrawFunction::DrawRoundRect(scene, GetContentRect(), cornerRadius, backgroundColor, GetLayoutDirection());
+    ViewDrawFunction::DrawRoundRectBorder(scene, GetContentRect(), cornerRadius, borderColor, borderWidth, GetLayoutDirection());
 }
 
 ///
