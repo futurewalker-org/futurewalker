@@ -7,7 +7,6 @@
 
 #include <Futurewalker.Test.TestPlatformDebug.hpp>
 #include <Futurewalker.Test.TestPlatformViewLayerContext.hpp>
-#include <Futurewalker.Test.TestPlatformDrawableViewLayerContext.hpp>
 #include <Futurewalker.Test.TestView.hpp>
 
 using namespace Futurewalker;
@@ -18,7 +17,6 @@ TEST_CASE("View")
     Locator::Register<ViewLayerManager>();
     Locator::Register<TestPlatformDebug>();
     Locator::Register<TestPlatformViewLayerContext>();
-    Locator::Register<TestPlatformDrawableViewLayerContext>();
 
     auto const uniqueIdManager = Locator::Resolve<UniqueIdentifierManager>();
     auto const viewLayerManager = Locator::Resolve<ViewLayerManager>();

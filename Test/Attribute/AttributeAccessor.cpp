@@ -37,13 +37,13 @@ TEST_CASE("AttributeAccessor")
     SECTION("BindWithDefault")
     {
         AttributeAccessor<SInt32> accessor;
-        REQUIRE(accessor.BindAttributeWithDefault(*node, Attribute1, 24));
+        REQUIRE(accessor.BindAttributeWithDefaultValue(*node, Attribute1, 24));
         REQUIRE(accessor.GetValueOr(0) == 24);
         accessor.SetValue(42);
         REQUIRE(accessor.GetValueOr(0) == 42);
-        REQUIRE(accessor.BindAttributeWithDefault(*node, Attribute1, 123));
+        REQUIRE(accessor.BindAttributeWithDefaultValue(*node, Attribute1, 123));
         REQUIRE(accessor.GetValueOr(0) == 123);
-        REQUIRE(accessor.BindAttributeWithDefault(*node, Attribute1, Attribute2));
+        REQUIRE(accessor.BindAttributeWithDefaultReference(*node, Attribute1, Attribute2));
         REQUIRE(accessor.GetValueOr(0) == 24);
     }
 

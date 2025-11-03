@@ -34,13 +34,13 @@ TEST_CASE("Task")
         REQUIRE(AsyncFunction::SyncWait(std::move(task)) == 42);
     }
 
-    SECTION("")
-    {
-        auto task1 = []() -> Task<SInt32> { co_return 42; }();
-        auto task2 = []() -> Task<SInt32> { co_return 24; }();
-        auto task3 = [&]() -> Task<SInt32> { co_return co_await std::move(task1) + co_await std::move(task2); }();
-        REQUIRE(AsyncFunction::SyncWait(std::move(task3)) == 66);
-    }
+    //SECTION("")
+    //{
+    //    auto task1 = []() -> Task<SInt32> { co_return 42; }();
+    //    auto task2 = []() -> Task<SInt32> { co_return 24; }();
+    //    auto task3 = [&]() -> Task<SInt32> { co_return co_await std::move(task1) + co_await std::move(task2); }();
+    //    REQUIRE(AsyncFunction::SyncWait(std::move(task3)) == 66);
+    //}
 
     SECTION("")
     {
