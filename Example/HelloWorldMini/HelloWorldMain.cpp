@@ -40,7 +40,6 @@ protected:
 
     auto ReceiveEvent(Event<>& event) -> Async<Bool>
     {
-
         if (event.Is<ApplicationEvent::Started>())
         {
             ApplicationTheme::PushTheme(ThemeBrightness::Light, Shared<Lamp::Theme>::Make(ThemeBrightness::Light));
