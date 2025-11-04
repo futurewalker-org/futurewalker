@@ -226,10 +226,10 @@ auto PlatformViewLayerVisualWin::Render() -> void
         if (fragment.displayList)
         {
             if (fragment.clipRect.IsFinite())
-        {
-            auto const rect = Rect<Dp>::Offset(fragment.clipRect, fragment.offset);
-            unionRect = Rect<Dp>::Union(unionRect, rect);
-        }
+            {
+                auto const rect = Rect<Dp>::Offset(fragment.clipRect, fragment.offset);
+                unionRect = Rect<Dp>::Union(unionRect, rect);
+            }
             else if (fragment.displayList->GetBounds().IsFinite())
             {
                 auto const rect = Rect<Dp>::Offset(fragment.displayList->GetBounds(), fragment.offset + fragment.displayListOffset);
