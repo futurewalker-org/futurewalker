@@ -190,6 +190,7 @@ auto PlatformRootViewLayerWin::RootGetDisplayScale() const -> DisplayScale
 ///
 auto PlatformRootViewLayerWin::RootOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
+    (void)layer;
     QueueUpdateLayer();
 }
 
@@ -198,6 +199,7 @@ auto PlatformRootViewLayerWin::RootOffsetChanged(Shared<PlatformViewLayerWin> co
 ///
 auto PlatformRootViewLayerWin::RootSizeChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
+    (void)layer;
     QueueUpdateLayer();
 }
 
@@ -206,6 +208,7 @@ auto PlatformRootViewLayerWin::RootSizeChanged(Shared<PlatformViewLayerWin> cons
 ///
 auto PlatformRootViewLayerWin::RootClipModeChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
+    (void)layer;
     QueueUpdateLayer();
 }
 
@@ -214,6 +217,7 @@ auto PlatformRootViewLayerWin::RootClipModeChanged(Shared<PlatformViewLayerWin> 
 ///
 auto PlatformRootViewLayerWin::RootOpacityChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
+    (void)layer;
     QueueUpdateLayer();
 }
 
@@ -234,6 +238,7 @@ auto PlatformRootViewLayerWin::RootRenderFlagsChanged(Shared<PlatformViewLayerWi
 auto PlatformRootViewLayerWin::RootDisplayListChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
     // TODO: This should not require full update.
+    (void)layer;
     QueueUpdateLayer();
 }
 
@@ -243,6 +248,7 @@ auto PlatformRootViewLayerWin::RootDisplayListChanged(Shared<PlatformViewLayerWi
 auto PlatformRootViewLayerWin::RootDisplayListOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void
 {
     // TODO: This should not require full update.
+    (void)layer;
     QueueUpdateLayer();
 }
 
