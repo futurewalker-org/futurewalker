@@ -14,10 +14,8 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
       - name: Install Conan
         uses: conan-io/setup-conan@v1
         with:
@@ -27,7 +25,6 @@ jobs:
         with:
           repository: 'mocabe/conan-skia'
           path: 'conan-skia'
-          refn: 'main'
       - name: Add Skia recipe to Conan
         run: conan remote add conan_skia ./conan-skia
       - name: Build
