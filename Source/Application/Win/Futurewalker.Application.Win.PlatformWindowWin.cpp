@@ -1211,25 +1211,25 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
                     break;
                 }
 
-                auto msg = MSG();
-                if (::GetMessageW(&msg, NULL, 0, 0) == -1)
+                auto loopMsg = MSG();
+                if (::GetMessageW(&loopMsg, NULL, 0, 0) == -1)
                 {
                     FW_DEBUG_ASSERT(false);
                     continue;
                 }
 
-                if (msg.message == WM_QUIT)
+                if (loopMsg.message == WM_QUIT)
                 {
-                    quit = msg.wParam;
+                    quit = loopMsg.wParam;
                     continue;
                 }
-                ::TranslateMessage(&msg);
-                ::DispatchMessageW(&msg);
+                ::TranslateMessage(&loopMsg);
+                ::DispatchMessageW(&loopMsg);
             }
 
             if (quit)
             {
-                ::PostQuitMessage(*quit);
+                ::PostQuitMessage(static_cast<int>(*quit));
             }
 
             if (*result && **result)
