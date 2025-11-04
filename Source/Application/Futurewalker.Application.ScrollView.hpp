@@ -5,6 +5,8 @@
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.ContainerView.hpp"
 
+#include "Futurewalker.Attribute.AttributeAccessor.hpp"
+
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -34,6 +36,8 @@ protected:
 private:
     Shared<ContainerView> _containerView;
     ScrollViewDirection _direction = ScrollViewDirection::None;
+    AttributeAccessor<Float64> _horizontalScrollFactor;
+    AttributeAccessor<Float64> _verticalScrollFactor;
     Offset<Dp> _offset;
 };
 }

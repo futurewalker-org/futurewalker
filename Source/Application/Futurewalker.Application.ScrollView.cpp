@@ -5,6 +5,8 @@
 #include "Futurewalker.Application.ArrangeScope.hpp"
 #include "Futurewalker.Application.PointerEvent.hpp"
 #include "Futurewalker.Application.KeyEvent.hpp"
+#include "Futurewalker.Application.ViewAttribute.hpp"
+#include "Futurewalker.Application.ViewLayoutFunction.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -48,6 +50,9 @@ auto ScrollView::Initialize() -> void
 
     _containerView = ContainerView::Make();
     AddChildBack(_containerView);
+
+    _horizontalScrollFactor.BindAttribute(*this, ViewAttribute::HorizontalScrollFactor);
+    _verticalScrollFactor.BindAttribute(*this, ViewAttribute::VerticalScrollFactor);
 
     EventReceiver::Connect(*this, *this, &ScrollView::ReceiveEvent);
 }
@@ -97,7 +102,12 @@ auto ScrollView::Arrange(ArrangeScope& scope) -> void
         auto const deltaY = Dp::Min(Dp::Max(0, _offset.GetDeltaY()), maxOffset);
         _offset.SetDeltaY(deltaY);
     }
-    ForEachChild([&](View& view) { scope.ArrangeChild(view, (-_offset).As<Point>()); });
+
+    ForEachChild([&](View& view) {
+        auto const x = ViewLayoutFunction::AlignToPixelGridByRound(-_offset.GetDeltaX(), *this);
+        auto const y = ViewLayoutFunction::AlignToPixelGridByRound(-_offset.GetDeltaY(), *this);
+        scope.ArrangeChild(view, {x, y});
+    });
 }
 
 auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
@@ -109,13 +119,15 @@ auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
         auto const deltaX = wheelEvent->GetDeltaX();
         auto const deltaY = wheelEvent->GetDeltaY();
 
-        auto const scrollStep = Dp(15);
+        auto const horizontalScrollFactor = _horizontalScrollFactor.GetValueOr(0.0);
+        auto const verticalScrollFactor = _verticalScrollFactor.GetValueOr(0.0);
 
         if ((_direction & ScrollViewDirection::Horizontal) != ScrollViewDirection::None)
         {
-            if (deltaX != 0 && precision == PointerScrollPrecision::Coarse)
+            if (deltaX != 0)
             {
-                _offset.SetDeltaX(_offset.GetDeltaX() - Dp(deltaX) * scrollStep);
+                auto const distance = precision == PointerScrollPrecision::Coarse ? deltaX * Dp(horizontalScrollFactor) : deltaX;
+                _offset.SetDeltaX(_offset.GetDeltaX() - distance);
                 InvalidateLayout();
             }
         }
@@ -123,7 +135,8 @@ auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
         {
             if (deltaY != 0)
             {
-                _offset.SetDeltaY(_offset.GetDeltaY() - Dp(deltaY) * scrollStep);
+                auto const distance = precision == PointerScrollPrecision::Coarse ? deltaY * Dp(verticalScrollFactor) : deltaY;
+                _offset.SetDeltaY(_offset.GetDeltaY() - distance);
                 InvalidateLayout();
             }
         }
