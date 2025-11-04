@@ -41,7 +41,6 @@ protected:
     auto Initialize() -> void override;
     auto Measure(MeasureScope& scope) -> void override;
     auto Arrange(ArrangeScope& scope) -> void override;
-    auto Draw(DrawScope& scope) -> void override;
     auto ReceiveEvent(Event<>& event) -> Async<Bool>;
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 

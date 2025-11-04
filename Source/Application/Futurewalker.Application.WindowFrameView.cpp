@@ -18,8 +18,6 @@
 
 namespace FW_DETAIL_NS
 {
-namespace FW_EXPORT
-{
 ///
 /// @brief Make title bar layout.
 ///
@@ -105,53 +103,8 @@ auto WindowFrameView::Arrange(ArrangeScope& scope) -> void
 ///
 /// @brief 
 ///
-auto WindowFrameView::Draw(DrawScope& scope) -> void
-{
-    auto& scene = scope.GetScene();
-
-    scene.AddRect({
-      .rect = GetContentRect(),
-      .color = RGBAColor(1, 1, 1, 0.25),
-      .drawStyle = Graphics::DrawStyle::Fill,
-    });
-
-    scene.AddRect({
-      .rect = GetTitleBarAreaRect(),
-      .color = RGBAColor(0, 1, 1, 0.25),
-      .drawStyle = Graphics::DrawStyle::Fill,
-    });
-    scene.AddRect({
-      .rect = GetTitleBarAreaRect(),
-      .color = RGBAColor(0, 1, 0, 1),
-      .drawStyle = Graphics::DrawStyle::Stroke,
-      .strokeWidth = 1.0,
-    });
-
-    scene.AddRect({
-      .rect = GetTitleBarAvailableAreaRect(),
-      .color = RGBAColor(1, 0, 1, 0.25),
-      .drawStyle = Graphics::DrawStyle::Fill,
-    });
-    scene.AddRect({
-      .rect = GetTitleBarAvailableAreaRect(),
-      .color = RGBAColor(0, 1, 0, 1),
-      .drawStyle = Graphics::DrawStyle::Stroke,
-      .strokeWidth = 1.0,
-    });
-
-    scene.AddRect({
-      .rect = GetContentAreaRect(),
-      .color = RGBAColor(1, 1, 0, 0.25),
-      .drawStyle = Graphics::DrawStyle::Fill,
-    });
-    scene.AddRect({
-      .rect = GetContentAreaRect(),
-      .color = RGBAColor(0, 1, 0, 1),
-      .drawStyle = Graphics::DrawStyle::Stroke,
-      .strokeWidth = 1.0,
-    });
-}
-
+/// @param event 
+///
 auto WindowFrameView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<WindowAreaManagerEvent::TitleBarAreaRectChanged>() ||
@@ -335,6 +288,5 @@ auto WindowFrameView::UpdateAreaManager() -> void
         InvalidateLayout();
         InvalidateVisual();
     }
-}
 }
 }
