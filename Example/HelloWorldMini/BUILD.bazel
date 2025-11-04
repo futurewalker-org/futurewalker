@@ -1,0 +1,11 @@
+load("//:defs.bzl", "fw_binary")
+
+fw_binary(
+    name = "HelloWorldMini",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@futurewalker//:Application",
+        "@futurewalker//:Main",
+        "@futurewalker//:Components/Lamp",
+    ],
+)
