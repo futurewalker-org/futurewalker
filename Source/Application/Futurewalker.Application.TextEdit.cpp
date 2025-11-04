@@ -52,16 +52,6 @@ auto TextEdit::SetBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void
     _backgroundAlpha.SetAttributeArg(alpha);
 }
 
-auto TextEdit::SetDisabledBackgroundColor(AttributeArg<RGBAColor> const& color) -> void
-{
-    _disabledBackgroundColor.SetAttributeArg(color);
-}
-
-auto TextEdit::SetDisabledBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void
-{
-    _disabledBackgroundAlpha.SetAttributeArg(alpha);
-}
-
 auto TextEdit::SetTextColor(AttributeArg<RGBAColor> const& color) -> void
 {
     _textColor.SetAttributeArg(color);
@@ -72,16 +62,6 @@ auto TextEdit::SetTextAlpha(AttributeArg<Channel> const& alpha) -> void
     _textAlpha.SetAttributeArg(alpha);
 }
 
-auto TextEdit::SetDisabledTextColor(AttributeArg<RGBAColor> const& color) -> void
-{
-    _disabledTextColor.SetAttributeArg(color);
-}
-
-auto TextEdit::SetDisabledTextAlpha(AttributeArg<Channel> const& alpha) -> void
-{
-    _disabledTextAlpha.SetAttributeArg(alpha);
-}
-
 auto TextEdit::SetBorderColor(AttributeArg<RGBAColor> const& color) -> void
 {
     _borderColor.SetAttributeArg(color);
@@ -90,16 +70,6 @@ auto TextEdit::SetBorderColor(AttributeArg<RGBAColor> const& color) -> void
 auto TextEdit::SetBorderAlpha(AttributeArg<Channel> const& alpha) -> void
 {
     _borderAlpha.SetAttributeArg(alpha);
-}
-
-auto TextEdit::SetDisabledBorderColor(AttributeArg<RGBAColor> const& color) -> void
-{
-    _disabledBorderColor.SetAttributeArg(color);
-}
-
-auto TextEdit::SetDisabledBorderAlpha(AttributeArg<Channel> const& alpha) -> void
-{
-    _disabledBorderAlpha.SetAttributeArg(alpha);
 }
 
 auto TextEdit::SetBorderWidth(AttributeArg<Dp> const& width) -> void
@@ -147,16 +117,10 @@ auto TextEdit::Initialize() -> void
 
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBackgroundColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBackgroundAlpha, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledBackgroundColor, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledBackgroundAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeTextColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeTextAlpha, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledTextColor, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledTextAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBorderColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBorderAlpha, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledBorderColor, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledBorderAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeBorderWidth, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSize, AttributeFontSize, {0});
@@ -171,16 +135,10 @@ auto TextEdit::Initialize() -> void
     };
     bindAndConnectAttribute(_backgroundColor, AttributeBackgroundColor, {});
     bindAndConnectAttribute(_backgroundAlpha, AttributeBackgroundAlpha, {});
-    bindAndConnectAttribute(_disabledBackgroundColor, AttributeDisabledBackgroundColor, {});
-    bindAndConnectAttribute(_disabledBackgroundAlpha, AttributeDisabledBackgroundAlpha, {});
     bindAndConnectAttribute(_textColor, AttributeTextColor, {});
     bindAndConnectAttribute(_textAlpha, AttributeTextAlpha, {});
-    bindAndConnectAttribute(_disabledTextColor, AttributeDisabledTextColor, {});
-    bindAndConnectAttribute(_disabledTextAlpha, AttributeDisabledTextAlpha, {});
     bindAndConnectAttribute(_borderColor, AttributeBorderColor, {});
     bindAndConnectAttribute(_borderAlpha, AttributeBorderAlpha, {});
-    bindAndConnectAttribute(_disabledBorderColor, AttributeDisabledBorderColor, {});
-    bindAndConnectAttribute(_disabledBorderAlpha, AttributeDisabledBorderAlpha, {});
     bindAndConnectAttribute(_borderWidth, AttributeBorderWidth, {0});
     bindAndConnectAttribute(_cornerRadius, AttributeCornerRadius, {});
     bindAndConnectAttribute(_fontSize, AttributeFontSize, {0});
@@ -497,49 +455,22 @@ auto TextEdit::InternalUpdateLayoutCache() -> void
 
 auto TextEdit::InternalGetBackgroundCololr() const -> RGBAColor
 {
-    if (IsEnabled())
-    {
-        auto const color = _backgroundColor.GetValueOrDefault();
-        auto const alpha = _backgroundAlpha.GetValueOrDefault();
-        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
-    }
-    else
-    {
-        auto const color = _disabledBackgroundColor.GetValueOrDefault();
-        auto const alpha = _disabledBackgroundAlpha.GetValueOrDefault();
-        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
-    }
+    auto const color = _backgroundColor.GetValueOrDefault();
+    auto const alpha = _backgroundAlpha.GetValueOrDefault();
+    return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
 }
 
 auto TextEdit::InternalGetTextColor() const -> RGBAColor
 {
-    if (IsEnabled())
-    {
-        auto const color = _textColor.GetValueOrDefault();
-        auto const alpha = _textAlpha.GetValueOrDefault();
-        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
-    }
-    else
-    {
-        auto const color = _disabledTextColor.GetValueOrDefault();
-        auto const alpha = _disabledTextAlpha.GetValueOrDefault();
-        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
-    }
+    auto const color = _textColor.GetValueOrDefault();
+    auto const alpha = _textAlpha.GetValueOrDefault();
+    return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
 }
 
 auto TextEdit::InternalGetBorderColor() const -> RGBAColor
 {
-    if (IsEnabled())
-    {
-        auto const color = _borderColor.GetValueOrDefault();
-        auto const alpha = _borderAlpha.GetValueOrDefault();
-        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
-    }
-    else
-    {
-        auto const color = _disabledBorderColor.GetValueOrDefault();
-        auto const alpha = _disabledBorderAlpha.GetValueOrDefault();
-        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
-    }
+    auto const color = _borderColor.GetValueOrDefault();
+    auto const alpha = _borderAlpha.GetValueOrDefault();
+    return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
 }
 }

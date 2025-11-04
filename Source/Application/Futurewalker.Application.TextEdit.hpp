@@ -41,12 +41,8 @@ public:
 
     auto SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void;
-    auto SetDisabledBackgroundColor(AttributeArg<RGBAColor> const& color) -> void;
-    auto SetDisabledBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetTextColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetTextAlpha(AttributeArg<Channel> const& alpha) -> void;
-    auto SetDisabledTextColor(AttributeArg<RGBAColor> const& color) -> void;
-    auto SetDisabledTextAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetBorderColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetBorderAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetDisabledBorderColor(AttributeArg<RGBAColor> const& color) -> void;
@@ -94,16 +90,10 @@ private:
     Shared<InputMethodEditable> _inputMethodEditable;
     AttributeAccessor<RGBAColor> _backgroundColor;
     AttributeAccessor<Channel> _backgroundAlpha;
-    AttributeAccessor<RGBAColor> _disabledBackgroundColor;
-    AttributeAccessor<Channel> _disabledBackgroundAlpha;
     AttributeAccessor<RGBAColor> _textColor;
     AttributeAccessor<Channel> _textAlpha;
-    AttributeAccessor<RGBAColor> _disabledTextColor;
-    AttributeAccessor<Channel> _disabledTextAlpha;
     AttributeAccessor<RGBAColor> _borderColor;
     AttributeAccessor<Channel> _borderAlpha;
-    AttributeAccessor<RGBAColor> _disabledBorderColor;
-    AttributeAccessor<Channel> _disabledBorderAlpha;
     AttributeAccessor<Dp> _borderWidth;
     AttributeAccessor<CornerRadius> _cornerRadius;
     AttributeAccessor<Graphics::FontSize> _fontSize;

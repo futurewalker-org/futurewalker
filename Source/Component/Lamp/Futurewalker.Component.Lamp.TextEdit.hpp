@@ -25,6 +25,10 @@ protected:
     auto Initialize() -> void override;
 
 private:
+    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto UpdateStyle() -> void;
+
+private:
     Shared<::FW_NS::TextEdit> _textEdit;
 };
 }
