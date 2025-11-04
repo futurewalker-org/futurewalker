@@ -37,9 +37,7 @@ public:
     auto SetText(AttributeArg<String> const& text) -> void;
 
     auto SetColor(AttributeArg<RGBAColor> const& color) -> void;
-    auto SetDisabledColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetAlpha(AttributeArg<Channel> const& alpha) -> void;
-    auto SetDisabledAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetFontSize(AttributeArg<Graphics::FontSize> const& size) -> void;
     auto SetFontWeight(AttributeArg<Graphics::FontWeight> const& weight) -> void;
     auto SetFontWidth(AttributeArg<Graphics::FontWidth> const& width) -> void;
@@ -72,8 +70,6 @@ private:
     AttributeAccessor<String> _text;
     AttributeAccessor<RGBAColor> _color;
     AttributeAccessor<Channel> _alpha;
-    AttributeAccessor<RGBAColor> _disabledColor;
-    AttributeAccessor<Channel> _disabledAlpha;
     AttributeAccessor<Graphics::FontSize> _fontSize;
     AttributeAccessor<Graphics::FontWeight> _fontWeight;
     AttributeAccessor<Graphics::FontWidth> _fontWidth;

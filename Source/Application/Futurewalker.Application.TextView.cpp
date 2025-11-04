@@ -66,16 +66,6 @@ auto TextView::SetColor(AttributeArg<RGBAColor> const& color) -> void
 }
 
 ///
-/// @brief
-///
-/// @param color
-///
-auto TextView::SetDisabledColor(AttributeArg<RGBAColor> const& color) -> void
-{
-    _disabledColor.SetAttributeArg(color);
-}
-
-///
 /// @brief 
 ///
 /// @param alpha 
@@ -83,16 +73,6 @@ auto TextView::SetDisabledColor(AttributeArg<RGBAColor> const& color) -> void
 auto TextView::SetAlpha(AttributeArg<Channel> const& alpha) -> void
 {
     _alpha.SetAttributeArg(alpha);
-}
-
-///
-/// @brief
-///
-/// @param alpha
-///
-auto TextView::SetDisabledAlpha(AttributeArg<Channel> const& alpha) -> void
-{
-    _disabledAlpha.SetAttributeArg(alpha);
 }
 
 ///
@@ -180,9 +160,7 @@ auto TextView::Initialize() -> void
 {
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(String, AttributeText, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeColor, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeAlpha, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSize, AttributeFontSize, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWeight, AttributeFontWeight, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWidth, AttributeFontWidth, {0});
@@ -199,9 +177,7 @@ auto TextView::Initialize() -> void
     };
     bindAndConnectAttribute(_text, AttributeText, {});
     bindAndConnectAttribute(_color, AttributeColor, {});
-    bindAndConnectAttribute(_disabledColor, AttributeDisabledColor, {});
     bindAndConnectAttribute(_alpha, AttributeAlpha, {});
-    bindAndConnectAttribute(_disabledAlpha, AttributeDisabledAlpha, {});
     bindAndConnectAttribute(_fontSize, AttributeFontSize, {0});
     bindAndConnectAttribute(_fontWeight, AttributeFontWeight, {0});
     bindAndConnectAttribute(_fontWidth, AttributeFontWidth, {0});
@@ -324,18 +300,9 @@ auto TextView::GetFontSize() const -> Graphics::FontSize
 ///
 auto TextView::GetTextColor() const -> RGBAColor
 {
-    if (IsEnabledFromRoot())
-    {
-        auto const color = _color.GetValueOrDefault();
-        auto const alpha = _alpha.GetValueOrDefault();
-        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), alpha.GetF64() * color.GetAlpha().GetF64());
-    }
-    else
-    {
-        auto const color = _disabledColor.GetValueOrDefault();
-        auto const alpha = _disabledAlpha.GetValueOrDefault();
-        return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), alpha.GetF64() * color.GetAlpha().GetF64());
-    }
+    auto const color = _color.GetValueOrDefault();
+    auto const alpha = _alpha.GetValueOrDefault();
+    return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), alpha.GetF64() * color.GetAlpha().GetF64());
 }
 
 ///

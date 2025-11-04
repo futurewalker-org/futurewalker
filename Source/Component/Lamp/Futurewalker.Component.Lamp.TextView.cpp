@@ -43,10 +43,34 @@ TextView::TextView(PassKey<View> key)
 auto TextView::Initialize() -> void
 {
     _textView = ::FW_NS::TextView::Make();
-    _textView->SetColor(TextViewStyle::Color);
-    _textView->SetAlpha(TextViewStyle::Alpha);
-    _textView->SetDisabledColor(TextViewStyle::DisabledColor);
-    _textView->SetDisabledAlpha(TextViewStyle::DisabledAlpha);
+    AddChildBack(_textView);
+
+    UpdateStyle();
+
+    EventReceiver::Connect(*this, *this, &TextView::ReceiveEvent);
+}
+
+auto TextView::ReceiveEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<ViewEvent::EnabledChanged>())
+    {
+        UpdateStyle();
+    }
+    co_return false;
+}
+
+auto TextView::UpdateStyle() -> void
+{
+    if (IsEnabledFromRoot())
+    {
+        _textView->SetColor(TextViewStyle::Color);
+        _textView->SetAlpha(TextViewStyle::Alpha);
+    }
+    else
+    {
+        _textView->SetColor(TextViewStyle::DisabledColor);
+        _textView->SetAlpha(TextViewStyle::DisabledAlpha);
+    }
     _textView->SetFontSize(TextViewStyle::FontSize);
     _textView->SetFontWeight(TextViewStyle::FontWeight);
     _textView->SetFontWidth(TextViewStyle::FontWidth);
@@ -54,7 +78,6 @@ auto TextView::Initialize() -> void
     _textView->SetFontFamily(TextViewStyle::FontFamily);
     _textView->SetHorizontalAlignment(TextViewStyle::HorizontalAlignment);
     _textView->SetVerticalAlignment(TextViewStyle::VerticalAlignment);
-    AddChildBack(_textView);
 }
 }
 }
