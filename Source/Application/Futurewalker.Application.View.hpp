@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.ViewType.hpp"
+#include "Futurewalker.Application.ViewEvent.hpp"
 #include "Futurewalker.Application.RootViewType.hpp"
 #include "Futurewalker.Application.WindowType.hpp"
 #include "Futurewalker.Application.MeasureScopeType.hpp"
