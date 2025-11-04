@@ -62,17 +62,6 @@ Window::Window(PassKey<Window>)
 ///
 Window::~Window()
 {
-    try
-    {
-        if (!IsClosed())
-        {
-            _platformObject->Close();
-        }
-    }
-    catch (...)
-    {
-        FW_DEBUG_ASSERT(false);
-    }
 }
 
 ///
