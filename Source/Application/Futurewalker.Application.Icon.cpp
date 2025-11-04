@@ -111,11 +111,12 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
     return Icon(nullptr);
 }
 
-auto Icon::Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color) const -> void
+auto Icon::Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color, Channel const& alpha) const -> void
 {
     if (_impl)
     {
-        _impl->Draw(scene, rect, color);
+        auto const drawColor = RGBAColor(color.GetRGBColor(), color.GetAlpha().GetF64() * alpha.GetF64());
+        _impl->Draw(scene, rect, drawColor);
     }
 }
 

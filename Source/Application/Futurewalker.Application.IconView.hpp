@@ -28,8 +28,6 @@ public:
     auto SetSize(AttributeArg<Dp> const& size) -> void;
     auto SetColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetAlpha(AttributeArg<Channel> const& alpha) -> void;
-    auto SetDisabledColor(AttributeArg<RGBAColor> const& color) -> void;
-    auto SetDisabledAlpha(AttributeArg<Channel> const& alpha) -> void;
 
 protected:
     auto Initialize() -> void override;
@@ -38,15 +36,12 @@ protected:
 
 private:
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
-    auto GetIconColor() const -> RGBAColor;
 
 private:
     AttributeAccessor<Icon> _icon;
     AttributeAccessor<Dp> _size;
     AttributeAccessor<RGBAColor> _color;
     AttributeAccessor<Channel> _alpha;
-    AttributeAccessor<RGBAColor> _disabledColor;
-    AttributeAccessor<Channel> _disabledAlpha;
 };
 }
 }

@@ -27,6 +27,8 @@ public:
 
 protected:
     auto Initialize() -> void override;
+    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto UpdateStyle() -> void;
 
 private:
     Shared<::FW_NS::IconView> _iconView;

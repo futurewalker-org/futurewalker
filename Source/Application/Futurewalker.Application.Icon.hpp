@@ -28,7 +28,7 @@ public:
     auto operator==(Icon const& other) const -> bool = default;
     auto operator!=(Icon const& other) const -> bool = default;
 
-    auto Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color) const -> void;
+    auto Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color, Channel const& alpha) const -> void;
 
 private:
     class Impl;

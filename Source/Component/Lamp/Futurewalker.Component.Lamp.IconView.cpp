@@ -43,11 +43,33 @@ IconView::IconView(PassKey<View> key)
 auto IconView::Initialize() -> void
 {
     _iconView = ::FW_NS::IconView::Make();
-    _iconView->SetSize(IconViewStyle::Size);
-    _iconView->SetColor(IconViewStyle::Color);
-    _iconView->SetAlpha(IconViewStyle::Alpha);
-    _iconView->SetDisabledColor(IconViewStyle::DisabledColor);
-    _iconView->SetDisabledAlpha(IconViewStyle::DisabledAlpha);
     AddChildBack(_iconView);
+    UpdateStyle();
+    EventReceiver::Connect(*this, *this, &IconView::ReceiveEvent);
+}
+
+auto IconView::ReceiveEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<ViewEvent::EnabledChanged>())
+    {
+        UpdateStyle();
+    }
+    co_return false;
+}
+
+auto IconView::UpdateStyle() -> void
+{
+    _iconView->SetSize(IconViewStyle::Size);
+
+    if (IsEnabledFromRoot())
+    {
+        _iconView->SetColor(IconViewStyle::Color);
+        _iconView->SetAlpha(IconViewStyle::Alpha);
+    }
+    else
+    {
+        _iconView->SetColor(IconViewStyle::DisabledColor);
+        _iconView->SetAlpha(IconViewStyle::DisabledAlpha);
+    }
 }
 }
