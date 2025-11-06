@@ -39,7 +39,7 @@ public:
     template <class T>
     auto GetValue() const -> Optional<T>
     {
-        if (auto const ptr = _holder.Maybe<Holder<T> const>())
+        if (auto const ptr = _holder.TryAs<Holder<T> const>())
         {
             return ptr->value;
         }
@@ -68,7 +68,7 @@ private:
 
         auto EqualsTo(Shared<HolderBase const> const& other) const -> bool override
         {
-            if (auto const otherPtr = other.Maybe<Holder<T> const>())
+            if (auto const otherPtr = other.TryAs<Holder<T> const>())
             {
                 return value == otherPtr->value;
             }

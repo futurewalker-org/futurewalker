@@ -55,79 +55,79 @@ public:
     static auto As(std::shared_ptr<T>&& p) -> std::shared_ptr<U>;
 
     template <class U, class T>
-    static auto Assume(T& r) -> U&;
+    static auto UnsafeAs(T& r) -> U&;
 
     template <class U, class T>
-    static auto Assume(T* p) -> U*;
+    static auto UnsafeAs(T* p) -> U*;
 
     template <class U, class T>
-    static auto Assume(std::shared_ptr<T>& p) -> std::shared_ptr<U>;
+    static auto UnsafeAs(std::shared_ptr<T>& p) -> std::shared_ptr<U>;
 
     template <class U, class T>
-    static auto Assume(const std::shared_ptr<T>& p) -> std::shared_ptr<U>;
+    static auto UnsafeAs(const std::shared_ptr<T>& p) -> std::shared_ptr<U>;
 
     template <class U, class T>
-    static auto Assume(std::shared_ptr<T>&& p) -> std::shared_ptr<U>;
+    static auto UnsafeAs(std::shared_ptr<T>&& p) -> std::shared_ptr<U>;
 
     template <class U, class T>
-    static auto Assume(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>;
+    static auto UnsafeAs(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>;
 
     template <class U, class T>
-    static auto Maybe(T* p) -> U*;
+    static auto TryAs(T* p) -> U*;
 
     template <class U, class T>
-    static auto Maybe(std::shared_ptr<T>& p) -> std::shared_ptr<U>;
+    static auto TryAs(std::shared_ptr<T>& p) -> std::shared_ptr<U>;
 
     template <class U, class T>
-    static auto Maybe(const std::shared_ptr<T>& p) -> std::shared_ptr<U>;
+    static auto TryAs(const std::shared_ptr<T>& p) -> std::shared_ptr<U>;
 
     template <class U, class T>
-    static auto Maybe(std::shared_ptr<T>&& p) -> std::shared_ptr<U>;
+    static auto TryAs(std::shared_ptr<T>&& p) -> std::shared_ptr<U>;
 
     template <class U, class T>
-    static auto Maybe(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>;
+    static auto TryAs(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>;
 };
 
 template <class U, class T>
 auto DynamicCastFunction::Is(T& r) -> Bool
 {
-    return Maybe<U>(&r) != nullptr;
+    return TryAs<U>(&r) != nullptr;
 }
 
 template <class U, class T>
 auto DynamicCastFunction::Is(T* p) -> Bool
 {
-    return Maybe<U>(p) != nullptr;
+    return TryAS<U>(p) != nullptr;
 }
 
 template <class U, class T>
 auto DynamicCastFunction::Is(const std::shared_ptr<T>& p) -> Bool
 {
-    return Maybe<U>(p) != nullptr;
+    return TryAs<U>(p) != nullptr;
 }
 
 template <class U, class T>
 auto DynamicCastFunction::Is(std::shared_ptr<T>& p) -> Bool
 {
-    return Maybe<U>(p) != nullptr;
+    return TryAs<U>(p) != nullptr;
 }
 
 template <class U, class T>
 auto DynamicCastFunction::Is(std::shared_ptr<T>&& p) -> Bool
 {
-    return Maybe<U>(std::move(p)) != nullptr;
+    return TryAs<U>(std::move(p)) != nullptr;
 }
 
 template <class U, class T>
 auto DynamicCastFunction::Is(const std::shared_ptr<T>&& p) -> Bool
 {
-    return Maybe<U>(std::move(p)) != nullptr;
+    return TryAs<U>(std::move(p)) != nullptr;
 }
 
 template <class U, class T>
 auto DynamicCastFunction::As(T& r) -> U&
 {
-    if (auto ptr = Maybe<U>(&r))
+    if (auto ptr = TryAs<U>(&r))
     {
         return *ptr;
     }
@@ -137,7 +137,7 @@ auto DynamicCastFunction::As(T& r) -> U&
 template <class U, class T>
 auto DynamicCastFunction::As(T* p) -> U*
 {
-    if (auto ptr = Maybe<U>(p))
+    if (auto ptr = TryAs<U>(p))
     {
         return ptr;
     }
@@ -147,7 +147,7 @@ auto DynamicCastFunction::As(T* p) -> U*
 template <class U, class T>
 auto DynamicCastFunction::As(const std::shared_ptr<T>& p) -> std::shared_ptr<U>
 {
-    if (auto ptr = Maybe<U>(p))
+    if (auto ptr = TryAs<U>(p))
     {
         return ptr;
     }
@@ -157,7 +157,7 @@ auto DynamicCastFunction::As(const std::shared_ptr<T>& p) -> std::shared_ptr<U>
 template <class U, class T>
 auto DynamicCastFunction::As(std::shared_ptr<T>& p) -> std::shared_ptr<U>
 {
-    if (auto ptr = Maybe<U>(p))
+    if (auto ptr = TryAs<U>(p))
     {
         return ptr;
     }
@@ -167,7 +167,7 @@ auto DynamicCastFunction::As(std::shared_ptr<T>& p) -> std::shared_ptr<U>
 template <class U, class T>
 auto DynamicCastFunction::As(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>
 {
-    if (auto ptr = Maybe<U>(std::move(p)))
+    if (auto ptr = TryAs<U>(std::move(p)))
     {
         return ptr;
     }
@@ -177,7 +177,7 @@ auto DynamicCastFunction::As(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>
 template <class U, class T>
 auto DynamicCastFunction::As(std::shared_ptr<T>&& p) -> std::shared_ptr<U>
 {
-    if (auto ptr = Maybe<U>(std::move(p)))
+    if (auto ptr = TryAs<U>(std::move(p)))
     {
         return ptr;
     }
@@ -185,68 +185,67 @@ auto DynamicCastFunction::As(std::shared_ptr<T>&& p) -> std::shared_ptr<U>
 }
 
 template <class U, class T>
-auto DynamicCastFunction::Assume(T& r) -> U&
+auto DynamicCastFunction::UnsafeAs(T& r) -> U&
 {
     return static_cast<U&>(r);
 }
 
 template <class U, class T>
-auto DynamicCastFunction::Assume(T* p) -> U*
+auto DynamicCastFunction::UnsafeAs(T* p) -> U*
 {
     return static_cast<U*>(p);
 }
 
 template <class U, class T>
-auto DynamicCastFunction::Assume(std::shared_ptr<T>& p) -> std::shared_ptr<U>
+auto DynamicCastFunction::UnsafeAs(std::shared_ptr<T>& p) -> std::shared_ptr<U>
 {
     return std::static_pointer_cast<U>(p);
 }
 
 template <class U, class T>
-auto DynamicCastFunction::Assume(const std::shared_ptr<T>& p) -> std::shared_ptr<U>
+auto DynamicCastFunction::UnsafeAs(const std::shared_ptr<T>& p) -> std::shared_ptr<U>
 {
     return std::static_pointer_cast<U>(p);
 }
 
 template <class U, class T>
-auto DynamicCastFunction::Assume(std::shared_ptr<T>&& p) -> std::shared_ptr<U>
+auto DynamicCastFunction::UnsafeAs(std::shared_ptr<T>&& p) -> std::shared_ptr<U>
 {
     return std::static_pointer_cast<U>(std::move(p));
 }
 
 template <class U, class T>
-auto DynamicCastFunction::Assume(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>
+auto DynamicCastFunction::UnsafeAs(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>
 {
     return std::static_pointer_cast<U>(std::move(p));
 }
 
-
 template <class U, class T>
-auto DynamicCastFunction::Maybe(T* p) -> U*
+auto DynamicCastFunction::TryAs(T* p) -> U*
 {
     return dynamic_cast<U*>(p);
 }
 
 template <class U, class T>
-auto DynamicCastFunction::Maybe(std::shared_ptr<T>& p) -> std::shared_ptr<U>
+auto DynamicCastFunction::TryAs(std::shared_ptr<T>& p) -> std::shared_ptr<U>
 {
     return std::dynamic_pointer_cast<U>(p);
 }
 
 template <class U, class T>
-auto DynamicCastFunction::Maybe(const std::shared_ptr<T>& p) -> std::shared_ptr<U>
+auto DynamicCastFunction::TryAs(const std::shared_ptr<T>& p) -> std::shared_ptr<U>
 {
     return std::dynamic_pointer_cast<U>(p);
 }
 
 template <class U, class T>
-auto DynamicCastFunction::Maybe(std::shared_ptr<T>&& p) -> std::shared_ptr<U>
+auto DynamicCastFunction::TryAs(std::shared_ptr<T>&& p) -> std::shared_ptr<U>
 {
     return std::dynamic_pointer_cast<U>(std::move(p));
 }
 
 template <class U, class T>
-auto DynamicCastFunction::Maybe(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>
+auto DynamicCastFunction::TryAs(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>
 {
     return std::dynamic_pointer_cast<U>(std::move(p));
 }

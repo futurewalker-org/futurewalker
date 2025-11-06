@@ -308,7 +308,7 @@ auto SkiaScene::AddRoundRect(RoundRectParam param) -> void
 ///
 auto SkiaScene::AddGlyphRun(GlyphRunParam param) -> void
 {
-    if (auto const skiaGlyphRun = param.run.Maybe<SkiaGlyphRun>())
+    if (auto const skiaGlyphRun = param.run.TryAs<SkiaGlyphRun>())
     {
         skiaGlyphRun->Draw(static_cast<SkCanvas*>(_canvas), SceneParamToSkPaint(param));
     }
@@ -321,7 +321,7 @@ auto SkiaScene::AddGlyphRun(GlyphRunParam param) -> void
 ///
 auto SkiaScene::AddDisplayList(DisplayListParam param) -> void
 {
-    if (auto const skiaDisplayList = param.displayList.Maybe<SkiaDisplayList>())
+    if (auto const skiaDisplayList = param.displayList.TryAs<SkiaDisplayList>())
     {
         if (auto const picture = skiaDisplayList->GetPicture())
         {

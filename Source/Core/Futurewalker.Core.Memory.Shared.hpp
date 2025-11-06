@@ -256,9 +256,9 @@ public:
     /// @return
     ///
     template <class U>
-    auto Maybe() const noexcept -> Shared<U>
+    auto TryAs() const noexcept -> Shared<U>
     {
-        return Shared<U>(DynamicCastFunction::Maybe<U>(_ptr));
+        return Shared<U>(DynamicCastFunction::TryAs<U>(_ptr));
     }
 
     ///
@@ -269,9 +269,9 @@ public:
     /// @return
     ///
     template <class U>
-    auto Assume() const noexcept -> Shared<U>
+    auto UnsafeAs() const noexcept -> Shared<U>
     {
-        return Shared<U>(DynamicCastFunction::Assume<U>(_ptr));
+        return Shared<U>(DynamicCastFunction::UnsafeAs<U>(_ptr));
     }
 
     template <class U, class V>

@@ -43,7 +43,7 @@ PlatformViewLayerWin::PlatformViewLayerWin(PassKey<PlatformViewLayer> key, Share
 ///
 auto PlatformViewLayerWin::AddChild(Shared<PlatformViewLayer> child, Shared<PlatformViewLayer> after) -> void
 {
-    if (auto childWin = child.Maybe<PlatformViewLayerWin>())
+    if (auto childWin = child.TryAs<PlatformViewLayerWin>())
     {
         child->RemoveFromParent();
 

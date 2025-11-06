@@ -499,7 +499,7 @@ auto PlatformWindowWin::RequestFrame() -> void
         if (const auto context = GetContext())
         {
             context->RequestFrame(GetSelf(), [](Shared<void> data, PlatformVsyncFrameInfo const& frameInfo) {
-                if (const auto window = data.Assume<PlatformWindowWin>())
+                if (const auto window = data.UnsafeAs<PlatformWindowWin>())
                 {
                     window->HandleFrameSwap(frameInfo.targetTimestamp);
                 }
@@ -1055,7 +1055,7 @@ auto PlatformWindowWin::HandleShow(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
         {
             if (_options.behavior == WindowBehavior::Dialog)
             {
-                if (const auto owner = _options.owner.Maybe<PlatformWindowWin>())
+                if (const auto owner = _options.owner.TryAs<PlatformWindowWin>())
                 {
                     owner->DisableWindow(GetSelf());
                 }
@@ -1268,7 +1268,7 @@ auto PlatformWindowWin::HandleDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
         try
         {
-            if (const auto owner = _options.owner.Maybe<PlatformWindowWin>())
+            if (const auto owner = _options.owner.TryAs<PlatformWindowWin>())
             {
                 owner->RemoveOwnedWindow(GetSelf());
             }
@@ -2017,7 +2017,7 @@ auto PlatformWindowWin::DisableWindow(Shared<PlatformWindowWin> const& source) -
 
     if (_options.behavior != WindowBehavior::Dialog)
     {
-        const auto owner = _options.owner.Maybe<PlatformWindowWin>();
+        const auto owner = _options.owner.TryAs<PlatformWindowWin>();
         if (owner && owner != source)
         {
             owner->DisableWindow(self);
@@ -2034,7 +2034,7 @@ auto PlatformWindowWin::EnableWindow(Shared<PlatformWindowWin> const& source) ->
 
     if (_options.behavior != WindowBehavior::Dialog)
     {
-        const auto owner = _options.owner.Maybe<PlatformWindowWin>();
+        const auto owner = _options.owner.TryAs<PlatformWindowWin>();
         if (owner && owner != source)
         {
             owner->EnableWindow(self);
@@ -2063,7 +2063,7 @@ auto PlatformWindowWin::Destroy() -> void
 {
     if (_hwnd)
     {
-        if (const auto owner = _options.owner.Maybe<PlatformWindowWin>())
+        if (const auto owner = _options.owner.TryAs<PlatformWindowWin>())
         {
             if (_options.behavior == WindowBehavior::Dialog)
             {

@@ -15,7 +15,7 @@ auto PlatformInputMethodWin::SetEditable(Shared<PlatformInputMethodEditable> con
 {
     if (auto textStore = GetTextStore())
     {
-        if (auto win = editable.Maybe<PlatformInputMethodEditableWin>())
+        if (auto win = editable.TryAs<PlatformInputMethodEditableWin>())
         {
             textStore->SetEditable(win);
         }

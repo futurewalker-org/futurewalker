@@ -212,9 +212,9 @@ public:
     /// @return
     ///
     template <class U>
-    auto Maybe() && noexcept -> Unique<U>
+    auto TryAs() && noexcept -> Unique<U>
     {
-        return Unique<U>(DynamicCastFunction::Maybe<U>(_ptr));
+        return Unique<U>(DynamicCastFunction::TryAs<U>(_ptr));
     }
 
     ///
@@ -225,9 +225,9 @@ public:
     /// @return
     ///
     template <class U>
-    auto Assume() && noexcept -> Unique<U>
+    auto UnsafeAs() && noexcept -> Unique<U>
     {
-        return Unique<U>(DynamicCastFunction::Assume<U>(_ptr));
+        return Unique<U>(DynamicCastFunction::UnsafeAs<U>(_ptr));
     }
 
     template <class U, class V>

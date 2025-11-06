@@ -76,7 +76,7 @@ private:
 template <class Self>
 auto PlatformInputMethodEditable::GetSelf(this Self& self) -> Shared<Self>
 {
-    return static_cast<TypeTraits::PropagateCVRef<Self&, PlatformInputMethodEditable>>(self)._self.Lock().template Assume<Self>();
+    return static_cast<TypeTraits::PropagateCVRef<Self&, PlatformInputMethodEditable>>(self)._self.Lock().template UnsafeAs<Self>();
 }
 
 ///

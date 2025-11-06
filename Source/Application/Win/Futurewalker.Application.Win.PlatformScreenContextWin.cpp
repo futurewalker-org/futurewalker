@@ -104,7 +104,7 @@ auto PlatformScreenContextWin::GetPrimaryScreen() -> Shared<PlatformScreen>
 ///
 auto PlatformScreenContextWin::GetScreenFromWindow(Shared<PlatformWindow> window) -> Shared<PlatformScreen>
 {
-    if (auto const win = window.Maybe<PlatformWindowWin>())
+    if (auto const win = window.TryAs<PlatformWindowWin>())
     {
         auto const hwnd = win->GetNativeHandle();
         if (::IsWindow(hwnd))

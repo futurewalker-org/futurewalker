@@ -112,7 +112,7 @@ private:
 template <class Self>
 auto PlatformViewLayer::GetSelf(this Self& self) -> Shared<Self>
 {
-    return static_cast<TypeTraits::PropagateCVRef<Self&, PlatformViewLayer>>(self)._self.Lock().template Assume<Self>();
+    return static_cast<TypeTraits::PropagateCVRef<Self&, PlatformViewLayer>>(self)._self.Lock().template UnsafeAs<Self>();
 }
 
 ///

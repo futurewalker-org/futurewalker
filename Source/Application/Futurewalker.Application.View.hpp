@@ -306,7 +306,7 @@ private:
 template <class Self>
 auto View::GetSelf(this Self& self) -> Shared<Self>
 {
-    return static_cast<TypeTraits::PropagateCVRef<Self&, View>>(self).GetSelfBase().template Assume<Self>();
+    return static_cast<TypeTraits::PropagateCVRef<Self&, View>>(self).GetSelfBase().template UnsafeAs<Self>();
 }
 
 ///

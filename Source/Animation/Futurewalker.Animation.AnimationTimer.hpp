@@ -111,7 +111,7 @@ private:
 template <class Self>
 auto AnimationTimer::GetSelf(this Self& self) -> Shared<Self>
 {
-    return static_cast<TypeTraits::PropagateCVRef<Self&, AnimationTimer>>(self).GetSelfBase().template Assume<Self>();
+    return static_cast<TypeTraits::PropagateCVRef<Self&, AnimationTimer>>(self).GetSelfBase().template UnsafeAs<Self>();
 }
 
 ///

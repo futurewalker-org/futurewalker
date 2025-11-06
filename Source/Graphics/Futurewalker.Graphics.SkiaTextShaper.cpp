@@ -24,7 +24,7 @@ namespace
 {
 auto GetSkTypeface(Shared<Typeface> const& typeface) -> sk_sp<SkTypeface>
 {
-    if (auto const skia = typeface.Maybe<SkiaTypeface>())
+    if (auto const skia = typeface.TryAs<SkiaTypeface>())
     {
         return skia->GetTypeface();
     }
@@ -98,7 +98,7 @@ public:
     // Called after each runBuffer is filled out.
     auto commitRunBuffer(const RunInfo& info) -> void override
     {
-        auto run = _runs.back().Assume<SkiaGlyphRun>();
+        auto run = _runs.back().UnsafeAs<SkiaGlyphRun>();
         run->SetFont(info.fFont);
         run->SetAdvance(info.fAdvance.fX);
         run->SetText(_text.GetSubTextByU8Range({info.utf8Range.begin(), info.utf8Range.end()}));

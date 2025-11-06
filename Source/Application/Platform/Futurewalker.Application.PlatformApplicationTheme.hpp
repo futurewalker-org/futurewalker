@@ -47,7 +47,7 @@ private:
 template <class Self>
 auto PlatformApplicationTheme::GetSelf(this Self& self) -> Shared<Self>
 {
-    return static_cast<TypeTraits::PropagateCVRef<Self&, PlatformApplicationTheme>>(self)._self.Lock().template Assume<Self>();
+    return static_cast<TypeTraits::PropagateCVRef<Self&, PlatformApplicationTheme>>(self)._self.Lock().template UnsafeAs<Self>();
 }
 
 template <class Derived, class... Args>

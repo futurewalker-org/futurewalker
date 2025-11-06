@@ -313,7 +313,7 @@ auto PlatformWindowContextWin::InitializeWindow(Shared<PlatformWindowWin> const&
 
     FW_DEBUG_LOG_INFO("CreateWindowHandle(): hwnd=0x{:x}", (uintptr_t)hwnd);
 
-    if (const auto ownerWindow = options.owner.Maybe<PlatformWindowWin>())
+    if (const auto ownerWindow = options.owner.TryAs<PlatformWindowWin>())
     {
         ownerWindow->AddOwnedWindow(window);
     }

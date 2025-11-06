@@ -222,11 +222,11 @@ auto Locator::InternalResolve() -> Shared<Interface>
     auto const id = TypeId::Get<Interface>();
     if (auto instance = FindInstance(static_cast<Id>(id)))
     {
-        return instance.Assume<Interface>();
+        return instance.UnsafeAs<Interface>();
     }
     if (auto instance = CreateInstance(static_cast<Id>(id)))
     {
-        return instance.Assume<Interface>();
+        return instance.UnsafeAs<Interface>();
     }
     throw Exception(ErrorCode::Failure, "Failed to resolve dependency");
 }
@@ -241,7 +241,7 @@ auto Locator::InternalGetInstance() -> Shared<Interface>
     auto const id = TypeId::Get<Interface>();
     if (auto instance = FindInstance(static_cast<Id>(id)))
     {
-        return instance.Assume<Interface>();
+        return instance.UnsafeAs<Interface>();
     }
     return nullptr;
 }

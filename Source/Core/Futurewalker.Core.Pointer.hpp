@@ -287,9 +287,9 @@ public:
     /// @return
     ///
     template <class U>
-    auto Maybe() const noexcept -> Pointer<U>
+    auto TryAs() const noexcept -> Pointer<U>
     {
-        return Pointer<U>(DynamicCastFunction::Maybe<U>(_ptr));
+        return Pointer<U>(DynamicCastFunction::TryAs<U>(_ptr));
     }
 
     ///
@@ -300,9 +300,9 @@ public:
     /// @return
     ///
     template <class U>
-    auto Assume() const noexcept -> Pointer<U>
+    auto UnsafeAs() const noexcept -> Pointer<U>
     {
-        return Pointer<U>(DynamicCastFunction::Assume<U>(_ptr));
+        return Pointer<U>(DynamicCastFunction::UnsafeAs<U>(_ptr));
     }
 
 private:

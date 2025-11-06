@@ -110,7 +110,7 @@ auto Application::MakeDerived(Args&&... args) -> Shared<Derived>
 template <class Self>
 auto Application::GetSelf(this Self& self) -> Shared<Self>
 {
-    return static_cast<TypeTraits::PropagateCVRef<Self&, Application>>(self).GetSelfBase().template Assume<Self>();
+    return static_cast<TypeTraits::PropagateCVRef<Self&, Application>>(self).GetSelfBase().template UnsafeAs<Self>();
 }
 }
 }
