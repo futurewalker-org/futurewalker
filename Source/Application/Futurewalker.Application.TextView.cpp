@@ -312,6 +312,7 @@ auto TextView::InvalidateLayoutCache() -> void
 {
     _shapedText.Reset();
     _shapedTextMaxWidth = Dp::Infinity();
+    _shapedTextIntrinsicWidth = Dp::Infinity();
 }
 
 ///
@@ -327,7 +328,8 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
 
     auto const matchesMaxWidth = Dp::IsNearlyEqual(maxWidth, _shapedTextMaxWidth);
     auto const matchesWidth = Dp::IsNearlyEqual(GetCachedTextSize().GetWidth(), maxWidth);
-    if (!_shapedText || (!matchesMaxWidth && !matchesWidth))
+    auto const belowIntrinsicWidth = _shapedTextIntrinsicWidth < maxWidth;
+    if (!_shapedText || (!matchesMaxWidth && !matchesWidth && !belowIntrinsicWidth))
     {
         auto const size = GetFontSize();
         auto const text = GetText();
@@ -335,6 +337,15 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
         {
             _shapedText = _shaper->ShapeText(Text(text), GetTypeface(), size, maxWidth);
             _shapedTextMaxWidth = maxWidth;
+
+            if (GetCachedTextLineCount() == 1)
+            {
+                _shapedTextIntrinsicWidth = GetCachedTextLineSize(0).GetWidth();
+            }
+            else
+            {
+                _shapedTextIntrinsicWidth = Dp::Infinity();
+            }
         }
     }
 }

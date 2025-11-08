@@ -80,6 +80,7 @@ private:
     Shared<Graphics::TextShaper> _shaper;
     Optional<Graphics::ShapedText> _shapedText;
     Dp _shapedTextMaxWidth = Dp::Infinity();
+    Dp _shapedTextIntrinsicWidth = Dp::Infinity();
 };
 }
 }
