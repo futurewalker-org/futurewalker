@@ -347,6 +347,10 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
                 _shapedTextIntrinsicWidth = Dp::Infinity();
             }
         }
+        else
+        {
+            InvalidateLayoutCache();
+        }
     }
 }
 
