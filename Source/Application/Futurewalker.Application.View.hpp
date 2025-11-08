@@ -146,7 +146,7 @@ public:
     auto GetAttributeNode() -> AttributeNode&;
     auto GetAttributeNode() const -> AttributeNode const&;
 
-    auto EnterMeasureScope(PassKey<MeasureScope>, MeasureParameter const& parameter) -> void;
+    auto EnterMeasureScope(PassKey<MeasureScope>, MeasureParameter const& parameter) -> Size<Dp>;
     auto EnterArrangeScope(PassKey<ArrangeScope>, ArrangeParameter const& parameter) -> void;
     auto EnterDrawScope(PassKey<DrawScope>) -> void;
     auto EnterHitTestScope(PassKey<HitTestScope>, HitTestParameter const& parameter) -> Shared<View>;

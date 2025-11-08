@@ -54,10 +54,11 @@ private:
     Bool _arrangeRequired = true;
     Bool _measuring = false;
     Bool _arranging = false;
-    MeasureParameter _measureParameter;
-    ArrangeParameter _arrangeParameter;
+
+    MeasureParameter _lastMeasureParameter;
 
     Bool _measuredSizeSet = false;
+    Bool _measuredIntrinsicSizeSet = false;
 
     struct MeasuredSize
     {
@@ -66,6 +67,7 @@ private:
         Size<Dp> size;
     };
     MeasuredSize _measuredSize;
+    MeasuredSize _measuredIntrinsicSize;
 
     LayoutDirection _layoutDirection = LayoutDirection::LeftToRight;
     ViewLayoutDirection _rawLayoutDirection = ViewLayoutDirection::Inherited;

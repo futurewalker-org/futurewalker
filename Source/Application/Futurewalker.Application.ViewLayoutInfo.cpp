@@ -42,13 +42,20 @@ auto ViewLayoutInfo::BeginMeasure(MeasureParameter const& parameter) -> Bool
 {
     if (!_measuring && !_arranging)
     {
-        _measureParameter = parameter;
+        _lastMeasureParameter = parameter;
 
-        if (IsMeasureRequired() || IsMeasureNeeded(parameter))
+        auto const measureRequired = IsMeasureRequired();
+        auto const measureNeeded = IsMeasureNeeded(parameter);
+        if (measureRequired || measureNeeded)
         {
             _measuring = true;
             _measuredSizeSet = false;
             _arrangeRequired = true;
+
+            if (measureRequired)
+            {
+                _measuredIntrinsicSizeSet = false;
+            }
             return true;
         }
     }
@@ -119,10 +126,21 @@ auto ViewLayoutInfo::IsArranging() const -> Bool
 ///
 auto ViewLayoutInfo::GetMeasuredSize() const -> Size<Dp>
 {
+    auto const lastParameterWidth = _lastMeasureParameter.GetWidthConstraints();
+    auto const lastParameterHeight = _lastMeasureParameter.GetHeightConstraints();
+
+    if (_measuredIntrinsicSizeSet)
+    {
+        if (_measuredIntrinsicSize.widthConstraints == lastParameterWidth && _measuredIntrinsicSize.heightConstraints == lastParameterHeight)
+        {
+            return _measuredIntrinsicSize.size;
+        }
+    }
+
     if (_measuredSizeSet)
     {
-        FW_DEBUG_ASSERT(_measuredSize.widthConstraints == _measureParameter.GetWidthConstraints());
-        FW_DEBUG_ASSERT(_measuredSize.heightConstraints == _measureParameter.GetHeightConstraints());
+        FW_DEBUG_ASSERT(_measuredSize.widthConstraints == lastParameterWidth);
+        FW_DEBUG_ASSERT(_measuredSize.heightConstraints == lastParameterHeight);
         return _measuredSize.size;
     }
     FW_DEBUG_ASSERT(false);
@@ -143,15 +161,26 @@ auto ViewLayoutInfo::SetMeasuredSize(MeasureParameter const& parameter, Size<Dp>
         return constrained;
     };
 
-    const auto width = forceConstraints(parameter.GetWidthConstraints(), size.GetWidth());
-    const auto height = forceConstraints(parameter.GetHeightConstraints(), size.GetHeight());
+    auto const parameterWidth = parameter.GetWidthConstraints();
+    auto const parameterHeight = parameter.GetHeightConstraints();
+
+    auto const width = forceConstraints(parameterWidth, size.GetWidth());
+    auto const height = forceConstraints(parameterHeight, size.GetHeight());
 
     _measuredSize = {
-        .widthConstraints = parameter.GetWidthConstraints(),
-        .heightConstraints = parameter.GetHeightConstraints(),
+        .widthConstraints = parameterWidth,
+        .heightConstraints = parameterHeight,
         .size = Size<Dp>(width, height),
     };
     _measuredSizeSet = true;
+
+    auto const unboundedLooseWidth = !parameterWidth.IsBounded() && parameterWidth.GetMin() == 0;
+    auto const unboundedLooseHeight = !parameterHeight.IsBounded() && parameterHeight.GetMin() == 0;
+    if (unboundedLooseWidth && unboundedLooseHeight)
+    {
+        _measuredIntrinsicSize = _measuredSize;
+        _measuredIntrinsicSizeSet = true;
+    }
 }
 
 ///
@@ -207,7 +236,20 @@ auto ViewLayoutInfo::IsMeasureNeeded(MeasureParameter const& parameter) const ->
 {
     const auto widthConstraints = parameter.GetWidthConstraints();
     const auto heightConstraints = parameter.GetHeightConstraints();
-    return _measuredSize.widthConstraints != widthConstraints || _measuredSize.heightConstraints != heightConstraints;
+
+    if (_measuredIntrinsicSizeSet)
+    {
+        if (_measuredIntrinsicSize.widthConstraints == widthConstraints && _measuredIntrinsicSize.heightConstraints == heightConstraints)
+        {
+            return false;
+        }
+    }
+
+    if (_measuredSizeSet)
+    {
+        return _measuredSize.widthConstraints != widthConstraints || _measuredSize.heightConstraints != heightConstraints;
+    }
+    return true;
 }
 
 ///

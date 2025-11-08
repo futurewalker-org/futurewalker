@@ -745,7 +745,7 @@ auto View::GetAttributeNode() const -> AttributeNode const&
 ///
 /// @param parameter 
 ///
-auto View::EnterMeasureScope(PassKey<MeasureScope>, MeasureParameter const& parameter) -> void
+auto View::EnterMeasureScope(PassKey<MeasureScope>, MeasureParameter const& parameter) -> Size<Dp>
 {
     try
     {
@@ -761,12 +761,14 @@ auto View::EnterMeasureScope(PassKey<MeasureScope>, MeasureParameter const& para
             Measure(scope);
             _layoutInfo.EndMeasure();
         }
+        return _layoutInfo.GetMeasuredSize();
     }
     catch (...)
     {
         FW_DEBUG_ASSERT(false);
         _layoutInfo.EndMeasure();
     }
+    return {};
 }
 
 ///
