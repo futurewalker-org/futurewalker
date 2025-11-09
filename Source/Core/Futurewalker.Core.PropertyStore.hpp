@@ -48,7 +48,7 @@ template <class Owner, class T>
 auto PropertyStore::SetValue(Owner& owner, Id const key, T const& value) -> void
 {
     auto& map = owner.GetPropertyStore()._map;
-    map.emplace(key, value);
+    map.insert_or_assign(key, value);
 }
 
 ///
