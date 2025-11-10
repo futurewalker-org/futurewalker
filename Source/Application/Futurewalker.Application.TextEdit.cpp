@@ -129,23 +129,19 @@ auto TextEdit::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSlant, AttributeFontSlant, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontFamily, AttributeFontFamily, {});
 
-    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute, typename Accessor::ValueType const& value) {
-        accessor.BindAttributeWithDefaultValue(*this, attribute, value);
-        EventReceiver::Connect(accessor, *this, &TextEdit::ReceiveAttributeEvent);
-    };
-    bindAndConnectAttribute(_backgroundColor, AttributeBackgroundColor, {});
-    bindAndConnectAttribute(_backgroundAlpha, AttributeBackgroundAlpha, {});
-    bindAndConnectAttribute(_textColor, AttributeTextColor, {});
-    bindAndConnectAttribute(_textAlpha, AttributeTextAlpha, {});
-    bindAndConnectAttribute(_borderColor, AttributeBorderColor, {});
-    bindAndConnectAttribute(_borderAlpha, AttributeBorderAlpha, {});
-    bindAndConnectAttribute(_borderWidth, AttributeBorderWidth, {0});
-    bindAndConnectAttribute(_cornerRadius, AttributeCornerRadius, {});
-    bindAndConnectAttribute(_fontSize, AttributeFontSize, {0});
-    bindAndConnectAttribute(_fontWeight, AttributeFontWeight, {0});
-    bindAndConnectAttribute(_fontWidth, AttributeFontWidth, {0});
-    bindAndConnectAttribute(_fontSlant, AttributeFontSlant, {});
-    bindAndConnectAttribute(_fontFamily, AttributeFontFamily, {});
+    _backgroundColor.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeBackgroundColor, {});
+    _backgroundAlpha.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeBackgroundAlpha, {});
+    _textColor.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeTextColor, {});
+    _textAlpha.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeTextAlpha, {});
+    _borderColor.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeBorderColor, {});
+    _borderAlpha.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeBorderAlpha, {});
+    _borderWidth.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeBorderWidth, {0});
+    _cornerRadius.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeCornerRadius, {});
+    _fontSize.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontSize, {0});
+    _fontWeight.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontWeight, {0});
+    _fontWidth.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontWidth, {0});
+    _fontSlant.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontSlant, {});
+    _fontFamily.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontFamily, {});
 
     EventReceiver::Connect(*_inputMethodEditable, *this, &TextEdit::ReceiveInputEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveInputEvent);

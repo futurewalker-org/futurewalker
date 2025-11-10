@@ -247,23 +247,19 @@ auto ButtonView::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeBorderWidth, {0});
 
-    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute, StaticAttributeRef<typename Accessor::ValueType> reference) {
-        accessor.BindAttributeWithDefaultReference(*this, attribute, reference);
-        EventReceiver::Connect(accessor, *this, &ButtonView::ReceiveAttributeEvent);
-    };
-    bindAndConnectAttribute(_backgroundColor, AttributeBackgroundColor, ButtonViewStyle::BackgroundColor);
-    bindAndConnectAttribute(_backgroundAlpha, AttributeBackgroundAlpha, ButtonViewStyle::BackgroundAlpha);
-    bindAndConnectAttribute(_disabledBackgroundColor, AttributeDisabledBackgroundColor, ButtonViewStyle::DisabledBackgroundColor);
-    bindAndConnectAttribute(_disabledBackgroundAlpha, AttributeDisabledBackgroundAlpha, ButtonViewStyle::DisabledBackgroundAlpha);
-    bindAndConnectAttribute(_borderColor, AttributeBorderColor, ButtonViewStyle::BorderColor);
-    bindAndConnectAttribute(_borderAlpha, AttributeBorderAlpha, ButtonViewStyle::BorderAlpha);
-    bindAndConnectAttribute(_disabledBorderColor, AttributeDisabledBorderColor, ButtonViewStyle::DisabledBorderColor);
-    bindAndConnectAttribute(_disabledBorderAlpha, AttributeDisabledBorderAlpha, ButtonViewStyle::DisabledBorderAlpha);
-    bindAndConnectAttribute(_highlightColor, AttributeHighlightColor, ButtonViewStyle::HighlightColor);
-    bindAndConnectAttribute(_hoverHighlightAlpha, AttributeHoverHighlightAlpha, ButtonViewStyle::HoverHighlightAlpha);
-    bindAndConnectAttribute(_pressHighlightAlpha, AttributePressHighlightAlpha, ButtonViewStyle::PressHighlightAlpha);
-    bindAndConnectAttribute(_cornerRadius, AttributeCornerRadius, ButtonViewStyle::CornerRadius);
-    bindAndConnectAttribute(_borderWidth, AttributeBorderWidth, ButtonViewStyle::BorderWidth);
+    _backgroundColor.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeBackgroundColor, ButtonViewStyle::BackgroundColor);
+    _backgroundAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeBackgroundAlpha, ButtonViewStyle::BackgroundAlpha);
+    _disabledBackgroundColor.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeDisabledBackgroundColor, ButtonViewStyle::DisabledBackgroundColor);
+    _disabledBackgroundAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeDisabledBackgroundAlpha, ButtonViewStyle::DisabledBackgroundAlpha);
+    _borderColor.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeBorderColor, ButtonViewStyle::BorderColor);
+    _borderAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeBorderAlpha, ButtonViewStyle::BorderAlpha);
+    _disabledBorderColor.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeDisabledBorderColor, ButtonViewStyle::DisabledBorderColor);
+    _disabledBorderAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeDisabledBorderAlpha, ButtonViewStyle::DisabledBorderAlpha);
+    _highlightColor.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeHighlightColor, ButtonViewStyle::HighlightColor);
+    _hoverHighlightAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeHoverHighlightAlpha, ButtonViewStyle::HoverHighlightAlpha);
+    _pressHighlightAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributePressHighlightAlpha, ButtonViewStyle::PressHighlightAlpha);
+    _cornerRadius.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeCornerRadius, ButtonViewStyle::CornerRadius);
+    _borderWidth.BindAndConnectAttributeWithDefaultReference(*this, &ButtonView::ReceiveAttributeEvent, AttributeBorderWidth, ButtonViewStyle::BorderWidth);
 }
 
 ///

@@ -66,13 +66,12 @@ PaddingView::PaddingView(PassKey<View> key)
 
 auto PaddingView::Initialize() -> void
 {
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(EdgeInsets, PaddingAttribute, {});
-
-    _padding.BindAttribute(*this, PaddingAttribute);
     _container = ContainerView::Make();
     AddChildBack(_container);
 
-    EventReceiver::Connect(_padding, *this, &PaddingView::ReceiveAttributeEvent);
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(EdgeInsets, PaddingAttribute, {});
+
+    _padding.BindAndConnectAttributeWithDefaultValue(*this, &PaddingView::ReceiveAttributeEvent, PaddingAttribute, {});
 }
 
 auto PaddingView::Measure(MeasureScope& scope) -> void

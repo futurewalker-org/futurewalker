@@ -19,7 +19,7 @@ auto SizedView::Make() -> Shared<SizedView>
 ///
 /// @brief Make with width and height.
 ///
-auto SizedView::Make(Dp const width, Dp const height) -> Shared<SizedView>
+auto SizedView::Make(AttributeArg<Dp> const& width, AttributeArg<Dp> const& height) -> Shared<SizedView>
 {
     auto view = Make();
     view->SetWidth(width);
@@ -40,7 +40,7 @@ auto SizedView::MakeWithContent(Shared<View> const& content) -> Shared<SizedView
 ///
 /// @brief Make with width/height and content view.
 ///
-auto SizedView::MakeWithContent(Dp const width, Dp const height, Shared<View> const& content) -> Shared<SizedView>
+auto SizedView::MakeWithContent(AttributeArg<Dp> const& width, AttributeArg<Dp> const& height, Shared<View> const& content) -> Shared<SizedView>
 {
     auto view = Make(width, height);
     view->SetContent(content);
@@ -50,19 +50,9 @@ auto SizedView::MakeWithContent(Dp const width, Dp const height, Shared<View> co
 ///
 /// @brief Set width.
 ///
-auto SizedView::SetWidth(Dp const width) -> void
+auto SizedView::SetWidth(AttributeArg<Dp> const& width) -> void
 {
-    if (Dp::IsNaN(width))
-    {
-        return;
-    }
-
-    const auto actual = Dp::Max(0, width);
-    if (_width != actual)
-    {
-        _width = actual;
-        InvalidateLayout();
-    }
+    _width.SetAttributeArg(width);
 }
 
 ///
@@ -70,25 +60,15 @@ auto SizedView::SetWidth(Dp const width) -> void
 ///
 auto SizedView::GetWidth() const -> Dp
 {
-    return _width;
+    return _width.GetValueOr(0);
 }
 
 ///
 /// @brief Set height.
 ///
-auto SizedView::SetHeight(Dp const height) -> void
+auto SizedView::SetHeight(AttributeArg<Dp> const& height) -> void
 {
-    if (Dp::IsNaN(height))
-    {
-        return;
-    }
-
-    const auto actual = Dp::Max(0, height);
-    if (_height != actual)
-    {
-        _height = actual;
-        InvalidateLayout();
-    }
+    _height.SetAttributeArg(height);
 }
 
 ///
@@ -96,7 +76,7 @@ auto SizedView::SetHeight(Dp const height) -> void
 ///
 auto SizedView::GetHeight() const -> Dp
 {
-    return _height;
+    return _height.GetValueOr(0);
 }
 
 ///
@@ -137,6 +117,12 @@ auto SizedView::Initialize() -> void
 {
     _container = ContainerView::Make();
     AddChildBack(_container);
+
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeWidth, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeHeight, {0});
+
+    _width.BindAndConnectAttributeWithDefaultValue(*this, &SizedView::ReceiveAttributeEvent, AttributeWidth, 0);
+    _height.BindAndConnectAttributeWithDefaultValue(*this, &SizedView::ReceiveAttributeEvent, AttributeHeight, 0);
 }
 
 ///
@@ -148,11 +134,20 @@ auto SizedView::Measure(MeasureScope& scope) -> void
     const auto& widthConstr = parameter.GetWidthConstraints();
     const auto& heightConstr = parameter.GetHeightConstraints();
 
-    const auto measuredWidth = MeasureAxis(widthConstr, _width);
-    const auto measuredHeight = MeasureAxis(heightConstr, _height);
+    const auto measuredWidth = MeasureAxis(widthConstr, GetLayoutWidth());
+    const auto measuredHeight = MeasureAxis(heightConstr, GetLayoutHeight());
     scope.SetMeasuredSize(measuredWidth, measuredHeight);
 
     ForEachVisibleChild([&](View& view) { scope.MeasureChild(view, AxisConstraints::MakeExact(measuredWidth), AxisConstraints::MakeExact(measuredHeight)); });
+}
+
+auto SizedView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<AttributeEvent::ValueChanged>())
+    {
+        InvalidateLayout();
+    }
+    co_return false;
 }
 
 ///
@@ -165,5 +160,35 @@ auto SizedView::MeasureAxis(const AxisConstraints& c, Dp const v) const -> Dp
         return AxisConstraints::Constrain(c, ViewLayoutFunction::AlignToPixelGridByRound(v, *this));
     }
     return c.IsBounded() ? c.GetMax() : c.GetMin();
+}
+
+///
+/// @brief 
+///
+auto SizedView::GetLayoutWidth() const -> Dp
+{
+    if (auto width = _width.GetValue())
+    {
+        if (!Dp::IsNaN(*width))
+        {
+            return Dp::Max(0, *width);
+        }
+    }
+    return 0;
+}
+
+///
+/// @brief 
+///
+auto SizedView::GetLayoutHeight() const -> Dp
+{
+    if (auto height = _height.GetValue())
+    {
+        if (!Dp::IsNaN(*height))
+        {
+            return Dp::Max(0, *height);
+        }
+    }
+    return 0;
 }
 }

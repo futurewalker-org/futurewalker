@@ -52,6 +52,22 @@ public:
     }
 
     ///
+    /// @brief Bind attribute accessor and connect event.
+    ///
+    /// @param owner Owner of attribute node.
+    /// @param function Event receiver function.
+    /// @param attribute Attribute to bind.
+    ///
+    /// @return Signal connection.
+    ///
+    template <class Owner, class Function>
+    auto BindAndConnectAttribute(Owner& owner, Function&& function, StaticAttributeRef<T> attribute) -> SignalConnection
+    {
+        BindAttribute(owner, attribute);
+        return EventReceiver::Connect(*this, owner, std::forward<Function>(function));
+    }
+
+    ///
     /// @brief Bind accessor to an attribute with default value assigned.
     ///
     /// @param[in] owner Owner of AttributeNode
@@ -74,6 +90,23 @@ public:
     }
 
     ///
+    /// @brief Bind attribute accessor with fallback value and connect event.
+    ///
+    /// @param owner Owner of attribute node.
+    /// @param function Event receiver function.
+    /// @param attribute Attribute to bind.
+    /// @param defaultValue Default value of the attribute.
+    ///
+    /// @return Signal connection.
+    ///
+    template <class Owner, class Function>
+    auto BindAndConnectAttributeWithDefaultValue(Owner& owner, Function&& function, StaticAttributeRef<T> attribute, T const& defaultValue) -> SignalConnection
+    {
+        BindAttributeWithDefaultValue(owner, attribute, defaultValue);
+        return EventReceiver::Connect(*this, owner, std::forward<Function>(function));
+    }
+
+    ///
     /// @brief Bind accessor to an attribute with default reference assigned.
     ///
     /// @param[in] owner Owner of AttributeNode
@@ -93,6 +126,23 @@ public:
             return true;
         }
         return false;
+    }
+
+    ///
+    /// @brief Bind attribute accessor with default attribute reference and connect event.
+    ///
+    /// @param owner Owner of attribute node.
+    /// @param function Event receiver function.
+    /// @param attribute Attribute to bind.
+    /// @param reference Default reference of the attribute.
+    ///
+    /// @return Signal connection.
+    ///
+    template <class Owner, class Function>
+    auto BindAndConnectAttributeWithDefaultReference(Owner& owner, Function&& function, StaticAttributeRef<T> attribute, StaticAttributeRef<T> reference) -> SignalConnection
+    {
+        BindAttributeWithDefaultReference(owner, attribute, reference);
+        return EventReceiver::Connect(*this, owner, std::forward<Function>(function));
     }
 
     ///

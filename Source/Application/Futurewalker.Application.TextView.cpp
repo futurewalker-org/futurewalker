@@ -171,20 +171,16 @@ auto TextView::Initialize() -> void
 
     _shaper = Graphics::TextShaper::Make();
 
-    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute, typename Accessor::ValueType const& value) {
-        accessor.BindAttributeWithDefaultValue(*this, attribute, value);
-        EventReceiver::Connect(accessor, *this, &TextView::ReceiveAttributeEvent);
-    };
-    bindAndConnectAttribute(_text, AttributeText, {});
-    bindAndConnectAttribute(_color, AttributeColor, {});
-    bindAndConnectAttribute(_alpha, AttributeAlpha, {});
-    bindAndConnectAttribute(_fontSize, AttributeFontSize, {0});
-    bindAndConnectAttribute(_fontWeight, AttributeFontWeight, {0});
-    bindAndConnectAttribute(_fontWidth, AttributeFontWidth, {0});
-    bindAndConnectAttribute(_fontSlant, AttributeFontSlant, {});
-    bindAndConnectAttribute(_fontFamily, AttributeFontFamily, {});
-    bindAndConnectAttribute(_horizontalAlignment, AttributeHorizontalAlignment, {TextViewHorizontalAlignment::Center});
-    bindAndConnectAttribute(_verticalAlignment, AttributeVerticalAlignment, {TextViewVerticalAlignment::Middle});
+    _text.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeText, {});
+    _color.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeColor, {});
+    _alpha.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeAlpha, {});
+    _fontSize.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeFontSize, {0});
+    _fontWeight.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeFontWeight, {0});
+    _fontWidth.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeFontWidth, {0});
+    _fontSlant.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeFontSlant, {});
+    _fontFamily.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeFontFamily, {});
+    _horizontalAlignment.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeHorizontalAlignment, {TextViewHorizontalAlignment::Center});
+    _verticalAlignment.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeVerticalAlignment, {TextViewVerticalAlignment::Middle});
 }
 
 ///

@@ -414,7 +414,7 @@ auto Window::MeasureSize(BoxConstraints const& constraints) -> Size<Dp>
 ///
 /// @brief
 ///
-auto Window::SetBackgroundColor(AttributeArg<RGBAColor> color) -> void
+auto Window::SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void
 {
     _backgroundColor.SetAttributeArg(color);
 }

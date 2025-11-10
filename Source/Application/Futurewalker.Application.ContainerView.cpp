@@ -124,15 +124,10 @@ auto ContainerView::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBorderColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeBorderWidth, {0});
 
-    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute, typename Accessor::ValueType const& defaultValue) {
-        accessor.BindAttributeWithDefaultValue(*this, attribute, defaultValue);
-        EventReceiver::Connect(accessor, *this, &ContainerView::ReceiveEvent);
-    };
-
-    bindAndConnectAttribute(_backgroundColor, AttributeBackgroundColor, {});
-    bindAndConnectAttribute(_borderColor, AttributeBorderColor, {});
-    bindAndConnectAttribute(_borderWidth, AttributeBorderWidth, {0});
-    bindAndConnectAttribute(_cornerRadius, AttributeCornerRadius, {});
+    _backgroundColor.BindAndConnectAttributeWithDefaultValue(*this, &ContainerView::ReceiveEvent, AttributeBackgroundColor, {});
+    _borderColor.BindAndConnectAttributeWithDefaultValue(*this, &ContainerView::ReceiveEvent, AttributeBorderColor, {});
+    _borderWidth.BindAndConnectAttributeWithDefaultValue(*this, &ContainerView::ReceiveEvent, AttributeBorderWidth, {0});
+    _cornerRadius.BindAndConnectAttributeWithDefaultValue(*this, &ContainerView::ReceiveEvent, AttributeCornerRadius, {});
 
     EventReceiver::Connect(*this, *this, &ContainerView::ReceiveEvent);
 }

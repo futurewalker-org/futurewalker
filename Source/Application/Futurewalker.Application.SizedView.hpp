@@ -5,6 +5,8 @@
 #include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.View.hpp"
 
+#include "Futurewalker.Attribute.AttributeAccessor.hpp"
+
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -16,14 +18,14 @@ class SizedView final : public View
 {
 public:
     static auto Make() -> Shared<SizedView>;
-    static auto Make(Dp const width, Dp const height) -> Shared<SizedView>;
+    static auto Make(AttributeArg<Dp> const& width, AttributeArg<Dp> const& height) -> Shared<SizedView>;
     static auto MakeWithContent(Shared<View> const& content) -> Shared<SizedView>;
-    static auto MakeWithContent(Dp const width, Dp const height, Shared<View> const& content) -> Shared<SizedView>;
+    static auto MakeWithContent(AttributeArg<Dp> const& width, AttributeArg<Dp> const& height, Shared<View> const& content) -> Shared<SizedView>;
 
-    auto SetWidth(Dp const width) -> void;
+    auto SetWidth(AttributeArg<Dp> const& width) -> void;
     auto GetWidth() const -> Dp;
 
-    auto SetHeight(Dp const height) -> void;
+    auto SetHeight(AttributeArg<Dp> const& height) -> void;
     auto GetHeight() const -> Dp;
 
     auto SetContent(Shared<View> const& content) -> void;
@@ -34,14 +36,17 @@ public:
 protected:
     auto Initialize() -> void override;
     auto Measure(MeasureScope& scope) -> void override;
+    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 
 private:
     auto MeasureAxis(const AxisConstraints& c, Dp const v) const -> Dp;
+    auto GetLayoutWidth() const -> Dp;
+    auto GetLayoutHeight() const -> Dp;
 
 private:
     Shared<ContainerView> _container;
-    Dp _width = 0;
-    Dp _height = 0;
+    AttributeAccessor<Dp> _width;
+    AttributeAccessor<Dp> _height;
 };
 }
 }

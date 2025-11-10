@@ -159,7 +159,7 @@ public:
 
     auto MeasureSize(BoxConstraints const& constraints) -> Size<Dp>;
 
-    auto SetBackgroundColor(AttributeArg<RGBAColor> color) -> void;
+    auto SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void;
 
     auto GetTracker() -> Tracker&;
     auto GetTracker() const -> Tracker const&;
