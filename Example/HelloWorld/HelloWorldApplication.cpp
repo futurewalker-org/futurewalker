@@ -35,8 +35,8 @@ auto HelloWorldApplication::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<ApplicationEvent::Started>())
     {
-        ApplicationTheme::PushTheme(ThemeBrightness::Light, Shared<Lamp::Theme>::Make(ThemeBrightness::Light));
-        ApplicationTheme::PushTheme(ThemeBrightness::Dark, Shared<Lamp::Theme>::Make(ThemeBrightness::Dark));
+        ApplicationTheme::AddTheme(ThemeBrightness::Light, Shared<Lamp::Theme>::Make(ThemeBrightness::Light));
+        ApplicationTheme::AddTheme(ThemeBrightness::Dark, Shared<Lamp::Theme>::Make(ThemeBrightness::Dark));
 
         auto const hello = String(u8"Hello, World!");
 

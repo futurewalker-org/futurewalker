@@ -36,11 +36,11 @@ auto ApplicationTheme::SetBrightness(ApplicationThemeBrightness const brightness
     }
 }
 
-auto ApplicationTheme::PushTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void
+auto ApplicationTheme::AddTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void
 {
     if (auto const themeInstance = Locator::GetInstance<ApplicationTheme>())
     {
-        themeInstance->InternalPushTheme(brightness, theme);
+        themeInstance->InternalAddTheme(brightness, theme);
     }
 }
 
@@ -117,7 +117,7 @@ auto ApplicationTheme::InternalSetBrightness(ApplicationThemeBrightness const br
     }
 }
 
-auto ApplicationTheme::InternalPushTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void
+auto ApplicationTheme::InternalAddTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void
 {
     if (!theme)
     {

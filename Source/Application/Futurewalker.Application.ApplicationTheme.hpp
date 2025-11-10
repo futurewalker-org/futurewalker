@@ -26,7 +26,7 @@ public:
     static auto GetBrightness() -> ApplicationThemeBrightness;
     static auto SetBrightness(ApplicationThemeBrightness const brightness) -> void;
 
-    static auto PushTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void;
+    static auto AddTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void;
 
 private:
     auto ApplyTheme(Shared<Theme> const& theme) -> void;
@@ -36,7 +36,7 @@ private:
 
     auto InternalGetBrightness() const -> ApplicationThemeBrightness;
     auto InternalSetBrightness(ApplicationThemeBrightness const brightness) -> void;
-    auto InternalPushTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void;
+    auto InternalAddTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void;
 
 private:
     Shared<PlatformApplicationThemeContext> _platformContext;
