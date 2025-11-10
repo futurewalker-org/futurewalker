@@ -20,6 +20,26 @@ public:
     virtual auto Draw(Graphics::Scene& scene,  Rect<Dp> const& rect, RGBAColor const& color) const -> void = 0;
 };
 
+///
+/// @brief Create non-empty but blank icon.
+///
+auto Icon::MakeBlank() -> Icon
+{
+    struct IconBlank final : public Icon::Impl
+    {
+        auto Draw(Graphics::Scene&, Rect<Dp> const&, RGBAColor const&) const -> void override
+        {
+        }
+    };
+    return Icon(Shared<IconBlank>::Make());
+}
+
+///
+/// @brief Create icon from font.
+///
+/// @param family Font family.
+/// @param codePoint Unicode code point.
+///
 auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& codePoint) -> Icon
 {
     struct FontIconDrawable final : public Icon::Impl
@@ -80,8 +100,7 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
                     scene.PushTranslate({.x = 0, .y = offset});
                     scene.PushScale({.x = scale, .y = scale});
                     DrawGlyph(scene, shapedGlyph, color);
-                    scene.Pop({});
-                    scene.Pop({});
+                    scene.Pop({.count = 2});
                 }
                 else
                 {
@@ -90,8 +109,7 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
                     scene.PushTranslate({.x = offset, .y = 0});
                     scene.PushScale({.x = scale, .y = scale});
                     DrawGlyph(scene, shapedGlyph, color);
-                    scene.Pop({});
-                    scene.Pop({});
+                    scene.Pop({.count = 2});
                 }
             }
             scene.Pop({});
@@ -111,6 +129,14 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
     return Icon(nullptr);
 }
 
+///
+/// @brief Draw icon to scene.
+///
+/// @param scene Scene to draw.
+/// @param rect Drawing rectangle.
+/// @param color Color of the icon.
+/// @param alpha Alpha channel of the icon.
+///
 auto Icon::Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color, Channel const& alpha) const -> void
 {
     if (_impl)
@@ -120,6 +146,17 @@ auto Icon::Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& c
     }
 }
 
+///
+/// @brief Check if the icon is empty.
+///
+auto Icon::IsEmpty() const -> Bool
+{
+    return !_impl;
+}
+
+///
+/// @brief Constructor.
+///
 Icon::Icon(Shared<Impl const> const& impl)
   : _impl {impl}
 {

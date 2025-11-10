@@ -20,6 +20,7 @@ namespace FW_EXPORT
 class Icon
 {
 public:
+    static auto MakeBlank() -> Icon;
     static auto MakeFromFont(Graphics::FontFamily const& family, char32_t const& codePoint) -> Icon;
 
     Icon() = default;
@@ -29,6 +30,8 @@ public:
     auto operator!=(Icon const& other) const -> bool = default;
 
     auto Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color, Channel const& alpha) const -> void;
+
+    auto IsEmpty() const -> Bool;
 
 private:
     class Impl;

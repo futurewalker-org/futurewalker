@@ -58,21 +58,18 @@ auto IconView::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeAlpha, {});
 
-    auto bindAndConnectAttribute = [this]<class Accessor>(Accessor& accessor, StaticAttributeRef<typename Accessor::ValueType> attribute, typename Accessor::ValueType const& value) {
-        accessor.BindAttributeWithDefaultValue(*this, attribute, value);
-        EventReceiver::Connect(accessor, *this, &IconView::ReceiveAttributeEvent);
-    };
-    bindAndConnectAttribute(_icon, AttributeIcon, {});
-    bindAndConnectAttribute(_size, AttributeSize, {0});
-    bindAndConnectAttribute(_color, AttributeColor, {});
-    bindAndConnectAttribute(_alpha, AttributeAlpha, {});
+    _icon.BindAndConnectAttributeWithDefaultValue(*this, &IconView::ReceiveAttributeEvent, AttributeIcon, {});
+    _size.BindAndConnectAttributeWithDefaultValue(*this, &IconView::ReceiveAttributeEvent, AttributeSize, {0});
+    _color.BindAndConnectAttributeWithDefaultValue(*this, &IconView::ReceiveAttributeEvent, AttributeColor, {});
+    _alpha.BindAndConnectAttributeWithDefaultValue(*this, &IconView::ReceiveAttributeEvent, AttributeAlpha, {});
 }
 
 auto IconView::Measure(MeasureScope& scope) -> void
 {
     auto const& parameter = scope.GetParameter();
     auto const& constraints = parameter.GetConstraints();
-    auto const iconSize = _size.GetValueOr(0);
+    auto const icon = _icon.GetValueOrDefault();
+    auto const iconSize = icon.IsEmpty() ? 0 : _size.GetValueOr(0);
     auto const measuredSize = BoxConstraints::Constrain(constraints, Size<Dp>(iconSize, iconSize));
     scope.SetMeasuredSize(measuredSize);
 }
