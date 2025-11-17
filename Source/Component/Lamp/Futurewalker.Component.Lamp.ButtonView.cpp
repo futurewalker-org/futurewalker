@@ -282,16 +282,19 @@ auto ButtonView::Draw(DrawScope& scope) -> void
     ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, backgroundColor, layoutDirection);
     ViewDrawFunction::DrawRoundRectBorder(scene, rect, cornerRadius, borderColor, borderWidth, layoutDirection);
 
-    auto highlightAlpha = Channel();
-    if (_down)
+    if (IsEnabledFromRoot())
     {
-        highlightAlpha = _pressHighlightAlpha.GetValueOrDefault();
+        auto highlightAlpha = Channel();
+        if (_down)
+        {
+            highlightAlpha = _pressHighlightAlpha.GetValueOrDefault();
+        }
+        else if (_enter)
+        {
+            highlightAlpha = _hoverHighlightAlpha.GetValueOrDefault();
+        }
+        ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, RGBAColor(highlightColor.GetRGBColor(), highlightAlpha), layoutDirection);
     }
-    else if (_enter)
-    {
-        highlightAlpha = _hoverHighlightAlpha.GetValueOrDefault();
-    }
-    ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, RGBAColor(highlightColor.GetRGBColor(), highlightAlpha), layoutDirection);
 }
 
 ///
