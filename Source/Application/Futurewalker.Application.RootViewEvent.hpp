@@ -9,6 +9,8 @@
 
 #include "Futurewalker.Attribute.AttributeNodeType.hpp"
 
+#include "Futurewalker.Action.CommandNodeType.hpp"
+
 #include "Futurewalker.Geometry.hpp"
 
 #include "Futurewalker.Unit.hpp"
@@ -59,6 +61,9 @@ public:
     auto GetParentAttributeNode() const -> Shared<AttributeNode>;
     auto SetParentAttributeNode(Shared<AttributeNode> parentAttributeNode) -> void;
 
+    auto GetParentCommandNode() const -> Shared<CommandNode>;
+    auto SetParentCommandNode(Shared<CommandNode> parentCommandNode) -> void;
+
     auto GetInputMethod() const -> Shared<InputMethod>;
     auto SetInputMethod(Shared<InputMethod> const& inputMethod) -> void;
 
@@ -69,6 +74,7 @@ private:
     BackingScale _backingScale = 1.0;
     Shared<ViewLayer> _parentLayer;
     Shared<AttributeNode> _parentAttributeNode;
+    Shared<CommandNode> _parentCommandNode;
     Shared<InputMethod> _inputMethod;
 };
 

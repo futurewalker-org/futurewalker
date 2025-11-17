@@ -659,10 +659,12 @@ auto View::SetRawLayoutDirection(ViewLayoutDirection const layoutDirection) -> v
 ///
 /// @brief
 ///
-auto View::MakeOwnedWindow(WindowOptions const& options) -> Shared<Window>
+auto View::MakeOwnedWindow(WindowOptions options) -> Shared<Window>
 {
     if (auto root = GetRoot())
     {
+        options.attributeNode = _attributeNode;
+        options.commandNode = _commandNode;
         return root->RootMakeOwnedWindow(options);
     }
     return {};
@@ -738,6 +740,30 @@ auto View::GetAttributeNode() const -> AttributeNode const&
         return RootGetAttributeNode();
     }
     return *_attributeNode;
+}
+
+///
+/// @brief 
+///
+auto View::GetCommandNode() -> CommandNode&
+{
+    if (IsRoot())
+    {
+        return RootGetCommandNode();
+    }
+    return *_commandNode;
+}
+
+///
+/// @brief
+///
+auto View::GetCommandNode() const -> CommandNode const&
+{
+    if (IsRoot())
+    {
+        return RootGetCommandNode();
+    }
+    return *_commandNode;
 }
 
 ///
@@ -1513,6 +1539,22 @@ auto View::RootGetAttributeNode() const -> AttributeNode const&
 }
 
 ///
+/// @brief 
+///
+auto View::RootGetCommandNode() -> CommandNode&
+{
+    return *_commandNode;
+}
+
+///
+/// @brief
+///
+auto View::RootGetCommandNode() const -> CommandNode const&
+{
+    return *_commandNode;
+}
+
+///
 /// @brief
 ///
 auto View::RootGetLayer() -> ViewLayer&
@@ -1632,6 +1674,7 @@ auto View::SetParent(Shared<View> const& parent) -> void
             parent->GetAnimationTimer().AddChild(_animationTimer, viewAfter ? &viewAfter->GetAnimationTimer() : nullptr);
             parent->GetFocusNode().AddChild(_focusNode, viewAfter ? &viewAfter->GetFocusNode() : nullptr);
             parent->GetAttributeNode().AddChild(_attributeNode);
+            parent->GetCommandNode().AddChild(_commandNode);
             parent->GetLayer().AddChild(_layer, viewAfter ? &viewAfter->GetLayer() : nullptr);
         }
         else
@@ -1639,6 +1682,7 @@ auto View::SetParent(Shared<View> const& parent) -> void
             oldParent->GetAttributeNode().RemoveChild(_attributeNode);
             oldParent->GetFocusNode().RemoveChild(_focusNode);
             oldParent->GetAnimationTimer().RemoveChild(_animationTimer);
+            oldParent->GetCommandNode().RemoveChild(_commandNode);
             oldParent->GetLayer().RemoveChild(_layer);
         }
     }
@@ -1703,6 +1747,7 @@ auto View::InitializeSelf(Shared<View> const& self) -> void
     _animationTimer = AnimationTimer::Make();
     _focusNode = FocusNode::Make();
     _attributeNode = AttributeNode::Make();
+    _commandNode = CommandNode::Make();
     _layerManager = Locator::Resolve<ViewLayerManager>();
     _layer = _layerManager->MakeLayer(ViewLayerKindNormal);
 

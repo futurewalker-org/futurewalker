@@ -8,6 +8,10 @@
 
 #include "Futurewalker.Color.hpp"
 
+#include "Futurewalker.Attribute.AttributeNodeType.hpp"
+
+#include "Futurewalker.Action.CommandNodeType.hpp"
+
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -146,6 +150,20 @@ struct WindowOptions
     /// @note Owner window should not be the one disabled by another modal window.
     ///
     Shared<Window> owner = nullptr;
+
+    ///
+    /// @brief Attribute node to which this window attach.
+    ///
+    /// @note For internal use.
+    ///
+    Shared<AttributeNode> attributeNode = nullptr;
+
+    ///
+    /// @brief Command node to which this window attach.
+    ///
+    /// @note For internal use.
+    ///
+    Shared<CommandNode> commandNode = nullptr;
 
     ///
     /// @brief Is the window closable.

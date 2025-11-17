@@ -30,6 +30,8 @@
 #include "Futurewalker.Attribute.AttributeArg.hpp"
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
+#include "Futurewalker.Action.CommandNodeType.hpp"
+
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.PropertyStore.hpp"
@@ -231,6 +233,7 @@ private:
     WindowBehavior _behavior = WindowBehavior::Normal;
     Unique<PropertyStore> _propertyStore;
     Shared<AttributeNode> _attributeNode;
+    Shared<CommandNode> _commandNode;
     Shared<PlatformWindowContext> _platformContext;
     Shared<PlatformWindow> _platformObject;
     Unique<EventReceiver> _eventReceiver;

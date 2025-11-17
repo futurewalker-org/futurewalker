@@ -77,6 +77,8 @@ private:
     auto RootGetFocusNode() const -> FocusNode const& override;
     auto RootGetAttributeNode() -> AttributeNode& override;
     auto RootGetAttributeNode() const -> AttributeNode const& override;
+    auto RootGetCommandNode() -> CommandNode& override;
+    auto RootGetCommandNode() const -> CommandNode const& override;
     auto RootGetLayer() -> ViewLayer& override;
     auto RootGetLayer() const -> ViewLayer const& override;
     auto RootInvalidateLayout() -> void override;
@@ -99,6 +101,8 @@ private:
     Shared<RootFocusNode> _focusNode;
     Shared<AttributeNode> _parentAttributeNode;
     Shared<AttributeNode> _attributeNode;
+    Shared<CommandNode> _parentCommandNode;
+    Shared<CommandNode> _commandNode;
     Shared<ContainerView> _container;
     Shared<InputMethod> _inputMethod;
     RootViewDrawInfo _drawInfo;

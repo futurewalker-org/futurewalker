@@ -64,6 +64,16 @@ auto RootViewEvent::Owner::SetParentAttributeNode(Shared<AttributeNode> parentAt
     _parentAttributeNode = parentAttributeNode;
 }
 
+auto RootViewEvent::Owner::GetParentCommandNode() const -> Shared<CommandNode>
+{
+    return _parentCommandNode;
+}
+
+auto RootViewEvent::Owner::SetParentCommandNode(Shared<CommandNode> parentCommandNode) -> void
+{
+    _parentCommandNode = parentCommandNode;
+}
+
 auto RootViewEvent::Owner::GetInputMethod() const -> Shared<InputMethod>
 {
     return _inputMethod;

@@ -23,6 +23,8 @@
 
 #include "Futurewalker.Attribute.AttributeNode.hpp"
 
+#include "Futurewalker.Action.CommandNode.hpp"
+
 #include "Futurewalker.Geometry.hpp"
 
 #include "Futurewalker.Unit.hpp"
@@ -132,7 +134,7 @@ public:
     auto GetRawLayoutDirection() const -> ViewLayoutDirection;
     auto SetRawLayoutDirection(ViewLayoutDirection const layoutDirection) -> void;
 
-    auto MakeOwnedWindow(WindowOptions const& options) -> Shared<Window>;
+    auto MakeOwnedWindow(WindowOptions options) -> Shared<Window>;
 
     auto GetTracker() -> Tracker&;
     auto GetTracker() const -> Tracker const&;
@@ -145,6 +147,9 @@ public:
 
     auto GetAttributeNode() -> AttributeNode&;
     auto GetAttributeNode() const -> AttributeNode const&;
+
+    auto GetCommandNode() -> CommandNode&;
+    auto GetCommandNode() const -> CommandNode const&;
 
     auto EnterMeasureScope(PassKey<MeasureScope>, MeasureParameter const& parameter) -> Size<Dp>;
     auto EnterArrangeScope(PassKey<ArrangeScope>, ArrangeParameter const& parameter) -> void;
@@ -220,6 +225,8 @@ private:
     virtual auto RootGetFocusNode() const -> FocusNode const&;
     virtual auto RootGetAttributeNode() -> AttributeNode&;
     virtual auto RootGetAttributeNode() const -> AttributeNode const&;
+    virtual auto RootGetCommandNode() -> CommandNode&;
+    virtual auto RootGetCommandNode() const -> CommandNode const&;
     virtual auto RootGetLayer() -> ViewLayer&;
     virtual auto RootGetLayer() const -> ViewLayer const&;
     virtual auto RootInvalidateLayout() -> void;
@@ -286,6 +293,7 @@ private:
     Shared<AnimationTimer> _animationTimer;
     Shared<FocusNode> _focusNode;
     Shared<AttributeNode> _attributeNode;
+    Shared<CommandNode> _commandNode;
     Shared<ViewLayerManager> _layerManager;
     Shared<ViewLayer> _layer;
     Bool _visible = true;

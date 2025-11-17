@@ -86,6 +86,7 @@ auto RootView::Initialize() -> void
     });
     _focusNode = RootFocusNode::Make();
     _attributeNode = AttributeNode::Make();
+    _commandNode = CommandNode::Make();
 
     _drawInfo.Initialize();
 
@@ -114,7 +115,7 @@ auto RootView::ReceiveEvent(Event<>& event) -> Async<Bool>
         _drawInfo.SetParentLayer(parameter->GetParentLayer());
 
         auto const parentAttributeNode = parameter->GetParentAttributeNode();
-        if (parentAttributeNode != _parentAttributeNode)
+        if (_parentAttributeNode != parentAttributeNode)
         {
             if (_parentAttributeNode)
             {
@@ -128,6 +129,23 @@ auto RootView::ReceiveEvent(Event<>& event) -> Async<Bool>
                 _parentAttributeNode->AddChild(_attributeNode);
             }
         }
+
+        auto const parentCommandNode = parameter->GetParentCommandNode();
+        if (_parentCommandNode != parentCommandNode)
+        {
+            if (_parentCommandNode)
+            {
+                _parentCommandNode->RemoveChild(_commandNode);
+            }
+
+            _parentCommandNode = parentCommandNode;
+
+            if (_parentCommandNode)
+            {
+                _parentCommandNode->AddChild(_commandNode);
+            }
+        }
+
         NotifyRootChanged();
     }
     else if (event.Is<RootViewEvent::Resize>())
@@ -563,6 +581,22 @@ auto RootView::RootGetAttributeNode() -> AttributeNode&
 auto RootView::RootGetAttributeNode() const -> AttributeNode const&
 {
     return *_attributeNode;
+}
+
+///
+/// @brief
+///
+auto RootView::RootGetCommandNode() -> CommandNode&
+{
+    return *_commandNode;
+}
+
+///
+/// @brief
+///
+auto RootView::RootGetCommandNode() const -> CommandNode const&
+{
+    return *_commandNode;
 }
 
 ///

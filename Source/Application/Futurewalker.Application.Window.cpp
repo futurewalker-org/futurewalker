@@ -31,6 +31,9 @@
 
 #include "Futurewalker.Attribute.AttributeNode.hpp"
 
+#include "Futurewalker.Action.CommandNode.hpp"
+#include "Futurewalker.Action.CommandDispatcherContext.hpp"
+
 #include "Futurewalker.Base.Debug.hpp"
 #include "Futurewalker.Base.Locator.hpp"
 
@@ -54,7 +57,6 @@ auto Window::Make(WindowOptions const& options) -> Shared<Window>
 Window::Window(PassKey<Window>)
 {
     _propertyStore = PropertyStore::Make();
-    _attributeNode = AttributeNode::Make();
 }
 
 ///
@@ -680,9 +682,30 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
         .dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); },
     });
 
-    if (const auto applicationContext = Locator::GetInstance<ApplicationContext>())
+    if (options.attributeNode)
     {
-        applicationContext->GetAttributeNode().AddChild(_attributeNode);
+        _attributeNode = options.attributeNode;
+    }
+    else
+    {
+        _attributeNode = AttributeNode::Make();
+        if (auto const applicationContext = Locator::GetInstance<ApplicationContext>())
+        {
+            applicationContext->GetAttributeNode().AddChild(_attributeNode);
+        }
+    }
+
+    if (options.commandNode)
+    {
+        _commandNode = options.commandNode;
+    }
+    else
+    {
+        _commandNode = CommandNode::Make();
+        if (auto const commandDispatcherContext = Locator::GetInstance<CommandDispatcherContext>())
+        {
+            commandDispatcherContext->GetCommandNode().AddChild(_commandNode);
+        }
     }
 
     EventReceiver::Connect(*this, *this, &Window::ReceiveWindowEvent);
@@ -774,6 +797,7 @@ auto Window::AttachRootView() -> void
         parameter->SetBackingScale(GetBackingScale());
         parameter->SetParentLayer(_rootViewLayer);
         parameter->SetParentAttributeNode(_attributeNode);
+        parameter->SetParentCommandNode(_commandNode);
         parameter->SetInputMethod(_inputMethod);
         auto event = Event<>(parameter);
         _rootView->SendEventDetached(event);
@@ -793,6 +817,7 @@ auto Window::DetachRootView() -> void
         parameter->SetBackingScale(1.0);
         parameter->SetDisplayScale(1.0);
         parameter->SetParentAttributeNode(nullptr);
+        parameter->SetParentCommandNode(nullptr);
         parameter->SetParentLayer(nullptr);
         parameter->SetInputMethod(nullptr);
         auto event = Event<>(parameter);
