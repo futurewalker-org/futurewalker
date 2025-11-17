@@ -52,8 +52,7 @@ auto MeasureScope::MeasureChild(ReferenceArg<View> child, BoxConstraints const& 
     {
         auto parameter = MeasureParameter();
         parameter.SetConstraints(constraints);
-        child->EnterMeasureScope(PassKey<MeasureScope>(), parameter);
-        return GetMeasuredSize(*child);
+        return child->EnterMeasureScope(PassKey<MeasureScope>(), parameter);
     }
     FW_DEBUG_ASSERT(false);
     return {};
