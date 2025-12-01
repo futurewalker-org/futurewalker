@@ -289,73 +289,123 @@ auto UnicodeFunction::GetCodePointOrFFFDAndNextIndex(Pointer<char16_t const> dat
 }
 
 ///
-/// @brief Synchronize index to the start of a code point.
+/// @brief Adjust index to the start of a code point.
+///
+/// @param[in] data The pointer to the code units.
+/// @param[in] end The end index of the code units.
+/// @param[in] index The index to synchronize.
+///
+/// @return The adjusted index.
 ///
 /// @note data should contain valid UTF-8 string.
 ///
 auto UnicodeFunction::GetCodePointStartUnsafe(Pointer<char8_t const> data, SInt64 const& end, SInt64 const& index) -> SInt64
 {
-    if (index < end)
+    if (index <= 0)
     {
-        auto const s = reinterpret_cast<uint8_t const*>(static_cast<char8_t const*>(data));
-        auto i = static_cast<int32_t>(index);
-        U8_SET_CP_START_UNSAFE(s, i);
-        return i;
+        return 0;
     }
-    return end;
+    else if (end <= index)
+    {
+        return end;
+    }
+    auto const s = reinterpret_cast<uint8_t const*>(static_cast<char8_t const*>(data));
+    auto i = static_cast<int32_t>(index);
+    U8_SET_CP_START_UNSAFE(s, i);
+    return i;
 }
 
 ///
-/// @brief Synchronize index to the start of a code point.
+/// @brief Adjust index to the start of a code point.
+///
+/// @param[in] data The pointer to the code units.
+/// @param[in] end The end index of the code units.
+/// @param[in] index The index to synchronize.
+///
+/// @return The adjusted index.
 ///
 /// @note data should contain valid UTF-16 string.
 ///
 auto UnicodeFunction::GetCodePointStartUnsafe(Pointer<char16_t const> data, SInt64 const& end, SInt64 const& index) -> SInt64
 {
-    if (index < end)
+    if (index <= 0)
     {
-        auto const s = static_cast<char16_t const*>(data);
-        auto i = static_cast<int32_t>(index);
-        U16_SET_CP_START_UNSAFE(s, i);
-        return i;
+        return 0;
     }
-    return end;
+    else if (end <= index)
+    {
+        return end;
+    }
+    auto const s = static_cast<char16_t const*>(data);
+    auto i = static_cast<int32_t>(index);
+    U16_SET_CP_START_UNSAFE(s, i);
+    return i;
 }
 
 ///
-/// @brief Synchronize index to the end of a code point.
+/// @brief Adjust index to the end of a code point.
+///
+/// @param[in] data The pointer to the code units.
+/// @param[in] end The end index of the code units.
+/// @param[in] index The index to synchronize.
+///
+/// @return The adjusted index.
 ///
 /// @note data should contain valid UTF-8 string.
 ///
 auto UnicodeFunction::GetCodePointLimitUnsafe(Pointer<char8_t const> data, SInt64 const& end, SInt64 const& index) -> SInt64
 {
-    if (index < end)
+    if (index <= 0)
     {
-        auto const s = reinterpret_cast<uint8_t const*>(static_cast<char8_t const*>(data));
-        auto i = static_cast<int32_t>(index);
-        U8_SET_CP_LIMIT_UNSAFE(s, i);
-        return i;
+        return 0;
     }
-    return end;
+    else if (end <= index)
+    {
+        return end;
+    }
+    auto const s = reinterpret_cast<uint8_t const*>(static_cast<char8_t const*>(data));
+    auto i = static_cast<int32_t>(index);
+    U8_SET_CP_LIMIT_UNSAFE(s, i);
+    return i;
 }
 
 ///
-/// @brief Synchronize index to the end of a code point.
+/// @brief Adjust index to the end of a code point.
+///
+/// @param[in] data The pointer to the code units.
+/// @param[in] end The end index of the code units.
+/// @param[in] index The index to synchronize.
+///
+/// @return The adjusted index.
 ///
 /// @note data should contain valid UTF-16 string.
 ///
 auto UnicodeFunction::GetCodePointLimitUnsafe(Pointer<char16_t const> data, SInt64 const& end, SInt64 const& index) -> SInt64
 {
-    if (index < end)
+    if (index <= 0)
     {
-        auto const s = static_cast<char16_t const*>(data);
-        auto i = static_cast<int32_t>(index);
-        U16_SET_CP_LIMIT_UNSAFE(s, i);
-        return i;
+        return 0;
     }
-    return end;
+    else if (end <= index)
+    {
+        return end;
+    }
+    auto const s = static_cast<char16_t const*>(data);
+    auto i = static_cast<int32_t>(index);
+    U16_SET_CP_LIMIT_UNSAFE(s, i);
+    return i;
 }
 
+///
+/// @brief Get next UTF-8 code point index.
+///
+/// @param[in] data Pointer to UTF-8 string data.  
+/// @param[in] index Current index.
+/// @param[in] last Maximum index (one past the end).
+/// @param[in] n Number of code points to move forward.
+///
+/// @return New index after moving forward n code points.
+///
 auto UnicodeFunction::GetNextCodePointIndex(Pointer<char8_t const> data, SInt64 const& index, SInt64 const& last, SInt64 const& n) -> SInt64
 {
     if (n > 0)
