@@ -3,10 +3,8 @@
 #include "Futurewalker.Text.Text.hpp"
 
 #include "Futurewalker.Core.StringFunction.hpp"
+#include "Futurewalker.Core.UnicodeFunction.hpp"
 #include "Futurewalker.Core.Range.hpp"
-
-#include <unicode/utf8.h>
-#include <unicode/utf16.h>
 
 #include <vector>
 #include <algorithm>
@@ -15,147 +13,40 @@ namespace FW_DETAIL_NS
 {
 namespace
 {
-auto Utf8Append(auto& buffer, int32_t c)
+auto MakeStringDataU8(U16String& utf16String, std::vector<CodeUnit>& utf8Bounds, std::vector<CodeUnit>& utf16Bounds, CodePoint& codePoints, String const& source) -> void
 {
-    auto i = int32_t();
-    auto tmp = std::array<char8_t, 4>();
-    U8_APPEND_UNSAFE(tmp.data(), i, c);
-    buffer.append_range(std::ranges::subrange(tmp.begin(), tmp.begin() + i));
-}
-
-auto Utf16Append(auto& buffer, int32_t c)
-{
-    auto i = int32_t();
-    auto tmp = std::array<char16_t, 2>();
-    U16_APPEND_UNSAFE(tmp.data(), i, c);
-    buffer.append_range(std::ranges::subrange(tmp.begin(), tmp.begin() + i));
-}
-
-auto MakeStringDataU8(String& utf8String, U16String& utf16String, std::vector<CodeUnit>& utf8Bounds, std::vector<CodeUnit>& utf16Bounds, CodePoint& codePoints, String const& source) -> Bool
-{
-    auto const view = source.GetView();
-    auto const data = view.GetData();
-
-    auto const utf8Str = static_cast<char8_t const*>(data);
-    auto const utf8Length = static_cast<int32_t>(view.GetSize());
-
-    utf8String = {};
     utf16String = {};
-
+    codePoints = 0;
     utf8Bounds = {0};
     utf16Bounds = {0};
 
-    codePoints = 0;
-
-    if (utf8Length <= 0)
+    auto index = source.GetBegin();
+    auto c = String::CharType();
+    while (source.GetChar(index, c, index))
     {
-        return true;
-    }
-
-    auto utf8Buffer = std::vector<char8_t>();
-    auto utf16Buffer = std::vector<char16_t>();
-
-    utf8Buffer.reserve(utf8Length);
-
-    auto r = true;
-    auto i = int32_t();
-    while (i < utf8Length)
-    {
-        auto c = UChar32();
-        auto next = i;
-        U8_NEXT(utf8Str, next, utf8Length, c);
-        if (0 <= c)
-        {
-            assert(next - i <= 4);
-            utf8Buffer.append_range(std::ranges::subrange(&utf8Str[i], &utf8Str[next]));
-            Utf16Append(utf16Buffer, c);
-        }
-        else
-        {
-            r = false;
-            c = 0xfffd;
-            Utf8Append(utf8Buffer, c);
-            Utf16Append(utf16Buffer, c);
-        }
-
-        utf8Bounds.push_back(static_cast<CodeUnit>(utf8Buffer.size()));
-        utf16Bounds.push_back(static_cast<CodeUnit>(utf16Buffer.size()));
+        utf16String.Append(c);
+        utf16Bounds.push_back(utf16String.GetEnd());
+        utf8Bounds.push_back(index);
         ++codePoints;
-        i = next;
     }
-
-    utf8String = StringFunction::ConvertUtf8ToStringUnchecked({reinterpret_cast<char const*>(utf8Buffer.data()), utf8Buffer.size()});
-    utf16String = U16String(utf16Buffer.begin(), utf16Buffer.end());
-
-    if (r)
-    {
-        assert(utf8String == source);
-        return true;
-    }
-    return false;
 }
 
-auto MakeStringDataU16(String& utf8String, U16String& utf16String, std::vector<CodeUnit>& utf8Bounds, std::vector<CodeUnit>& utf16Bounds, CodePoint& codePoints, U16String const& source) -> Bool
+auto MakeStringDataU16(String& utf8String, std::vector<CodeUnit>& utf8Bounds, std::vector<CodeUnit>& utf16Bounds, CodePoint& codePoints, U16String const& source) -> void
 {
-    auto const view = source.GetView();
-    auto const data = view.GetData();
-
-    auto const utf16Str = static_cast<char16_t const*>(data);
-    auto const utf16Length = static_cast<int32_t>(view.GetSize());
-
     utf8String = {};
-    utf16String = {};
     codePoints = 0;
-
     utf8Bounds = {0};
     utf16Bounds = {0};
 
-    if (utf16Length <= 0)
+    auto index = source.GetBegin();
+    auto c = U16String::CharType();
+    while (source.GetChar(index, c, index))
     {
-        return true;
-    }
-
-    auto utf8Buffer = std::vector<uint8_t>();
-    auto utf16Buffer = std::vector<UChar>();
-
-    utf16Buffer.reserve(utf16Length);
-
-    auto r = true;
-    auto i = int32_t();
-    while (i < utf16Length)
-    {
-        auto c = UChar32();
-        auto next = i;
-        U16_NEXT(utf16Str, next, utf16Length, c);
-        if (0 <= c)
-        {
-            Utf8Append(utf8Buffer, c);
-            assert(next - i <= 2);
-            utf16Buffer.append_range(std::ranges::subrange(&utf16Str[i], &utf16Str[next]));
-        }
-        else
-        {
-            r = false;
-            c = 0xfffd;
-            Utf8Append(utf8Buffer, c);
-            Utf16Append(utf16Buffer, c);
-        }
-
-        utf8Bounds.push_back(static_cast<CodeUnit>(utf8Buffer.size()));
-        utf16Bounds.push_back(static_cast<CodeUnit>(utf16Buffer.size()));
+        utf8String.Append(c);
+        utf8Bounds.push_back(utf8String.GetEnd());
+        utf16Bounds.push_back(index);
         ++codePoints;
-        i = next;
     }
-
-    utf8String = StringFunction::ConvertUtf8ToStringUnchecked({reinterpret_cast<const char*>(utf8Buffer.data()), utf8Buffer.size()});
-    utf16String = U16String(utf16Buffer.begin(), utf16Buffer.end());
-
-    if (r)
-    {
-        assert(utf16String == source);
-        return true;
-    }
-    return false;
 }
 
 auto IteratorAt(auto& c, auto idx)
@@ -217,7 +108,7 @@ auto Text::GetString(Range<CodePoint> range) const -> String
     {
         auto const begin = GetU8IndexByCodePointIndex(range.GetBegin());
         auto const end = GetU8IndexByCodePointIndex(range.GetEnd());
-        return state->u8String.GetSubString(SInt64(begin), SInt64(end));
+        return state->u8String.GetSubString(begin, end);
     }
     return {};
 }
@@ -256,7 +147,7 @@ auto Text::GetU16String(Range<CodePoint> range) const -> U16String
     {
         auto const begin = GetU16IndexByCodePointIndex(range.GetBegin());
         auto const end = GetU16IndexByCodePointIndex(range.GetEnd());
-        return state->u16String.GetSubString(SInt64(begin), SInt64(end));
+        return state->u16String.GetSubString(begin, end);
     }
     return {};
 }
@@ -416,7 +307,7 @@ auto Text::GetSubTextByU8Range(Range<CodeUnit> const& range) const -> Text
     auto const textRange = Range<CodeUnit>(0, GetU8CodeUnitCount());
     auto const b = Range<CodeUnit>::Clamp(range.GetBegin(), textRange);
     auto const e = Range<CodeUnit>::Clamp(range.GetEnd(), textRange);
-    return Text(GetString().GetSubString(SInt64(b), SInt64(e)));
+    return Text(GetString().GetSubString(b, e));
 }
 
 ///
@@ -428,7 +319,7 @@ auto Text::GetSubTextByU16Range(Range<CodeUnit> const& range) const -> Text
     auto const textRange = Range<CodeUnit>(0, GetU16CodeUnitCount());
     auto const b = Range<CodeUnit>::Clamp(range.GetBegin(), textRange);
     auto const e = Range<CodeUnit>::Clamp(range.GetEnd(), textRange);
-    return Text(GetString().GetSubString(SInt64(b), SInt64(e)));
+    return Text(GetString().GetSubString(b, e));
 }
 
 ///
@@ -471,7 +362,7 @@ auto Text::ReplaceU8Core(Range<CodePoint> const& range, String const& u8String, 
     if (auto const selfState = GetMutableState())
     {
         auto const u8Range = Range<CodeUnit>(GetU8IndexByCodePointIndex(range.GetBegin()), GetU8IndexByCodePointIndex(range.GetEnd()));
-        selfState->u8String.Replace(static_cast<SInt64>(u8Range.GetBegin()), static_cast<SInt64>(u8Range.GetEnd()), u8String);
+        selfState->u8String.Replace(u8Range.GetBegin(), u8Range.GetEnd(), u8String);
 
         auto const replaceBegin = IteratorAt(selfState->utf8Bounds, range.GetBegin());
         auto const replaceBeginValue = *replaceBegin;
@@ -497,7 +388,7 @@ auto Text::ReplaceU16Core(Range<CodePoint> const& range, U16String const& u16Str
     if (auto const selfState = GetMutableState())
     {
         auto const u16Range = Range<CodeUnit>(GetU16IndexByCodePointIndex(range.GetBegin()), GetU16IndexByCodePointIndex(range.GetEnd()));
-        selfState->u16String.Replace(static_cast<SInt64>(u16Range.GetBegin()), static_cast<SInt64>(u16Range.GetEnd()), u16String);
+        selfState->u16String.Replace(u16Range.GetBegin(), u16Range.GetEnd(), u16String);
 
         auto const replaceBegin = IteratorAt(selfState->utf16Bounds, range.GetBegin());
         auto const replaceBeginValue = *replaceBegin;
@@ -524,7 +415,8 @@ auto Text::ReplaceU16Core(Range<CodePoint> const& range, U16String const& u16Str
 auto Text::CreateState(String const& text) const -> Shared<State>
 {
     auto state = Shared<State>::Make();
-    MakeStringDataU8(state->u8String, state->u16String, state->utf8Bounds, state->utf16Bounds, state->codePoints, text);
+    state->u8String = text;
+    MakeStringDataU8(state->u16String, state->utf8Bounds, state->utf16Bounds, state->codePoints, state->u8String);
     return state;
 }
 
@@ -534,7 +426,8 @@ auto Text::CreateState(String const& text) const -> Shared<State>
 auto Text::CreateState(U16String const& text) const -> Shared<State>
 {
     auto state = Shared<State>::Make();
-    MakeStringDataU16(state->u8String, state->u16String, state->utf8Bounds, state->utf16Bounds, state->codePoints, text);
+    state->u16String = text;
+    MakeStringDataU16(state->u8String, state->utf8Bounds, state->utf16Bounds, state->codePoints, state->u16String);
     return state;
 }
 

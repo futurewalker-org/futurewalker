@@ -1,62 +1,34 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.DataFunction.hpp"
+#include "Futurewalker.Core.UnicodeFunction.hpp"
 
 namespace FW_DETAIL_NS
 {
-namespace
+///
+/// @brief Construct string from single character.
+///
+/// @param c Character.
+///
+/// @note If c is not a valid Unicode code point, it will be replaced with U+FFFD.
+///
+String::String(CharType c) noexcept
+  : String()
 {
-///
-/// @brief Allocate new shared string buffer and copy data into it.
-///
-/// @param[in] data Pointer to input string.
-/// @param[in] size Size of input string.
-/// @param[in] capacity Size of buffer allocate.
-///
-auto AllocateSharedString(Pointer<char8_t const> const data, auto const size, auto const capacity) -> std::shared_ptr<char8_t[]>
-{
-    auto const ptr = std::make_shared<char8_t[]>(static_cast<size_t>(capacity));
-    DataFunction::CopyMemory(Pointer(ptr.get()), data, size);
-    return ptr;
-}
-}
-
-struct String::Internal
-{
-    static auto constexpr smallStringCapacity = sizeof(SmallString::data); ///< Capacity of small string.
-    static auto constexpr largeStringFlag = uint8_t(1 << 7);               ///< Flag used to determine large string mode.
-};
-
-///
-/// @brief Construct empty string.
-///
-String::String() noexcept
-  : _small {}
-{
+    auto codeUnits = std::array<ValueType, 4>();
+    _data.Resize(UnicodeFunction::GetCodeUnitsOrFFFD(codeUnits, c), false);
+    DataFunction::MemoryCopy(_data.GetMutableData(), Pointer<char8_t const>(codeUnits.data()), _data.GetSize());
 }
 
 ///
-/// @brief Destructor.
+/// @brief Construct sting from single code unit value.
 ///
-String::~String() noexcept
-{
-    if (IsSmallString())
-    {
-        _small.~SmallString();
-    }
-    else
-    {
-        _large.~LargeString();
-    }
-}
-
+/// @param[in] v Code unit.
 ///
-/// @brief Construct sting from single character.
+/// @note If v does not represent valid Unicode code point, it will be replaced with U+FFFD.
 ///
-/// @param[in] c Character.
-///
-String::String(ValueType c) noexcept
-  : String(StringView(&c, 1))
+String::String(ValueType v) noexcept
+  : String(StringView(&v, 1))
 {
 }
 
@@ -110,60 +82,17 @@ String::String(ValueType const* chars, SizeType size)
 String::String(StringView view)
   : String()
 {
-    Resize(view.GetSize());
-    DataFunction::CopyMemory(GetMutableData(), view.GetData(), view.GetSize());
-}
-
-///
-/// @brief Copy constructor.
-///
-String::String(String const& other)
-  : String()
-{
-    if (other.IsSmallString())
+    _data.Reserve(view.GetSize());
+    auto index = SInt64(0);
+    auto codeUnits = std::array<ValueType, 4>();
+    while (index < view.GetSize())
     {
-        _small = other._small;
+        auto const [codePoint, nextIndex] = UnicodeFunction::GetCodePointOrFFFDAndNextIndex(view.GetData(), index, view.GetSize());
+        auto const codeUnitCount = UnicodeFunction::GetCodeUnitsUnsafe(codeUnits, codePoint);
+        _data.Resize(_data.GetSize() + codeUnitCount, false);
+        DataFunction::MemoryCopy(_data.GetMutableData() + (_data.GetSize() - codeUnitCount), Pointer<ValueType const>(codeUnits.data()), codeUnitCount);
+        index = nextIndex;
     }
-    else
-    {
-        _small.~SmallString();
-        new (&_large) LargeString(other._large);
-    }
-}
-
-///
-/// @brief Move constructor.
-///
-String::String(String&& other) noexcept
-  : String()
-{
-    Swap(other);
-}
-
-///
-/// @brief operator=
-///
-String& String::operator=(String const& other)
-{
-    if (this != &other)
-    {
-        auto tmp = other;
-        Swap(tmp);
-    }
-    return *this;
-}
-
-///
-/// @brief operator=
-///
-String& String::operator=(String&& other) noexcept
-{
-    if (this != &other)
-    {
-        auto tmp = std::move(other);
-        Swap(tmp);
-    }
-    return *this;
 }
 
 ///
@@ -195,143 +124,147 @@ auto String::operator<=>(String const& other) const noexcept -> std::strong_orde
 ///
 auto String::IsEmpty() const noexcept -> Bool
 {
-    if (IsSmallString())
-    {
-        return _small.size == uint8_t();
-    }
-    else
-    {
-        return _large.size == 0;
-    }
+    return _data.IsEmpty();
 }
 
 ///
-/// @brief Get view of string.
+/// @brief Get index of first character.
 ///
-/// @note Unsafe: Any modification to string will invalidate returned view.
-///
-auto String::GetView() const noexcept -> StringView
+auto String::GetBegin() const -> IndexType
 {
-    return StringView(GetConstData(), GetSize());
+    return IndexType(0);
 }
 
 ///
-/// @brief Get character at given position.
+/// @brief Get index of one past last character.
 ///
-/// @param[in] pos Position of character.
-///
-auto String::GetChar(ValueType& value, IndexType const pos) const noexcept -> Bool
+auto String::GetEnd() const -> IndexType
 {
-    if (pos < 0 || GetSize() <= pos)
+    return IndexType(_data.GetSize());
+}
+
+///
+/// @brief Get next character index.
+///
+/// @param index Current character index.
+/// @param offset Offset to move.
+///
+auto String::GetNext(IndexType const& index, SInt64 const offset) const -> IndexType
+{
+    if (auto const data = _data.GetImmutableData())
     {
-        return false;
+        if (offset > 0)
+        {
+            return IndexType(UnicodeFunction::GetNextCodePointIndex(data, SInt64(index), _data.GetSize(), SInt64(offset)));
+        }
+        else
+        {
+            return GetPrev(index, -offset);
+        }
     }
-    value = GetConstData()[pos];
+    return index;
+}
+
+///
+/// @brief Get previous character index.
+///
+/// @param index Current character index.
+/// @param offset Offset to move.
+///
+auto String::GetPrev(IndexType const& index, SInt64 const offset) const -> IndexType
+{
+    if (auto const data = _data.GetImmutableData())
+    {
+        if (offset > 0)
+        {
+            return IndexType(UnicodeFunction::GetPrevCodePointIndex(data, SInt64(index), 0, SInt64(offset)));
+        }
+        else
+        {
+            return GetNext(index, -offset);
+        }
+    }
+    return index;
+}
+
+///
+/// @brief Get character at index.
+///
+/// @param index Character index.
+/// @param value Output character.
+///
+/// @return True if character was successfully retrieved, false otherwise.
+///
+auto String::GetChar(IndexType const& index, CharType& value) const -> Bool
+{
+    if (GetBegin() <= index && index < GetEnd())
+    {
+        if (auto const data = _data.GetImmutableData())
+        {
+            if (auto const c = UnicodeFunction::GetCodePoint(data, SInt64(index), 0, _data.GetSize()))
+            {
+                value = static_cast<CharType>(*c);
+                return true;
+            }
+        }
+    }
     return false;
 }
 
 ///
-/// @brief Extract range of sub string.
+/// @brief Get character at index and next index.
 ///
-/// @param[in] begin Index of beginning of range.
-/// @param[in] end Index of end of range.
+/// @param[in] index Character index.
+/// @param[out] value Output character.
+/// @param[out] next Next character index.
 ///
-auto String::GetSubString(IndexType const begin, IndexType const end) const noexcept -> String
+/// @return True if character was successfully retrieved, false otherwise.
+///
+/// @note index and next can overlap.
+///
+auto String::GetChar(IndexType const& index, CharType& value, IndexType& next) const -> Bool
 {
-    if (begin < 0 || begin > end || end > GetSize())
+    if (GetBegin() <= index && index < GetEnd())
+    {
+        if (auto const data = _data.GetImmutableData())
+        {
+            auto const [c, nextIndex] = UnicodeFunction::GetCodePointAndNextIndex(data, SInt64(index), _data.GetSize());
+            next = IndexType(nextIndex);
+            if (c)
+            {
+                value = static_cast<CharType>(*c);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+///
+/// @brief
+///
+/// @param begin
+/// @param end
+///
+auto String::GetSubString(IndexType const& begin, IndexType const& end) const noexcept -> String
+{
+    if (begin < GetBegin() || begin > end || end > GetEnd())
     {
         return {};
     }
 
-    auto const newSize = (end - begin);
-    auto const newCapacity = (GetCapacity() - begin);
-
-    if (IsSmallString())
-    {
-        auto const data = GetConstData();
-        auto const newData = (data + begin);
-        auto const view = StringView(newData, newSize);
-        return String(view);
-    }
-    else
-    {
-        auto ret = String();
-        ret._small.~SmallString();
-        auto const newData = _large.data.get() + static_cast<ptrdiff_t>(begin);
-        new (&ret._large) LargeString {
-            .data = std::shared_ptr<ValueType[]>(_large.data, newData),
-            .capacity = static_cast<int64_t>(newCapacity),
-            .size = static_cast<int64_t>(newSize),
-            .padding = {},
-            .flags = Internal::largeStringFlag,
-        };
-        return ret;
-    }
+    auto const data = _data.GetImmutableData();
+    auto const beginOffset = UnicodeFunction::GetCodePointStartUnsafe(data, SInt64(GetEnd()), SInt64(begin));
+    auto const endOffset = UnicodeFunction::GetCodePointLimitUnsafe(data, SInt64(GetEnd()), SInt64(end));
+    return String(_data.GetSubString(beginOffset, endOffset));
 }
 
 ///
-/// @brief Resize string.
+/// @brief Get string view.
 ///
-/// @param[in] size New size of string.
-///
-/// @note Invalidates previously returned iterators and data pointers.
-///
-/// @pre size must not be negative.
-///
-void String::Resize(SizeType const size)
+auto String::GetView() const noexcept -> StringView
 {
-    if (size < 0)
-    {
-        return;
-    }
-
-    Reserve(size);
-    SetSize(size);
-
-    if (auto const oldSize = GetSize(); oldSize < size)
-    {
-        auto const data = GetMutableData();
-        for (auto i = oldSize; i < size; ++i)
-        {
-            data[i] = ValueType();
-        }
-    }
-}
-
-///
-/// @brief Reserve string.
-///
-/// @param[in] capacity New capacity.
-///
-/// @note Invalidates previously returned iterators and data pointers.
-///
-void String::Reserve(SizeType const capacity)
-{
-    if (IsSmallString())
-    {
-        if (capacity > GetCapacity())
-        {
-            auto const size = GetSize();
-            auto const data = AllocateSharedString(GetConstData(), size, capacity);
-            _small.~SmallString();
-            new (&_large) LargeString {
-                .data = data,
-                .capacity = static_cast<int64_t>(capacity),
-                .size = static_cast<int64_t>(size),
-                .padding = {},
-                .flags = Internal::largeStringFlag,
-            };
-        }
-    }
-    else
-    {
-        if (capacity > GetCapacity() || _large.data.use_count() != 1)
-        {
-            auto const cap = std::max(capacity, GetCapacity());
-            _large.data = AllocateSharedString(GetConstData(), GetSize(), cap);
-            _large.capacity = static_cast<int64_t>(cap);
-        }
-    }
+    return StringView(_data.GetImmutableData(), _data.GetSize());
 }
 
 ///
@@ -339,65 +272,71 @@ void String::Reserve(SizeType const capacity)
 ///
 void String::Clear()
 {
-    SetSize(0);
+    _data.Clear();
 }
 
 ///
 /// @brief Erase range of string.
 ///
-/// @param[in] begin Index of beginning of range to erase.
-/// @param[in] end Index of end of range to erase (non-inclusive).
+/// @param[in] begin IndexType of beginning of range to erase.
+/// @param[in] end IndexType of end of range to erase (non-inclusive).
 ///
-auto String::Erase(IndexType const begin, IndexType const end) -> void
+auto String::Erase(IndexType const& begin, IndexType const& end) -> void
 {
-    if (begin < 0 || begin > end || end > GetSize())
-    {
-        return;
-    }
-
     if (IsEmpty())
     {
         return;
     }
 
-    auto const data = GetMutableData();
-    auto const copyCount = GetSize() - end;
+    if (begin < GetBegin() || begin > end || end > GetEnd())
+    {
+        return;
+    }
+
+    auto const data = _data.GetMutableData();
+    auto const beginOffset = UnicodeFunction::GetCodePointStartUnsafe(data, _data.GetSize(), SInt64(begin));
+    auto const endOffset = UnicodeFunction::GetCodePointLimitUnsafe(data, _data.GetSize(), SInt64(end));
+
+    auto const copyCount = _data.GetSize() - endOffset;
     for (auto i = SizeType(0); i < copyCount; ++i)
     {
-        data[begin + i] = data[end + i];
+        data[beginOffset + i] = data[endOffset + i];
     }
-    SetSize(begin + copyCount);
+    _data.Resize(beginOffset + copyCount, false);
 }
 
 ///
 /// @brief Replace range of string into new string.
 ///
-/// @param[in] begin Index of beginning of range to replace.
-/// @param[in] end Index of end of range to replace.
+/// @param[in] begin IndexType of beginning of range to replace.
+/// @param[in] end IndexType of end of range to replace.
 /// @param[in] str String to replace range.
 ///
-auto String::Replace(IndexType const begin, IndexType const end, StringView const str) -> void
+auto String::Replace(IndexType const& begin, IndexType const& end, String const& str) -> void
 {
-    if (begin < 0 || begin > end || end > GetSize())
+    if (begin < GetBegin() || begin > end || end > GetEnd())
     {
         return;
     }
 
-    auto const oldSize = GetSize();
-    auto const newSize = oldSize - (end - begin) + str.GetSize();
-    Reserve(newSize);
+    auto const oldData = _data.GetImmutableData();
+    auto const oldSize = _data.GetSize();
+    auto const beginOffset = UnicodeFunction::GetCodePointStartUnsafe(oldData, oldSize, SInt64(begin));
+    auto const endOffset = UnicodeFunction::GetCodePointLimitUnsafe(oldData, oldSize, SInt64(end));
+    auto const newSize = oldSize - (endOffset - beginOffset) + str._data.GetSize();
+    _data.Resize(newSize, false); // Assuming capacity does not decrease on resize.
 
-    auto const data = GetMutableData();
-    auto const copyCount = oldSize - end;
+    auto const data = _data.GetMutableData();
+    auto const copyCount = oldSize - endOffset;
 
-    auto const dstSize = end - begin;
-    auto const srcSize = str.GetSize();
+    auto const dstSize = endOffset - beginOffset;
+    auto const srcSize = str._data.GetSize();
 
     if (dstSize > srcSize)
     {
         for (auto i = SizeType(0); i < copyCount; ++i)
         {
-            data[begin + srcSize + i] = data[end + i];
+            data[beginOffset + srcSize + i] = data[endOffset + i];
         }
     }
     else if (dstSize < srcSize)
@@ -408,12 +347,11 @@ auto String::Replace(IndexType const begin, IndexType const end, StringView cons
         }
     }
 
+    auto const strData = str._data.GetImmutableData();
     for (auto i = SizeType(0); i < srcSize; ++i)
     {
-        data[begin + i] = str[i];
+        data[beginOffset + i] = strData[i];
     }
-
-    SetSize(newSize);
 }
 
 ///
@@ -422,36 +360,18 @@ auto String::Replace(IndexType const begin, IndexType const end, StringView cons
 /// @param[in] pos Position to insert string.
 /// @param[in] str String to be inserted.
 ///
-auto String::Insert(IndexType const pos, StringView const str) -> void
+auto String::Insert(IndexType const& pos, String const& str) -> void
 {
-    if (pos < 0 || GetSize() < pos)
-    {
-        return;
-    }
+    Replace(pos, pos, str);
+}
 
-    auto const oldSize = GetSize();
-    auto const newSize = oldSize + str.GetSize();
-
-    if (oldSize == newSize)
-    {
-        return;
-    }
-
-    Reserve(newSize);
-
-    auto data = GetMutableData();
-
-    for (auto i = SizeType(0); i < str.GetSize(); ++i)
-    {
-        data[newSize - 1 - i] = data[oldSize - 1 - i];
-    }
-
-    for (auto i = SizeType(0); i < str.GetSize(); ++i)
-    {
-        data[pos + i] = str[i];
-    }
-
-    SetSize(newSize);
+///
+/// @brief Append string at the end.
+///
+auto String::Append(String const& string) -> void
+{
+    auto const end = GetEnd();
+    Replace(end, end, string);
 }
 
 ///
@@ -461,131 +381,14 @@ auto String::Insert(IndexType const pos, StringView const str) -> void
 ///
 void String::Swap(String& other) noexcept
 {
-    if (this == &other)
-    {
-        return;
-    }
-
-    if (IsSmallString())
-    {
-        if (IsSmallString())
-        {
-            std::swap(_small, other._small);
-        }
-        else
-        {
-            auto large = std::move(other._large);
-            other._large.~LargeString();
-            new (&other._small) SmallString(std::move(_small));
-            _small.~SmallString();
-            new (&_large) LargeString(std::move(large));
-        }
-    }
-    else
-    {
-        if (IsSmallString())
-        {
-            auto small = std::move(other._small);
-            other._small.~SmallString();
-            new (&other._large) LargeString(std::move(_large));
-            _large.~LargeString();
-            new (&_small) SmallString(std::move(small));
-        }
-        else
-        {
-            std::swap(_large, other._large);
-        }
-    }
+    _data.Swap(other._data);
 }
 
 ///
-/// @brief Small string?
+/// @brief Private constructor from StringData.
 ///
-auto String::IsSmallString() const -> Bool
+String::String(StringData<ValueType>&& data) noexcept
+  : _data(std::move(data))
 {
-    auto extra = uint8_t();
-    DataFunction::CopyMemory(Pointer(&extra), Pointer(&_small.size), 1);
-    return (extra & Internal::largeStringFlag) == 0U;
-}
-
-///
-/// @brief Set size without modifying data.
-///
-/// @param[in] size New size.
-///
-auto String::SetSize(SizeType const size) -> void
-{
-    if (IsSmallString())
-    {
-        _small.size = static_cast<uint8_t>(size);
-    }
-    else
-    {
-        _large.size = static_cast<int64_t>(size);
-    }
-}
-
-///
-/// @brief Get size of string.
-///
-auto String::GetSize() const noexcept -> SizeType
-{
-    if (IsSmallString())
-    {
-        return _small.size;
-    }
-    else
-    {
-        return _large.size;
-    }
-}
-
-///
-/// @brief Get capacity of string.
-///
-auto String::GetCapacity() const noexcept -> SizeType
-{
-    if (IsSmallString())
-    {
-        return static_cast<SizeType>(Internal::smallStringCapacity);
-    }
-    else
-    {
-        return _large.capacity;
-    }
-}
-
-///
-/// @brief Get immutable data pointer.
-///
-auto String::GetConstData() const -> Pointer<ValueType const>
-{
-    if (IsSmallString())
-    {
-        return _small.data;
-    }
-    else
-    {
-        return _large.data.get();
-    }
-}
-
-///
-/// @brief Get mutable data pointer.
-///
-auto String::GetMutableData() -> Pointer<ValueType>
-{
-    if (IsSmallString())
-    {
-        return _small.data;
-    }
-    else
-    {
-        if (_large.data.use_count() != 1)
-        {
-            _large.data = AllocateSharedString(_large.data.get(), _large.size, _large.capacity);
-        }
-        return _large.data.get();
-    }
 }
 }

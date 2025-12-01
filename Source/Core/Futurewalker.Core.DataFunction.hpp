@@ -18,27 +18,24 @@ class DataFunction final : NonConstructible
 {
 public:
     template <class T, class U>
-    static void CopyMemory(Pointer<U> dst, Pointer<T const> src, SInt64 const size) noexcept;
+    static void MemoryCopy(Pointer<U> dst, Pointer<T const> src, SInt64 const size) noexcept;
 };
 
 ///
 /// @brief Copy range of memory.
 ///
-/// A wrapper of memcpy, which is easier to work with Pointer<T>.
+/// A safe wrapper of std::memcpy.
 ///
 /// @param[in] dst Destination memory location.
 /// @param[in] src Source memory location.
-/// @param[in] size Bytes to copy.
-///
-/// @note `dst` and `src` should be non-null.
-/// @note `size` should be greater than zero.
+/// @param[in] size Number of elements to copy.
 ///
 template <class T, class U>
-void DataFunction::CopyMemory(Pointer<U> dst, Pointer<T const> src, SInt64 const size) noexcept
+void DataFunction::MemoryCopy(Pointer<U> dst, Pointer<T const> src, SInt64 const size) noexcept
 {
     if (dst && src && size > 0)
     {
-        std::memcpy(static_cast<U*>(dst), static_cast<T const*>(src), static_cast<size_t>(size));
+        std::memcpy(static_cast<U*>(dst), static_cast<T const*>(src), static_cast<size_t>(size) * sizeof(T));
     }
 }
 }

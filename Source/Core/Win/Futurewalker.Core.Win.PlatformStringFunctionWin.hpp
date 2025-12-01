@@ -8,8 +8,6 @@
 
 #include <string>
 
-#include <windows.h>
-
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT

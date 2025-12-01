@@ -2,11 +2,16 @@
 
 #include "Futurewalker.Core.U16String.hpp"
 #include "Futurewalker.Core.DataFunction.hpp"
+#include "Futurewalker.Core.UnicodeFunction.hpp"
 
 namespace FW_DETAIL_NS
 {
-U16String::U16String() noexcept
+U16String::U16String(CharType const c)
+  : U16String()
 {
+    auto codeUnits = std::array<ValueType, 2>();
+    _data.Resize(UnicodeFunction::GetCodeUnitsOrFFFD(codeUnits, c), false);
+    DataFunction::MemoryCopy(_data.GetMutableData(), Pointer<char16_t const>(codeUnits.data()), _data.GetSize());
 }
 
 U16String::U16String(ValueType const c)
@@ -35,44 +40,19 @@ U16String::U16String(ValueType const* chars, SizeType size)
 }
 
 U16String::U16String(U16StringView view)
-  : _data(std::make_shared<ValueType[]>(static_cast<size_t>(view.GetSize())))
-  , _size(view.GetSize())
-  , _capacity(_size)
-{
-    DataFunction::CopyMemory(Pointer(_data.get()), view.GetData(), SInt64(sizeof(ValueType)) * _size);
-}
-
-U16String::U16String(U16String const& other)
-  : _data(other._data)
-  , _size(other._size)
-  , _capacity(other._capacity)
-{
-}
-
-U16String::U16String(U16String&& other) noexcept
   : U16String()
 {
-    Swap(other);
-}
-
-auto U16String::operator=(U16String const& other) -> U16String&
-{
-    if (this != &other)
+    _data.Reserve(view.GetSize());
+    auto index = SInt64(0);
+    auto codeUnits = std::array<ValueType, 2>();
+    while (index < view.GetSize())
     {
-        auto tmp = other;
-        Swap(tmp);
+        auto const [codePoint, nextIndex] = UnicodeFunction::GetCodePointOrFFFDAndNextIndex(view.GetData(), index, view.GetSize());
+        auto const codeUnitCount = UnicodeFunction::GetCodeUnitsUnsafe(codeUnits, codePoint);
+        _data.Resize(_data.GetSize() + codeUnitCount, false);
+        DataFunction::MemoryCopy(_data.GetMutableData() + (_data.GetSize() - codeUnitCount), Pointer<ValueType const>(codeUnits.data()), codeUnitCount);
+        index = nextIndex;
     }
-    return *this;
-}
-
-auto U16String::operator=(U16String&& other) noexcept -> U16String&
-{
-    if (this != &other)
-    {
-        auto tmp = std::move(other);
-        Swap(tmp);
-    }
-    return *this;
 }
 
 U16String::operator U16StringView() const noexcept
@@ -95,92 +75,130 @@ auto U16String::IsEmpty() const noexcept -> Bool
     return GetView().IsEmpty();
 }
 
-auto U16String::GetView() const noexcept -> U16StringView
+auto U16String::GetBegin() const -> IndexType
 {
-    return U16StringView(GetImmutableData(), GetSize());
+    return IndexType(0);
 }
 
-auto U16String::GetChar(ValueType& value, IndexType pos) const noexcept -> Bool
+auto U16String::GetEnd() const -> IndexType
 {
-    if (0 <= pos && pos < GetSize())
+    return IndexType(_data.GetSize());
+}
+
+auto U16String::GetNext(IndexType const& index, SInt64 const offset) const -> IndexType
+{
+    if (auto const data = _data.GetImmutableData())
     {
-        value = GetImmutableData()[pos];
-        return true;
+        if (offset > 0)
+        {
+            return IndexType(UnicodeFunction::GetNextCodePointIndex(data, SInt64(index), _data.GetSize(), SInt64(offset)));
+        }
+        else
+        {
+            return GetPrev(index, -offset);
+        }
+    }
+    return index;
+}
+
+auto U16String::GetPrev(IndexType const& index, SInt64 const offset) const -> IndexType
+{
+    if (auto const data = _data.GetImmutableData())
+    {
+        if (offset > 0)
+        {
+            return IndexType(UnicodeFunction::GetPrevCodePointIndex(data, SInt64(index), 0, SInt64(offset)));
+        }
+        else
+        {
+            return GetNext(index, -offset);
+        }
+    }
+    return index;
+}
+
+auto U16String::GetChar(IndexType const& index, CharType& value) const -> Bool
+{
+    if (GetBegin() <= index && index < GetEnd())
+    {
+        if (auto const data = _data.GetImmutableData())
+        {
+            if (auto const c = UnicodeFunction::GetCodePoint(data, SInt64(index), 0, _data.GetSize()))
+            {
+                value = static_cast<CharType>(*c);
+                return true;
+            }
+        }
     }
     return false;
 }
 
-auto U16String::GetSubString(IndexType begin, IndexType end) const noexcept -> U16String
+auto U16String::GetChar(IndexType const& index, CharType& value, IndexType& next) const -> Bool
 {
-    if (begin < 0 || begin > end || end > GetSize())
+    if (GetBegin() <= index && index < GetEnd())
+    {
+        if (auto const data = _data.GetImmutableData())
+        {
+            auto const [c, nextIndex] = UnicodeFunction::GetCodePointAndNextIndex(data, SInt64(index), _data.GetSize());
+            next = IndexType(nextIndex);
+            if (c)
+            {
+                value = static_cast<CharType>(*c);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+auto U16String::GetSubString(IndexType const& begin, IndexType const& end) const noexcept -> U16String
+{
+    if (begin < GetBegin() || begin > end || end > GetEnd())
     {
         return {};
     }
 
-    auto const newSize = (end - begin);
-    auto const newCapacity = GetCapacity() - begin;
-    auto const newData = _data.get() + static_cast<ptrdiff_t>(begin);
-
-    auto ret = U16String();
-    ret.SetSize(newSize);
-    ret.SetData(std::shared_ptr<ValueType[]>(_data, newData), newCapacity);
-    return ret;
+    auto const data = _data.GetImmutableData();
+    auto const beginOffset = UnicodeFunction::GetCodePointStartUnsafe(data, SInt64(GetEnd()), SInt64(begin));
+    auto const endOffset = UnicodeFunction::GetCodePointLimitUnsafe(data, SInt64(GetEnd()), SInt64(end));
+    return U16String(_data.GetSubString(beginOffset, endOffset));
 }
 
-auto U16String::Resize(SizeType const size) -> void
+auto U16String::GetView() const noexcept -> U16StringView
 {
-    if (size < 0)
-    {
-        return;
-    }
-    Reserve(size);
-    SetSize(size);
-
-    if (auto const oldSize = GetSize(); oldSize < size)
-    {
-        auto const data = GetMutableData();
-        for (auto i = oldSize; i < size; ++i)
-        {
-            data[i] = ValueType();
-        }
-    }
+    return U16StringView(_data.GetImmutableData(), _data.GetSize());
 }
 
-auto U16String::Reserve(SizeType const capacity) -> void
+auto U16String::Clear() -> void
 {
-    if (capacity > _capacity)
-    {
-        auto newData = std::make_shared<ValueType[]>(static_cast<size_t>(capacity));
-        if (auto const data = GetImmutableData())
-        {
-            DataFunction::CopyMemory(Pointer(newData.get()), data, SInt64(sizeof(ValueType)) * _size);
-        }
-        SetData(newData, capacity);
-    }
+    _data.Clear();
 }
 
-auto U16String::Replace(IndexType begin, IndexType end, U16StringView str) -> void
+auto U16String::Replace(IndexType const& begin, IndexType const& end, U16String const& str) -> void
 {
-    if (begin < 0 || begin > end || end > GetSize())
+    if (begin < GetBegin() || begin > end || end > GetEnd())
     {
         return;
     }
 
-    auto const oldSize = GetSize();
-    auto const newSize = oldSize - (end - begin) + str.GetSize();
-    Reserve(newSize);
+    auto const oldData = _data.GetImmutableData();
+    auto const oldSize = _data.GetSize();
+    auto const beginOffset = UnicodeFunction::GetCodePointStartUnsafe(oldData, oldSize, SInt64(begin));
+    auto const endOffset = UnicodeFunction::GetCodePointLimitUnsafe(oldData, oldSize, SInt64(end));
+    auto const newSize = oldSize - (endOffset - beginOffset) + str._data.GetSize();
+    _data.Resize(newSize, false); // Assuming capacity does not decrease on resize.
 
-    auto const data = GetMutableData();
-    auto const copyCount = oldSize - end;
+    auto const data = _data.GetMutableData();
+    auto const copyCount = oldSize - endOffset;
 
-    auto const dstSize = end - begin;
-    auto const srcSize = str.GetSize();
+    auto const dstSize = endOffset - beginOffset;
+    auto const srcSize = str._data.GetSize();
 
     if (dstSize > srcSize)
     {
         for (auto i = SizeType(0); i < copyCount; ++i)
         {
-            data[begin + srcSize + i] = data[end + i];
+            data[beginOffset + srcSize + i] = data[endOffset + i];
         }
     }
     else if (dstSize < srcSize)
@@ -191,59 +209,31 @@ auto U16String::Replace(IndexType begin, IndexType end, U16StringView str) -> vo
         }
     }
 
+    auto const strData = str._data.GetImmutableData();
     for (auto i = SizeType(0); i < srcSize; ++i)
     {
-        data[begin + i] = str[i];
+        data[beginOffset + i] = strData[i];
     }
-
-    SetSize(newSize);
 }
 
-void U16String::Swap(U16String& other) noexcept
+auto U16String::Insert(IndexType const& pos, U16String const& str) -> void
 {
-    std::swap(_data, other._data);
-    std::swap(_size, other._size);
-    std::swap(_capacity, other._capacity);
+    Replace(pos, pos, str);
 }
 
-auto U16String::GetImmutableData() const -> Pointer<ValueType const>
+auto U16String::Append(U16String const& string) -> void
 {
-    return Pointer(_data.get());
+    auto const end = GetEnd();
+    Replace(end, end, string);
 }
 
-auto U16String::GetMutableData() -> Pointer<ValueType>
+auto U16String::Swap(U16String& other) noexcept -> void
 {
-    if (_data)
-    {
-        if (_data.use_count() != 1)
-        {
-            auto data = std::make_shared<ValueType[]>(static_cast<size_t>(_size));
-            DataFunction::CopyMemory(Pointer(data.get()), GetImmutableData(), SInt64(sizeof(ValueType)) * _size);
-            _data = data;
-        }
-        return Pointer(_data.get());
-    }
-    return nullptr;
+    _data.Swap(other._data);
 }
 
-auto U16String::GetSize() const -> SizeType
+U16String::U16String(StringData<ValueType>&& data) noexcept
+  : _data {std::move(data)}
 {
-    return _size;
-}
-
-auto U16String::GetCapacity() const -> SizeType
-{
-    return _capacity;
-}
-
-auto U16String::SetData(std::shared_ptr<ValueType[]> const& data, SizeType const capacity) -> void
-{
-    _data = data;
-    _capacity = capacity;
-}
-
-auto U16String::SetSize(SizeType size) -> void
-{
-    _size = size;
 }
 }

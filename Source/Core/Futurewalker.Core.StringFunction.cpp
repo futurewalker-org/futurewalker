@@ -3,7 +3,6 @@
 #include "Futurewalker.Core.Exception.hpp"
 
 #include <boost/locale.hpp>
-#include <boost/functional/overloaded_function.hpp>
 
 #include <fmt/format.h>
 #include <fmt/xchar.h>
@@ -67,12 +66,11 @@ namespace FW_DETAIL_NS
 auto StringFunction::ConvertASCIIToString(std::string_view const sv) -> String
 {
     auto result = String();
-    result.Reserve(String::SizeType(sv.size()));
     for (const auto& c : sv)
     {
         if (0 <= c && c <= 0x7F)
         {
-            result.Insert(result.GetView().GetSize(), String(String::ValueType(c)));
+            result.Insert(result.GetEnd(), String(String::ValueType(c)));
         }
     }
     return result;

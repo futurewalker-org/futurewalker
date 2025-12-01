@@ -2,6 +2,8 @@
 #pragma once
 
 #include "Futurewalker.Core.StringType.hpp"
+#include "Futurewalker.Core.StringData.hpp"
+#include "Futurewalker.Core.StringUnit.hpp"
 #include "Futurewalker.Core.StringView.hpp"
 #include "Futurewalker.Core.Primitive.hpp"
 #include "Futurewalker.Core.PointerIterator.hpp"
@@ -13,42 +15,33 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 ///
-/// @brief Container of UTF-8 code units.
+/// @brief Container of Unicode characters.
 ///
-/// Copy-on-write implementation of UTF-8 string buffer.
-/// It also supports small string optimization.
+/// Holds unicode code points encoded in valid sequence of UTF-8 code units.
+/// Designed to be cheap to copy with copy-on-write and small string optimization.
 ///
-/// ### Creating `String` from UTF-8 string
-///
-/// If input buffer is UTF-8 but not represented by array of `char8_t`, use `StringFunction::Utf8ToString()` or `StringFunction::Utf8ToStringUnchecked()`.
-/// 
-/// ```cpp
-/// auto const buffer = std::string(...);
-/// auto const string = StringFunction::Utf8ToString(buffer);
-/// ```
-///
-class String final
+class String
 {
 public:
+    using IndexType = CodeUnit;
     using ValueType = char8_t;
+    using CharType = char32_t;
     using SizeType = SInt64;
-    using IndexType = SInt64;
 
 public:
-    String() noexcept;
-    ~String() noexcept;
+    String() noexcept = default;
+    String(String const& other) noexcept = default;
+    String(String&& other) noexcept = default;
+    auto operator=(String const& other) noexcept -> String& = default;
+    auto operator=(String&& other) noexcept -> String& = default;
 
-    String(ValueType c) noexcept;
+    String(CharType c) noexcept;
+    String(ValueType v) noexcept;
     String(Pointer<ValueType const> chars);
     String(Pointer<ValueType const> chars, SizeType size);
     String(ValueType const* chars);
     String(ValueType const* chars, SizeType size);
     String(StringView view);
-    String(String const& other);
-    String(String&& other) noexcept;
-
-    auto operator=(String const& other) -> String&;
-    auto operator=(String&& other) noexcept -> String&;
 
     template <Concepts::ContiguousIterator Iter>
     String(Iter begin, Iter end);
@@ -60,54 +53,29 @@ public:
 
     operator StringView() const noexcept;
 
-    [[nodiscard]] auto operator==(String const& other) const noexcept -> bool;
-    [[nodiscard]] auto operator<=>(String const& other) const noexcept -> std::strong_ordering;
+    auto operator==(String const& other) const noexcept -> bool;
+    auto operator<=>(String const& other) const noexcept -> std::strong_ordering;
 
-    [[nodiscard]] auto IsEmpty() const noexcept -> Bool;
-    [[nodiscard]] auto GetView() const noexcept -> StringView;
-    [[nodiscard]] auto GetChar(ValueType& value, IndexType pos) const noexcept -> Bool;
-    [[nodiscard]] auto GetSubString(IndexType begin, IndexType end) const noexcept -> String;
+    auto IsEmpty() const noexcept -> Bool;
+    auto GetBegin() const -> IndexType;
+    auto GetEnd() const -> IndexType;
+    auto GetNext(IndexType const& index, SInt64 const offset = 1) const -> IndexType;
+    auto GetPrev(IndexType const& index, SInt64 const offset = 1) const -> IndexType;
+    auto GetChar(IndexType const& index, CharType& value) const -> Bool;
+    auto GetChar(IndexType const& index, CharType& value, IndexType& next) const -> Bool;
+    auto GetSubString(IndexType const& begin, IndexType const& end) const noexcept -> String;
 
-    auto Resize(SizeType size) -> void;
-    auto Reserve(SizeType capacity) -> void;
+    auto GetView() const noexcept -> StringView;
     auto Clear() -> void;
-    auto Erase(IndexType begin, IndexType end) -> void;
-    auto Replace(IndexType begin, IndexType end, StringView str) -> void;
-    auto Insert(IndexType pos, StringView str) -> void;
+    auto Erase(IndexType const& begin, IndexType const& end) -> void;
+    auto Replace(IndexType const& begin, IndexType const& end, String const& string) -> void;
+    auto Insert(IndexType const& position, String const& string) -> void;
+    auto Append(String const& string) -> void;
     auto Swap(String& other) noexcept -> void;
 
 private:
-    auto IsSmallString() const -> Bool;
-    auto SetSize(SizeType size) -> void;
-    auto GetSize() const noexcept -> SizeType;
-    auto GetCapacity() const noexcept -> SizeType;
-    auto GetConstData() const -> Pointer<const ValueType>;
-    auto GetMutableData() -> Pointer<ValueType>;
-
-private:
-    struct LargeString
-    {
-        std::shared_ptr<ValueType[]> data; ///< Large string buffer.
-        int64_t capacity = 0; ///< Capacity.
-        int64_t size = 0; ///< Size.
-        uint8_t padding[7]; ///< Padding (unused).
-        uint8_t flags = 0; ///< Flag bits.
-    };
-
-    struct SmallString
-    {
-        ValueType data[sizeof(LargeString) - 1]; ///< Small string buffer.
-        uint8_t size = 0; ///< Flag and size bits.
-    };
-
-    struct Internal;
-    static_assert(sizeof(LargeString) == sizeof(SmallString));
-
-    union
-    {
-        SmallString _small; ///< Small string data.
-        LargeString _large; ///< Large string data.
-    };
+    String(StringData<ValueType>&& data) noexcept;
+    StringData<ValueType> _data;
 };
 
 ///
@@ -118,6 +86,5 @@ String::String(Iter begin, Iter end)
   : String(StringView(begin, end))
 {
 }
-
 }
 }
