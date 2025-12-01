@@ -244,16 +244,19 @@ auto CommandNode::InternalSetBlocking(Bool const blocking) -> void
 
 auto CommandNode::RootIsEnabled(CommandId const& command) -> Bool
 {
+    (void)command;
     return false;
 }
 
 auto CommandNode::RootIsToggled(CommandId const& command) -> Bool
 {
+    (void)command;
     return false;
 }
 
 auto CommandNode::RootExecute(CommandId const& command) -> Bool
 {
+    (void)command;
     return false;
 }
 }
