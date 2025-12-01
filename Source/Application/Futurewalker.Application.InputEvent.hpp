@@ -6,8 +6,6 @@
 
 #include "Futurewalker.Event.EventParameter.hpp"
 
-#include "Futurewalker.Unit.Text.hpp"
-
 #include "Futurewalker.Core.Range.hpp"
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.Memory.hpp"

@@ -5,8 +5,6 @@
 
 #include "Futurewalker.Event.EventParameter.hpp"
 
-#include "Futurewalker.Unit.Text.hpp"
-
 #include "Futurewalker.Core.String.hpp"
 
 namespace FW_DETAIL_NS
