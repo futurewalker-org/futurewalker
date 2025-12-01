@@ -8,8 +8,6 @@
 #include <fmt/xchar.h>
 #include <fmt/args.h>
 
-#include <unicode/utf8.h>
-
 template <class T, class Tag>
 struct fmt::formatter<FW_NS::Integer<T, Tag>, char8_t> : fmt::formatter<T, char8_t>
 {
@@ -194,6 +192,28 @@ auto StringFunction::ValidateString(String& result, String const& source) -> Boo
         return true;
     }
     return false;
+}
+
+///
+/// @brief Join strings with separator.
+///
+/// @param[in] separator Separator string.
+/// @param[in] parts Parts to join.
+///
+/// @return Joined string.
+///
+auto StringFunction::Join(String const separator, std::span<String const> const parts) -> String
+{
+    auto result = String();
+    for (auto i = SInt64(0); i < std::ssize(parts); ++i)
+    {
+        if (i > 0)
+        {
+            result.Append(separator);
+        }
+        result.Append(parts[static_cast<size_t>(i)]);
+    }
+    return result;
 }
 
 ///

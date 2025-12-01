@@ -85,4 +85,25 @@ TEST_CASE("StringFunction")
             }
         }
     }
+
+    SECTION("Join")
+    {
+        SECTION("0")
+        {
+            std::vector<String> parts = {};
+            REQUIRE(StringFunction::Join(u8",", parts) == u8"");
+        }
+
+        SECTION("1")
+        {
+            std::vector<String> parts = {u8"one"};
+            REQUIRE(StringFunction::Join(u8",", parts) == u8"one");
+        }
+
+        SECTION("3")
+        {
+            std::vector<String> parts = {u8"one", u8"two", u8"three"};
+            REQUIRE(StringFunction::Join(u8",", parts) == u8"one,two,three");
+        }
+    }
 }
