@@ -79,6 +79,76 @@ auto MenuItem::SetSubtitle(String const& subtitle) -> void
     GetMutableState().subtitle = subtitle;
 }
 
+auto MenuItem::GetLeadingIcon() const -> Icon
+{
+    if (auto const state = GetImmutableState())
+    {
+        return state->leadingIcon;
+    }
+    return Icon();
+}
+
+auto MenuItem::SetLeadingIcon(Icon const& icon) -> void
+{
+    GetMutableState().leadingIcon = icon;
+}
+
+auto MenuItem::GetTrailingIcon() const -> Icon
+{
+    if (auto const state = GetImmutableState())
+    {
+        return state->trailingIcon;
+    }
+    return Icon();
+}
+
+auto MenuItem::SetTrailingIcon(Icon const& icon) -> void
+{
+    GetMutableState().trailingIcon = icon;
+}
+
+auto MenuItem::GetAccessKey() const -> String
+{
+    if (auto const state = GetImmutableState())
+    {
+        return state->accessKey;
+    }
+    return String();
+}
+
+auto MenuItem::SetAccessKey(String const& key) -> void
+{
+    GetMutableState().accessKey = key;
+}
+
+auto MenuItem::GetAccessKeyModifiers() const -> ModifierKeyFlags
+{
+    if (auto const state = GetImmutableState())
+    {
+        return state->accessKeyModifiers;
+    }
+    return ModifierKeyFlags::None;
+}
+
+auto MenuItem::SetAccessKeyModifiers(ModifierKeyFlags const modifiers) -> void
+{
+    GetMutableState().accessKeyModifiers = modifiers;
+}
+
+auto MenuItem::GetCommandId() const -> CommandId
+{
+    if (auto const state = GetImmutableState())
+    {
+        return state->commandId;
+    }
+    return 0U;
+}
+
+auto MenuItem::SetCommandId(CommandId const commandId) -> void
+{
+    GetMutableState().commandId = commandId;
+}
+
 auto MenuItem::IsUnique() const -> Bool
 {
     return _state.GetUseCount() == 1;

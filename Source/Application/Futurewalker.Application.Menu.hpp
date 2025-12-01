@@ -5,6 +5,7 @@
 #include "Futurewalker.Application.MenuItemType.hpp"
 
 #include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.Optional.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -16,6 +17,8 @@ namespace FW_EXPORT
 class Menu
 {
 public:
+    auto GetItemCount() const -> SInt64;
+    auto GetItemAt(SInt64 index) const -> Optional<MenuItem>;
     auto GetItems() const -> MenuItemArray;
     auto SetItems(MenuItemArray const& items) -> void;
 

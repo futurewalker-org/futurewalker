@@ -5,6 +5,28 @@
 
 namespace FW_DETAIL_NS
 {
+auto Menu::GetItemCount() const -> SInt64
+{
+    if (auto state = GetImmutableState())
+    {
+        return static_cast<SInt64>(state->items.size());
+    }
+    return 0;
+}
+
+auto Menu::GetItemAt(SInt64 index) const -> Optional<MenuItem>
+{
+    if (auto state = GetImmutableState())
+    {
+        auto const itemsSize = static_cast<SInt64>(state->items.size());
+        if (0 <= index && index < itemsSize)
+        {
+            return state->items[static_cast<std::size_t>(index)];
+        }
+    }
+    return {};
+}
+
 auto Menu::GetItems() const -> MenuItemArray
 {
     if (auto state = GetImmutableState())

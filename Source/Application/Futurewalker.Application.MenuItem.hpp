@@ -3,6 +3,10 @@
 
 #include "Futurewalker.Application.MenuItemType.hpp"
 #include "Futurewalker.Application.Menu.hpp"
+#include "Futurewalker.Application.KeyEventType.hpp"
+#include "Futurewalker.Application.Icon.hpp"
+
+#include "Futurewalker.Action.CommandId.hpp"
 
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.Memory.hpp"
@@ -34,6 +38,21 @@ public:
     auto GetSubtitle() const -> String;
     auto SetSubtitle(String const& subtitle) -> void;
 
+    auto GetLeadingIcon() const -> Icon;
+    auto SetLeadingIcon(Icon const& icon) -> void;
+
+    auto GetTrailingIcon() const -> Icon;
+    auto SetTrailingIcon(Icon const& icon) -> void;
+
+    auto GetAccessKey() const -> String;
+    auto SetAccessKey(String const& key) -> void;
+
+    auto GetAccessKeyModifiers() const -> ModifierKeyFlags;
+    auto SetAccessKeyModifiers(ModifierKeyFlags const modifiers) -> void;
+
+    auto GetCommandId() const -> CommandId;
+    auto SetCommandId(CommandId const commandId) -> void;
+
 private:
     struct State
     {
@@ -42,6 +61,11 @@ private:
         Menu subMenu;
         String title;
         String subtitle;
+        Icon leadingIcon;
+        Icon trailingIcon;
+        String accessKey;
+        ModifierKeyFlags accessKeyModifiers = ModifierKeyFlags::None;
+        CommandId commandId = 0U;
     };
     Shared<State> _state;
 
