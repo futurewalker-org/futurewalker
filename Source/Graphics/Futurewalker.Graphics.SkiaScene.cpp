@@ -327,9 +327,8 @@ auto SkiaScene::AddDisplayList(DisplayListParam param) -> void
         {
             if (_canvas)
             {
-                auto const paint = SceneParamToSkPaint(param);
-                auto const matrix = SkMatrix();
-                _canvas->drawPicture(picture, &matrix, &paint);
+                // NOTE: Passing non-null paint will create temporary layer.
+                _canvas->drawPicture(picture, nullptr, nullptr);
             }
         }
     }
