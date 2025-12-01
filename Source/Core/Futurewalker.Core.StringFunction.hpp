@@ -23,8 +23,6 @@ public:
     static auto ConvertStringToStdString(StringView const sv) -> std::string;
     static auto ConvertStringToStdU8String(StringView const sv) -> std::u8string;
 
-    static auto ValidateString(String& result, String const& source) -> Bool;
-
     template <class... Args>
     static auto Format(StringView const formatter, Args&&... args) -> String;
 

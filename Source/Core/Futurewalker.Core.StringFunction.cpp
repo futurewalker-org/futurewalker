@@ -140,61 +140,6 @@ auto StringFunction::ConvertStringToStdU8String(StringView const sv) -> std::u8s
 }
 
 ///
-/// @brief Validate UTF-8 string.
-///
-/// @param[out] result Source string with invalid code points removed or replaced.
-/// @param[in] source Source string
-///
-/// @return Returns true when source and result is identical.
-///
-/// @note Invalid code points will be either removed or replaced by Unicode replacement character U+FFFD.
-///
-auto StringFunction::ValidateString(String& result, String const& source) -> Bool
-{
-    auto const view = source.GetView();
-    auto const data = view.GetData();
-
-    auto const str = reinterpret_cast<const uint8_t*>(static_cast<const String::ValueType*>(data));
-    auto const length = static_cast<int32_t>(view.GetSize());
-
-    auto buffer = std::vector<uint8_t>();
-    buffer.reserve(length);
-
-    auto r = true;
-    auto i = int32_t();
-    while (i < length)
-    {
-        auto c = UChar32();
-        auto next = i;
-        U8_NEXT(str, next, length, c);
-        if (0 <= c)
-        {
-            assert(next - i <= 4);
-            buffer.append_range(std::ranges::subrange(&str[i], &str[next]));
-        }
-        else
-        {
-            r = false;
-            c = 0xfffd;
-            auto j = int32_t();
-            auto tmp = std::array<uint8_t, 4>();
-            U8_APPEND_UNSAFE(tmp.data(), j, c);
-            buffer.append_range(std::ranges::subrange(&tmp[0], &tmp[j]));
-        }
-        i = next;
-    }
-
-    result = StringFunction::ConvertUtf8ToStringUnchecked({reinterpret_cast<const char*>(buffer.data()), buffer.size()});
-
-    if (r)
-    {
-        assert(result == source);
-        return true;
-    }
-    return false;
-}
-
-///
 /// @brief Join strings with separator.
 ///
 /// @param[in] separator Separator string.
