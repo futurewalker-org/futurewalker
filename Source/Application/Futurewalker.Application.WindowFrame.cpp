@@ -1,6 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
-#include "Futurewalker.Application.WindowFrameView.hpp"
+#include "Futurewalker.Application.WindowFrame.hpp"
 #include "Futurewalker.Application.ContainerView.hpp"
 #include "Futurewalker.Application.ViewAttribute.hpp"
 #include "Futurewalker.Application.ViewAreaManager.hpp"
@@ -21,15 +21,15 @@ namespace FW_DETAIL_NS
 ///
 /// @brief Make title bar layout.
 ///
-auto WindowFrameView::Make() -> Shared<WindowFrameView>
+auto WindowFrame::Make() -> Shared<WindowFrame>
 {
-    return View::MakeDerived<WindowFrameView>();
+    return View::MakeDerived<WindowFrame>();
 }
 
 ///
 /// @brief Constructor.
 ///
-WindowFrameView::WindowFrameView(PassKey<View> key)
+WindowFrame::WindowFrame(PassKey<View> key)
   : View(key)
 {
 }
@@ -37,7 +37,7 @@ WindowFrameView::WindowFrameView(PassKey<View> key)
 ///
 /// @brief Initialize.
 ///
-auto WindowFrameView::Initialize() -> void
+auto WindowFrame::Initialize() -> void
 {
     _areaManager = AttributeNode::GetObserver<&ViewAttribute::AreaManager>(*this);
     _titleBackground = ContainerView::Make();
@@ -50,8 +50,8 @@ auto WindowFrameView::Initialize() -> void
     AddChildBack(_titleContent);
     AddChildBack(_content);
 
-    EventReceiver::Connect(*_areaManager, *this, &WindowFrameView::ReceiveAttributeEvent);
-    EventReceiver::Connect(*this, *this, &WindowFrameView::ReceiveEvent);
+    EventReceiver::Connect(*_areaManager, *this, &WindowFrame::ReceiveAttributeEvent);
+    EventReceiver::Connect(*this, *this, &WindowFrame::ReceiveEvent);
 
     UpdateAreaManager();
 }
@@ -59,7 +59,7 @@ auto WindowFrameView::Initialize() -> void
 ///
 /// @brief Measure.
 ///
-auto WindowFrameView::Measure(MeasureScope& scope) -> void
+auto WindowFrame::Measure(MeasureScope& scope) -> void
 {
     auto const& parameter = scope.GetParameter();  
     auto const& width = parameter.GetWidthConstraints();
@@ -93,7 +93,7 @@ auto WindowFrameView::Measure(MeasureScope& scope) -> void
 ///
 /// @param size
 ///
-auto WindowFrameView::GetTitleBarContentRect(Size<Dp> const& size) const -> Rect<Dp>
+auto WindowFrame::GetTitleBarContentRect(Size<Dp> const& size) const -> Rect<Dp>
 {
     auto const titleBarInsets = GetTitleBarInsets();
     auto boundingRects = GetTitleBarBoundingRects();
@@ -121,7 +121,7 @@ auto WindowFrameView::GetTitleBarContentRect(Size<Dp> const& size) const -> Rect
 ///
 /// @brief Arrange.
 ///
-auto WindowFrameView::Arrange(ArrangeScope& scope) -> void
+auto WindowFrame::Arrange(ArrangeScope& scope) -> void
 {
     auto const titleBarInsets = GetTitleBarInsets();
     auto const titleBarContentRect = GetTitleBarContentRect(scope.GetMeasuredSize(*this));
@@ -136,7 +136,7 @@ auto WindowFrameView::Arrange(ArrangeScope& scope) -> void
 ///
 /// @param event 
 ///
-auto WindowFrameView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto WindowFrame::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<ViewAreaManagerEvent::GeometryChanged>())
     {
@@ -149,7 +149,7 @@ auto WindowFrameView::ReceiveEvent(Event<>& event) -> Async<Bool>
 ///
 /// @brief Handle attribute event.
 ///
-auto WindowFrameView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto WindowFrame::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
@@ -161,7 +161,7 @@ auto WindowFrameView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
 ///
 /// @brief Get background of entire area.
 ///
-auto WindowFrameView::GetBackground() -> Shared<View>
+auto WindowFrame::GetBackground() -> Shared<View>
 {
     return _background->GetContent();
 }
@@ -169,7 +169,7 @@ auto WindowFrameView::GetBackground() -> Shared<View>
 ///
 /// @brief Set background of entire area.
 ///
-auto WindowFrameView::SetBackground(Shared<View> background) -> void
+auto WindowFrame::SetBackground(Shared<View> background) -> void
 {
     _background->SetContent(background);
 }
@@ -177,7 +177,7 @@ auto WindowFrameView::SetBackground(Shared<View> background) -> void
 ///
 /// @brief Get background of content area.
 ///
-auto WindowFrameView::GetTitleBackground() -> Shared<View>
+auto WindowFrame::GetTitleBackground() -> Shared<View>
 {
     return _titleBackground->GetContent();
 }
@@ -185,7 +185,7 @@ auto WindowFrameView::GetTitleBackground() -> Shared<View>
 ///
 /// @brief Set background of title area.
 ///
-auto WindowFrameView::SetTitleBackground(Shared<View> background) -> void
+auto WindowFrame::SetTitleBackground(Shared<View> background) -> void
 {
     _titleBackground->SetContent(background);
 }
@@ -193,7 +193,7 @@ auto WindowFrameView::SetTitleBackground(Shared<View> background) -> void
 ///
 /// @brief Get background of content area.
 ///
-auto WindowFrameView::GetContentBackground() -> Shared<View>
+auto WindowFrame::GetContentBackground() -> Shared<View>
 {
     return _contentBackground->GetContent();
 }
@@ -201,7 +201,7 @@ auto WindowFrameView::GetContentBackground() -> Shared<View>
 ///
 /// @brief
 ///
-auto WindowFrameView::SetContentBackground(Shared<View> background) -> void
+auto WindowFrame::SetContentBackground(Shared<View> background) -> void
 {
     _contentBackground->SetContent(background);
 }
@@ -209,7 +209,7 @@ auto WindowFrameView::SetContentBackground(Shared<View> background) -> void
 ///
 /// @brief Get content of content area.
 ///
-auto WindowFrameView::GetContent() -> Shared<View>
+auto WindowFrame::GetContent() -> Shared<View>
 {
     return _content->GetContent();
 }
@@ -217,7 +217,7 @@ auto WindowFrameView::GetContent() -> Shared<View>
 ///
 /// @brief Set content of content area.
 ///
-auto WindowFrameView::SetContent(Shared<View> content) -> void
+auto WindowFrame::SetContent(Shared<View> content) -> void
 {
     _content->SetContent(content);
 }
@@ -225,7 +225,7 @@ auto WindowFrameView::SetContent(Shared<View> content) -> void
 ///
 /// @brief Get content of title area.
 ///
-auto WindowFrameView::GetTitleContent() -> Shared<View>
+auto WindowFrame::GetTitleContent() -> Shared<View>
 {
     return _titleContent->GetContent();
 }
@@ -233,7 +233,7 @@ auto WindowFrameView::GetTitleContent() -> Shared<View>
 ///
 /// @brief Set content of title area.
 ///
-auto WindowFrameView::SetTitleContent(Shared<View> content) -> void
+auto WindowFrame::SetTitleContent(Shared<View> content) -> void
 {
     _titleContent->SetContent(content);
 }
@@ -241,7 +241,7 @@ auto WindowFrameView::SetTitleContent(Shared<View> content) -> void
 ///
 /// @brief Get current area manager.
 ///
-auto WindowFrameView::GetAreaManager() -> Shared<ViewAreaManager>
+auto WindowFrame::GetAreaManager() -> Shared<ViewAreaManager>
 {
     if (_areaManager)
     {
@@ -256,7 +256,7 @@ auto WindowFrameView::GetAreaManager() -> Shared<ViewAreaManager>
 ///
 /// @brief Get current area manager.
 ///
-auto WindowFrameView::GetAreaManager() const -> Shared<const ViewAreaManager>
+auto WindowFrame::GetAreaManager() const -> Shared<const ViewAreaManager>
 {
     if (_areaManager)
     {
@@ -271,7 +271,7 @@ auto WindowFrameView::GetAreaManager() const -> Shared<const ViewAreaManager>
 ///
 /// @brief 
 ///
-auto WindowFrameView::GetTitleBarInsets() const -> EdgeInsets
+auto WindowFrame::GetTitleBarInsets() const -> EdgeInsets
 {
     if (auto const manager = GetAreaManager())
     {
@@ -283,7 +283,7 @@ auto WindowFrameView::GetTitleBarInsets() const -> EdgeInsets
 ///
 /// @brief 
 ///
-auto WindowFrameView::GetTitleBarBoundingRects() const -> std::vector<Rect<Dp>>
+auto WindowFrame::GetTitleBarBoundingRects() const -> std::vector<Rect<Dp>>
 {
     if (auto const manager = GetAreaManager())
     {
@@ -295,13 +295,13 @@ auto WindowFrameView::GetTitleBarBoundingRects() const -> std::vector<Rect<Dp>>
 ///
 /// @brief Update area manager.
 ///
-auto WindowFrameView::UpdateAreaManager() -> void
+auto WindowFrame::UpdateAreaManager() -> void
 {
     _connection.Disconnect();
 
     if (auto const manager = GetAreaManager())
     {
-        _connection = EventReceiver::Connect(*manager, *this, &WindowFrameView::ReceiveEvent);
+        _connection = EventReceiver::Connect(*manager, *this, &WindowFrame::ReceiveEvent);
         InvalidateLayout();
         InvalidateVisual();
     }

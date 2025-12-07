@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Application.WindowFrameViewType.hpp"
+#include "Futurewalker.Application.WindowFrameType.hpp"
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.ViewAreaManagerType.hpp"
 #include "Futurewalker.Application.ContainerViewType.hpp"
@@ -16,12 +16,12 @@ namespace FW_EXPORT
 ///
 /// @brief
 ///
-class WindowFrameView : public View
+class WindowFrame : public View
 {
 public:
-    static auto Make() -> Shared<WindowFrameView>;
+    static auto Make() -> Shared<WindowFrame>;
 
-    WindowFrameView(PassKey<View> key);
+    WindowFrame(PassKey<View> key);
 
     auto GetBackground() -> Shared<View>;
     auto SetBackground(Shared<View> background) -> void;

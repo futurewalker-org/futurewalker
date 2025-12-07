@@ -10,6 +10,7 @@
 #include <Futurewalker.Application.ApplicationEvent.hpp>
 #include <Futurewalker.Application.ApplicationTheme.hpp>
 #include <Futurewalker.Application.Window.hpp>
+#include <Futurewalker.Application.WindowFrame.hpp>
 #include <Futurewalker.Application.FlexLayout.hpp>
 #include <Futurewalker.Application.ScrollView.hpp>
 #include <Futurewalker.Application.ThemeView.hpp>
@@ -68,13 +69,16 @@ auto ThemeViewerApplication::ReceiveEvent(Event<>& event) -> Async<Bool>
         scroll->SetDirection(ScrollViewDirection::Vertical);
         scroll->SetContent(column);
 
+        auto frame = WindowFrame::Make();
+        frame->SetContent(scroll);
+
         auto window = Window::Make({
             .backgroundStyle = WindowBackgroundStyle::Solid,
         });
         window->SetTitle(u8"Theme Viewer");
         window->SetBackgroundColor(Lamp::Style::ColorSurface);
         window->SetFrameRect({0, 0, 1000, 1000});
-        window->SetContent(scroll);
+        window->SetContent(frame);
         window->SetVisible(true);
 
         co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
