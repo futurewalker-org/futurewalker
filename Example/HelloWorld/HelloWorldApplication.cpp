@@ -42,7 +42,7 @@ auto HelloWorldApplication::ReceiveEvent(Event<>& event) -> Async<Bool>
 
         auto window = Window::Make({});
         window->SetTitle(hello);
-        window->SetSize({500, 500});
+        window->SetFrameRect({0, 0, 500, 500});
         auto text = Lamp::TextView::MakeWithText(hello);
         AttributeNode::SetValue<&Lamp::TextViewStyle::FontSize>(*text, 42);
         AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());

@@ -52,26 +52,14 @@ enum class WindowArea
     None = 0,
 
     ///
-    /// @brief Client area of the window.
+    /// @brief Frame area of the window.
     ///
-    /// This is the area where the framework draws the content of the window, including client rendered title bar.
-    ///
-    Client,
+    Frame,
 
     ///
     /// @brief Total area of title bar.
     ///
     TitleBar,
-
-    ///
-    /// @brief Customizable area in title bar.
-    ///
-    TitleBarContent,
-
-    ///
-    /// @brief Content area of the window.
-    ///
-    Content,
 };
 
 ///

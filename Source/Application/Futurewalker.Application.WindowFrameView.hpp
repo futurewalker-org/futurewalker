@@ -3,8 +3,9 @@
 
 #include "Futurewalker.Application.WindowFrameViewType.hpp"
 #include "Futurewalker.Application.View.hpp"
+#include "Futurewalker.Application.ViewAreaManagerType.hpp"
 #include "Futurewalker.Application.ContainerViewType.hpp"
-#include "Futurewalker.Application.WindowAreaManagerType.hpp"
+#include "Futurewalker.Application.EdgeInsets.hpp"
 
 #include "Futurewalker.Attribute.AttributeObserverType.hpp"
 
@@ -45,16 +46,15 @@ protected:
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 
 private:
-    auto GetAreaManager() -> Shared<WindowAreaManager>;
-    auto GetAreaManager() const -> Shared<const WindowAreaManager>;
-    auto GetTitleBarAreaRect() const -> Rect<Dp>;
-    auto GetTitleBarAvailableAreaRect() const -> Rect<Dp>;
-    auto GetContentAreaRect() const -> Rect<Dp>;
-
+    auto GetAreaManager() -> Shared<ViewAreaManager>;
+    auto GetAreaManager() const -> Shared<const ViewAreaManager>;
+    auto GetTitleBarInsets() const -> EdgeInsets;
+    auto GetTitleBarBoundingRects() const -> std::vector<Rect<Dp>>;
+    auto GetTitleBarContentRect(Size<Dp> const& size) const -> Rect<Dp>;
     auto UpdateAreaManager() -> void;
 
 private:
-    Unique<AttributeObserver<Shared<WindowAreaManager>>> _windowAreaManager;
+    Unique<AttributeObserver<Shared<ViewAreaManager>>> _areaManager;
     Shared<ContainerView> _background;
     Shared<ContainerView> _titleBackground;
     Shared<ContainerView> _contentBackground;

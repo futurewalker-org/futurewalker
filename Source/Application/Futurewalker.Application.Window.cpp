@@ -3,16 +3,6 @@
 #include "Futurewalker.Application.Window.hpp"
 #include "Futurewalker.Application.WindowEvent.hpp"
 #include "Futurewalker.Application.WindowAttribute.hpp"
-#include "Futurewalker.Application.WindowAreaManager.hpp"
-#include "Futurewalker.Application.WindowFrameView.hpp"
-#include "Futurewalker.Application.PlatformWindowContext.hpp"
-#include "Futurewalker.Application.PlatformWindow.hpp"
-#include "Futurewalker.Application.PlatformWindowEvent.hpp"
-#include "Futurewalker.Application.PlatformFrameEvent.hpp"
-#include "Futurewalker.Application.PlatformPointerEvent.hpp"
-#include "Futurewalker.Application.PlatformKeyEvent.hpp"
-#include "Futurewalker.Application.PlatformInputEvent.hpp"
-#include "Futurewalker.Application.PlatformViewLayerContext.hpp"
 #include "Futurewalker.Application.ApplicationContext.hpp"
 #include "Futurewalker.Application.FrameEvent.hpp"
 #include "Futurewalker.Application.PointerEvent.hpp"
@@ -24,6 +14,17 @@
 #include "Futurewalker.Application.ViewLayer.hpp"
 #include "Futurewalker.Application.Screen.hpp"
 #include "Futurewalker.Application.MeasureScope.hpp"
+#include "Futurewalker.Application.ContainerView.hpp"
+#include "Futurewalker.Application.ViewAreaManager.hpp"
+#include "Futurewalker.Application.ViewAttribute.hpp"
+#include "Futurewalker.Application.PlatformWindowContext.hpp"
+#include "Futurewalker.Application.PlatformWindow.hpp"
+#include "Futurewalker.Application.PlatformWindowEvent.hpp"
+#include "Futurewalker.Application.PlatformFrameEvent.hpp"
+#include "Futurewalker.Application.PlatformPointerEvent.hpp"
+#include "Futurewalker.Application.PlatformKeyEvent.hpp"
+#include "Futurewalker.Application.PlatformInputEvent.hpp"
+#include "Futurewalker.Application.PlatformViewLayerContext.hpp"
 
 #include "Futurewalker.Event.EventReceiver.hpp"
 
@@ -36,6 +37,8 @@
 
 #include "Futurewalker.Base.Debug.hpp"
 #include "Futurewalker.Base.Locator.hpp"
+
+#include <ranges>
 
 namespace FW_DETAIL_NS
 {
@@ -118,50 +121,55 @@ auto Window::IsFocused() const -> Bool
 ///
 /// @brief Get size of window.
 ///
-auto Window::GetSize() const -> Size<Vp>
+auto Window::GetFrameRect() const -> Rect<Vp>
 {
     if (!IsClosed())
     {
-        return _platformObject->GetSize();
+        return _platformObject->GetFrameRect();
     }
     return {};
 }
 
 ///
-/// @brief Set size of window.
+/// @brief Set frame rectangle of window.
 ///
-/// @param size New size of the window.
+/// @param rect New frame rectangle of the window.
 ///
-auto Window::SetSize(Size<Vp> const& size) -> void
+/// @note When the window is minimized, changes the frame rectangle to be used when restoring the window.
+/// @note When the window is maximized, restores the window and changes the frame rectangle.
+///
+auto Window::SetFrameRect(Rect<Vp> const& rect) -> void
 {
     if (!IsClosed())
     {
-        _platformObject->SetSize(size);
+        _platformObject->SetFrameRect(rect);
     }
 }
 
 ///
-/// @brief Get position of window.
+/// @brief Get restored frame rectangle of window.
 ///
-auto Window::GetPosition() const -> Point<Vp>
+auto Window::GetRestoredFrameRect() const -> Rect<Vp>
 {
     if (!IsClosed())
     {
-        return _platformObject->GetPosition();
+        return _platformObject->GetRestoredFrameRect();
     }
     return {};
 }
 
 ///
-/// @brief Set position of window.
+/// @brief Set restored frame rectangle of window.
 ///
-/// @param position New position of the window.
+/// @param rect New restored frame rectangle of the window.
 ///
-auto Window::SetPosition(Point<Vp> const& position) -> void
+/// @note When the window is minimized or maximized, changes the frame rectangle to be used when restoring the window.
+///
+auto Window::SetRestoredFrameRect(Rect<Vp> const& rect) -> void
 {
     if (!IsClosed())
     {
-        _platformObject->SetPosition(position);
+        _platformObject->SetRestoredFrameRect(rect);
     }
 }
 
@@ -170,7 +178,7 @@ auto Window::SetPosition(Point<Vp> const& position) -> void
 ///
 auto Window::LocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>
 {
-    auto const position = GetPosition();
+    auto const position = GetFrameRect().GetPosition();
     return position + UnitFunction::ConvertDpToVp(point, GetDisplayScale()).As<Offset>();
 }
 
@@ -179,7 +187,7 @@ auto Window::LocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>
 ///
 auto Window::GlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>
 {
-    auto const position = GetPosition();
+    auto const position = GetFrameRect().GetPosition();
     return UnitFunction::ConvertVpToDp(point - position.As<Offset>(), GetDisplayScale());
 }
 
@@ -400,15 +408,10 @@ auto Window::MeasureSize(BoxConstraints const& constraints) -> Size<Dp>
 {
     if (!IsClosed())
     {
-        // We cannot directly measure root view since WindowFrameView expects window area rects to be set.
-        auto const insets = _platformObject->GetClientAreaInsets();
-        auto clientSize = Size<Dp>();
-        if (auto content = _frameView->GetContent())
-        {
-            auto const cs = BoxConstraints::Offset(constraints, -insets.GetTotalWidth(), -insets.GetTotalHeight());
-            clientSize = MeasureScope::MeasureView(*content, cs);
-        }
-        return Size<Dp>(clientSize.GetWidth() + insets.GetTotalWidth(), clientSize.GetHeight() + insets.GetTotalHeight());
+        auto const clientInsets = _platformObject->GetAreaInsets(WindowArea::Frame);
+        auto const cs = BoxConstraints::Offset(constraints, -clientInsets.GetTotalWidth(), -clientInsets.GetTotalHeight());
+        auto clientSize = MeasureScope::MeasureView(*_frameView, cs);
+        return Size<Dp>(clientSize.GetWidth() + clientInsets.GetTotalWidth(), clientSize.GetHeight() + clientInsets.GetTotalHeight());
     }
     return {};
 }
@@ -716,9 +719,9 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
 
     Realize(options);
 
-    _areaManager = WindowAreaManager::Make();
+    _areaManager = ViewAreaManager::Make();
 
-    _frameView = WindowFrameView::Make();
+    _frameView = ContainerView::Make();
 
     _rootViewLayer = ViewLayer::Make(_platformObject->GetViewLayer());
 
@@ -734,7 +737,7 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
       },
       _frameView);
 
-    AttributeNode::SetValue<&WindowAttribute::AreaManager>(*this, _areaManager);
+    AttributeNode::SetValue<&ViewAttribute::AreaManager>(*this, _areaManager);
 
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, BackgroundColor, {});
     _backgroundColor.BindAttribute(*this, BackgroundColor);
@@ -864,7 +867,14 @@ auto Window::GetClientRect() const -> Rect<Dp>
 {
     if (_platformObject)
     {
-        return _platformObject->GetAreaRect(WindowArea::Client);
+        auto const clientInsets = _platformObject->GetAreaInsets(WindowArea::Frame);
+        auto const size = UnitFunction::ConvertVpToDp(GetFrameRect().GetSize(), GetDisplayScale());
+        auto const localRect = Rect<Dp>({}, size);
+        return Rect<Dp>(
+          localRect.GetLeft() + clientInsets.GetLeading(),
+          localRect.GetTop() + clientInsets.GetTop(),
+          localRect.GetRight() - clientInsets.GetTrailing(),
+          localRect.GetBottom() - clientInsets.GetBottom());
     }
     return {};
 }
@@ -887,10 +897,15 @@ auto Window::UpdateAreaRects() -> void
 {
     if (!IsClosed() && _areaManager)
     {
-        auto const clientOffset = _platformObject->GetAreaRect(WindowArea::Client).GetPosition().As<Offset>();
-        _areaManager->SetTitleBarAreaRect(Rect<Dp>::Offset(_platformObject->GetAreaRect(WindowArea::TitleBar), -clientOffset));
-        _areaManager->SetTitleBarAvailableAreaRect(Rect<Dp>::Offset(_platformObject->GetAreaRect(WindowArea::TitleBarContent), -clientOffset));
-        _areaManager->SetContentAreaRect(Rect<Dp>::Offset(_platformObject->GetAreaRect(WindowArea::Content), -clientOffset));
+        auto const frameInsets = _platformObject->GetAreaInsets(WindowArea::Frame);
+        auto const titleBarInsets = _platformObject->GetAreaInsets(WindowArea::TitleBar);
+        auto const titleBarRects = _platformObject->GetAreaBounds(WindowArea::TitleBar);
+        auto const localTitleBarInsets = EdgeInsets::Max(titleBarInsets - frameInsets, EdgeInsets());
+        auto const localTitleBarRects = titleBarRects
+                                        | std::ranges::views::transform([&](auto const& rect) { return Rect<Dp>::Offset(rect, -Offset<Dp>(frameInsets.GetLeading(), frameInsets.GetTop())); })
+                                        | std::ranges::to<std::vector>();
+        _areaManager->SetAreaInsets(ViewArea::TitleBar, localTitleBarInsets);
+        _areaManager->SetAreaBounds(ViewArea::TitleBar, localTitleBarRects);
     }
 }
 
@@ -901,7 +916,7 @@ auto Window::UpdateRootViewLayer() -> void
 {
     if (_rootViewLayer)
     {
-        _rootViewLayer->SetSize(UnitFunction::ConvertVpToDp(GetSize(), GetDisplayScale()));
+        _rootViewLayer->SetSize(UnitFunction::ConvertVpToDp(GetFrameRect().GetSize(), GetDisplayScale()));
     }
 }
 
@@ -975,7 +990,7 @@ auto Window::HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>
     {
         UpdateRootViewLayer();
         auto windowEventParameter = Event<WindowEvent::SizeChanged>();
-        windowEventParameter->SetSize(GetSize());
+        windowEventParameter->SetSize(GetFrameRect().GetSize());
         auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;
@@ -983,7 +998,7 @@ auto Window::HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>
     else if (event.Is<PlatformWindowEvent::PositionChanged>())
     {
         auto windowEventParameter = Event<WindowEvent::PositionChanged>();
-        windowEventParameter->SetPosition(GetPosition());
+        windowEventParameter->SetPosition(GetFrameRect().GetPosition());
         auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;

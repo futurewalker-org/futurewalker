@@ -3,15 +3,14 @@
 
 #include "Futurewalker.Application.WindowType.hpp"
 #include "Futurewalker.Application.WindowEvent.hpp"
-#include "Futurewalker.Application.WindowAreaManagerType.hpp"
-#include "Futurewalker.Application.WindowFrameViewType.hpp"
+#include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.ViewType.hpp"
 #include "Futurewalker.Application.ViewLayerType.hpp"
 #include "Futurewalker.Application.RootViewType.hpp"
 #include "Futurewalker.Application.ScreenType.hpp"
 #include "Futurewalker.Application.BoxConstraints.hpp"
 #include "Futurewalker.Application.InputMethodType.hpp"
-
+#include "Futurewalker.Application.ViewAreaManagerType.hpp"
 #include "Futurewalker.Application.PlatformWindowType.hpp"
 #include "Futurewalker.Application.PlatformWindowContextType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
@@ -120,11 +119,11 @@ public:
     auto IsActive() const -> Bool;
     auto IsFocused() const -> Bool;
 
-    auto GetSize() const -> Size<Vp>;
-    auto SetSize(Size<Vp> const& size) -> void;
+    auto GetFrameRect() const -> Rect<Vp>;
+    auto SetFrameRect(Rect<Vp> const& rect) -> void;
 
-    auto GetPosition() const -> Point<Vp>;
-    auto SetPosition(Point<Vp> const& position) -> void;
+    auto GetRestoredFrameRect() const -> Rect<Vp>;
+    auto SetRestoredFrameRect(Rect<Vp> const& rect) -> void;
 
     auto LocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>;
     auto GlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>;
@@ -240,8 +239,8 @@ private:
     Shared<ViewLayer> _rootViewLayer;
     Shared<InputMethod> _inputMethod;
     Shared<RootView> _rootView;
-    Shared<WindowFrameView> _frameView;
-    Shared<WindowAreaManager> _areaManager;
+    Shared<ContainerView> _frameView;
+    Shared<ViewAreaManager> _areaManager;
     AttributeAccessor<RGBAColor> _backgroundColor;
 };
 

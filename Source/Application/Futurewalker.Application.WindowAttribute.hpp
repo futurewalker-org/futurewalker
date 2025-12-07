@@ -2,7 +2,6 @@
 #pragma once
 
 #include "Futurewalker.Application.Prelude.hpp"
-#include "Futurewalker.Application.WindowAreaManagerType.hpp"
 
 #include "Futurewalker.Attribute.StaticAttribute.hpp"
 
@@ -20,8 +19,6 @@ namespace FW_EXPORT
 ///
 class WindowAttribute : NonConstructible
 {
-public:
-    FW_STATIC_ATTRIBUTE(Shared<WindowAreaManager>, AreaManager);
 };
 }
 }

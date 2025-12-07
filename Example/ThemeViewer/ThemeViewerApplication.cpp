@@ -73,7 +73,7 @@ auto ThemeViewerApplication::ReceiveEvent(Event<>& event) -> Async<Bool>
         });
         window->SetTitle(u8"Theme Viewer");
         window->SetBackgroundColor(Lamp::Style::ColorSurface);
-        window->SetSize({1000, 1000});
+        window->SetFrameRect({0, 0, 1000, 1000});
         window->SetContent(scroll);
         window->SetVisible(true);
 

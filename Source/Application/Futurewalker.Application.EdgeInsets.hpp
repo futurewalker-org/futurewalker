@@ -178,6 +178,66 @@ public:
         return _top + _bottom;
     }
 
+    ///
+    /// @brief
+    ///
+    constexpr auto operator-() const noexcept -> EdgeInsets
+    {
+        return EdgeInsets(-_leading, -_top, -_trailing, -_bottom);
+    }
+
+    ///
+    /// @brief 
+    ///
+    constexpr auto operator+() const noexcept -> EdgeInsets
+    {
+        return EdgeInsets(+_leading, +_top, +_trailing, +_bottom);
+    }
+
+    ///
+    /// @brief 
+    ///
+    constexpr auto operator+=(EdgeInsets const& x) noexcept -> EdgeInsets&
+    {
+        _leading += x._leading;
+        _top += x._top;
+        _trailing += x._trailing;
+        _bottom += x._bottom;
+        return *this;
+    }
+
+    ///
+    /// @brief 
+    ///
+    constexpr auto operator-=(EdgeInsets const& x) noexcept -> EdgeInsets&
+    {
+        _leading -= x._leading;
+        _top -= x._top;
+        _trailing -= x._trailing;
+        _bottom -= x._bottom;
+        return *this;
+    }
+
+    ///
+    /// @brief 
+    ///
+    friend constexpr auto operator+(EdgeInsets const& l, EdgeInsets const& r) noexcept -> EdgeInsets
+    {
+        auto tmp = l;
+        tmp += r;
+        return tmp;
+    }
+
+    ///
+    /// @brief 
+    ///
+    friend constexpr auto operator-(EdgeInsets const& l, EdgeInsets const& r) noexcept -> EdgeInsets
+    {
+        auto tmp = l;
+        tmp -= r;
+        return tmp;
+    }
+
     auto operator=(EdgeInsets const&) -> EdgeInsets& = default;
     auto operator==(EdgeInsets const&) const -> bool = default;
 

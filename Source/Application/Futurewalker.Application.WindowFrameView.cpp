@@ -2,9 +2,9 @@
 
 #include "Futurewalker.Application.WindowFrameView.hpp"
 #include "Futurewalker.Application.ContainerView.hpp"
-#include "Futurewalker.Application.WindowAttribute.hpp"
-#include "Futurewalker.Application.WindowAreaManager.hpp"
-#include "Futurewalker.Application.WindowAreaManagerEvent.hpp"
+#include "Futurewalker.Application.ViewAttribute.hpp"
+#include "Futurewalker.Application.ViewAreaManager.hpp"
+#include "Futurewalker.Application.ViewAreaManagerEvent.hpp"
 #include "Futurewalker.Application.MeasureScope.hpp"
 #include "Futurewalker.Application.ArrangeScope.hpp"
 #include "Futurewalker.Application.DrawScope.hpp"
@@ -39,7 +39,7 @@ WindowFrameView::WindowFrameView(PassKey<View> key)
 ///
 auto WindowFrameView::Initialize() -> void
 {
-    _windowAreaManager = AttributeNode::GetObserver<&WindowAttribute::AreaManager>(*this);
+    _areaManager = AttributeNode::GetObserver<&ViewAttribute::AreaManager>(*this);
     _titleBackground = ContainerView::Make();
     _titleContent = ContainerView::Make();
     _background = ContainerView::Make();
@@ -50,7 +50,7 @@ auto WindowFrameView::Initialize() -> void
     AddChildBack(_titleContent);
     AddChildBack(_content);
 
-    EventReceiver::Connect(*_windowAreaManager, *this, &WindowFrameView::ReceiveAttributeEvent);
+    EventReceiver::Connect(*_areaManager, *this, &WindowFrameView::ReceiveAttributeEvent);
     EventReceiver::Connect(*this, *this, &WindowFrameView::ReceiveEvent);
 
     UpdateAreaManager();
@@ -65,22 +65,57 @@ auto WindowFrameView::Measure(MeasureScope& scope) -> void
     auto const& width = parameter.GetWidthConstraints();
     auto const& height = parameter.GetHeightConstraints();
 
-    auto measureSize = [](auto const& c) { return c.IsBounded() ? c.GetMax() : c.GetMin(); };
-    auto const measuredWidth = measureSize(width);
-    auto const measuredHeight = measureSize(height);
+    auto const titleBarInsets = GetTitleBarInsets();
+    auto const contentWidth = width;
+    auto const contentHeight = AxisConstraints::Offset(height, -titleBarInsets.GetTop());
+    auto const contentSize = scope.MeasureChild(_content, contentWidth, contentHeight);
 
-    scope.MeasureChild(_background, AxisConstraints::MakeExact(measuredWidth), AxisConstraints::MakeExact(measuredHeight));
+    auto const measuredWidth = AxisConstraints::Constrain(width, contentSize.GetWidth());
+    auto const measuredHeight = AxisConstraints::Constrain(height, contentSize.GetHeight() + titleBarInsets.GetTop());
+    auto const measuredSize = Size<Dp>(measuredWidth, measuredHeight);
+    scope.MeasureChild(_background, AxisConstraints::MakeExact(measuredSize.GetWidth()), AxisConstraints::MakeExact(measuredSize.GetHeight()));
+    scope.MeasureChild(_titleBackground, AxisConstraints::MakeExact(measuredSize.GetWidth()), AxisConstraints::MakeExact(titleBarInsets.GetTop()));
 
-    auto const titleBarAreaRect = GetTitleBarAreaRect();
-    scope.MeasureChild(_titleBackground, AxisConstraints::MakeExact(titleBarAreaRect.GetWidth()), AxisConstraints::MakeExact(titleBarAreaRect.GetHeight()));
+    if (width.IsBounded() && height.IsBounded())
+    {
+        auto const titleBarContentRect = GetTitleBarContentRect(measuredSize);
+        scope.MeasureChild(_titleContent, AxisConstraints::MakeExact(titleBarContentRect.GetWidth()), AxisConstraints::MakeExact(titleBarContentRect.GetHeight()));
+    }
+    else
+    {
+        scope.MeasureChild(_titleContent, contentWidth, AxisConstraints::MakeExact(titleBarInsets.GetTop()));
+    }
+    scope.SetMeasuredSize(measuredSize);
+}
 
-    auto const titleBarAvailableAreaRect = GetTitleBarAvailableAreaRect();
-    scope.MeasureChild(_titleContent, AxisConstraints::MakeExact(titleBarAvailableAreaRect.GetWidth()), AxisConstraints::MakeExact(titleBarAvailableAreaRect.GetHeight()));
+///
+/// @brief
+///
+/// @param size
+///
+auto WindowFrameView::GetTitleBarContentRect(Size<Dp> const& size) const -> Rect<Dp>
+{
+    auto const titleBarInsets = GetTitleBarInsets();
+    auto boundingRects = GetTitleBarBoundingRects();
+    std::sort(boundingRects.begin(), boundingRects.end(), [](auto const& lhs, auto const& rhs) { return lhs.GetLeft() < rhs.GetLeft(); });
+    boundingRects.push_back(Rect<Dp>(size.GetWidth(), Dp(0), size.GetWidth(), titleBarInsets.GetTop()));
 
-    auto const contentAreaRect = GetContentAreaRect();
-    scope.MeasureChild(_content, AxisConstraints::MakeExact(contentAreaRect.GetWidth()), AxisConstraints::MakeExact(contentAreaRect.GetHeight()));
-
-    scope.SetMeasuredSize(measuredWidth, measuredHeight);
+    auto maxWidth = Dp(0);
+    auto maxWidthLeft = Dp(0);
+    auto maxWidthRight = Dp(0);
+    auto lastRight = Dp(0);
+    for (auto const& rect : boundingRects)
+    {
+        auto const gap = rect.GetLeft() - lastRight;
+        if (gap > maxWidth)
+        {
+            maxWidth = gap;
+            maxWidthLeft = lastRight;
+            maxWidthRight = rect.GetLeft();
+        }
+        lastRight = rect.GetRight();
+    }
+    return Rect<Dp>(maxWidthLeft, Dp(0), maxWidthRight, titleBarInsets.GetTop());
 }
 
 ///
@@ -88,16 +123,12 @@ auto WindowFrameView::Measure(MeasureScope& scope) -> void
 ///
 auto WindowFrameView::Arrange(ArrangeScope& scope) -> void
 {
+    auto const titleBarInsets = GetTitleBarInsets();
+    auto const titleBarContentRect = GetTitleBarContentRect(scope.GetMeasuredSize(*this));
     scope.ArrangeChild(_background, Point<Dp>());
-
-    auto const titleBarAreaRect = GetTitleBarAreaRect();
-    scope.ArrangeChild(_titleBackground, titleBarAreaRect.GetPosition());
-
-    auto const titleBarAvailableAreaRect = GetTitleBarAvailableAreaRect();
-    scope.ArrangeChild(_titleContent, titleBarAvailableAreaRect.GetPosition());
-
-    auto const contentAreaRect = GetContentAreaRect();
-    scope.ArrangeChild(_content, contentAreaRect.GetPosition());
+    scope.ArrangeChild(_content, Point<Dp>(Dp(0), titleBarInsets.GetTop()));
+    scope.ArrangeChild(_titleBackground, Point<Dp>());
+    scope.ArrangeChild(_titleContent, titleBarContentRect.GetTopLeft());
 }
 
 ///
@@ -107,9 +138,7 @@ auto WindowFrameView::Arrange(ArrangeScope& scope) -> void
 ///
 auto WindowFrameView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
-    if (event.Is<WindowAreaManagerEvent::TitleBarAreaRectChanged>() ||
-        event.Is<WindowAreaManagerEvent::TitleBarAvailableAreaRectChanged>() ||
-        event.Is<WindowAreaManagerEvent::ContentAreaRectChanged>())
+    if (event.Is<ViewAreaManagerEvent::GeometryChanged>())
     {
         InvalidateLayout();
         InvalidateVisual();
@@ -212,11 +241,11 @@ auto WindowFrameView::SetTitleContent(Shared<View> content) -> void
 ///
 /// @brief Get current area manager.
 ///
-auto WindowFrameView::GetAreaManager() -> Shared<WindowAreaManager>
+auto WindowFrameView::GetAreaManager() -> Shared<ViewAreaManager>
 {
-    if (_windowAreaManager)
+    if (_areaManager)
     {
-        if (auto const manager = _windowAreaManager->GetValue())
+        if (auto const manager = _areaManager->GetValue())
         {
             return *manager;
         }
@@ -227,11 +256,11 @@ auto WindowFrameView::GetAreaManager() -> Shared<WindowAreaManager>
 ///
 /// @brief Get current area manager.
 ///
-auto WindowFrameView::GetAreaManager() const -> Shared<const WindowAreaManager>
+auto WindowFrameView::GetAreaManager() const -> Shared<const ViewAreaManager>
 {
-    if (_windowAreaManager)
+    if (_areaManager)
     {
-        if (auto const manager = _windowAreaManager->GetValue())
+        if (auto const manager = _areaManager->GetValue())
         {
             return *manager;
         }
@@ -240,37 +269,25 @@ auto WindowFrameView::GetAreaManager() const -> Shared<const WindowAreaManager>
 }
 
 ///
-/// @brief Get local rect of an area.
+/// @brief 
 ///
-auto WindowFrameView::GetTitleBarAreaRect() const -> Rect<Dp>
+auto WindowFrameView::GetTitleBarInsets() const -> EdgeInsets
 {
-    if (auto const areaManager = GetAreaManager())
+    if (auto const manager = GetAreaManager())
     {
-        return RootToLocalRect(areaManager->GetTitleBarAreaRect());
+        return manager->GetAreaInsets(ViewArea::TitleBar);
     }
     return {};
 }
 
 ///
-/// @brief Get local rect of an area.
+/// @brief 
 ///
-auto WindowFrameView::GetTitleBarAvailableAreaRect() const -> Rect<Dp>
+auto WindowFrameView::GetTitleBarBoundingRects() const -> std::vector<Rect<Dp>>
 {
-    if (auto const areaManager = GetAreaManager())
+    if (auto const manager = GetAreaManager())
     {
-        return RootToLocalRect(areaManager->GetTitleBarAvailableAreaRect());
-    }
-    return {};
-}
-
-///
-/// @brief Get local rect of an area.
-///
-auto WindowFrameView::GetContentAreaRect() const -> Rect<Dp>
-{
-    if (auto const areaManager = GetAreaManager())
-    {
-        return RootToLocalRect(areaManager->GetContentAreaRect());
+        return manager->GetAreaBounds(ViewArea::TitleBar);
     }
     return {};
 }

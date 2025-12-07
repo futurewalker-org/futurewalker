@@ -46,11 +46,12 @@ public:
     virtual auto SetActive() -> void = 0;
     virtual auto IsFocused() -> Bool = 0;
     virtual auto SetFocus() -> void = 0;
-    virtual auto GetSize() -> Size<Vp> = 0;
-    virtual auto SetSize(Size<Vp> const& size) -> void = 0;
-    virtual auto GetPosition() -> Point<Vp> = 0;
-    virtual auto SetPosition(Point<Vp> const& position) -> void = 0;
-    virtual auto GetAreaRect(WindowArea const area) -> Rect<Dp> = 0;
+    virtual auto GetFrameRect() -> Rect<Vp> = 0;
+    virtual auto SetFrameRect(Rect<Vp> const& rect) -> void = 0;
+    virtual auto GetRestoredFrameRect() -> Rect<Vp> = 0;
+    virtual auto SetRestoredFrameRect(Rect<Vp> const& rect) -> void = 0;
+    virtual auto GetAreaBounds(WindowArea const area) -> std::vector<Rect<Dp>> = 0;
+    virtual auto GetAreaInsets(WindowArea const are) -> EdgeInsets = 0;
     virtual auto GetDisplayScale() -> DisplayScale = 0;
     virtual auto GetBackingScale() -> BackingScale = 0;
     virtual auto GetSizeConstraints() -> BoxConstraints = 0;
@@ -67,7 +68,6 @@ public:
     virtual auto GetFrameTime() -> MonotonicTime = 0;
     virtual auto GetViewLayer() -> Shared<PlatformViewLayer> = 0;
     virtual auto GetInputMethod() -> Shared<PlatformInputMethod> = 0;
-    virtual auto GetClientAreaInsets() -> EdgeInsets = 0;
     virtual auto SetBackgroundColor(RGBColor const& color) -> void = 0;
 
 protected:

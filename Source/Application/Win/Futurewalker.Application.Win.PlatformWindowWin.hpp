@@ -54,11 +54,12 @@ public:
     auto SetActive() -> void override;
     auto IsFocused() -> Bool override;
     auto SetFocus() -> void override;
-    auto GetSize() -> Size<Vp> override;
-    auto SetSize(Size<Vp> const& size) -> void override;
-    auto GetPosition() -> Point<Vp> override;
-    auto SetPosition(Point<Vp> const& position) -> void override;
-    auto GetAreaRect(WindowArea const area) -> Rect<Dp> override;
+    auto GetFrameRect() -> Rect<Vp> override;
+    auto SetFrameRect(Rect<Vp> const& rect) -> void override;
+    auto GetRestoredFrameRect() -> Rect<Vp> override;
+    auto SetRestoredFrameRect(Rect<Vp> const& rect) -> void override;
+    auto GetAreaBounds(WindowArea const area) -> std::vector<Rect<Dp>> override;
+    auto GetAreaInsets(WindowArea const area) -> EdgeInsets override;
     auto GetDisplayScale() -> DisplayScale override;
     auto GetBackingScale() -> BackingScale override;
     auto GetSizeConstraints() -> BoxConstraints override;
@@ -75,7 +76,6 @@ public:
     auto GetFrameTime() -> MonotonicTime override;
     auto GetViewLayer() -> Shared<PlatformViewLayer> override;
     auto GetInputMethod() -> Shared<PlatformInputMethod> override;
-    auto GetClientAreaInsets() -> EdgeInsets override;
     auto SetBackgroundColor(RGBColor const& backgroundColor) -> void override;
 
 public:
@@ -116,7 +116,8 @@ private:
     auto GetSystemFrameThicknessX() const -> int;
     auto GetSystemFrameThicknessY() const -> int;
     auto GetSystemTitleBarHeight() const -> int;
-    auto GetSystemControlRect() const -> RECT;
+    auto GetSystemControlRect() const -> Rect<Vp>;
+    auto RefreshSystemControlRect() -> void;
 
     auto HasWindowStyle(DWORD style) const -> Bool;
 
@@ -155,6 +156,8 @@ private:
     Bool _destructing = false;
     Bool _closing = false;
     Bool _closed = false;
+    Rect<Vp> _systemControlRect;
+    Bool _restoreOnShow = false;
 
 private:
     struct PointerState

@@ -4,5 +4,4 @@
 
 namespace FW_DETAIL_NS
 {
-FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(WindowAttribute::AreaManager, nullptr);
 }

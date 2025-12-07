@@ -8,6 +8,7 @@
 #include <Futurewalker.Application.ApplicationEvent.hpp>
 #include <Futurewalker.Application.ApplicationTheme.hpp>
 #include <Futurewalker.Application.Window.hpp>
+#include <Futurewalker.Application.WindowBuilder.hpp>
 #include <Futurewalker.Application.AlignView.hpp>
 
 #include <Futurewalker.Event.EventReceiver.hpp>
@@ -49,7 +50,7 @@ protected:
 
             auto window = Window::Make({});
             window->SetTitle(hello);
-            window->SetSize({500, 500});
+            window->SetFrameRect({{0, 0}, {500, 500}});
             auto text = Lamp::TextView::MakeWithText(hello);
             AttributeNode::SetValue<&Lamp::TextViewStyle::FontSize>(*text, 42);
             AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());

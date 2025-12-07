@@ -170,7 +170,15 @@ auto PlatformWindowWin::SetVisible(Bool visible) -> void
 {
     if (!IsClosed())
     {
-        ::ShowWindow(_hwnd, visible ? SW_SHOW : SW_HIDE);
+        if (visible)
+        {
+            ::ShowWindow(_hwnd, _restoreOnShow ? SW_SHOWNORMAL : SW_SHOW);
+            _restoreOnShow = false;
+        }
+        else
+        {
+            ::ShowWindow(_hwnd, SW_HIDE);
+        }
     }
 }
 
@@ -223,14 +231,141 @@ auto PlatformWindowWin::SetFocus() -> void
 ///
 /// @brief
 ///
-auto PlatformWindowWin::GetSize() -> Size<Vp>
+auto PlatformWindowWin::GetFrameRect() -> Rect<Vp>
 {
     if (!IsClosed())
     {
-        auto rect = RECT();
-        if (::GetWindowRect(_hwnd, &rect))
+        auto placement = WINDOWPLACEMENT();
+        placement.length = sizeof(WINDOWPLACEMENT);
+        if (!::GetWindowPlacement(_hwnd, &placement))
         {
-            return Size<Vp>(rect.right - rect.left, rect.bottom - rect.top);
+            FW_DEBUG_ASSERT(false);
+            return {};
+        }
+
+        if (placement.showCmd == SW_SHOWMINIMIZED)
+        {
+            auto rect = Rect<Vp>(placement.rcNormalPosition.left, placement.rcNormalPosition.top, placement.rcNormalPosition.right, placement.rcNormalPosition.bottom);
+            if (!HasWindowStyle(WS_EX_TOOLWINDOW))
+            {
+                auto monitor = ::MonitorFromWindow(_hwnd, MONITOR_DEFAULTTOPRIMARY);
+                auto monitorInfo = MONITORINFO();
+                monitorInfo.cbSize = sizeof(MONITORINFO);
+                if (::GetMonitorInfoW(monitor, &monitorInfo))
+                {
+                    rect.SetLeft(rect.GetLeft() + monitorInfo.rcWork.left);
+                    rect.SetTop(rect.GetTop() + monitorInfo.rcWork.top);
+                }
+            }
+            return rect;
+        }
+        else
+        {
+            auto rect = RECT();
+            if (::GetWindowRect(_hwnd, &rect))
+            {
+                return Rect<Vp>(rect.left, rect.top, rect.right, rect.bottom);
+            }
+        }
+        FW_DEBUG_ASSERT(false);
+    }
+    return {};
+}
+
+///
+/// @brief
+///
+/// @param rect
+///
+auto PlatformWindowWin::SetFrameRect(Rect<Vp> const& rect) -> void
+{
+    if (!IsClosed())
+    {
+        auto const w = static_cast<int>(Vp::Round(rect.GetWidth()));
+        auto const h = static_cast<int>(Vp::Round(rect.GetHeight()));
+        auto x = static_cast<int>(Vp::Round(rect.GetLeft()));
+        auto y = static_cast<int>(Vp::Round(rect.GetTop()));
+
+        auto placement = WINDOWPLACEMENT();
+        placement.length = sizeof(WINDOWPLACEMENT);
+        if (!::GetWindowPlacement(_hwnd, &placement))
+        {
+            FW_DEBUG_ASSERT(false);
+            return;
+        }
+
+        if (placement.showCmd == SW_SHOWMINIMIZED || placement.showCmd == SW_SHOWMAXIMIZED)
+        {
+            if (!HasWindowStyle(WS_EX_TOOLWINDOW))
+            {
+                auto monitor = ::MonitorFromWindow(_hwnd, MONITOR_DEFAULTTOPRIMARY);
+                auto monitorInfo = MONITORINFO();
+                monitorInfo.cbSize = sizeof(MONITORINFO);
+                if (::GetMonitorInfoW(monitor, &monitorInfo))
+                {
+                    x -= monitorInfo.rcWork.left;
+                    y -= monitorInfo.rcWork.top;
+                }
+            }
+
+            placement.rcNormalPosition.left = x;
+            placement.rcNormalPosition.top = y;
+            placement.rcNormalPosition.right = placement.rcNormalPosition.left + w;
+            placement.rcNormalPosition.bottom = placement.rcNormalPosition.top + h;
+
+            if (::IsWindowVisible(_hwnd))
+            {
+                placement.showCmd = placement.showCmd == SW_SHOWMINIMIZED ? SW_SHOWMINNOACTIVE : SW_SHOWNOACTIVATE;
+            }
+            else
+            {
+                if (placement.showCmd == SW_SHOWMAXIMIZED)
+                {
+                    _restoreOnShow = true;
+                }
+                placement.showCmd = SW_HIDE;
+            }
+
+            if (::SetWindowPlacement(_hwnd, &placement))
+            {
+                return;
+            }
+        }
+        else
+        {
+            if (::SetWindowPos(_hwnd, NULL, x, y, w, h, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER))
+            {
+                return;
+            }
+        }
+        FW_DEBUG_ASSERT(false);
+    }
+}
+
+///
+/// @brief 
+///
+auto PlatformWindowWin::GetRestoredFrameRect() -> Rect<Vp>
+{
+    if (!IsClosed())
+    {
+        auto placement = WINDOWPLACEMENT();
+        placement.length = sizeof(WINDOWPLACEMENT);
+        if (::GetWindowPlacement(_hwnd, &placement))
+        {
+            auto rect = Rect<Vp>(placement.rcNormalPosition.left, placement.rcNormalPosition.top, placement.rcNormalPosition.right, placement.rcNormalPosition.bottom);
+            if (!HasWindowStyle(WS_EX_TOOLWINDOW))
+            {
+                auto monitor = ::MonitorFromWindow(_hwnd, MONITOR_DEFAULTTOPRIMARY);
+                auto monitorInfo = MONITORINFO();
+                monitorInfo.cbSize = sizeof(MONITORINFO);
+                if (::GetMonitorInfoW(monitor, &monitorInfo))
+                {
+                    rect.SetLeft(rect.GetLeft() + monitorInfo.rcWork.left);
+                    rect.SetTop(rect.GetTop() + monitorInfo.rcWork.top);
+                }
+            }
+            return rect;
         }
     }
     return {};
@@ -239,97 +374,122 @@ auto PlatformWindowWin::GetSize() -> Size<Vp>
 ///
 /// @brief
 ///
-/// @param frameRect
+/// @param rect
 ///
-auto PlatformWindowWin::SetSize(Size<Vp> const& size) -> void
+auto PlatformWindowWin::SetRestoredFrameRect(Rect<Vp> const& rect) -> void
 {
     if (!IsClosed())
     {
-        const auto w = static_cast<int>(Vp::Round(size.GetWidth()));
-        const auto h = static_cast<int>(Vp::Round(size.GetHeight()));
-        ::SetWindowPos(_hwnd, NULL, 0, 0, w, h, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE);
+        auto placement = WINDOWPLACEMENT();
+        placement.length = sizeof(WINDOWPLACEMENT);
+        if (::GetWindowPlacement(_hwnd, &placement))
+        {
+            auto const w = static_cast<int>(Vp::Round(rect.GetWidth()));
+            auto const h = static_cast<int>(Vp::Round(rect.GetHeight()));
+            auto x = static_cast<int>(Vp::Round(rect.GetLeft()));
+            auto y = static_cast<int>(Vp::Round(rect.GetTop()));
+
+            if (!HasWindowStyle(WS_EX_TOOLWINDOW))
+            {
+                auto monitor = ::MonitorFromWindow(_hwnd, MONITOR_DEFAULTTOPRIMARY);
+                auto monitorInfo = MONITORINFO();
+                monitorInfo.cbSize = sizeof(MONITORINFO);
+                if (::GetMonitorInfoW(monitor, &monitorInfo))
+                {
+                    x -= monitorInfo.rcWork.left;
+                    y -= monitorInfo.rcWork.top;
+                }
+            }
+
+            placement.rcNormalPosition.left = x;
+            placement.rcNormalPosition.top = y;
+            placement.rcNormalPosition.right = placement.rcNormalPosition.left + w;
+            placement.rcNormalPosition.bottom = placement.rcNormalPosition.top + h;
+
+            if (::IsWindowVisible(_hwnd))
+            {
+                if (placement.showCmd == SW_SHOWMINIMIZED)
+                {
+                    placement.showCmd = SW_SHOWMINNOACTIVE;
+                }
+                else
+                {
+                    placement.showCmd = SW_SHOWNA;
+                }
+            }
+            else
+            {
+                placement.showCmd = SW_HIDE;
+            }
+
+            if (::SetWindowPlacement(_hwnd, &placement))
+            {
+                return;
+            }
+        }
+        FW_DEBUG_ASSERT(false);
     }
 }
 
 ///
-/// @brief
+/// @brief Get bounding rectangles which are obscured by system UI elements within the specified area.
 ///
-auto PlatformWindowWin::GetPosition() -> Point<Vp>
+/// @param[in] area Area to get bounds.
+///
+/// @note This does not include the bounds of the area itself. Use GetAreaInsets to calculate overall geometry of the area.
+///
+auto PlatformWindowWin::GetAreaBounds(WindowArea const area) -> std::vector<Rect<Dp>>
 {
     if (!IsClosed())
     {
-        auto rect = RECT();
-        if (::GetWindowRect(_hwnd, &rect))
+        if (area == WindowArea::TitleBar)
         {
-            return Point<Vp>(rect.left, rect.top);
+            if (_options.hasTitleBar)
+            {
+                const auto controlRect = GetSystemControlRect();
+                if (!controlRect.IsEmpty())
+                {
+                    return {UnitFunction::ConvertVpToDp(controlRect, GetDisplayScale())};
+                }
+            }
         }
     }
     return {};
 }
 
 ///
-/// @brief
+/// @brief Get insets of the specified area.
 ///
-/// @param contentRect
+/// @param[in] area Area to get insets.
 ///
-auto PlatformWindowWin::SetPosition(Point<Vp> const& position) -> void
+auto PlatformWindowWin::GetAreaInsets(WindowArea const area) -> EdgeInsets
 {
     if (!IsClosed())
     {
-        const auto x = static_cast<int>(Vp::Round(position.GetX()));
-        const auto y = static_cast<int>(Vp::Round(position.GetY()));
-        ::SetWindowPos(_hwnd, NULL, x, y, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSIZE);
-    }
-}
-
-///
-/// @brief
-///
-auto PlatformWindowWin::GetAreaRect(WindowArea const area) -> Rect<Dp>
-{
-    if (!IsClosed())
-    {
-        auto clientRect = RECT();
-        ::GetClientRect(_hwnd, &clientRect);
-
-        auto windowRect = RECT();
-        ::GetWindowRect(_hwnd, &windowRect);
-
+        if (area == WindowArea::Frame)
         {
-            auto clientPosition = POINT {clientRect.left, clientRect.top};
-            ::ClientToScreen(_hwnd, &clientPosition);
-            ::OffsetRect(&clientRect, clientPosition.x - windowRect.left, clientPosition.y - windowRect.top);
-        }
-
-        if (area == WindowArea::Client)
-        {
-            auto const rect = Rect<Vp>(clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
-            return UnitFunction::ConvertVpToDp(rect, GetDisplayScale());
+            // This should match WM_NCCALCSIZE handling.
+            if (_options.hasFrame)
+            {
+                if (_options.hasTitleBar || !HasWindowStyle(WS_POPUP))
+                {
+                    const auto marginX = UnitFunction::ConvertVpToDp(GetSystemFrameThicknessX(), GetDisplayScale());
+                    const auto marginTop = UnitFunction::ConvertVpToDp(0, GetDisplayScale());
+                    const auto marginBottom = UnitFunction::ConvertVpToDp(GetSystemFrameThicknessY(), GetDisplayScale());
+                    return EdgeInsets(marginX, marginTop, marginX, marginBottom);
+                }
+                else
+                {
+                    return EdgeInsets::MakeUniform(1);
+                }
+            }
         }
         else if (area == WindowArea::TitleBar)
         {
-            if (_options.hasTitleBar)
-            {
-                const auto titleBarHeight = GetSystemTitleBarHeight();
-                const auto titleBarRect = Rect<Vp>(0, 0, windowRect.right - windowRect.left, titleBarHeight);
-                return UnitFunction::ConvertVpToDp(titleBarRect, GetDisplayScale());
-            }
-        }
-        else if (area == WindowArea::TitleBarContent)
-        {
-            if (_options.hasTitleBar)
-            {
-                const auto titleBarHeight = GetSystemTitleBarHeight();
-                const auto controlRect = GetSystemControlRect();
-                const auto availableRect = Rect<Vp>(clientRect.left, clientRect.top, controlRect.left, titleBarHeight);
-                return UnitFunction::ConvertVpToDp(availableRect, GetDisplayScale());
-            }
-        }
-        else if (area == WindowArea::Content)
-        {
-            const auto titleBarHeight = _options.hasTitleBar ? GetSystemTitleBarHeight() : 0;
-            const auto contentRect = Rect<Vp>(clientRect.left, Vp::Max(titleBarHeight, clientRect.top), clientRect.right, clientRect.bottom);
-            return UnitFunction::ConvertVpToDp(contentRect, GetDisplayScale());
+            auto const titleBarHeight = _options.hasTitleBar ? UnitFunction::ConvertVpToDp(GetSystemTitleBarHeight(), GetDisplayScale()) : Dp(0);
+            auto clientInsets = GetAreaInsets(WindowArea::Frame);
+            clientInsets.SetTop(clientInsets.GetTop() + titleBarHeight);
+            return clientInsets;
         }
     }
     return {};
@@ -412,6 +572,7 @@ auto PlatformWindowWin::Minimize() -> void
     if (!IsClosed())
     {
         ::ShowWindow(_hwnd, SW_MINIMIZE);
+        _restoreOnShow = false;
     }
 }
 
@@ -423,6 +584,7 @@ auto PlatformWindowWin::Maximize() -> void
     if (!IsClosed())
     {
         ::ShowWindow(_hwnd, SW_MAXIMIZE);
+        _restoreOnShow = false;
     }
 }
 
@@ -433,7 +595,14 @@ auto PlatformWindowWin::Restore() -> void
 {
     if (!IsClosed())
     {
-        ::ShowWindow(_hwnd, SW_NORMAL);
+        if (::IsWindowVisible(_hwnd))
+        {
+            ::ShowWindow(_hwnd, SW_RESTORE);
+        }
+        else
+        {
+            _restoreOnShow = true;
+        }
     }
 }
 
@@ -535,33 +704,6 @@ auto PlatformWindowWin::GetViewLayer() -> Shared<PlatformViewLayer>
 auto PlatformWindowWin::GetInputMethod() -> Shared<PlatformInputMethod>
 {
     return _inputMethod;
-}
-
-///
-/// @brief
-///
-auto PlatformWindowWin::GetClientAreaInsets() -> EdgeInsets
-{
-    // This should match WM_NCCALCSIZE handling.
-    if (_options.hasFrame)
-    {
-        if (_options.hasTitleBar || !HasWindowStyle(WS_POPUP))
-        {
-            const auto marginX = GetSystemFrameThicknessX();
-            const auto marginTop = 0;
-            const auto marginBottom = GetSystemFrameThicknessY();
-            return EdgeInsets(
-              UnitFunction::ConvertVpToDp(marginX, GetDisplayScale()),
-              UnitFunction::ConvertVpToDp(marginTop, GetDisplayScale()),
-              UnitFunction::ConvertVpToDp(marginX, GetDisplayScale()),
-              UnitFunction::ConvertVpToDp(marginBottom, GetDisplayScale()));
-        }
-        else
-        {
-            return EdgeInsets::MakeUniform(1);
-        }
-    }
-    return {};
 }
 
 ///
@@ -1162,14 +1304,15 @@ auto PlatformWindowWin::HandlePosChanged(HWND hWnd, UINT msg, WPARAM wParam, LPA
         {
             try
             {
-                {
-                    auto event = Event<>(Event<PlatformWindowEvent::AreaChanged>());
-                    SendWindowEventDetached(event);
-                }
+                // Update geometry of system controls in title bar.
+                // NOTE: DWM may return stalte value on DWMWA_CAPTION_BUTTON_BOUNDS immediately after resizing.
+                RefreshSystemControlRect();
                 {
                     auto event = Event<>(Event<PlatformWindowEvent::SizeChanged>());
                     SendWindowEventDetached(event);
                 }
+                // Force a new frame so that we can catch up with the new state of DWM in next layout pass.
+                RequestFrame();
             }
             catch (...)
             {
@@ -1720,6 +1863,9 @@ auto PlatformWindowWin::HandleFrameSwap(MonotonicTime const& targetTimestamp) ->
 {
     try
     {
+        // Refresh metrics which might have changed since last frame.
+        RefreshSystemControlRect();
+
         auto parameter = Event<PlatformFrameEvent::Tick>();
         parameter->SetTargetTimestamp(targetTimestamp);
         auto event = Event(parameter);
@@ -1774,14 +1920,38 @@ auto PlatformWindowWin::GetSystemFrameThicknessY() const -> int
 ///
 /// @brief Get rectangle of system control buttons.
 ///
-auto PlatformWindowWin::GetSystemControlRect() const -> RECT
+auto PlatformWindowWin::GetSystemControlRect() const -> Rect<Vp>
 {
-    auto systemControlRect = RECT();
-    if (SUCCEEDED(::DwmGetWindowAttribute(_hwnd, DWMWA_CAPTION_BUTTON_BOUNDS, &systemControlRect, sizeof(systemControlRect))))
+    return _systemControlRect;
+}
+
+///
+/// @brief
+///
+auto PlatformWindowWin::RefreshSystemControlRect() -> void
+{
+    if (::IsWindowVisible(_hwnd) && !::IsIconic(_hwnd))
     {
-        return systemControlRect;
+        auto rect = RECT();
+        if (SUCCEEDED(::DwmGetWindowAttribute(_hwnd, DWMWA_CAPTION_BUTTON_BOUNDS, &rect, sizeof(rect))))
+        {
+            auto const systemControlRect = Rect<Vp>(rect.left, rect.top, rect.right, rect.bottom);
+            if (_systemControlRect != systemControlRect)
+            {
+                _systemControlRect = systemControlRect;
+
+                try
+                {
+                    auto event = Event<>(Event<PlatformWindowEvent::AreaChanged>());
+                    SendWindowEventDetached(event);
+                }
+                catch (...)
+                {
+                    FW_DEBUG_ASSERT(false);
+                }
+            }
+        }
     }
-    return {};
 }
 
 ///
