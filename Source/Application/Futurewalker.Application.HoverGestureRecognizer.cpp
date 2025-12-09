@@ -33,13 +33,13 @@ auto HoverGestureRecognizer::Recognize(const Event<PointerEvent>& event, const R
 
     if (event.Is<PointerEvent::Motion::Enter>())
     {
-        auto hoverEvent = Event<>(Event<HoverGestureEvent::Enter>::Make());
+        auto hoverEvent = Event<>(Event<HoverGestureEvent::Enter>());
         SendEventDetached(hoverEvent);
         return true;
     }
     else if (event.Is<PointerEvent::Motion::Leave>())
     {
-        auto hoverEvent = Event<>(Event<HoverGestureEvent::Leave>::Make());
+        auto hoverEvent = Event<>(Event<HoverGestureEvent::Leave>());
         SendEventDetached(hoverEvent);
         return true;
     }

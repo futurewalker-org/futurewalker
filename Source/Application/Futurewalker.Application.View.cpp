@@ -587,7 +587,7 @@ auto View::RemoveFromParent() -> void
             FW_DEBUG_ASSERT(false);
         }
 
-        auto parameter = Event<ViewEvent::ChildRemoved>::Make();
+        auto parameter = Event<ViewEvent::ChildRemoved>();
         parameter->SetRemovedView(GetSelf());
         auto event = Event<>(parameter);
         parent->SendEventDetached(event);
@@ -983,7 +983,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
         {
             if ((phase & PointerPhaseFlags::Capture) != PointerPhaseFlags::None)
             {
-                auto pointerInterceptEventParameter = Event<PointerEvent::Forecast>::Make();
+                auto pointerInterceptEventParameter = Event<PointerEvent::Forecast>();
                 PointerEvent::Copy(*pointerInterceptEventParameter, *pointerEvent);
                 pointerInterceptEventParameter->SetPointerEvent(pointerEvent);
                 pointerInterceptEventParameter->SetIntercepted(false);
@@ -998,7 +998,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
 
                 if (pointerInterceptEventParameter->IsIntercepted())
                 {
-                    auto cancelEvent = Event<PointerEvent::Motion::Cancel>::Make();
+                    auto cancelEvent = Event<PointerEvent::Motion::Cancel>();
                     PointerEvent::Copy(*cancelEvent, *pointerEvent);
                     ForEachVisibleChild([&](auto& view) { dispatch(view, cancelEvent, target, phase); });
                     return GetSelf();
@@ -1168,7 +1168,7 @@ auto View::HitTest(HitTestScope& scope) -> void
 {
     auto const& parameter = scope.GetParameter();
 
-    auto hitTestParameter = Event<HitTestEvent>::Make();
+    auto hitTestParameter = Event<HitTestEvent>();
     hitTestParameter->SetPosition(parameter.GetPosition());
     hitTestParameter->SetHit(IsPointerInteractive());
     auto hitTestEvent = Event<>(hitTestParameter);

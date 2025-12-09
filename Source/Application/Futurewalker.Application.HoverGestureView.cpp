@@ -58,12 +58,12 @@ auto HoverGestureView::ReceiveEvent(Event<>& event) -> Async<Bool>
     {
         if (event.Is<HoverGestureEvent::Enter>())
         {
-            auto viewEvent = Event<>(Event<HoverGestureViewEvent::Enter>::Make());
+            auto viewEvent = Event<>(Event<HoverGestureViewEvent::Enter>());
             co_await SendEvent(viewEvent);
         }
         else if (event.Is<HoverGestureEvent::Leave>())
         {
-            auto viewEvent = Event<>(Event<HoverGestureViewEvent::Leave>::Make());
+            auto viewEvent = Event<>(Event<HoverGestureViewEvent::Leave>());
             co_await SendEvent(viewEvent);
         }
     }

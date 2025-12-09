@@ -97,7 +97,7 @@ auto ViewAreaManager::GetEventReceiver() const -> EventReceiver const&
 
 auto ViewAreaManager::SendAreaGeometryChangedEvent() -> void
 {
-    auto event = Event<ViewAreaManagerEvent::GeometryChanged>();
+    auto event = Event<>(Event<ViewAreaManagerEvent::GeometryChanged>());
     _eventReceiver->SendEventDetached(event);
 }
 }

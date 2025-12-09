@@ -4,6 +4,7 @@
 #include "Futurewalker.Event.EventParameterType.hpp"
 
 #include "Futurewalker.Core.DynamicCastFunction.hpp"
+#include "Futurewalker.Core.Pointer.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -36,6 +37,18 @@ public:
     auto As() const -> T const&
     {
         return DynamicCastFunction::As<T const>(*this);
+    }
+
+    template <class T>
+    auto TryAs() -> Pointer<T>
+    {
+        return DynamicCastFunction::TryAs<T>(this);
+    }
+
+    template <class T>
+    auto TryAs() const -> Pointer<T const>
+    {
+        return DynamicCastFunction::TryAs<T const>(this);
     }
 };
 }

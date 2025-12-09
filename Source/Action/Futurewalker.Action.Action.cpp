@@ -19,13 +19,13 @@ Action::Action(PassKey<Action>)
 
 auto Action::Execute() -> void
 {
-    auto event = Event<ActionEvent::Execute>();
+    auto event = Event<>(Event<ActionEvent::Execute>());
     GetEventReceiver().SendEventDetached(event);
 }
 
 auto Action::State(Bool& enabled, Bool& toggled) -> Bool
 {
-    auto event = Event<ActionEvent::State>();
+    auto event = Event<>(Event<ActionEvent::State>());
     if (GetEventReceiver().SendEventDetached(event))
     {
         if (event.Is<ActionEvent::State>())
@@ -41,7 +41,7 @@ auto Action::State(Bool& enabled, Bool& toggled) -> Bool
 
 auto Action::NotifyStateChanged() -> void
 {
-    auto event = Event<ActionEvent::StateChanged>();
+    auto event = Event<>(Event<ActionEvent::StateChanged>());
     GetEventReceiver().SendEventDetached(event);
 }
 

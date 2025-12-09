@@ -4,5 +4,4 @@
 
 namespace FW_DETAIL_NS
 {
-Event<>::Holder::~Holder() noexcept = default;
 }

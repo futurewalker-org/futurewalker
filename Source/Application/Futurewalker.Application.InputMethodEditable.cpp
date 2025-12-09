@@ -268,7 +268,7 @@ auto InputMethodEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool
         if (event.Is<PlatformInputEvent::InsertText>())
         {
             auto platformInputEventParameter = event.As<PlatformInputEvent::InsertText>();
-            auto inputEventParameter = Event<InputEvent::InsertText>::Make();
+            auto inputEventParameter = Event<InputEvent::InsertText>();
             inputEventParameter->SetText(platformInputEventParameter->GetText());
             inputEventParameter->SetCancel(platformInputEventParameter->GetCancel());
             auto inputEvent = Event<>(inputEventParameter);
@@ -286,7 +286,7 @@ auto InputMethodEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool
         else if (event.Is<PlatformInputEvent::DeleteSurroundingText>())
         {
             auto platformInputEventParameter = event.As<PlatformInputEvent::DeleteSurroundingText>();
-            auto inputEventParameter = Event<InputEvent::DeleteSurroundingText>::Make();
+            auto inputEventParameter = Event<InputEvent::DeleteSurroundingText>();
             inputEventParameter->SetBefore(platformInputEventParameter->GetBefore());
             inputEventParameter->SetAfter(platformInputEventParameter->GetAfter());
             inputEventParameter->SetCancel(platformInputEventParameter->GetCancel());

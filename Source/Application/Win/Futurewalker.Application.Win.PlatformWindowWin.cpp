@@ -625,7 +625,7 @@ auto PlatformWindowWin::Close() -> Async<Bool>
 {
     if (!IsClosed())
     {
-        auto event = Event<PlatformWindowEvent::CloseRequested>();
+        auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
         if (co_await SendWindowEvent(event))
         {
             if (event.Is<PlatformWindowEvent::CloseRequested>())
@@ -1685,7 +1685,7 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
                 parameter->SetRepeat(isRepeat);
                 parameter->SetTimestamp(timestamp);
 
-                auto event = Event(parameter);
+                auto event = Event<>(parameter);
                 SendKeyEventDetached(event);
             }
             catch (...)
@@ -1723,7 +1723,7 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
         {
             auto parameter = Event<PlatformKeyEvent::Up>();
             parameter->SetTimestamp(MonotonicClock::GetNow());
-            auto event = Event(parameter);
+            auto event = Event<>(parameter);
             SendKeyEventDetached(event);
         }
         catch (...)
@@ -1868,7 +1868,7 @@ auto PlatformWindowWin::HandleFrameSwap(MonotonicTime const& targetTimestamp) ->
 
         auto parameter = Event<PlatformFrameEvent::Tick>();
         parameter->SetTargetTimestamp(targetTimestamp);
-        auto event = Event(parameter);
+        auto event = Event<>(parameter);
         SendFrameEventDetached(event);
     }
     catch (...)
@@ -2022,7 +2022,7 @@ void PlatformWindowWin::PointerDown(Bool const down, WPARAM const wParam)
             auto parameter = Event<PlatformPointerEvent::Motion::Down>();
             SetPointerEventParams(*parameter, pointerId, _hwnd);
             SetPointerMotionEventDetailParams(*parameter, pointerId);
-            auto event = Event(parameter);
+            auto event = Event<>(parameter);
             SendPointerEventDetached(event);
         }
         else
@@ -2030,7 +2030,7 @@ void PlatformWindowWin::PointerDown(Bool const down, WPARAM const wParam)
             auto parameter = Event<PlatformPointerEvent::Motion::Up>();
             SetPointerEventParams(*parameter, pointerId, _hwnd);
             SetPointerMotionEventDetailParams(*parameter, pointerId);
-            auto event = Event(parameter);
+            auto event = Event<>(parameter);
             SendPointerEventDetached(event);
         }
     }
@@ -2066,14 +2066,14 @@ void PlatformWindowWin::PointerEnter(Bool const enter, WPARAM const wParam)
         {
             auto parameter = Event<PlatformPointerEvent::Motion::Enter>();
             SetPointerEventParams(*parameter, pointerId, _hwnd);
-            auto event = Event(parameter);
+            auto event = Event<>(parameter);
             SendPointerEventDetached(event);
         }
         else
         {
             auto parameter = Event<PlatformPointerEvent::Motion::Leave>();
             SetPointerEventParams(*parameter, pointerId, _hwnd);
-            auto event = Event(parameter);
+            auto event = Event<>(parameter);
             SendPointerEventDetached(event);
         }
     }
@@ -2098,7 +2098,7 @@ void PlatformWindowWin::PointerUpdate(WPARAM const wParam)
 
         auto parameter = Event<PlatformPointerEvent::Motion::Cancel>();
         SetPointerEventParams(*parameter, pointerId, _hwnd);
-        auto event = Event(parameter);
+        auto event = Event<>(parameter);
         SendPointerEventDetached(event);
         return;
     }
@@ -2107,7 +2107,8 @@ void PlatformWindowWin::PointerUpdate(WPARAM const wParam)
 
     auto parameter = Event<PlatformPointerEvent::Motion::Move>();
     SetPointerEventParams(*parameter, pointerId, _hwnd);
-    SendPointerEventDetached(parameter);
+    auto event = Event<>(parameter);
+    SendPointerEventDetached(event);
 }
 
 ///
@@ -2137,7 +2138,8 @@ auto PlatformWindowWin::PointerWheel(Bool const vertical, WPARAM const wParam) -
     parameter->SetPrecision(precision);
     parameter->SetDeltaY(deltaY);
     parameter->SetDeltaX(deltaX);
-    SendPointerEventDetached(parameter);
+    auto event = Event<>(parameter);
+    SendPointerEventDetached(event);
 }
 
 ///

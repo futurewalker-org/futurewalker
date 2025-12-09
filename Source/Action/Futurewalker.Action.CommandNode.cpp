@@ -112,8 +112,9 @@ auto CommandNode::InternalNotifyStateChanged(CommandId const& command) -> void
         auto const& observers = it->second;
         if (std::any_of(observers.begin(), observers.end(), [](auto const& tracked) { return !tracked.IsExpired(); }))
         {
-            auto event = Event<CommandEvent::StateChanged>();
-            event->SetCommandId(command);
+            auto stateEvent = Event<CommandEvent::StateChanged>();
+            stateEvent->SetCommandId(command);
+            auto event = Event<>(stateEvent);
             GetEventReceiver().SendEventDetached(event);
         }
     }
@@ -130,8 +131,9 @@ auto CommandNode::InternalNotifyStateChanged() -> void
     {
         if (std::any_of(observers.begin(), observers.end(), [](auto const& tracked) { return !tracked.IsExpired(); }))
         {
-            auto event = Event<CommandEvent::StateChanged>();
-            event->SetCommandId(command);
+            auto stateEvent = Event<CommandEvent::StateChanged>();
+            stateEvent->SetCommandId(command);
+            auto event = Event<>(stateEvent);
             GetEventReceiver().SendEventDetached(event);
         }
     }

@@ -949,7 +949,7 @@ auto Window::HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>
     }
     else if (event.Is<PlatformWindowEvent::ActiveChanged>())
     {
-        auto windowEventParameter = Event<WindowEvent::ActiveChanged>::Make();
+        auto windowEventParameter = Event<WindowEvent::ActiveChanged>();
         windowEventParameter->SetActive(IsActive());
         auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
@@ -957,7 +957,7 @@ auto Window::HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>
     }
     else if (event.Is<PlatformWindowEvent::FocusedChanged>())
     {
-        auto windowEventParameter = Event<WindowEvent::FocusedChanged>::Make();
+        auto windowEventParameter = Event<WindowEvent::FocusedChanged>();
         windowEventParameter->SetFocused(IsFocused());
         auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);

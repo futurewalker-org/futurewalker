@@ -3,6 +3,8 @@
 
 #include "Futurewalker.Event.EventType.hpp"
 #include "Futurewalker.Event.EventParameter.hpp"
+#include "Futurewalker.Event.EventParameterHolder.hpp"
+
 #include "Futurewalker.Core.Primitive.hpp"
 #include "Futurewalker.Core.PropertyStore.hpp"
 #include "Futurewalker.Core.Exception.hpp"
@@ -12,17 +14,45 @@ namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-template <>
-class Event<EventParameter>
+///
+/// @brief Polymorphic container for event parameters.
+///
+/// @tparam Parameter Type of event parameter.
+///
+template <Concepts::DerivedFrom<EventParameter> Parameter>
+class Event final
 {
+    template <Concepts::DerivedFrom<EventParameter> U>
+    friend class Event;
+
 public:
-    using ParameterType = EventParameter;
+    ///
+    /// @brief Construct event.
+    ///
+    /// @param[in] args Parameters for constructor of Parameter.
+    ///
+    template <class... Args>
+    static auto Make(Args&&... args) -> Event<Parameter>
+    {
+        return Event(std::make_unique<EventParameterHolderT<Parameter>>(std::in_place, std::forward<Args>(args)...));
+    }
 
     ///
-    /// @brief Default constructor.
+    /// @brief Copy constructor from another event type.
+    ///
+    /// @param[in] other Other event.
+    ///
+    template <Concepts::DerivedFrom<Parameter> U>
+    Event(Event<U> const& other)
+      : Event(other._holder->Clone())
+    {
+    }
+
+    ///
+    /// @brief Construct event with default-constructed parameter.
     ///
     Event()
-      : Event(std::make_unique<HolderT<EventParameter>>())
+      : Event(std::make_unique<EventParameterHolderT<Parameter>>())
     {
     }
 
@@ -37,7 +67,7 @@ public:
     ///
     /// @brief Assign from another event type.
     ///
-    Event& operator=(Event const& other)
+    auto operator=(Event const& other) -> Event&
     {
         if (this != &other)
         {
@@ -57,7 +87,7 @@ public:
     }
 
     ///
-    /// @brief Access contained event value.
+    /// @brief Get contained event value.
     ///
     template <Concepts::DerivedFrom<EventParameter> T>
     auto As() const -> Event<T>
@@ -67,6 +97,19 @@ public:
             return Event<T>(_holder->Clone());
         }
         throw Exception(ErrorCode::Failure, "Bad event cast");
+    }
+
+    ///
+    /// @brief Try to get contained event value.
+    ///
+    template <Concepts::DerivedFrom<EventParameter> T>
+    auto TryAs() const -> Optional<Event<T>>
+    {
+        if (Is<T>())
+        {
+            return Event<T>(_holder->Clone());
+        }
+        return {};
     }
 
     ///
@@ -141,100 +184,12 @@ public:
         return static_cast<Parameter&>(self._holder->Get());
     }
 
-protected:
-    struct Holder
-    {
-        virtual ~Holder() noexcept = 0;
-        virtual auto Get() -> EventParameter& = 0;
-        virtual auto Clone() -> std::unique_ptr<Holder> = 0;
-    };
-
-    template <class EventType>
-    struct HolderT final : Holder
-    {
-        EventType event;
-
-        template <class... Args>
-        HolderT(std::in_place_t, Args&&... args)
-          : event {std::forward<Args>(args)...}
-        {
-        }
-
-        HolderT()
-          : event {}
-        {
-        }
-
-        HolderT(EventType const& event)
-          : event {event}
-        {
-        }
-
-        auto Get() -> EventParameter& override
-        {
-            return event;
-        }
-
-        auto Clone() -> std::unique_ptr<Holder> override
-        {
-            return std::make_unique<HolderT>(*this);
-        }
-    };
-
-    explicit Event(std::unique_ptr<Holder> holder)
+private:
+    explicit Event(std::unique_ptr<EventParameterHolder> holder)
       : _holder(std::move(holder))
     {
     }
-
-private:
-    std::unique_ptr<Holder> _holder;
-};
-
-///
-/// @brief Polymorphic value holder for events.
-///
-template <Concepts::DerivedFrom<EventParameter> Parameter>
-class Event final : public Event<EventParameter>
-{
-    friend class Event<EventParameter>;
-
-public:
-    using ParameterType = Parameter;
-
-    ///
-    /// @brief Construct event.
-    ///
-    /// @param[in] args Parameters for constructor of Parameter.
-    ///
-    template <class... Args>
-    static auto Make(Args&&... args) -> Event<Parameter>
-    {
-        return Event(std::make_unique<HolderT<Parameter>>(std::in_place, std::forward<Args>(args)...));
-    }
-
-    ///
-    /// @brief Default constructor.
-    ///
-    Event()
-      : Event<>(std::make_unique<HolderT<Parameter>>())
-    {
-    }
-
-    Event(Event<> const& other)
-      : Event<>(other)
-    {
-    }
-
-    Event& operator=(Event<> const& other)
-    {
-        return static_cast<Event&>(Event<>::operator=(other));
-    }
-
-protected:
-    explicit Event(std::unique_ptr<Holder> holder)
-      : Event<>(std::move(holder))
-    {
-    }
+    std::unique_ptr<EventParameterHolder> _holder;
 };
 }
 }

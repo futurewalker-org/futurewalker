@@ -108,7 +108,7 @@ auto ButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                 }
                 else if (event.Is<TapGestureViewEvent::Tap>())
                 {
-                    auto buttonEvent = Event<>(Event<ButtonViewEvent::Press>::Make());
+                    auto buttonEvent = Event<>(Event<ButtonViewEvent::Press>());
                     SendEventDetached(buttonEvent);
                 }
                 co_return true;
@@ -141,12 +141,12 @@ auto ButtonView::SetDown(const Bool down) -> void
 
         if (_down)
         {
-            auto event = Event<>(Event<ButtonViewEvent::Down>::Make());
+            auto event = Event<>(Event<ButtonViewEvent::Down>());
             SendEventDetached(event);
         }
         else
         {
-            auto event = Event<>(Event<ButtonViewEvent::Up>::Make());
+            auto event = Event<>(Event<ButtonViewEvent::Up>());
             SendEventDetached(event);
         }
     }
@@ -163,12 +163,12 @@ auto ButtonView::SetEnter(const Bool enter) -> void
 
         if (_enter)
         {
-            auto event = Event<>(Event<ButtonViewEvent::Enter>::Make());
+            auto event = Event<>(Event<ButtonViewEvent::Enter>());
             SendEventDetached(event);
         }
         else
         {
-            auto event = Event<>(Event<ButtonViewEvent::Leave>::Make());
+            auto event = Event<>(Event<ButtonViewEvent::Leave>());
             SendEventDetached(event);
         }
     }
