@@ -287,12 +287,13 @@ auto ViewLayer::RemoveFromParent() -> void
 {
     if (auto parent = _parent.Lock())
     {
+        _platformLayer->RemoveFromParent();
+
         const auto self = GetSelf();
-        const auto it = std::find(_children.begin(), _children.end(), self);
-        if (it != _children.end())
+        const auto it = std::find(parent->_children.begin(), parent->_children.end(), self);
+        if (it != parent->_children.end())
         {
             parent->_children.erase(it);
-            parent->_platformLayer->RemoveFromParent();
         }
         SetParent(nullptr);
     }
