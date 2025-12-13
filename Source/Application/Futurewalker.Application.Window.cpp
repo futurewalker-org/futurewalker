@@ -24,6 +24,7 @@
 #include "Futurewalker.Application.PlatformPointerEvent.hpp"
 #include "Futurewalker.Application.PlatformKeyEvent.hpp"
 #include "Futurewalker.Application.PlatformInputEvent.hpp"
+#include "Futurewalker.Application.PlatformHitTestEvent.hpp"
 #include "Futurewalker.Application.PlatformViewLayerContext.hpp"
 
 #include "Futurewalker.Event.EventReceiver.hpp"
@@ -586,6 +587,22 @@ auto Window::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 ///
 /// @brief
 ///
+auto Window::ReceiveHitTestEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<HitTestEvent>())
+    {
+        if (_rootView)
+        {
+            auto rootViewEvent = Event<>(Event<RootViewEvent::HitTest>::Make(event));
+            co_return co_await _rootView->SendEvent(rootViewEvent);
+        }
+    }
+    co_return false;
+}
+
+///
+/// @brief
+///
 auto Window::ReceiveInputEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<InputEvent>())
@@ -664,6 +681,7 @@ auto Window::Realize(WindowOptions const& options) -> void
         .sendInputEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformInputEvent(e); },
         .sendFrameEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformFrameEvent(e); },
         .sendWindowEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformWindowEvent(e); },
+        .sendHitTestEvent = [this](Event<>& e) -> Async<Bool> { co_return co_await HandlePlatformHitTestEvent(e); },
     };
 
     _platformObject = _platformContext->MakePlatformWindow(platformOptions, delegate);
@@ -716,6 +734,7 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
     EventReceiver::Connect(*this, *this, &Window::ReceivePointerEvent);
     EventReceiver::Connect(*this, *this, &Window::ReceiveKeyEvent);
     EventReceiver::Connect(*this, *this, &Window::ReceiveInputEvent);
+    EventReceiver::Connect(*this, *this, &Window::ReceiveHitTestEvent);
 
     Realize(options);
 
@@ -1075,6 +1094,30 @@ auto Window::HandlePlatformInputEvent(Event<>& event) -> Async<Bool>
     co_return false;
 }
 
+auto Window::HandlePlatformHitTestEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<PlatformHitTestEvent>())
+    {
+        auto parameter = event.As<PlatformHitTestEvent>();
+        auto hitTestEventParameter = Event<HitTestEvent>();
+        hitTestEventParameter->SetPosition(LocalToRootViewPoint(parameter->GetPosition()));
+        auto hitTestEvent = Event<>(hitTestEventParameter);
+        if (co_await SendEvent(hitTestEvent))
+        {
+            if (hitTestEvent.Is<HitTestEvent>())
+            {
+                if (hitTestEvent.Is<HitTestEvent>())
+                {
+                    parameter->SetHit(hitTestEvent.As<HitTestEvent>()->GetHit());
+                    event = parameter;
+                }
+            }
+            co_return true;
+        }
+    }
+    co_return false;
+}
+
 auto Window::ConvertPointerEvent(Event<> const& from) const noexcept -> Event<>
 {
     auto copyPointerEventParameter = [this](PointerEvent& to, PlatformPointerEvent const& from) -> void {
@@ -1097,6 +1140,8 @@ auto Window::ConvertPointerEvent(Event<> const& from) const noexcept -> Event<>
         to.SetPressure(from.GetPressure());
         to.SetTangentialPressure(from.GetTangentialPressure());
         to.SetButton(from.GetButton());
+        to.SetButtons(from.GetButtons());
+        to.SetModifiers(from.GetModifiers());
     };
 
     auto to = Event<PointerEvent>();

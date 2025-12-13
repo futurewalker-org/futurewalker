@@ -70,7 +70,7 @@ auto MakeWindowClassName(StringView className) -> std::wstring
 ///
 /// @param options
 ///
-auto GetWindowStyle(PlatformWindowOptions const& options) -> DWORD
+auto GetWindowStyleForOptions(PlatformWindowOptions const& options) -> DWORD
 {
     auto style = DWORD(0);
 
@@ -119,7 +119,7 @@ auto GetWindowStyle(PlatformWindowOptions const& options) -> DWORD
 ///
 /// @return
 ///
-auto GetWindowExStyle(PlatformWindowOptions const& options) -> DWORD
+auto GetWindowExStyleForOptions(PlatformWindowOptions const& options) -> DWORD
 {
     auto exStyle = DWORD(0);
 
@@ -296,8 +296,8 @@ auto PlatformWindowContextWin::InitializeWindow(Shared<PlatformWindowWin> const&
 {
     const auto instance = _instanceHandle->GetInstanceHandle();
     const auto owner = options.owner ? options.owner.As<PlatformWindowWin>()->GetNativeHandle() : NULL;
-    const auto style = GetWindowStyle(options);
-    const auto exStyle = GetWindowExStyle(options);
+    const auto style = GetWindowStyleForOptions(options);
+    const auto exStyle = GetWindowExStyleForOptions(options);
     const auto title = PlatformStringFunctionWin::Utf8ToWide(options.title);
 
     auto createParams = PlatformToplevelWindowCreateParams {

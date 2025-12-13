@@ -123,4 +123,14 @@ auto RootViewEvent::Input::GetEvent() -> Event<>&
 {
     return _event;
 }
+
+RootViewEvent::HitTest::HitTest(Event<>& event)
+  : _event {event}
+{
+}
+
+auto RootViewEvent::HitTest::GetEvent() -> Event<>&
+{
+    return _event;
+}
 }

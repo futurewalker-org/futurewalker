@@ -189,6 +189,7 @@ private:
     auto ReceivePointerEvent(Event<>& event) -> Async<Bool>;
     auto ReceiveKeyEvent(Event<>& event) -> Async<Bool>;
     auto ReceiveInputEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveHitTestEvent(Event<>& event) -> Async<Bool>;
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 
 private:
@@ -221,6 +222,7 @@ private:
     auto HandlePlatformPointerEvent(Event<>& event) -> Async<Bool>;
     auto HandlePlatformKeyEvent(Event<>& event) -> Async<Bool>;
     auto HandlePlatformInputEvent(Event<>& event) -> Async<Bool>;
+    auto HandlePlatformHitTestEvent(Event<>& event) -> Async<Bool>;
 
     auto ConvertPointerEvent(Event<> const& from) const noexcept -> Event<>;
 

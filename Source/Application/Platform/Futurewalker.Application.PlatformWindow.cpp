@@ -24,6 +24,30 @@ PlatformWindow::~PlatformWindow() = default;
 ///
 /// @brief
 ///
+auto PlatformWindow::SendWindowEvent(Event<>& event) -> Async<Bool>
+{
+    if (_delegate.sendWindowEvent)
+    {
+        co_return co_await _delegate.sendWindowEvent(event);
+    }
+    co_return false;
+}
+
+///
+/// @brief
+///
+auto PlatformWindow::SendFrameEvent(Event<>& event) -> Async<Bool>
+{
+    if (_delegate.sendFrameEvent)
+    {
+        co_return co_await _delegate.sendFrameEvent(event);
+    }
+    co_return false;
+}
+
+///
+/// @brief
+///
 /// @param event
 ///
 auto PlatformWindow::SendPointerEvent(Event<>& event) -> Async<Bool>
@@ -66,11 +90,11 @@ auto PlatformWindow::SendInputEvent(Event<>& event) -> Async<Bool>
 ///
 /// @brief
 ///
-auto PlatformWindow::SendFrameEvent(Event<>& event) -> Async<Bool>
+auto PlatformWindow::SendHitTestEvent(Event<>& event) -> Async<Bool>
 {
-    if (_delegate.sendFrameEvent)
+    if (_delegate.sendHitTestEvent)
     {
-        co_return co_await _delegate.sendFrameEvent(event);
+        co_return co_await _delegate.sendHitTestEvent(event);
     }
     co_return false;
 }
@@ -78,101 +102,132 @@ auto PlatformWindow::SendFrameEvent(Event<>& event) -> Async<Bool>
 ///
 /// @brief
 ///
-/// @param event
-///
-/// @return
-///
-auto PlatformWindow::SendWindowEvent(Event<>& event) -> Async<Bool>
+auto PlatformWindow::SendWindowEventDetached(Event<>& event) -> Bool
 {
-    if (_delegate.sendWindowEvent)
-    {
-        co_return co_await _delegate.sendWindowEvent(event);
-    }
-    co_return false;
-}
-
-///
-/// @brief
-///
-auto PlatformWindow::SendWindowEventDetached(Event<> const& event) -> void
-{
-    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
+    auto const r = Shared<Bool>::Make(false);
+    auto const e = Shared<Event<>>::Make(event);
+    auto const self = GetSelf();
+    AsyncFunction::SpawnFn([=]() mutable -> Task<void> {
         try
         {
-            co_await self->SendWindowEvent(e);
+            *r = co_await self->SendWindowEvent(*e);
         }
         catch (...)
         {
             FW_DEBUG_ASSERT(false);
         }
     }).Detach();
+    event = *e;
+    return *r;
 }
 
 ///
 /// @brief
 ///
-auto PlatformWindow::SendFrameEventDetached(Event<> const& event) -> void
+auto PlatformWindow::SendFrameEventDetached(Event<>& event) -> Bool
 {
-    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
+    auto const r = Shared<Bool>::Make(false);
+    auto const e = Shared<Event<>>::Make(event);
+    auto const self = GetSelf();
+    AsyncFunction::SpawnFn([=]() mutable -> Task<void> {
         try
         {
-            co_await self->SendFrameEvent(e);
+            *r = co_await self->SendFrameEvent(*e);
         }
         catch (...)
         {
             FW_DEBUG_ASSERT(false);
         }
     }).Detach();
+    event = *e;
+    return *r;
 }
 
 ///
 /// @brief
 ///
-auto PlatformWindow::SendPointerEventDetached(Event<> const& event) -> void
+auto PlatformWindow::SendPointerEventDetached(Event<>& event) -> Bool
 {
-    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
+    auto const r = Shared<Bool>::Make(false);
+    auto const e = Shared<Event<>>::Make(event);
+    auto const self = GetSelf();
+    AsyncFunction::SpawnFn([=]() mutable -> Task<void> {
         try
         {
-            co_await self->SendPointerEvent(e);
+            *r = co_await self->SendPointerEvent(*e);
         }
         catch (...)
         {
             FW_DEBUG_ASSERT(false);
         }
     }).Detach();
+    event = *e;
+    return *r;
 }
 
 ///
 /// @brief
 ///
-auto PlatformWindow::SendKeyEventDetached(Event<> const& event) -> void
+auto PlatformWindow::SendKeyEventDetached(Event<>& event) -> Bool
 {
-    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
+    auto const r = Shared<Bool>::Make(false);
+    auto const e = Shared<Event<>>::Make(event);
+    auto const self = GetSelf();
+    AsyncFunction::SpawnFn([=]() mutable -> Task<void> {
         try
         {
-            co_await self->SendKeyEvent(e);
+            *r = co_await self->SendKeyEvent(*e);
         }
         catch (...)
         {
             FW_DEBUG_ASSERT(false);
         }
     }).Detach();
+    event = *e;
+    return *r;
 }
 
 ///
 /// @brief
 ///
-auto PlatformWindow::SendInputEventDetached(Event<> const& event) -> void
+auto PlatformWindow::SendInputEventDetached(Event<>& event) -> Bool
 {
-    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
+    auto const r = Shared<Bool>::Make(false);
+    auto const e = Shared<Event<>>::Make(event);
+    auto const self = GetSelf();
+    AsyncFunction::SpawnFn([=]() mutable -> Task<void> {
         try
         {
-            co_await self->SendInputEvent(e);
+            *r = co_await self->SendInputEvent(*e);
         }
         catch (...)
         {
             FW_DEBUG_ASSERT(false);
         }
     }).Detach();
+    event = *e;
+    return *r;
+}
+
+///
+/// @brief
+///
+auto PlatformWindow::SendHitTestEventDetached(Event<>& event) -> Bool
+{
+    auto const r = Shared<Bool>::Make(false);
+    auto const e = Shared<Event<>>::Make(event);
+    auto const self = GetSelf();
+    AsyncFunction::SpawnFn([=]() mutable -> Task<void> {
+        try
+        {
+            *r = co_await self->SendHitTestEvent(*e);
+        }
+        catch (...)
+        {
+            FW_DEBUG_ASSERT(false);
+        }
+    }).Detach();
+    event = *e;
+    return *r;
 }
 }

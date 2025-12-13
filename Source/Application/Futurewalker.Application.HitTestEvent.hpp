@@ -2,7 +2,6 @@
 #pragma once
 
 #include "Futurewalker.Application.HitTestEventType.hpp"
-#include "Futurewalker.Application.ViewType.hpp"
 
 #include "Futurewalker.Event.EventParameter.hpp"
 

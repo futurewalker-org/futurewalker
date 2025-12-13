@@ -35,6 +35,7 @@ public:
         EventFunction sendInputEvent;
         EventFunction sendFrameEvent;
         EventFunction sendWindowEvent;
+        EventFunction sendHitTestEvent;
     };
     PlatformWindow(PassKey<PlatformWindow>, Delegate const& delegate);
 
@@ -73,17 +74,19 @@ public:
 protected:
     virtual auto Initialize() -> void = 0;
 
+    auto SendWindowEvent(Event<>& event) -> Async<Bool>;
+    auto SendFrameEvent(Event<>& event) -> Async<Bool>;
     auto SendPointerEvent(Event<>& event) -> Async<Bool>;
     auto SendKeyEvent(Event<>& event) -> Async<Bool>;
     auto SendInputEvent(Event<>& event) -> Async<Bool>;
-    auto SendFrameEvent(Event<>& event) -> Async<Bool>;
-    auto SendWindowEvent(Event<>& event) -> Async<Bool>;
+    auto SendHitTestEvent(Event<>& event) -> Async<Bool>;
 
-    auto SendWindowEventDetached(Event<> const& event) -> void;
-    auto SendFrameEventDetached(Event<> const& event) -> void;
-    auto SendPointerEventDetached(Event<> const& event) -> void;
-    auto SendKeyEventDetached(Event<> const& event) -> void;
-    auto SendInputEventDetached(Event<> const& event) -> void;
+    auto SendWindowEventDetached(Event<>& event) -> Bool;
+    auto SendFrameEventDetached(Event<>& event) -> Bool;
+    auto SendPointerEventDetached(Event<>& event) -> Bool;
+    auto SendKeyEventDetached(Event<>& event) -> Bool;
+    auto SendInputEventDetached(Event<>& event) -> Bool;
+    auto SendHitTestEventDetached(Event<>& event) -> Bool;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;

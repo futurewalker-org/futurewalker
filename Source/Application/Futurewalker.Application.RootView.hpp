@@ -61,6 +61,7 @@ private:
     auto DispatchPointerEvent(Event<>& event) -> Async<void>;
     auto DispatchKeyEvent(Event<>& event) -> Async<void>;
     auto DispatchInputEvent(Event<>& event) -> Async<void>;
+    auto DispatchHitTestEvent(Event<>& event) -> Async<void>;
     auto GetPointerCaptureView(PointerId const id) -> Shared<View>;
     auto SetPointerCaptureView(PointerId const id, Shared<View> const& view) -> void;
     auto GetPointerOverView(PointerId const id) -> Shared<View>;

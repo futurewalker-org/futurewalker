@@ -14,6 +14,7 @@
 #include "Futurewalker.Application.FocusEvent.hpp"
 #include "Futurewalker.Application.KeyEvent.hpp"
 #include "Futurewalker.Application.InputEvent.hpp"
+#include "Futurewalker.Application.HitTestEvent.hpp"
 
 #include "Futurewalker.Animation.RootAnimationTimer.hpp"
 
@@ -182,6 +183,13 @@ auto RootView::ReceiveEvent(Event<>& event) -> Async<Bool>
         auto parameter = event.As<RootViewEvent::Input>();
         auto& sourceEvent = parameter->GetEvent();
         co_await DispatchInputEvent(sourceEvent);
+        co_return true;
+    }
+    else if (event.Is<RootViewEvent::HitTest>())
+    {
+        auto parameter = event.As<RootViewEvent::HitTest>();
+        auto& sourceEvent = parameter->GetEvent();
+        co_await DispatchHitTestEvent(sourceEvent);
         co_return true;
     }
     else if (event.Is<ViewEvent::Attached>())
@@ -448,6 +456,20 @@ auto RootView::DispatchKeyEvent(Event<>& event) -> Async<void>
 auto RootView::DispatchInputEvent(Event<>& event) -> Async<void>
 {
     (void)event;
+    co_return;
+}
+
+///
+/// @brief
+///
+auto RootView::DispatchHitTestEvent(Event<>& event) -> Async<void>
+{
+    if (event.Is<HitTestEvent>())
+    {
+        auto hitTestEvent = event.As<HitTestEvent>();
+        DispatchHitTestEventFromRoot(PassKey<RootView>(), hitTestEvent);
+        event = hitTestEvent;
+    }
     co_return;
 }
 

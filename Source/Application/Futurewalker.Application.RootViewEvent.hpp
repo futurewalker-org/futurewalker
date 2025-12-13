@@ -38,6 +38,7 @@ public:
     class Pointer;
     class Key;
     class Input;
+    class HitTest;
 };
 
 class RootViewEvent::Owner final : public RootViewEvent
@@ -119,6 +120,17 @@ class RootViewEvent::Input final : public RootViewEvent
 {
 public:
     Input(Event<>& event);
+
+    auto GetEvent() -> Event<>&;
+
+private:
+    Event<>& _event;
+};
+
+class RootViewEvent::HitTest final : public RootViewEvent
+{
+public:
+    HitTest(Event<>& event);
 
     auto GetEvent() -> Event<>&;
 

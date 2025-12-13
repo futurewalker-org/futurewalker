@@ -108,9 +108,6 @@ PlatformApplicationContextWin::PlatformApplicationContextWin(
 
     _classAtom = RegisterMessageWindowClass(_instanceHandle->GetInstanceHandle(), &PlatformApplicationContextWin::MessageWindowProcedure);
 
-    // TODO: Use mouse events directly.
-    ::EnableMouseInPointer(TRUE);
-
     _screenContext->Refresh();
 }
 

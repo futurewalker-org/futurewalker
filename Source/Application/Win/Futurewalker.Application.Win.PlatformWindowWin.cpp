@@ -4,16 +4,18 @@
 #include "Futurewalker.Application.Win.PlatformWindowContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformRootViewLayerWin.hpp"
 #include "Futurewalker.Application.Win.PlatformKeyboardLayoutWin.hpp"
-#include "Futurewalker.Application.PlatformWindowEvent.hpp"
-#include "Futurewalker.Application.PlatformFrameEvent.hpp"
-#include "Futurewalker.Application.PlatformPointerEvent.hpp"
-#include "Futurewalker.Application.PlatformKeyEvent.hpp"
-#include "Futurewalker.Application.PlatformInputEvent.hpp"
 #include "Futurewalker.Application.Win.PlatformApplicationContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformApplicationWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodWin.hpp"
+#include "Futurewalker.Application.Win.PlatformPointerEventFunctionWin.hpp"
+#include "Futurewalker.Application.PlatformWindowEvent.hpp"
+#include "Futurewalker.Application.PlatformFrameEvent.hpp"
+#include "Futurewalker.Application.PlatformPointerEvent.hpp"
+#include "Futurewalker.Application.PlatformKeyEvent.hpp"
+#include "Futurewalker.Application.PlatformInputEvent.hpp"
+#include "Futurewalker.Application.PlatformHitTestEvent.hpp"
 #include "Futurewalker.Application.MainThread.hpp"
 #include "Futurewalker.Application.Key.hpp"
 
@@ -849,12 +851,15 @@ auto PlatformWindowWin::WindowProcedure(PassKey<PlatformWindowContextWin>, HWND 
     {
         return HandleDestroy(hWnd, msg, wParam, lParam);
     }
+    else if (msg == WM_NCPOINTERDOWN || msg == WM_NCPOINTERUP || msg == WM_NCPOINTERUPDATE)
+    {
+        return HandleNcPointer(hWnd, msg, wParam, lParam);
+    }
     else if (
-      msg == WM_NCPOINTERDOWN || msg == WM_NCPOINTERUP || msg == WM_NCPOINTERUPDATE || //
-      msg == WM_POINTERDOWN || msg == WM_POINTERUP || msg == WM_POINTERUPDATE ||       //
-      msg == WM_POINTERENTER || msg == WM_POINTERLEAVE ||                              //
-      msg == WM_POINTERWHEEL || msg == WM_POINTERHWHEEL ||                             //
-      msg == WM_POINTERCAPTURECHANGED ||                                               //
+      msg == WM_POINTERDOWN || msg == WM_POINTERUP || msg == WM_POINTERUPDATE || //
+      msg == WM_POINTERENTER || msg == WM_POINTERLEAVE ||                        //
+      msg == WM_POINTERWHEEL || msg == WM_POINTERHWHEEL ||                       //
+      msg == WM_POINTERCAPTURECHANGED ||                                         //
       msg == WM_POINTERDEVICECHANGE || msg == WM_POINTERDEVICEINRANGE)
     {
         return HandlePointer(hWnd, msg, wParam, lParam);
@@ -864,6 +869,10 @@ auto PlatformWindowWin::WindowProcedure(PassKey<PlatformWindowContextWin>, HWND 
         return HandleNcHitTest(hWnd, msg, wParam, lParam);
     }
     else if (msg == WM_NCMOUSEHOVER || msg == WM_NCMOUSEHOVER || msg == WM_NCMOUSELEAVE || msg == WM_NCLBUTTONDOWN || msg == WM_NCLBUTTONDBLCLK || msg == WM_NCLBUTTONUP)
+    {
+        return HandleNcMouse(hWnd, msg, wParam, lParam);
+    }
+    else if ((WM_MOUSEFIRST <= msg && msg <= WM_MOUSELAST) || msg == WM_MOUSEHOVER || msg == WM_MOUSELEAVE)
     {
         return HandleMouse(hWnd, msg, wParam, lParam);
     }
@@ -1103,10 +1112,51 @@ auto PlatformWindowWin::HandleNcHitTest(HWND hWnd, UINT msg, WPARAM wParam, LPAR
         {
             if ((y - frameRect.top) <= GetSystemTitleBarHeight())
             {
+                auto const dpX = UnitFunction::ConvertVpToDp(x - frameRect.left, GetDisplayScale());
+                auto const dpY = UnitFunction::ConvertVpToDp(y - frameRect.top, GetDisplayScale());
+                auto hitTestEvent = Event<PlatformHitTestEvent>();
+                hitTestEvent->SetPosition({dpX, dpY});
+                auto event = Event<>(hitTestEvent);
+                if (SendHitTestEventDetached(event))
+                {
+                    if (event.Is<PlatformHitTestEvent>())
+                    {
+                        if (event.As<PlatformHitTestEvent>()->GetHit())
+                        {
+                            return HTCLIENT;
+                        }
+                    }
+                }
                 return HTCAPTION;
             }
         }
         return HTCLIENT;
+    }
+    return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+
+///
+/// @brief Handle WM_NCMOUSE*
+///
+auto PlatformWindowWin::HandleNcMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
+{
+    auto dwmResult = LRESULT();
+    if (::DwmDefWindowProc(hWnd, msg, wParam, lParam, &dwmResult))
+    {
+        return dwmResult;
+    }
+    return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+
+///
+/// @brief Handle WM_NCPOINTER*
+///
+auto PlatformWindowWin::HandleNcPointer(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
+{
+    auto dwmResult = LRESULT();
+    if (::DwmDefWindowProc(hWnd, msg, wParam, lParam, &dwmResult))
+    {
+        return dwmResult;
     }
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
@@ -1144,7 +1194,7 @@ auto PlatformWindowWin::HandleActivate(HWND hWnd, UINT msg, WPARAM wParam, LPARA
     {
         try
         {
-            FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleActivate(): {} {:x}", LOWORD(wParam), lParam);
+            FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleActivate(): {} {:x} <-> {:x}", LOWORD(wParam), (LPARAM)hWnd, lParam);
 
             auto event = Event<>(Event<PlatformWindowEvent::ActiveChanged>());
             SendWindowEventDetached(event);
@@ -1334,22 +1384,12 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         try
         {
             auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
-            auto result = Shared<Optional<Bool>>::Make();
-            AsyncFunction::SpawnFn([&event, result, self = GetSelf()]() mutable -> Task<void> {
-                try
-                {
-                    *result = co_await self->SendWindowEvent(event);
-                }
-                catch (...)
-                {
-                    FW_DEBUG_ASSERT(false);
-                }
-            }).Detach();
+            auto const result = SendWindowEventDetached(event);
 
             auto quit = Optional<WPARAM>();
             while (true)
             {
-                if (*result)
+                if (result)
                 {
                     break;
                 }
@@ -1375,7 +1415,7 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
                 ::PostQuitMessage(static_cast<int>(*quit));
             }
 
-            if (*result && **result)
+            if (result)
             {
                 if (event.Is<PlatformWindowEvent::CloseRequested>())
                 {
@@ -1441,147 +1481,16 @@ auto PlatformWindowWin::HandleDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 }
 
 ///
-/// @brief
-///
-static void SetPointerEventParams(PlatformPointerEvent& parameter, UINT32 const pointerId, HWND const hwnd)
-{
-    auto info = POINTER_INFO();
-    if (!::GetPointerInfo(pointerId, &info))
-    {
-        FW_DEBUG_LOG_ERROR("PlatformWindowWin: GetPointerInfo failed");
-        return;
-    }
-
-    parameter.SetPointerId(PointerId(info.pointerId));
-    parameter.SetPrimaryPointer((info.pointerFlags & POINTER_FLAG_PRIMARY) != POINTER_FLAG_NONE);
-
-    if (info.pointerType == PT_MOUSE)
-    {
-        parameter.SetPointerType(PointerType::Mouse);
-    }
-    else if (info.pointerType == PT_PEN)
-    {
-        parameter.SetPointerType(PointerType::Pen);
-    }
-    else if (info.pointerType == PT_TOUCH)
-    {
-        parameter.SetPointerType(PointerType::Touch);
-    }
-    else if (info.pointerType == PT_TOUCHPAD)
-    {
-        parameter.SetPointerType(PointerType::TouchPad);
-    }
-
-    {
-        auto frequency = LARGE_INTEGER();
-        ::QueryPerformanceFrequency(&frequency);
-
-        auto timestamp = info.PerformanceCount;
-        if (timestamp == 0)
-        {
-            auto tickCount = LARGE_INTEGER();
-            ::QueryPerformanceCounter(&tickCount);
-            timestamp = tickCount.QuadPart;
-        }
-        parameter.SetTimestamp(static_cast<float64_t>(timestamp) / frequency.QuadPart);
-    }
-    {
-        auto rect = RECT();
-        if (::GetWindowRect(hwnd, &rect))
-        {
-            const auto displayScale = ::GetDpiForWindow(hwnd) / DisplayScale(USER_DEFAULT_SCREEN_DPI);
-            const auto pos = info.ptPixelLocation;
-            parameter.SetPosition(UnitFunction::ConvertVpToDp(Point<Vp>(pos.x - rect.left, pos.y - rect.top), displayScale));
-        }
-    }
-}
-
-///
-/// @brief
-///
-static void SetPointerMotionEventDetailParams(auto& parameter, UINT32 const pointerId)
-{
-    auto inputType = POINTER_INPUT_TYPE();
-    if (!::GetPointerType(pointerId, &inputType))
-    {
-        FW_DEBUG_LOG_ERROR("PlatformWindowWin: GetPointerType failed");
-        return;
-    }
-
-    if (inputType == PT_PEN)
-    {
-        auto info = POINTER_PEN_INFO();
-        if (::GetPointerPenInfo(pointerId, &info))
-        {
-            if (info.penMask & PEN_MASK_PRESSURE)
-            {
-                // 0 to 1024.
-                parameter.SetPressure(info.pressure / 1024.0);
-            }
-
-            if (info.penMask & PEN_MASK_ROTATION)
-            {
-                parameter.SetTwist(info.rotation);
-            }
-
-            if ((info.penMask & PEN_MASK_TILT_X) && (info.penMask & PEN_MASK_TILT_Y))
-            {
-                const auto [azimuth, altitude] = PlatformPointerEvent::ConvertTiltToSpherical(info.tiltX, info.tiltY);
-                parameter.SetTiltX(info.tiltX);
-                parameter.SetTiltY(info.tiltY);
-                parameter.SetAzimuth(azimuth);
-                parameter.SetAltitude(altitude);
-            }
-        }
-        else
-        {
-            FW_DEBUG_LOG_ERROR("PlatformWindowWin: GetPointerPenInfo failed");
-        }
-    }
-    else if (inputType == PT_TOUCH)
-    {
-        auto info = POINTER_TOUCH_INFO();
-        if (::GetPointerTouchInfo(pointerId, &info))
-        {
-            if (info.touchMask & TOUCH_MASK_PRESSURE)
-            {
-                // 0 to 1024 where 512 represents normal touch pressure.
-                parameter.SetPressure(info.pressure / 512.0);
-            }
-
-            if (info.touchMask & TOUCH_MASK_ORIENTATION)
-            {
-                parameter.SetAzimuth(info.orientation);
-            }
-        }
-        else
-        {
-            FW_DEBUG_LOG_ERROR("PlatformWindowWin: GetPointerTouchInfo failed");
-        }
-    }
-}
-
-///
 /// @brief Handle WM_POINTER*
 ///
 auto PlatformWindowWin::HandlePointer(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
+    (void)lParam;
+    (void)hWnd;
+
     try
     {
-        if (msg == WM_NCPOINTERDOWN)
-        {
-            PointerEnter(true, wParam);
-            PointerDown(true, wParam);
-        }
-        else if (msg == WM_NCPOINTERUP)
-        {
-            PointerDown(false, wParam);
-        }
-        else if (msg == WM_NCPOINTERUPDATE)
-        {
-            PointerUpdate(wParam);
-        }
-        else if (msg == WM_POINTERDOWN)
+        if (msg == WM_POINTERDOWN)
         {
             PointerEnter(true, wParam);
             PointerDown(true, wParam);
@@ -1622,13 +1531,7 @@ auto PlatformWindowWin::HandlePointer(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
         {
             // TODO.
         }
-
-        auto dwmResult = LRESULT();
-        if (::DwmDefWindowProc(hWnd, msg, wParam, lParam, &dwmResult))
-        {
-            return dwmResult;
-        }
-        return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+        return 0;
     }
     catch (...)
     {
@@ -1642,12 +1545,65 @@ auto PlatformWindowWin::HandlePointer(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 ///
 auto PlatformWindowWin::HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
 {
-    auto dwmResult = LRESULT();
-    if (::DwmDefWindowProc(hWnd, msg, wParam, lParam, &dwmResult))
+    if (msg == WM_MOUSEMOVE)
     {
-        return dwmResult;
+        if (!_mouseEnter)
+        {
+            FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleMouse(): Motion::Enter");
+            _mouseEnter = true;
+            auto parameter = Event<PlatformPointerEvent::Motion::Enter>();
+            PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
+            auto event = Event<>(parameter);
+            SendPointerEventDetached(event);
+        }
+        {
+            FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleMouse(): Motion::Move");
+            auto parameter = Event<PlatformPointerEvent::Motion::Move>();
+            PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
+            PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForMouse(*parameter, msg, wParam, lParam);
+            auto event = Event<>(parameter);
+            SendPointerEventDetached(event);
+        }
+
+        auto tme = TRACKMOUSEEVENT {
+            .cbSize = sizeof(TRACKMOUSEEVENT),
+            .dwFlags = TME_LEAVE,
+            .hwndTrack = hWnd,
+            .dwHoverTime = 0,
+        };
+        ::TrackMouseEvent(&tme);
     }
-    return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+    else if (msg == WM_MOUSELEAVE)
+    {
+        if (_mouseEnter)
+        {
+            FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleMouse(): Motion::Leave");
+            _mouseEnter = false;
+            auto parameter = Event<PlatformPointerEvent::Motion::Leave>();
+            PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
+            auto event = Event<>(parameter);
+            SendPointerEventDetached(event);
+        }
+    }
+    else if (msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN || msg == WM_XBUTTONDOWN)
+    {
+        FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleMouse(): Motion::Down");
+        auto parameter = Event<PlatformPointerEvent::Motion::Down>();
+        PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
+        PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForMouse(*parameter, msg, wParam, lParam);
+        auto event = Event<>(parameter);
+        SendPointerEventDetached(event);
+    }
+    else if (msg == WM_LBUTTONUP || msg == WM_RBUTTONUP || msg == WM_MBUTTONUP || msg == WM_XBUTTONUP)
+    {
+        FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleMouse(): Motion::Up");
+        auto parameter = Event<PlatformPointerEvent::Motion::Up>();
+        PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
+        PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForMouse(*parameter, msg, wParam, lParam);
+        auto event = Event<>(parameter);
+        SendPointerEventDetached(event);
+    }
+    return 0;
 }
 
 auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
@@ -2020,16 +1976,16 @@ void PlatformWindowWin::PointerDown(Bool const down, WPARAM const wParam)
         if (down)
         {
             auto parameter = Event<PlatformPointerEvent::Motion::Down>();
-            SetPointerEventParams(*parameter, pointerId, _hwnd);
-            SetPointerMotionEventDetailParams(*parameter, pointerId);
+            PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
+            PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForPointer(*parameter, pointerId);
             auto event = Event<>(parameter);
             SendPointerEventDetached(event);
         }
         else
         {
             auto parameter = Event<PlatformPointerEvent::Motion::Up>();
-            SetPointerEventParams(*parameter, pointerId, _hwnd);
-            SetPointerMotionEventDetailParams(*parameter, pointerId);
+            PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
+            PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForPointer(*parameter, pointerId);
             auto event = Event<>(parameter);
             SendPointerEventDetached(event);
         }
@@ -2065,14 +2021,14 @@ void PlatformWindowWin::PointerEnter(Bool const enter, WPARAM const wParam)
         if (enter)
         {
             auto parameter = Event<PlatformPointerEvent::Motion::Enter>();
-            SetPointerEventParams(*parameter, pointerId, _hwnd);
+            PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
             auto event = Event<>(parameter);
             SendPointerEventDetached(event);
         }
         else
         {
             auto parameter = Event<PlatformPointerEvent::Motion::Leave>();
-            SetPointerEventParams(*parameter, pointerId, _hwnd);
+            PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
             auto event = Event<>(parameter);
             SendPointerEventDetached(event);
         }
@@ -2097,7 +2053,7 @@ void PlatformWindowWin::PointerUpdate(WPARAM const wParam)
         }
 
         auto parameter = Event<PlatformPointerEvent::Motion::Cancel>();
-        SetPointerEventParams(*parameter, pointerId, _hwnd);
+        PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
         auto event = Event<>(parameter);
         SendPointerEventDetached(event);
         return;
@@ -2106,7 +2062,8 @@ void PlatformWindowWin::PointerUpdate(WPARAM const wParam)
     PointerEnter(true, wParam);
 
     auto parameter = Event<PlatformPointerEvent::Motion::Move>();
-    SetPointerEventParams(*parameter, pointerId, _hwnd);
+    PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
+    PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForPointer(*parameter, pointerId);
     auto event = Event<>(parameter);
     SendPointerEventDetached(event);
 }
@@ -2134,7 +2091,7 @@ auto PlatformWindowWin::PointerWheel(Bool const vertical, WPARAM const wParam) -
     auto const deltaY = vertical ? delta / WHEEL_DELTA : 0;
 
     auto parameter = Event<PlatformPointerEvent::Action::Scroll>();
-    SetPointerEventParams(*parameter, pointerId, _hwnd);
+    PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
     parameter->SetPrecision(precision);
     parameter->SetDeltaY(deltaY);
     parameter->SetDeltaX(deltaX);

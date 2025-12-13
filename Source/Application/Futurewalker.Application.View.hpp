@@ -18,6 +18,7 @@
 #include "Futurewalker.Application.LayoutDirection.hpp"
 #include "Futurewalker.Application.ViewLayerManagerType.hpp"
 #include "Futurewalker.Application.FocusNodeType.hpp"
+#include "Futurewalker.Application.HitTestEvent.hpp"
 
 #include "Futurewalker.Animation.AnimationTimer.hpp"
 
@@ -201,6 +202,7 @@ protected:
     auto CancelInput() -> void;
 
     auto DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, PointerPhaseFlags const phase) -> Shared<View>;
+    auto DispatchHitTestEventFromRoot(PassKey<RootView>, Event<HitTestEvent>& event) -> void;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;

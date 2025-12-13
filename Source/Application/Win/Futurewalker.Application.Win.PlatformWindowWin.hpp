@@ -91,6 +91,8 @@ private:
     auto HandleNcCalcSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleNcActivate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleNcHitTest(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
+    auto HandleNcMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
+    auto HandleNcPointer(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleGetMinMaxInfo(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleActivate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleActivateApp(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
@@ -158,6 +160,7 @@ private:
     Bool _closed = false;
     Rect<Vp> _systemControlRect;
     Bool _restoreOnShow = false;
+    Bool _mouseEnter = false;
 
 private:
     struct PointerState

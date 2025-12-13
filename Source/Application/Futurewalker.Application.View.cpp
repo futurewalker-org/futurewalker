@@ -1461,6 +1461,18 @@ auto View::DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> c
 ///
 /// @brief
 ///
+/// @param event
+///
+auto View::DispatchHitTestEventFromRoot(PassKey<RootView>, Event<HitTestEvent>& event) -> void
+{
+    auto parameter = HitTestParameter();
+    parameter.SetPosition(event->GetPosition());
+    event->SetHit(HitTestScope::HitTestView({}, *this, parameter) != nullptr);
+}
+
+///
+/// @brief
+///
 auto View::RootIsActive() const -> Bool
 {
     return false;
