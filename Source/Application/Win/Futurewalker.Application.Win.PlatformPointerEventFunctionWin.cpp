@@ -296,7 +296,7 @@ auto PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForPointer(Plat
                 if (info.touchMask & TOUCH_MASK_PRESSURE)
                 {
                     // 0 to 1024 where 512 represents normal touch pressure.
-                    parameter.SetPressure(info.pressure / 512.0);
+                    parameter.SetPressure(info.pressure / 1024.0);
                 }
 
                 if (info.touchMask & TOUCH_MASK_ORIENTATION)
