@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Component.Lamp.ButtonViewType.hpp"
+#include "Futurewalker.Component.Lamp.ButtonRenderViewType.hpp"
 #include "Futurewalker.Component.Lamp.ButtonViewStyle.hpp"
 
 #include "Futurewalker.Application.ButtonViewType.hpp"
@@ -9,7 +10,7 @@
 #include "Futurewalker.Application.CornerRadius.hpp"
 #include "Futurewalker.Application.View.hpp"
 
-#include "Futurewalker.Attribute.AttributeAccessor.hpp"
+#include "Futurewalker.Attribute.AttributeArg.hpp"
 
 #include "Futurewalker.Color.hpp"
 
@@ -50,29 +51,13 @@ public:
 
 protected:
     auto Initialize() -> void override;
-    auto Draw(DrawScope& scope) -> void override;
     auto ReceiveEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
     auto SetDown(const Bool down) -> void;
     auto SetEnter(const Bool enter) -> void;
 
 private:
     Shared<::FW_NS::ButtonView> _buttonView;
-    AttributeAccessor<RGBAColor> _backgroundColor;
-    AttributeAccessor<Channel> _backgroundAlpha;
-    AttributeAccessor<RGBAColor> _disabledBackgroundColor;
-    AttributeAccessor<Channel> _disabledBackgroundAlpha;
-    AttributeAccessor<RGBAColor> _borderColor;
-    AttributeAccessor<Channel> _borderAlpha;
-    AttributeAccessor<RGBAColor> _disabledBorderColor;
-    AttributeAccessor<Channel> _disabledBorderAlpha;
-    AttributeAccessor<RGBAColor> _highlightColor;
-    AttributeAccessor<Channel> _hoverHighlightAlpha;
-    AttributeAccessor<Channel> _pressHighlightAlpha;
-    AttributeAccessor<CornerRadius> _cornerRadius;
-    AttributeAccessor<Dp> _borderWidth;
-    Bool _down = false;
-    Bool _enter = false;
+    Shared<ButtonRenderView> _renderView;
 };
 }
 }
