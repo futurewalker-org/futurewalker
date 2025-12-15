@@ -5,6 +5,8 @@
 
 #include "Futurewalker.Core.Win.PlatformStringFunctionWin.hpp"
 
+#include <iostream>
+
 namespace FW_DETAIL_NS
 {
 ///
@@ -16,7 +18,15 @@ auto PlatformDebugWin::Print(StringView const message) -> void
 {
     std::wstring wideMessage = PlatformStringFunctionWin::Utf8ToWide(message);
     wideMessage += L'\n';
-    ::OutputDebugStringW(wideMessage.c_str());
+
+    if (::GetConsoleWindow())
+    {
+        std::wcerr << wideMessage;
+    }
+    else
+    {
+        ::OutputDebugStringW(wideMessage.c_str());
+    }
 }
 
 ///
