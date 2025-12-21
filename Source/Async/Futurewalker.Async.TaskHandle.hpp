@@ -96,6 +96,8 @@ public:
         std::promise<ResultType> _promise;
     };
 
+    TaskHandle() noexcept = default;
+
     ///
     /// @brief Move constructor.
     ///
@@ -246,6 +248,8 @@ public:
     private:
         std::promise<ResultType> _promise;
     };
+
+    TaskHandle() noexcept = default;
 
     ///
     /// @brief Move constructor.
