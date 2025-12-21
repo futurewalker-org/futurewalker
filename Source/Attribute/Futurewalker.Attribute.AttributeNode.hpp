@@ -123,7 +123,6 @@ private:
 template <const auto* Attribute, class Owner>
 auto AttributeNode::GetValue(Owner& owner) -> Optional<ValueTypeOf<Attribute>>
 {
-    static_assert(Attribute);
     static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
     auto constexpr attribute = StaticReference(*Attribute);
     return GetValue(owner, attribute);
@@ -170,7 +169,6 @@ auto AttributeNode::GetValue(Owner& owner, StaticAttributeRef<T> attribute) -> O
 template <const auto* Attribute, class U, class Owner>
 auto AttributeNode::SetValue(Owner& owner, U const& value) -> void
 {
-    static_assert(Attribute);
     static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
     auto constexpr attribute = StaticReference(*Attribute);
     return SetValue(owner, attribute, value);
@@ -205,7 +203,6 @@ auto AttributeNode::SetValue(Owner& owner, StaticAttributeRef<T> attribute, U co
 template <const auto* Attribute, class Owner>
 auto AttributeNode::SetReference(Owner& owner, StaticAttributeRef<ValueTypeOf<Attribute>> reference) -> void
 {
-    static_assert(Attribute);
     static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
     auto constexpr attribute = StaticReference(*Attribute);
     return SetReference(owner, attribute, reference);
@@ -239,7 +236,6 @@ auto AttributeNode::SetReference(Owner& owner, StaticAttributeRef<T> attribute, 
 template <const auto* Attribute, class Owner>
 auto AttributeNode::Clear(Owner& owner) -> void
 {
-    static_assert(Attribute);
     static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
     auto constexpr attribute = StaticReference(*Attribute);
     return Clear(owner, attribute);
@@ -273,7 +269,6 @@ auto AttributeNode::Clear(Owner& owner, StaticAttributeRef<T> attribute) -> void
 template <auto const* Attribute, class Owner>
 auto AttributeNode::GetObserver(Owner& owner) -> Unique<AttributeObserver<ValueTypeOf<Attribute>>>
 {
-    static_assert(Attribute);
     static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
     auto constexpr attribute = StaticReference(*Attribute);
     return GetObserver(owner, attribute);
