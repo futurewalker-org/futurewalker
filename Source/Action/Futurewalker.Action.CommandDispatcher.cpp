@@ -104,9 +104,11 @@ auto CommandDispatcher::Attach() -> void
 
     if (!_prevDispatcher && !_nextDispatcher)
     {
-        auto firstDispatcher = _context->GetFirstDispatcher({});
-        firstDispatcher->_prevDispatcher = this;
-        _nextDispatcher = firstDispatcher;
+        if (auto const firstDispatcher = _context->GetFirstDispatcher({}))
+        {
+            firstDispatcher->_prevDispatcher = this;
+            _nextDispatcher = firstDispatcher;
+        }
         _context->SetFirstDispatcher({}, this);
     }
     else
