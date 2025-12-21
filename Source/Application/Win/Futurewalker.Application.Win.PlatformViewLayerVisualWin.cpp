@@ -60,7 +60,7 @@ auto PlatformViewLayerVisualWin::GetVisual() -> Microsoft::WRL::ComPtr<IDComposi
 
 auto PlatformViewLayerVisualWin::GetBaseLayerId() const -> PlatformViewLayerId
 {
-    return _baseLayerId; 
+    return _baseLayerId;
 }
 
 auto PlatformViewLayerVisualWin::SetBaseLayerId(PlatformViewLayerId const layerId) -> void
