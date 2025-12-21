@@ -172,14 +172,17 @@ auto PlatformWindowWin::SetVisible(Bool visible) -> void
 {
     if (!IsClosed())
     {
-        if (visible)
+        if (IsVisible() != visible)
         {
-            ::ShowWindow(_hwnd, _restoreOnShow ? SW_SHOWNORMAL : SW_SHOW);
-            _restoreOnShow = false;
-        }
-        else
-        {
-            ::ShowWindow(_hwnd, SW_HIDE);
+            if (visible)
+            {
+                ::ShowWindow(_hwnd, _restoreOnShow ? SW_SHOWNORMAL : SW_SHOW);
+                _restoreOnShow = false;
+            }
+            else
+            {
+                ::ShowWindow(_hwnd, SW_HIDE);
+            }
         }
     }
 }
@@ -628,20 +631,46 @@ auto PlatformWindowWin::Close() -> Async<Bool>
     if (!IsClosed())
     {
         auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
-        if (co_await SendWindowEvent(event))
+        co_await SendWindowEvent(event);
+
+        auto close = True;
+        if (event.Is<PlatformWindowEvent::CloseRequested>())
         {
-            if (event.Is<PlatformWindowEvent::CloseRequested>())
+            if (event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
             {
-                if (!event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
-                {
-                    ::DestroyWindow(_hwnd);
-                    co_return true;
-                }
+                close = false;
             }
         }
-        co_return false;
+
+        if (close)
+        {
+            ::DestroyWindow(_hwnd);
+        }
+        co_return close;
     }
     co_return true;
+}
+
+///
+/// @brief
+///
+auto PlatformWindowWin::Destroy() -> void
+{
+    if (_hwnd)
+    {
+        if (const auto owner = _options.owner.TryAs<PlatformWindowWin>())
+        {
+            if (_options.behavior == WindowBehavior::Dialog)
+            {
+                owner->EnableWindow(GetSelf());
+            }
+        }
+
+        if (!::DestroyWindow(_hwnd))
+        {
+            FW_DEBUG_LOG_ERROR("PlatformWindowWin: DestroyWindow failed");
+        }
+    }
 }
 
 ///
@@ -690,6 +719,34 @@ auto PlatformWindowWin::GetFrameTime() -> MonotonicTime
     }
     FW_DEBUG_ASSERT(false);
     return {};
+}
+
+///
+/// @brief
+///
+auto PlatformWindowWin::CapturePointer(PointerId const id) -> void
+{
+    if (!IsClosed())
+    {
+        if (id == 1U)
+        {
+            ::SetCapture(_hwnd);
+        }
+    }
+}
+
+///
+/// @brief
+///
+auto PlatformWindowWin::ReleasePointer(PointerId const id) -> void
+{
+    if (!IsClosed())
+    {
+        if (id == 1U)
+        {
+            ::ReleaseCapture();
+        }
+    }
 }
 
 ///
@@ -875,6 +932,10 @@ auto PlatformWindowWin::WindowProcedure(PassKey<PlatformWindowContextWin>, HWND 
     else if ((WM_MOUSEFIRST <= msg && msg <= WM_MOUSELAST) || msg == WM_MOUSEHOVER || msg == WM_MOUSELEAVE)
     {
         return HandleMouse(hWnd, msg, wParam, lParam);
+    }
+    else if (msg == WM_CAPTURECHANGED)
+    {
+        return HandleCaptureChanged(hWnd, msg, wParam, lParam);
     }
     else if (msg == WM_INPUTLANGCHANGE)
     {
@@ -1185,6 +1246,26 @@ auto PlatformWindowWin::HandleGetMinMaxInfo(HWND hWnd, UINT msg, WPARAM wParam, 
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
+static auto IsOwnerOf(HWND wnd, HWND target) -> Bool
+{
+    HWND parent = target;
+    while (parent)
+    {
+        if (parent == wnd)
+        {
+            return true;
+        }
+        parent = ::GetWindow(parent, GW_OWNER);
+    }
+    return false;
+}
+
+static auto GetWindowPointer(HWND wnd) -> Pointer<PlatformWindowWin>
+{
+    const auto data = ::GetWindowLongPtrW(wnd, GWLP_USERDATA);
+    return reinterpret_cast<PlatformWindowWin*>(data);
+}
+
 ///
 /// @brief Handle WM_ACTIVATE.
 ///
@@ -1194,17 +1275,82 @@ auto PlatformWindowWin::HandleActivate(HWND hWnd, UINT msg, WPARAM wParam, LPARA
     {
         try
         {
-            FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleActivate(): {} {:x} <-> {:x}", LOWORD(wParam), (LPARAM)hWnd, lParam);
+            FW_DEBUG_LOG_TRACE("PlatformWindowWin::HandleActivate(): {} {:x} <-> {:x}", LOWORD(wParam), (LPARAM)hWnd, lParam);
+            FW_DEBUG_LOG_TRACE("PlatformWindowWin::HandleActivate(): active={:x} ", (LPARAM)::GetActiveWindow());
 
-            auto event = Event<>(Event<PlatformWindowEvent::ActiveChanged>());
-            SendWindowEventDetached(event);
-
-            auto const activated = LOWORD(wParam) != WA_INACTIVE;
-            if (!activated && _options.behavior == WindowBehavior::Popup)
+            if (!_destructing)
             {
-                // Destroy popup window when it become inactive.
-                // NOTE: Usually this prevents lParam window to be actually activated.
-                ::DestroyWindow(hWnd);
+                auto event = Event<>(Event<PlatformWindowEvent::ActiveChanged>());
+                SendWindowEventDetached(event);
+            }
+
+            // Destroy popup chain when unrelated window is activated.
+            // TODO: Consider moving this logic to Window so that we can share it with other platforms.
+            if (LOWORD(wParam) == WA_INACTIVE)
+            {
+                if (_options.behavior == WindowBehavior::Popup)
+                {
+                    // If owner window is activated, destroying popup will break activation flow and WM_ACTIVATE will not be sent to the owner.
+                    // So we only destroy popup chain when unrelated window is activated here.
+                    auto const activated = reinterpret_cast<HWND>(lParam);
+                    if (!IsOwnerOf(hWnd, activated) && !IsOwnerOf(activated, hWnd))
+                    {
+                        FW_DEBUG_LOG_TRACE("PlatformWindowWin::HandleActivate(): Unrelated window activated, destroying popup chain.");
+                        auto parent = hWnd;
+                        while (parent)
+                        {
+                            auto const window = GetWindowPointer(parent);
+                            if (!window || window->_options.behavior != WindowBehavior::Popup)
+                            {
+                                break;
+                            }
+                            FW_DEBUG_LOG_TRACE("PlatformWindowWin::HandleActivate(): DestroyWindow({:x})", (uintptr_t)parent);
+                            ::DestroyWindow(std::exchange(parent, ::GetWindow(parent, GW_OWNER)));
+                        }
+                        FW_DEBUG_LOG_TRACE("PlatformWindowWin::HandleActivate(): Destroyed popup chain.");
+                    }
+                }
+            }
+            else
+            {
+                // Destroy owned popup chain after owner window is activated.
+                auto const deactivated = reinterpret_cast<HWND>(lParam);
+                if (IsOwnerOf(hWnd, deactivated))
+                {
+                    FW_DEBUG_LOG_TRACE("PlatformWindowWin::HandleActivate(): Owner window activated, destroying popup chain.");
+                    HWND parent = deactivated;
+                    while (parent)
+                    {
+                        auto const window = GetWindowPointer(parent);
+                        if (!window || window->_options.behavior != WindowBehavior::Popup)
+                        {
+                            break;
+                        }
+
+                        if (parent == hWnd)
+                        {
+                            break;
+                        }
+                        auto newParent = ::GetWindow(parent, GW_OWNER);
+                        auto oldParent = std::exchange(parent, newParent);
+                        if (newParent && oldParent)
+                        {
+                            if (auto newParentWindow = GetWindowPointer(newParent))
+                            {
+                                if (newParentWindow->_options.behavior == WindowBehavior::Popup)
+                                {
+                                    if (window->_options.allowActiveOwnerPopup)
+                                    {
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                        FW_DEBUG_LOG_TRACE("PlatformWindowWin::HandleActivate(): DestroyWindow({:x})", (uintptr_t)oldParent);
+                        ::DestroyWindow(oldParent);
+                    }
+                    FW_DEBUG_LOG_TRACE("PlatformWindowWin::HandleActivate(): Destroyed popup chain.");
+                }
             }
         }
         catch (...)
@@ -1384,7 +1530,17 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         try
         {
             auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
-            auto const result = SendWindowEventDetached(event);
+            auto result = Shared<Optional<Bool>>::Make();
+            AsyncFunction::SpawnFn([&event, result, self = GetSelf()]() mutable -> Task<void> {
+                try
+                {
+                    *result = co_await self->SendWindowEvent(event);
+                }
+                catch (...)
+                {
+                    FW_DEBUG_ASSERT(false);
+                }
+            }).Detach();
 
             auto quit = Optional<WPARAM>();
             while (true)
@@ -1415,15 +1571,18 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
                 ::PostQuitMessage(static_cast<int>(*quit));
             }
 
-            if (result)
+            auto close = True;
+            if (event.Is<PlatformWindowEvent::CloseRequested>())
             {
-                if (event.Is<PlatformWindowEvent::CloseRequested>())
+                if (event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
                 {
-                    if (!event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
-                    {
-                        ::DestroyWindow(hWnd);
-                    }
+                    close = false;
                 }
+            }
+
+            if (close)
+            {
+                ::DestroyWindow(hWnd);
             }
         }
         catch (...)
@@ -1521,7 +1680,7 @@ auto PlatformWindowWin::HandlePointer(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
         }
         else if (msg == WM_POINTERCAPTURECHANGED)
         {
-            // TODO.
+            PointerCancel(wParam);
         }
         else if (msg == WM_POINTERDEVICECHANGE)
         {
@@ -1604,6 +1763,15 @@ auto PlatformWindowWin::HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         SendPointerEventDetached(event);
     }
     return 0;
+}
+
+auto PlatformWindowWin::HandleCaptureChanged(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
+{
+    if (msg == WM_CAPTURECHANGED)
+    {
+        return 0;
+    }
+    return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
 auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT
@@ -2071,6 +2239,16 @@ void PlatformWindowWin::PointerUpdate(WPARAM const wParam)
 ///
 /// @brief
 ///
+auto PlatformWindowWin::PointerCancel(WPARAM const wParam) -> void
+{
+    (void)wParam;
+    auto event = Event<>(Event<PlatformPointerEvent::Motion::Cancel>());
+    SendPointerEventDetached(event);
+}
+
+///
+/// @brief
+///
 /// @param vertical
 /// @param wParam
 ///
@@ -2181,28 +2359,6 @@ auto PlatformWindowWin::EnableWindow(Shared<PlatformWindowWin> const& source) ->
             {
                 ownedWindow->EnableWindow(self);
             }
-        }
-    }
-}
-
-///
-/// @brief
-///
-auto PlatformWindowWin::Destroy() -> void
-{
-    if (_hwnd)
-    {
-        if (const auto owner = _options.owner.TryAs<PlatformWindowWin>())
-        {
-            if (_options.behavior == WindowBehavior::Dialog)
-            {
-                owner->EnableWindow(GetSelf());
-            }
-        }
-
-        if (!::DestroyWindow(_hwnd))
-        {
-            FW_DEBUG_LOG_ERROR("PlatformWindowWin: DestroyWindow failed");
         }
     }
 }

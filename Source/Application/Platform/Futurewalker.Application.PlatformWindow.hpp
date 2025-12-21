@@ -5,6 +5,7 @@
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 #include "Futurewalker.Application.PlatformInputMethodType.hpp"
 #include "Futurewalker.Application.BoxConstraints.hpp"
+#include "Futurewalker.Application.PointerEventType.hpp"
 #include "Futurewalker.Application.EdgeInsets.hpp"
 
 #include "Futurewalker.Event.hpp"
@@ -39,6 +40,8 @@ public:
     };
     PlatformWindow(PassKey<PlatformWindow>, Delegate const& delegate);
 
+    auto SetDelegate(Delegate const& delegate) -> void;
+
     virtual ~PlatformWindow() = 0;
 
     virtual auto IsVisible() -> Bool = 0;
@@ -49,6 +52,8 @@ public:
     virtual auto SetFocus() -> void = 0;
     virtual auto GetFrameRect() -> Rect<Vp> = 0;
     virtual auto SetFrameRect(Rect<Vp> const& rect) -> void = 0;
+    virtual auto CapturePointer(PointerId const id) -> void = 0; 
+    virtual auto ReleasePointer(PointerId const id) -> void = 0; 
     virtual auto GetRestoredFrameRect() -> Rect<Vp> = 0;
     virtual auto SetRestoredFrameRect(Rect<Vp> const& rect) -> void = 0;
     virtual auto GetAreaBounds(WindowArea const area) -> std::vector<Rect<Dp>> = 0;
@@ -64,6 +69,7 @@ public:
     virtual auto Restore() -> void = 0;
     virtual auto IsClosed() -> Bool = 0;
     virtual auto Close() -> Async<Bool> = 0;
+    virtual auto Destroy() -> void = 0;
     virtual auto Render() -> void = 0;
     virtual auto RequestFrame() -> void = 0;
     virtual auto GetFrameTime() -> MonotonicTime = 0;
@@ -93,6 +99,10 @@ protected:
 
     template <class Derived, class... Args>
     static auto MakeDerived(Args&&... args) -> Shared<Derived>;
+
+private:
+    auto SendEvent(Event<>& event, EventFunction const& func) -> Async<Bool>;
+    auto SendEventDetached(Event<>& event, auto (PlatformWindow::*func)(Event<>&)->Async<Bool>) -> Bool;
 
 private:
     Weak<PlatformWindow> _self;

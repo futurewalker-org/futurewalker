@@ -10,6 +10,7 @@
 #include "Futurewalker.Application.ScreenType.hpp"
 #include "Futurewalker.Application.BoxConstraints.hpp"
 #include "Futurewalker.Application.InputMethodType.hpp"
+#include "Futurewalker.Application.PointerEventType.hpp"
 #include "Futurewalker.Application.ViewAreaManagerType.hpp"
 #include "Futurewalker.Application.PlatformWindowType.hpp"
 #include "Futurewalker.Application.PlatformWindowContextType.hpp"
@@ -200,6 +201,9 @@ private:
 
     auto RequestFrame() -> void;
     auto GetFrameTime() const -> MonotonicTime;
+
+    auto CapturePointer(PointerId const id) -> void;
+    auto ReleasePointer(PointerId const id) -> void;
 
     auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
 

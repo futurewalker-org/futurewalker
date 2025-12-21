@@ -49,6 +49,17 @@ public:
     }
 
     ///
+    /// @brief Move constructor from another event type.
+    ///
+    /// @param[in] other Other event.
+    ///
+    template <Concepts::DerivedFrom<Parameter> U>
+    Event(Event<U>&& other) noexcept
+      : _holder(std::move(other._holder))
+    {
+    }
+
+    ///
     /// @brief Construct event with default-constructed parameter.
     ///
     Event()
@@ -61,6 +72,14 @@ public:
     ///
     Event(Event const& other)
       : Event(other._holder->Clone())
+    {
+    }
+
+    ///
+    /// @brief Move constructor.
+    ///
+    Event(Event&& other) noexcept
+      : _holder(std::move(other._holder))
     {
     }
 
@@ -78,12 +97,28 @@ public:
     }
 
     ///
+    /// @brief Move assignment operator.
+    ///
+    auto operator=(Event&& other) noexcept -> Event&
+    {
+        if (this != &other)
+        {
+            _holder = std::move(other._holder);
+        }
+        return *this;
+    }
+
+    ///
     /// @brief Check type of contained event value.
     ///
     template <Concepts::DerivedFrom<EventParameter> T>
     auto Is() const noexcept -> Bool
     {
-        return DynamicCastFunction::Is<T>(_holder->Get());
+        if (_holder)
+        {
+            return DynamicCastFunction::Is<T>(_holder->Get());
+        }
+        return false;
     }
 
     ///
@@ -116,72 +151,104 @@ public:
     /// @brief Access contained event value.
     ///
     template <class Parameter>
-    auto operator->(this const Event<Parameter>& self) noexcept -> Parameter const*
+    auto operator->(this const Event<Parameter>& self) -> Parameter const*
     {
-        return static_cast<Parameter const*>(&self._holder->Get());
+        if (self._holder)
+        {
+            return static_cast<Parameter const*>(&self._holder->Get());
+        }
+        throw Exception(ErrorCode::InvalidOperation);
     }
 
     ///
     /// @brief Access contained event value.
     ///
     template <class Parameter>
-    auto operator->(this const Event<Parameter>&& self) noexcept -> Parameter const*
+    auto operator->(this const Event<Parameter>&& self) -> Parameter const*
     {
-        return static_cast<Parameter const*>(&self._holder->Get());
+        if (self._holder)
+        {
+            return static_cast<Parameter const*>(&self._holder->Get());
+        }
+        throw Exception(ErrorCode::InvalidOperation);
     }
 
     ///
     /// @brief Access contained event value.
     ///
     template <class Parameter>
-    auto operator->(this Event<Parameter>& self) noexcept -> Parameter*
+    auto operator->(this Event<Parameter>& self) -> Parameter*
     {
-        return static_cast<Parameter*>(&self._holder->Get());
+        if (self._holder)
+        {
+            return static_cast<Parameter*>(&self._holder->Get());
+        }
+        throw Exception(ErrorCode::InvalidOperation);
     }
 
     ///
     /// @brief Access contained event value.
     ///
     template <class Parameter>
-    auto operator->(this Event<Parameter>&& self) noexcept -> Parameter*
+    auto operator->(this Event<Parameter>&& self) -> Parameter*
     {
-        return static_cast<Parameter*>(&self._holder->Get());
+        if (self._holder)
+        {
+            return static_cast<Parameter*>(&self._holder->Get());
+        }
+        throw Exception(ErrorCode::InvalidOperation);
     }
 
     ///
     /// @brief Access contained event value.
     ///
     template <class Parameter>
-    auto operator*(this const Event<Parameter>& self) noexcept -> Parameter const&
+    auto operator*(this const Event<Parameter>& self) -> Parameter const&
     {
-        return static_cast<Parameter const&>(self._holder->Get());
+        if (self._holder)
+        {
+            return static_cast<Parameter const&>(self._holder->Get());
+        }
+        throw Exception(ErrorCode::InvalidOperation);
     }
 
     ///
     /// @brief Access contained event value.
     ///
     template <class Parameter>
-    auto operator*(this const Event<Parameter>&& self) noexcept -> Parameter const&
+    auto operator*(this const Event<Parameter>&& self) -> Parameter const&
     {
-        return static_cast<Parameter const&>(self._holder->Get());
+        if (self._holder)
+        {
+            return static_cast<Parameter const&>(self._holder->Get());
+        }
+        throw Exception(ErrorCode::InvalidOperation);
     }
 
     ///
     /// @brief Access contained event value.
     ///
     template <class Parameter>
-    auto operator*(this Event<Parameter>& self) noexcept -> Parameter&
+    auto operator*(this Event<Parameter>& self) -> Parameter&
     {
-        return static_cast<Parameter&>(self._holder->Get());
+        if (self._holder)
+        {
+            return static_cast<Parameter&>(self._holder->Get());
+        }
+        throw Exception(ErrorCode::InvalidOperation);
     }
 
     ///
     /// @brief Access contained event value.
     ///
     template <class Parameter>
-    auto operator*(this Event<Parameter>&& self) noexcept -> Parameter&
+    auto operator*(this Event<Parameter>&& self) -> Parameter&
     {
-        return static_cast<Parameter&>(self._holder->Get());
+        if (self._holder)
+        {
+            return static_cast<Parameter&>(self._holder->Get());
+        }
+        throw Exception(ErrorCode::InvalidOperation);
     }
 
 private:

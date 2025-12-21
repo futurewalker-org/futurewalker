@@ -682,7 +682,14 @@ auto RootView::RootGlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>
 ///
 auto RootView::RootCapturePointer(PointerId const id, Shared<View> const& view) -> void
 {
-    SetPointerCaptureView(id, view);
+    if (view)
+    {
+        if (_delegate.capturePointer)
+        {
+            _delegate.capturePointer(id);
+        }
+        SetPointerCaptureView(id, view);
+    }
 }
 
 ///
@@ -693,6 +700,10 @@ auto RootView::RootReleasePointer(PointerId const id, Shared<View> const& view) 
     if (GetPointerCaptureView(id) == view)
     {
         SetPointerCaptureView(id, nullptr);
+        if (_delegate.releasePointer)
+        {
+            _delegate.releasePointer(id);
+        }
     }
 }
 

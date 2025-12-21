@@ -35,6 +35,7 @@ struct PlatformWindowOptions
     Bool visible = true;
     Bool maximized = false;
     Bool minimized = false;
+    Bool allowActiveOwnerPopup = false;
     BoxConstraints sizeConstraints = BoxConstraints::MakeUnconstrained();
 };
 }

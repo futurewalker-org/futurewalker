@@ -68,6 +68,11 @@ Window::Window(PassKey<Window>)
 ///
 Window::~Window()
 {
+    if (_platformObject)
+    {
+        _platformObject->SetDelegate({});
+        _platformObject->Destroy();
+    }
 }
 
 ///
@@ -673,6 +678,7 @@ auto Window::Realize(WindowOptions const& options) -> void
         .minimizable = options.minimizable,
         .hasFrame = options.hasFrame,
         .hasTitleBar = options.hasTitleBar,
+        .allowActiveOwnerPopup = options.allowActiveOwnerPopup,
     };
 
     const auto delegate = PlatformWindow::Delegate {
@@ -749,6 +755,8 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
     _rootView = RootView::MakeWithContent(
       {
           .requestFrame = [&] { return RequestFrame(); },
+          .capturePointer = [&](PointerId const id) { return CapturePointer(id); },
+          .releasePointer = [&](PointerId const id) { return ReleasePointer(id); },
           .getFrameTime = [&] { return GetFrameTime(); },
           .localToGlobalPoint = [&](Point<Dp> const& point) { return LocalToGlobalPoint(RootViewToLocalPoint(point)); },
           .globalToLocalPoint = [&](Point<Vp> const& point) { return RootViewToLocalPoint(GlobalToLocalPoint(point)); },
@@ -792,6 +800,28 @@ auto Window::GetFrameTime() const -> MonotonicTime
         return _platformObject->GetFrameTime();
     }
     return {};
+}
+
+///
+/// @brief
+///
+auto Window::CapturePointer(PointerId const id) -> void
+{
+    if (_platformObject)
+    {
+        _platformObject->CapturePointer(id);
+    }
+}
+
+///
+/// @brief
+///
+auto Window::ReleasePointer(PointerId const id) -> void
+{
+    if (_platformObject)
+    {
+        _platformObject->ReleasePointer(id);
+    }
 }
 
 ///

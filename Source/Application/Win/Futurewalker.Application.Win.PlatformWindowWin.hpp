@@ -71,9 +71,12 @@ public:
     auto Restore() -> void override;
     auto IsClosed() -> Bool override;
     auto Close() -> Async<Bool> override;
+    auto Destroy() -> void override;
     auto Render() -> void override;
     auto RequestFrame() -> void override;
     auto GetFrameTime() -> MonotonicTime override;
+    auto CapturePointer(PointerId const id) -> void override;
+    auto ReleasePointer(PointerId const id) -> void override;
     auto GetViewLayer() -> Shared<PlatformViewLayer> override;
     auto GetInputMethod() -> Shared<PlatformInputMethod> override;
     auto SetBackgroundColor(RGBColor const& backgroundColor) -> void override;
@@ -104,6 +107,7 @@ private:
     auto HandleDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandlePointer(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
+    auto HandleCaptureChanged(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleInputMethod(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleEraseBackground(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
@@ -129,14 +133,13 @@ private:
     auto PointerDown(Bool const down, WPARAM const wParam) -> void;
     auto PointerEnter(Bool const enter, WPARAM const wParam) -> void;
     auto PointerUpdate(WPARAM const wParam) -> void;
+    auto PointerCancel(WPARAM const wParam) -> void;
     auto PointerWheel(Bool const vertical, WPARAM const wParam) -> void;
 
     auto PostWindowEvent(Event<> const& event) -> void;
 
     auto DisableWindow(Shared<PlatformWindowWin> const& source) -> void;
     auto EnableWindow(Shared<PlatformWindowWin> const& source) -> void;
-
-    auto Destroy() -> void;
 
     auto UpdateThemeColor() -> void;
 

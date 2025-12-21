@@ -97,7 +97,7 @@ auto DynamicCastFunction::Is(T& r) -> Bool
 template <class U, class T>
 auto DynamicCastFunction::Is(T* p) -> Bool
 {
-    return TryAS<U>(p) != nullptr;
+    return TryAs<U>(p) != nullptr;
 }
 
 template <class U, class T>

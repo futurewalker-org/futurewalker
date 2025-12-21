@@ -31,13 +31,13 @@ struct PlatformLevelWindowCreateParams
 {
 };
 
-auto GetWindowPointer(HWND wnd) -> PlatformWindowWin*
+auto GetWindowPointer(HWND wnd) -> Pointer<PlatformWindowWin>
 {
     const auto data = ::GetWindowLongPtrW(wnd, GWLP_USERDATA);
     return reinterpret_cast<PlatformWindowWin*>(data);
 }
 
-auto GetWindowContextPointer(HWND wnd) -> PlatformWindowContextWin*
+auto GetWindowContextPointer(HWND wnd) -> Pointer<PlatformWindowContextWin>
 {
     const auto data = ::GetWindowLongPtrW(wnd, GWLP_USERDATA);
     return reinterpret_cast<PlatformWindowContextWin*>(data);

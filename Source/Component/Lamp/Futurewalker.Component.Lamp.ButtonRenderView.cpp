@@ -158,6 +158,8 @@ void ButtonRenderView::Initialize()
     _pressHighlightAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributePressHighlightAlpha, ButtonViewStyle::PressHighlightAlpha);
     _cornerRadius.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeCornerRadius, ButtonViewStyle::CornerRadius);
     _borderWidth.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeBorderWidth, ButtonViewStyle::BorderWidth);
+
+    EventReceiver::Connect(*this, *this, &ButtonRenderView::ReceiveEvent);
 }
 
 ///
@@ -193,6 +195,20 @@ auto ButtonRenderView::Draw(DrawScope& scope) -> void
         }
         ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, RGBAColor(highlightColor.GetRGBColor(), highlightAlpha), layoutDirection);
     }
+}
+
+///
+/// @brief
+///
+/// @param event
+///
+auto ButtonRenderView::ReceiveEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<ViewEvent::EnabledChanged>())
+    {
+        InvalidateVisual();
+    }
+    co_return false;
 }
 
 ///

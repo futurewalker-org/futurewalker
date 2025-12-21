@@ -17,6 +17,7 @@ namespace FW_EXPORT
 class Menu
 {
 public:
+    auto IsEmpty() const -> Bool;
     auto GetItemCount() const -> SInt64;
     auto GetItemAt(SInt64 index) const -> Optional<MenuItem>;
     auto GetItems() const -> MenuItemArray;

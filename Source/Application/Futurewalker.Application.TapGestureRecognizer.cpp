@@ -80,8 +80,17 @@ auto TapGestureRecognizer::Recognize(const Event<PointerEvent>& event, const Rec
         recognizerEvent->pointerEvent = event;
         recognizerEvent->area = area;
         recognizerEvent->result = Shared<Bool>::Make(false);
-        GetEventReceiver().SendEventDetached(recognizerEvent);
-        return *recognizerEvent->result;
+        auto sendingEvent = Event<>(recognizerEvent);
+        if (GetEventReceiver().SendEventDetached(sendingEvent))
+        {
+            if (sendingEvent.Is<RecognizerEvent>())
+            {
+                if (auto const result = sendingEvent.As<RecognizerEvent>()->result)
+                {
+                    return *result;
+                }
+            }
+        }
     }
     return false;
 }

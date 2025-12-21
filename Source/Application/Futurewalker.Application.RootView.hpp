@@ -30,6 +30,8 @@ public:
     struct Delegate
     {
         Function<void()> requestFrame;
+        Function<void(PointerId const id)> capturePointer;
+        Function<void(PointerId const id)> releasePointer;
         Function<MonotonicTime()> getFrameTime;
         Function<Point<Vp>(Point<Dp> const& point)> localToGlobalPoint;
         Function<Point<Dp>(Point<Vp> const& point)> globalToLocalPoint;

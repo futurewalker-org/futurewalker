@@ -5,6 +5,15 @@
 
 namespace FW_DETAIL_NS
 {
+auto Menu::IsEmpty() const -> Bool
+{
+    if (auto state = GetImmutableState())
+    {
+        return state->items.empty();
+    }
+    return true;
+}
+
 auto Menu::GetItemCount() const -> SInt64
 {
     if (auto state = GetImmutableState())

@@ -190,6 +190,13 @@ struct WindowOptions
     /// Set this value to `false` to make the window titlebar-less.
     ///
     Bool hasTitleBar = true;
+
+    ///
+    /// @brief Allow activating owner popup window without closing.
+    ///
+    /// @note This option is only effective when `behavior` is set to `WindowBehavior::Popup`.
+    ///
+    Bool allowActiveOwnerPopup = false;
 };
 }
 }
