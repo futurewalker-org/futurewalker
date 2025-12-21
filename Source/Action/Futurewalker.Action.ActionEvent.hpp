@@ -2,7 +2,6 @@
 #pragma once
 
 #include "Futurewalker.Action.ActionEventType.hpp"
-#include "Futurewalker.Action.CommandParameter.hpp"
 
 #include "Futurewalker.Event.EventParameter.hpp"
 
@@ -54,19 +53,6 @@ private:
 
 class ActionEvent::Execute final : public ActionEvent
 {
-public:
-    auto GetParameter() const -> CommandParameter const&
-    {
-        return _parameter;
-    }
-
-    auto SetParameter(CommandParameter const& parameter) -> void
-    {
-        _parameter = parameter;
-    }
-
-private:
-    CommandParameter _parameter;
 };
 }
 }
