@@ -25,7 +25,7 @@ public:
     ///
     /// @param[in] reference Attribute reference.
     ///
-    consteval AttributeArg(StaticAttribute<T> const& reference)
+    consteval AttributeArg(StaticAttribute<T> const& reference) noexcept
       : _variant {StaticAttributeRef(reference)}
     {
     }
@@ -33,7 +33,7 @@ public:
     ///
     /// @brief Construct from StaticAttributeRef.
     ///
-    AttributeArg(StaticAttributeRef<T> const& reference)
+    AttributeArg(StaticAttributeRef<T> const& reference) noexcept
       : _variant {reference}
     {
     }
