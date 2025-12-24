@@ -11,9 +11,24 @@ auto ThemeView::Make() -> Shared<ThemeView>
     return View::MakeDerived<ThemeView>();
 }
 
+auto ThemeView::Make(Shared<Theme> const& theme) -> Shared<ThemeView>
+{
+    auto view = Make();
+    view->SetTheme(theme);
+    return view;
+}
+
 auto ThemeView::MakeWithContent(Shared<View> const& content) -> Shared<ThemeView>
 {
     auto view = Make();
+    view->SetContent(content);
+    return view;
+}
+
+auto ThemeView::MakeWithContent(Shared<Theme> const& theme, Shared<View> const& content) -> Shared<ThemeView>
+{
+    auto view = Make();
+    view->SetTheme(theme);
     view->SetContent(content);
     return view;
 }
