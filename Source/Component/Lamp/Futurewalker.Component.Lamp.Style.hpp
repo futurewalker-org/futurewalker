@@ -100,6 +100,7 @@ struct Style : NonConstructible
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusLargeIncreased);
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusExtraLarge);
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusExtraLargeIncreased);
+    FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusLargest);
 
     FW_STATIC_ATTRIBUTE(Dp, IconSizeNone);
     FW_STATIC_ATTRIBUTE(Dp, IconSizeSmall);

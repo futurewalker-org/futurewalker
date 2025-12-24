@@ -29,6 +29,14 @@ public:
     }
 
     ///
+    /// @brief Make largest possible corner radius.
+    ///
+    static constexpr auto MakeLargest() noexcept -> CornerRadius
+    {
+        return MakeUniform(Dp::Infinity());
+    }
+
+    ///
     /// @brief Offset corner radius by a given value.
     ///
     /// @param[in] radius The original corner radius
@@ -184,12 +192,15 @@ public:
     /// @param[in] rect Rectangle to create round rectangle from.
     /// @param[in] direction Layout direction.
     ///
+    /// @note If the corner radius is too large to fit in the rectangle, it will be clamped to half of the rectangle's width or height.
+    ///
     constexpr auto GetRoundRect(Rect<Dp> const& rect, LayoutDirection const& direction) const -> RoundRect<Dp>
     {
-        auto const tl = GetTopLeft(direction);
-        auto const tr = GetTopRight(direction);
-        auto const br = GetBottomRight(direction);
-        auto const bl = GetBottomLeft(direction);
+        auto const maxRadius = Dp::Min(rect.GetWidth(), rect.GetHeight()) / 2;
+        auto const tl = Dp::Min(GetTopLeft(direction), maxRadius);
+        auto const tr = Dp::Min(GetTopRight(direction), maxRadius);
+        auto const br = Dp::Min(GetBottomRight(direction), maxRadius);
+        auto const bl = Dp::Min(GetBottomLeft(direction), maxRadius);
         return RoundRect<Dp>(rect, {tl, tl}, {tr, tr}, {br, br}, {bl, bl});
     }
 

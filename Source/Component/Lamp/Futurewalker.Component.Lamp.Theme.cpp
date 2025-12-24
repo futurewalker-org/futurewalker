@@ -634,6 +634,7 @@ auto Theme::ApplyApplicationStyle(AttributeNode& target) -> void
     AttributeNode::SetValue<&Style::CornerRadiusLargeIncreased>(target, CornerRadius::MakeUniform(20));
     AttributeNode::SetValue<&Style::CornerRadiusExtraLarge>(target, CornerRadius::MakeUniform(28));
     AttributeNode::SetValue<&Style::CornerRadiusExtraLargeIncreased>(target, CornerRadius::MakeUniform(32));
+    AttributeNode::SetValue<&Style::CornerRadiusLargest>(target, CornerRadius::MakeLargest());
 
     AttributeNode::SetValue<&Style::IconSizeNone>(target, 0);
     AttributeNode::SetValue<&Style::IconSizeSmall>(target, 20);

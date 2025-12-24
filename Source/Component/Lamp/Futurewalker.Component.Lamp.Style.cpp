@@ -81,6 +81,7 @@ FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusLarge, {});
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusLargeIncreased, {});
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusExtraLarge, {});
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusExtraLargeIncreased, {});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::CornerRadiusLargest, {});
 
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::IconSizeNone, {0});
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(Style::IconSizeSmall, {0});
