@@ -169,18 +169,22 @@ void ButtonRenderView::Initialize()
 ///
 auto ButtonRenderView::Draw(DrawScope& scope) -> void
 {
+    auto colorWithAlpha = [](RGBAColor const& color, Channel const& alpha) { return RGBAColor(color.GetRGBColor(), alpha.GetF64() * color.GetAlpha().GetF64()); };
+
     auto const rect = GetContentRect();
-    auto const backgroundColor = _backgroundColor.GetValueOrDefault();
+    auto const backgroundColor = IsEnabledFromRoot() ? _backgroundColor.GetValueOrDefault() : _disabledBackgroundColor.GetValueOrDefault();
+    auto const backgroundAlpha = IsEnabledFromRoot() ? _backgroundAlpha.GetValueOrDefault() : _disabledBackgroundAlpha.GetValueOrDefault();
+    auto const borderColor = IsEnabledFromRoot() ? _borderColor.GetValueOrDefault() : _disabledBorderColor.GetValueOrDefault();
+    auto const borderAlpha = IsEnabledFromRoot() ? _borderAlpha.GetValueOrDefault() : _disabledBorderAlpha.GetValueOrDefault();
     auto const highlightColor = _highlightColor.GetValueOrDefault();
-    auto const borderColor = _borderColor.GetValueOrDefault();
     auto const cornerRadius = _cornerRadius.GetValueOrDefault();
     auto const borderWidth = _borderWidth.GetValueOr(0);
     auto const layoutDirection = GetLayoutDirection();
 
     auto& scene = scope.GetScene();
 
-    ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, backgroundColor, layoutDirection);
-    ViewDrawFunction::DrawRoundRectBorder(scene, rect, cornerRadius, borderColor, borderWidth, layoutDirection);
+    ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, colorWithAlpha(backgroundColor, backgroundAlpha), layoutDirection);
+    ViewDrawFunction::DrawRoundRectBorder(scene, rect, cornerRadius, colorWithAlpha(borderColor, borderAlpha), borderWidth, layoutDirection);
 
     if (IsEnabledFromRoot())
     {
@@ -193,7 +197,7 @@ auto ButtonRenderView::Draw(DrawScope& scope) -> void
         {
             highlightAlpha = _hoverHighlightAlpha.GetValueOrDefault();
         }
-        ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, RGBAColor(highlightColor.GetRGBColor(), highlightAlpha), layoutDirection);
+        ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, colorWithAlpha(highlightColor, highlightAlpha), layoutDirection);
     }
 }
 
