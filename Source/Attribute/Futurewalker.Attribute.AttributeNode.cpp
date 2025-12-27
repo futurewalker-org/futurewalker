@@ -276,6 +276,8 @@ auto AttributeNode::AddAttributeSlot(StaticAttributeBaseRef description) -> void
             auto const& computeFunction = sourceSlot->GetComputeFunctionCache();
             auto args = std::vector<AttributeValue>();
             auto dependentSlots = std::vector<Shared<AttributeSlot>>();
+            args.reserve(references.size());
+            dependentSlots.reserve(references.size());
             for (auto const& reference : references)
             {
                 if (auto const valueSlot = ResolveValue(reference))
@@ -489,11 +491,9 @@ auto AttributeNode::ResolveValue(StaticAttributeBaseRef reference) -> Shared<Att
         auto const& computeFunction = reference.Get().GetComputeFunction();
 
         auto args = std::vector<AttributeValue>();
-        args.reserve(references.size());
-
         auto dependentSlots = std::vector<Shared<AttributeSlot>>();
+        args.reserve(references.size());
         dependentSlots.reserve(references.size());
-
         for (auto const& ref : references)
         {
             if (auto const slot = ResolveValue(ref))
@@ -542,6 +542,8 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
 
         auto args = std::vector<AttributeValue>();
         auto dependentSlots = std::vector<Shared<AttributeSlot>>();
+        args.reserve(references.size());
+        dependentSlots.reserve(references.size());
         for (auto const& reference : references)
         {
             if (auto const resolved = ResolveValue(reference))
@@ -576,6 +578,8 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
 
             auto args = std::vector<AttributeValue>();
             auto dependentSlots = std::vector<Shared<AttributeSlot>>();
+            args.reserve(references.size());
+            dependentSlots.reserve(references.size());
             for (auto const& reference : references)
             {
                 if (auto const valueSlot = ResolveValue(reference))
@@ -609,6 +613,8 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
 
             auto args = std::vector<AttributeValue>();
             auto dependentSlots = std::vector<Shared<AttributeSlot>>();
+            args.reserve(references.size());
+            dependentSlots.reserve(references.size());
             for (auto const& reference : references)
             {
                 if (auto const valueSlot = ResolveValue(reference))
