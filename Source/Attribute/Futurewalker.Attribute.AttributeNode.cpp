@@ -608,6 +608,7 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
             auto const& computeFunction = description.GetComputeFunction();
 
             auto args = std::vector<AttributeValue>();
+            auto dependentSlots = std::vector<Shared<AttributeSlot>>();
             for (auto const& reference : references)
             {
                 if (auto const valueSlot = ResolveValue(reference))
@@ -615,12 +616,14 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
                     if (auto const value = valueSlot->GetValueCache())
                     {
                         args.push_back(*value);
+                        dependentSlots.push_back(valueSlot);
                     }
                 }
             }
 
             slot.SetReferenceCache(references);
             slot.SetComputeFunctionCache(computeFunction);
+            slot.SetValueDependentSlots(dependentSlots);
 
             FW_DEBUG_ASSERT(args.size() == references.size());
             FW_DEBUG_ASSERT(computeFunction);

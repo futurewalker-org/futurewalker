@@ -89,6 +89,15 @@ TEST_CASE("AttributeNode")
             REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*node) == 24);
         }
 
+        SECTION("changing value")
+        {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
+            auto node = AttributeNode::Make();
+            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*node) == 42);
+            AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
+            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*node) == 24);
+        }
+
         SECTION("indirect update")
         {
             auto node = AttributeNode::Make();
