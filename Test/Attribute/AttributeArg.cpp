@@ -9,7 +9,7 @@ auto TestFunc(AttributeArg<SInt32> arg, auto test)
     test(arg);
 }
 
-auto const attr = StaticAttribute<SInt32>::MakeWithDefaultValue(24);
+FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, attr, 24);
 
 TEST_CASE("AttributeArg")
 {

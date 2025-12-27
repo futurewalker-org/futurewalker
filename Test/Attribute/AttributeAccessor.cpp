@@ -6,8 +6,8 @@ using namespace Futurewalker;
 
 TEST_CASE("AttributeAccessor")
 {
-    static auto const Attribute1 = StaticAttribute<SInt32>::MakeWithDefaultValue(42);
-    static auto const Attribute2 = StaticAttribute<SInt32>::MakeWithDefaultValue(24);
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attribute1, 42);
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attribute2, 24);
 
     auto const idManager = Locator::ResolveWithDefault<UniqueIdentifierManager>();
     auto const node = AttributeNode::Make();

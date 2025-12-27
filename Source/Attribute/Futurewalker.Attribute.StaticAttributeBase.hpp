@@ -19,15 +19,24 @@ class StaticAttributeBase : NonCopyable
 {
 public:
     StaticAttributeBase() = delete;
-    StaticAttributeBase(AttributeValue const& value);
-    StaticAttributeBase(StaticAttributeBaseRef reference);
+
+    StaticAttributeBase(
+#if FW_ENABLE_DEBUG
+      Pointer<char const> str,
+#endif
+      StaticAttributeComputeFunction const& computeFunction,
+      std::span<StaticAttributeBaseRef const> const references);
 
     auto GetId() const noexcept -> AttributeId;
-    auto GetDefaultValue() const -> Optional<AttributeValue>;
-    auto GetDefaultReference() const -> Optional<StaticAttributeBaseRef>;
+    auto GetReferences() const noexcept -> std::vector<StaticAttributeBaseRef> const&;
+    auto GetComputeFunction() const noexcept -> StaticAttributeComputeFunction const&;
 
 private:
-    UniqueAttributeId _uniqueId;
-    StaticAttributeValue _default;
+#if FW_ENABLE_DEBUG
+    Pointer<char const> _name = nullptr;
+#endif
+    UniqueAttributeId const _uniqueId;
+    StaticAttributeComputeFunction const _computeFunction;
+    std::vector<StaticAttributeBaseRef> const _references;
 };
 }

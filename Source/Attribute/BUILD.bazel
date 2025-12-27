@@ -7,6 +7,5 @@ fw_library(
         "//Source/Core",
         "//Source/Base",
         "//Source/Event",
-        "//Source/Dependency",
     ],
 )

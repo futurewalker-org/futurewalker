@@ -2,27 +2,31 @@
 
 #include "Futurewalker.Attribute.StaticAttributeBase.hpp"
 
+#include "Futurewalker.Base.Debug.hpp"
+
 namespace FW_DETAIL_NS
 {
+#if FW_ENABLE_DEBUG
 ///
 /// @brief
 ///
 /// @param value
 ///
-StaticAttributeBase::StaticAttributeBase(AttributeValue const& value)
-  : _default {value}
+StaticAttributeBase::StaticAttributeBase(Pointer<char const> str, StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references)
+  : _name {str}
+  , _computeFunction {computeFunction}
+  , _references {references.begin(), references.end()}
 {
+    FW_DEBUG_ASSERT(_computeFunction);
 }
-
-///
-/// @brief
-///
-/// @param reference
-///
-StaticAttributeBase::StaticAttributeBase(StaticAttributeBaseRef reference)
-  : _default {reference}
+#else
+StaticAttributeBase::StaticAttributeBase(StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references)
+  : _computeFunction {computeFunction}
+  , _references {references.begin(), references.end()}
 {
+    FW_DEBUG_ASSERT(_computeFunction);
 }
+#endif
 
 ///
 /// @brief
@@ -34,31 +38,13 @@ auto StaticAttributeBase::GetId() const noexcept -> AttributeId
     return static_cast<AttributeId>(_uniqueId);
 }
 
-///
-/// @brief
-///
-/// @return
-///
-auto StaticAttributeBase::GetDefaultValue() const -> Optional<AttributeValue>
+auto StaticAttributeBase::GetReferences() const noexcept -> std::vector<StaticAttributeBaseRef> const&
 {
-    if (auto const ptr = std::get_if<AttributeValue>(&_default))
-    {
-        return *ptr;
-    }
-    return {};
+    return _references;
 }
 
-///
-/// @brief
-///
-/// @return
-///
-auto StaticAttributeBase::GetDefaultReference() const -> Optional<StaticAttributeBaseRef>
+auto StaticAttributeBase::GetComputeFunction() const noexcept -> StaticAttributeComputeFunction const&
 {
-    if (auto const ptr = std::get_if<StaticAttributeBaseRef>(&_default))
-    {
-        return *ptr;
-    }
-    return {};
+    return _computeFunction;
 }
 }

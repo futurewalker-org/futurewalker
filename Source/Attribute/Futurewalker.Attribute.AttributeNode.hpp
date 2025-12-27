@@ -7,8 +7,6 @@
 #include "Futurewalker.Attribute.AttributeValue.hpp"
 #include "Futurewalker.Attribute.StaticAttribute.hpp"
 
-#include "Futurewalker.Dependency.DependencyNode.hpp"
-
 #include "Futurewalker.Base.Debug.hpp"
 
 #include "Futurewalker.Core.NonCopyable.hpp"
@@ -96,10 +94,8 @@ private:
     auto FindAncestorAttributeSlot(AttributeId const& id) -> Shared<AttributeSlot>;
 
     auto ResolveSource(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
-    auto ResolveSourceCore(StaticAttributeBaseRef reference, SInt64 const depth) -> Shared<AttributeSlot>;
 
     auto ResolveValue(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
-    auto ResolveValueCore(StaticAttributeBaseRef reference, SInt64 const depth) -> Shared<AttributeSlot>;
 
     auto UpdateSlotCacheRecursive(AttributeSlot& slot) -> void;
 

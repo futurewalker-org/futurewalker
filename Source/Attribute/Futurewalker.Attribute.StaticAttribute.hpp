@@ -38,34 +38,58 @@ public:
     ///
     /// @return Reference to unique attribute object.
     ///
-    static auto MakeWithDefaultValue(T const& value) -> StaticAttribute<T>
+    static auto MakeWithDefaultValue(
+#if FW_ENABLE_DEBUG
+      Pointer<char const> name,
+#endif
+      T const& value) -> StaticAttribute<T>
     {
-        return StaticAttribute<T>(AttributeValue(value));
+        return StaticAttribute<T>(
+#if FW_ENABLE_DEBUG
+          name,
+#endif
+          [value](auto const&) -> AttributeValue { return AttributeValue(value); },
+          {});
     }
 
     ///
     /// @brief Create new attribute with default reference.
     ///
-    /// @param reference Initial reference value of attribute.  
+    /// @param reference Initial reference value of attribute.
     ///
     /// @return Reference to unique attribute object.
     ///
     template <const auto* Reference>
-    static auto MakeWithDefaultReference() -> StaticAttribute<T>
+    static auto MakeWithDefaultReference(
+#if FW_ENABLE_DEBUG
+      Pointer<char const> name
+#endif
+      ) -> StaticAttribute<T>
     {
-        return StaticAttribute<T>(StaticReference(*Reference));
+        auto const reference = StaticAttributeBaseRef(*Reference);
+        return StaticAttribute<T>(
+#if FW_ENABLE_DEBUG
+          name,
+#endif
+          [](auto const& references) -> AttributeValue { return references[0]; },
+          {&reference, 1});
     }
 
 private:
     StaticAttribute() = delete;
 
-    StaticAttribute(AttributeValue const& value)
-      : StaticAttributeBase {value}
-    {
-    }
-
-    StaticAttribute(StaticAttributeRef<T> reference)
-      : StaticAttributeBase {reference}
+    StaticAttribute(
+#if FW_ENABLE_DEBUG
+      Pointer<char const> name,
+#endif
+      StaticAttributeComputeFunction const& computeFunction,
+      std::span<StaticAttributeBaseRef const> const references)
+      : StaticAttributeBase {
+#if FW_ENABLE_DEBUG
+            name,
+#endif
+            computeFunction,
+            references}
     {
     }
 };

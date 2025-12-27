@@ -231,7 +231,7 @@ TEST_CASE("AttributeNode")
 
         SECTION("simple reference")
         {
-            static auto const TestAttribute = StaticAttribute<SInt32>::MakeWithDefaultReference<&IntegerAttribute>();
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, TestAttribute, IntegerAttribute);
 
             auto node = AttributeNode::Make();
             auto child = AttributeNode::Make();

@@ -3,39 +3,12 @@
 #include "Futurewalker.Attribute.AttributeSlot.hpp"
 #include "Futurewalker.Attribute.StaticAttributeBase.hpp"
 
-#include "Futurewalker.Dependency.DependencyNode.hpp"
-
 #include "Futurewalker.Base.UniqueIdentifier.hpp"
 
 #include "Futurewalker.Core.PropertyStore.hpp"
 
 namespace FW_DETAIL_NS
 {
-namespace
-{
-UniqueId DependencyNodePropertyKeyOwner;
-
-auto SetOwnerSlot(Shared<DependencyNode> const& node, Shared<AttributeSlot> owner) -> void 
-{
-    if (node)
-    {
-        PropertyStore::SetValue(*node, DependencyNodePropertyKeyOwner, Weak(owner));
-    }
-}
-
-auto GetOwnerSlot(Shared<DependencyNode> const& node) -> Shared<AttributeSlot>
-{
-    if (node)
-    {
-        if (auto const owner = PropertyStore::GetValue<Weak<AttributeSlot>>(*node, DependencyNodePropertyKeyOwner))
-        {
-            return owner->Lock();
-        }
-    }
-    return nullptr;
-}
-}
-
 ///
 /// @brief Make new slot.
 ///
@@ -45,7 +18,6 @@ auto AttributeSlot::Make(StaticAttributeBaseRef description) -> Shared<Attribute
 {
     auto slot = Shared<AttributeSlot>::Make(PassKey<AttributeSlot>(), description);
     slot->SetSelf(slot);
-    slot->Initialize();
     return slot;
 }
 
@@ -116,27 +88,14 @@ auto AttributeSlot::ClearValueCache() -> void
     _valueCache.Reset();
 }
 
-///
-/// @brief 
-///
-auto AttributeSlot::GetReferenceCache() const -> Optional<StaticAttributeBaseRef>
+auto AttributeSlot::GetReferenceCache() const -> std::vector<StaticAttributeBaseRef> const&
 {
     return _referenceCache;
 }
 
-///
-/// @brief 
-///
-/// @param reference 
-///
-auto AttributeSlot::SetReferenceCache(StaticAttributeBaseRef reference) -> Bool
+auto AttributeSlot::SetReferenceCache(std::vector<StaticAttributeBaseRef> const& references) -> void
 {
-    if (!_referenceCache || (_referenceCache->GetPointer() != reference.GetPointer()))
-    {
-        _referenceCache = reference;
-        return true;
-    }
-    return false;
+    _referenceCache = references;
 }
 
 ///
@@ -144,25 +103,33 @@ auto AttributeSlot::SetReferenceCache(StaticAttributeBaseRef reference) -> Bool
 ///
 auto AttributeSlot::ClearReferenceCache() -> void
 {
-    _referenceCache.Reset();
+    _referenceCache.clear();
 }
 
-///
-/// @brief
-///
-auto AttributeSlot::GetValue() const -> Optional<AttributeValue>
+auto AttributeSlot::GetComputeFunctionCache() const -> StaticAttributeComputeFunction const&
 {
-    return _value;
+    return _computeFunctionCache;
 }
 
-///
-/// @brief 
-///
-/// @param value 
-///
-auto AttributeSlot::SetValue(AttributeValue const& value) -> void
+auto AttributeSlot::SetComputeFunctionCache(StaticAttributeComputeFunction const& computeFunction) -> void
 {
-    _value = value;
+    _computeFunctionCache = computeFunction;
+}
+
+auto AttributeSlot::GetReferences() -> std::vector<StaticAttributeBaseRef> const&
+{
+    return _references;
+}
+
+auto AttributeSlot::GetComputeFunction() const -> StaticAttributeComputeFunction const&
+{
+    return _computeFunction;
+}
+
+auto AttributeSlot::SetValue(StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void
+{
+    _computeFunction = computeFunction;
+    _references.assign(references.begin(), references.end());
 }
 
 ///
@@ -170,135 +137,76 @@ auto AttributeSlot::SetValue(AttributeValue const& value) -> void
 ///
 auto AttributeSlot::ClearValue() -> void
 {
-    _value.Reset();
-}
-
-///
-/// @brief Get attribute reference.
-///
-auto AttributeSlot::GetReference() const -> Optional<StaticAttributeBaseRef>
-{
-    return _reference;
-}
-
-///
-/// @brief 
-///
-/// @param reference 
-///
-auto AttributeSlot::SetReference(StaticAttributeBaseRef reference) -> void
-{
-    _reference = reference;
-}
-
-///
-/// @brief Clear reference.
-///
-auto AttributeSlot::ClearReference() -> void
-{
-    _reference.Reset();
-}
-
-///
-/// @brief 
-///
-/// @param parent 
-///
-auto AttributeSlot::SetSourceDependentSlot(AttributeSlot& parent) -> void
-{
-    if (parent._sourceDependency)
-    {
-        parent._sourceDependency->AddChild(_sourceDependency, nullptr);
-    }
-}
-
-///
-/// @brief 
-///
-/// @param parent 
-///
-auto AttributeSlot::SetValueDependentSlot(AttributeSlot& parent) -> void
-{
-    if (parent._valueDependency)
-    {
-        parent._valueDependency->AddChild(_valueDependency, nullptr);
-    }
-}
-
-///
-/// @brief 
-///
-auto AttributeSlot::DetachFromSourceDependentSlot() -> void
-{
-    if (_sourceDependency)
-    {
-        if (auto const parent = _sourceDependency->GetParent())
-        {
-            parent->RemoveChild(_sourceDependency);
-        }
-    }
-}
-
-///
-/// @brief 
-///
-auto AttributeSlot::DetachFromValueDependentSlot() -> void
-{
-    if (_valueDependency)
-    {
-        if (auto const parent = _valueDependency->GetParent())
-        {
-            parent->RemoveChild(_valueDependency);
-        }
-    }
-}
-
-///
-/// @brief 
-///
-auto AttributeSlot::GetSourceDependentSlot() -> Shared<AttributeSlot>
-{
-    if (_sourceDependency)
-    {
-        if (auto const parent = _sourceDependency->GetParent())
-        {
-            return GetOwnerSlot(parent);
-        }
-    }
-    return nullptr;
+    _computeFunction = {};
+    _references.clear();
 }
 
 ///
 /// @brief
 ///
-auto AttributeSlot::GetValueDependentSlot() -> Shared<AttributeSlot>
+auto AttributeSlot::GetValueDependentSlots() -> std::vector<Shared<AttributeSlot>>
 {
-    if (_valueDependency)
+    auto slots = std::vector<Shared<AttributeSlot>>();
+    for (auto const& slot : _valueDependentSlots)
     {
-        if (auto const parent = _valueDependency->GetParent())
+        if (auto const locked = slot.Lock())
         {
-            return GetOwnerSlot(parent);
+            slots.push_back(locked);
         }
     }
-    return nullptr;
+    return slots;
 }
 
-///
-/// @brief 
-///
-auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Shared<AttributeSlot>>
+auto AttributeSlot::SetValueDependentSlots(std::vector<Shared<AttributeSlot>> const& slots) -> void
 {
-    if (_sourceDependency)
+    DetachFromValueDependentSlots();
+
+    for (auto const& slot : slots)
     {
-        std::vector<Shared<AttributeSlot>> slots;
-        slots.reserve(static_cast<size_t>(_sourceDependency->GetChildCount()));
-        for (auto i = SInt64(0); i < _sourceDependency->GetChildCount(); ++i)
-        {
-            slots.push_back(GetOwnerSlot(_sourceDependency->GetChildAt(i)));
-        }
-        return slots;
+        slot->_valueDependantSlots.push_back(GetSelf());
+        _valueDependentSlots.push_back(slot);
     }
-    return {};
+}
+
+auto AttributeSlot::DetachFromValueDependentSlots() -> void
+{
+    for (auto const& weakSlot : _valueDependentSlots)
+    {
+        if (auto const slot = weakSlot.Lock())
+        {
+            auto& dependantSlots = slot->_valueDependantSlots;
+            auto self = GetSelf();
+            dependantSlots.erase(std::remove_if(dependantSlots.begin(), dependantSlots.end(), [=](Weak<AttributeSlot> const& w) { return w.Lock() == self; }), dependantSlots.end());
+        }
+    }
+    _valueDependentSlots.clear();
+}
+
+auto AttributeSlot::GetSourceDependentSlot() -> Shared<AttributeSlot>
+{
+    return _sourceDependentSlot.Lock();
+}
+
+auto AttributeSlot::SetSourceDependentSlot(Shared<AttributeSlot> const& slot) -> void
+{
+    DetachFromSourceDependentSlot();
+
+    if (slot)
+    {
+        slot->_sourceDependantSlots.push_back(GetSelf());
+        _sourceDependentSlot = slot;
+    }
+}
+
+auto AttributeSlot::DetachFromSourceDependentSlot() -> void
+{
+    if (auto const slot = _sourceDependentSlot.Lock())
+    {
+        auto& dependantSlots = slot->_sourceDependantSlots;
+        auto self = GetSelf();
+        dependantSlots.erase(std::remove_if(dependantSlots.begin(), dependantSlots.end(), [=](Weak<AttributeSlot> const& w) { return w.Lock() == self; }), dependantSlots.end());
+    }
+    _sourceDependentSlot.Reset();
 }
 
 ///
@@ -306,18 +214,33 @@ auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Shared<AttributeSlo
 ///
 auto AttributeSlot::GetValueDependantSlots() -> std::vector<Shared<AttributeSlot>>
 {
-    if (_valueDependency)
+    auto slots = std::vector<Shared<AttributeSlot>>();
+    for (auto const& slot : _valueDependantSlots)
     {
-        std::vector<Shared<AttributeSlot>> slots;
-        slots.reserve(static_cast<size_t>(_valueDependency->GetChildCount()));
-        for (auto i = SInt64(0); i < _valueDependency->GetChildCount(); ++i)
+        if (auto const locked = slot.Lock())
         {
-            slots.push_back(GetOwnerSlot(_valueDependency->GetChildAt(i)));
+            slots.push_back(locked);
         }
-        return slots;
     }
-    return {};
+    return slots;
 }
+
+///
+/// @brief 
+///
+auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Shared<AttributeSlot>>
+{
+    auto slots = std::vector<Shared<AttributeSlot>>();
+    for (auto const& slot : _sourceDependantSlots)
+    {
+        if (auto const locked = slot.Lock())
+        {
+            slots.push_back(locked);
+        }
+    }
+    return slots;
+}
+
 
 ///
 /// @brief 
@@ -335,16 +258,5 @@ auto AttributeSlot::SetSelf(Shared<AttributeSlot> const& self) -> void
 auto AttributeSlot::GetSelf() -> Shared<AttributeSlot>
 {
     return _self.Lock();
-}
-
-///
-/// @brief 
-///
-auto AttributeSlot::Initialize() -> void
-{
-    _sourceDependency = DependencyNode::Make({});
-    _valueDependency = DependencyNode::Make({});
-    SetOwnerSlot(_sourceDependency, GetSelf());
-    SetOwnerSlot(_valueDependency, GetSelf());
 }
 }
