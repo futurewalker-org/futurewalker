@@ -36,8 +36,6 @@ public:
     ///
     /// @param value Initial value of attribute. 
     ///
-    /// @return Reference to unique attribute object.
-    ///
     static auto MakeWithDefaultValue(
 #if FW_ENABLE_DEBUG
       Pointer<char const> name,
@@ -48,7 +46,7 @@ public:
 #if FW_ENABLE_DEBUG
           name,
 #endif
-          [value](auto const&) -> AttributeValue { return AttributeValue(value); },
+          [value](auto const&) { return AttributeValue(value); },
           {});
     }
 
@@ -56,8 +54,6 @@ public:
     /// @brief Create new attribute with default reference.
     ///
     /// @param reference Initial reference value of attribute.
-    ///
-    /// @return Reference to unique attribute object.
     ///
     template <const auto* Reference>
     static auto MakeWithDefaultReference(
@@ -73,6 +69,33 @@ public:
 #endif
           [](auto const& references) -> AttributeValue { return references[0]; },
           {&reference, 1});
+    }
+
+    ///
+    /// @brief Create new attribute with default reference.
+    ///
+    /// @tparam References Referenced attributes.
+    ///
+    /// @param f Compute function of attribute.
+    ///
+    template <const auto*... References, class F>
+    static auto MakeWithDefaultFunction(
+#if FW_ENABLE_DEBUG
+      Pointer<char const> name,
+#endif
+      F&& f) -> StaticAttribute<T>
+    {
+        using types = std::tuple<typename std::remove_reference_t<decltype(*References)>::ValueType...>;
+        auto constexpr references = std::array {StaticAttributeBaseRef(*References)...};
+        auto constexpr indices = std::make_index_sequence<sizeof...(References)>();
+        auto constexpr mapper = []<size_t... Seq>(std::index_sequence<Seq...>, auto& args, auto& f) { return f(*args[Seq].template GetValue<std::tuple_element_t<Seq, types>>()...); };
+        return StaticAttribute<T>(
+#if FW_ENABLE_DEBUG
+          name,
+#endif
+          // MSVC ICE: [f = std::forward<F>(f)](auto const references) { return AttributeValue(T(mapper(indices, references, f))); },
+          [f = std::forward<F>(f)](std::span<AttributeValue const> const references) { return AttributeValue(T(mapper(indices, references, f))); },
+          references);
     }
 
 private:

@@ -13,5 +13,5 @@ namespace FW_DETAIL_NS
 {
 class StaticAttributeBase;
 using StaticAttributeBaseRef = StaticReference<StaticAttributeBase const>;
-using StaticAttributeComputeFunction = Function<AttributeValue(std::span<AttributeValue const> args)>;
+using StaticAttributeComputeFunction = Function<AttributeValue(std::span<AttributeValue const> const references)>;
 }
