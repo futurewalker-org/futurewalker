@@ -684,9 +684,7 @@ auto AttributeNode::CheckReferenceLoop(StaticAttributeBaseRef reference) -> Bool
         if (std::find_if(stack.begin(), stack.end(), [&](auto r) { return r == reference.Get().GetId(); }) == stack.end())
         {
             stack.push_back(reference.Get().GetId());
-
-            auto const& references = reference.Get().GetReferences();
-            for (auto const& ref : references)
+            for (auto const& ref : reference.Get().GetReferences())
             {
                 if (!self(ref, stack))
                 {
@@ -694,6 +692,7 @@ auto AttributeNode::CheckReferenceLoop(StaticAttributeBaseRef reference) -> Bool
                     return false;
                 }
             }
+            stack.pop_back();
             return true;
         }
         FW_DEBUG_ASSERT(false);
