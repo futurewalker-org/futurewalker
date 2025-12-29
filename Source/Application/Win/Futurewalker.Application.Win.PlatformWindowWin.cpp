@@ -1762,6 +1762,15 @@ auto PlatformWindowWin::HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         auto event = Event<>(parameter);
         SendPointerEventDetached(event);
     }
+    else if (msg == WM_MOUSEWHEEL || msg == WM_MOUSEHWHEEL)
+    {
+        FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleMouse(): Motion::Wheel");
+        auto parameter = Event<PlatformPointerEvent::Action::Scroll>();
+        PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
+        PlatformPointerEventFunctionWin::SetPointerScrollEventParamsForMouse(*parameter, msg, wParam, lParam);
+        auto event = Event<>(parameter);
+        SendPointerEventDetached(event);
+    }
     return 0;
 }
 

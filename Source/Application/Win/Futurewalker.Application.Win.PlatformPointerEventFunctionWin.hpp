@@ -19,7 +19,8 @@ struct PlatformPointerEventFunctionWin : public NonConstructible
     static auto ConvertPointerFlagsToPointerButtonFlags(UINT32 const pointerFlags) -> PointerButtonFlags;
 
     static auto SetPointerEventParamsForMouse(PlatformPointerEvent& parameter, HWND hWnd, UINT const msg, WPARAM const wParam, LPARAM const lParam) -> void;
-    static auto SetPointerMotionEventParamsForMouse(PlatformPointerEvent& parameter, UINT const msg, WPARAM const wParam, LPARAM const lParam) -> void;
+    static auto SetPointerMotionEventParamsForMouse(PlatformPointerEvent::Motion& parameter, UINT const msg, WPARAM const wParam, LPARAM const lParam) -> void;
+    static auto SetPointerScrollEventParamsForMouse(PlatformPointerEvent::Action::Scroll& parameter, UINT const msg, WPARAM const wParam, LPARAM const lParam) -> void;
 
     static auto SetPointerEventParamsForPointer(PlatformPointerEvent& parameter, UINT32 const pointerId, HWND const hwnd) -> void;
     static auto SetPointerMotionEventParamsForPointer(PlatformPointerEvent::Motion& parameter, UINT32 const pointerId) -> void;

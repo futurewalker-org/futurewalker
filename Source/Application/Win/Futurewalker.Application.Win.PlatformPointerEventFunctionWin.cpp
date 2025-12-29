@@ -127,7 +127,7 @@ auto PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(PlatformPoin
     }
 }
 
-auto PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForMouse(PlatformPointerEvent& parameter, UINT const msg, WPARAM const wParam, LPARAM const lParam) -> void
+auto PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForMouse(PlatformPointerEvent::Motion& parameter, UINT const msg, WPARAM const wParam, LPARAM const lParam) -> void
 {
     (void)lParam;
 
@@ -165,15 +165,40 @@ auto PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForMouse(Platfo
 
     if (parameter.Is<PlatformPointerEvent::Motion::Down>())
     {
-        setParams(parameter.As<PlatformPointerEvent::Motion::Down>());
+        auto downParameter = parameter.As<PlatformPointerEvent::Motion::Down>();
+        setParams(downParameter);
+        parameter = downParameter;
     }
     else if (parameter.Is<PlatformPointerEvent::Motion::Up>())
     {
-        setParams(parameter.As<PlatformPointerEvent::Motion::Up>());
+        auto upParameter = parameter.As<PlatformPointerEvent::Motion::Up>();
+        setParams(upParameter);
+        parameter = upParameter;
     }
     else if (parameter.Is<PlatformPointerEvent::Motion::Move>())
     {
-        setParams(parameter.As<PlatformPointerEvent::Motion::Move>());
+        auto moveParameter = parameter.As<PlatformPointerEvent::Motion::Move>();
+        setParams(moveParameter);
+        parameter = moveParameter;
+    }
+}
+
+auto PlatformPointerEventFunctionWin::SetPointerScrollEventParamsForMouse(PlatformPointerEvent::Action::Scroll& parameter, UINT const msg, WPARAM const wParam, LPARAM const lParam) -> void
+{
+    (void)lParam;
+
+    auto const delta = std::bit_cast<SHORT>(HIWORD(wParam));
+    if (msg == WM_MOUSEWHEEL)
+    {
+        parameter.SetDeltaX(0);
+        parameter.SetDeltaY(delta / Dp(WHEEL_DELTA));
+        parameter.SetPrecision(PointerScrollPrecision::Coarse);
+    }
+    else if (msg == WM_MOUSEHWHEEL)
+    {
+        parameter.SetDeltaX(delta / Dp(WHEEL_DELTA));
+        parameter.SetDeltaY(0);
+        parameter.SetPrecision(PointerScrollPrecision::Coarse);
     }
 }
 
