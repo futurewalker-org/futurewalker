@@ -78,6 +78,6 @@ auto TextEdit::UpdateStyle() -> void
     _textEdit->SetFontWeight(TextEditStyle::FontWeight);
     _textEdit->SetFontWidth(TextEditStyle::FontWidth);
     _textEdit->SetFontSlant(TextEditStyle::FontSlant);
-    _textEdit->SetFontFamily(TextEditStyle::FontFamily);
+    //_textEdit->SetFontFamily(TextEditStyle::FontFamily); // FIXME: MSVC Bug
 }
 }
