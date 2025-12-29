@@ -1093,10 +1093,10 @@ auto View::Initialize() -> void
 /// #### Mutating children during Measure()
 ///
 /// Some layout algorithms require mutation of children during Measure(). 
-/// Adding/Removing/Modifying child views during Measure() is only supported under specific conditions: 
+/// Adding/removing/modifying child views during Measure() is only supported under specific conditions: 
 ///
 /// 1. Only descendants of currently measured view can be added/removed/modified during Measure().
-/// 2. All affected children must be properly measured to reflect latest state before exiting Measure().
+/// 2. All affected children must be measured after mutation to reflect latest state before exiting Measure().
 ///
 /// Violating conditions above results in unspecified behavior, such as broken layouts or infinite re-layout loops.
 ///
