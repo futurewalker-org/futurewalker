@@ -6,6 +6,7 @@ COMPILE_OPTIONS = select({
         "/permissive-",
         "/Zc:__cplusplus",
         "/Zc:preprocessor",
+        "/Zc:u8EscapeEncoding",
     ],
     "//conditions:default" : [],
 })
@@ -34,6 +35,10 @@ DEFINES = select({
     "//conditions:default" : [],
 })
 
+FEATURES = [
+    'no_legacy_features'
+]
+
 def fw_library(name, visibility, deps, copts=[], copts_win=[], linkopts=[], linkopts_win=[]):
 
     name_hdrs = name + "_hdrs" 
@@ -53,6 +58,7 @@ def fw_library(name, visibility, deps, copts=[], copts_win=[], linkopts=[], link
         defines = DEFINES,
         copts = COPTS + copts,
         linkopts = LINKOPTS + linkopts,
+        features = FEATURES,
     )
 
     cc_library(
@@ -65,6 +71,7 @@ def fw_library(name, visibility, deps, copts=[], copts_win=[], linkopts=[], link
         defines = DEFINES,
         copts = COPTS + copts,
         linkopts = LINKOPTS + linkopts,
+        features = FEATURES,
     )
 
     cc_library(
@@ -77,6 +84,7 @@ def fw_library(name, visibility, deps, copts=[], copts_win=[], linkopts=[], link
         defines = DEFINES,
         copts = COPTS + copts + copts_win,
         linkopts = LINKOPTS + linkopts + linkopts_win,
+        features = FEATURES,
     )
 
     cc_library(
@@ -92,6 +100,7 @@ def fw_library(name, visibility, deps, copts=[], copts_win=[], linkopts=[], link
         }),
         copts = COPTS + copts,
         linkopts = LINKOPTS + linkopts,
+        features = FEATURES,
     )
 
 def fw_binary(name, visibility, deps, copts=[], copts_win=[], linkopts=[], linkopts_win=[]):
@@ -108,6 +117,7 @@ def fw_binary(name, visibility, deps, copts=[], copts_win=[], linkopts=[], linko
         deps = deps,
         copts = COPTS + copts + copts_win,
         linkopts = LINKOPTS + linkopts + linkopts_win,
+        features = FEATURES,
     )
 
     cc_binary(
@@ -118,6 +128,7 @@ def fw_binary(name, visibility, deps, copts=[], copts_win=[], linkopts=[], linko
         deps = [lib_win] + deps,
         copts = COPTS + copts,
         linkopts = LINKOPTS + linkopts,
+        features = FEATURES,
     )
 
 def fw_test(name, deps, srcs, tags):
@@ -128,6 +139,7 @@ def fw_test(name, deps, srcs, tags):
         tags = tags,
         defines = DEFINES,
         copts = COPTS,
+        features = FEATURES,
     )
 
 def fw_test_suite(deps, tags, names):

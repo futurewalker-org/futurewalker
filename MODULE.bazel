@@ -3,8 +3,8 @@ module(
     version = "0.0.1",
 )
 
-bazel_dep(name = "platforms", version = "0.0.11")
-bazel_dep(name = "rules_cc", version = "0.1.1")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_cc", version = "0.2.16")
 
 conan_extension = use_extension("//build/conan:conan_deps_module_extension.bzl", "conan_extension")
 use_repo(conan_extension, "boost", "catch2", "bzip2", "zlib", "fmt", "brotli", "expat", "freetype", "harfbuzz", "icu", "libjpeg-turbo", "libpng", "libwebp", "skia")

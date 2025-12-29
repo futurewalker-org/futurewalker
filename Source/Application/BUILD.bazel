@@ -4,6 +4,7 @@ fw_library(
     name = "Application",
     visibility = ["//visibility:public"],
     deps = [
+        "//Source/Action",
         "//Source/Base",
         "//Source/Core",
         "//Source/Event",
