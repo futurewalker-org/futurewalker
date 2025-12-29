@@ -61,9 +61,9 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
         else if (type == MenuItemType::SubMenu)
         {
             auto leadingIcon = IconView::MakeWithIcon(item.GetLeadingIcon());
-            auto trailingIcon = IconView::MakeWithIcon(Icon::MakeFromFont(Graphics::FontFamily(u8"Segoe Fluent Icons"), 0xE76C));
+            auto trailingIcon = IconView::MakeWithIcon(Icon::MakeFromFont(Graphics::FontFamily(u8"Segoe Fluent Icons"), 0xE974));
             AttributeNode::SetReference<&IconViewStyle::Size>(*leadingIcon, Style::IconSizeSmall);
-            AttributeNode::SetReference<&IconViewStyle::Size>(*trailingIcon, Style::IconSizeSmall);
+            AttributeNode::SetReference<&IconViewStyle::Size>(*trailingIcon, Style::IconSizeExtraSmall);
             auto text = TextView::MakeWithText(item.GetTitle());
             auto itemView = MenuItemView::Make();
             itemView->SetLeadingView(leadingIcon);
