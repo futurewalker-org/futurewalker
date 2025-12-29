@@ -43,6 +43,11 @@ auto ButtonRenderView::SetContent(Shared<View> const& content) -> void
     }
 }
 
+auto ButtonRenderView::IsDown() const -> Bool
+{
+    return _down;
+}
+
 auto ButtonRenderView::SetDown(Bool const down) -> void
 {
     if (_down != down)
@@ -50,6 +55,11 @@ auto ButtonRenderView::SetDown(Bool const down) -> void
         _down = down;
         InvalidateVisual();
     }
+}
+
+auto ButtonRenderView::IsEnter() const -> Bool
+{
+    return _enter;
 }
 
 auto ButtonRenderView::SetEnter(Bool const enter) -> void

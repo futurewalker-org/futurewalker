@@ -29,7 +29,10 @@ public:
     auto GetContent() -> Shared<View>;
     auto SetContent(Shared<View> const& content) -> void;
 
+    auto IsDown() const -> Bool;
     auto SetDown(Bool const down) -> void;
+
+    auto IsEnter() const -> Bool;
     auto SetEnter(Bool const enter) -> void;
 
     auto SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void;
