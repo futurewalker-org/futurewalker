@@ -54,6 +54,8 @@ inline auto Debug::Log(DebugLogLevel const level, std::string_view const message
     auto const levelString = [&]() -> char const* {
         switch (level)
         {
+            case DebugLogLevel::Trace:
+                return "T";
             case DebugLogLevel::Info:
                 return "I";
             case DebugLogLevel::Warning:
@@ -66,8 +68,9 @@ inline auto Debug::Log(DebugLogLevel const level, std::string_view const message
 
     if (levelString)
     {
-        auto const formattedString = std::format("[{}]: {}", levelString, message);
-        Debug::PrintPriv(StringFunction::ConvertASCIIToString(formattedString));
+        auto const formattedString = std::format("[{}] {}", levelString, message);
+        auto const asciiString = StringFunction::ConvertASCIIToString(formattedString);
+        Debug::PrintPriv(asciiString);
     }
 }
 

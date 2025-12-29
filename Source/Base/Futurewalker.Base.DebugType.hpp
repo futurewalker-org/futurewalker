@@ -14,6 +14,7 @@ class Debug;
 ///
 enum DebugLogLevel
 {
+    Trace,
     Info,
     Warning,
     Error,
