@@ -16,6 +16,6 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextViewStyle::FontWeight, Style::FontWeig
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::FontWidth, Graphics::FontWidth::Normal());
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::FontSlant, Graphics::FontSlant::Upright);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::FontFamily, Graphics::FontFamily());
-FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::HorizontalAlignment, TextViewHorizontalAlignment::Center);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::HorizontalAlignment, TextViewHorizontalAlignment::Leading);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::VerticalAlignment, TextViewVerticalAlignment::Middle);
 }
