@@ -21,7 +21,7 @@
 #endif
 
 #ifndef FW_ENABLE_DEBUG
-    #ifdef _NDEBUG
+    #ifdef NDEBUG
         #define FW_ENABLE_DEBUG 0
     #else
         #define FW_ENABLE_DEBUG 1
