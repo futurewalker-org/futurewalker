@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Component.Lamp.MenuItemViewType.hpp"
-#include "Futurewalker.Component.Lamp.MenuViewStyle.hpp"
+#include "Futurewalker.Component.Lamp.MenuItemViewStyle.hpp"
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
@@ -22,6 +22,7 @@ class MenuItemView : public View
 {
 public:
     static auto Make() -> Shared<MenuItemView>;
+    static auto MakeWithContents(Shared<View> const& leadingView, Shared<View> const& middleView, Shared<View> const& trailingView) -> Shared<MenuItemView>;
 
     MenuItemView(PassKey<View> key);
 

@@ -13,6 +13,15 @@ auto MenuItemView::Make() -> Shared<MenuItemView>
     return View::MakeDerived<MenuItemView>();
 }
 
+auto MenuItemView::MakeWithContents(Shared<View> const& leadingView, Shared<View> const& middleView, Shared<View> const& trailingView) -> Shared<MenuItemView>
+{
+    auto view = MenuItemView::Make();
+    view->SetLeadingView(leadingView);
+    view->SetMiddleView(middleView);
+    view->SetTrailingView(trailingView);
+    return view;
+}
+
 MenuItemView::MenuItemView(PassKey<View> key)
   : View(key)
 {
@@ -69,7 +78,7 @@ auto MenuItemView::Initialize() -> void
     _paddingView = PaddingView::MakeWithPaddingAndContent(EdgeInsets(), flex);
     AddChildBack(_paddingView);
 
-    _itemPadding.BindAndConnectAttribute(*this, &MenuItemView::ReceiveAttributeEvent, MenuViewStyle::ItemPadding);
+    _itemPadding.BindAndConnectAttribute(*this, &MenuItemView::ReceiveAttributeEvent, MenuItemViewStyle::Padding);
 
     UpdatePadding();
 }

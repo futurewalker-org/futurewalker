@@ -12,8 +12,8 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::DisabledIconColor, IconView
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::TextColor, TextViewStyle::Color);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::DisabledTextColor, TextViewStyle::DisabledColor);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::HighlightColor, Style::ColorOnSurface);
-FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::BackgroundColor, Style::ColorSurfaceContainerHighest);
-FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::DisabledBackgroundColor, Style::ColorSurfaceContainerHighest);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::BackgroundColor, Style::ColorSurfaceContainerLow);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::DisabledBackgroundColor, Style::ColorSurfaceContainerLow);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::BorderColor, Style::ColorSecondary);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::DisabledBorderColor, Style::ColorSecondary);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::IconAlpha, IconViewStyle::Alpha);

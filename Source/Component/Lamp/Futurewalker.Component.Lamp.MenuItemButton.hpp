@@ -3,6 +3,7 @@
 
 #include "Futurewalker.Component.Lamp.MenuItemButtonType.hpp"
 #include "Futurewalker.Component.Lamp.MenuItemButtonEvent.hpp"
+#include "Futurewalker.Component.Lamp.MenuItemButtonStyle.hpp"
 #include "Futurewalker.Component.Lamp.ButtonRenderViewType.hpp"
 
 #include "Futurewalker.Application.ContainerViewType.hpp"
@@ -37,6 +38,8 @@ protected:
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 
 private:
+    auto IsDown() const -> Bool;
+    auto IsEnter() const -> Bool;
     auto SetDown(Bool const down) -> void;
     auto SetEnter(Bool const enter) -> void;
 

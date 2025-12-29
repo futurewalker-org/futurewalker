@@ -35,25 +35,29 @@ auto MenuItemButton::Initialize() -> void
     _container = ContainerView::Make();
 
     _buttonView = ButtonRenderView::MakeWithContent(_container);
-    _buttonView->SetBackgroundColor(MenuViewStyle::BackgroundColor);
-    _buttonView->SetDisabledBackgroundColor(MenuViewStyle::DisabledBackgroundColor);
-    _buttonView->SetBorderColor(MenuViewStyle::BorderColor);
-    _buttonView->SetDisabledBorderColor(MenuViewStyle::DisabledBorderColor);
-    _buttonView->SetHighlightColor(MenuViewStyle::HighlightColor);
-    _buttonView->SetHoverHighlightAlpha(MenuViewStyle::HoverHighlightAlpha);
-    _buttonView->SetPressHighlightAlpha(MenuViewStyle::PressHighlightAlpha);
-    _buttonView->SetCornerRadius(MenuViewStyle::ItemCornerRadius);
-    _buttonView->SetBorderWidth(MenuViewStyle::BorderWidth);
+    _buttonView->SetBackgroundColor(MenuItemButtonStyle::BackgroundColor);
+    _buttonView->SetBackgroundAlpha(MenuItemButtonStyle::BackgroundAlpha);
+    _buttonView->SetDisabledBackgroundColor(MenuItemButtonStyle::DisabledBackgroundColor);
+    _buttonView->SetDisabledBackgroundAlpha(MenuItemButtonStyle::DisabledBackgroundAlpha);
+    _buttonView->SetBorderColor(MenuItemButtonStyle::BorderColor);
+    _buttonView->SetBorderAlpha(MenuItemButtonStyle::BorderAlpha);
+    _buttonView->SetDisabledBorderColor(MenuItemButtonStyle::DisabledBorderColor);
+    _buttonView->SetDisabledBorderAlpha(MenuItemButtonStyle::DisabledBorderAlpha);
+    _buttonView->SetHighlightColor(MenuItemButtonStyle::HighlightColor);
+    _buttonView->SetHoverHighlightAlpha(MenuItemButtonStyle::HoverHighlightAlpha);
+    _buttonView->SetPressHighlightAlpha(MenuItemButtonStyle::PressHighlightAlpha);
+    _buttonView->SetCornerRadius(MenuItemButtonStyle::CornerRadius);
+    _buttonView->SetBorderWidth(MenuItemButtonStyle::BorderWidth);
     AddChildBack(_buttonView);
 
-    _textColor.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuViewStyle::TextColor);
-    _textAlpha.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuViewStyle::TextAlpha);
-    _textDisabledColor.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuViewStyle::DisabledTextColor);
-    _textDisabledAlpha.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuViewStyle::DisabledTextAlpha);
-    _iconColor.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuViewStyle::IconColor);
-    _iconAlpha.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuViewStyle::IconAlpha);
-    _iconDisabledColor.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuViewStyle::DisabledIconColor);
-    _iconDisabledAlpha.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuViewStyle::DisabledIconAlpha);
+    _textColor.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuItemButtonStyle::TextColor);
+    _textAlpha.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuItemButtonStyle::TextAlpha);
+    _textDisabledColor.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuItemButtonStyle::DisabledTextColor);
+    _textDisabledAlpha.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuItemButtonStyle::DisabledTextAlpha);
+    _iconColor.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuItemButtonStyle::IconColor);
+    _iconAlpha.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuItemButtonStyle::IconAlpha);
+    _iconDisabledColor.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuItemButtonStyle::DisabledIconColor);
+    _iconDisabledAlpha.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuItemButtonStyle::DisabledIconAlpha);
 
     EventReceiver::Connect(*this, *this, &MenuItemButton::ReceiveEvent);
 }
@@ -92,6 +96,24 @@ auto MenuItemButton::ReceiveEvent(Event<>& event) -> Async<Bool>
             if (event.As<PointerEvent::Motion::Move>()->GetButtons() != PointerButtonFlags::None)
             {
                 SetDown(true);
+            }
+        }
+        else if (event.Is<PointerEvent::Motion::Cancel>())
+        {
+            auto const down = IsDown();
+            auto const enter = IsEnter();
+            SetDown(false);
+            SetEnter(false);
+
+            if (down)
+            {
+                auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Up>());
+                co_await SendEvent(buttonEvent);
+            }
+            if (enter)
+            {
+                auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Leave>());
+                co_await SendEvent(buttonEvent);
             }
         }
         co_return true;
@@ -133,6 +155,24 @@ auto MenuItemButton::SetContent(Shared<View> const& content) -> void
     {
         _container->SetContent(content);
     }
+}
+
+auto MenuItemButton::IsDown() const -> Bool
+{
+    if (_buttonView)
+    {
+        return _buttonView->IsDown();
+    }
+    return false;
+}
+
+auto MenuItemButton::IsEnter() const -> Bool
+{
+    if (_buttonView)
+    {
+        return _buttonView->IsEnter();
+    }
+    return false;
 }
 
 auto MenuItemButton::SetDown(Bool const down) -> void
