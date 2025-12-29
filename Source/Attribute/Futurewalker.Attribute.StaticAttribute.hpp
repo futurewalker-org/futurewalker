@@ -4,6 +4,7 @@
 #include "Futurewalker.Attribute.StaticAttributeType.hpp"
 #include "Futurewalker.Attribute.StaticAttributeBase.hpp"
 #include "Futurewalker.Attribute.AttributeValue.hpp"
+#include "Futurewalker.Attribute.AttributeFunction.hpp"
 
 #include "Futurewalker.Base.UniqueIdentifier.hpp"
 
@@ -85,16 +86,12 @@ public:
 #endif
       F&& f) -> StaticAttribute<T>
     {
-        using types = std::tuple<typename std::remove_reference_t<decltype(*References)>::ValueType...>;
         auto constexpr references = std::array {StaticAttributeBaseRef(*References)...};
-        auto constexpr indices = std::make_index_sequence<sizeof...(References)>();
-        auto constexpr mapper = []<size_t... Seq>(std::index_sequence<Seq...>, auto& args, auto& f) { return f(*args[Seq].template GetValue<std::tuple_element_t<Seq, types>>()...); };
         return StaticAttribute<T>(
 #if FW_ENABLE_DEBUG
           name,
 #endif
-          // MSVC ICE: [f = std::forward<F>(f)](auto const references) { return AttributeValue(T(mapper(indices, references, f))); },
-          [f = std::forward<F>(f)](std::span<AttributeValue const> const references) { return AttributeValue(T(mapper(indices, references, f))); },
+          AttributeFunction::MakeComputeFunction<T, typename std::remove_reference_t<decltype(*References)>::ValueType...>(std::forward<F>(f)),
           references);
     }
 

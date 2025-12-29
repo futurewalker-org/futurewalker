@@ -271,6 +271,15 @@ TEST_CASE("AttributeNode")
             AttributeNode::SetValue<&IntegerAttribute>(*node, 15);
             REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 30);
         }
+
+        SECTION("simple compute with reference")
+        {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 0);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 42);
+            auto node = AttributeNode::Make();
+            AttributeNode::SetFunction<&Attr1>(*node, [](auto a) { return a * 2; }, StaticAttributeRef(Attr2));
+            REQUIRE(*AttributeNode::GetValue<&Attr1>(*node) == 84);
+        }
     }
 
     SECTION("add child")

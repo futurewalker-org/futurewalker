@@ -6,6 +6,7 @@
 #include "Futurewalker.Attribute.AttributeSlot.hpp"
 #include "Futurewalker.Attribute.AttributeValue.hpp"
 #include "Futurewalker.Attribute.StaticAttribute.hpp"
+#include "Futurewalker.Attribute.AttributeFunction.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -62,6 +63,11 @@ public:
     template <class T, class Owner>
     static auto SetReference(Owner& owner, StaticAttributeRef<T> attribute, StaticAttributeRef<T> reference) -> void;
 
+    template <const auto* Attribute, class Owner, class F, class... Ts>
+    static auto SetFunction(Owner& owner, F&& f, StaticAttributeRef<Ts>... references) -> void;
+    template <class T, class Owner, class F, class... Ts>
+    static auto SetFunction(Owner& owner, F&& f, StaticAttributeRef<T> attribute, StaticAttributeRef<Ts>... references) -> void;
+
     template <const auto* Attribute, class Owner>
     static auto Clear(Owner& owner) -> void;
     template <class T, class Owner>
@@ -88,6 +94,7 @@ private:
     auto ResetAttributeSlot(StaticAttributeBaseRef description) -> void;
     auto SetAttributeSlotValue(StaticAttributeBaseRef description, AttributeValue const& value) -> void;
     auto SetAttributeSlotReference(StaticAttributeBaseRef description, StaticAttributeBaseRef const reference) -> void;
+    auto SetAttributeSlotFunction(StaticAttributeBaseRef description, StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void;
 
     auto InsertAttributeSlot(StaticAttributeBaseRef description) -> Shared<AttributeSlot>;
     auto FindAttributeSlot(AttributeId const& id) -> Shared<AttributeSlot>;
@@ -219,6 +226,42 @@ auto AttributeNode::SetReference(Owner& owner, StaticAttributeRef<T> attribute, 
         auto& node = owner.GetAttributeNode();
         node.AddAttributeSlot(attribute);
         node.SetAttributeSlotReference(attribute, reference);
+    }
+}
+
+///
+/// @brief Set compute function of attribute.
+///
+/// @param owner Reference to owner of AttributeNode
+/// @param f Compute function of attribute.
+/// @param references Referenced attributes which are passed to compute function.
+///
+template <const auto* Attribute, class Owner, class F, class... Ts>
+auto AttributeNode::SetFunction(Owner& owner, F&& f, StaticAttributeRef<Ts>... references) -> void
+{
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(*Attribute);
+    return SetFunction(owner, std::forward<F>(f), attribute, references...);
+}
+
+///
+/// @brief Set compute function of attribute.
+///
+/// @param owner Reference to owner of AttributeNode
+/// @param f Compute function of attribute.
+/// @param attribute Description of attribute.
+/// @param references Referenced attributes which are passed to compute function.
+///
+template <class T, class Owner, class F, class... Ts>
+auto AttributeNode::SetFunction(Owner& owner, F&& f, StaticAttributeRef<T> attribute, StaticAttributeRef<Ts>... references) -> void
+{
+    if (CheckReferenceLoop(attribute))
+    {
+        using types = std::tuple<Ts...>;
+        auto const args = std::array {StaticAttributeBaseRef(references)...};
+        auto& node = owner.GetAttributeNode();
+        node.AddAttributeSlot(attribute);
+        node.SetAttributeSlotFunction(attribute, AttributeFunction::MakeComputeFunction<T, Ts...>(std::forward<F>(f)), args);
     }
 }
 

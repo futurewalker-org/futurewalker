@@ -389,6 +389,26 @@ auto AttributeNode::SetAttributeSlotReference(StaticAttributeBaseRef description
 }
 
 ///
+/// @brief
+///
+/// @param description
+/// @param computeFunction
+/// @param references
+///
+auto AttributeNode::SetAttributeSlotFunction(StaticAttributeBaseRef description, StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references)
+  -> void
+{
+    auto const id = description.Get().GetId();
+    if (auto const slot = FindAttributeSlot(id))
+    {
+        slot->SetValue(computeFunction, references);
+        slot->DetachFromSourceDependentSlot();
+
+        UpdateSlotCacheRecursive(*slot);
+    }
+}
+
+///
 /// @brief Insert new attribute slot.
 ///
 /// @param[in] description Description of attribute.
