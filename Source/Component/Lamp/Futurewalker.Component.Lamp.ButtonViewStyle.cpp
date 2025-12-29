@@ -18,7 +18,7 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::DisabledBorderAlpha, Styl
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::HighlightColor, Style::ColorOnSecondaryContainer);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::HoverHighlightAlpha, Style::AlphaHighlightHover);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::PressHighlightAlpha, Style::AlphaHighlightPress);
-FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::CornerRadius, Style::CornerRadiusSmall);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::CornerRadius, Style::CornerRadiusLargest);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ButtonViewStyle::BorderWidth, 0);
 }
 }
