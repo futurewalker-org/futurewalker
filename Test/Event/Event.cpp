@@ -21,7 +21,7 @@ TEST_CASE("Event")
             int i = 42;
         };
 
-        auto event = Event<TestEvent>::Make();
+        auto event = Event<TestEvent>();
         REQUIRE(event->i == 42);
         REQUIRE(event.Is<TestEvent>());
         REQUIRE(event.As<TestEvent>()->i == 42);
@@ -57,10 +57,16 @@ TEST_CASE("Event")
 
         struct DerivedEvent : BaseEvent
         {
+            int i = 42;
         };
 
-        auto const event = Event<DerivedEvent>::Make();
-        REQUIRE(event.Is<BaseEvent>());
-        REQUIRE(event.Is<DerivedEvent>());
+        SECTION("Type")
+        {
+            auto const event = Event<DerivedEvent>();
+            REQUIRE(event.Is<BaseEvent>());
+            REQUIRE(event.Is<DerivedEvent>());
+            REQUIRE(event.TryAs<BaseEvent>());
+            REQUIRE(event.TryAs<DerivedEvent>());
+        }
     }
 }
