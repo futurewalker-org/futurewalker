@@ -626,35 +626,54 @@ auto Theme::ApplyApplicationStyle(AttributeNode& target) -> void
     AttributeNode::SetValue<&Style::FontWeightDisplayMedium>(target, 400);
     AttributeNode::SetValue<&Style::FontWeightDisplayLarge>(target, 400);
 
-    AttributeNode::SetValue<&Style::CornerRadiusNone>(target, CornerRadius::MakeUniform(0));
-    AttributeNode::SetValue<&Style::CornerRadiusExtraSmall>(target, CornerRadius::MakeUniform(4));
-    AttributeNode::SetValue<&Style::CornerRadiusSmall>(target, CornerRadius::MakeUniform(8));
-    AttributeNode::SetValue<&Style::CornerRadiusMedium>(target, CornerRadius::MakeUniform(12));
-    AttributeNode::SetValue<&Style::CornerRadiusLarge>(target, CornerRadius::MakeUniform(16));
-    AttributeNode::SetValue<&Style::CornerRadiusLargeIncreased>(target, CornerRadius::MakeUniform(20));
-    AttributeNode::SetValue<&Style::CornerRadiusExtraLarge>(target, CornerRadius::MakeUniform(28));
-    AttributeNode::SetValue<&Style::CornerRadiusExtraLargeIncreased>(target, CornerRadius::MakeUniform(32));
+    auto constexpr makeUniformCornerRadius = [](auto s) { return CornerRadius::MakeUniform(s); };
+    AttributeNode::SetFunction<&Style::CornerRadiusNone>(target, makeUniformCornerRadius, StaticAttributeRef(Style::SizeNone));
+    AttributeNode::SetFunction<&Style::CornerRadiusExtraSmall>(target, makeUniformCornerRadius, StaticAttributeRef(Style::Size40));
+    AttributeNode::SetFunction<&Style::CornerRadiusSmall>(target, makeUniformCornerRadius, StaticAttributeRef(Style::Size80));
+    AttributeNode::SetFunction<&Style::CornerRadiusMedium>(target, makeUniformCornerRadius, StaticAttributeRef(Style::Size120));
+    AttributeNode::SetFunction<&Style::CornerRadiusLarge>(target, makeUniformCornerRadius, StaticAttributeRef(Style::Size160));
+    AttributeNode::SetFunction<&Style::CornerRadiusLargeIncreased>(target, makeUniformCornerRadius, StaticAttributeRef(Style::Size200));
+    AttributeNode::SetFunction<&Style::CornerRadiusExtraLarge>(target, makeUniformCornerRadius, StaticAttributeRef(Style::Size280));
+    AttributeNode::SetFunction<&Style::CornerRadiusExtraLargeIncreased>(target, makeUniformCornerRadius, StaticAttributeRef(Style::Size320));
     AttributeNode::SetValue<&Style::CornerRadiusLargest>(target, CornerRadius::MakeLargest());
 
-    AttributeNode::SetValue<&Style::IconSizeNone>(target, 0);
-    AttributeNode::SetValue<&Style::IconSizeSmall>(target, 20);
-    AttributeNode::SetValue<&Style::IconSizeMedium>(target, 24);
-    AttributeNode::SetValue<&Style::IconSizeLarge>(target, 40);
-    AttributeNode::SetValue<&Style::IconSizeExtraLarge>(target, 48);
+    AttributeNode::SetValue<&Style::SizeNone>(target, 0);
+    AttributeNode::SetValue<&Style::Size20>(target, 2);
+    AttributeNode::SetValue<&Style::Size40>(target, 4);
+    AttributeNode::SetValue<&Style::Size60>(target, 6);
+    AttributeNode::SetValue<&Style::Size80>(target, 8);
+    AttributeNode::SetValue<&Style::Size100>(target, 10);
+    AttributeNode::SetValue<&Style::Size120>(target, 12);
+    AttributeNode::SetValue<&Style::Size160>(target, 16);
+    AttributeNode::SetValue<&Style::Size200>(target, 20);
+    AttributeNode::SetValue<&Style::Size240>(target, 24);
+    AttributeNode::SetValue<&Style::Size280>(target, 28);
+    AttributeNode::SetValue<&Style::Size320>(target, 32);
+    AttributeNode::SetValue<&Style::Size360>(target, 36);
+    AttributeNode::SetValue<&Style::Size400>(target, 40);
+    AttributeNode::SetValue<&Style::Size480>(target, 48);
+    AttributeNode::SetValue<&Style::Size520>(target, 52);
 
-    AttributeNode::SetValue<&Style::SpaceNone>(target, 0);
-    AttributeNode::SetValue<&Style::SpaceExtraSmall>(target, 4);
-    AttributeNode::SetValue<&Style::SpaceSmall>(target, 8);
-    AttributeNode::SetValue<&Style::SpaceMedium>(target, 16);
-    AttributeNode::SetValue<&Style::SpaceLarge>(target, 24);
-    AttributeNode::SetValue<&Style::SpaceExtraLarge>(target, 32);
+    AttributeNode::SetReference<&Style::IconSizeNone>(target, Style::SizeNone);
+    AttributeNode::SetReference<&Style::IconSizeSmall>(target, Style::Size200);
+    AttributeNode::SetReference<&Style::IconSizeMedium>(target, Style::Size240);
+    AttributeNode::SetReference<&Style::IconSizeLarge>(target, Style::Size400);
+    AttributeNode::SetReference<&Style::IconSizeExtraLarge>(target, Style::Size480);
 
-    AttributeNode::SetValue<&Style::PaddingNone>(target, EdgeInsets::MakeUniform(0));
-    AttributeNode::SetValue<&Style::PaddingExtraSmall>(target, EdgeInsets::MakeUniform(4));
-    AttributeNode::SetValue<&Style::PaddingSmall>(target, EdgeInsets::MakeUniform(8));
-    AttributeNode::SetValue<&Style::PaddingMedium>(target, EdgeInsets::MakeUniform(16));
-    AttributeNode::SetValue<&Style::PaddingLarge>(target, EdgeInsets::MakeUniform(24));
-    AttributeNode::SetValue<&Style::PaddingExtraLarge>(target, EdgeInsets::MakeUniform(32));
+    AttributeNode::SetReference<&Style::SpaceNone>(target, Style::SizeNone);
+    AttributeNode::SetReference<&Style::SpaceExtraSmall>(target, Style::Size40);
+    AttributeNode::SetReference<&Style::SpaceSmall>(target, Style::Size80);
+    AttributeNode::SetReference<&Style::SpaceMedium>(target, Style::Size160);
+    AttributeNode::SetReference<&Style::SpaceLarge>(target, Style::Size240);
+    AttributeNode::SetReference<&Style::SpaceExtraLarge>(target, Style::Size320);
+
+    auto constexpr makeUniformPadding = [](auto s) { return EdgeInsets::MakeUniform(s); };
+    AttributeNode::SetFunction<&Style::PaddingNone>(target, makeUniformPadding, StaticAttributeRef(Style::SizeNone));
+    AttributeNode::SetFunction<&Style::PaddingExtraSmall>(target, makeUniformPadding, StaticAttributeRef(Style::Size40));
+    AttributeNode::SetFunction<&Style::PaddingSmall>(target, makeUniformPadding, StaticAttributeRef(Style::Size80));
+    AttributeNode::SetFunction<&Style::PaddingMedium>(target, makeUniformPadding, StaticAttributeRef(Style::Size160));
+    AttributeNode::SetFunction<&Style::PaddingLarge>(target, makeUniformPadding, StaticAttributeRef(Style::Size240));
+    AttributeNode::SetFunction<&Style::PaddingExtraLarge>(target, makeUniformPadding, StaticAttributeRef(Style::Size320));
 }
 }
 }

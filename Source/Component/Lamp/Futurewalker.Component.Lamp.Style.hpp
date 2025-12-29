@@ -102,6 +102,23 @@ struct Style : NonConstructible
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusExtraLargeIncreased);
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusLargest);
 
+    FW_STATIC_ATTRIBUTE(Dp, SizeNone);
+    FW_STATIC_ATTRIBUTE(Dp, Size20);
+    FW_STATIC_ATTRIBUTE(Dp, Size40);
+    FW_STATIC_ATTRIBUTE(Dp, Size60);
+    FW_STATIC_ATTRIBUTE(Dp, Size80);
+    FW_STATIC_ATTRIBUTE(Dp, Size100);
+    FW_STATIC_ATTRIBUTE(Dp, Size120);
+    FW_STATIC_ATTRIBUTE(Dp, Size160);
+    FW_STATIC_ATTRIBUTE(Dp, Size200);
+    FW_STATIC_ATTRIBUTE(Dp, Size240);
+    FW_STATIC_ATTRIBUTE(Dp, Size280);
+    FW_STATIC_ATTRIBUTE(Dp, Size320);
+    FW_STATIC_ATTRIBUTE(Dp, Size360);
+    FW_STATIC_ATTRIBUTE(Dp, Size400);
+    FW_STATIC_ATTRIBUTE(Dp, Size480);
+    FW_STATIC_ATTRIBUTE(Dp, Size520);
+
     FW_STATIC_ATTRIBUTE(Dp, IconSizeNone);
     FW_STATIC_ATTRIBUTE(Dp, IconSizeSmall);
     FW_STATIC_ATTRIBUTE(Dp, IconSizeMedium);
