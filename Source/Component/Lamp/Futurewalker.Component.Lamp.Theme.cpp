@@ -591,6 +591,8 @@ auto Theme::ApplyApplicationStyle(AttributeNode& target) -> void
     AttributeNode::SetValue<&Style::AlphaHighlightHover>(target, 0.08);
     AttributeNode::SetValue<&Style::AlphaHighlightPress>(target, 0.10);
 
+    AttributeNode::SetValue<&Style::AlphaNone>(target, 0.0);
+    AttributeNode::SetValue<&Style::AlphaOpaque>(target, 1.0);
     AttributeNode::SetValue<&Style::AlphaEnabled>(target, 1.0);
     AttributeNode::SetValue<&Style::AlphaDisabled>(target, 0.38);
 
@@ -638,6 +640,7 @@ auto Theme::ApplyApplicationStyle(AttributeNode& target) -> void
     AttributeNode::SetValue<&Style::CornerRadiusLargest>(target, CornerRadius::MakeLargest());
 
     AttributeNode::SetValue<&Style::SizeNone>(target, 0);
+    AttributeNode::SetValue<&Style::Size10>(target, 1);
     AttributeNode::SetValue<&Style::Size20>(target, 2);
     AttributeNode::SetValue<&Style::Size40>(target, 4);
     AttributeNode::SetValue<&Style::Size60>(target, 6);
@@ -655,6 +658,7 @@ auto Theme::ApplyApplicationStyle(AttributeNode& target) -> void
     AttributeNode::SetValue<&Style::Size520>(target, 52);
 
     AttributeNode::SetReference<&Style::IconSizeNone>(target, Style::SizeNone);
+    AttributeNode::SetReference<&Style::IconSizeExtraSmall>(target, Style::Size120);
     AttributeNode::SetReference<&Style::IconSizeSmall>(target, Style::Size200);
     AttributeNode::SetReference<&Style::IconSizeMedium>(target, Style::Size240);
     AttributeNode::SetReference<&Style::IconSizeLarge>(target, Style::Size400);

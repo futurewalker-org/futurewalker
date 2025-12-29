@@ -57,6 +57,8 @@ struct Style : NonConstructible
     FW_STATIC_ATTRIBUTE(Channel, AlphaHighlightHover);
     FW_STATIC_ATTRIBUTE(Channel, AlphaHighlightPress);
 
+    FW_STATIC_ATTRIBUTE(Channel, AlphaNone);
+    FW_STATIC_ATTRIBUTE(Channel, AlphaOpaque);
     FW_STATIC_ATTRIBUTE(Channel, AlphaEnabled);
     FW_STATIC_ATTRIBUTE(Channel, AlphaDisabled);
 
@@ -103,6 +105,7 @@ struct Style : NonConstructible
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadiusLargest);
 
     FW_STATIC_ATTRIBUTE(Dp, SizeNone);
+    FW_STATIC_ATTRIBUTE(Dp, Size10);
     FW_STATIC_ATTRIBUTE(Dp, Size20);
     FW_STATIC_ATTRIBUTE(Dp, Size40);
     FW_STATIC_ATTRIBUTE(Dp, Size60);
@@ -120,6 +123,7 @@ struct Style : NonConstructible
     FW_STATIC_ATTRIBUTE(Dp, Size520);
 
     FW_STATIC_ATTRIBUTE(Dp, IconSizeNone);
+    FW_STATIC_ATTRIBUTE(Dp, IconSizeExtraSmall);
     FW_STATIC_ATTRIBUTE(Dp, IconSizeSmall);
     FW_STATIC_ATTRIBUTE(Dp, IconSizeMedium);
     FW_STATIC_ATTRIBUTE(Dp, IconSizeLarge);

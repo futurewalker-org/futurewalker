@@ -19,6 +19,6 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::HighlightColor, Style::Co
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::HoverHighlightAlpha, Style::AlphaHighlightHover);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::PressHighlightAlpha, Style::AlphaHighlightPress);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::CornerRadius, Style::CornerRadiusLargest);
-FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ButtonViewStyle::BorderWidth, 0);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(ButtonViewStyle::BorderWidth, Style::SizeNone);
 }
 }
