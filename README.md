@@ -11,8 +11,8 @@ If you have interest in the project, please try it out and provide feedback!
 | OS | Support Status |
 | ---- | ---- |
 | Windows 10 | ❔ Undecided |
-| Windows 11 | ✅ Supported |
-| macOS | 🚧 Work in progress |
+| Windows 11 | 🚧 In Development |
+| macOS | 📝 Planned for 2026~ |
 | iOS | 📝 Planned for 2027~ |
 | Android | 📝 Planned for 2027~ |
 | Linux | ❔ Undecided |
@@ -53,23 +53,6 @@ conan build . -pr:h=./conan/vs2022_x86_64_Debug.profile --build=missing
 ## Hello, World!
 
 ```cpp
-#include <Futurewalker.Component.Lamp.TextView.hpp>
-#include <Futurewalker.Component.Lamp.Theme.hpp>
-#include <Futurewalker.Component.Lamp.Style.hpp>
-
-#include <Futurewalker.Application.Application.hpp>
-#include <Futurewalker.Application.ApplicationEvent.hpp>
-#include <Futurewalker.Application.ApplicationTheme.hpp>
-#include <Futurewalker.Application.Window.hpp>
-#include <Futurewalker.Application.AlignView.hpp>
-
-#include <Futurewalker.Event.EventReceiver.hpp>
-#include <Futurewalker.Event.EventWaiter.hpp>
-
-#include <Futurewalker.Base.Environment.hpp>
-
-#include <Futurewalker.Main.Main.hpp>
-
 namespace Futurewalker
 {
 class HelloWorldApplication : public Application
