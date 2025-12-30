@@ -21,7 +21,9 @@ public:
 
     auto GetAddedChildCount() const -> SInt64;
     auto GetAddedChildAt(SInt64 const index) -> Shared<View>;
+    auto GetAddedChildIndex(Shared<View> const& child) const -> Optional<SInt64>;
     auto AddChild(Shared<View> const& content) -> void;
+    auto Contains(Shared<View> const& child) const -> Bool;
 
     auto GetDirection() const -> FlexLayoutDirection;
     auto SetDirection(FlexLayoutDirection const direction) -> void;

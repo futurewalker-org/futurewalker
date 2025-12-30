@@ -61,11 +61,27 @@ auto FlexLayout::GetAddedChildAt(SInt64 const index) -> Shared<View>
 }
 
 ///
+/// @brief Get child index of added view.
+///
+auto FlexLayout::GetAddedChildIndex(Shared<View> const& child) const -> Optional<SInt64>
+{
+    return GetChildIndex(child);
+}
+
+///
 /// @brief Add view to layout.
 ///
 auto FlexLayout::AddChild(Shared<View> const& content) -> void
 {
     AddChildBack(content);
+}
+
+///
+/// @brief Check if layout contains the specified child.
+///
+auto FlexLayout::Contains(Shared<View> const& child) const -> Bool
+{
+    return IsParentOf(child);
 }
 
 ///
@@ -301,9 +317,12 @@ auto FlexLayout::Measure(MeasureScope& scope) -> void
     auto const mainConstraints = GetMainAxisConstraints(scope);
     auto const crossConstraints = GetCrossAxisConstraints(scope);
 
+    auto const crossAxisAlignment = GetCrossAxisAlignment();
+    auto const crossAxisSize = GetCrossAxisSize();
+
     auto calcCrossAxisConstraints = [&](View& view) {
         auto childCross = AxisConstraints::MakeMinMax(0, crossConstraints.GetMax());
-        if (GetCrossAxisAlignment() == FlexLayoutCrossAxisAlignment::Stretch && GetCrossAxisSize() == FlexLayoutCrossAxisSize::Max)
+        if (crossAxisAlignment == FlexLayoutCrossAxisAlignment::Stretch && crossAxisSize == FlexLayoutCrossAxisSize::Max)
         {
             if (crossConstraints.IsBounded())
             {
@@ -315,7 +334,6 @@ auto FlexLayout::Measure(MeasureScope& scope) -> void
 
     auto totalGrowFactor = FlexFactor(0);
     auto totalShrinkFactor = FlexFactor(0);
-    auto totalMainMargin = Dp(0);
     auto totalMain = Dp(0);
     auto maxCross = Dp(0);
     ForEachVisibleChild([&](View& view) {
@@ -326,26 +344,25 @@ auto FlexLayout::Measure(MeasureScope& scope) -> void
         auto const childMarginMain = GetMainAxisLength(childMargin);
         auto const childMarginCross = GetCrossAxisLength(childMargin);
         totalMain += GetMainAxisLength(childSize) + childMarginMain;
-        totalMainMargin += childMarginMain;
         maxCross = Dp::Max(maxCross, GetCrossAxisLength(childSize) + childMarginCross);
         totalGrowFactor += GetChildGrowFactor(view);
-        totalShrinkFactor += GetChildShrinkFactor(view);
+        totalShrinkFactor += GetChildShrinkFactor(view) * FlexFactor(GetMainAxisLength(childSize));
     });
 
     auto const mainSpaceTotal = MeasureMainAxisSize(mainConstraints, totalMain);
-    auto const mainSpace = mainSpaceTotal - totalMain - totalMainMargin;
+    auto const mainSpace = mainSpaceTotal - totalMain;
 
     totalMain = 0;
     maxCross = 0;
     auto alignedMain = Dp(0);
     auto alignedMainError = Dp(0);
     ForEachVisibleChild([&](View& view) {
-        auto const growFactor = GetChildGrowFactor(view);
-        auto const shrinkFactor = GetChildShrinkFactor(view);
-
         auto const childSize = scope.GetMeasuredSize(view);
         auto const childMain = GetMainAxisLength(childSize);
         auto const childMargin = GetChildMargin(view);
+
+        auto const growFactor = GetChildGrowFactor(view);
+        auto const shrinkFactor = GetChildShrinkFactor(view) * FlexFactor(childMain);
 
         if (growFactor > 0 || shrinkFactor > 0)
         {
@@ -361,7 +378,6 @@ auto FlexLayout::Measure(MeasureScope& scope) -> void
             {
                 if (totalShrinkFactor > 0 && shrinkFactor > 0)
                 {
-                    // TODO: Shrink factor should be multiplied by basis.
                     diff = mainSpace * Dp(shrinkFactor / totalShrinkFactor);
                 }
             }
@@ -393,16 +409,23 @@ auto FlexLayout::Measure(MeasureScope& scope) -> void
     auto const measuredMain = MeasureMainAxisSize(mainConstraints, totalMain);
     auto const measuredCross = MeasureCrossAxisSize(crossConstraints, maxCross);
 
-    if (GetCrossAxisAlignment() == FlexLayoutCrossAxisAlignment::Stretch)
+    if (crossAxisAlignment == FlexLayoutCrossAxisAlignment::Stretch)
     {
-        ForEachVisibleChild([&](View& view) {
-            auto const childSize = scope.GetMeasuredSize(view);
-            auto const childMain = GetMainAxisLength(childSize);
-            auto const childMargin = GetChildMargin(view);
-            auto const newChildMain = AxisConstraints::MakeExact(childMain);
-            auto const newChildCross = AxisConstraints::MakeExact(measuredCross - GetCrossAxisLength(childMargin));
-            MeasureChild(scope, view, newChildMain, newChildCross);
-        });
+        if (!(crossConstraints.IsBounded() && crossAxisSize == FlexLayoutCrossAxisSize::Max))
+        {
+            ForEachVisibleChild([&](View& view) {
+                auto const childSize = scope.GetMeasuredSize(view);
+                auto const childMain = GetMainAxisLength(childSize);
+                auto const childCross = GetCrossAxisLength(childSize);
+                auto const childMargin = GetChildMargin(view);
+                auto const newChildMain = childMain;
+                auto const newChildCross = measuredCross - GetCrossAxisLength(childMargin);
+                if (!Dp::IsNearlyEqual(childCross, newChildCross))
+                {
+                    MeasureChild(scope, view, AxisConstraints::MakeExact(newChildMain), AxisConstraints::MakeExact(newChildCross));
+                }
+            });
+        }
     }
 
     SetMeasuredSize(scope, measuredMain, measuredCross);
@@ -440,7 +463,10 @@ auto FlexLayout::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<InvalidateFromChild>())
     {
-        InvalidateLayout();
+        if (IsParentOf(event.As<InvalidateFromChild>()->GetSender()))
+        {
+            InvalidateLayout();
+        }
         co_return true;
     }
     co_return false;
