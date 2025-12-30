@@ -1,0 +1,10 @@
+load("//:defs.bzl", "fw_binary")
+
+fw_binary(
+    name = "WindowGeometryTest",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@futurewalker//:Application",
+        "@futurewalker//:Main",
+    ],
+)
