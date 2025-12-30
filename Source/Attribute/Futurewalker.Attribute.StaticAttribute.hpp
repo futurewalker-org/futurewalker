@@ -13,6 +13,7 @@
 #include "Futurewalker.Core.StaticReference.hpp"
 
 #include <variant>
+#include <array>
 
 namespace FW_DETAIL_NS
 {

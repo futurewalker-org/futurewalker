@@ -6,6 +6,8 @@
 
 #include "Futurewalker.Core.NonConstructible.hpp"
 
+#include <utility>
+
 namespace FW_DETAIL_NS
 {
 struct AttributeFunction : NonConstructible
@@ -23,8 +25,8 @@ public:
     static auto MakeComputeFunction(F&& f) -> StaticAttributeComputeFunction
     {
         using types = std::tuple<Ts...>;
-        auto constexpr indices = std::make_index_sequence<sizeof...(Ts)>();
-        auto constexpr mapper = []<size_t... Seq>(std::index_sequence<Seq...>, auto& args, auto& f) { return f(*args[Seq].template GetValue<std::tuple_element_t<Seq, types>>()...); };
+        static auto constexpr indices = std::make_index_sequence<sizeof...(Ts)>();
+        static auto constexpr mapper = []<size_t... Seq>(std::index_sequence<Seq...>, auto& args, auto& f) { return f(*args[Seq].template GetValue<std::tuple_element_t<Seq, types>>()...); };
         // MSVC ICE: return [f = std::forward<F>(f)](auto const args) { return AttributeValue(R(mapper(indices, args, f))); };
         return [f = std::forward<F>(f)](std::span<AttributeValue const> const args) { return AttributeValue(R(mapper(indices, args, f))); };
     }
