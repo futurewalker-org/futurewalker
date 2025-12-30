@@ -8,7 +8,6 @@
 #include <Futurewalker.Application.ApplicationEvent.hpp>
 #include <Futurewalker.Application.ApplicationTheme.hpp>
 #include <Futurewalker.Application.Window.hpp>
-#include <Futurewalker.Application.WindowBuilder.hpp>
 #include <Futurewalker.Application.AlignView.hpp>
 
 #include <Futurewalker.Event.EventReceiver.hpp>
