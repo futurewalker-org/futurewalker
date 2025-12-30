@@ -4,6 +4,7 @@
 #include "Futurewalker.Event.EventParameterType.hpp"
 
 #include <memory>
+#include <utility>
 
 namespace FW_DETAIL_NS
 {

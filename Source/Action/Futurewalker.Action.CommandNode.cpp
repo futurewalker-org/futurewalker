@@ -16,6 +16,8 @@ CommandNode::CommandNode(PassKey<CommandNode>)
     _eventReceiver = EventReceiver::Make();
 }
 
+CommandNode::~CommandNode() noexcept = default;
+
 auto CommandNode::AddChild(Shared<CommandNode> const& child) -> void
 {
     if (child)

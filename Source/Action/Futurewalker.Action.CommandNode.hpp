@@ -45,7 +45,9 @@ public:
     template <class Owner>
     static auto SetBlocking(Owner& owner, Bool const blocking) -> void;
 
+    CommandNode() = delete;
     CommandNode(PassKey<CommandNode>);
+    virtual ~CommandNode() noexcept;
 
     auto AddChild(Shared<CommandNode> const& child) -> void;
     auto RemoveChild(Shared<CommandNode> const& child) -> void;

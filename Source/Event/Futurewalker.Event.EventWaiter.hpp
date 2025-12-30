@@ -34,9 +34,9 @@ public:
         while (true)
         {
             auto const event = co_await WaitEvent();
-            if (event.Is<T>())
+            if (event.template Is<T>())
             {
-                co_return event.As<T>();
+                co_return event.template As<T>();
             }
         }
     }

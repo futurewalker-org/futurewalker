@@ -150,7 +150,6 @@ public:
     ///
     /// @brief Access contained event value.
     ///
-    template <class Parameter>
     auto operator->(this const Event<Parameter>& self) -> Parameter const*
     {
         if (self._holder)
@@ -163,7 +162,6 @@ public:
     ///
     /// @brief Access contained event value.
     ///
-    template <class Parameter>
     auto operator->(this const Event<Parameter>&& self) -> Parameter const*
     {
         if (self._holder)
@@ -176,7 +174,6 @@ public:
     ///
     /// @brief Access contained event value.
     ///
-    template <class Parameter>
     auto operator->(this Event<Parameter>& self) -> Parameter*
     {
         if (self._holder)
@@ -189,7 +186,6 @@ public:
     ///
     /// @brief Access contained event value.
     ///
-    template <class Parameter>
     auto operator->(this Event<Parameter>&& self) -> Parameter*
     {
         if (self._holder)
@@ -202,7 +198,6 @@ public:
     ///
     /// @brief Access contained event value.
     ///
-    template <class Parameter>
     auto operator*(this const Event<Parameter>& self) -> Parameter const&
     {
         if (self._holder)
@@ -215,7 +210,6 @@ public:
     ///
     /// @brief Access contained event value.
     ///
-    template <class Parameter>
     auto operator*(this const Event<Parameter>&& self) -> Parameter const&
     {
         if (self._holder)
@@ -228,7 +222,6 @@ public:
     ///
     /// @brief Access contained event value.
     ///
-    template <class Parameter>
     auto operator*(this Event<Parameter>& self) -> Parameter&
     {
         if (self._holder)
@@ -241,7 +234,6 @@ public:
     ///
     /// @brief Access contained event value.
     ///
-    template <class Parameter>
     auto operator*(this Event<Parameter>&& self) -> Parameter&
     {
         if (self._holder)

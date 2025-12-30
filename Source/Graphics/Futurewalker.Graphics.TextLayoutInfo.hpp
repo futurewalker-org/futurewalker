@@ -11,6 +11,7 @@
 
 #include "Futurewalker.Core.Optional.hpp"
 #include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.StringUnit.hpp"
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
