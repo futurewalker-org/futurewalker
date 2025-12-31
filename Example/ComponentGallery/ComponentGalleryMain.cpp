@@ -15,7 +15,6 @@ auto Main() -> Async<ExitCode>
     try
     {
         auto env = Environment();
-        Debug::Console();
         auto app = ComponentGallery::ComponentGalleryApplication::Make();
         co_await app->Run();
     }

@@ -244,7 +244,6 @@ auto Main() -> Async<ExitCode>
     try
     {
         auto env = Environment();
-            Debug::Console();
         auto app = App::Make();
         co_await app->Run();
     }
