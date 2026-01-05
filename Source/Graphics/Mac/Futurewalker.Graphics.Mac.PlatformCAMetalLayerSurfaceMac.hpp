@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MPL-2.0
+﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Graphics.Mac.PlatformMTKViewSurfaceMacType.hpp"
+#include "Futurewalker.Graphics.Mac.PlatformCAMetalLayerSurfaceMacType.hpp"
 
 #include "Futurewalker.Graphics.SceneType.hpp"
 
@@ -30,15 +30,17 @@ namespace FW_EXPORT
 ///
 /// @brief MTKView surface.
 ///
-class PlatformMTKViewSurfaceMac : NonCopyable
+class PlatformCAMetalLayerSurfaceMac : NonCopyable
 {
 public:
-    PlatformMTKViewSurfaceMac(id<MTLDevice> metalDevice, id<MTLCommandQueue>);
+    PlatformCAMetalLayerSurfaceMac(id<MTLDevice> metalDevice, id<MTLCommandQueue> metalQueue);
 
-    auto SetupConfiguration(MTKView* mtkView) -> void;
-    auto Draw(MTKView* mtkView, Function<void(Scene& canvas)> func) -> Bool;
+    auto Resize(IntPx const width, IntPx const height) -> void;
+    auto Draw(Function<void(Scene& canvas)> func) -> Bool;
+    auto GetMetalLayer() -> CAMetalLayer*;
 
 private:
+    __strong CAMetalLayer* _metalLayer = nil;
     __strong id<MTLDevice> _metalDevice = nil;
     __strong id<MTLCommandQueue> _metalCommandQueue = nil;
     sk_sp<GrDirectContext> _context;
