@@ -200,7 +200,7 @@ auto MenuView::UpdatePopup(SInt64 const index) -> void
             }
             else
             {
-                _createPopupTask = AsyncFunction::SpawnFn([index = index, weakSelf = Weak(GetSelf())]() -> Async<void> {
+                _createPopupTask = AsyncFunction::SpawnFn([weakSelf = Weak(GetSelf())]() -> Async<void> {
                     co_await ThisThread::ScheduleAfter(std::chrono::milliseconds(400));
                     if (auto self = weakSelf.Lock())
                     {
