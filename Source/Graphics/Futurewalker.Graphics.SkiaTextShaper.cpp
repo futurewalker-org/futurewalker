@@ -14,6 +14,9 @@
 #include <include/core/SkFontMetrics.h>
 #include <include/core/SkTextBlob.h>
 #include <modules/skshaper/include/SkShaper.h>
+#include <modules/skshaper/include/SkShaper_harfbuzz.h>
+#include <modules/skshaper/include/SkShaper_skunicode.h>
+#include <modules/skunicode/include/SkUnicode_icu.h>
 #include <include/ports/SkTypeface_win.h>
 
 #include <unicode/utf8.h>
@@ -147,13 +150,14 @@ auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typefac
     auto const utf8Bytes = utf8Str.size();
 
     auto const fontMgr = GetSkFontMgr();
+    auto const unicode = SkUnicodes::ICU::Make();
 
     auto const fontRunIterator = SkShaper::MakeFontMgrRunIterator(utf8Chars, utf8Bytes, font, fontMgr);
-    auto const bidiRunIterator = SkShaper::MakeBiDiRunIterator(utf8Chars, utf8Bytes, 0xfe /*UBIDI_DEFAULT_LTR*/);
-    auto const scriptRunIterator = SkShaper::MakeScriptRunIterator(utf8Chars, utf8Bytes, 'latn');
+    auto const bidiRunIterator = SkShapers::unicode::BidiRunIterator(unicode, utf8Chars, utf8Bytes, 0xfe /*UBIDI_DEFAULT_LTR*/);
+    auto const scriptRunIterator = SkShapers::HB::ScriptRunIterator(utf8Chars, utf8Bytes, 'latn');
     auto const languageRunIterator = SkShaper::MakeStdLanguageRunIterator(utf8Chars, utf8Bytes);
 
-    auto shaper = SkShaper::MakeShaperDrivenWrapper(fontMgr);
+    auto shaper = SkShapers::HB::ShapeDontWrapOrReorder(unicode, fontMgr);
     auto runHandler = SkiaRunHandler(text);
     shaper->shape(utf8Chars, utf8Bytes, *fontRunIterator, *bidiRunIterator, *scriptRunIterator, *languageRunIterator, nullptr, 0, width, &runHandler);
 
