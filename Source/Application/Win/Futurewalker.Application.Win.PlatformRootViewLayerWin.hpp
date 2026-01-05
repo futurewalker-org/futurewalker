@@ -32,25 +32,24 @@ public:
 
     auto Render() -> void;
 
-    using PlatformViewLayerWin::NotifyDisplayScaleChanged;
-
 protected:
     auto Initialize() -> void override;
 
 private:
     auto RootGetWindowHandle() const -> HWND override;
     auto RootGetDisplayScale() const -> DisplayScale override;
+    auto RootGetBackingScale() const -> BackingScale override;
 
 private:
-    auto RootOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void override;
-    auto RootSizeChanged(Shared<PlatformViewLayerWin> const& layer) -> void override;
-    auto RootClipModeChanged(Shared<PlatformViewLayerWin> const& layer) -> void override;
-    auto RootOpacityChanged(Shared<PlatformViewLayerWin> const& layer) -> void override;
-    auto RootRenderFlagsChanged(Shared<PlatformViewLayerWin> const& layer) -> void override;
-    auto RootDisplayListChanged(Shared<PlatformViewLayerWin> const& layer) -> void override;
-    auto RootDisplayListOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void override;
-    auto RootChildAdded(Shared<PlatformViewLayerWin> const& child) -> void override;
-    auto RootChildRemoved(Shared<PlatformViewLayerWin> const& parent) -> void override;
+    auto RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void override;
+    auto RootSizeChanged(Shared<PlatformViewLayer> const& layer) -> void override;
+    auto RootClipModeChanged(Shared<PlatformViewLayer> const& layer) -> void override;
+    auto RootOpacityChanged(Shared<PlatformViewLayer> const& layer) -> void override;
+    auto RootRenderFlagsChanged(Shared<PlatformViewLayer> const& layer) -> void override;
+    auto RootDisplayListChanged(Shared<PlatformViewLayer> const& layer) -> void override;
+    auto RootDisplayListOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void override;
+    auto RootChildAdded(Shared<PlatformViewLayer> const& child) -> void override;
+    auto RootChildRemoved(Shared<PlatformViewLayer> const& parent) -> void override;
 
 private:
     auto MakeTarget(HWND hwnd) -> Microsoft::WRL::ComPtr<IDCompositionTarget>;

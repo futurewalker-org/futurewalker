@@ -15,6 +15,15 @@ TEST_CASE("String")
         REQUIRE_NOTHROW(str.Clear());
     }
 
+    SECTION("Empty")
+    {
+        auto str = String(u8"");
+        REQUIRE(str.IsEmpty());
+        REQUIRE(str.GetView().GetSize() == 0);
+        REQUIRE(str == str);
+        REQUIRE_NOTHROW(str.Clear());
+    }
+
     SECTION("Ctor")
     {
         auto str = String(U'\U0001F600');

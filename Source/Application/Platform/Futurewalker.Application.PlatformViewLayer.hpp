@@ -72,12 +72,16 @@ public:
     auto GetDisplayScale() const -> DisplayScale;
     auto GetBackingScale() const -> BackingScale;
 
+    auto NotifyRootChanged() -> void;
+
 public:
     virtual auto ShouldRasterize() const -> Bool;
     virtual auto GetControl() -> Shared<PlatformViewLayerControl>;
 
 protected:
-    virtual auto Initialize() -> void;
+    virtual auto Initialize() -> void = 0;
+    virtual auto OnAttach() -> void = 0;
+    virtual auto OnDetach() -> void = 0;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;
@@ -98,13 +102,12 @@ private:
     virtual auto RootChildAdded(Shared<PlatformViewLayer> const& child) -> void;
     virtual auto RootChildRemoved(Shared<PlatformViewLayer> const& parent) -> void;
 
-
 private:
     auto InitializeSelf() -> void;
     auto InternalAttach() -> void;
     auto InternalDetach() -> void;
     auto NotifyRootDisplayScaleChanged(DisplayScale const rootDisplayScale) -> void;
-    auto NotifyRootBackingScaleChanged(DisplayScale const rootDisplayScale) -> void;
+    auto NotifyRootBackingScaleChanged(BackingScale const rootBackingScale) -> void;
 
 private:
     Shared<PlatformViewLayerContext> _context;

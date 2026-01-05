@@ -1429,7 +1429,7 @@ auto PlatformWindowWin::HandleDpiChanged(HWND hWnd, UINT msg, WPARAM wParam, LPA
             {
                 if (_rootViewLayer)
                 {
-                    _rootViewLayer->NotifyDisplayScaleChanged();
+                    _rootViewLayer->NotifyRootChanged();
                 }
                 auto event = Event<>(Event<PlatformWindowEvent::DisplayScaleChanged>());
                 SendWindowEventDetached(event);

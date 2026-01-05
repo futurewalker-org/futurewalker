@@ -29,6 +29,12 @@ TEST_CASE("Float")
             STATIC_REQUIRE(!Concepts::ImplicitlyConvertibleTo<Float32, Float<float64_t, int>>);
             STATIC_REQUIRE(Concepts::ExplicitlyConvertibleTo<Float32, Float<float32_t, int>>);
             STATIC_REQUIRE(Concepts::ExplicitlyConvertibleTo<Float32, Float<float64_t, int>>);
+            STATIC_REQUIRE(std::is_standard_layout_v<Float64>);
+            STATIC_REQUIRE(std::is_trivially_copyable_v<Float64>);
+            STATIC_REQUIRE(std::is_trivially_copy_assignable_v<Float64>);
+            STATIC_REQUIRE(std::is_trivially_destructible_v<Float64>);
+            STATIC_REQUIRE(!std::is_trivially_constructible_v<Float64>);
+            STATIC_REQUIRE(!std::is_trivially_default_constructible_v<Float64>);
         }
 
         SECTION("Types")

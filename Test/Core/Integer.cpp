@@ -23,6 +23,12 @@ TEST_CASE("Integer")
         STATIC_REQUIRE(!Concepts::ImplicitlyConvertibleTo<SInt32, Integer<int64_t, int>>);
         STATIC_REQUIRE(Concepts::ExplicitlyConvertibleTo<SInt32, Integer<int32_t, int>>);
         STATIC_REQUIRE(Concepts::ExplicitlyConvertibleTo<SInt32, Integer<int64_t, int>>);
+        STATIC_REQUIRE(std::is_standard_layout_v<SInt32>);
+        STATIC_REQUIRE(std::is_trivially_copyable_v<SInt32>);
+        STATIC_REQUIRE(std::is_trivially_copy_assignable_v<SInt32>);
+        STATIC_REQUIRE(std::is_trivially_destructible_v<SInt32>);
+        STATIC_REQUIRE(!std::is_trivially_constructible_v<SInt32>);
+        STATIC_REQUIRE(!std::is_trivially_default_constructible_v<SInt32>);
     }
 
     SECTION("Type")

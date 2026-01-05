@@ -32,7 +32,7 @@ auto FindViewLayerById(PlatformViewLayerId const id, Shared<PlatformViewLayerWin
     return {};
 }
 
-auto GetRasterizingLayer(Shared<PlatformViewLayerWin> const& layer) -> Shared<PlatformViewLayerWin>
+auto GetRasterizingLayer(Shared<PlatformViewLayer> const& layer) -> Shared<PlatformViewLayer>
 {
     auto current = layer;
     while (current)
@@ -46,7 +46,7 @@ auto GetRasterizingLayer(Shared<PlatformViewLayerWin> const& layer) -> Shared<Pl
     return {};
 }
 
-auto GetRasterizingBaseLayer(Shared<PlatformViewLayerWin> const& layer) -> Shared<PlatformViewLayerWin>
+auto GetRasterizingBaseLayer(Shared<PlatformViewLayer> const& layer) -> Shared<PlatformViewLayer>
 {
     if (layer)
     {
@@ -100,11 +100,16 @@ auto PlatformRootViewLayerWin::GetControl() -> Shared<PlatformViewLayerControl>
 ///
 auto PlatformRootViewLayerWin::Render() -> void
 {
+#if FW_ENABLE_DEBUG
     auto bgn = std::chrono::high_resolution_clock::now();
+#endif
 
     _dcompVisual->RemoveAllVisuals();
 
+#if FW_ENABLE_DEBUG
     auto rebuildBgn = std::chrono::high_resolution_clock::now();
+#endif
+
     for (auto const& layerId : _layersToRebuild)
     {
         // Check if the layer still exists.
@@ -116,18 +121,24 @@ auto PlatformRootViewLayerWin::Render() -> void
         }
     }
     _layersToRebuild.clear();
+
+#if FW_ENABLE_DEBUG
     auto rebuildEnd = std::chrono::high_resolution_clock::now();
     auto rebuildDur = std::chrono::duration_cast<std::chrono::milliseconds>(rebuildEnd - rebuildBgn).count();
 
     auto updateBgn = std::chrono::high_resolution_clock::now();
+#endif
     if (_shouldUpdateLayer)
     {
         // TODO: Improve algo so that we don't need to O(n) traverse all layers.
         UpdateVisual();
         _shouldUpdateLayer = false;
     }
+
+#if FW_ENABLE_DEBUG
     auto updateEnd = std::chrono::high_resolution_clock::now();
     auto updateDur = std::chrono::duration_cast<std::chrono::milliseconds>(updateEnd - updateBgn).count();
+#endif
 
     auto traverseVisual = [](this auto self, Shared<PlatformViewLayerVisualWin> const& visual, auto&& func) -> void {
         if (visual)
@@ -148,9 +159,11 @@ auto PlatformRootViewLayerWin::Render() -> void
         }
     });
 
+#if FW_ENABLE_DEBUG
     auto end = std::chrono::high_resolution_clock::now();
     auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - bgn).count();
     FW_DEBUG_LOG_INFO("PlatformRootViewLayerWin::Render: took {} ms, rebuild: {} ms, update: {} ms", dur, rebuildDur, updateDur);
+#endif
 }
 
 ///
@@ -186,9 +199,17 @@ auto PlatformRootViewLayerWin::RootGetDisplayScale() const -> DisplayScale
 }
 
 ///
+/// @brief
+///
+auto PlatformRootViewLayerWin::RootGetBackingScale() const -> BackingScale
+{
+    return 1.0;
+}
+
+///
 /// @brief Notify offset change.
 ///
-auto PlatformRootViewLayerWin::RootOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+auto PlatformRootViewLayerWin::RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     (void)layer;
     QueueUpdateLayer();
@@ -197,7 +218,7 @@ auto PlatformRootViewLayerWin::RootOffsetChanged(Shared<PlatformViewLayerWin> co
 ///
 /// @brief Notify size change.
 ///
-auto PlatformRootViewLayerWin::RootSizeChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+auto PlatformRootViewLayerWin::RootSizeChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     (void)layer;
     QueueUpdateLayer();
@@ -206,7 +227,7 @@ auto PlatformRootViewLayerWin::RootSizeChanged(Shared<PlatformViewLayerWin> cons
 ///
 /// @brief Notify clip mode change.
 ///
-auto PlatformRootViewLayerWin::RootClipModeChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+auto PlatformRootViewLayerWin::RootClipModeChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     (void)layer;
     QueueUpdateLayer();
@@ -215,7 +236,7 @@ auto PlatformRootViewLayerWin::RootClipModeChanged(Shared<PlatformViewLayerWin> 
 ///
 /// @brief Notify opacity change.
 ///
-auto PlatformRootViewLayerWin::RootOpacityChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+auto PlatformRootViewLayerWin::RootOpacityChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     (void)layer;
     QueueUpdateLayer();
@@ -224,7 +245,7 @@ auto PlatformRootViewLayerWin::RootOpacityChanged(Shared<PlatformViewLayerWin> c
 ///
 /// @brief Notify render flags change.
 ///
-auto PlatformRootViewLayerWin::RootRenderFlagsChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+auto PlatformRootViewLayerWin::RootRenderFlagsChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     if (auto const baseLayer = GetRasterizingBaseLayer(layer))
     {
@@ -235,7 +256,7 @@ auto PlatformRootViewLayerWin::RootRenderFlagsChanged(Shared<PlatformViewLayerWi
 ///
 /// @brief Notify display list change.
 ///
-auto PlatformRootViewLayerWin::RootDisplayListChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+auto PlatformRootViewLayerWin::RootDisplayListChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     // TODO: This should not require full update.
     (void)layer;
@@ -245,7 +266,7 @@ auto PlatformRootViewLayerWin::RootDisplayListChanged(Shared<PlatformViewLayerWi
 ///
 /// @brief Notify display list offset change.
 ///
-auto PlatformRootViewLayerWin::RootDisplayListOffsetChanged(Shared<PlatformViewLayerWin> const& layer) -> void
+auto PlatformRootViewLayerWin::RootDisplayListOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     // TODO: This should not require full update.
     (void)layer;
@@ -255,7 +276,7 @@ auto PlatformRootViewLayerWin::RootDisplayListOffsetChanged(Shared<PlatformViewL
 ///
 /// @brief Notify child added.
 ///
-auto PlatformRootViewLayerWin::RootChildAdded(Shared<PlatformViewLayerWin> const& child) -> void
+auto PlatformRootViewLayerWin::RootChildAdded(Shared<PlatformViewLayer> const& child) -> void
 {
     if (auto const baseLayer = GetRasterizingBaseLayer(child))
     {
@@ -266,7 +287,7 @@ auto PlatformRootViewLayerWin::RootChildAdded(Shared<PlatformViewLayerWin> const
 ///
 /// @brief Notify child removed.
 ///
-auto PlatformRootViewLayerWin::RootChildRemoved(Shared<PlatformViewLayerWin> const& parent) -> void
+auto PlatformRootViewLayerWin::RootChildRemoved(Shared<PlatformViewLayer> const& parent) -> void
 {
     if (auto const layer = GetRasterizingLayer(parent))
     {
@@ -323,7 +344,7 @@ auto PlatformRootViewLayerWin::FindBaseVisualByBaseLayerId(PlatformViewLayerId c
 ///
 auto PlatformRootViewLayerWin::RebuildVisual(Shared<PlatformViewLayerWin> const& baseLayer) -> void
 {
-    FW_DEBUG_LOG_INFO("Rebuilding visuals starting from layer ID {}", (uint64_t)(UInt64)baseLayer->GetId());
+    //FW_DEBUG_LOG_INFO("Rebuilding visuals starting from layer ID {}", (uint64_t)(UInt64)baseLayer->GetId());
 
     // find visual corresponding to base layer.
     auto const baseVisual = FindBaseVisualByBaseLayerId(baseLayer->GetId());
