@@ -257,7 +257,6 @@ auto AttributeNode::SetFunction(Owner& owner, F&& f, StaticAttributeRef<T> attri
 {
     if (CheckReferenceLoop(attribute))
     {
-        using types = std::tuple<Ts...>;
         auto const args = std::array {StaticAttributeBaseRef(references)...};
         auto& node = owner.GetAttributeNode();
         node.AddAttributeSlot(attribute);
