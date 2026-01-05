@@ -15,6 +15,7 @@ PlatformCAMetalLayerSurfaceMac::PlatformCAMetalLayerSurfaceMac(id<MTLDevice> met
         _metalLayer = [CAMetalLayer layer];
         [_metalLayer setDevice:_metalDevice];
         [_metalLayer setPixelFormat:MTLPixelFormatBGRA8Unorm];
+        [_metalLayer setOpaque:NO];
 
         auto backendContext = GrMtlBackendContext();
         backendContext.fDevice.reset((__bridge void*)_metalDevice);
