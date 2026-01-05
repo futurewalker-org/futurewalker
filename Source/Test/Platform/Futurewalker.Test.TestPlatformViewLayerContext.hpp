@@ -13,6 +13,12 @@ namespace FW_EXPORT
 class TestPlatformViewLayerContext : public PlatformViewLayerContext
 {
 public:
+    auto GetNextId() -> PlatformViewLayerId override
+    {
+        _nextLayerId = PlatformViewLayerId(static_cast<UInt64>(_nextLayerId) + 1U);
+        return _nextLayerId;
+    }
+
     auto MakeViewLayer() -> Shared<PlatformViewLayer> override
     {
         return TestPlatformViewLayer::Make();
@@ -20,12 +26,6 @@ public:
 
     auto Commit() -> void override
     {
-    }
-
-    auto GetNextId() -> PlatformViewLayerId override
-    {
-        _nextLayerId = PlatformViewLayerId(static_cast<UInt64>(_nextLayerId) + 1U);
-        return _nextLayerId;
     }
 
 private:

@@ -17,6 +17,8 @@
 #include "Futurewalker.Core.TypeTraits.hpp"
 #include "Futurewalker.Core.Memory.hpp"
 
+#include <vector>
+
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -33,60 +35,46 @@ public:
 
     auto GetId() const -> PlatformViewLayerId;
 
-    ///
-    /// @brief Add child layer.
-    ///
-    virtual auto AddChild(Shared<PlatformViewLayer> child, Shared<PlatformViewLayer> after) -> void = 0;
+    auto AddChild(Shared<PlatformViewLayer> child, Shared<PlatformViewLayer> after) -> void;
+    auto RemoveFromParent() -> void;
 
-    ///
-    /// @brief Remove from parent layer.
-    ///
-    virtual auto RemoveFromParent() -> void = 0;
+    auto IsRoot() const -> Bool;
+    auto GetRoot() -> Shared<PlatformViewLayer>;
+    auto GetRoot() const -> Shared<PlatformViewLayer const>;
 
-    ///
-    /// @brief Get array of child layers.
-    ///
-    virtual auto GetChildren() -> PlatformViewLayerArray = 0;
+    auto GetParent() -> Shared<PlatformViewLayer>;
+    auto GetParent() const -> Shared<PlatformViewLayer const>;
 
-    ///
-    /// @brief Get control interface.
-    ///
-    virtual auto GetControl() -> Shared<PlatformViewLayerControl> = 0;
+    auto GetChildren() -> std::vector<Shared<PlatformViewLayer>>;
+    auto GetChildren() const -> std::vector<Shared<PlatformViewLayer const>>;
 
-    ///
-    /// @brief Set offset of this layer.
-    ///
-    virtual auto SetOffset(Offset<Dp> const& pos) -> void = 0;
+    auto GetOffset() const -> Offset<Dp>;
+    auto SetOffset(Offset<Dp> const& pos) -> void;
 
-    ///
-    /// @brief Set size of this layer's bounds.
-    ///
-    virtual auto SetSize(Size<Dp> const& size) -> void = 0;
+    auto GetSize() const -> Size<Dp>;
+    auto SetSize(Size<Dp> const& size) -> void;
 
-    ///
-    /// @brief Set if the layer clips to bounds.
-    ///
-    virtual auto SetClipMode(ViewClipMode const clipMode) -> void = 0;
+    auto GetClipMode() const -> ViewClipMode;
+    auto SetClipMode(ViewClipMode const clipMode) -> void;
 
-    ///
-    /// @brief Set opacity of this layer.
-    ///
-    virtual auto SetOpacity(Float64 const opacity) -> void = 0;
+    auto GetOpacity() const -> Float64;
+    auto SetOpacity(Float64 const opacity) -> void;
 
-    ///
-    /// @brief Set render flags.
-    ///
-    virtual auto SetRenderFlags(PlatformViewLayerRenderFlags const renderFlags) -> void = 0;
+    auto GetRenderFlags() const -> PlatformViewLayerRenderFlags;
+    auto SetRenderFlags(PlatformViewLayerRenderFlags const renderFlags) -> void;
 
-    ///
-    /// @brief Set display list to be rendered.
-    ///
-    virtual auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void = 0;
+    auto GetDisplayList() const -> Shared<Graphics::DisplayList>;
+    auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void;
 
-    ///
-    /// @brief Set offset of display list content.
-    ///
-    virtual auto SetDisplayListOffset(Offset<Dp> const& offset) -> void = 0;
+    auto GetDisplayListOffset() const -> Offset<Dp>;
+    auto SetDisplayListOffset(Offset<Dp> const& offset) -> void;
+
+    auto GetDisplayScale() const -> DisplayScale;
+    auto GetBackingScale() const -> BackingScale;
+
+public:
+    virtual auto ShouldRasterize() const -> Bool;
+    virtual auto GetControl() -> Shared<PlatformViewLayerControl>;
 
 protected:
     virtual auto Initialize() -> void;
@@ -98,11 +86,40 @@ protected:
     static auto MakeDerived(Args&&... args) -> Shared<Derived>;
 
 private:
+    virtual auto RootGetDisplayScale() const -> DisplayScale;
+    virtual auto RootGetBackingScale() const -> BackingScale;
+    virtual auto RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void;
+    virtual auto RootSizeChanged(Shared<PlatformViewLayer> const& layer) -> void;
+    virtual auto RootClipModeChanged(Shared<PlatformViewLayer> const& layer) -> void;
+    virtual auto RootOpacityChanged(Shared<PlatformViewLayer> const& layer) -> void;
+    virtual auto RootRenderFlagsChanged(Shared<PlatformViewLayer> const& layer) -> void;
+    virtual auto RootDisplayListChanged(Shared<PlatformViewLayer> const& layer) -> void;
+    virtual auto RootDisplayListOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void;
+    virtual auto RootChildAdded(Shared<PlatformViewLayer> const& child) -> void;
+    virtual auto RootChildRemoved(Shared<PlatformViewLayer> const& parent) -> void;
+
+
+private:
     auto InitializeSelf() -> void;
+    auto InternalAttach() -> void;
+    auto InternalDetach() -> void;
+    auto NotifyRootDisplayScaleChanged(DisplayScale const rootDisplayScale) -> void;
+    auto NotifyRootBackingScaleChanged(DisplayScale const rootDisplayScale) -> void;
 
 private:
     Shared<PlatformViewLayerContext> _context;
     Weak<PlatformViewLayer> _self;
+    Weak<PlatformViewLayer> _parent;
+    std::list<Shared<PlatformViewLayer>> _children;
+    PlatformViewLayerRenderFlags _renderFlags = PlatformViewLayerRenderFlags::None;
+    Size<Dp> _size;
+    Offset<Dp> _offset;
+    ViewClipMode _clipMode = ViewClipMode::None;
+    Float64 _opacity = 1.0;
+    Shared<Graphics::DisplayList> _displayList;
+    Offset<Dp> _displayListOffset;
+    DisplayScale _displayScale = 1.0;
+    BackingScale _backingScale = 1.0;
     PlatformViewLayerId _id = 0U;
 };
 
