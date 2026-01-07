@@ -97,7 +97,6 @@ private:
     Weak<PlatformViewLayerVisual> _parent;
     std::vector<Shared<PlatformViewLayerVisual>> _children;
     PlatformViewLayerId _baseLayerId = PlatformViewLayerId(0U);
-    Bool _invalidated = true;
     Offset<Dp> _offset;
     Rect<Dp> _clipRect;
     Float64 _opacity = 1.0;
