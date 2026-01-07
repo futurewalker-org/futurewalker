@@ -3,6 +3,7 @@
 
 #include "Futurewalker.Application.Win.PlatformViewLayerVisualWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformViewLayerSurfaceWinType.hpp"
+#include "Futurewalker.Application.PlatformViewLayerVisual.hpp"
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 
 #include "Futurewalker.Graphics.DisplayListType.hpp"
@@ -30,67 +31,31 @@ namespace FW_EXPORT
 /// There are visuals those that correspond to rasterizing view layers and those that do not.
 /// A visual that correspond to rasterizing view layer includes a fragment for the base layer itself.
 ///
-class PlatformViewLayerVisualWin : NonCopyable
+class PlatformViewLayerVisualWin : public PlatformViewLayerVisual
 {
 public:
-    explicit PlatformViewLayerVisualWin(Shared<PlatformDCompositionDeviceWin> const& device);
+    static auto Make(Shared<PlatformDCompositionDeviceWin> const& device) -> Shared<PlatformViewLayerVisualWin>;
 
-    auto AddChild(Shared<PlatformViewLayerVisualWin> const& child) -> void;
-    auto RemoveChild(Shared<PlatformViewLayerVisualWin> const& child) -> void;
-
-    auto GetChildren() -> PlatformViewLayerVisualWinArray const&;
-    auto GetParent() -> Shared<PlatformViewLayerVisualWin>;
+    PlatformViewLayerVisualWin(PassKey<PlatformViewLayerVisual>, Shared<PlatformDCompositionDeviceWin> const& device);
 
     auto GetVisual() -> Microsoft::WRL::ComPtr<IDCompositionVisual3>;
-
-    auto GetBaseLayerId() const -> PlatformViewLayerId;
-    auto SetBaseLayerId(PlatformViewLayerId const layerId) -> void;
-
-    auto SetOffset(Offset<Dp> const& offset) -> void;
-    auto SetClipRect(Rect<Dp> const& clipRect) -> void;
-    auto SetOpacity(Float64 const opacity) -> void;
-    auto SetDisplayScale(DisplayScale const scale) -> void;
-    auto SetBackingScale(BackingScale const scale) -> void;
-
-    struct Fragment
-    {
-        Offset<Dp> offset;
-        Rect<Dp> clipRect;
-        Float64 opacity = 1.0;
-        Shared<Graphics::DisplayList> displayList;
-        Offset<Dp> displayListOffset;
-    };
-    auto InsertFragment(const SInt64 index, PlatformViewLayerId layerId, Fragment const& fragment) -> void;
-    auto ReplaceFragment(const SInt64 index, PlatformViewLayerId layerId, Fragment const& fragment) -> void;
-    auto ReplaceFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void;
-    auto RemoveFragment(const SInt64 index) -> void;
-    auto ClearFragments() -> void;
-    auto GetFragmentIndexByLayerId(PlatformViewLayerId const layerId) const -> Optional<SInt64>;
-    auto GetFragment(SInt64 const index) const -> Optional<Fragment>;
-    auto GetFragmentCount() const -> SInt64;
-
     auto Render() -> void;
 
 private:
     auto Invalidate() -> void;
-    auto UpdateOffset() -> void;
-    auto UpdateClipRect() -> void;
-    auto UpdateOpacity() -> void;
+    auto Initialize() -> void override;
+    auto OnFragmentChanged() -> void override;
+    auto OnOffsetChanged() -> void override;
+    auto OnClipRectChanged() -> void override;
+    auto OnOpacityChanged() -> void override;
+    auto OnDisplayScaleChanged() -> void override;
+    auto OnBackingScaleChanged() -> void override;
 
 private:
-    Weak<PlatformViewLayerVisualWin> _parent;
-    PlatformViewLayerVisualWinArray _children;
     Shared<PlatformDCompositionDeviceWin> _device;
     Shared<PlatformViewLayerSurfaceWin> _surface;
     Microsoft::WRL::ComPtr<IDCompositionVisual3> _visual;
-    PlatformViewLayerId _baseLayerId = PlatformViewLayerId(0U);
     Bool _invalidated = true;
-    Offset<Dp> _offset;
-    Rect<Dp> _clipRect;
-    Float64 _opacity = 1.0;
-    OrderedHashMap<PlatformViewLayerId, Fragment> _fragments;
-    DisplayScale _displayScale = 1.0;
-    BackingScale _backingScale = 1.0;
 };
 }
 }

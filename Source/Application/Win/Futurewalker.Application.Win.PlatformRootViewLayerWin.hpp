@@ -4,6 +4,7 @@
 #include "Futurewalker.Application.Win.PlatformRootViewLayerWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformViewLayerWin.hpp"
 #include "Futurewalker.Application.Win.PlatformViewLayerVisualWin.hpp"
+#include "Futurewalker.Application.PlatformViewLayerVisualRendererType.hpp"
 
 #include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWinType.hpp"
 #include "Futurewalker.Graphics.Win.PlatformD3D11DeviceWinType.hpp"
@@ -54,21 +55,11 @@ private:
 private:
     auto MakeTarget(HWND hwnd) -> Microsoft::WRL::ComPtr<IDCompositionTarget>;
 
-    auto FindBaseVisualByBaseLayerId(PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisualWin>;
-
-    auto RebuildVisual(Shared<PlatformViewLayerWin> const& baseLayer) -> void;
-    auto UpdateVisual() -> void;
-
-    auto QueueRebuildLayer(PlatformViewLayerId const layerId) -> void;
-    auto QueueUpdateLayer() -> void;
-
 private:
     HWND _hwnd = NULL;
     Microsoft::WRL::ComPtr<IDCompositionTarget> _dcompTarget;
     Microsoft::WRL::ComPtr<IDCompositionVisual3> _dcompVisual;
-    Shared<PlatformViewLayerVisualWin> _visual;
-    std::vector<PlatformViewLayerId> _layersToRebuild;
-    Bool _shouldUpdateLayer = false;
+    Unique<PlatformViewLayerVisualRenderer> _renderer;
 };
 }
 }

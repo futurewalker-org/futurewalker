@@ -2,8 +2,8 @@
 
 #include "Futurewalker.Application.Win.PlatformRootViewLayerWin.hpp"
 #include "Futurewalker.Application.Win.PlatformViewLayerVisualWin.hpp"
-#include "Futurewalker.Application.Win.PlatformViewLayerVisualPropertyUpdaterWin.hpp"
-#include "Futurewalker.Application.Win.PlatformViewLayerVisualUpdaterWin.hpp"
+#include "Futurewalker.Application.Win.PlatformViewLayerVisualContextWin.hpp"
+#include "Futurewalker.Application.PlatformViewLayerVisualRenderer.hpp"
 
 #include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 
@@ -13,49 +13,6 @@
 
 namespace FW_DETAIL_NS
 {
-namespace
-{
-auto FindViewLayerById(PlatformViewLayerId const id, Shared<PlatformViewLayerWin> const& layer) -> Shared<PlatformViewLayerWin>
-{
-    if (layer->GetId() == id)
-    {
-        return layer;
-    }
-
-    for (auto const& child : layer->GetChildren())
-    {
-        if (auto const found = FindViewLayerById(id, child.As<PlatformViewLayerWin>()))
-        {
-            return found;
-        }
-    }
-    return {};
-}
-
-auto GetRasterizingLayer(Shared<PlatformViewLayer> const& layer) -> Shared<PlatformViewLayer>
-{
-    auto current = layer;
-    while (current)
-    {
-        if (current->ShouldRasterize())
-        {
-            return current;
-        }
-        current = current->GetParent();
-    }
-    return {};
-}
-
-auto GetRasterizingBaseLayer(Shared<PlatformViewLayer> const& layer) -> Shared<PlatformViewLayer>
-{
-    if (layer)
-    {
-        return GetRasterizingLayer(layer->GetParent());
-    }
-    return {};
-}
-}
-
 ///
 /// @brief
 ///
@@ -95,86 +52,40 @@ auto PlatformRootViewLayerWin::GetControl() -> Shared<PlatformViewLayerControl>
     return {};
 }
 
-///
-/// @brief Render all visuals.
-///
 auto PlatformRootViewLayerWin::Render() -> void
 {
-#if FW_ENABLE_DEBUG
-    auto bgn = std::chrono::high_resolution_clock::now();
-#endif
-
-    _dcompVisual->RemoveAllVisuals();
-
-#if FW_ENABLE_DEBUG
-    auto rebuildBgn = std::chrono::high_resolution_clock::now();
-#endif
-
-    for (auto const& layerId : _layersToRebuild)
+    if (_renderer)
     {
-        // Check if the layer still exists.
-        // TODO: We can cache weak references to avoid tree traversal.
-        auto const layer = FindViewLayerById(layerId, GetSelf());
-        if (layer)
-        {
-            RebuildVisual(layer);
-        }
+        _renderer->Render();
     }
-    _layersToRebuild.clear();
-
-#if FW_ENABLE_DEBUG
-    auto rebuildEnd = std::chrono::high_resolution_clock::now();
-    auto rebuildDur = std::chrono::duration_cast<std::chrono::milliseconds>(rebuildEnd - rebuildBgn).count();
-
-    auto updateBgn = std::chrono::high_resolution_clock::now();
-#endif
-    if (_shouldUpdateLayer)
-    {
-        // TODO: Improve algo so that we don't need to O(n) traverse all layers.
-        UpdateVisual();
-        _shouldUpdateLayer = false;
-    }
-
-#if FW_ENABLE_DEBUG
-    auto updateEnd = std::chrono::high_resolution_clock::now();
-    auto updateDur = std::chrono::duration_cast<std::chrono::milliseconds>(updateEnd - updateBgn).count();
-#endif
-
-    auto traverseVisual = [](this auto self, Shared<PlatformViewLayerVisualWin> const& visual, auto&& func) -> void {
-        if (visual)
-        {
-            func(visual);
-            for (auto const& child : visual->GetChildren())
-            {
-                self(child, func);
-            }
-        }
-    };
-
-    traverseVisual(_visual, [&](auto const& visual) {
-        if (visual)
-        {
-            _dcompVisual->AddVisual(visual->GetVisual().Get(), FALSE, nullptr);
-            visual->Render();
-        }
-    });
-
-#if FW_ENABLE_DEBUG
-    auto end = std::chrono::high_resolution_clock::now();
-    auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - bgn).count();
-    FW_DEBUG_LOG_INFO("PlatformRootViewLayerWin::Render: took {} ms, rebuild: {} ms, update: {} ms", dur, rebuildDur, updateDur);
-#endif
 }
 
-///
-/// @brief Initialize.
-///
 auto PlatformRootViewLayerWin::Initialize() -> void
 {
-    _visual = Shared<PlatformViewLayerVisualWin>::Make(GetCompositionDevice());
-    _visual->SetBaseLayerId(GetId());
-    RebuildVisual(GetSelf());
+    PlatformViewLayerWin::Initialize();
+
     SetClipMode(ViewClipMode::Bounds);
+
+    auto const layer = GetSelf();
+    auto const context = Shared<PlatformViewLayerVisualContextWin>::Make(GetCompositionDevice());
+    _renderer = Unique<PlatformViewLayerVisualRenderer>::Make(
+      PlatformViewLayerVisualRenderer::Delegate {
+          .renderBegin = [&]() -> void { _dcompVisual->RemoveAllVisuals(); },
+          .renderEnd = []() -> void {},
+          .renderVisual = [&](Shared<PlatformViewLayerVisual> const& visual) -> void {
+              auto const c = visual->GetFragmentCount();
+              if (auto const visualWin = visual.TryAs<PlatformViewLayerVisualWin>())
+              {
+                  if (auto const dcompVisual = visualWin->GetVisual())
+                  {
+                      _dcompVisual->AddVisual(dcompVisual.Get(), FALSE, nullptr);
+                  }
+                  visualWin->Render();
+              }
+          },
+      },
+      layer,
+      context);
 }
 
 ///
@@ -212,7 +123,10 @@ auto PlatformRootViewLayerWin::RootGetBackingScale() const -> BackingScale
 auto PlatformRootViewLayerWin::RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     (void)layer;
-    QueueUpdateLayer();
+    if (_renderer)
+    {
+        _renderer->RequestUpdateLayer();
+    }
 }
 
 ///
@@ -221,7 +135,10 @@ auto PlatformRootViewLayerWin::RootOffsetChanged(Shared<PlatformViewLayer> const
 auto PlatformRootViewLayerWin::RootSizeChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     (void)layer;
-    QueueUpdateLayer();
+    if (_renderer)
+    {
+        _renderer->RequestUpdateLayer();
+    }
 }
 
 ///
@@ -230,7 +147,10 @@ auto PlatformRootViewLayerWin::RootSizeChanged(Shared<PlatformViewLayer> const& 
 auto PlatformRootViewLayerWin::RootClipModeChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     (void)layer;
-    QueueUpdateLayer();
+    if (_renderer)
+    {
+        _renderer->RequestUpdateLayer();
+    }
 }
 
 ///
@@ -239,7 +159,10 @@ auto PlatformRootViewLayerWin::RootClipModeChanged(Shared<PlatformViewLayer> con
 auto PlatformRootViewLayerWin::RootOpacityChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     (void)layer;
-    QueueUpdateLayer();
+    if (_renderer)
+    {
+        _renderer->RequestUpdateLayer();
+    }
 }
 
 ///
@@ -247,9 +170,10 @@ auto PlatformRootViewLayerWin::RootOpacityChanged(Shared<PlatformViewLayer> cons
 ///
 auto PlatformRootViewLayerWin::RootRenderFlagsChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
-    if (auto const baseLayer = GetRasterizingBaseLayer(layer))
+    (void)layer;
+    if (_renderer)
     {
-        QueueRebuildLayer(baseLayer->GetId());
+        _renderer->RequestRebuildLayer();
     }
 }
 
@@ -258,9 +182,12 @@ auto PlatformRootViewLayerWin::RootRenderFlagsChanged(Shared<PlatformViewLayer> 
 ///
 auto PlatformRootViewLayerWin::RootDisplayListChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
-    // TODO: This should not require full update.
     (void)layer;
-    QueueUpdateLayer();
+    // TODO: Optimize to only update changed parts.
+    if (_renderer)
+    {
+        _renderer->RequestUpdateLayer();
+    }
 }
 
 ///
@@ -268,9 +195,12 @@ auto PlatformRootViewLayerWin::RootDisplayListChanged(Shared<PlatformViewLayer> 
 ///
 auto PlatformRootViewLayerWin::RootDisplayListOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
-    // TODO: This should not require full update.
     (void)layer;
-    QueueUpdateLayer();
+    // TODO: Optimize to only update changed parts.
+    if (_renderer)
+    {
+        _renderer->RequestUpdateLayer();
+    }
 }
 
 ///
@@ -278,9 +208,10 @@ auto PlatformRootViewLayerWin::RootDisplayListOffsetChanged(Shared<PlatformViewL
 ///
 auto PlatformRootViewLayerWin::RootChildAdded(Shared<PlatformViewLayer> const& child) -> void
 {
-    if (auto const baseLayer = GetRasterizingBaseLayer(child))
+    (void)child;
+    if (_renderer)
     {
-        QueueRebuildLayer(baseLayer->GetId());
+        _renderer->RequestRebuildLayer();
     }
 }
 
@@ -289,9 +220,10 @@ auto PlatformRootViewLayerWin::RootChildAdded(Shared<PlatformViewLayer> const& c
 ///
 auto PlatformRootViewLayerWin::RootChildRemoved(Shared<PlatformViewLayer> const& parent) -> void
 {
-    if (auto const layer = GetRasterizingLayer(parent))
+    (void)parent;
+    if (_renderer)
     {
-        QueueRebuildLayer(layer->GetId());
+        _renderer->RequestRebuildLayer();
     }
 }
 
@@ -307,82 +239,5 @@ auto PlatformRootViewLayerWin::MakeTarget(HWND hwnd) -> Microsoft::WRL::ComPtr<I
         return dcompDevice->CreateTargetForHwnd(hwnd);
     }
     return {};
-}
-
-///
-/// @brief 
-///
-/// @param layerId 
-///
-auto PlatformRootViewLayerWin::FindBaseVisualByBaseLayerId(PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisualWin>
-{
-    auto traverse = [](this auto self, Shared<PlatformViewLayerVisualWin> const& visual, PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisualWin> {
-        if (visual)
-        {
-            if (visual->GetBaseLayerId() == layerId)
-            {
-                return visual;
-            }
-
-            for (auto const& child : visual->GetChildren())
-            {
-                if (auto const found = self(child, layerId))
-                {
-                    return found;
-                }
-            }
-        }
-        return {};
-    };
-    return traverse(_visual, layerId);
-}
-
-///
-/// @brief 
-///
-/// @param baseLayer 
-///
-auto PlatformRootViewLayerWin::RebuildVisual(Shared<PlatformViewLayerWin> const& baseLayer) -> void
-{
-    //FW_DEBUG_LOG_INFO("Rebuilding visuals starting from layer ID {}", (uint64_t)(UInt64)baseLayer->GetId());
-
-    // find visual corresponding to base layer.
-    auto const baseVisual = FindBaseVisualByBaseLayerId(baseLayer->GetId());
-
-    // rebuild with builder.
-    auto builder = PlatformViewLayerVisualUpdaterWin(GetCompositionDevice());
-    builder.Update(baseVisual, baseLayer);
-}
-
-///
-/// @brief 
-///
-auto PlatformRootViewLayerWin::UpdateVisual() -> void
-{
-    auto updater = PlatformViewLayerVisualPropertyUpdaterWin();
-    updater.Update(_visual, GetSelf());
-}
-
-///
-/// @brief Request rebuild.
-///
-auto PlatformRootViewLayerWin::QueueRebuildLayer(PlatformViewLayerId const layerId) -> void
-{
-    for (auto const& id : _layersToRebuild)
-    {
-        if (id == layerId)
-        {
-            return;
-        }
-    }
-    _layersToRebuild.push_back(layerId);
-}
-
-///
-/// @brief Request update.
-///
-auto PlatformRootViewLayerWin::QueueUpdateLayer() -> void
-{
-    _shouldUpdateLayer = true;
 }
 }
