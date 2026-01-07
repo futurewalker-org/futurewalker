@@ -10,6 +10,8 @@ PlatformViewLayerVisual::PlatformViewLayerVisual(PassKey<PlatformViewLayerVisual
 {
 }
 
+PlatformViewLayerVisual::~PlatformViewLayerVisual() = default;
+
 auto PlatformViewLayerVisual::AddChild(Shared<PlatformViewLayerVisual> const& child) -> void
 {
     if (child)

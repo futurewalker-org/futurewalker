@@ -33,6 +33,8 @@ class PlatformViewLayerVisual : NonCopyable
 public:
     PlatformViewLayerVisual(PassKey<PlatformViewLayerVisual>);
 
+    virtual ~PlatformViewLayerVisual() = 0;
+
     auto AddChild(Shared<PlatformViewLayerVisual> const& child) -> void;
     auto RemoveChild(Shared<PlatformViewLayerVisual> const& child) -> void;
 
