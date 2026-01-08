@@ -21,6 +21,17 @@ public:
       : PlatformViewLayer(key)
     {
     }
+
+protected:
+    auto Initialize() -> void
+    {
+    }
+    auto OnAttach() -> void
+    {
+    }
+    auto OnDetach() -> void
+    {
+    }
 };
 }
 }
