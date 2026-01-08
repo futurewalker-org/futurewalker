@@ -150,46 +150,22 @@ auto PlatformViewLayerVisual::SetBackingScale(BackingScale const backingScale) -
     }
 }
 
-auto PlatformViewLayerVisual::InsertFragment(const SInt64 index, PlatformViewLayerId layerId, Fragment const& fragment) -> void
+auto PlatformViewLayerVisual::AddFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void
 {
-    if (0 <= index && index <= GetFragmentCount())
+    if (_fragments.Insert(layerId, fragment))
     {
-        if (_fragments.Insert(index, layerId, fragment))
-        {
-            OnFragmentChanged();
-        }
-    }
-}
-
-auto PlatformViewLayerVisual::ReplaceFragment(const SInt64 index, PlatformViewLayerId layerId, Fragment const& fragment) -> void
-{
-    if (0 <= index && index <= GetFragmentCount())
-    {
-        if (_fragments.Replace(index, layerId, fragment))
-        {
-            OnFragmentChanged();
-        }
+        OnFragmentChanged();
     }
 }
 
 auto PlatformViewLayerVisual::ReplaceFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void
 {
-    if (auto const idx = _fragments.Find(layerId))
+    if (_fragments.ReplaceIf(layerId, fragment, [&](Fragment const& old) { return old != fragment; }))
     {
-        ReplaceFragment(*idx, layerId, fragment);
+        OnFragmentChanged();
     }
 }
 
-auto PlatformViewLayerVisual::RemoveFragment(const SInt64 index) -> void
-{
-    if (0 <= index && index < GetFragmentCount())
-    {
-        if (_fragments.Erase(index))
-        {
-            OnFragmentChanged();
-        }
-    }
-}
 auto PlatformViewLayerVisual::ClearFragments() -> void
 {
     if (!_fragments.IsEmpty())
@@ -199,18 +175,12 @@ auto PlatformViewLayerVisual::ClearFragments() -> void
     }
 }
 
-auto PlatformViewLayerVisual::GetFragmentIndexByLayerId(PlatformViewLayerId const layerId) const -> Optional<SInt64>
+auto PlatformViewLayerVisual::ForEachFragment(Function<void(Fragment const&)> const& func) const -> void
 {
-    return _fragments.Find(layerId);
-}
-
-auto PlatformViewLayerVisual::GetFragment(SInt64 const index) const -> Optional<Fragment>
-{
-    if (0 <= index && index < GetFragmentCount())
+    if (func)
     {
-        return _fragments.GetValue(index);
+        _fragments.ForEach([&](auto const& pair) { std::invoke(func, pair.second); });
     }
-    return {};
 }
 
 auto PlatformViewLayerVisual::GetFragmentCount() const -> SInt64

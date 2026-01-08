@@ -54,11 +54,11 @@ private:
         Offset<Dp> offset;
         Rect<Dp> clipRect;
         Float64 opacity = 1.0;
-        Offset<Dp> currentOffset = Offset<Dp>();
-        Rect<Dp> currentClipRect = Rect<Dp>::Infinite();
+        Offset<Dp> currentOffset;
+        Rect<Dp> currentClipRect;
         Float64 currentOpacity = 1.0;
-        Offset<Dp> currentOffsetFromBase = Offset<Dp>();
-        Rect<Dp> currentClipRectFromBase = Rect<Dp>::Infinite();
+        Offset<Dp> currentOffsetFromBase;
+        Rect<Dp> currentClipRectFromBase;
         Float64 currentOpacityFromBase = 1.0;
     };
     std::vector<NodeInfo> _nodeStack;

@@ -36,14 +36,16 @@ auto PlatformViewLayerVisualUpdater::PushVisual(PlatformViewLayerId const id) ->
             nextVisual->ClearFragments();
             InternalSetCurrentVisual(nextVisual);
             InternalPushVisualNodeIndex();
+            InternalResetRelativePropertiesFromBase();
             return true;
         }
         InternalSetCurrentVisual(nullptr);
         return false;
     }
     FW_DEBUG_ASSERT(!_nodeStack.empty());
-    InternalSetCurrentVisual(InternalInsertVisual(id, 0, InternalGetCurrentNodeIndex()));
+    InternalSetCurrentVisual(InternalInsertVisual(id, InternalGetCurrentNodeIndex()));
     InternalPushVisualNodeIndex();
+    InternalResetRelativePropertiesFromBase();
     return true;
 }
 
@@ -55,11 +57,41 @@ auto PlatformViewLayerVisualUpdater::PopVisual() -> void
 
 auto PlatformViewLayerVisualUpdater::PushNode(PlatformViewLayerId const& id, Offset<Dp> const& offset, Rect<Dp> const& clipRect, Float64 const& opacity) -> void
 {
+    Offset<Dp> currentOffset = Offset<Dp>();
+    Rect<Dp> currentClipRect = Rect<Dp>::Infinite();
+    Float64 currentOpacity = 1.0;
+    Offset<Dp> currentOffsetFromBase = Offset<Dp>();
+    Rect<Dp> currentClipRectFromBase = Rect<Dp>::Infinite();
+    Float64 currentOpacityFromBase = 1.0;
+
+    if (_nodeStack.empty())
+    {
+        currentOffset = offset;
+        currentClipRect = clipRect;
+        currentOpacity = opacity;
+    }
+    else
+    {
+        auto& back = _nodeStack.back();
+        currentOffset = back.currentOffset + offset;
+        currentClipRect = Rect<Dp>::Intersect(Rect<Dp>::Offset(back.currentClipRect, -offset), clipRect);
+        currentOpacity = back.currentOpacity * opacity;
+        currentOffsetFromBase = back.currentOffsetFromBase + offset;
+        currentClipRectFromBase = Rect<Dp>::Intersect(Rect<Dp>::Offset(back.currentClipRectFromBase, -offset), clipRect);
+        currentOpacityFromBase = back.currentOpacityFromBase * opacity;
+    }
+
     _nodeStack.push_back({
         .id = id,
         .offset = offset,
         .clipRect = clipRect,
         .opacity = opacity,
+        .currentOffset = currentOffset,
+        .currentClipRect = currentClipRect,
+        .currentOpacity = currentOpacity,
+        .currentOffsetFromBase = currentOffsetFromBase,
+        .currentClipRectFromBase = currentClipRectFromBase,
+        .currentOpacityFromBase = currentOpacityFromBase,
     });
 }
 
@@ -75,20 +107,18 @@ auto PlatformViewLayerVisualUpdater::AddFragment(PlatformViewLayerId const id, S
     if (!visual)
     {
         // When one of child nodes has its own visual, rest of siblings needs another visual for them.
-        visual = InternalInsertVisual(id, 0, InternalGetBaseNodeIndex());
+        visual = InternalInsertVisual(id, InternalGetBaseNodeIndex());
         InternalSetCurrentVisual(visual);
         InternalPushVisualNodeIndex();
     }
 
-    // Append fragment.
     auto const baseIndex = InternalGetBaseNodeIndex();
-    visual->InsertFragment(
-      visual->GetFragmentCount(),
+    visual->AddFragment(
       id,
       {
-          .offset = InternalGetOffset(baseIndex, InternalGetCurrentNodeIndex()),
-          .clipRect = InternalGetClipRect(baseIndex, InternalGetCurrentNodeIndex()),
-          .opacity = InternalGetOpacity(baseIndex, InternalGetCurrentNodeIndex()),
+          .offset = InternalGetCurrentOffsetFromBase(),
+          .clipRect = InternalGetCurrentClipRectFromBase(),
+          .opacity = InternalGetCurrentOpacityFromBase(),
           .displayList = displayList,
           .displayListOffset = displayListOffset,
       });
@@ -129,18 +159,13 @@ auto PlatformViewLayerVisualUpdater::UpdateCore(Shared<PlatformViewLayer> const&
     }
 }
 
-auto PlatformViewLayerVisualUpdater::InternalInsertVisual(PlatformViewLayerId const id, SInt64 const base, SInt64 const target) -> Shared<PlatformViewLayerVisual>
+auto PlatformViewLayerVisualUpdater::InternalInsertVisual(PlatformViewLayerId const id, SInt64 const target) -> Shared<PlatformViewLayerVisual>
 {
-    FW_DEBUG_LOG_INFO("PlatformViewLayerVisualUpdater::InternalInsertVisual: id={}, base={}, target={}", (uint64_t)(UInt64)id, (int)base, (int)target);
-    for (auto const& node : _nodeStack)
-    {
-        FW_DEBUG_LOG_INFO("clipRect: {},{},{},{}", (double)node.clipRect.GetLeft(), (double)node.clipRect.GetTop(), (double)node.clipRect.GetRight(), (double)node.clipRect.GetBottom());
-    }
     auto const visual = _context->CreateVisual();
     visual->SetBaseLayerId(id);
-    visual->SetClipRect(InternalGetClipRect(base, target));
-    visual->SetOffset(InternalGetOffset(base, target));
-    visual->SetOpacity(InternalGetOpacity(base, target));
+    visual->SetClipRect(InternalGetClipRect(target));
+    visual->SetOffset(InternalGetOffset(target));
+    visual->SetOpacity(InternalGetOpacity(target));
     if (auto const currentVisual = InternalGetCurrentVisual())
     {
         currentVisual->AddChild(visual);
@@ -170,37 +195,96 @@ auto PlatformViewLayerVisualUpdater::InternalPopVisualNodeIndex() -> void
     _visualNodeIndexStack.pop_back();
 }
 
-auto PlatformViewLayerVisualUpdater::InternalGetOffset(SInt64 const base, SInt64 const target) const -> Offset<Dp>
+auto PlatformViewLayerVisualUpdater::InternalResetRelativePropertiesFromBase() -> void
 {
-    auto result = Offset<Dp>();
-    for (auto i = base + 1; i <= target; ++i)
+    if (!_nodeStack.empty())
     {
-        result = result + _nodeStack[static_cast<size_t>(i)].offset;
+        auto& back = _nodeStack.back();
+        back.currentOffsetFromBase = Offset<Dp>();
+        back.currentClipRectFromBase = Rect<Dp>::Infinite();
+        back.currentOpacityFromBase = 1.0;
     }
-    return result;
 }
 
-auto PlatformViewLayerVisualUpdater::InternalGetClipRect(SInt64 const base, SInt64 const target) const -> Rect<Dp>
+auto PlatformViewLayerVisualUpdater::InternalGetOffset(SInt64 const target) const -> Offset<Dp>
 {
-    auto offset = Offset<Dp>();
-    auto clipRect = Rect<Dp>::Infinite();
-    for (auto i = base + 1; i <= target; ++i)
+    if (0 <= target && target < std::ssize(_nodeStack))
     {
-        auto const& node = _nodeStack[static_cast<size_t>(i)];
-        offset = offset + node.offset;
-        clipRect = Rect<Dp>::Intersect(clipRect, Rect<Dp>::Offset(node.clipRect, offset));
+        _nodeStack[static_cast<size_t>(target)].currentOffset;
     }
-    return Rect<Dp>::Offset(clipRect, -offset);
+    return Offset<Dp>();
 }
 
-auto PlatformViewLayerVisualUpdater::InternalGetOpacity(SInt64 const base, SInt64 const target) const -> Float64
+auto PlatformViewLayerVisualUpdater::InternalGetClipRect(SInt64 const target) const -> Rect<Dp>
 {
-    auto result = Float64(1.0);
-    for (auto i = base + 1; i <= target; ++i)
+    if (0 <= target && target < std::ssize(_nodeStack))
     {
-        result = result * _nodeStack[static_cast<size_t>(i)].opacity;
+        _nodeStack[static_cast<size_t>(target)].currentClipRect;
     }
-    return result;
+    return Rect<Dp>::Infinite();
+}
+
+auto PlatformViewLayerVisualUpdater::InternalGetOpacity(SInt64 const target) const -> Float64
+{
+    if (0 <= target && target < std::ssize(_nodeStack))
+    {
+        _nodeStack[static_cast<size_t>(target)].currentOpacity;
+    }
+    return 1.0;
+}
+
+auto PlatformViewLayerVisualUpdater::InternalGetCurrentOffset() const -> Offset<Dp>
+{
+    if (!_nodeStack.empty())
+    {
+        return _nodeStack.back().currentOffset;
+    }
+    return Offset<Dp>();
+}
+
+auto PlatformViewLayerVisualUpdater::InternalGetCurrentClipRect() const -> Rect<Dp>
+{
+    if (!_nodeStack.empty())
+    {
+        return _nodeStack.back().currentClipRect;
+    }
+    return Rect<Dp>::Infinite();
+}
+
+auto PlatformViewLayerVisualUpdater::InternalGetCurrentOpacity() const -> Float64
+{
+    if (!_nodeStack.empty())
+    {
+        return _nodeStack.back().currentOpacity;
+    }
+    return 1.0;
+}
+
+auto PlatformViewLayerVisualUpdater::InternalGetCurrentOffsetFromBase() const -> Offset<Dp>
+{
+    if (!_nodeStack.empty())
+    {
+        return _nodeStack.back().currentOffsetFromBase;
+    }
+    return Offset<Dp>();
+}
+
+auto PlatformViewLayerVisualUpdater::InternalGetCurrentClipRectFromBase() const -> Rect<Dp>
+{
+    if (!_nodeStack.empty())
+    {
+        return _nodeStack.back().currentClipRectFromBase;
+    }
+    return Rect<Dp>::Infinite();
+}
+
+auto PlatformViewLayerVisualUpdater::InternalGetCurrentOpacityFromBase() const -> Float64
+{
+    if (!_nodeStack.empty())
+    {
+        return _nodeStack.back().currentOpacityFromBase;
+    }
+    return 1.0;
 }
 
 auto PlatformViewLayerVisualUpdater::InternalGetBaseNodeIndex() const -> SInt64

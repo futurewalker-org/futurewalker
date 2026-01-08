@@ -27,137 +27,169 @@ public:
     using KeyType = K;
     using ValueType = V;
     using SizeType = SInt64;
-    using PairType = std::pair<K, V>;
+    using PairType = std::pair<K const, V>;
 
     OrderedHashMap() = default;
     OrderedHashMap(OrderedHashMap const&) = default;
     OrderedHashMap(OrderedHashMap&&) noexcept = default;
 
-    auto operator=(OrderedHashMap const&) -> OrderedHashMap& = default;
-    auto operator=(OrderedHashMap&&) noexcept -> OrderedHashMap& = default;
-
-    auto Insert(SizeType const& index, KeyType const& key, ValueType const& value) -> Bool
+    ///
+    /// @brief Assignment operator.
+    ///
+    auto operator=(OrderedHashMap const& other) -> OrderedHashMap&
     {
-        if (0 <= index && index <= GetSize())
+        if (this != &other)
         {
-            auto const result = _map.emplace(key, index);
-            if (result.second)
-            {
-                _list.insert(_list.begin() + static_cast<ptrdiff_t>(index), std::make_pair(key, value));
-                for (size_t i = static_cast<size_t>(index) + 1; i < _list.size(); ++i)
-                {
-                    _map[_list[i].first] = i;
-                }
-                return true;
-            }
+            auto tmp = other;
+            Swap(tmp);
         }
-        return false;
+        return *this;
     }
 
-    auto Replace(SizeType const& index, KeyType const& key, ValueType const& value) -> Bool
+    ///
+    /// @brief Move assignment operator.
+    ///
+    auto operator=(OrderedHashMap&& other) noexcept -> OrderedHashMap&
     {
-        if (0 <= index && index < GetSize())
+        if (this != &other)
         {
-            auto const i = static_cast<size_t>(index);
-            auto const it = _map.find(key);
-            if (it != _map.end())
-            {
-                if (it->second == i)
-                {
-                    _list[i].second = value;
-                    return true;
-                }
-            }
-            else
-            {
-                _map.erase(_list[i].first);
-                _list[i] = std::make_pair(key, value);
-                _map[key] = i;
-                return true;
-            }
+            auto tmp = std::move(other);
+            Swap(tmp);
         }
-        return false;
+        return *this;
     }
 
-    auto Erase(SizeType const& index) -> Bool
+    ///
+    /// @brief Insert a new key-value pair.
+    ///
+    /// @param key Key.
+    /// @param value Value.
+    ///
+    /// @return True if inserted, false if key already exists.
+    ///
+    auto Insert(KeyType const& key, ValueType const& value) -> Bool
     {
-        if (0 <= index && index < GetSize())
+        auto const result = _map.emplace(key, GetSize());
+        if (result.second)
         {
-            auto const i = static_cast<size_t>(index);
-            _map.erase(_list[i].first);
-            _list.erase(_list.begin() + static_cast<ptrdiff_t>(i));
-            for (size_t j = i; j < _list.size(); ++j)
+            try
             {
-                _map[_list[j].first] = j;
+                _list.emplace_back(key, value);
+            }
+            catch (...)
+            {
+                _map.erase(key);
+                throw;
             }
             return true;
         }
         return false;
     }
 
-    auto GetValue(SizeType const& index) const -> ValueType const&
-    {
-        return _list.at(static_cast<size_t>(index)).second;
-    }
-
-    auto GetValue(SizeType const& index) -> ValueType&
-    {
-        return _list.at(static_cast<size_t>(index)).second;
-    }
-
-    auto GetKey(SizeType const& index) const -> KeyType const&
-    {
-        return _list.at(static_cast<size_t>(index)).first;
-    }
-
-    auto Contains(KeyType const& key) const -> Bool
-    {
-        return _map.find(key) != _map.end();
-    }
-
-    auto Find(KeyType const& key) const -> Optional<SizeType>
+    ///
+    /// @brief Replace value for existing key.
+    ///
+    /// @param key Key.
+    /// @param value New value.
+    ///
+    /// @return True if replaced, false if key does not exist.
+    ///
+    auto Replace(KeyType const& key, ValueType const& value) -> Bool
     {
         auto const it = _map.find(key);
         if (it != _map.end())
         {
-            return static_cast<SizeType>(it->second);
+            _list[it->second].second = value;
+            return true;
         }
-        return {};
+        return false;
     }
 
-    auto begin(this auto&& self)
+    ///
+    /// @brief Replace value for existing key if predicate returns true.
+    ///
+    /// @param key Key.
+    /// @param value New value.
+    /// @param f Predicate function that takes the existing value and returns a Bool.
+    ///
+    /// @return True if replaced, false if key does not exist or predicate returned false.
+    ///
+    template <class F>
+    auto ReplaceIf(KeyType const& key, ValueType const& value, F&& f) -> Bool
     {
-        return self._list.begin();
+        auto const it = _map.find(key);
+        if (it != _map.end())
+        {
+            if (std::invoke(f, _list[it->second].second))
+            {
+                _list[it->second].second = value;
+                return true;
+            }
+        }
+        return false;
     }
 
-    auto end(this auto&& self)
+    ///
+    /// @brief Check if the container contains the given key.
+    ///
+    /// @param key Key to check.
+    ///
+    auto Contains(KeyType const& key) const -> Bool
     {
-        return self._list.end();
+        return _map.contains(key);
     }
 
+    ///
+    /// @brief Get size of the container.
+    ///
     auto GetSize() const noexcept -> SizeType
     {
         return std::ssize(_list);
     }
 
+    ///
+    /// @brief Check if the container is empty.
+    ///
     auto IsEmpty() const noexcept -> Bool
     {
         return _list.empty();
     }
 
+    ///
+    /// @brief Clear the container.
+    ///
     auto Clear() -> void
     {
         _list.clear();
         _map.clear();
     }
 
-    auto operator[](SizeType const index) const -> PairType const&
+    ///
+    /// @brief Swap contents with another OrderedHashMap.
+    ///
+    auto Swap(OrderedHashMap& other) noexcept -> void
     {
-        return _list.at(static_cast<size_t>(index));
+        _list.swap(other._list);
+        _map.swap(other._map);
+    }
+
+    ///
+    /// @brief Iterate over all key-value pairs in insertion order.
+    ///
+    /// @param self The container instance.
+    /// @param f The function to invoke for each key-value pair.
+    ///
+    template <class Self, class F>
+    auto ForEach(this Self&& self, F&& f)
+    {
+        for (auto&& pair : std::forward_like<Self>(self._list))
+        {
+            std::invoke(f, pair);
+        }
     }
 
 private:
-    std::vector<std::pair<K, V>> _list;
+    std::vector<PairType> _list;
     boost::unordered_flat_map<K, size_t, H, P> _map;
 };
 }

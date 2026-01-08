@@ -5,6 +5,8 @@
 #include "Futurewalker.Application.PlatformViewLayerVisualContextType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerVisualType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
+#include "Futurewalker.Application.PlatformViewLayerVisualUpdaterType.hpp"
+#include "Futurewalker.Application.PlatformViewLayerVisualPropertyUpdaterType.hpp"
 
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Function.hpp"
@@ -34,7 +36,7 @@ public:
 private:
     auto GetLayer() -> Shared<PlatformViewLayer>;
     auto FindBaseVisualByBaseLayerId(PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisual>;
-    auto RebuildVisual(Shared<PlatformViewLayer> const& baseLayer) -> void;
+    auto RebuildVisual() -> void;
     auto UpdateVisual() -> void;
     auto RenderBegin() -> void;
     auto RenderEnd() -> void;
@@ -45,6 +47,8 @@ private:
     Weak<PlatformViewLayer> _layer;
     Shared<PlatformViewLayerVisualContext> _context;
     Shared<PlatformViewLayerVisual> _visual;
+    Shared<PlatformViewLayerVisualUpdater> _visualUpdater;
+    Shared<PlatformViewLayerVisualPropertyUpdater> _visualPropertyUpdater;
     Bool _shouldRebuildLayer = true;
     Bool _shouldUpdateLayer = true;
 };

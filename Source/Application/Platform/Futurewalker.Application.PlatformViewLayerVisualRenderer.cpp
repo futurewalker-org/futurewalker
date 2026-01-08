@@ -11,49 +11,6 @@
 
 namespace FW_DETAIL_NS
 {
-namespace
-{
-auto FindViewLayerById(PlatformViewLayerId const id, Shared<PlatformViewLayer> const& layer) -> Shared<PlatformViewLayer>
-{
-    if (layer->GetId() == id)
-    {
-        return layer;
-    }
-
-    for (auto const& child : layer->GetChildren())
-    {
-        if (auto const found = FindViewLayerById(id, child.As<PlatformViewLayer>()))
-        {
-            return found;
-        }
-    }
-    return {};
-}
-
-auto GetRasterizingLayer(Shared<PlatformViewLayer> const& layer) -> Shared<PlatformViewLayer>
-{
-    auto current = layer;
-    while (current)
-    {
-        if (current->ShouldRasterize())
-        {
-            return current;
-        }
-        current = current->GetParent();
-    }
-    return {};
-}
-
-auto GetRasterizingBaseLayer(Shared<PlatformViewLayer> const& layer) -> Shared<PlatformViewLayer>
-{
-    if (layer)
-    {
-        return GetRasterizingLayer(layer->GetParent());
-    }
-    return {};
-}
-}
-
 PlatformViewLayerVisualRenderer::PlatformViewLayerVisualRenderer(Delegate const& delegate, Shared<PlatformViewLayer> const& layer, Shared<PlatformViewLayerVisualContext> const& context)
   : _delegate {delegate}
   , _layer {layer}
@@ -63,7 +20,9 @@ PlatformViewLayerVisualRenderer::PlatformViewLayerVisualRenderer(Delegate const&
     {
         _visual = context->CreateVisual();
         _visual->SetBaseLayerId(layer->GetId());
-        RebuildVisual(GetLayer());
+        _visualUpdater = Shared<PlatformViewLayerVisualUpdater>::Make(context);
+        _visualPropertyUpdater = Shared<PlatformViewLayerVisualPropertyUpdater>::Make();
+        RebuildVisual();
     }
     else
     {
@@ -76,21 +35,17 @@ auto PlatformViewLayerVisualRenderer::Render() -> void
 {
     RenderBegin();
 
-    auto c1 = _visual->GetFragmentCount();
     if (_shouldRebuildLayer)
     {
-        RebuildVisual(GetLayer());
+        RebuildVisual();
         _shouldRebuildLayer = false;
+        _shouldUpdateLayer = false;
     }
-    c1 = _visual->GetFragmentCount();
-
-    if (_shouldUpdateLayer)
+    else if (_shouldUpdateLayer)
     {
-        // TODO: Improve algo so that we don't need to O(n) traverse all layers.
         UpdateVisual();
         _shouldUpdateLayer = false;
     }
-    c1 = _visual->GetFragmentCount();
 
     auto traverseVisual = [this](this auto self, Shared<PlatformViewLayerVisual> const& visual) -> void {
         if (visual)
@@ -146,22 +101,19 @@ auto PlatformViewLayerVisualRenderer::FindBaseVisualByBaseLayerId(PlatformViewLa
     return traverse(_visual, layerId);
 }
 
-auto PlatformViewLayerVisualRenderer::RebuildVisual(Shared<PlatformViewLayer> const& baseLayer) -> void
+auto PlatformViewLayerVisualRenderer::RebuildVisual() -> void
 {
-    // find visual corresponding to base layer.
-    auto const baseVisual = FindBaseVisualByBaseLayerId(baseLayer->GetId());
-    // rebuild with builder.
-    if (auto updater = Shared<PlatformViewLayerVisualUpdater>::Make(_context))
+    if (_visualUpdater)
     {
-        updater->Update(baseVisual, baseLayer);
+        _visualUpdater->Update(_visual, GetLayer());
     }
 }
 
 auto PlatformViewLayerVisualRenderer::UpdateVisual() -> void
 {
-    if (auto updater = Shared<PlatformViewLayerVisualPropertyUpdater>::Make())
+    if (_visualPropertyUpdater)
     {
-        updater->Update(_visual, GetLayer());
+        _visualPropertyUpdater->Update(_visual, GetLayer());
     }
 }
 

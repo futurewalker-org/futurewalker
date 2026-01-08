@@ -12,6 +12,7 @@
 #include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.OrderedHashMap.hpp"
+#include "Futurewalker.Core.Function.hpp"
 
 #include <vector>
 
@@ -66,14 +67,14 @@ public:
         Float64 opacity = 1.0;
         Shared<Graphics::DisplayList> displayList;
         Offset<Dp> displayListOffset;
+
+        auto operator==(Fragment const& other) const -> bool = default;
+        auto operator!=(Fragment const& other) const -> bool = default;
     };
-    auto InsertFragment(const SInt64 index, PlatformViewLayerId layerId, Fragment const& fragment) -> void;
-    auto ReplaceFragment(const SInt64 index, PlatformViewLayerId layerId, Fragment const& fragment) -> void;
+    auto AddFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void;
     auto ReplaceFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void;
-    auto RemoveFragment(const SInt64 index) -> void;
     auto ClearFragments() -> void;
-    auto GetFragmentIndexByLayerId(PlatformViewLayerId const layerId) const -> Optional<SInt64>;
-    auto GetFragment(SInt64 const index) const -> Optional<Fragment>;
+    auto ForEachFragment(Function<void(Fragment const&)> const& func) const -> void;
     auto GetFragmentCount() const -> SInt64;
 
 protected:

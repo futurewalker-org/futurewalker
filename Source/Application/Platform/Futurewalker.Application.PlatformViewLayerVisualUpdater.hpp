@@ -34,14 +34,21 @@ private:
     auto UpdateCore(Shared<PlatformViewLayer> const& layer) -> void;
 
 private:
-    auto InternalInsertVisual(PlatformViewLayerId const id, SInt64 const base, SInt64 const target) -> Shared<PlatformViewLayerVisual>;
+    auto InternalInsertVisual(PlatformViewLayerId const id, SInt64 const target) -> Shared<PlatformViewLayerVisual>;
     auto InternalGetCurrentVisual() -> Shared<PlatformViewLayerVisual>;
     auto InternalSetCurrentVisual(Shared<PlatformViewLayerVisual> const& visual) -> void;
     auto InternalPushVisualNodeIndex() -> void;
     auto InternalPopVisualNodeIndex() -> void;
-    auto InternalGetOffset(SInt64 const base, SInt64 const target) const -> Offset<Dp>;
-    auto InternalGetClipRect(SInt64 const base, SInt64 const target) const -> Rect<Dp>;
-    auto InternalGetOpacity(SInt64 const base, SInt64 const target) const -> Float64;
+    auto InternalResetRelativePropertiesFromBase() -> void;
+    auto InternalGetOffset(SInt64 const target) const -> Offset<Dp>;
+    auto InternalGetClipRect(SInt64 const target) const -> Rect<Dp>;
+    auto InternalGetOpacity(SInt64 const target) const -> Float64;
+    auto InternalGetCurrentOffset() const -> Offset<Dp>;
+    auto InternalGetCurrentClipRect() const -> Rect<Dp>;
+    auto InternalGetCurrentOpacity() const -> Float64;
+    auto InternalGetCurrentOffsetFromBase() const -> Offset<Dp>;
+    auto InternalGetCurrentClipRectFromBase() const -> Rect<Dp>;
+    auto InternalGetCurrentOpacityFromBase() const -> Float64;
     auto InternalGetBaseNodeIndex() const -> SInt64;
     auto InternalGetCurrentNodeIndex() const -> SInt64;
     auto InternalRemoveUntilNextVisual(PlatformViewLayerId const id) -> Shared<PlatformViewLayerVisual>;
@@ -53,6 +60,12 @@ private:
         Offset<Dp> offset;
         Rect<Dp> clipRect;
         Float64 opacity = 1.0;
+        Offset<Dp> currentOffset;
+        Rect<Dp> currentClipRect;
+        Float64 currentOpacity = 1.0;
+        Offset<Dp> currentOffsetFromBase;
+        Rect<Dp> currentClipRectFromBase;
+        Float64 currentOpacityFromBase = 1.0;
     };
     Shared<PlatformViewLayerVisualContext> _context;
     std::vector<NodeInfo> _nodeStack;
