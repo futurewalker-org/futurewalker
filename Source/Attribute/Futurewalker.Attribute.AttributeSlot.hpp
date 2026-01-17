@@ -6,6 +6,8 @@
 #include "Futurewalker.Attribute.StaticAttributeBaseType.hpp"
 #include "Futurewalker.Attribute.AttributeNodeType.hpp"
 
+#include "Futurewalker.Event.EventReceiver.hpp"
+
 #include "Futurewalker.Core.Optional.hpp"
 #include "Futurewalker.Core.StaticReference.hpp"
 #include "Futurewalker.Core.NonCopyable.hpp"
@@ -27,9 +29,24 @@ public:
     auto GetOwner() -> Shared<AttributeNode>;
     auto SetOwner(Shared<AttributeNode> owner) -> void;
 
+    auto GetTracker() -> Tracker&;
+    auto GetTracker() const -> Tracker const&;
+
+    auto GetEventReceiver() -> EventReceiver&;  
+    auto GetEventReceiver() const -> EventReceiver const&;
+
+    auto AddUpdateNumber(UInt64 const number) -> void;
+    auto RemoveUpdateNumber(UInt64 const number) -> Bool;
+
+    auto HasEventConnection() const -> Bool;
+
+    auto GetValueChanged() const -> Bool;
+    auto SetValueChanged(Bool const changed) -> void;
+
     auto GetDescription() -> StaticAttributeBaseRef;
 
-    auto GetValueCache() const -> Optional<AttributeValue>;
+    auto HasValueCache() const -> Bool;
+    auto GetValueCache() const -> Optional<AttributeValue> const&;
     auto SetValueCache(AttributeValue const& value) -> Bool;
     auto ClearValueCache() -> void;
 
@@ -63,6 +80,8 @@ private:
 private:
     Weak<AttributeSlot> _self;
     Weak<AttributeNode> _owner;
+    std::vector<UInt64> _updateNumbers;
+    Bool _valueChanged = false;
     StaticAttributeBaseRef _description;
     Optional<AttributeValue> _valueCache;
     std::vector<StaticAttributeBaseRef> _references;
@@ -73,5 +92,6 @@ private:
     std::vector<Weak<AttributeSlot>> _valueDependantSlots;
     Weak<AttributeSlot> _sourceDependentSlot;
     std::vector<Weak<AttributeSlot>> _sourceDependantSlots;
+    Shared<EventReceiver> _eventReceiver;
 };
 }

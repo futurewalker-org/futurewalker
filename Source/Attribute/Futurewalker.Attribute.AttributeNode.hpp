@@ -39,12 +39,6 @@ public:
     auto GetAttributeNode() -> AttributeNode&;
     auto GetAttributeNode() const -> AttributeNode const&;
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
-
-    auto GetEventReceiver() -> EventReceiver&;
-    auto GetEventReceiver() const -> EventReceiver const&;
-
     template <const auto* Attribute>
     using ValueTypeOf = typename std::remove_pointer_t<decltype(Attribute)>::ValueType;
 
@@ -73,6 +67,11 @@ public:
     template <class T, class Owner>
     static auto Clear(Owner& owner, StaticAttributeRef<T> attribute) -> void;
 
+    template <const auto* Attribute, class Owner, class Observer, class Function>
+    static auto ConnectAttributeEvent(Owner& owner, Observer&& observer, Function&& function) -> SignalConnection;
+    template <class T, class Owner, class Observer, class Function>
+    static auto ConnectAttributeEvent(Owner& owner, StaticAttributeRef<T> attribute, Observer&& observer, Function&& function) -> SignalConnection;
+
     template <const auto* Attribute, class Owner>
     static auto GetObserver(Owner& owner) -> Unique<AttributeObserver<ValueTypeOf<Attribute>>>;
     template <class T, class Owner>
@@ -90,13 +89,14 @@ private:
 
     auto IsAncestorOf(ReferenceArg<AttributeNode const> node) const -> Bool;
 
-    auto AddAttributeSlot(StaticAttributeBaseRef description) -> void;
+    auto AddAttributeSlot(StaticAttributeBaseRef description) -> Shared<AttributeSlot>;
     auto ResetAttributeSlot(StaticAttributeBaseRef description) -> void;
     auto SetAttributeSlotValue(StaticAttributeBaseRef description, AttributeValue const& value) -> void;
     auto SetAttributeSlotReference(StaticAttributeBaseRef description, StaticAttributeBaseRef const reference) -> void;
     auto SetAttributeSlotFunction(StaticAttributeBaseRef description, StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void;
 
     auto InsertAttributeSlot(StaticAttributeBaseRef description) -> Shared<AttributeSlot>;
+    auto EraseAttributeSlot(StaticAttributeBaseRef description) -> void;
     auto FindAttributeSlot(AttributeId const& id) -> Shared<AttributeSlot>;
     auto FindAncestorAttributeSlot(AttributeId const& id) -> Shared<AttributeSlot>;
 
@@ -104,7 +104,9 @@ private:
 
     auto ResolveValue(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
 
-    auto UpdateSlotCacheRecursive(AttributeSlot& slot) -> void;
+    auto UpdateSlotCacheRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> Bool;
+
+    auto NotifyValueChangedRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> void;
 
     static auto CheckReferenceLoop(StaticAttributeBaseRef reference) -> Bool;
 
@@ -113,7 +115,6 @@ private:
     Weak<AttributeNode> _parent;
     AttributeNodeList _children;
     AttributeSlotMap _slots;
-    Shared<EventReceiver> _eventReceiver;
 };
 
 ///
@@ -293,6 +294,44 @@ auto AttributeNode::Clear(Owner& owner, StaticAttributeRef<T> attribute) -> void
         auto& node = owner.GetAttributeNode();
         node.ResetAttributeSlot(attribute);
     }
+}
+
+///
+/// @brief Connect event to attribute.
+///
+/// @tparam Attribute Attribute
+///
+/// @param[in] owner Reference to owner of AttributeNode
+/// @param[in] observer Event observer.
+///
+template <const auto* Attribute, class Owner, class Observer, class Function>
+auto AttributeNode::ConnectAttributeEvent(Owner& owner, Observer&& observer, Function&& function) -> SignalConnection
+{
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(*Attribute);
+    return ConnectAttributeEvent(owner, attribute, std::forward<Observer>(observer), std::forward<Function>(function));
+}
+
+///
+/// @brief Connect event to attribute.
+///
+/// @param[in] owner Reference to owner of AttributeNode
+/// @param[in] attribute Description of attribute.
+/// @param[in] observer Event observer.
+/// @param[in] function Event receiver function.
+///
+template <class T, class Owner, class Observer, class Function>
+auto AttributeNode::ConnectAttributeEvent(Owner& owner, StaticAttributeRef<T> attribute, Observer&& observer, Function&& function) -> SignalConnection
+{
+    if (CheckReferenceLoop(attribute))
+    {
+        auto& node = owner.GetAttributeNode();
+        if (auto slot = node.AddAttributeSlot(attribute))
+        {
+            return EventReceiver::Connect(*slot, std::forward<Observer>(observer), std::forward<Function>(function));
+        }
+    }
+    return {};
 }
 
 ///

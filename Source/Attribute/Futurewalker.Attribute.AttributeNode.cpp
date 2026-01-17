@@ -8,9 +8,19 @@
 #include "Futurewalker.Base.Debug.hpp"
 
 #include <array>
+#include <atomic>
 
 namespace FW_DETAIL_NS
 {
+namespace
+{
+auto GetNextUpdateNumber() -> UInt64
+{
+    static std::atomic<uint64_t> s_nextUpdateNumber = 0U;
+    return ++s_nextUpdateNumber;
+}
+}
+
 ///
 /// @brief Make attribute node.
 ///
@@ -26,7 +36,6 @@ auto AttributeNode::Make() -> Shared<AttributeNode>
 ///
 AttributeNode::AttributeNode(PassKey<AttributeNode>)
 {
-    _eventReceiver = EventReceiver::Make();
 }
 
 ///
@@ -49,7 +58,10 @@ auto AttributeNode::AddChild(Shared<AttributeNode> const& child) -> void
     _children.push_back(child);
     child->_parent = _self;
 
-    for (auto const& [id, slot] : child->_slots)
+    auto const updateNumber = GetNextUpdateNumber();
+    auto const childSlots = std::vector(std::from_range, child->_slots);
+    auto notifySlots = std::vector<Weak<AttributeSlot>>();
+    for (auto const& [id, slot] : childSlots)
     {
         if (slot->GetComputeFunction())
         {
@@ -58,8 +70,64 @@ auto AttributeNode::AddChild(Shared<AttributeNode> const& child) -> void
 
         if (auto const sourceSlot = ResolveSource(slot->GetDescription()))
         {
-            slot->SetSourceDependentSlot(sourceSlot);
-            child->UpdateSlotCacheRecursive(*slot);
+            if (slot->HasEventConnection())
+            {
+                slot->SetSourceDependentSlot(sourceSlot);
+
+                if (child->UpdateSlotCacheRecursive(*slot, updateNumber) || slot->GetValueChanged())
+                {
+                    notifySlots.push_back(slot);
+                }
+            }
+            else
+            {
+                slot->DetachFromSourceDependentSlot();
+                slot->DetachFromValueDependentSlots();
+                child->EraseAttributeSlot(slot->GetDescription());
+
+                auto const sourceDependantSlots = slot->GetSourceDependantSlots();
+                auto const valueDependantSlots = slot->GetValueDependantSlots();
+
+                for (auto const sourceDependantSlot : sourceDependantSlots)
+                {
+                    sourceDependantSlot->SetSourceDependentSlot(sourceSlot);
+                }
+
+                for (auto const sourceDependantSlot : sourceDependantSlots)
+                {
+                    if (auto const owner = sourceDependantSlot->GetOwner())
+                    {
+                        if (owner->UpdateSlotCacheRecursive(*sourceDependantSlot, updateNumber) || sourceDependantSlot->GetValueChanged())
+                        {
+                            notifySlots.push_back(sourceDependantSlot);
+                        }
+                    }
+                }
+
+                for (auto const valueDependantSlot : valueDependantSlots)
+                {
+                    if (auto const owner = valueDependantSlot->GetOwner())
+                    {
+                        if (owner->UpdateSlotCacheRecursive(*valueDependantSlot, updateNumber) || valueDependantSlot->GetValueChanged())
+                        {
+                            notifySlots.push_back(valueDependantSlot);
+                        }
+                    }
+                }
+                FW_DEBUG_ASSERT(slot->GetSourceDependantSlots().empty());
+                FW_DEBUG_ASSERT(slot->GetValueDependantSlots().empty());
+            }
+        }
+    }
+
+    for (auto const& weakSlot : notifySlots)
+    {
+        if (auto const slot = weakSlot.Lock())
+        {
+            if (auto const owner = slot->GetOwner())
+            {
+                owner->NotifyValueChangedRecursive(*slot, updateNumber);
+            }
         }
     }
 }
@@ -85,7 +153,9 @@ auto AttributeNode::RemoveChild(Shared<AttributeNode> const& child) -> void
         auto parent = GetSelf();
         while (parent)
         {
-            auto const slots = parent->_slots;
+            auto const updateNumber = GetNextUpdateNumber();
+            auto const slots = std::vector(std::from_range, parent->_slots);
+            auto notifySlots = std::vector<Shared<AttributeSlot>>();
             for (auto const& [id, slot] : slots)
             {
                 for (auto const& dependantSlot : slot->GetSourceDependantSlots())
@@ -103,21 +173,38 @@ auto AttributeNode::RemoveChild(Shared<AttributeNode> const& child) -> void
                                     dependantSlot->SetSourceDependentSlot(sourceSlot);
                                 }
                             }
-                            node->UpdateSlotCacheRecursive(*dependantSlot);
+
+                            if (node->UpdateSlotCacheRecursive(*dependantSlot, updateNumber) || dependantSlot->GetValueChanged())
+                            {
+                                notifySlots.push_back(dependantSlot);
+                            }
                         }
                     }
                 }
 
                 for (auto const& dep : slot->GetValueDependantSlots())
                 {
-                    auto const node = dep->GetOwner();
-
-                    if (node && IsAncestorOf(node))
+                    if (auto const node = dep->GetOwner())
                     {
-                        node->UpdateSlotCacheRecursive(*dep);
+                        if (node != parent && !parent->IsAncestorOf(node))
+                        {
+                            if (node->UpdateSlotCacheRecursive(*dep, updateNumber) || dep->GetValueChanged())
+                            {
+                                notifySlots.push_back(dep);
+                            }
+                        }
                     }
                 }
             }
+
+            for (auto const& slot : notifySlots)
+            {
+                if (auto const owner = slot->GetOwner())
+                {
+                    owner->NotifyValueChangedRecursive(*slot, updateNumber);
+                }
+            }
+
             parent = parent->GetParent();
         }
     }
@@ -137,38 +224,6 @@ auto AttributeNode::GetAttributeNode() -> AttributeNode&
 auto AttributeNode::GetAttributeNode() const -> AttributeNode const&
 {
     return *this;
-}
-
-///
-/// @brief Get tracker.
-///
-auto AttributeNode::GetTracker() -> Tracker&
-{
-    return _eventReceiver->GetTracker();
-}
-
-///
-/// @brief Get tracker.
-///
-auto AttributeNode::GetTracker() const -> Tracker const&
-{
-    return _eventReceiver->GetTracker();
-}
-
-///
-/// @brief Get event receiver.
-///
-auto AttributeNode::GetEventReceiver() -> EventReceiver&
-{
-    return *_eventReceiver;
-}
-
-///
-/// @brief Get event receiver.
-///
-auto AttributeNode::GetEventReceiver() const -> EventReceiver const&
-{
-    return *_eventReceiver;
 }
 
 ///
@@ -228,7 +283,7 @@ auto AttributeNode::GetRoot() const -> Shared<AttributeNode const>
 }
 
 ///
-/// @brief Check thisd node is ancestor of another node.
+/// @brief Check if this node is ancestor of another node.
 ///
 /// @param[in] node Attribute node.
 ///
@@ -236,7 +291,7 @@ auto AttributeNode::IsAncestorOf(ReferenceArg<AttributeNode const> node) const -
 {
     if (node)
     {
-        auto parent = node->GetSelf();
+        auto parent = node->GetParent();
         while (parent)
         {
             if (this == parent.GetPointer())
@@ -254,12 +309,12 @@ auto AttributeNode::IsAncestorOf(ReferenceArg<AttributeNode const> node) const -
 ///
 /// @param description Reference to attribute description.
 ///
-auto AttributeNode::AddAttributeSlot(StaticAttributeBaseRef description) -> void
+auto AttributeNode::AddAttributeSlot(StaticAttributeBaseRef description) -> Shared<AttributeSlot>
 {
     auto const id = description.Get().GetId();
-    if (FindAttributeSlot(id))
+    if (auto slot = FindAttributeSlot(id))
     {
-        return;
+        return slot;
     }
 
     if (auto const sourceSlot = ResolveSource(description))
@@ -269,37 +324,12 @@ auto AttributeNode::AddAttributeSlot(StaticAttributeBaseRef description) -> void
             if (newSlot == sourceSlot)
             {
                 FW_DEBUG_ASSERT(GetSelf() == GetRoot());
-                return;
+                return newSlot;
             }
 
-            auto const& references = sourceSlot->GetReferenceCache();
-            auto const& computeFunction = sourceSlot->GetComputeFunctionCache();
-            auto args = std::vector<AttributeValue>();
-            auto dependentSlots = std::vector<Shared<AttributeSlot>>();
-            args.reserve(references.size());
-            dependentSlots.reserve(references.size());
-            for (auto const& reference : references)
-            {
-                if (auto const valueSlot = ResolveValue(reference))
-                {
-                    if (auto const valueCache = valueSlot->GetValueCache())
-                    {
-                        args.push_back(*valueCache);
-                        dependentSlots.push_back(valueSlot);
-                    }
-                }
-            }
-            newSlot->SetValueDependentSlots(dependentSlots);
-            newSlot->SetReferenceCache(references);
-            newSlot->SetComputeFunctionCache(computeFunction);
+            auto notifySlots = std::vector<Shared<AttributeSlot>>();
 
-            FW_DEBUG_ASSERT(computeFunction);
-            FW_DEBUG_ASSERT(args.size() == references.size());
-            if (computeFunction && args.size() == references.size())
-            {
-                newSlot->SetValueCache(computeFunction(args));
-            }
-
+            auto const updateNumber = GetNextUpdateNumber();
             for (auto const& slot : sourceSlot->GetSourceDependantSlots())
             {
                 if (IsAncestorOf(slot->GetOwner()))
@@ -308,8 +338,35 @@ auto AttributeNode::AddAttributeSlot(StaticAttributeBaseRef description) -> void
                 }
             }
             newSlot->SetSourceDependentSlot(sourceSlot);
+
+            if (UpdateSlotCacheRecursive(*newSlot, updateNumber))
+            {
+                notifySlots.push_back(newSlot);
+            }
+
+            for (auto const& dependantSlot : sourceSlot->GetValueDependantSlots())
+            {
+                if (auto const owner = dependantSlot->GetOwner())
+                {
+                    if (owner->UpdateSlotCacheRecursive(*dependantSlot, updateNumber))
+                    {
+                        notifySlots.push_back(dependantSlot);
+                    }
+                }
+            }
+
+            for (auto const& slot : notifySlots)
+            {
+                if (auto const owner = slot->GetOwner())
+                {
+                    owner->NotifyValueChangedRecursive(*slot, updateNumber);
+                }
+            }
+            return newSlot;
         }
     }
+    FW_DEBUG_ASSERT(false);
+    return {};
 }
 
 ///
@@ -332,7 +389,12 @@ auto AttributeNode::ResetAttributeSlot(StaticAttributeBaseRef description) -> vo
                 slot->SetSourceDependentSlot(sourceSlot);
             }
         }
-        UpdateSlotCacheRecursive(*slot);
+
+        auto const updateNumber = GetNextUpdateNumber();
+        if (UpdateSlotCacheRecursive(*slot, updateNumber))
+        {
+            NotifyValueChangedRecursive(*slot, updateNumber);
+        }
     }
 }
 
@@ -347,26 +409,14 @@ auto AttributeNode::SetAttributeSlotValue(StaticAttributeBaseRef description, At
     auto const id = description.Get().GetId();
     if (auto const slot = FindAttributeSlot(id))
     {
-        if (auto const sourceSlot = slot->GetSourceDependentSlot())
-        {
-            for (auto const& dependantSlot : sourceSlot->GetValueDependantSlots())
-            {
-                if (dependantSlot.GetPointer() != slot.GetPointer())
-                {
-                    if (auto const owner = dependantSlot->GetOwner())
-                    {
-                        if (owner == GetSelf() || IsAncestorOf(owner))
-                        {
-                            dependantSlot->SetSourceDependentSlot(slot);
-                        }
-                    }
-                }
-            }
-        }
         slot->SetValue([value](auto const&) -> AttributeValue { return value; }, {});
         slot->DetachFromSourceDependentSlot();
 
-        UpdateSlotCacheRecursive(*slot);
+        auto const updateNumber = GetNextUpdateNumber();
+        if (UpdateSlotCacheRecursive(*slot, updateNumber))
+        {
+            NotifyValueChangedRecursive(*slot, updateNumber);
+        }
     }
 }
 
@@ -384,7 +434,11 @@ auto AttributeNode::SetAttributeSlotReference(StaticAttributeBaseRef description
         slot->SetValue([](auto const& args) -> AttributeValue { return args[0]; }, {&reference, 1});
         slot->DetachFromSourceDependentSlot();
 
-        UpdateSlotCacheRecursive(*slot);
+        auto const updateNumber = GetNextUpdateNumber();
+        if (UpdateSlotCacheRecursive(*slot, updateNumber))
+        {
+            NotifyValueChangedRecursive(*slot, updateNumber);
+        }
     }
 }
 
@@ -401,10 +455,15 @@ auto AttributeNode::SetAttributeSlotFunction(StaticAttributeBaseRef description,
     auto const id = description.Get().GetId();
     if (auto const slot = FindAttributeSlot(id))
     {
+        FW_DEBUG_ASSERT(computeFunction);
         slot->SetValue(computeFunction, references);
         slot->DetachFromSourceDependentSlot();
 
-        UpdateSlotCacheRecursive(*slot);
+        auto const updateNumber = GetNextUpdateNumber();
+        if (UpdateSlotCacheRecursive(*slot, updateNumber))
+        {
+            NotifyValueChangedRecursive(*slot, updateNumber);
+        }
     }
 }
 
@@ -421,6 +480,21 @@ auto AttributeNode::InsertAttributeSlot(StaticAttributeBaseRef description) -> S
     auto const [id, slot] = *it;
     slot->SetOwner(GetSelf());
     return slot;
+}
+
+///
+/// @brief Erase attribute slot.
+///
+/// @param description Description of attribute.
+///
+auto AttributeNode::EraseAttributeSlot(StaticAttributeBaseRef description) -> void
+{
+    if (auto const it = _slots.find(description.Get().GetId()); it != _slots.end())
+    {
+        auto const slot = it->second;
+        slot->SetOwner(nullptr);
+        _slots.erase(it);
+    }
 }
 
 ///
@@ -472,7 +546,11 @@ auto AttributeNode::ResolveSource(StaticAttributeBaseRef reference) -> Shared<At
 
     if (auto const newSlot = InsertAttributeSlot(reference))
     {
-        UpdateSlotCacheRecursive(*newSlot);
+        auto const updateNumber = GetNextUpdateNumber();
+        if (UpdateSlotCacheRecursive(*newSlot, updateNumber))
+        {
+            NotifyValueChangedRecursive(*newSlot, updateNumber);
+        }
         return newSlot;
     }
     FW_DEBUG_ASSERT(false);
@@ -490,7 +568,7 @@ auto AttributeNode::ResolveValue(StaticAttributeBaseRef reference) -> Shared<Att
 {
     if (auto const slot = FindAttributeSlot(reference.Get().GetId()))
     {
-        if (slot->GetValueCache())
+        if (slot->HasValueCache())
         {
             return slot;
         }
@@ -518,7 +596,7 @@ auto AttributeNode::ResolveValue(StaticAttributeBaseRef reference) -> Shared<Att
         {
             if (auto const slot = ResolveValue(ref))
             {
-                if (auto const value = slot->GetValueCache())
+                if (auto const& value = slot->GetValueCache())
                 {
                     args.push_back(*value);
                     dependentSlots.push_back(slot);
@@ -545,10 +623,13 @@ auto AttributeNode::ResolveValue(StaticAttributeBaseRef reference) -> Shared<Att
 /// @brief Recursively update value of attributes.
 ///
 /// @param[in] slot A slot to update.
+/// @param[in] updateNumber Update number.
+///
+/// @return Return true if value changed during update.
 ///
 /// @note Source dependencies must be updated before calling this function.
 ///
-auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
+auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> Bool
 {
     FW_DEBUG_ASSERT(slot.GetOwner() == GetSelf());
 
@@ -568,20 +649,21 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
         {
             if (auto const resolved = ResolveValue(reference))
             {
-                if (auto const value = resolved->GetValueCache())
+                if (auto const& value = resolved->GetValueCache())
                 {
                     args.push_back(*value);
                     dependentSlots.push_back(resolved);
                 }
             }
         }
+        FW_DEBUG_ASSERT(function);
         FW_DEBUG_ASSERT(args.size() == references.size());
 
         slot.SetReferenceCache(references);
         slot.SetComputeFunctionCache(function);
         slot.SetValueDependentSlots(dependentSlots);
 
-        if (args.size() == references.size())
+        if (function && args.size() == references.size())
         {
             if (slot.SetValueCache(function(args)))
             {
@@ -604,7 +686,7 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
             {
                 if (auto const valueSlot = ResolveValue(reference))
                 {
-                    if (auto const value = valueSlot->GetValueCache())
+                    if (auto const& value = valueSlot->GetValueCache())
                     {
                         args.push_back(*value);
                         dependentSlots.push_back(valueSlot);
@@ -639,7 +721,7 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
             {
                 if (auto const valueSlot = ResolveValue(reference))
                 {
-                    if (auto const value = valueSlot->GetValueCache())
+                    if (auto const& value = valueSlot->GetValueCache())
                     {
                         args.push_back(*value);
                         dependentSlots.push_back(valueSlot);
@@ -663,32 +745,70 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot) -> void
         }
     }
 
+    auto result = valueChanged;
+
     for (auto const& sourceDependantSlot : slot.GetSourceDependantSlots())
     {
         if (auto const node = sourceDependantSlot->GetOwner())
         {
-            node->UpdateSlotCacheRecursive(*sourceDependantSlot);
+            if (node->UpdateSlotCacheRecursive(*sourceDependantSlot, updateNumber))
+            {
+                result = true;
+            }
         }
     }
 
     if (valueChanged)
     {
+        slot.SetValueChanged(true);
+
         for (auto const& valueDependantSlot : slot.GetValueDependantSlots())
         {
             if (auto const node = valueDependantSlot->GetOwner())
             {
-                node->UpdateSlotCacheRecursive(*valueDependantSlot);
+                node->UpdateSlotCacheRecursive(*valueDependantSlot, updateNumber);
             }
         }
+    }
 
-        if (auto const valueCache = slot.GetValueCache())
+    if (result)
+    {
+        slot.AddUpdateNumber(updateNumber);
+        return true;
+    }
+    return false;
+}
+
+auto AttributeNode::NotifyValueChangedRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> void
+{
+    if (slot.RemoveUpdateNumber(updateNumber))
+    {
+        if (slot.GetValueChanged())
         {
+            slot.SetValueChanged(false);
+
             if (auto const owner = slot.GetOwner())
             {
                 auto parameter = Event<AttributeEvent::ValueChanged>();
                 parameter->SetId(slot.GetDescription().Get().GetId());
-                auto event = Event<>(parameter);
-                owner->_eventReceiver->SendEventDetached(event);
+                auto event = Event<>(std::move(parameter));
+                slot.GetEventReceiver().SendEventDetached(event);
+            }
+        }
+
+        for (auto const& sourceDependantSlot : slot.GetSourceDependantSlots())
+        {
+            if (auto const node = sourceDependantSlot->GetOwner())
+            {
+                node->NotifyValueChangedRecursive(*sourceDependantSlot, updateNumber);
+            }
+        }
+
+        for (auto const& valueDependantSlot : slot.GetValueDependantSlots())
+        {
+            if (auto const node = valueDependantSlot->GetOwner())
+            {
+                node->NotifyValueChangedRecursive(*valueDependantSlot, updateNumber);
             }
         }
     }

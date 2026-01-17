@@ -4,6 +4,7 @@
 #include "Futurewalker.Attribute.StaticAttributeBase.hpp"
 
 #include "Futurewalker.Base.UniqueIdentifier.hpp"
+#include "Futurewalker.Base.Debug.hpp"
 
 #include "Futurewalker.Core.PropertyStore.hpp"
 
@@ -29,6 +30,7 @@ auto AttributeSlot::Make(StaticAttributeBaseRef description) -> Shared<Attribute
 AttributeSlot::AttributeSlot(PassKey<AttributeSlot>, StaticAttributeBaseRef description)
   : _description {description}
 {
+    _eventReceiver = EventReceiver::Make();
 }
 
 ///
@@ -40,9 +42,96 @@ auto AttributeSlot::GetOwner() -> Shared<AttributeNode>
 }
 
 ///
+/// @brief
+///
+auto AttributeSlot::GetTracker() -> Tracker&
+{
+    return _eventReceiver->GetTracker();
+}
+
+///
+/// @brief
+///
+auto AttributeSlot::GetTracker() const -> Tracker const&
+{
+    return _eventReceiver->GetTracker();
+}
+
+///
+/// @brief
+///
+auto AttributeSlot::GetEventReceiver() -> EventReceiver&
+{
+    return *_eventReceiver;
+}
+
+///
+/// @brief
+///
+auto AttributeSlot::GetEventReceiver() const -> EventReceiver const&
+{
+    return *_eventReceiver;
+}
+
+///
+/// @brief
+///
+/// @param number
+///
+auto AttributeSlot::AddUpdateNumber(UInt64 const number) -> void
+{
+    if (std::find(_updateNumbers.begin(), _updateNumbers.end(), number) == _updateNumbers.end())
+    {
+        _updateNumbers.push_back(number);
+    }
+}
+
+///
 /// @brief 
 ///
-/// @param owner 
+/// @param number 
+///
+auto AttributeSlot::RemoveUpdateNumber(UInt64 const number) -> Bool
+{
+    auto const it = std::find(_updateNumbers.begin(), _updateNumbers.end(), number);
+    if (it != _updateNumbers.end())
+    {
+        _updateNumbers.erase(it);
+        return true;
+    }
+    return false;
+}
+
+///
+/// @brief
+///
+auto AttributeSlot::HasEventConnection() const -> Bool
+{
+    return _eventReceiver->HasConnection();
+}
+
+///
+/// @brief
+///
+auto AttributeSlot::GetValueChanged() const -> Bool
+{
+    return _valueChanged;
+}
+
+///
+/// @brief
+///
+/// @param changed
+///
+auto AttributeSlot::SetValueChanged(Bool const changed) -> void
+{
+    _valueChanged = changed;
+}
+
+///
+/// @brief
+///
+/// @param owner
 ///
 auto AttributeSlot::SetOwner(Shared<AttributeNode> owner) -> void
 {
@@ -60,7 +149,15 @@ auto AttributeSlot::GetDescription() -> StaticAttributeBaseRef
 ///
 /// @brief
 ///
-auto AttributeSlot::GetValueCache() const -> Optional<AttributeValue>
+auto AttributeSlot::HasValueCache() const -> Bool
+{
+    return _valueCache.HasValue();
+}
+
+///
+/// @brief
+///
+auto AttributeSlot::GetValueCache() const -> Optional<AttributeValue> const&
 {
     return _valueCache;
 }
@@ -128,6 +225,7 @@ auto AttributeSlot::GetComputeFunction() const -> StaticAttributeComputeFunction
 
 auto AttributeSlot::SetValue(StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void
 {
+    FW_DEBUG_ASSERT(computeFunction);
     _computeFunction = computeFunction;
     _references.assign(references.begin(), references.end());
 }
@@ -147,6 +245,7 @@ auto AttributeSlot::ClearValue() -> void
 auto AttributeSlot::GetValueDependentSlots() -> std::vector<Shared<AttributeSlot>>
 {
     auto slots = std::vector<Shared<AttributeSlot>>();
+    slots.reserve(_valueDependentSlots.size());
     for (auto const& slot : _valueDependentSlots)
     {
         if (auto const locked = slot.Lock())
@@ -193,6 +292,7 @@ auto AttributeSlot::SetSourceDependentSlot(Shared<AttributeSlot> const& slot) ->
 
     if (slot)
     {
+        FW_DEBUG_ASSERT(_description.Get().GetId() == slot->GetDescription().Get().GetId());
         slot->_sourceDependantSlots.push_back(GetSelf());
         _sourceDependentSlot = slot;
     }
@@ -215,6 +315,7 @@ auto AttributeSlot::DetachFromSourceDependentSlot() -> void
 auto AttributeSlot::GetValueDependantSlots() -> std::vector<Shared<AttributeSlot>>
 {
     auto slots = std::vector<Shared<AttributeSlot>>();
+    slots.reserve(_valueDependantSlots.size());
     for (auto const& slot : _valueDependantSlots)
     {
         if (auto const locked = slot.Lock())
@@ -226,11 +327,12 @@ auto AttributeSlot::GetValueDependantSlots() -> std::vector<Shared<AttributeSlot
 }
 
 ///
-/// @brief 
+/// @brief
 ///
 auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Shared<AttributeSlot>>
 {
     auto slots = std::vector<Shared<AttributeSlot>>();
+    slots.reserve(_sourceDependantSlots.size());
     for (auto const& slot : _sourceDependantSlots)
     {
         if (auto const locked = slot.Lock())
@@ -240,7 +342,6 @@ auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Shared<AttributeSlo
     }
     return slots;
 }
-
 
 ///
 /// @brief 

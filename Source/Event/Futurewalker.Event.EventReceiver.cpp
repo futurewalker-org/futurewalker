@@ -19,6 +19,14 @@ auto EventReceiver::Make(Delegate delegate) -> Unique<EventReceiver>
 }
 
 ///
+/// @brief Check if receiver has any connection.
+///
+auto EventReceiver::HasConnection() const -> Bool
+{
+    return !_eventSignal.IsEmpty();
+}
+
+///
 /// @brief Send event to receiver.
 ///
 EventReceiver::EventReceiver(PassKey<EventReceiver>, Delegate delegate)

@@ -31,6 +31,13 @@ public:
     auto GetReferences() const noexcept -> std::vector<StaticAttributeBaseRef> const&;
     auto GetComputeFunction() const noexcept -> StaticAttributeComputeFunction const&;
 
+#if FW_ENABLE_DEBUG
+    auto GetName() const noexcept -> Pointer<char const>
+    {
+        return _name;
+    }
+#endif
+
 private:
 #if FW_ENABLE_DEBUG
     Pointer<char const> _name = nullptr;

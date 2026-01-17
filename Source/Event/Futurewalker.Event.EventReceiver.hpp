@@ -37,6 +37,8 @@ public:
     template <class Receiver, class Observer, class Function>
     static auto Connect(Receiver& receiver, Observer&& observer, Function&& function) -> SignalConnection;
 
+    auto HasConnection() const -> Bool;
+
 public:
     EventReceiver(PassKey<EventReceiver>, Delegate delegate);
 

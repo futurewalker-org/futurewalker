@@ -45,7 +45,7 @@ public:
 
         if (auto const attributeNode = _node.Lock())
         {
-            _signalConnection = EventReceiver::Connect(*attributeNode, *this, &AttributeObserver::ReceiveEvent);
+            _signalConnection = AttributeNode::ConnectAttributeEvent(*attributeNode, _description, *this, &AttributeObserver::ReceiveEvent);
         }
     }
 
