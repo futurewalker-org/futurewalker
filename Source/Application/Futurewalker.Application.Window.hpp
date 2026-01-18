@@ -207,6 +207,10 @@ private:
 
     auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
 
+    auto AttachAttributeNode(Shared<AttributeNode> const& parent) -> void;
+    auto DetachAttributeNode() -> void;
+    auto AttachCommandNode(Shared<CommandNode> const& parent) -> void;
+    auto DetachCommandNode() -> void;
     auto AttachRootView() -> void;
     auto DetachRootView() -> void;
 
@@ -237,6 +241,8 @@ private:
     Weak<Window> _owner;
     WindowBehavior _behavior = WindowBehavior::Normal;
     Unique<PropertyStore> _propertyStore;
+    Optional<Weak<AttributeNode>> _parentAttributeNode;
+    Optional<Weak<CommandNode>> _parentCommandNode;
     Shared<AttributeNode> _attributeNode;
     Shared<CommandNode> _commandNode;
     Shared<PlatformWindowContext> _platformContext;

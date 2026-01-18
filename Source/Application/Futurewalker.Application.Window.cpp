@@ -73,6 +73,9 @@ Window::~Window()
         _platformObject->SetDelegate({});
         _platformObject->Destroy();
     }
+    DetachRootView();
+    DetachCommandNode();
+    DetachAttributeNode();
 }
 
 ///
@@ -709,31 +712,11 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
         .dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); },
     });
 
-    if (options.attributeNode)
-    {
-        _attributeNode = options.attributeNode;
-    }
-    else
-    {
-        _attributeNode = AttributeNode::Make();
-        if (auto const applicationContext = Locator::GetInstance<ApplicationContext>())
-        {
-            applicationContext->GetAttributeNode().AddChild(_attributeNode);
-        }
-    }
+    _attributeNode = AttributeNode::Make();
+    AttachAttributeNode(options.attributeNode);
 
-    if (options.commandNode)
-    {
-        _commandNode = options.commandNode;
-    }
-    else
-    {
-        _commandNode = CommandNode::Make();
-        if (auto const commandDispatcherContext = Locator::GetInstance<CommandDispatcherContext>())
-        {
-            commandDispatcherContext->GetCommandNode().AddChild(_commandNode);
-        }
-    }
+    _commandNode = CommandNode::Make();
+    AttachCommandNode(options.commandNode);
 
     EventReceiver::Connect(*this, *this, &Window::ReceiveWindowEvent);
     EventReceiver::Connect(*this, *this, &Window::ReceiveFrameEvent);
@@ -833,6 +816,90 @@ auto Window::ReleasePointer(PointerId const id) -> void
 auto Window::DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>
 {
     co_return co_await dispatch(event);
+}
+
+///
+/// @brief Attaches own attribute node to parent.
+///
+/// @param parent Optional parent attribute node.
+///
+auto Window::AttachAttributeNode(Shared<AttributeNode> const& parent) -> void
+{
+    if (parent)
+    {
+        _parentAttributeNode = parent;
+        parent->AddChild(_attributeNode);
+    }
+    else
+    {
+        if (auto const applicationContext = Locator::GetInstance<ApplicationContext>())
+        {
+            applicationContext->GetAttributeNode().AddChild(_attributeNode);
+        }
+    }
+}
+
+///
+/// @brief Detaches own attribute node from parent.
+///
+auto Window::DetachAttributeNode() -> void
+{
+    if (_parentAttributeNode)
+    {
+        if (auto const parent = _parentAttributeNode->Lock())
+        {
+            parent->RemoveChild(_attributeNode);
+        }
+    }
+    else
+    {
+        if (auto const applicationContext = Locator::GetInstance<ApplicationContext>())
+        {
+            applicationContext->GetAttributeNode().RemoveChild(_attributeNode);
+        }
+    }
+}
+
+///
+/// @brief Attaches own command node to parent.
+///
+/// @param parent Optional parent command node.
+///
+auto Window::AttachCommandNode(Shared<CommandNode> const& parent) -> void
+{
+    if (parent)
+    {
+        _parentCommandNode = parent;
+        parent->AddChild(_commandNode);
+    }
+    else
+    {
+        if (auto const commandDispatcherContext = Locator::GetInstance<CommandDispatcherContext>())
+        {
+            commandDispatcherContext->GetCommandNode().AddChild(_commandNode);
+        }
+    }
+}
+
+///
+/// @brief Detaches own command node from parent.
+///
+auto Window::DetachCommandNode() -> void
+{
+    if (_parentCommandNode)
+    {
+        if (auto const parent = _parentCommandNode->Lock())
+        {
+            parent->RemoveChild(_commandNode);
+        }
+    }
+    else
+    {
+        if (auto const commandDispatcherContext = Locator::GetInstance<CommandDispatcherContext>())
+        {
+            commandDispatcherContext->GetCommandNode().RemoveChild(_commandNode);
+        }
+    }
 }
 
 ///
