@@ -3,6 +3,8 @@
 #include "Futurewalker.Graphics.SkiaScene.hpp"
 #include "Futurewalker.Graphics.SkiaDisplayList.hpp"
 #include "Futurewalker.Graphics.SkiaGlyphRun.hpp"
+#include "Futurewalker.Graphics.SkiaPathData.hpp"
+#include "Futurewalker.Graphics.SkiaFunction.hpp"
 
 #include <include/core/SkPaint.h>
 #include <include/core/SkRRect.h>
@@ -11,55 +13,6 @@ namespace FW_GRAPHICS_DETAIL_NS
 {
 namespace
 {
-auto PointToSkPoint(Point<Dp> const& point) -> SkPoint
-{
-    return SkPoint {
-        .fX = static_cast<SkScalar>(point.GetX()),
-        .fY = static_cast<SkScalar>(point.GetY()),
-    };
-}
-
-auto RectToSkRect(Rect<Dp> const& rect)
-{
-    return SkRect {
-        .fLeft = static_cast<SkScalar>(rect.GetLeft()),
-        .fTop = static_cast<SkScalar>(rect.GetTop()),
-        .fRight = static_cast<SkScalar>(rect.GetRight()),
-        .fBottom = static_cast<SkScalar>(rect.GetBottom()),
-    };
-}
-
-auto RadiusToSkVector(Radius<Dp> const& radius) -> SkVector
-{
-    return SkVector {
-        .fX = static_cast<SkScalar>(radius.GetX()),
-        .fY = static_cast<SkScalar>(radius.GetY()),
-    };
-}
-
-auto RoundRectToSkRRect(RoundRect<Dp> const& roundRect) -> SkRRect
-{
-    auto rr = SkRRect();
-    auto radii = std::array<SkVector, 4> {
-        RadiusToSkVector(roundRect.GetTopLeftRadius()),
-        RadiusToSkVector(roundRect.GetTopRightRadius()),
-        RadiusToSkVector(roundRect.GetBottomRightRadius()),
-        RadiusToSkVector(roundRect.GetBottomLeftRadius()),
-    };
-    rr.setRectRadii(RectToSkRect(roundRect.GetRect()), radii.data());
-    return rr;
-}
-
-auto RGBAColorToSkColor4f(RGBAColor const& color)
-{
-    return SkColor4f {
-        .fR = static_cast<SkScalar>(color.GetRedF64()),
-        .fG = static_cast<SkScalar>(color.GetGreenF64()),
-        .fB = static_cast<SkScalar>(color.GetBlueF64()),
-        .fA = static_cast<SkScalar>(color.GetAlphaF64()),
-    };
-}
-
 auto DrawStyleToSkPaintStyle(DrawStyle const& style)
 {
     switch (style)
@@ -94,7 +47,7 @@ auto SceneParamToSkPaint(auto const& param) -> SkPaint
 
     if constexpr (requires { param.color; })
     {
-        p.setColor4f(RGBAColorToSkColor4f(param.color));
+        p.setColor4f(SkiaFunction::RGBAColorToSkColor4f(param.color));
     }
 
     if constexpr (requires { param.drawStyle; })
@@ -154,7 +107,7 @@ auto SkiaScene::PushClipRect(ClipRectParam param) -> void
 {
     if (_canvas)
     {
-        auto const r = RectToSkRect(param.rect);
+        auto const r = SkiaFunction::RectToSkRect(param.rect);
         auto const aa = static_cast<bool>(param.antiAlias);
         _canvas->save();
         _canvas->clipRect(r, aa);
@@ -170,10 +123,31 @@ auto SkiaScene::PushClipRoundRect(ClipRoundRectParam param) -> void
 {
     if (_canvas)
     {
-        auto const rr = RoundRectToSkRRect(param.roundRect);
+        auto const rr = SkiaFunction::RoundRectToSkRRect(param.roundRect);
         auto const aa = static_cast<bool>(param.antiAlias);
         _canvas->save();
         _canvas->clipRRect(rr, aa);
+    }
+}
+
+///
+/// @brief
+///
+/// @param param
+///
+auto SkiaScene::PushClipPath(ClipPathParam param) -> void
+{
+    if (_canvas)
+    {
+        auto skPath = SkPath();
+        auto aa = false;
+        if (auto const skiaPathData = param.path.GetData().TryAs<SkiaPathData const>())
+        {
+            skPath = skiaPathData->GetSkPath();
+            aa = static_cast<bool>(param.antiAlias);
+        }
+        _canvas->save();
+        _canvas->clipPath(skPath, aa);
     }
 }
 
@@ -254,8 +228,8 @@ auto SkiaScene::AddLine(LineParam param) -> void
             // Skip drawing hairline stroke.
             return;
         }
-        auto const p1 = PointToSkPoint(param.p1);
-        auto const p2 = PointToSkPoint(param.p2);
+        auto const p1 = SkiaFunction::PointToSkPoint(param.p1);
+        auto const p2 = SkiaFunction::PointToSkPoint(param.p2);
         auto const p = SceneParamToSkPaint(param);
         _canvas->drawLine(p1, p2, p);
     }
@@ -275,7 +249,7 @@ auto SkiaScene::AddRect(RectParam param) -> void
             // Skip drawing hairline stroke.
             return;
         }
-        auto const r = RectToSkRect(param.rect);
+        auto const r = SkiaFunction::RectToSkRect(param.rect);
         auto const p = SceneParamToSkPaint(param);
         _canvas->drawRect(r, p);
     }
@@ -295,7 +269,7 @@ auto SkiaScene::AddRoundRect(RoundRectParam param) -> void
             // Skip drawing hairline stroke.
             return;
         }
-        auto const rr = RoundRectToSkRRect(param.roundRect);
+        auto const rr = SkiaFunction::RoundRectToSkRRect(param.roundRect);
         auto const p = SceneParamToSkPaint(param);
         _canvas->drawRRect(rr, p);
     }
@@ -330,6 +304,23 @@ auto SkiaScene::AddDisplayList(DisplayListParam param) -> void
                 // NOTE: Passing non-null paint will create temporary layer.
                 _canvas->drawPicture(picture, nullptr, nullptr);
             }
+        }
+    }
+}
+
+///
+/// @brief
+///
+/// @param param
+///
+auto SkiaScene::AddPath(PathParam param) -> void
+{
+    if (auto const skiaPathData = param.path.GetData().TryAs<SkiaPathData const>())
+    {
+        if (_canvas)
+        {
+            auto const p = SceneParamToSkPaint(param);
+            _canvas->drawPath(skiaPathData->GetSkPath(), p);
         }
     }
 }

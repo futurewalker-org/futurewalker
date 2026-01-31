@@ -19,6 +19,11 @@ auto NoOpScene::PushClipRoundRect(ClipRoundRectParam param) -> void
     (void)param;
 }
 
+auto NoOpScene::PushClipPath(ClipPathParam param) -> void
+{
+    (void)param;
+}
+
 auto NoOpScene::PushTranslate(TranslateParam param) -> void
 {
     (void)param;
@@ -60,6 +65,11 @@ auto NoOpScene::AddGlyphRun(GlyphRunParam param) -> void
 }
 
 auto NoOpScene::AddDisplayList(DisplayListParam param) -> void
+{
+    (void)param;
+}
+
+auto NoOpScene::AddPath(PathParam param) -> void
 {
     (void)param;
 }

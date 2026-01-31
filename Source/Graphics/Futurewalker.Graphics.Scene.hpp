@@ -5,6 +5,7 @@
 
 #include "Futurewalker.Graphics.DisplayListType.hpp"
 #include "Futurewalker.Graphics.GlyphRunType.hpp"
+#include "Futurewalker.Graphics.Path.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -40,6 +41,12 @@ public:
     struct ClipRoundRectParam
     {
         RoundRect<Dp> roundRect;
+        Bool antiAlias = false;
+    };
+
+    struct ClipPathParam
+    {
+        Path path;
         Bool antiAlias = false;
     };
 
@@ -107,10 +114,21 @@ public:
         Shared<DisplayList> displayList;
     };
 
+    struct PathParam
+    {
+        Path path;
+        RGBAColor color = RGBAColor(0, 0, 0, 1);
+        DrawStyle drawStyle = DrawStyle::Fill;
+        BlendMode blendMode = BlendMode::SrcOver;
+        Bool antiAlias = false;
+        Dp strokeWidth = 1.0;
+    };
+
     virtual ~Scene() = 0;
     virtual auto PushLayer(LayerParam param) -> void = 0;
     virtual auto PushClipRect(ClipRectParam param) -> void = 0;
     virtual auto PushClipRoundRect(ClipRoundRectParam param) -> void = 0;
+    virtual auto PushClipPath(ClipPathParam param) -> void = 0;
     virtual auto PushTranslate(TranslateParam param) -> void = 0;
     virtual auto PushRotate(RotateParam param) -> void = 0;
     virtual auto PushScale(ScaleParam param) -> void = 0;
@@ -120,6 +138,7 @@ public:
     virtual auto AddRoundRect(RoundRectParam param) -> void = 0;
     virtual auto AddGlyphRun(GlyphRunParam param) -> void = 0;
     virtual auto AddDisplayList(DisplayListParam param) -> void = 0;
+    virtual auto AddPath(PathParam param) -> void = 0;
 };
 }
 }

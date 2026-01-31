@@ -17,6 +17,7 @@ public:
     auto PushLayer(LayerParam param) -> void override;
     auto PushClipRect(ClipRectParam param) -> void override;
     auto PushClipRoundRect(ClipRoundRectParam param) -> void override;
+    auto PushClipPath(ClipPathParam param) -> void override;
     auto PushTranslate(TranslateParam param) -> void override;
     auto PushRotate(RotateParam param) -> void override;
     auto PushScale(ScaleParam param) -> void override;
@@ -26,6 +27,7 @@ public:
     auto AddRoundRect(RoundRectParam param) -> void override;
     auto AddGlyphRun(GlyphRunParam param) -> void override;
     auto AddDisplayList(DisplayListParam param) -> void override;
+    auto AddPath(PathParam param) -> void override;
 };
 }
 }
