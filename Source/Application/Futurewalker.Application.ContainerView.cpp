@@ -144,6 +144,17 @@ auto ContainerView::Draw(DrawScope& scope) -> void
     auto const borderWidth = _borderWidth.GetValueOr(0);
     auto const cornerRadius = _cornerRadius.GetValueOrDefault();
 
+    if (cornerRadius != CornerRadius())
+    {
+        auto path = Graphics::Path();
+        path.AddRoundRect(cornerRadius.GetRoundRect(GetContentRect(), GetLayoutDirection()));
+        scope.SetClipPath(path);
+    }
+    else
+    {
+        scope.SetClipMode(ViewClipMode::Bounds);
+    }
+
     ViewDrawFunction::DrawRoundRect(scene, GetContentRect(), cornerRadius, backgroundColor, GetLayoutDirection());
     ViewDrawFunction::DrawRoundRectBorder(scene, GetContentRect(), cornerRadius, borderColor, borderWidth, GetLayoutDirection());
 }

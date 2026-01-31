@@ -50,7 +50,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
     _surface->Draw([&](Graphics::Scene& scene) {
         for (auto const& clipPath : clipPaths)
         {
-            scene.PushClipPath({.path = clipPath});
+            scene.PushClipPath({.path = clipPath, .antiAlias = true});
         }
         scene.PushTranslate({.x = -unionRect.GetLeft(), .y = -unionRect.GetTop()});
         ForEachFragment([&](auto const& fragmentInfo) {
@@ -64,7 +64,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
 
                     if (fragment->clipPath)
                     {
-                        scene.PushClipPath({.path = *fragment->clipPath});
+                        scene.PushClipPath({.path = *fragment->clipPath, .antiAlias = true});
                     }
                 }
             }
