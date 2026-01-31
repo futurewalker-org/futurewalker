@@ -103,7 +103,8 @@ auto PlatformSkiaCompositionSwapChainSurfaceWin::Draw(Function<void(Scene& scene
     {
         if (auto const canvas = surface->getCanvas())
         {
-            canvas->clear(SkColor4f(0, 0, 0, 0));
+            auto const saveCount = canvas->save();
+            canvas->clear(SkColor4f());
 
             auto const scene = Shared<SkiaScene>::Make();
             scene->SetCanvas(canvas);
@@ -119,6 +120,7 @@ auto PlatformSkiaCompositionSwapChainSurfaceWin::Draw(Function<void(Scene& scene
             {
                 FW_DEBUG_ASSERT(false);
             }
+            canvas->restoreToCount(saveCount);
         }
         _device->FlushAndSubmitSurface(surface.get(), SkSurfaces::BackendSurfaceAccess::kPresent, GrSyncCpu::kYes);
     }
