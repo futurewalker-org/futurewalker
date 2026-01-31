@@ -5,9 +5,14 @@
 #include "Futurewalker.Application.PlatformViewLayerVisualType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 
+#include "Futurewalker.Graphics.Path.hpp"
+#include "Futurewalker.Graphics.DisplayListType.hpp"
+
 #include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Geometry.hpp"
+
+#include "Futurewalker.Core.Optional.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -24,28 +29,27 @@ public:
     auto Update(Shared<PlatformViewLayerVisual> const& visual, Shared<PlatformViewLayer> const& layer) -> void;
 
 private:
-    auto PushNode(PlatformViewLayerId const& id, Offset<Dp> const& offset, Rect<Dp> const& clipRect, Float64 const& opacity) -> void;
+    auto PushNode(PlatformViewLayerId const& id, Offset<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void;
     auto PopNode() -> void;
     auto FindNextVisual(PlatformViewLayerId const id) -> Shared<PlatformViewLayerVisual>;
     auto PushVisual(PlatformViewLayerId const id) -> void;
     auto PopVisual() -> void;
-    auto GetBaseNodeIndex() const -> SInt64;
-    auto GetCurrentNodeIndex() const -> SInt64;
     auto UpdateFragment(Shared<PlatformViewLayer> const& layer) -> void;
     auto UpdateCore(Shared<PlatformViewLayer> const& layer) -> void;
 
 private:
     auto InternalGetCurrentVisual() -> Shared<PlatformViewLayerVisual>;
     auto InternalSetCurrentVisual(Shared<PlatformViewLayerVisual> const& visual) -> void;
-    auto InternalPushVisualNodeIndex() -> void;
-    auto InternalPopVisualNodeIndex() -> void;
-    auto InternalResetRelativePropertiesFromBase() -> void;
-    auto InternalGetCurrentOffset() const -> Offset<Dp>;
-    auto InternalGetCurrentClipRect() const -> Rect<Dp>;
-    auto InternalGetCurrentOpacity() const -> Float64;
-    auto InternalGetCurrentOffsetFromBase() const -> Offset<Dp>;
-    auto InternalGetCurrentClipRectFromBase() const -> Rect<Dp>;
-    auto InternalGetCurrentOpacityFromBase() const -> Float64;
+    auto InternalSetCurrentVisualProperties(Shared<PlatformViewLayerVisual> const& visual, SInt64 const target) -> void;
+    auto InternalPushBaseVisual(Shared<PlatformViewLayerVisual> const& visual) -> void;
+    auto InternalPopBaseVisual() -> void;
+    auto InternalGetNodeState(SInt64 const target, Offset<Dp>& offset, Rect<Dp>& clipRect, std::vector<Graphics::Path>& clipPaths, Float64& opacity) const -> void;
+    auto InternalGetBaseNodeIndex() const -> SInt64;
+    auto InternalGetBaseVisual() const -> Shared<PlatformViewLayerVisual>;
+    auto InternalGetCurrentNodeIndex() const -> SInt64;
+    auto InternalReplaceNextPushNodeFragment(Offset<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void;
+    auto InternalReplaceNextPopNodeFragment() -> void;
+    auto InternalReplaceNextDisplayListFragment(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& displayListOffset) -> void;
 
 private:
     struct NodeInfo
@@ -53,17 +57,14 @@ private:
         PlatformViewLayerId id;
         Offset<Dp> offset;
         Rect<Dp> clipRect;
+        Optional<Graphics::Path> clipPath;
         Float64 opacity = 1.0;
-        Offset<Dp> currentOffset;
-        Rect<Dp> currentClipRect;
-        Float64 currentOpacity = 1.0;
-        Offset<Dp> currentOffsetFromBase;
-        Rect<Dp> currentClipRectFromBase;
-        Float64 currentOpacityFromBase = 1.0;
     };
     std::vector<NodeInfo> _nodeStack;
-    std::vector<SInt64> _visualNodeIndexStack;
+    std::vector<SInt64> _baseVisualNodeIndexStack;
+    std::vector<Shared<PlatformViewLayerVisual>> _baseVisualStack;
     Shared<PlatformViewLayerVisual> _currentVisual;
+    SInt64 _currentFragmentIndex = 0;
 };
 }
 }

@@ -5,6 +5,7 @@
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 
 #include "Futurewalker.Graphics.DisplayListType.hpp"
+#include "Futurewalker.Graphics.Path.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -51,6 +52,9 @@ public:
     auto GetClipRect() const -> Rect<Dp>;
     auto SetClipRect(Rect<Dp> const& clipRect) -> void;
 
+    auto GetClipPaths() const -> std::vector<Graphics::Path> const&;
+    auto SetClipPaths(std::vector<Graphics::Path> const& clipPaths) -> void;
+
     auto GetOpacity() const -> Float64;
     auto SetOpacity(Float64 const opacity) -> void;
 
@@ -60,21 +64,57 @@ public:
     auto GetBackingScale() const -> BackingScale;
     auto SetBackingScale(BackingScale const backingScale) -> void;
 
-    struct Fragment
+    enum class FragmentType
     {
-        Offset<Dp> offset;
-        Rect<Dp> clipRect;
-        Float64 opacity = 1.0;
+        DisplayList,
+        PushNode,
+        PopNode,
+    };
+
+    struct FragmentInfo
+    {
+        PlatformViewLayerId layerId = PlatformViewLayerId(0U);
+        FragmentType type = FragmentType::DisplayList;
+        SInt64 index = 0;
+    };
+
+    struct DisplayListFragment
+    {
         Shared<Graphics::DisplayList> displayList;
         Offset<Dp> displayListOffset;
 
-        auto operator==(Fragment const& other) const -> bool = default;
-        auto operator!=(Fragment const& other) const -> bool = default;
+        auto operator==(DisplayListFragment const& other) const -> bool = default;
+        auto operator!=(DisplayListFragment const& other) const -> bool = default;
     };
-    auto AddFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void;
-    auto ReplaceFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void;
+
+    struct PushNodeFragment
+    {
+        Offset<Dp> offset;
+        Rect<Dp> clipRect;
+        Optional<Graphics::Path> clipPath;
+        Float64 opacity = 1.0;
+
+        auto operator==(PushNodeFragment const& other) const -> bool = default;
+        auto operator!=(PushNodeFragment const& other) const -> bool = default;
+    };
+
+    struct PopNodeFragment
+    {
+        SInt64 pushNodeIndex = 0;
+        auto operator==(PopNodeFragment const& other) const -> bool = default;
+        auto operator!=(PopNodeFragment const& other) const -> bool = default;
+    };
+
+    auto AddDisplayListFragment(PlatformViewLayerId layerId, DisplayListFragment const& fragment) -> void;
+    auto AddPushNodeFragment(PlatformViewLayerId layerId, PushNodeFragment const& fragment) -> void;
+    auto AddPopNodeFragment(PlatformViewLayerId layerId) -> void;
+    auto ReplaceDisplayListFragment(SInt64 const index, DisplayListFragment const& fragment) -> void;
+    auto ReplacePushNodeFragment(SInt64 const index, PushNodeFragment const& fragment) -> void;
     auto ClearFragments() -> void;
-    auto ForEachFragment(Function<void(Fragment const&)> const& func) const -> void;
+    auto ForEachFragment(Function<void(FragmentInfo const&)> const& func) const -> void;
+    auto GetDisplayListFragment(SInt64 const index) const -> Pointer<DisplayListFragment const>;
+    auto GetPushNodeFragment(SInt64 const index) const -> Pointer<PushNodeFragment const>;
+    auto GetPopNodeFragment(SInt64 const index) const -> Pointer<PopNodeFragment const>;
     auto GetFragmentCount() const -> SInt64;
 
 protected:
@@ -89,6 +129,7 @@ protected:
     virtual auto OnFragmentChanged() -> void = 0;
     virtual auto OnOffsetChanged() -> void = 0;
     virtual auto OnClipRectChanged() -> void = 0;
+    virtual auto OnClipPathChanged() -> void = 0;
     virtual auto OnOpacityChanged() -> void = 0;
     virtual auto OnDisplayScaleChanged() -> void = 0;
     virtual auto OnBackingScaleChanged() -> void = 0;
@@ -100,8 +141,12 @@ private:
     PlatformViewLayerId _baseLayerId = PlatformViewLayerId(0U);
     Offset<Dp> _offset;
     Rect<Dp> _clipRect;
+    std::vector<Graphics::Path> _clipPaths;
     Float64 _opacity = 1.0;
-    OrderedHashMap<PlatformViewLayerId, Fragment> _fragments;
+    std::vector<FragmentInfo> _fragments;
+    std::vector<DisplayListFragment> _displayListFragments;
+    std::vector<PushNodeFragment> _pushNodeFragments;
+    std::vector<PopNodeFragment> _popNodeFragments;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
 };

@@ -8,55 +8,33 @@
 
 namespace FW_DETAIL_NS
 {
-auto PlatformViewLayerVisualPropertyUpdater::PushNode(PlatformViewLayerId const& id, Offset<Dp> const& offset, Rect<Dp> const& clipRect, Float64 const& opacity) -> void
+auto PlatformViewLayerVisualPropertyUpdater::PushNode(PlatformViewLayerId const& id, Offset<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void
 {
-    Offset<Dp> currentOffset = Offset<Dp>();
-    Rect<Dp> currentClipRect = Rect<Dp>::Infinite();
-    Float64 currentOpacity = 1.0;
-    Offset<Dp> currentOffsetFromBase = Offset<Dp>();
-    Rect<Dp> currentClipRectFromBase = Rect<Dp>::Infinite();
-    Float64 currentOpacityFromBase = 1.0;
-
-    if (_nodeStack.empty())
-    {
-        currentOffset = offset;
-        currentClipRect = clipRect;
-        currentOpacity = opacity;
-    }
-    else
-    {
-        auto& back = _nodeStack.back();
-        currentOffset = back.currentOffset + offset;
-        currentClipRect = Rect<Dp>::Intersect(Rect<Dp>::Offset(back.currentClipRect, -offset), clipRect);
-        currentOpacity = back.currentOpacity * opacity;
-        currentOffsetFromBase = back.currentOffsetFromBase + offset;
-        currentClipRectFromBase = Rect<Dp>::Intersect(Rect<Dp>::Offset(back.currentClipRectFromBase, -offset), clipRect);
-        currentOpacityFromBase = back.currentOpacityFromBase * opacity;
-    }
-
     _nodeStack.push_back({
         .id = id,
         .offset = offset,
         .clipRect = clipRect,
+        .clipPath = clipPath,
         .opacity = opacity,
-        .currentOffset = currentOffset,
-        .currentClipRect = currentClipRect,
-        .currentOpacity = currentOpacity,
-        .currentOffsetFromBase = currentOffsetFromBase,
-        .currentClipRectFromBase = currentClipRectFromBase,
-        .currentOpacityFromBase = currentOpacityFromBase,
     });
+
+    // Ignore initial PushNode() before first visual is pushed.
+    if (InternalGetBaseVisual())
+    {
+        InternalReplaceNextPushNodeFragment(offset, clipRect, clipPath, opacity);
+    }
 }
 
 auto PlatformViewLayerVisualPropertyUpdater::PopNode() -> void
 {
     FW_DEBUG_ASSERT(!_nodeStack.empty());
     _nodeStack.pop_back();
+    InternalReplaceNextPopNodeFragment();
 }
 
 auto PlatformViewLayerVisualPropertyUpdater::FindNextVisual(PlatformViewLayerId const id) -> Shared<PlatformViewLayerVisual>
 {
-    if (auto const visual = InternalGetCurrentVisual())
+    if (auto const visual = InternalGetBaseVisual())
     {
         if (visual->GetBaseLayerId() == id)
         {
@@ -71,7 +49,7 @@ auto PlatformViewLayerVisualPropertyUpdater::FindNextVisual(PlatformViewLayerId 
             }
         }
     }
-    return {};
+    return InternalGetCurrentVisual();
 }
 
 auto PlatformViewLayerVisualPropertyUpdater::PushVisual(PlatformViewLayerId const id) -> void
@@ -79,8 +57,8 @@ auto PlatformViewLayerVisualPropertyUpdater::PushVisual(PlatformViewLayerId cons
     if (auto const nextVisual = FindNextVisual(id))
     {
         InternalSetCurrentVisual(nextVisual);
-        InternalPushVisualNodeIndex();
-        InternalResetRelativePropertiesFromBase();
+        InternalSetCurrentVisualProperties(nextVisual, InternalGetCurrentNodeIndex());
+        InternalPushBaseVisual(nextVisual);
     }
     else
     {
@@ -90,22 +68,8 @@ auto PlatformViewLayerVisualPropertyUpdater::PushVisual(PlatformViewLayerId cons
 
 auto PlatformViewLayerVisualPropertyUpdater::PopVisual() -> void
 {
-    InternalPopVisualNodeIndex();
+    InternalPopBaseVisual();
     InternalSetCurrentVisual(nullptr);
-}
-
-auto PlatformViewLayerVisualPropertyUpdater::GetBaseNodeIndex() const -> SInt64
-{
-    if (!_visualNodeIndexStack.empty())
-    {
-        return _visualNodeIndexStack.back();
-    }
-    return 0;
-}
-
-auto PlatformViewLayerVisualPropertyUpdater::GetCurrentNodeIndex() const -> SInt64
-{
-    return static_cast<SInt64>(std::ssize(_nodeStack)) - 1;
 }
 
 auto PlatformViewLayerVisualPropertyUpdater::UpdateFragment(Shared<PlatformViewLayer> const& layer) -> void
@@ -116,45 +80,39 @@ auto PlatformViewLayerVisualPropertyUpdater::UpdateFragment(Shared<PlatformViewL
         return;
     }
 
-    auto const id = layer->GetId();
-    if (auto const visual = InternalGetCurrentVisual())
+    auto visual = InternalGetCurrentVisual();
+    if (!visual)
     {
-        if (visual->GetBaseLayerId() == id)
+        auto const id = layer->GetId();
+        visual = FindNextVisual(id);
+
+        for (auto i = InternalGetBaseNodeIndex() + 1; i <= InternalGetCurrentNodeIndex(); ++i)
         {
-            visual->SetOffset(InternalGetCurrentOffset());
-            visual->SetClipRect(InternalGetCurrentClipRect());
-            visual->SetOpacity(InternalGetCurrentOpacity());
-
-            for (auto const& child : visual->GetChildren())
-            {
-                if (child->GetBaseLayerId() == id)
-                {
-                    child->SetOffset(InternalGetCurrentOffset());
-                    child->SetClipRect(InternalGetCurrentClipRect());
-                    child->SetOpacity(InternalGetCurrentOpacity());
-                }
-            }
+            auto const& node = _nodeStack[static_cast<size_t>(i)];
+            visual->ReplacePushNodeFragment(
+              _currentFragmentIndex++,
+              {
+                  .offset = node.offset,
+                  .clipRect = node.clipRect,
+                  .clipPath = node.clipPath,
+                  .opacity = node.opacity,
+              });
         }
-
-        visual->ReplaceFragment(
-          id,
-          {
-              .offset = InternalGetCurrentOffsetFromBase(),
-              .clipRect = InternalGetCurrentClipRectFromBase(),
-              .opacity = InternalGetCurrentOpacityFromBase(),
-              .displayList = layer->GetDisplayList(),
-              .displayListOffset = layer->GetDisplayListOffset(),
-          });
+        InternalSetCurrentVisualProperties(visual, InternalGetCurrentNodeIndex());
+        InternalSetCurrentVisual(visual);
+        InternalPushBaseVisual(visual);
     }
+    InternalReplaceNextDisplayListFragment(layer->GetDisplayList(), layer->GetDisplayListOffset());
 }
 
 auto PlatformViewLayerVisualPropertyUpdater::UpdateCore(Shared<PlatformViewLayer> const& layer) -> void
 {
     auto const layerId = layer->GetId();
     auto const layerOffset = layer->GetOffset();
-    auto const layerClipRect = layer->GetClipMode() == ViewClipMode::Bounds ? Rect<Dp>({}, layer->GetSize()) : Rect<Dp>::Infinite();
     auto const layerOpacity = layer->GetOpacity();
-    PushNode(layerId, layerOffset, layerClipRect, layerOpacity);
+    auto const layerClipRect = layer->GetClipMode() == ViewClipMode::Bounds ? Rect<Dp>({}, layer->GetSize()) : Rect<Dp>::Infinite();
+    auto const layerClipPath = layer->GetClipPath();
+    PushNode(layerId, layerOffset, layerClipRect, layerClipPath, layerOpacity);
 
     auto const needsSurface = layer->ShouldRasterize();
     if (needsSurface)
@@ -179,8 +137,10 @@ auto PlatformViewLayerVisualPropertyUpdater::UpdateCore(Shared<PlatformViewLayer
 auto PlatformViewLayerVisualPropertyUpdater::Update(Shared<PlatformViewLayerVisual> const& visual, Shared<PlatformViewLayer> const& layer) -> void
 {
     _nodeStack.clear();
-    _visualNodeIndexStack.clear();
+    _baseVisualNodeIndexStack.clear();
+    _baseVisualStack.clear();
     _currentVisual = visual;
+    _currentFragmentIndex = 0;
     UpdateCore(layer);
 }
 
@@ -194,78 +154,125 @@ auto PlatformViewLayerVisualPropertyUpdater::InternalSetCurrentVisual(Shared<Pla
     _currentVisual = visual;
 }
 
-auto PlatformViewLayerVisualPropertyUpdater::InternalPushVisualNodeIndex() -> void
+auto PlatformViewLayerVisualPropertyUpdater::InternalSetCurrentVisualProperties(Shared<PlatformViewLayerVisual> const& visual, SInt64 const target) -> void
 {
-    _visualNodeIndexStack.push_back(std::ssize(_nodeStack) - 1);
-}
-
-auto PlatformViewLayerVisualPropertyUpdater::InternalPopVisualNodeIndex() -> void
-{
-    _visualNodeIndexStack.pop_back();
-}
-
-auto PlatformViewLayerVisualPropertyUpdater::InternalResetRelativePropertiesFromBase() -> void
-{
-    if (!_nodeStack.empty())
+    if (visual)
     {
-        auto& back = _nodeStack.back();
-        back.currentOffsetFromBase = Offset<Dp>();
-        back.currentClipRectFromBase = Rect<Dp>::Infinite();
-        back.currentOpacityFromBase = 1.0;
+        auto offset = Offset<Dp>();
+        auto clipRect = Rect<Dp>();
+        auto clipPaths = std::vector<Graphics::Path>();
+        auto opacity = Float64(1.0);
+        InternalGetNodeState(target, offset, clipRect, clipPaths, opacity);
+        visual->SetOffset(offset);
+        visual->SetClipRect(clipRect);
+        visual->SetClipPaths(clipPaths);
+        visual->SetOpacity(opacity);
     }
 }
 
-auto PlatformViewLayerVisualPropertyUpdater::InternalGetCurrentOffset() const -> Offset<Dp>
+auto PlatformViewLayerVisualPropertyUpdater::InternalPushBaseVisual(Shared<PlatformViewLayerVisual> const& visual) -> void
 {
-    if (!_nodeStack.empty())
-    {
-        return _nodeStack.back().currentOffset;
-    }
-    return Offset<Dp>();
+    _baseVisualNodeIndexStack.push_back(std::ssize(_nodeStack) - 1);
+    _baseVisualStack.push_back(visual);
 }
 
-auto PlatformViewLayerVisualPropertyUpdater::InternalGetCurrentClipRect() const -> Rect<Dp>
+auto PlatformViewLayerVisualPropertyUpdater::InternalPopBaseVisual() -> void
 {
-    if (!_nodeStack.empty())
-    {
-        return _nodeStack.back().currentClipRect;
-    }
-    return Rect<Dp>::Infinite();
+    _baseVisualNodeIndexStack.pop_back();
+    _baseVisualStack.pop_back();
 }
 
-auto PlatformViewLayerVisualPropertyUpdater::InternalGetCurrentOpacity() const -> Float64
+auto PlatformViewLayerVisualPropertyUpdater::InternalGetNodeState(SInt64 const target, Offset<Dp>& offset, Rect<Dp>& clipRect, std::vector<Graphics::Path>& clipPaths, Float64& opacity) const -> void
 {
-    if (!_nodeStack.empty())
+    auto totalOffset = Offset<Dp>();
+    auto accumulatedOpacity = Float64(1.0);
+    for (auto i = SInt64(0); i <= target; ++i)
     {
-        return _nodeStack.back().currentOpacity;
+        auto const& node = _nodeStack[static_cast<size_t>(i)];
+        totalOffset += node.offset;
+        accumulatedOpacity *= node.opacity;
     }
-    return 1.0;
+
+    auto currentOffset = -totalOffset;
+    auto currentClipRect = Rect<Dp>::Infinite();
+    auto currentClipPaths = std::vector<Graphics::Path>();
+    for (auto i = SInt64(0); i <= target; ++i)
+    {
+        auto const& node = _nodeStack[static_cast<size_t>(i)];
+        currentOffset += node.offset;
+        currentClipRect = Rect<Dp>::Intersect(Rect<Dp>::Offset(currentClipRect, currentOffset), node.clipRect);
+
+        if (node.clipPath)
+        {
+            currentClipPaths.push_back(*node.clipPath);
+            currentClipPaths.back().Translate(currentOffset);
+        }
+    }
+    offset = currentOffset;
+    clipRect = currentClipRect;
+    clipPaths = currentClipPaths;
+    opacity = accumulatedOpacity;
 }
 
-auto PlatformViewLayerVisualPropertyUpdater::InternalGetCurrentOffsetFromBase() const -> Offset<Dp>
+auto PlatformViewLayerVisualPropertyUpdater::InternalGetBaseNodeIndex() const -> SInt64
 {
-    if (!_nodeStack.empty())
+    if (!_baseVisualNodeIndexStack.empty())
     {
-        return _nodeStack.back().currentOffsetFromBase;
+        return _baseVisualNodeIndexStack.back();
     }
-    return Offset<Dp>();
+    return 0;
 }
 
-auto PlatformViewLayerVisualPropertyUpdater::InternalGetCurrentClipRectFromBase() const -> Rect<Dp>
+auto PlatformViewLayerVisualPropertyUpdater::InternalGetBaseVisual() const -> Shared<PlatformViewLayerVisual>
 {
-    if (!_nodeStack.empty())
+    if (!_baseVisualStack.empty())
     {
-        return _nodeStack.back().currentClipRectFromBase;
+        return _baseVisualStack.back();
     }
-    return Rect<Dp>::Infinite();
-}
-auto PlatformViewLayerVisualPropertyUpdater::InternalGetCurrentOpacityFromBase() const -> Float64
-{
-    if (!_nodeStack.empty())
-    {
-        return _nodeStack.back().currentOpacityFromBase;
-    }
-    return 1.0;
+    return {};
 }
 
+auto PlatformViewLayerVisualPropertyUpdater::InternalGetCurrentNodeIndex() const -> SInt64
+{
+    return static_cast<SInt64>(std::ssize(_nodeStack)) - 1;
+}
+
+auto PlatformViewLayerVisualPropertyUpdater::InternalReplaceNextPushNodeFragment(Offset<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void
+{
+    if (auto const visual = InternalGetCurrentVisual())
+    {
+        FW_DEBUG_ASSERT(InternalGetBaseVisual());
+        visual->ReplacePushNodeFragment(
+          _currentFragmentIndex++,
+          {
+              .offset = offset,
+              .clipRect = clipRect,
+              .clipPath = clipPath,
+              .opacity = opacity,
+          });
+    }
+}
+
+auto PlatformViewLayerVisualPropertyUpdater::InternalReplaceNextPopNodeFragment() -> void
+{
+    if (InternalGetCurrentVisual())
+    {
+        FW_DEBUG_ASSERT(InternalGetBaseVisual());
+        _currentFragmentIndex++;
+    }
+}
+
+auto PlatformViewLayerVisualPropertyUpdater::InternalReplaceNextDisplayListFragment(Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& displayListOffset) -> void
+{
+    if (auto const visual = InternalGetCurrentVisual())
+    {
+        FW_DEBUG_ASSERT(InternalGetBaseVisual());
+        visual->ReplaceDisplayListFragment(
+          _currentFragmentIndex++,
+          {
+              .displayList = displayList,
+              .displayListOffset = displayListOffset,
+          });
+    }
+}
 }

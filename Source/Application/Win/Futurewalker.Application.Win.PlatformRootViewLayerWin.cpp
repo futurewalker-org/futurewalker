@@ -142,6 +142,18 @@ auto PlatformRootViewLayerWin::RootSizeChanged(Shared<PlatformViewLayer> const& 
 }
 
 ///
+/// @brief Notify clip path change.
+///
+auto PlatformRootViewLayerWin::RootClipPathChanged(Shared<PlatformViewLayer> const& layer) -> void
+{
+    (void)layer;
+    if (_renderer)
+    {
+        _renderer->RequestUpdateLayer();
+    }
+}
+
+///
 /// @brief Notify clip mode change.
 ///
 auto PlatformRootViewLayerWin::RootClipModeChanged(Shared<PlatformViewLayer> const& layer) -> void

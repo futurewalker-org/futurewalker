@@ -7,6 +7,7 @@
 #include "Futurewalker.Application.ViewType.hpp"
 
 #include "Futurewalker.Graphics.DisplayListType.hpp"
+#include "Futurewalker.Graphics.Path.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -16,6 +17,7 @@
 #include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.TypeTraits.hpp"
 #include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.Optional.hpp"
 
 #include <vector>
 
@@ -53,6 +55,9 @@ public:
 
     auto GetSize() const -> Size<Dp>;
     auto SetSize(Size<Dp> const& size) -> void;
+
+    auto GetClipPath() const -> Optional<Graphics::Path>;
+    auto SetClipPath(Optional<Graphics::Path> const& path) -> void;
 
     auto GetClipMode() const -> ViewClipMode;
     auto SetClipMode(ViewClipMode const clipMode) -> void;
@@ -94,6 +99,7 @@ private:
     virtual auto RootGetBackingScale() const -> BackingScale;
     virtual auto RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void;
     virtual auto RootSizeChanged(Shared<PlatformViewLayer> const& layer) -> void;
+    virtual auto RootClipPathChanged(Shared<PlatformViewLayer> const& layer) -> void;
     virtual auto RootClipModeChanged(Shared<PlatformViewLayer> const& layer) -> void;
     virtual auto RootOpacityChanged(Shared<PlatformViewLayer> const& layer) -> void;
     virtual auto RootRenderFlagsChanged(Shared<PlatformViewLayer> const& layer) -> void;
@@ -117,6 +123,7 @@ private:
     PlatformViewLayerRenderFlags _renderFlags = PlatformViewLayerRenderFlags::None;
     Size<Dp> _size;
     Offset<Dp> _offset;
+    Optional<Graphics::Path> _clipPath;
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
     Shared<Graphics::DisplayList> _displayList;

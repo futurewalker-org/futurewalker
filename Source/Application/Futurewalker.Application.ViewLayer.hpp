@@ -8,6 +8,7 @@
 #include "Futurewalker.Application.CornerRadius.hpp"
 
 #include "Futurewalker.Graphics.DisplayListType.hpp"
+#include "Futurewalker.Graphics.Path.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -58,6 +59,7 @@ public:
 
     auto SetOffset(Offset<Dp> const& offset) -> void;
     auto SetSize(Size<Dp> const& size) -> void;
+    auto SetClipPath(Optional<Graphics::Path> const& path) -> void;
     auto SetClipMode(ViewClipMode const clipMode) -> void;
     auto SetOpacity(Float64 const opacity) -> void;
     auto SetShouldRasterize(Bool const shouldRasterize) -> void;

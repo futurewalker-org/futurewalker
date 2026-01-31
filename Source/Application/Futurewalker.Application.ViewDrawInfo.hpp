@@ -8,6 +8,7 @@
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 
 #include "Futurewalker.Graphics.DisplayListType.hpp"
+#include "Futurewalker.Graphics.Path.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -15,6 +16,7 @@
 
 #include "Futurewalker.Core.Primitive.hpp"
 #include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.Optional.hpp"
 
 #include <vector>
 
@@ -42,6 +44,7 @@ public:
     auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void;
     auto SetDisplayScale(DisplayScale const displayScale) -> void;
     auto SetBackingScale(BackingScale const backingScale) -> void;
+    auto SetClipPath(Optional<Graphics::Path> const& path) -> void;
     auto SetClipMode(ViewClipMode const clipMode) -> void;
     auto SetOpacity(Float64 const opacity) -> void;
     auto UpdateLayers(ViewLayer& layer) -> void;
@@ -74,6 +77,7 @@ private:
     Shared<Graphics::DisplayList> _displayList;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
+    Optional<Graphics::Path> _clipPath;
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
 };

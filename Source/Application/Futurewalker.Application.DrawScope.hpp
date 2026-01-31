@@ -9,6 +9,7 @@
 #include "Futurewalker.Graphics.SceneType.hpp"
 #include "Futurewalker.Graphics.SceneRecorderType.hpp"
 #include "Futurewalker.Graphics.DisplayListType.hpp"
+#include "Futurewalker.Graphics.Path.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -16,6 +17,7 @@
 #include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.Optional.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -33,10 +35,12 @@ public:
 
     auto GetScene() -> Graphics::Scene&;
 
+    auto SetClipPath(Graphics::Path const& path) -> void;
     auto SetClipMode(ViewClipMode const clipMode) -> void;
     auto SetOpacity(Float64 const opacity) -> void;
 
     auto GetDisplayList(PassKey<View>) -> Shared<Graphics::DisplayList>;
+    auto GetClipPath(PassKey<View>) -> Optional<Graphics::Path>;
     auto GetClipMode(PassKey<View>) -> ViewClipMode;
     auto GetOpacity(PassKey<View>) -> Float64;
 
@@ -52,6 +56,7 @@ private:
     Shared<Graphics::SceneRecorder> _recordingSurface;
     Shared<Graphics::Scene> _recordingCanvas;
     Shared<Graphics::DisplayList> _recordedDisplayList;
+    Optional<Graphics::Path> _clipPath;
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
 };

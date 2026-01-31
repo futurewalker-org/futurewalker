@@ -100,6 +100,9 @@ public:
         Base::reset();
     }
 
+    auto operator==(Optional const& other) const noexcept -> bool = default;
+    auto operator!=(Optional const& other) const noexcept -> bool = default;
+
     ///
     /// @brief Conversion operator to bool.
     ///

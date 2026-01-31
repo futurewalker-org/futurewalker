@@ -104,6 +104,7 @@ auto PlatformViewLayer::GetOffset() const -> Offset<Dp>
 {
     return _offset;
 }
+
 auto PlatformViewLayer::SetOffset(Offset<Dp> const& pos) -> void
 {
     if (_offset != pos)
@@ -117,12 +118,27 @@ auto PlatformViewLayer::GetSize() const -> Size<Dp>
 {
     return _size;
 }
+
 auto PlatformViewLayer::SetSize(Size<Dp> const& size) -> void
 {
     if (_size != size)
     {
         _size = size;
         GetRoot()->RootSizeChanged(GetSelf());
+    }
+}
+
+auto PlatformViewLayer::GetClipPath() const -> Optional<Graphics::Path>
+{
+    return _clipPath;
+}
+
+auto PlatformViewLayer::SetClipPath(Optional<Graphics::Path> const& path) -> void
+{
+    if (_clipPath != path)
+    {
+        _clipPath = path;
+        GetRoot()->RootClipPathChanged(GetSelf());
     }
 }
 
@@ -262,6 +278,11 @@ auto PlatformViewLayer::RootOffsetChanged(Shared<PlatformViewLayer> const& layer
 }
 
 auto PlatformViewLayer::RootSizeChanged(Shared<PlatformViewLayer> const& layer) -> void
+{
+    (void)layer;
+}
+
+auto PlatformViewLayer::RootClipPathChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     (void)layer;
 }

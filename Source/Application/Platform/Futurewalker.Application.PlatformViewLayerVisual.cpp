@@ -90,6 +90,20 @@ auto PlatformViewLayerVisual::SetClipRect(Rect<Dp> const& clipRect) -> void
     }
 }
 
+auto PlatformViewLayerVisual::GetClipPaths() const -> std::vector<Graphics::Path> const&
+{
+    return _clipPaths;
+}
+
+auto PlatformViewLayerVisual::SetClipPaths(std::vector<Graphics::Path> const& clipPaths) -> void
+{
+    if (_clipPaths != clipPaths)
+    {
+        _clipPaths = clipPaths;
+        OnClipPathChanged();
+    }
+}
+
 auto PlatformViewLayerVisual::GetOpacity() const -> Float64
 {
     return _opacity;
@@ -150,42 +164,139 @@ auto PlatformViewLayerVisual::SetBackingScale(BackingScale const backingScale) -
     }
 }
 
-auto PlatformViewLayerVisual::AddFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void
+auto PlatformViewLayerVisual::AddDisplayListFragment(PlatformViewLayerId layerId, DisplayListFragment const& fragment) -> void
 {
-    if (_fragments.Insert(layerId, fragment))
-    {
-        OnFragmentChanged();
-    }
+    _fragments.push_back(
+      FragmentInfo {
+          .layerId = layerId,
+          .type = FragmentType::DisplayList,
+          .index = std::ssize(_displayListFragments),
+      });
+    _displayListFragments.push_back(fragment);
+    OnFragmentChanged();
 }
 
-auto PlatformViewLayerVisual::ReplaceFragment(PlatformViewLayerId layerId, Fragment const& fragment) -> void
+auto PlatformViewLayerVisual::AddPushNodeFragment(PlatformViewLayerId layerId, PushNodeFragment const& fragment) -> void
 {
-    if (_fragments.ReplaceIf(layerId, fragment, [&](Fragment const& old) { return old != fragment; }))
+    _fragments.push_back(
+      FragmentInfo {
+          .layerId = layerId,
+          .type = FragmentType::PushNode,
+          .index = std::ssize(_pushNodeFragments),
+      });
+    _pushNodeFragments.push_back(fragment);
+    OnFragmentChanged();
+}
+
+auto PlatformViewLayerVisual::AddPopNodeFragment(PlatformViewLayerId layerId) -> void
+{
+    _fragments.push_back(
+      FragmentInfo {
+          .layerId = layerId,
+          .type = FragmentType::PopNode,
+          .index = 0,
+      });
+    _popNodeFragments.push_back(
+      PopNodeFragment {
+          .pushNodeIndex = std::ssize(_pushNodeFragments) - 1,
+      });
+    OnFragmentChanged();
+}
+
+auto PlatformViewLayerVisual::ReplaceDisplayListFragment(SInt64 const index, DisplayListFragment const& fragment) -> void
+{
+    if (0 <= index && index < std::ssize(_fragments))
     {
-        OnFragmentChanged();
+        auto const& fragmentInfo = _fragments[static_cast<size_t>(index)];
+        if (fragmentInfo.type == FragmentType::DisplayList)
+        {
+            auto& existingFragment = _displayListFragments[static_cast<size_t>(fragmentInfo.index)];
+            if (existingFragment != fragment)
+            {
+                existingFragment = fragment;
+                OnFragmentChanged();
+            }
+            return;
+        }
     }
+    FW_DEBUG_ASSERT(false);
+}
+
+auto PlatformViewLayerVisual::ReplacePushNodeFragment(SInt64 const index, PushNodeFragment const& fragment) -> void
+{
+    if (0 <= index && index < std::ssize(_fragments))
+    {
+        auto const& fragmentInfo = _fragments[static_cast<size_t>(index)];
+        if (fragmentInfo.type == FragmentType::PushNode)
+        {
+            auto& existingFragment = _pushNodeFragments[static_cast<size_t>(fragmentInfo.index)];
+            if (existingFragment != fragment)
+            {
+                existingFragment = fragment;
+                OnFragmentChanged();
+            }
+            return;
+        }
+    }
+    FW_DEBUG_ASSERT(false);
 }
 
 auto PlatformViewLayerVisual::ClearFragments() -> void
 {
-    if (!_fragments.IsEmpty())
+    if (!_fragments.empty())
     {
-        _fragments.Clear();
+        _fragments.clear();
+        _displayListFragments.clear();
+        _pushNodeFragments.clear();
+        _popNodeFragments.clear();
         OnFragmentChanged();
     }
 }
 
-auto PlatformViewLayerVisual::ForEachFragment(Function<void(Fragment const&)> const& func) const -> void
+auto PlatformViewLayerVisual::ForEachFragment(Function<void(FragmentInfo const&)> const& func) const -> void
 {
-    if (func)
+    for (auto const& fragment : _fragments)
     {
-        _fragments.ForEach([&](auto const& pair) { std::invoke(func, pair.second); });
+        if (func)
+        {
+            func(fragment);
+        }
     }
+}
+
+auto PlatformViewLayerVisual::GetDisplayListFragment(SInt64 const index) const -> Pointer<DisplayListFragment const>
+{
+    if (0 <= index && index < std::ssize(_displayListFragments))
+    {
+        return Pointer<DisplayListFragment const>(&_displayListFragments[static_cast<size_t>(index)]);
+    }
+    FW_DEBUG_ASSERT(false);
+    return nullptr;
+}
+
+auto PlatformViewLayerVisual::GetPushNodeFragment(SInt64 const index) const -> Pointer<PushNodeFragment const>
+{
+    if (0 <= index && index < std::ssize(_pushNodeFragments))
+    {
+        return Pointer<PushNodeFragment const>(&_pushNodeFragments[static_cast<size_t>(index)]);
+    }
+    FW_DEBUG_ASSERT(false);
+    return nullptr;
+}
+
+auto PlatformViewLayerVisual::GetPopNodeFragment(SInt64 const index) const -> Pointer<PopNodeFragment const>
+{
+    if (0 <= index && index < std::ssize(_popNodeFragments))
+    {
+        return Pointer<PopNodeFragment const>(&_popNodeFragments[static_cast<size_t>(index)]);
+    }
+    FW_DEBUG_ASSERT(false);
+    return nullptr;
 }
 
 auto PlatformViewLayerVisual::GetFragmentCount() const -> SInt64
 {
-    return _fragments.GetSize();
+    return std::ssize(_fragments);
 }
 
 auto PlatformViewLayerVisual::Initialize() -> void

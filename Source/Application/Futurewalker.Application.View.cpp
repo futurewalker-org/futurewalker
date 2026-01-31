@@ -868,6 +868,7 @@ auto View::EnterDrawScope(PassKey<DrawScope> key) -> void
                     _drawInfo.SetDisplayScale(GetDisplayScale());
                     _drawInfo.SetBackingScale(GetBackingScale());
                     _drawInfo.SetDisplayList(scope.GetDisplayList({}));
+                    _drawInfo.SetClipPath(scope.GetClipPath({}));
                     _drawInfo.SetClipMode(scope.GetClipMode({}));
                     _drawInfo.SetOpacity(scope.GetOpacity({}));
                     _drawInfo.UpdateLayers(GetLayer());

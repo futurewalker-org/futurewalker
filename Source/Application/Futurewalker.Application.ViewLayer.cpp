@@ -147,6 +147,19 @@ auto ViewLayer::SetSize(Size<Dp> const& size) -> void
 }
 
 ///
+/// @brief
+///
+/// @param path
+///
+auto ViewLayer::SetClipPath(Optional<Graphics::Path> const& path) -> void
+{
+    if (_platformLayer)
+    {
+        _platformLayer->SetClipPath(path);
+    }
+}
+
+///
 /// @brief Set clip mode of the layer.
 ///
 /// @param clipMode

@@ -42,10 +42,12 @@ public:
 
 private:
     auto Invalidate() -> void;
+    auto CalcFragmentBounds() const -> Rect<Dp>;
     auto Initialize() -> void override;
     auto OnFragmentChanged() -> void override;
     auto OnOffsetChanged() -> void override;
     auto OnClipRectChanged() -> void override;
+    auto OnClipPathChanged() -> void override;
     auto OnOpacityChanged() -> void override;
     auto OnDisplayScaleChanged() -> void override;
     auto OnBackingScaleChanged() -> void override;

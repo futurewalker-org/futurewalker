@@ -44,6 +44,7 @@ private:
 private:
     auto RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void override;
     auto RootSizeChanged(Shared<PlatformViewLayer> const& layer) -> void override;
+    auto RootClipPathChanged(Shared<PlatformViewLayer> const& layer) -> void override;
     auto RootClipModeChanged(Shared<PlatformViewLayer> const& layer) -> void override;
     auto RootOpacityChanged(Shared<PlatformViewLayer> const& layer) -> void override;
     auto RootRenderFlagsChanged(Shared<PlatformViewLayer> const& layer) -> void override;

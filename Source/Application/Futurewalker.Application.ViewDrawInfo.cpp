@@ -144,6 +144,14 @@ auto ViewDrawInfo::SetBackingScale(BackingScale const backingScale) -> void
 ///
 /// @brief
 ///
+auto ViewDrawInfo::SetClipPath(Optional<Graphics::Path> const& path) -> void
+{
+    _clipPath = path;
+}
+
+///
+/// @brief
+///
 auto ViewDrawInfo::SetClipMode(ViewClipMode const clipMode) -> void
 {
     _clipMode = clipMode;
@@ -162,6 +170,7 @@ auto ViewDrawInfo::SetOpacity(Float64 const opacity) -> void
 ///
 auto ViewDrawInfo::UpdateLayers(ViewLayer& layer) -> void
 {
+    layer.SetClipPath(_clipPath);
     layer.SetClipMode(_clipMode);
     layer.SetOpacity(_opacity);
 

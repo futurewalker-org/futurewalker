@@ -35,54 +35,67 @@ auto PlatformViewLayerVisualWin::Render() -> void
         return;
     }
 
-    auto unionRect = Rect<Dp>();
-    ForEachFragment([&](auto const& fragment) {
-        if (fragment.displayList)
-        {
-            if (fragment.clipRect.IsFinite())
-            {
-                auto const rect = Rect<Dp>::Offset(fragment.clipRect, fragment.offset);
-                unionRect = Rect<Dp>::Union(unionRect, rect);
-            }
-            else if (fragment.displayList->GetBounds().IsFinite())
-            {
-                auto const rect = Rect<Dp>::Offset(fragment.displayList->GetBounds(), fragment.offset + fragment.displayListOffset);
-                unionRect = Rect<Dp>::Union(unionRect, rect);
-            }
-            else
-            {
-                unionRect = GetClipRect();
-            }
-        }
-    });
+    auto const unionRect = CalcFragmentBounds();
     FW_DEBUG_ASSERT(unionRect.IsFinite());
 
+    auto const& clipPaths = GetClipPaths();
     auto const displayScale = GetDisplayScale();
     auto const backingScale = GetBackingScale();
     auto const scale = static_cast<Float64>(displayScale) * static_cast<Float64>(backingScale);
 
     _surface->SetSize(unionRect.GetSize());
+    _surface->SetOffset(unionRect.GetPosition().As<Offset>());
     _surface->SetDisplayScale(GetDisplayScale());
     _surface->SetBackingScale(GetBackingScale());
     _surface->Draw([&](Graphics::Scene& scene) {
-        ForEachFragment([&](auto const& fragment) {
-            if (fragment.displayList)
+        for (auto const& clipPath : clipPaths)
+        {
+            scene.PushClipPath({.path = clipPath});
+        }
+        scene.PushTranslate({.x = -unionRect.GetLeft(), .y = -unionRect.GetTop()});
+        ForEachFragment([&](auto const& fragmentInfo) {
+            if (fragmentInfo.type == FragmentType::PushNode)
             {
-                scene.PushTranslate({.x = fragment.offset.GetDeltaX() - unionRect.GetLeft(), .y = fragment.offset.GetDeltaY() - unionRect.GetTop()});
-                scene.PushScale({.x = scale, .y = scale});
-                scene.PushClipRect({.rect = fragment.clipRect});
-                scene.PushTranslate({.x = fragment.displayListOffset.GetDeltaX(), .y = fragment.displayListOffset.GetDeltaY()});
-                scene.AddDisplayList({.displayList = fragment.displayList});
-                scene.Pop({.count = 4});
+                if (auto const fragment = GetPushNodeFragment(fragmentInfo.index))
+                {
+                    scene.PushTranslate({.x = fragment->offset.GetDeltaX(), .y = fragment->offset.GetDeltaY()});
+                    scene.PushScale({.x = scale, .y = scale});
+                    scene.PushClipRect({.rect = fragment->clipRect});
+
+                    if (fragment->clipPath)
+                    {
+                        scene.PushClipPath({.path = *fragment->clipPath});
+                    }
+                }
+            }
+            else if (fragmentInfo.type == FragmentType::PopNode)
+            {
+                if (auto const fragment = GetPopNodeFragment(fragmentInfo.index))
+                {
+                    scene.Pop({.count = 3});
+
+                    if (auto const pushFragment = GetPushNodeFragment(fragment->pushNodeIndex))
+                    {
+                        if (pushFragment->clipPath)
+                        {
+                            scene.Pop({.count = 1});
+                        }
+                    }
+                }
+            }
+            else if (fragmentInfo.type == FragmentType::DisplayList)
+            {
+                if (auto const fragment = GetDisplayListFragment(fragmentInfo.index))
+                {
+                    scene.PushTranslate({.x = fragment->displayListOffset.GetDeltaX(), .y = fragment->displayListOffset.GetDeltaY()});
+                    scene.AddDisplayList({.displayList = fragment->displayList});
+                    scene.Pop({.count = 1});
+                }
             }
         });
+        scene.Pop({.count = 1});
+        scene.Pop({.count = std::ssize(clipPaths)});
     });
-
-    auto const translation = D2D1::Matrix4x4F::Translation(
-      static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(unionRect.GetPosition().GetX(), displayScale, backingScale))),
-      static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(unionRect.GetPosition().GetY(), displayScale, backingScale))),
-      0);
-    _visual->SetTransform(translation);
 
     _invalidated = false;
 }
@@ -100,6 +113,63 @@ auto PlatformViewLayerVisualWin::Initialize() -> void
     _visual = _device->CreateVisual();
     _surface = Shared<PlatformViewLayerSurfaceWin>::Make();
     _surface->SetVisual(_visual);
+}
+
+auto PlatformViewLayerVisualWin::CalcFragmentBounds() const -> Rect<Dp>
+{
+    auto offsets = std::vector<Offset<Dp>>();
+    auto clipRects = std::vector<Rect<Dp>>();
+
+    offsets.push_back(GetOffset());
+    clipRects.push_back(GetClipRect());
+
+    auto unionRect = Rect<Dp>();
+    ForEachFragment([&](auto const& fragmentInfo) {
+        if (fragmentInfo.type == FragmentType::PushNode)
+        {
+            if (auto const fragment = GetPushNodeFragment(fragmentInfo.index))
+            {
+                auto const currentOffset = offsets.empty() ? Offset<Dp>() : offsets.back();
+                auto const currentClipRect = clipRects.empty() ? GetClipRect() : clipRects.back();
+                offsets.push_back(currentOffset + fragment->offset);
+                clipRects.push_back(Rect<Dp>::Intersect(currentClipRect, Rect<Dp>::Offset(fragment->clipRect, offsets.back())));
+            }
+        }
+        else if (fragmentInfo.type == FragmentType::PopNode)
+        {
+            FW_DEBUG_ASSERT(!offsets.empty());
+            FW_DEBUG_ASSERT(!clipRects.empty());
+            if (!offsets.empty())
+            {
+                offsets.pop_back();
+            }
+            if (!clipRects.empty())
+            {
+                clipRects.pop_back();
+            }
+        }
+        else if (fragmentInfo.type == FragmentType::DisplayList)
+        {
+            if (auto const fragment = GetDisplayListFragment(fragmentInfo.index))
+            {
+                if (fragment->displayList)
+                {
+                    auto const currentOffset = offsets.empty() ? Offset<Dp>() : offsets.back();
+                    auto const currentClipRect = clipRects.empty() ? GetClipRect() : clipRects.back();
+
+                    auto bounds = currentClipRect;
+                    auto const displayListBounds = Rect<Dp>::Offset(fragment->displayList->GetBounds(), currentOffset + fragment->displayListOffset);
+                    if (displayListBounds.IsFinite())
+                    {
+                        bounds = Rect<Dp>::Intersect(bounds, displayListBounds);
+                    }
+                    unionRect = Rect<Dp>::Union(unionRect, bounds);
+                }
+            }
+        }
+    });
+    FW_DEBUG_ASSERT(unionRect.IsFinite());
+    return unionRect;
 }
 
 auto PlatformViewLayerVisualWin::OnFragmentChanged() -> void
@@ -140,6 +210,12 @@ auto PlatformViewLayerVisualWin::OnClipRectChanged() -> void
             _visual->SetClip(nullptr);
         }
     }
+}
+
+auto PlatformViewLayerVisualWin::OnClipPathChanged() -> void
+{
+    // TODO: Is there any way to set clip path in DCompositionVisual?
+    Invalidate();
 }
 
 auto PlatformViewLayerVisualWin::OnOpacityChanged() -> void

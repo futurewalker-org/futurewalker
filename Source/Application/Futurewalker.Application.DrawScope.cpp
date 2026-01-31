@@ -39,6 +39,14 @@ auto DrawScope::GetScene() -> Graphics::Scene&
 ///
 /// @brief
 ///
+auto DrawScope::SetClipPath(Graphics::Path const& path) -> void
+{
+    _clipPath = path;
+}
+
+///
+/// @brief
+///
 auto DrawScope::SetClipMode( ViewClipMode const clipMode) -> void
 {
     _clipMode = clipMode;
@@ -58,6 +66,14 @@ auto DrawScope::SetOpacity(Float64 const opacity) -> void
 auto DrawScope::GetDisplayList(PassKey<View>) -> Shared<Graphics::DisplayList>
 {
     return EndRecording();
+}
+
+///
+/// @brief
+///
+auto DrawScope::GetClipPath(PassKey<View>) -> Optional<Graphics::Path>
+{
+    return _clipPath;
 }
 
 ///
