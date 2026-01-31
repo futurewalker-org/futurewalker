@@ -6,6 +6,7 @@
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.Identifier.hpp"
 #include "Futurewalker.Core.TypeTag.hpp"
+#include "Futurewalker.Core.EnumClassFlag.hpp"
 
 #include <vector>
 #include <list>
@@ -48,14 +49,16 @@ enum class ViewPointerTrackingFlags
     None = 0,     ///< No pointer tracking.
     All = 1 << 0, ///< Track all pointer intputs.
 };
+FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(ViewPointerTrackingFlags);
 
 ///
 /// @brief View's focus tracking flags.
 ///
 enum class ViewFocusTrackingFlags
 {
-    None = 0, ///< No focus tracking.
+    None = 0,     ///< No focus tracking.
     All = 1 << 0, ///< Track all focus events.
 };
+FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(ViewFocusTrackingFlags);
 }
 }
