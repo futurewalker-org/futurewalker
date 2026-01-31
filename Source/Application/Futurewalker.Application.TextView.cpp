@@ -419,7 +419,7 @@ auto TextView::DrawCachedTextLine(Graphics::Scene& scene, SInt64 const index, RG
         auto const line = _shapedText->GetLines()[static_cast<size_t>(index)];
         auto const lineMetrics = line.GetMetrics();
 
-        Dp offset = 0;
+        auto offset = Dp(0);
         for (auto const& run : line.GetRuns())
         {
             auto const runMetrics = run->GetMetrics();

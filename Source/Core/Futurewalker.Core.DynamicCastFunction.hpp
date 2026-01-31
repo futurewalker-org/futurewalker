@@ -229,24 +229,32 @@ auto DynamicCastFunction::TryAs(T* p) -> U*
 template <class U, class T>
 auto DynamicCastFunction::TryAs(std::shared_ptr<T>& p) -> std::shared_ptr<U>
 {
+    static_assert(std::has_virtual_destructor_v<T>);
+    static_assert(std::has_virtual_destructor_v<U>);
     return std::dynamic_pointer_cast<U>(p);
 }
 
 template <class U, class T>
 auto DynamicCastFunction::TryAs(const std::shared_ptr<T>& p) -> std::shared_ptr<U>
 {
+    static_assert(std::has_virtual_destructor_v<T>);
+    static_assert(std::has_virtual_destructor_v<U>);
     return std::dynamic_pointer_cast<U>(p);
 }
 
 template <class U, class T>
 auto DynamicCastFunction::TryAs(std::shared_ptr<T>&& p) -> std::shared_ptr<U>
 {
+    static_assert(std::has_virtual_destructor_v<T>);
+    static_assert(std::has_virtual_destructor_v<U>);
     return std::dynamic_pointer_cast<U>(std::move(p));
 }
 
 template <class U, class T>
 auto DynamicCastFunction::TryAs(const std::shared_ptr<T>&& p) -> std::shared_ptr<U>
 {
+    static_assert(std::has_virtual_destructor_v<T>);
+    static_assert(std::has_virtual_destructor_v<U>);
     return std::dynamic_pointer_cast<U>(std::move(p));
 }
 }
