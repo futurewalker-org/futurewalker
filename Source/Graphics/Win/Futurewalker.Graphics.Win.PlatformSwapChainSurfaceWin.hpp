@@ -42,6 +42,14 @@ public:
     virtual auto Resize(IntPx const width, IntPx const height) -> Bool = 0;
 
     ///
+    /// @brief Set offset of swap chain surface.
+    ///
+    /// @param x X offset in pixels.
+    /// @param y Y offset in pixels.
+    ///
+    virtual auto SetOffset(IntPx const x, IntPx const y) -> void = 0;
+
+    ///
     /// @brief Draw onto current buffer then swap.
     ///
     /// @param func Draw function.

@@ -28,6 +28,7 @@ public:
     PlatformSkiaSwapChainSurfaceWin(PassKey<PlatformSkiaSwapChainSurfaceWin>, Shared<PlatformSkiaGraphicsDeviceWin> const& device, IntPx const width, IntPx const height);
 
     auto Resize(IntPx const width, IntPx const height) -> Bool override;
+    auto SetOffset(IntPx const x, IntPx const y) -> void override;
     auto Draw(Function<void(Scene& scene)> func) -> Bool override;
     auto NotifyDeviceLost() -> void override;
     auto HandleDeviceLost() -> void override;

@@ -101,6 +101,28 @@ auto PlatformSkiaSwapChainSurfaceWin::Resize(IntPx const width, IntPx const heig
 }
 
 ///
+/// @brief Set offset of swap chain surface.
+///
+/// @param x X offset in pixels.
+/// @param y Y offset in pixels.
+///
+auto PlatformSkiaSwapChainSurfaceWin::SetOffset(IntPx const x, IntPx const y) -> void
+{
+    if (_swapChain)
+    {
+        auto const transform = DXGI_MATRIX_3X2_F {
+            ._11 = 1.0f,
+            ._12 = 0.0f,
+            ._21 = 0.0f,
+            ._22 = 1.0f,
+            ._31 = static_cast<FLOAT>(x),
+            ._32 = static_cast<FLOAT>(y),
+        };
+        _swapChain->SetMatrixTransform(&transform);
+    }
+}
+
+///
 /// @brief Draw content.
 ///
 /// @param func

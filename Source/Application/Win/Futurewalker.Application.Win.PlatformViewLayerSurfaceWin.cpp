@@ -23,6 +23,11 @@ auto PlatformViewLayerSurfaceWin::SetSize(Size<Dp> const& size) -> void
     _size = size;
 }
 
+auto PlatformViewLayerSurfaceWin::SetOffset(Offset<Dp> const& offset) -> void
+{
+    _offset = offset;
+}
+
 auto PlatformViewLayerSurfaceWin::SetDisplayScale(DisplayScale const scale) -> void
 {
     _displayScale = scale;
@@ -61,6 +66,7 @@ auto PlatformViewLayerSurfaceWin::Draw(Function<void(Graphics::Scene& scene)> co
     {
         if (_surface)
         {
+            _surface->SetOffset(GetOffsetX(), GetOffsetY());
             _surface->Draw(function);
         }
     }
@@ -97,6 +103,20 @@ auto PlatformViewLayerSurfaceWin::GetSurfaceHeight() const -> IntPx
     DisplayScale const displayScale = GetDisplayScale();
     BackingScale const backingScale = GetBackingScale();
     return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.GetHeight(), displayScale, backingScale)));
+}
+
+auto PlatformViewLayerSurfaceWin::GetOffsetX() const -> IntPx
+{
+    DisplayScale const displayScale = GetDisplayScale();
+    BackingScale const backingScale = GetBackingScale();
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_offset.GetDeltaX(), displayScale, backingScale)));
+}
+
+auto PlatformViewLayerSurfaceWin::GetOffsetY() const -> IntPx
+{
+    DisplayScale const displayScale = GetDisplayScale();
+    BackingScale const backingScale = GetBackingScale();
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_offset.GetDeltaY(), displayScale, backingScale)));
 }
 
 auto PlatformViewLayerSurfaceWin::ResizeSurface() -> Bool

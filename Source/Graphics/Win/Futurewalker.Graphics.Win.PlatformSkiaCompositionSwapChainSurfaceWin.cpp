@@ -76,6 +76,24 @@ auto PlatformSkiaCompositionSwapChainSurfaceWin::Resize(IntPx const width, IntPx
     return true;
 }
 
+auto PlatformSkiaCompositionSwapChainSurfaceWin::SetOffset(IntPx const x, IntPx const y) -> void
+{
+    if (_presentationSurface)
+    {
+        auto const offsetX = static_cast<LONG>(x);
+        auto const offsetY = static_cast<LONG>(y);
+        auto transform = PresentationTransform {
+            .M11 = 1.0f,
+            .M12 = 0.0f,
+            .M21 = 0.0f,
+            .M22 = 1.0f,
+            .M31 = static_cast<FLOAT>(offsetX),
+            .M32 = static_cast<FLOAT>(offsetY),
+        };
+        _presentationSurface->SetTransform(&transform);
+    }
+}
+
 auto PlatformSkiaCompositionSwapChainSurfaceWin::Draw(Function<void(Scene& scene)> func) -> Bool
 {
     auto const presentId = _presentationManager->GetNextPresentId();
