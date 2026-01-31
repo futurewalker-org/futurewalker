@@ -32,6 +32,8 @@ public:
     // clang-format on
 
 public:
+    constexpr Alignment() noexcept = default;
+
     constexpr Alignment(Float64 const x, Float64 const y) noexcept
     {
         SetX(x);
