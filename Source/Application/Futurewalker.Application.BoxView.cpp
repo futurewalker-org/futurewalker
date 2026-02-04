@@ -99,10 +99,8 @@ auto BoxView::Draw(DrawScope& scope) -> void
     auto const contentRect = GetContentRect();
     auto const direction = GetLayoutDirection();
 
-    auto colorWithAlpha = [](auto const& color, auto const& alpha) -> RGBAColor { return RGBAColor(color.GetRGBColor(), color.GetAlpha().GetF64() * alpha.GetF64()); };
-
-    ViewDrawFunction::DrawRoundRect(scene, contentRect, cornerRadius, colorWithAlpha(backgroundColor, backgroundAlpha), direction);
-    ViewDrawFunction::DrawRoundRectBorder(scene, contentRect, cornerRadius, colorWithAlpha(borderColor, borderAlpha), borderWidth, direction);
+    ViewDrawFunction::DrawRoundRect(scene, contentRect, cornerRadius, backgroundColor.WithAlphaMultiplied(backgroundAlpha), direction);
+    ViewDrawFunction::DrawRoundRectBorder(scene, contentRect, cornerRadius, borderColor.WithAlphaMultiplied(borderAlpha), borderWidth, direction);
 }
 
 auto BoxView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>

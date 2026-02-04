@@ -91,6 +91,9 @@ public:
     constexpr auto SetAlphaF32(Float32 const& a) -> void;
     constexpr auto SetAlphaF64(Float64 const& a) -> void;
 
+    constexpr auto WithAlphaReplaced(ChannelType const& a) const -> RGBAColorT;
+    constexpr auto WithAlphaMultiplied(ChannelType const& a) const -> RGBAColorT;
+
     friend inline constexpr bool operator==(RGBAColorT const&, RGBAColorT const&) = default;
     friend inline constexpr bool operator!=(RGBAColorT const&, RGBAColorT const&) = default;
 
@@ -630,6 +633,24 @@ template <class Tag>
 constexpr auto RGBAColorT<Tag>::SetAlphaF64(Float64 const& a) -> void
 {
     _a.SetF64(a);
+}
+
+///
+/// @brief Return copy with replaced alpha channel.
+///
+template <class Tag>
+constexpr auto RGBAColorT<Tag>::WithAlphaReplaced(ChannelType const& a) const -> RGBAColorT
+{
+    return RGBAColorT(_r, _g, _b, a);
+}
+
+///
+/// @brief Return copy with multiplied alpha channel.
+///
+template <class Tag>
+constexpr auto RGBAColorT<Tag>::WithAlphaMultiplied(ChannelType const& a) const -> RGBAColorT
+{
+    return RGBAColorT(_r, _g, _b, _a.GetF64() * a.GetF64());
 }
 }
 }
