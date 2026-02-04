@@ -20,6 +20,7 @@ class BoxConstraints
 public:
     static auto MakeUnconstrained() -> BoxConstraints;
     static auto MakeExact(Dp const width, Dp const height) -> BoxConstraints;
+    static auto MakeExact(Size<Dp> const& size) -> BoxConstraints;
     static auto MakeMinMax(Dp const min, Dp const max) -> BoxConstraints;
 
     static auto Constrain(BoxConstraints const& cs, Size<Dp> const& size) -> Size<Dp>;

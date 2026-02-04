@@ -5,9 +5,7 @@
 namespace FW_DETAIL_NS
 {
 ///
-/// @brief 
-///
-/// @return 
+/// @brief
 ///
 auto BoxConstraints::MakeUnconstrained() -> BoxConstraints
 {
@@ -16,16 +14,24 @@ auto BoxConstraints::MakeUnconstrained() -> BoxConstraints
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param width 
-/// @param height 
-///
-/// @return 
+/// @param width
+/// @param height
 ///
 auto BoxConstraints::MakeExact(Dp const width, Dp const height) -> BoxConstraints
 {
     return BoxConstraints(AxisConstraints::MakeExact(width), AxisConstraints::MakeExact(height));
+}
+
+///
+/// @brief
+///
+/// @param size
+///
+auto BoxConstraints::MakeExact(Size<Dp> const& size) -> BoxConstraints
+{
+    return BoxConstraints(AxisConstraints::MakeExact(size.GetWidth()), AxisConstraints::MakeExact(size.GetHeight()));
 }
 
 ///
