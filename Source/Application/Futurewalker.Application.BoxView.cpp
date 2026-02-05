@@ -57,9 +57,9 @@ auto BoxView::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
 
     _backgroundColor.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeBackgroundColor, {});
-    _backgroundAlpha.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeBackgroundAlpha, {0});
+    _backgroundAlpha.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeBackgroundAlpha, {1});
     _borderColor.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeBorderColor, {});
-    _borderAlpha.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeBorderAlpha, {0});
+    _borderAlpha.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeBorderAlpha, {1});
     _borderWidth.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeBorderWidth, {0});
     _cornerRadius.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeCornerRadius, {});
 }
