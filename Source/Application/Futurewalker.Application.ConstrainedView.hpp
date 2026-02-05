@@ -4,8 +4,10 @@
 #include "Futurewalker.Application.ConstrainedViewType.hpp"
 #include "Futurewalker.Application.AxisConstraints.hpp"
 #include "Futurewalker.Application.ContainerViewType.hpp"
-
 #include "Futurewalker.Application.View.hpp" 
+
+#include "Futurewalker.Attribute.AttributeArg.hpp"
+#include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -25,10 +27,10 @@ public:
     auto SetContent(Shared<View> const& content) -> void;
 
     auto GetWidthConstraints() const -> AxisConstraints;
-    auto SetWidthConstraints(AxisConstraints const& constraints) -> void;
+    auto SetWidthConstraints(AttributeArg<AxisConstraints> const& constraints) -> void;
 
     auto GetHeightConstraints() const -> AxisConstraints;
-    auto SetHeightConstraints(AxisConstraints const& constraints) -> void;
+    auto SetHeightConstraints(AttributeArg<AxisConstraints> const& constraints) -> void;
 
 protected:
     auto Initialize() -> void override;
@@ -36,9 +38,12 @@ protected:
     auto Arrange(ArrangeScope& scope) -> void override;
 
 private:
+    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+
+private:
     Shared<ContainerView> _container;
-    AxisConstraints _widthConstraints;
-    AxisConstraints _heightConstraints;
+    AttributeAccessor<AxisConstraints> _widthConstraints;
+    AttributeAccessor<AxisConstraints> _heightConstraints;
 };
 }
 }

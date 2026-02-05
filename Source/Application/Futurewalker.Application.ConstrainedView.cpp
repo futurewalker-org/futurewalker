@@ -36,34 +36,32 @@ auto ConstrainedView::SetContent(Shared<View> const& content) -> void
 
 auto ConstrainedView::GetWidthConstraints() const -> AxisConstraints
 {
-    return _widthConstraints;
+    return _widthConstraints.GetValueOrDefault();
 }
 
-auto ConstrainedView::SetWidthConstraints(AxisConstraints const& constraints) -> void
+auto ConstrainedView::SetWidthConstraints(AttributeArg<AxisConstraints> const& constraints) -> void
 {
-    if (_widthConstraints != constraints)
-    {
-        _widthConstraints = constraints;
-        InvalidateLayout();
-    }
+    _widthConstraints.SetAttributeArg(constraints);
 }
 
 auto ConstrainedView::GetHeightConstraints() const -> AxisConstraints
 {
-    return _heightConstraints;
+    return _heightConstraints.GetValueOrDefault();
 }
 
-auto ConstrainedView::SetHeightConstraints(AxisConstraints const& constraints) -> void
+auto ConstrainedView::SetHeightConstraints(AttributeArg<AxisConstraints> const& constraints) -> void
 {
-    if (_heightConstraints != constraints)
-    {
-        _heightConstraints = constraints;
-        InvalidateLayout();
-    }
+    _heightConstraints.SetAttributeArg(constraints);
 }
 
 auto ConstrainedView::Initialize() -> void
 {
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(AxisConstraints, AttributeWidthConstraints, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(AxisConstraints, AttributeHeightConstraints, {});
+
+    _widthConstraints.BindAndConnectAttributeWithDefaultValue(*this, &ConstrainedView::ReceiveAttributeEvent, AttributeWidthConstraints, AxisConstraints::MakeUnconstrained());
+    _heightConstraints.BindAndConnectAttributeWithDefaultValue(*this, &ConstrainedView::ReceiveAttributeEvent, AttributeHeightConstraints, AxisConstraints::MakeUnconstrained());
+
     _container = ContainerView::Make();
     AddChildBack(_container);
 }
@@ -90,8 +88,8 @@ auto ConstrainedView::Measure(MeasureScope& scope) -> void
 
     auto maxSize = Size<Dp>();
     ForEachVisibleChild([&](View& child) {
-        auto const childWidth = IntersectConstraints(parameter.GetWidthConstraints(), _widthConstraints);
-        auto const childHeight = IntersectConstraints(parameter.GetWidthConstraints(), _widthConstraints);
+        auto const childWidth = IntersectConstraints(parameter.GetWidthConstraints(), _widthConstraints.GetValueOrDefault());
+        auto const childHeight = IntersectConstraints(parameter.GetWidthConstraints(), _widthConstraints.GetValueOrDefault());
         maxSize = Size<Dp>::Max(maxSize, scope.MeasureChild(child, childWidth, childHeight));
     });
     scope.SetMeasuredSize(maxSize);
@@ -100,5 +98,15 @@ auto ConstrainedView::Measure(MeasureScope& scope) -> void
 auto ConstrainedView::Arrange(ArrangeScope& scope) -> void
 {
     View::Arrange(scope);
+}
+
+auto ConstrainedView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<AttributeEvent::ValueChanged>())
+    {
+        InvalidateLayout();
+        co_return true;
+    }
+    co_return false;
 }
 }
