@@ -53,4 +53,21 @@ auto SkiaFunction::RGBAColorToSkColor4f(RGBAColor const& color) -> SkColor4f
         .fA = static_cast<SkScalar>(color.GetAlphaF64()),
     };
 }
+
+auto SkiaFunction::BlurStyleToSkBlurStyle(BlurStyle const style) -> SkBlurStyle
+{
+    switch (style)
+    {
+        case BlurStyle::Normal:
+            return SkBlurStyle::kNormal_SkBlurStyle;
+        case BlurStyle::Solid:
+            return SkBlurStyle::kSolid_SkBlurStyle;
+        case BlurStyle::Outer:
+            return SkBlurStyle::kOuter_SkBlurStyle;
+        case BlurStyle::Inner:
+            return SkBlurStyle::kInner_SkBlurStyle;
+        default:
+            return SkBlurStyle::kNormal_SkBlurStyle;
+    }
+}
 }

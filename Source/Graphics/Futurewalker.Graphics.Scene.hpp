@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Graphics.SceneType.hpp"
-
+#include "Futurewalker.Graphics.MaskFilterType.hpp"
 #include "Futurewalker.Graphics.DisplayListType.hpp"
 #include "Futurewalker.Graphics.GlyphRunType.hpp"
 #include "Futurewalker.Graphics.Path.hpp"
@@ -122,6 +122,7 @@ public:
         BlendMode blendMode = BlendMode::SrcOver;
         Bool antiAlias = false;
         Dp strokeWidth = 1.0;
+        Shared<MaskFilter> maskFilter = nullptr;
     };
 
     virtual ~Scene() = 0;

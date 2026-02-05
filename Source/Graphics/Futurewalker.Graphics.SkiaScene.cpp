@@ -5,6 +5,7 @@
 #include "Futurewalker.Graphics.SkiaGlyphRun.hpp"
 #include "Futurewalker.Graphics.SkiaPathData.hpp"
 #include "Futurewalker.Graphics.SkiaFunction.hpp"
+#include "Futurewalker.Graphics.SkiaMaskFilter.hpp"
 
 #include <include/core/SkPaint.h>
 #include <include/core/SkRRect.h>
@@ -43,7 +44,7 @@ auto BlendModeToSkBlendMode(BlendMode const& mode)
 
 auto SceneParamToSkPaint(auto const& param) -> SkPaint
 {
-    SkPaint p;
+    auto p = SkPaint();
 
     if constexpr (requires { param.color; })
     {
@@ -68,6 +69,14 @@ auto SceneParamToSkPaint(auto const& param) -> SkPaint
     if constexpr (requires { param.strokeWidth; })
     {
         p.setStrokeWidth(static_cast<SkScalar>(param.strokeWidth));
+    }
+
+    if constexpr (requires { param.maskFilter; })
+    {
+        if (auto const maskFilter = param.maskFilter.template TryAs<SkiaMaskFilter>())
+        {
+            p.setMaskFilter(maskFilter->GetSkiaMaskFilter());
+        }
     }
 
     return p;

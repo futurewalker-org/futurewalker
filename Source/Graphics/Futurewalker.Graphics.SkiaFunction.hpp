@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Graphics.Prelude.hpp"
+#include "Futurewalker.Graphics.MaskFilterType.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -13,6 +14,7 @@
 
 #include <include/core/SkRRect.h>
 #include <include/core/SkColor.h>
+#include <include/core/SkBlurTypes.h>
 
 #include <array>
 
@@ -25,5 +27,6 @@ struct SkiaFunction : NonConstructible
     static auto RadiusToSkVector(Radius<Dp> const& radius) -> SkVector;
     static auto RoundRectToSkRRect(RoundRect<Dp> const& roundRect) -> SkRRect;
     static auto RGBAColorToSkColor4f(RGBAColor const& color) -> SkColor4f;
+    static auto BlurStyleToSkBlurStyle(BlurStyle const style) -> SkBlurStyle;
 };
 }
