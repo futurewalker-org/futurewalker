@@ -3,7 +3,11 @@
 #include "Futurewalker.Application.ContainerView.hpp"
 #include "Futurewalker.Application.ViewEvent.hpp"
 #include "Futurewalker.Application.ViewDrawFunction.hpp"
+#include "Futurewalker.Application.MeasureScope.hpp"
+#include "Futurewalker.Application.ArrangeScope.hpp"
 #include "Futurewalker.Application.DrawScope.hpp"
+#include "Futurewalker.Application.ClipView.hpp"
+#include "Futurewalker.Application.BoxView.hpp"
 
 #include "Futurewalker.Graphics.Scene.hpp"
 
@@ -44,7 +48,7 @@ ContainerView::ContainerView(PassKey<View> key)
 ///
 auto ContainerView::GetContent() -> Shared<View>
 {
-    return _content.Lock();
+    return _clipView->GetContent();
 }
 
 ///
@@ -52,7 +56,7 @@ auto ContainerView::GetContent() -> Shared<View>
 ///
 auto ContainerView::GetContent() const -> Shared<View const>
 {
-    return _content.Lock();
+    return _clipView->GetContent();
 }
 
 ///
@@ -62,16 +66,7 @@ auto ContainerView::GetContent() const -> Shared<View const>
 ///
 auto ContainerView::SetContent(Shared<View> const& view) -> void
 {
-    if (const auto content = GetContent())
-    {
-        if (content == view)
-        {
-            return;
-        }
-        content->RemoveFromParent();
-    }
-    _content = view;
-    AddChildFront(view);
+    _clipView->SetContent(view);
 }
 
 ///
@@ -85,6 +80,16 @@ auto ContainerView::SetBackgroundColor(AttributeArg<RGBAColor> color) -> void
 }
 
 ///
+/// @brief Set background alpha.
+///
+/// @param[in] alpha Background alpha.
+///
+auto ContainerView::SetBackgroundAlpha(AttributeArg<Channel> alpha) -> void
+{
+    _backgroundAlpha.SetAttributeArg(alpha);
+}
+
+///
 /// @brief Set border color.
 ///
 /// @param[in] color Border color.
@@ -92,6 +97,16 @@ auto ContainerView::SetBackgroundColor(AttributeArg<RGBAColor> color) -> void
 auto ContainerView::SetBorderColor(AttributeArg<RGBAColor> color) -> void
 {
     _borderColor.SetAttributeArg(color);
+}
+
+///
+/// @brief Set border alpha.
+///
+/// @param[in] alpha Border alpha.
+///
+auto ContainerView::SetBorderAlpha(AttributeArg<Channel> alpha) -> void
+{
+    _borderAlpha.SetAttributeArg(alpha);
 }
 
 ///
@@ -123,55 +138,42 @@ auto ContainerView::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBorderColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeBorderWidth, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBackgroundAlpha, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBorderAlpha, {0});
 
-    _backgroundColor.BindAndConnectAttributeWithDefaultValue(*this, &ContainerView::ReceiveEvent, AttributeBackgroundColor, {});
-    _borderColor.BindAndConnectAttributeWithDefaultValue(*this, &ContainerView::ReceiveEvent, AttributeBorderColor, {});
-    _borderWidth.BindAndConnectAttributeWithDefaultValue(*this, &ContainerView::ReceiveEvent, AttributeBorderWidth, {0});
-    _cornerRadius.BindAndConnectAttributeWithDefaultValue(*this, &ContainerView::ReceiveEvent, AttributeCornerRadius, {});
+    _backgroundColor.BindAttributeWithDefaultValue(*this, AttributeBackgroundColor, {});
+    _backgroundAlpha.BindAttributeWithDefaultValue(*this, AttributeBackgroundAlpha, {1});
+    _borderColor.BindAttributeWithDefaultValue(*this, AttributeBorderColor, {});
+    _borderAlpha.BindAttributeWithDefaultValue(*this, AttributeBorderAlpha, {1});
+    _borderWidth.BindAttributeWithDefaultValue(*this, AttributeBorderWidth, {0});
+    _cornerRadius.BindAttributeWithDefaultValue(*this, AttributeCornerRadius, {});
 
-    EventReceiver::Connect(*this, *this, &ContainerView::ReceiveEvent);
+    _backgroundBox = BoxView::Make();
+    _backgroundBox->SetBackgroundColor(AttributeBackgroundColor);
+    _backgroundBox->SetBackgroundAlpha(AttributeBackgroundAlpha);
+    _backgroundBox->SetCornerRadius(AttributeCornerRadius);
+    AddChildBack(_backgroundBox);
+
+    _clipView = ClipView::Make();
+    _clipView->SetCornerRadius(AttributeCornerRadius);
+    AddChildBack(_clipView);
+
+    _borderBox = BoxView::Make();
+    _borderBox->SetBorderColor(AttributeBorderColor);
+    _borderBox->SetBorderAlpha(AttributeBorderAlpha);
+    _borderBox->SetBorderWidth(AttributeBorderWidth);
+    _borderBox->SetCornerRadius(AttributeCornerRadius);
+    AddChildBack(_borderBox);
 }
 
 ///
-/// @brief Draw.
+/// @brief Measure.
 ///
-auto ContainerView::Draw(DrawScope& scope) -> void
+auto ContainerView::Measure(MeasureScope& scope) -> void
 {
-    auto& scene = scope.GetScene();
-
-    auto const backgroundColor = _backgroundColor.GetValueOrDefault();
-    auto const borderColor = _borderColor.GetValueOrDefault();
-    auto const borderWidth = _borderWidth.GetValueOr(0);
-    auto const cornerRadius = _cornerRadius.GetValueOrDefault();
-
-    if (cornerRadius != CornerRadius())
-    {
-        auto path = Graphics::Path();
-        path.AddRoundRect(cornerRadius.GetRoundRect(GetContentRect(), GetLayoutDirection()));
-        scope.SetClipPath(path);
-    }
-    else
-    {
-        scope.SetClipMode(ViewClipMode::Bounds);
-    }
-
-    ViewDrawFunction::DrawRoundRect(scene, GetContentRect(), cornerRadius, backgroundColor, GetLayoutDirection());
-    ViewDrawFunction::DrawRoundRectBorder(scene, GetContentRect(), cornerRadius, borderColor, borderWidth, GetLayoutDirection());
-}
-
-///
-/// @brief Handle event.
-///
-auto ContainerView::ReceiveEvent(Event<>& event) -> Async<Bool>
-{
-    if (event.Is<ViewEvent::ChildRemoved>())
-    {
-        _content.Reset();
-    }
-    else if (event.Is<AttributeEvent::ValueChanged>())
-    {
-        InvalidateVisual();
-    }
-    co_return false;
+    auto const contentSize = scope.MeasureChild(_clipView);
+    scope.MeasureChild(_borderBox, BoxConstraints::MakeExact(contentSize));
+    scope.MeasureChild(_backgroundBox, BoxConstraints::MakeExact(contentSize));
+    scope.SetMeasuredSize(contentSize);
 }
 }
