@@ -5,7 +5,7 @@
 #include "Futurewalker.Graphics.PathData.hpp"
 #include "Futurewalker.Graphics.PathType.hpp"
 
-#include <include/core/SkPath.h>
+#include <include/core/SkPathBuilder.h>
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
@@ -25,9 +25,9 @@ public:
     auto IsEmpty() const -> Bool override;
     auto IsEqual(PathData const& other) const noexcept -> Bool override;
 
-    auto GetSkPath() const -> SkPath const&; 
+    auto GetSkPath() const -> SkPath; 
 
 private:
-    SkPath _path;
+    SkPathBuilder _path;
 };
 }

@@ -112,16 +112,10 @@ auto SkiaGlyphRun::Draw(SkCanvas* canvas, SkPaint const& paint) const -> void
 {
     if (canvas)
     {
-        canvas->drawGlyphs(
-          static_cast<int>(_glyphCount),
-          _buffer.glyphs,
-          _buffer.positions,
-          _buffer.clusters,
-          static_cast<int>(_text.GetU8CodeUnitCount()),
-          reinterpret_cast<char const*>(static_cast<char8_t const*>(_text.GetString().GetView().GetData())),
-          SkPoint(),
-          _font,
-          paint);
+        auto const count = static_cast<int>(_glyphCount);
+        auto const utf8TextData = reinterpret_cast<char const*>(static_cast<char8_t const*>(_text.GetString().GetView().GetData()));
+        auto const utf8TextCount = static_cast<int>(_text.GetU8CodeUnitCount());
+        canvas->drawGlyphs({_buffer.glyphs, count}, {_buffer.positions, count}, {_buffer.clusters, count}, std::string_view(utf8TextData, utf8TextCount), SkPoint(), _font, paint);
     }
 }
 auto SkiaGlyphRun::ReleaseBuffer() -> void

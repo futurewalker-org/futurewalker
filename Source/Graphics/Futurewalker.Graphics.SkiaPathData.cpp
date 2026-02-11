@@ -93,8 +93,8 @@ auto SkiaPathData::IsEqual(PathData const& other) const noexcept -> Bool
     return false;
 }
 
-auto SkiaPathData::GetSkPath() const -> SkPath const&
+auto SkiaPathData::GetSkPath() const -> SkPath
 {
-    return _path;
+    return _path.snapshot();
 }
 }
