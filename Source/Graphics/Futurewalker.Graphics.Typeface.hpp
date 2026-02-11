@@ -2,6 +2,8 @@
 #pragma once
 
 #include "Futurewalker.Graphics.TypefaceType.hpp"
+#include "Futurewalker.Graphics.FontMetrics.hpp"
+#include "Futurewalker.Graphics.FontSize.hpp" 
 
 #include "Futurewalker.Core.NonCopyable.hpp"
 
@@ -13,6 +15,7 @@ class Typeface : NonCopyable
 {
 public:
     virtual ~Typeface() = 0;
+    virtual auto GetMetrics(FontSize const size) const -> FontMetrics = 0;
 };
 }
 }

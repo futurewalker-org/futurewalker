@@ -12,22 +12,42 @@ namespace FW_EXPORT
 ///
 /// @brief Layout metrics of a font.
 ///
-class FontMetrics
+struct FontMetrics
 {
-public:
-    auto GetAscent() const -> Dp;
-    auto SetAscent(Dp const ascent) -> void;
+    ///
+    /// @brief Distance between baseline to highest ascender.
+    ///
+    /// @note This value is typically positive.
+    ///
+    Dp ascent = 0;
 
-    auto GetDescent() const -> Dp;
-    auto SetDescent(Dp const descent) -> void;
+    ///
+    /// @brief Distance between baseline to lowest descender.
+    ///
+    /// @note This value is typically positive.
+    ///
+    Dp descent = 0;
 
-    auto GetLeading() const -> Dp;
-    auto SetLeading(Dp const leading) -> void;
+    ///
+    /// @brief Distance between lines of text.
+    ///
+    /// @note This value is typically positive.
+    ///
+    Dp leading = 0;
 
-private:
-    Dp _ascent = 0;
-    Dp _descent = 0;
-    Dp _leading = 0;
+    ///
+    /// @brief Height of lowercase 'x' character.
+    ///
+    /// @note This value is typically positive.
+    ///
+    Dp xHeight = 0;
+
+    ///
+    /// @brief Height of capital letters.
+    ///
+    /// @note This value is typically positive.
+    ///
+    Dp capHeight = 0;
 };
 }
 }

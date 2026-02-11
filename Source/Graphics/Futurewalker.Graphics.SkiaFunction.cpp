@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Graphics.SkiaFunction.hpp"
+#include "Futurewalker.Graphics.FontStyle.hpp"
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
@@ -69,5 +70,27 @@ auto SkiaFunction::BlurStyleToSkBlurStyle(BlurStyle const style) -> SkBlurStyle
         default:
             return SkBlurStyle::kNormal_SkBlurStyle;
     }
+}
+
+auto SkiaFunction::FontSlantToSkFontSlant(FontSlant const slant) -> SkFontStyle::Slant
+{
+    switch (slant)
+    {
+        case FontSlant::Upright:
+            return SkFontStyle::kUpright_Slant;
+        case FontSlant::Italic:
+            return SkFontStyle::kItalic_Slant;
+        case FontSlant::Oblique:
+            return SkFontStyle::kOblique_Slant;
+    }
+    return SkFontStyle::kUpright_Slant;
+}
+
+auto SkiaFunction::FontStyleToSkFontStyle(FontStyle const& fontStyle) -> SkFontStyle
+{
+    auto const weight = static_cast<int>(fontStyle.GetWeight());
+    auto const width = static_cast<int>(fontStyle.GetWidth());
+    auto const slant = FontSlantToSkFontSlant(fontStyle.GetSlant());
+    return SkFontStyle(weight, width, slant);
 }
 }

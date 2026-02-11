@@ -69,11 +69,13 @@ auto SkiaGlyphRun::GetMetrics() const -> FontMetrics
     auto skFontMetrics = SkFontMetrics();
     _font.getMetrics(&skFontMetrics);
 
-    auto metrics = FontMetrics();
-    metrics.SetAscent(-skFontMetrics.fAscent);
-    metrics.SetDescent(skFontMetrics.fDescent);
-    metrics.SetLeading(skFontMetrics.fLeading);
-    return metrics;
+    return FontMetrics {
+        .ascent = -skFontMetrics.fAscent,
+        .descent = skFontMetrics.fDescent,
+        .leading = skFontMetrics.fLeading,
+        .xHeight = skFontMetrics.fXHeight,
+        .capHeight = skFontMetrics.fCapHeight,
+    };
 }
 
 auto SkiaGlyphRun::GetAdvance() const -> Dp

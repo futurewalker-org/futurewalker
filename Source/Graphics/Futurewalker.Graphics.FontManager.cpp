@@ -1,12 +1,12 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Graphics.FontManager.hpp"
-#include "Futurewalker.Graphics.PlatformSkiaFontManager.hpp" 
+#include "Futurewalker.Graphics.PlatformFontManager.hpp" 
 #include "Futurewalker.Graphics.FontFamily.hpp"
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
-FontManager::FontManager(Shared<PlatformSkiaFontManager> const& platform)
+FontManager::FontManager(Shared<PlatformFontManager> const& platform)
   : _platform {platform}
 {
 }
@@ -15,13 +15,17 @@ auto FontManager::FindTypefaceByFamilyAndStyle(FontFamily const& fontFamily, Fon
 {
     if (_platform)
     {
-        if (auto familyName = fontFamily.GetFontFamily())
+        if (auto const familyName = fontFamily.GetFamilyName())
         {
             return FindTypefaceByFamilyNameAndStyle(*familyName, fontStyle);
         }
-        else if (auto kind = fontFamily.GetFontKind())
+        else if (auto const kind = fontFamily.GetFontKind())
         {
             return FindTypefaceByFontKind(*kind);
+        }
+        else if (auto const genericKind = fontFamily.GetGenericFontKind())
+        {
+            return FindTypefaceByGenericFontKind(*genericKind, fontStyle);
         }
     }
     return {};
@@ -32,6 +36,15 @@ auto FontManager::FindTypefaceByFamilyNameAndStyle(String const& familyName, Fon
     if (_platform)
     {
         return _platform->FindTypefaceByFamilyNameAndStyle(familyName, fontStyle);
+    }
+    return {};
+}
+
+auto FontManager::FindTypefaceByGenericFontKind(GenericFontKind const genericKind, FontStyle const& fontStyle) -> Shared<Typeface>
+{
+    if (_platform)
+    {
+        return _platform->FindTypefaceByGenericFontKind(genericKind, fontStyle);
     }
     return {};
 }
@@ -56,7 +69,7 @@ namespace FW_DETAIL_NS
 {
 auto Locator::Resolver<Graphics::FontManager>::Resolve() -> Shared<Graphics::FontManager>
 {
-    auto const platform = Locator::Resolve<Graphics::PlatformSkiaFontManager>();
+    auto const platform = Locator::Resolve<Graphics::PlatformFontManager>();
     return Shared<Graphics::FontManager>::Make(platform);
 }
 }

@@ -8,5 +8,12 @@ namespace FW_GRAPHICS_DETAIL_NS
 namespace FW_EXPORT
 {
 class FontFamily;
+
+enum class GenericFontKind
+{
+    UiSerif,
+    UiSansSerif,
+    UiMonospace,
+};
 }
 }

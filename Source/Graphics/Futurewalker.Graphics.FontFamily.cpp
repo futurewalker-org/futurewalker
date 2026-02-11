@@ -6,7 +6,12 @@
 namespace FW_GRAPHICS_DETAIL_NS
 {
 FontFamily::FontFamily()
-  : _var {String(u8"sans-serif")}
+  : _var {GenericFontKind::UiSansSerif}
+{
+}
+
+FontFamily::FontFamily(GenericFontKind const fontKind)
+  : _var {fontKind}
 {
 }
 
@@ -20,6 +25,15 @@ FontFamily::FontFamily(String const& familyName)
 {
 }
 
+auto FontFamily::GetGenericFontKind() const -> Optional<GenericFontKind>
+{
+    if (auto const genericKind = std::get_if<GenericFontKind>(&_var))
+    {
+        return *genericKind;
+    }
+    return {};
+}
+
 auto FontFamily::GetFontKind() const -> Optional<FontKind>
 {
     if (auto const kind = std::get_if<FontKind>(&_var))
@@ -29,7 +43,7 @@ auto FontFamily::GetFontKind() const -> Optional<FontKind>
     return {};
 }
 
-auto FontFamily::GetFontFamily() const -> Optional<String>
+auto FontFamily::GetFamilyName() const -> Optional<String>
 {
     if (auto const family = std::get_if<String>(&_var))
     {

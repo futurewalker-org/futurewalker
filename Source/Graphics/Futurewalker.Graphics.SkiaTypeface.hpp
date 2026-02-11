@@ -15,7 +15,9 @@ class SkiaTypeface final : public Typeface
 public:
     explicit SkiaTypeface(sk_sp<SkTypeface> const& typeface);
 
-    auto GetTypeface() const -> sk_sp<SkTypeface>;
+    auto GetMetrics(FontSize const size) const -> FontMetrics override;
+
+    auto GetSkTypeface() const -> sk_sp<SkTypeface>;
 
 private:
     sk_sp<SkTypeface> _typeface;

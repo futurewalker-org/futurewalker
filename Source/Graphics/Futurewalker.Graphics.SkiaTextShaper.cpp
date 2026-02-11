@@ -29,14 +29,14 @@ auto GetSkTypeface(Shared<Typeface> const& typeface) -> sk_sp<SkTypeface>
 {
     if (auto const skia = typeface.TryAs<SkiaTypeface>())
     {
-        return skia->GetTypeface();
+        return skia->GetSkTypeface();
     }
     return {};
 }
 
 auto GetSkFontMgr() -> sk_sp<SkFontMgr>
 {
-    if (auto const skia = Locator::GetInstance<PlatformSkiaFontManager>())
+    if (auto const skia = Locator::GetInstance<PlatformFontManager>().TryAs<PlatformSkiaFontManager>())
     {
         return skia->GetSkFontMgr();
     }
@@ -49,6 +49,8 @@ class SkiaRunHandler final : public SkShaper::RunHandler
     SkScalar _maxRunAscent = 0;
     SkScalar _maxRunDescent = 0;
     SkScalar _maxRunLeading = 0;
+    SkScalar _maxRunXHeight = 0;
+    SkScalar _maxRunCapHeight = 0;
     SkScalar _advance = 0;
     SkiaGlyphRun::Buffer _buffer;
     std::vector<Shared<GlyphRun>> _runs;
@@ -66,6 +68,8 @@ public:
         _maxRunAscent = 0;
         _maxRunDescent = 0;
         _maxRunLeading = 0;
+        _maxRunXHeight = 0;
+        _maxRunCapHeight = 0;
         _advance = 0;
     }
 
@@ -77,6 +81,8 @@ public:
         _maxRunAscent = std::max(_maxRunAscent, -metrics.fAscent);
         _maxRunDescent = std::max(_maxRunDescent, metrics.fDescent);
         _maxRunLeading = std::max(_maxRunLeading, metrics.fLeading);
+        _maxRunXHeight = std::max(_maxRunXHeight, metrics.fXHeight);
+        _maxRunCapHeight = std::max(_maxRunCapHeight, metrics.fCapHeight);
         _advance += info.fAdvance.fX;
     }
 
@@ -118,10 +124,13 @@ public:
     // Called when ending a line.
     auto commitLine() -> void override
     {
-        auto lineMetrics = FontMetrics();
-        lineMetrics.SetAscent(_maxRunAscent);
-        lineMetrics.SetDescent(_maxRunDescent);
-        lineMetrics.SetLeading(_maxRunLeading);
+        auto lineMetrics = FontMetrics {
+            .ascent = _maxRunAscent,
+            .descent = _maxRunDescent,
+            .leading = _maxRunLeading,
+            .xHeight = _maxRunXHeight,
+            .capHeight = _maxRunCapHeight,
+        };
 
         auto& line = _lines.emplace_back();
         line.SetRuns(std::exchange(_runs, {}));

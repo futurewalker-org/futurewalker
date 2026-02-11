@@ -3,6 +3,7 @@
 
 #include "Futurewalker.Graphics.Prelude.hpp"
 #include "Futurewalker.Graphics.MaskFilterType.hpp"
+#include "Futurewalker.Graphics.FontStyleType.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -15,6 +16,7 @@
 #include <include/core/SkRRect.h>
 #include <include/core/SkColor.h>
 #include <include/core/SkBlurTypes.h>
+#include <include/core/SkFontStyle.h>
 
 #include <array>
 
@@ -28,5 +30,7 @@ struct SkiaFunction : NonConstructible
     static auto RoundRectToSkRRect(RoundRect<Dp> const& roundRect) -> SkRRect;
     static auto RGBAColorToSkColor4f(RGBAColor const& color) -> SkColor4f;
     static auto BlurStyleToSkBlurStyle(BlurStyle const style) -> SkBlurStyle;
+    static auto FontSlantToSkFontSlant(FontSlant const slant) -> SkFontStyle::Slant;
+    static auto FontStyleToSkFontStyle(FontStyle const& fontStyle) -> SkFontStyle;
 };
 }

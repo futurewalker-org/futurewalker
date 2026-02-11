@@ -18,6 +18,7 @@ public:
     PlatformSkiaFontManagerWin();
 
     auto FindTypefaceByFamilyNameAndStyle(String const& familyName, FontStyle const& style) -> Shared<Typeface> override;
+    auto FindTypefaceByGenericFontKind(GenericFontKind const genericKind, FontStyle const& fontStyle) -> Shared<Typeface> override;
     auto GetSkFontMgr() -> sk_sp<SkFontMgr> override;
 
 private:
@@ -33,7 +34,7 @@ namespace FW_EXPORT
 template <>
 struct Locator::Resolver<Graphics::PlatformSkiaFontManagerWin>
 {
-    using Interface = Graphics::PlatformSkiaFontManager;
+    using Interface = Graphics::PlatformFontManager;
     static auto Resolve() -> Shared<Graphics::PlatformSkiaFontManagerWin>;
 };
 }

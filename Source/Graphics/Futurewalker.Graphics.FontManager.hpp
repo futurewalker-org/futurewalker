@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Graphics.FontManagerType.hpp"
-#include "Futurewalker.Graphics.PlatformSkiaFontManagerType.hpp"
+#include "Futurewalker.Graphics.PlatformFontManagerType.hpp"
 #include "Futurewalker.Graphics.FontStyle.hpp"
 #include "Futurewalker.Graphics.FontFamilyType.hpp"
 #include "Futurewalker.Graphics.TypefaceType.hpp"
@@ -24,16 +24,17 @@ namespace FW_EXPORT
 class FontManager : NonCopyable
 {
 public:
-    explicit FontManager(Shared<PlatformSkiaFontManager> const& platform);
+    explicit FontManager(Shared<PlatformFontManager> const& platform);
 
     auto FindTypefaceByFamilyAndStyle(FontFamily const& fontFamily, FontStyle const& fontStyle) -> Shared<Typeface>;
     auto FindTypefaceByFamilyNameAndStyle(String const& familyName, FontStyle const& fontStyle) -> Shared<Typeface>;
+    auto FindTypefaceByGenericFontKind(GenericFontKind const genericKind, FontStyle const& fontStyle) -> Shared<Typeface>;
     auto FindTypefaceByFontKind(FontKind const fontKind) -> Shared<Typeface>;
     auto RegisterFontKind(FontKind const fontKind, Shared<Typeface> const& typeface) -> void;
 
 private:
     HashMap<FontKind, Shared<Typeface>> _map;
-    Shared<PlatformSkiaFontManager> _platform;
+    Shared<PlatformFontManager> _platform;
 };
 }
 }
