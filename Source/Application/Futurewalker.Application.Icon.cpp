@@ -61,7 +61,7 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
                     {
                         auto const runMetrics = run->GetMetrics();
                         auto const width = line.GetAdvance();
-                        auto const height = runMetrics.GetAscent() + runMetrics.GetDescent() + runMetrics.GetLeading();
+                        auto const height = runMetrics.ascent + runMetrics.descent + runMetrics.leading;
                         return {width, height};
                     }
                 }
