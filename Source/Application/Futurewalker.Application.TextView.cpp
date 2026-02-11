@@ -372,7 +372,7 @@ auto TextView::GetCachedTextSize() const -> Size<Dp>
         {
             auto const metrics = line.GetMetrics();
             auto const lineWidth = line.GetAdvance();
-            auto const lineHeight = metrics.GetAscent() + metrics.GetDescent() + metrics.GetLeading();
+            auto const lineHeight = metrics.ascent + metrics.descent + metrics.leading;
             width = Dp::Max(width, lineWidth);
             height += lineHeight;
         }
@@ -403,7 +403,7 @@ auto TextView::GetCachedTextLineSize(SInt64 const index) const -> Size<Dp>
         auto const& line = _shapedText->GetLines()[static_cast<size_t>(index)];
         auto const metrics = line.GetMetrics();
         auto const lineWidth = line.GetAdvance();
-        auto const lineHeight = metrics.GetAscent() + metrics.GetDescent() + metrics.GetLeading();
+        auto const lineHeight = metrics.ascent + metrics.descent + metrics.leading;
         return {lineWidth, lineHeight};
     }
     return {};
@@ -426,7 +426,7 @@ auto TextView::DrawCachedTextLine(Graphics::Scene& scene, SInt64 const index, RG
 
             scene.PushTranslate({
                 .x = offset,
-                .y = lineMetrics.GetAscent() - runMetrics.GetAscent(),
+                .y = lineMetrics.ascent - runMetrics.ascent,
             });
             scene.AddGlyphRun({
                 .run = run,
