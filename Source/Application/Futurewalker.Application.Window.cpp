@@ -300,7 +300,7 @@ auto Window::GetSizeConstraints() const -> BoxConstraints
 ///
 /// @param constraints New size constraints of the window.
 ///
-auto Window::SetSizeConstraints(BoxConstraints const& constraints)
+auto Window::SetSizeConstraints(BoxConstraints const& constraints) -> void
 {
     if (!IsClosed())
     {

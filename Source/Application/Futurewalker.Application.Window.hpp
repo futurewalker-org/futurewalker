@@ -140,7 +140,7 @@ public:
     auto SetTitle(String const& title) -> void;
 
     auto GetSizeConstraints() const -> BoxConstraints;
-    auto SetSizeConstraints(BoxConstraints const& constraints);
+    auto SetSizeConstraints(BoxConstraints const& constraints) -> void;
 
     auto GetDisplayScale() const -> DisplayScale;
     auto GetBackingScale() const -> BackingScale;
