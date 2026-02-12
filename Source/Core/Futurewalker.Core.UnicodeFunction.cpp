@@ -456,7 +456,7 @@ auto UnicodeFunction::GetNextCodePointIndex(Pointer<char16_t const> data, SInt64
 ///
 auto UnicodeFunction::GetPrevCodePointIndex(Pointer<char8_t const> data, SInt64 const& index, SInt64 const& begin, SInt64 const& n) -> SInt64
 {
-    if (n < 0)
+    if (n > 0)
     {
         auto const s = reinterpret_cast<uint8_t const*>(static_cast<char8_t const*>(data));
         auto i = static_cast<int32_t>(index);
@@ -480,7 +480,7 @@ auto UnicodeFunction::GetPrevCodePointIndex(Pointer<char8_t const> data, SInt64 
 ///
 auto UnicodeFunction::GetPrevCodePointIndex(Pointer<char16_t const> data, SInt64 const& index, SInt64 const& min, SInt64 const& n) -> SInt64
 {
-    if (n < 0)
+    if (n > 0)
     {
         auto const s = static_cast<char16_t const*>(data);
         auto i = static_cast<int32_t>(index);
