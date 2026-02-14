@@ -17,6 +17,7 @@
 #include "Futurewalker.Graphics.FontWidth.hpp"
 #include "Futurewalker.Graphics.FontStyleType.hpp"
 #include "Futurewalker.Graphics.FontFamilyType.hpp"
+#include "Futurewalker.Graphics.FontMetrics.hpp"
 
 #include "Futurewalker.Core.Optional.hpp"
 
@@ -57,14 +58,14 @@ private:
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
     auto GetTypeface() const -> Shared<Graphics::Typeface>;
     auto GetFontSize() const -> Graphics::FontSize;
+    auto GetFontMetrics() const -> Graphics::FontMetrics;
     auto GetTextColor() const -> RGBAColor;
     auto InvalidateLayoutCache() -> void;
     auto UpdateLayoutCache(Dp const maxWidth) -> void;
-    auto MeasureText(Dp const maxWidth) -> Size<Dp>;
-    auto GetCachedTextSize() const -> Size<Dp>;
-    auto GetCachedTextLineCount() const -> SInt64;
-    auto GetCachedTextLineSize(SInt64 const index) const -> Size<Dp>;
-    auto DrawCachedTextLine(Graphics::Scene& scene, SInt64 const index, RGBAColor const& color) -> void;
+    auto InvalidateFontCache() -> void;
+    auto UpdateFontCache() -> void;
+    auto GetShapedTextSize() const -> Size<Dp>;
+    auto DrawTextLine(Graphics::Scene& scene, Graphics::ShapedText::Line const& line, RGBAColor const& color) -> void;
 
 private:
     AttributeAccessor<String> _text;
@@ -78,9 +79,13 @@ private:
     AttributeAccessor<TextViewHorizontalAlignment> _horizontalAlignment;
     AttributeAccessor<TextViewVerticalAlignment> _verticalAlignment;
     Shared<Graphics::TextShaper> _shaper;
-    Optional<Graphics::ShapedText> _shapedText;
-    Dp _shapedTextMaxWidth = Dp::Infinity();
-    Dp _shapedTextIntrinsicWidth = Dp::Infinity();
+    Shared<Graphics::Typeface> _typeface;
+    Graphics::FontMetrics _fontMetrics;
+    std::vector<Graphics::ShapedText> _shapedTexts;
+    Dp _shapedTextsMaxWidth = Dp::Infinity();
+    Dp _shapedTextsIntrinsicWidth = Dp::Infinity();
+    Dp _shapedTextsWidth = 0;
+    Dp _shapedTextsHeight = 0;
 };
 }
 }

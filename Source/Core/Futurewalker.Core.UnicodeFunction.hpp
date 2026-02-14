@@ -11,7 +11,7 @@
 namespace FW_DETAIL_NS
 {
 ///
-/// @brief Functions for Unicode processing.
+/// @brief Functions for Unicode characters.
 ///
 struct UnicodeFunction : NonConstructible
 {
@@ -50,5 +50,8 @@ struct UnicodeFunction : NonConstructible
 
     static auto GetPrevCodePointIndex(Pointer<char8_t const> data, SInt64 const& index, SInt64 const& first, SInt64 const& n = 1) -> SInt64;
     static auto GetPrevCodePointIndex(Pointer<char16_t const> data, SInt64 const& index, SInt64 const& first, SInt64 const& n = 1) -> SInt64;
+
+    static auto IsSpace(char32_t const codePoint) -> Bool;
+    static auto IsBreak(char32_t const codePoint) -> Bool;
 };
 }

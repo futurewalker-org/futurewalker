@@ -15,8 +15,42 @@
 #include "Futurewalker.Graphics.Scene.hpp"
 #include "Futurewalker.Graphics.FontFamily.hpp"
 
+#include "Futurewalker.Text.LineBreakIterator.hpp"
+
+#include "Futurewalker.Core.UnicodeFunction.hpp"
+
 namespace FW_DETAIL_NS
 {
+namespace
+{
+///
+/// @brief Trim end of text range that consists of break and space characters, and return substring of the trimmed range.
+///
+/// @param[in] text The text to trim.
+/// @param[in] begin The index of the beginning of the text range to trim.
+/// @param[in] end The index of the end of the text range to trim.
+///
+/// @return The substring of the trimmed text range.
+///
+auto StripTrailingBreakAndSpace(String const& text, String::IndexType const begin, String::IndexType const end) -> String
+{
+    auto idx = text.GetPrev(end);
+    while (begin < idx)
+    {
+        auto c = String::CharType();
+        if (text.GetChar(idx, c))
+        {
+            if (!UnicodeFunction::IsSpace(c) && !UnicodeFunction::IsBreak(c))
+            {
+                return text.GetSubString(begin, text.GetNext(idx));
+            }
+        }
+        idx = text.GetPrev(idx);
+    }
+    return String();
+}
+}
+
 ///
 /// @brief Create a new TextView instance.
 ///
@@ -192,7 +226,10 @@ auto TextView::Measure(MeasureScope& scope) -> void
     auto const& widthConstraints = parameter.GetWidthConstraints();
     auto const& heightConstraints = parameter.GetHeightConstraints();
 
-    auto const textSize = MeasureText(widthConstraints.GetMax());
+    UpdateFontCache();
+    UpdateLayoutCache(widthConstraints.GetMax());
+
+    auto const textSize = GetShapedTextSize();
     auto const measuredWidth = AxisConstraints::Constrain(widthConstraints, textSize.GetWidth());
     auto const measuredHeight = AxisConstraints::Constrain(heightConstraints, textSize.GetHeight());
     scope.SetMeasuredSize(measuredWidth, measuredHeight);
@@ -213,7 +250,7 @@ auto TextView::Draw(DrawScope& scope) -> void
     const auto hAlign = _horizontalAlignment.GetValueOr(TextViewHorizontalAlignment::Center);
     const auto vAlign = _verticalAlignment.GetValueOr(TextViewVerticalAlignment::Middle);
 
-    auto const textSize = GetCachedTextSize();
+    auto const textSize = GetShapedTextSize();
 
     auto y = Dp(0);
     if (vAlign == TextViewVerticalAlignment::Bottom)
@@ -225,31 +262,45 @@ auto TextView::Draw(DrawScope& scope) -> void
         y = rect.GetTop() + (rect.GetHeight() - textSize.GetHeight()) / 2;
     }
 
-    for (auto i = SInt64(0); i < GetCachedTextLineCount(); ++i)
+    for (auto const& shapedText : _shapedTexts)
     {
-        auto const lineSize = GetCachedTextLineSize(i);
-
-        auto x = Dp(0);
-        if ((hAlign == TextViewHorizontalAlignment::Leading && isRTL) || (hAlign == TextViewHorizontalAlignment::Trailing && !isRTL))
+        for (auto const& line : shapedText.GetLines())
         {
-            x = rect.GetLeft() + rect.GetWidth() - lineSize.GetWidth();
+            if (line.GetRunCount() == 0)
+            {
+                if (auto const typeface = GetTypeface())
+                {
+                    auto const metrics = typeface->GetMetrics(GetFontSize());
+                    y += metrics.ascent + metrics.descent + metrics.leading;
+                }
+                continue;
+            }
+
+            auto const lineWidth = line.GetAdvance();
+            auto const lineMetrics = line.GetMetrics();
+
+            auto x = Dp(0);
+            if ((hAlign == TextViewHorizontalAlignment::Leading && isRTL) || (hAlign == TextViewHorizontalAlignment::Trailing && !isRTL))
+            {
+                x = rect.GetLeft() + rect.GetWidth() - lineWidth;
+            }
+            else if (hAlign == TextViewHorizontalAlignment::Center)
+            {
+                x = rect.GetLeft() + (rect.GetWidth() - lineWidth) / 2;
+            }
+
+            auto const alignedX = ViewLayoutFunction::AlignToPixelGridByRound(x, *this);
+            auto const alignedY = ViewLayoutFunction::AlignToPixelGridByRound(y + lineMetrics.leading / 2, *this);
+
+            scene.PushTranslate({
+                .x = alignedX,
+                .y = alignedY,
+            });
+            DrawTextLine(scene, line, color);
+            scene.Pop({});
+
+            y += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
         }
-        else if (hAlign == TextViewHorizontalAlignment::Center)
-        {
-            x = rect.GetLeft() + (rect.GetWidth() - lineSize.GetWidth()) / 2;
-        }
-
-        auto const alignedX = ViewLayoutFunction::AlignToPixelGridByRound(x, *this);
-        auto const alignedY = ViewLayoutFunction::AlignToPixelGridByRound(y, *this);
-
-        scene.PushTranslate({
-            .x = alignedX,
-            .y = alignedY,
-        });
-        DrawCachedTextLine(scene, i, color);
-        scene.Pop({});
-
-        y += lineSize.GetHeight();
     }
 }
 
@@ -260,6 +311,7 @@ auto TextView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
+        InvalidateFontCache();
         InvalidateLayoutCache();
         InvalidateLayout();
         InvalidateVisual();
@@ -272,15 +324,7 @@ auto TextView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
 ///
 auto TextView::GetTypeface() const -> Shared<Graphics::Typeface>
 {
-    if (auto manager = Locator::GetInstance<Graphics::FontManager>())
-    {
-        auto const fontFamily = _fontFamily.GetValueOrDefault();
-        auto const fontWeight = _fontWeight.GetValueOr(Graphics::FontWeight::Normal());
-        auto const fontWidth = _fontWidth.GetValueOr(Graphics::FontWidth::Normal());
-        auto const fontSlant = _fontSlant.GetValueOr(Graphics::FontSlant::Upright);
-        return manager->FindTypefaceByFamilyAndStyle(fontFamily, Graphics::FontStyle(fontWeight, fontWidth, fontSlant));
-    }
-    return {};
+    return _typeface;
 }
 
 ///
@@ -289,6 +333,14 @@ auto TextView::GetTypeface() const -> Shared<Graphics::Typeface>
 auto TextView::GetFontSize() const -> Graphics::FontSize
 {
     return _fontSize.GetValueOr(16);
+}
+
+///
+/// @brief Get font metrics.
+///
+auto TextView::GetFontMetrics() const -> Graphics::FontMetrics
+{
+    return _fontMetrics;
 }
 
 ///
@@ -306,9 +358,11 @@ auto TextView::GetTextColor() const -> RGBAColor
 ///
 auto TextView::InvalidateLayoutCache() -> void
 {
-    _shapedText.Reset();
-    _shapedTextMaxWidth = Dp::Infinity();
-    _shapedTextIntrinsicWidth = Dp::Infinity();
+    _shapedTexts.clear();
+    _shapedTextsMaxWidth = Dp::Infinity();
+    _shapedTextsIntrinsicWidth = Dp::Infinity();
+    _shapedTextsWidth = 0;
+    _shapedTextsHeight = 0;
 }
 
 ///
@@ -322,26 +376,77 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
         return;
     }
 
-    auto const matchesMaxWidth = Dp::IsNearlyEqual(maxWidth, _shapedTextMaxWidth);
-    auto const matchesWidth = Dp::IsNearlyEqual(GetCachedTextSize().GetWidth(), maxWidth);
-    auto const belowIntrinsicWidth = _shapedTextIntrinsicWidth < maxWidth;
-    if (!_shapedText || (!matchesMaxWidth && !matchesWidth && !belowIntrinsicWidth))
+    auto const matchesMaxWidth = Dp::IsNearlyEqual(maxWidth, _shapedTextsMaxWidth);
+    auto const matchesWidth = Dp::IsNearlyEqual(GetShapedTextSize().GetWidth(), maxWidth);
+    auto const belowIntrinsicWidth = _shapedTextsIntrinsicWidth < maxWidth;
+    if (_shapedTexts.empty() || (!matchesMaxWidth && !matchesWidth && !belowIntrinsicWidth))
     {
-        auto const size = GetFontSize();
+        auto const typeface = GetTypeface();
+        auto const fontSize = GetFontSize();
         auto const text = GetText();
-        if (size > 0 && !text.IsEmpty())
+        if (fontSize > 0 && !text.IsEmpty())
         {
-            _shapedText = _shaper->ShapeText(Text(text), GetTypeface(), size, maxWidth);
-            _shapedTextMaxWidth = maxWidth;
+            auto breakIterator = LineBreakIterator("en-US");
+            breakIterator.SetText(text);
 
-            if (GetCachedTextLineCount() == 1)
+            auto shapedTexts = std::vector<Graphics::ShapedText>();
+            auto shapedTextsIntrinsicWidth = Dp::Infinity();
+            auto shapedTextsMaxWidth = Dp(0);
+            auto shapedTextsWidth = Dp(0);
+            auto shapedTextsHeight = Dp(0);
+
+            auto prevIndex = breakIterator.GetCurrent();
+            while (true)
             {
-                _shapedTextIntrinsicWidth = GetCachedTextLineSize(0).GetWidth();
+                if (auto nextIndex = breakIterator.GetNext())
+                {
+                    if (*nextIndex != text.GetEnd() && breakIterator.GetCurrentBreakCategory() != LineBreakIterator::BreakCategory::Hard)
+                    {
+                        continue;
+                    }
+
+                    // Break characters are not printable. Trim them before passing to the shaper.
+                    // We also trim spaces for consistency with soft break.
+                    auto const lineText = StripTrailingBreakAndSpace(text, prevIndex, *nextIndex);
+                    auto const shapedLine = _shaper->ShapeText(Text(lineText), typeface, fontSize, maxWidth);
+                    if (shapedLine.GetLineCount() == 1)
+                    {
+                        auto const lineWidth = shapedLine.GetLines()[0].GetAdvance();
+                        if (Dp::IsFinite(shapedTextsIntrinsicWidth))
+                        {
+                            shapedTextsIntrinsicWidth = Dp::Max(shapedTextsIntrinsicWidth, lineWidth);
+                        }
+                        else
+                        {
+                            shapedTextsIntrinsicWidth = lineWidth;
+                        }
+                    }
+
+                    for (auto const& line : shapedLine.GetLines())
+                    {
+                        if (line.GetRunCount() == 0)
+                        {
+                            auto const fontMetrics = GetFontMetrics();
+                            shapedTextsHeight += fontMetrics.ascent + fontMetrics.descent + fontMetrics.leading;
+                            continue;
+                        }
+                        auto const advance = line.GetAdvance();
+                        auto const metrics = line.GetMetrics();
+                        shapedTextsMaxWidth = Dp::Max(shapedTextsMaxWidth, advance);
+                        shapedTextsWidth = Dp::Max(shapedTextsWidth, advance);
+                        shapedTextsHeight += metrics.ascent + metrics.descent + metrics.leading;
+                    }
+                    shapedTexts.push_back(std::move(shapedLine));
+                    prevIndex = *nextIndex;
+                    continue;
+                }
+                break;
             }
-            else
-            {
-                _shapedTextIntrinsicWidth = Dp::Infinity();
-            }
+            _shapedTexts = std::move(shapedTexts);
+            _shapedTextsIntrinsicWidth = shapedTextsIntrinsicWidth;
+            _shapedTextsMaxWidth = shapedTextsMaxWidth;
+            _shapedTextsWidth = shapedTextsWidth;
+            _shapedTextsHeight = shapedTextsHeight;
         }
         else
         {
@@ -351,92 +456,77 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
 }
 
 ///
-/// @brief Measure text and return its size.
+/// @brief Invalidate font cache.
 ///
-auto TextView::MeasureText(Dp const maxWidth) -> Size<Dp>
+auto TextView::InvalidateFontCache() -> void
 {
-    UpdateLayoutCache(maxWidth);
-    return GetCachedTextSize();
+    _typeface = nullptr;
+    _fontMetrics = {};
+}
+
+///
+/// @brief Update font cache.
+///
+auto TextView::UpdateFontCache() -> void
+{
+    if (!_typeface)
+    {
+        auto const fontWidth = _fontWidth.GetValueOr(Graphics::FontWidth::Normal());
+        auto const fontWeight = _fontWeight.GetValueOr(Graphics::FontWeight::Normal());
+        auto const fontSlant = _fontSlant.GetValueOrDefault();
+        auto fontStyle = Graphics::FontStyle(fontWeight, fontWidth, fontSlant);
+        if (auto const fontManager = Locator::GetInstance<Graphics::FontManager>())
+        {
+            _typeface = fontManager->FindTypefaceByFamilyAndStyle(_fontFamily.GetValueOrDefault(), fontStyle);
+        }
+
+        auto const fontSize = GetFontSize();
+        if (_typeface)
+        {
+            _fontMetrics = _typeface->GetMetrics(fontSize);
+        }
+        else
+        {
+            // TODO: Better fallback.
+            _fontMetrics = Graphics::FontMetrics {
+                .ascent = static_cast<Dp>(fontSize),
+            };
+        }
+    }
 }
 
 ///
 /// @brief Get sized of cached text.
 ///
-auto TextView::GetCachedTextSize() const -> Size<Dp>
+auto TextView::GetShapedTextSize() const -> Size<Dp>
 {
-    if (_shapedText)
-    {
-        auto width = Dp(0);
-        auto height = Dp(0);
-        for (auto const& line : _shapedText->GetLines())
-        {
-            auto const metrics = line.GetMetrics();
-            auto const lineWidth = line.GetAdvance();
-            auto const lineHeight = metrics.ascent + metrics.descent + metrics.leading;
-            width = Dp::Max(width, lineWidth);
-            height += lineHeight;
-        }
-        return {width, height};
-    }
-    return {};
-}
-
-///
-/// @brief Get number of lines in cache.
-///
-auto TextView::GetCachedTextLineCount() const -> SInt64
-{
-    if (_shapedText)
-    {
-        return _shapedText->GetLineCount();
-    }
-    return 0;
-}
-
-///
-/// @brief Get size of cached text line.
-///
-auto TextView::GetCachedTextLineSize(SInt64 const index) const -> Size<Dp>
-{
-    if (0 <= index && index < GetCachedTextLineCount())
-    {
-        auto const& line = _shapedText->GetLines()[static_cast<size_t>(index)];
-        auto const metrics = line.GetMetrics();
-        auto const lineWidth = line.GetAdvance();
-        auto const lineHeight = metrics.ascent + metrics.descent + metrics.leading;
-        return {lineWidth, lineHeight};
-    }
-    return {};
+    return {_shapedTextsWidth, _shapedTextsHeight};
 }
 
 ///
 /// @brief Draw cached text line.
 ///
-auto TextView::DrawCachedTextLine(Graphics::Scene& scene, SInt64 const index, RGBAColor const& color) -> void
+auto TextView::DrawTextLine(Graphics::Scene& scene, Graphics::ShapedText::Line const& line, RGBAColor const& color) -> void
 {
-    if (0 <= index && index < GetCachedTextLineCount())
+    auto const lineMetrics = line.GetMetrics();
+
+    auto offset = Dp(0);
+    for (auto const& run : line.GetRuns())
     {
-        auto const line = _shapedText->GetLines()[static_cast<size_t>(index)];
-        auto const lineMetrics = line.GetMetrics();
+        auto const runMetrics = run->GetMetrics();
 
-        auto offset = Dp(0);
-        for (auto const& run : line.GetRuns())
-        {
-            auto const runMetrics = run->GetMetrics();
+        scene.PushTranslate({
+            .x = offset,
+            .y = lineMetrics.ascent - runMetrics.ascent,
+        });
+        scene.AddGlyphRun({
+            .run = run,
+            .color = color,
+        });
+        scene.Pop({});
 
-            scene.PushTranslate({
-                .x = offset,
-                .y = lineMetrics.ascent - runMetrics.ascent,
-            });
-            scene.AddGlyphRun({
-                .run = run,
-                .color = color,
-            });
-            scene.Pop({});
-
-            // TODO: support RTL layout.
-            offset += run->GetAdvance();
-        }
+        // TODO: support RTL layout.
+        offset += run->GetAdvance();
     }
 }
 }

@@ -4,6 +4,7 @@
 
 #include <unicode/utf16.h>
 #include <unicode/utf8.h>
+#include <unicode/uchar.h>
 
 namespace FW_DETAIL_NS
 {
@@ -490,5 +491,31 @@ auto UnicodeFunction::GetPrevCodePointIndex(Pointer<char16_t const> data, SInt64
         return i;
     }
     return index;
+}
+
+///
+/// @brief Check if code point is a whitespace character.
+///
+/// Includes class Zs (Space Separator), Zl (Line Separator), and Zp (Paragraph Separator).
+///
+/// @param[in] codePoint The Unicode code point to check.
+///
+auto UnicodeFunction::IsSpace(char32_t const codePoint) -> Bool
+{
+    auto const value = u_getIntPropertyValue(codePoint, UCHAR_GENERAL_CATEGORY);
+    return value == U_SPACE_SEPARATOR || value == U_LINE_SEPARATOR || value == U_PARAGRAPH_SEPARATOR;
+}
+
+///
+/// @brief Check if code point could be a part of mandatory line break.
+///
+/// Includes class BK (Mandatory Break), CR (Carriage Return), LF (Line Feed), and NL (Next Line).
+///
+/// @param[in] codePoint The Unicode code point to check.
+///
+auto UnicodeFunction::IsBreak(char32_t const codePoint) -> Bool
+{
+    auto const value = u_getIntPropertyValue(codePoint, UCHAR_LINE_BREAK);
+    return value == U_LB_MANDATORY_BREAK || value == U_LB_CARRIAGE_RETURN || value == U_LB_LINE_FEED || value == U_LB_NEXT_LINE;
 }
 }
