@@ -54,7 +54,7 @@ public:
             _layout->SetDirection(FlexLayoutDirection::Column);
             _layout->SetMainAxisAlignment(FlexLayoutMainAxisAlignment::Center);
             _layout->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Center);
-            _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"type: {}", StringFunction::ConvertASCIIToString(typeid(*event).name()))));
+            _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"type: {}", String::MakeFromStdString(typeid(*event).name()))));
             _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"id: {}", (UInt64)event.As<PointerEvent>()->GetPointerId())));
             _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"type: {}", std::to_underlying(event.As<PointerEvent>()->GetPointerType()))));
             _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"timestamp: {}", event.As<PointerEvent>()->GetTimestamp().GetIntervalSinceEpoch())));

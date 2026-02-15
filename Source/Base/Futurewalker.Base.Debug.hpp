@@ -40,7 +40,7 @@ private:
 ///
 inline auto Debug::Print(std::string_view const message) -> void
 {
-    Debug::PrintPriv(StringFunction::ConvertASCIIToString(message));
+    Debug::PrintPriv(String::MakeFromStdString(message));
 }
 
 ///
@@ -69,7 +69,7 @@ inline auto Debug::Log(DebugLogLevel const level, std::string_view const message
     if (levelString)
     {
         auto const formattedString = std::format("[{}] {}", levelString, message);
-        auto const asciiString = StringFunction::ConvertASCIIToString(formattedString);
+        auto const asciiString = String::MakeFromStdString(formattedString);
         Debug::PrintPriv(asciiString);
     }
 }

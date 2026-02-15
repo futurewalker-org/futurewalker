@@ -22,7 +22,7 @@ auto PlatformStringFunctionWin::WideToUtf8(std::wstring_view sv) -> String
 
     if (::WideCharToMultiByte(CP_UTF8, 0, sv.data(), static_cast<int>(sv.length()), reinterpret_cast<char*>(ret.data()), static_cast<int>(ret.length()), NULL, NULL) != 0)
     {
-        return StringFunction::ConvertUtf8ToStringUnchecked(ret);
+        return String::MakeFromStdString(ret);
     }
     return {};
 }

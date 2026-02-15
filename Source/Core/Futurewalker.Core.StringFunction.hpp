@@ -17,12 +17,6 @@ namespace FW_EXPORT
 class StringFunction final : NonConstructible
 {
 public:
-    static auto ConvertASCIIToString(std::string_view const sv) -> String;
-    static auto ConvertUtf8ToString(std::string_view const sv) -> String;
-    static auto ConvertUtf8ToStringUnchecked(std::string_view const sv) -> String;
-    static auto ConvertStringToStdString(StringView const sv) -> std::string;
-    static auto ConvertStringToStdU8String(StringView const sv) -> std::u8string;
-
     template <class... Args>
     static auto Format(StringView const formatter, Args&&... args) -> String;
 

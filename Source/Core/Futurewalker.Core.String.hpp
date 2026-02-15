@@ -28,7 +28,9 @@ public:
     using CharType = char32_t;
     using SizeType = SInt64;
 
-public:
+    static auto MakeFromStdString(std::string_view const sv) -> String;
+    static auto MakeFromStdU8String(std::u8string_view const sv) -> String;
+
     String() noexcept = default;
     String(String const& other) noexcept = default;
     String(String&& other) noexcept = default;
@@ -72,6 +74,9 @@ public:
     auto Insert(IndexType const& position, String const& string) -> void;
     auto Append(String const& string) -> void;
     auto Swap(String& other) noexcept -> void;
+
+    auto ToStdString() const -> std::string;
+    auto ToStdU8String() const -> std::u8string;
 
 private:
     String(StringData<ValueType>&& data) noexcept;

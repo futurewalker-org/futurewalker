@@ -6,6 +6,38 @@
 namespace FW_DETAIL_NS
 {
 ///
+/// @brief Create String from UTF-8 encoded string with runtime checks.
+///
+/// Copies content of incoming string into new String object.
+/// Any invalid code points found in incoming string will be replaced with U+FFFD.
+///
+/// @param[in] sv A view of UTF-8 encoded string.
+///
+/// @return Constructed String.
+///
+/// @note This function will not perform conversion from narrow string to UTF-8 string.
+///
+auto String::MakeFromStdString(std::string_view const sv) -> String
+{
+    return String(reinterpret_cast<const char8_t*>(sv.data()), SInt64(sv.size()));
+}
+
+///
+/// @brief Create String from UTF-8 encoded string with runtime checks.
+///
+/// Copies content of incoming string into new String object.
+/// Any invalid code points found in incoming string will be replaced with U+FFFD.
+///
+/// @param[in] sv A view of UTF-8 encoded string.
+///
+/// @return Constructed String.
+///
+auto String::MakeFromStdU8String(std::u8string_view const sv) -> String
+{
+    return String(sv.data(), SInt64(sv.size()));
+}
+
+///
 /// @brief Construct string from single character.
 ///
 /// @param c Character.
@@ -382,6 +414,30 @@ auto String::Append(String const& string) -> void
 void String::Swap(String& other) noexcept
 {
     _data.Swap(other._data);
+}
+
+///
+/// @brief Convert String to std::string.
+///
+auto String::ToStdString() const -> std::string
+{
+    if (auto const data = _data.GetImmutableData())
+    {
+        return std::string(reinterpret_cast<const char*>(static_cast<char8_t const*>(data)), static_cast<size_t>(_data.GetSize()));
+    }
+    return {};
+}
+
+///
+/// @brief Convert String to std::u8string.
+///
+auto String::ToStdU8String() const -> std::u8string
+{
+    if (auto const data = _data.GetImmutableData())
+    {
+        return std::u8string(static_cast<char8_t const*>(data), static_cast<size_t>(_data.GetSize()));
+    }
+    return {};
 }
 
 ///

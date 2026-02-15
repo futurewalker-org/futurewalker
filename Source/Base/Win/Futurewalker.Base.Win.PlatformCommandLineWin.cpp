@@ -21,7 +21,7 @@ PlatformCommandLineWin::PlatformCommandLineWin()
     _args.reserve(argc);
     for (int i = 0; i < argc; ++i)
     {
-        _args.emplace_back(StringFunction::ConvertUtf8ToStringUnchecked(argv[i]));
+        _args.emplace_back(String::MakeFromStdString(argv[i]));
     }
 }
 
