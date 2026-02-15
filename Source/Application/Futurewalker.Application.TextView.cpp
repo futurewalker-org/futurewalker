@@ -408,7 +408,7 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
                     // Break characters are not printable. Trim them before passing to the shaper.
                     // We also trim spaces for consistency with soft break.
                     auto const lineText = StripTrailingBreakAndSpace(text, prevIndex, *nextIndex);
-                    auto const shapedLine = _shaper->ShapeText(Text(lineText), typeface, fontSize, maxWidth);
+                    auto const shapedLine = _shaper->ShapeText(Text(lineText), typeface, fontSize, maxWidth, {'L', 'a', 't', 'n'}, Graphics::TextShaper::Direction::DefaultLtr);
                     if (shapedLine.GetLineCount() == 1)
                     {
                         auto const lineWidth = shapedLine.GetLines()[0].GetAdvance();

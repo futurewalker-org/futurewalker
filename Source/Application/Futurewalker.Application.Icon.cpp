@@ -89,7 +89,7 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
             scene.PushTranslate({.x = rect.GetLeft(), .y = rect.GetTop()});
             {
                 auto const shaper = Graphics::TextShaper::Make();
-                auto const shapedGlyph = shaper->ShapeGlyph(_codePoint, _typeface, 16);
+                auto const shapedGlyph = shaper->ShapeGlyph(_codePoint, _typeface, 16, {'L', 'a', 't', 'n'}, Graphics::TextShaper::Direction::DefaultLtr);
                 auto const size = GetGlyphSize(shapedGlyph);
                 auto const glyphAspectRatio = Float64(size.GetWidth() / size.GetHeight());
                 auto const sizeAspectRatio = Float64(rect.GetWidth() / rect.GetHeight());

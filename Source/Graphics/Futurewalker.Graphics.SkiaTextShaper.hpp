@@ -11,8 +11,8 @@ namespace FW_EXPORT
 class SkiaTextShaper : public TextShaper
 {
 public:
-    auto ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> ShapedText override;
-    auto ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size) -> ShapedText override;
+    auto ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText override;
+    auto ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText override;
 };
 }
 }

@@ -20,6 +20,7 @@
 #include <include/ports/SkTypeface_win.h>
 
 #include <unicode/utf8.h>
+#include <unicode/ubidi.h>
 
 namespace FW_GRAPHICS_DETAIL_NS
 {
@@ -149,7 +150,7 @@ public:
 ///
 /// @brief Shape text.
 ///
-auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth) -> ShapedText
+auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText
 {
     auto const width = static_cast<SkScalar>(maxWidth);
     auto const font = SkFont(GetSkTypeface(typeface), static_cast<SkScalar>(size));
@@ -161,9 +162,10 @@ auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typefac
     auto const fontMgr = GetSkFontMgr();
     auto const unicode = SkUnicodes::ICU::Make();
 
+    auto const bidiLevel = uint8_t((direction == Direction::DefaultRtl) ? UBIDI_DEFAULT_RTL : UBIDI_DEFAULT_LTR);
     auto const fontRunIterator = SkShaper::MakeFontMgrRunIterator(utf8Chars, utf8Bytes, font, fontMgr);
-    auto const bidiRunIterator = SkShapers::unicode::BidiRunIterator(unicode, utf8Chars, utf8Bytes, 0xfe /*UBIDI_DEFAULT_LTR*/);
-    auto const scriptRunIterator = SkShapers::HB::ScriptRunIterator(utf8Chars, utf8Bytes, 'latn');
+    auto const bidiRunIterator = SkShapers::unicode::BidiRunIterator(unicode, utf8Chars, utf8Bytes, bidiLevel);
+    auto const scriptRunIterator = SkShapers::HB::ScriptRunIterator(utf8Chars, utf8Bytes, std::bit_cast<SkFourByteTag>(bcp47ScriptTag));
     auto const languageRunIterator = SkShaper::MakeStdLanguageRunIterator(utf8Chars, utf8Bytes);
 
     auto shaper = SkShapers::HB::ShapeDontWrapOrReorder(unicode, fontMgr);
@@ -173,11 +175,11 @@ auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typefac
     return std::move(runHandler).Finalize();
 }
 
-auto SkiaTextShaper::ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size) -> ShapedText
+auto SkiaTextShaper::ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText
 {
     auto buffer = std::array<char8_t, U8_MAX_LENGTH>();
     auto offset = 0;
     U8_APPEND_UNSAFE(buffer.data(), offset, codePoint);
-    return ShapeText(Text(String(buffer.data(), offset)), typeface, size, Dp::Infinity());
+    return ShapeText(Text(String(buffer.data(), offset)), typeface, size, Dp::Infinity(), bcp47ScriptTag, direction);
 }
 }
