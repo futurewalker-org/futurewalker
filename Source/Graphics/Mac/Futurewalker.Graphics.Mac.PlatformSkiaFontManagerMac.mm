@@ -19,7 +19,7 @@ auto PlatformSkiaFontManagerMac::FindTypefaceByFamilyNameAndStyle(String const& 
 {
     if (_fontMgr)
     {
-        auto const skFamilyName = StringFunction::ConvertStringToStdString(familyName);
+        auto const skFamilyName = familyName.ToStdString();
         auto const skFontStyle = FontStyleToSkFontStyle(fontStyle);
         auto r = Shared<SkiaTypeface>::Make(_fontMgr->matchFamilyStyle(skFamilyName.c_str(), skFontStyle));
         return r;

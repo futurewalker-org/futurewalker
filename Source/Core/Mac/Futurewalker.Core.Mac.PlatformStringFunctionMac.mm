@@ -26,7 +26,7 @@ auto PlatformStringFunctionMac::ConvertStringToNSString(StringView sv) -> NSStri
 {
     @autoreleasepool
     {
-        auto const utf8Str = StringFunction::ConvertStringToStdString(sv);
+        auto const utf8Str = String(sv).ToStdString();
         return [NSString stringWithUTF8String:utf8Str.c_str()];
     }
 }

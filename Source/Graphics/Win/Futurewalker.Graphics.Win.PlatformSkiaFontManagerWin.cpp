@@ -20,7 +20,7 @@ auto PlatformSkiaFontManagerWin::FindTypefaceByFamilyNameAndStyle(String const& 
 {
     if (_fontMgr)
     {
-        auto const skFamilyName = StringFunction::ConvertStringToStdString(familyName);
+        auto const skFamilyName = familyName.ToStdString();
         auto const skFontStyle = SkiaFunction::FontStyleToSkFontStyle(fontStyle);
         return Shared<SkiaTypeface>::Make(_fontMgr->matchFamilyStyle(skFamilyName.c_str(), skFontStyle));
     }

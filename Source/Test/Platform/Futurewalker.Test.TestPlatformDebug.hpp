@@ -17,7 +17,7 @@ class TestPlatformDebug : public PlatformDebug
 public:
     auto Print(StringView const message) -> void override
     {
-        auto const str = StringFunction::ConvertStringToStdString(message);
+        auto const str = String(message).ToStdString();
         std::cerr << str << std::endl;
     }
 

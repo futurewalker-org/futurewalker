@@ -154,7 +154,7 @@ auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typefac
     auto const width = static_cast<SkScalar>(maxWidth);
     auto const font = SkFont(GetSkTypeface(typeface), static_cast<SkScalar>(size));
 
-    auto const utf8Str = StringFunction::ConvertStringToStdString(text.GetString());
+    auto const utf8Str = text.GetString().ToStdString();
     auto const utf8Chars = utf8Str.c_str();
     auto const utf8Bytes = utf8Str.size();
 
