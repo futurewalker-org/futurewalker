@@ -107,6 +107,55 @@ auto PlatformKeyboardLayoutWin::UpdateLayout() -> void
 }
 
 ///
+/// @brief Get key name.
+///
+/// @note Does not consume WM_(SYS)CHAR events in message loop.
+///
+auto PlatformKeyboardLayoutWin::GetKey(DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> String
+{
+    if (auto namedKey = MapVirtualKeyCodeToNamedKey(virtualKeyCode))
+    {
+        return *namedKey;
+    }
+
+    // Search printable representation by dropping modifiers except Shift or AltGr.
+    // This behavior follows W3C UI Events KeyEvent specification.
+
+    auto const shift = PlatformModifierFlagsWin::Shift;
+    auto const altGr = PlatformModifierFlagsWin::Control & PlatformModifierFlagsWin::RAlt;
+
+    auto modifierCombinations = std::vector<PlatformModifierFlagsWin>();
+
+    modifierCombinations.push_back(modifiers);
+
+    if ((modifiers & (shift | altGr)) != PlatformModifierFlagsWin::None)
+    {
+        modifierCombinations.push_back(shift | altGr);
+    }
+
+    if ((modifiers & shift) != PlatformModifierFlagsWin::None)
+    {
+        modifierCombinations.push_back(shift);
+    }
+
+    if ((modifiers & altGr) != PlatformModifierFlagsWin::None)
+    {
+        modifierCombinations.push_back(altGr);
+    }
+
+    modifierCombinations.push_back(PlatformModifierFlagsWin::None);
+
+    for (auto const& fallbackModifiers : modifierCombinations)
+    {
+        if (auto const c = MapVirtualKeyCodeToChars(virtualKeyCode, fallbackModifiers))
+        {
+            return PlatformStringFunctionWin::WideToUtf8(*c);
+        }
+    }
+    return Key::Unidentified;
+}
+
+///
 /// @brief Get unmodified key name.
 ///
 auto PlatformKeyboardLayoutWin::GetUnmodifiedKey(DWORD virtualKeyCode) const -> String
@@ -204,46 +253,7 @@ auto PlatformKeyboardLayoutWin::GetKeyAndText(HWND hWnd, DWORD virtualKeyCode, P
     {
         if (deadChars.empty())
         {
-            if (auto namedKey = MapVirtualKeyCodeToNamedKey(virtualKeyCode))
-            {
-                return {*namedKey, text};
-            }
-
-            // Search printable representation by dropping modifiers except Shift or AltGr.
-            // This behavior follows W3C UI Events KeyEvent specification.
-
-            auto const shift = PlatformModifierFlagsWin::Shift;
-            auto const altGr = PlatformModifierFlagsWin::Control & PlatformModifierFlagsWin::RAlt;
-
-            auto modifierCombinations = std::vector<PlatformModifierFlagsWin>();
-
-            modifierCombinations.push_back(modifiers);
-
-            if ((modifiers & (shift | altGr)) != PlatformModifierFlagsWin::None)
-            {
-                modifierCombinations.push_back(shift | altGr);
-            }
-
-            if ((modifiers & shift) != PlatformModifierFlagsWin::None)
-            {
-                modifierCombinations.push_back(shift);
-            }
-
-            if ((modifiers & altGr) != PlatformModifierFlagsWin::None)
-            {
-                modifierCombinations.push_back(altGr);
-            }
-
-            modifierCombinations.push_back(PlatformModifierFlagsWin::None);
-
-            for (auto const& fallbackModifiers : modifierCombinations)
-            {
-                if (auto const c = MapVirtualKeyCodeToChars(virtualKeyCode, fallbackModifiers))
-                {
-                    return {PlatformStringFunctionWin::WideToUtf8(*c), text};
-                }
-            }
-            return {Key::Unidentified, text};
+            return {GetKey(virtualKeyCode, modifiers), text};
         }
         else
         {
@@ -342,6 +352,10 @@ auto PlatformKeyboardLayoutWin::MapVirtualKeyCodeToNamedKey(DWORD virtualKeyCode
         case VK_LCONTROL:
         case VK_RCONTROL:
             return Key::Control;
+        case VK_MENU:
+        case VK_LMENU:
+        case VK_RMENU:
+            return Key::Alt;
         case VK_ESCAPE:
             return Key::Escape;
         case VK_LEFT:

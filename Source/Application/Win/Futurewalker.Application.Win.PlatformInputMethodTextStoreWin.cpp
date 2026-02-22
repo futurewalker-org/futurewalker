@@ -2,11 +2,14 @@
 
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWin.hpp"
-#include "Futurewalker.Application.Win.PlatformInputMethodEditableWin.hpp"
-#include "Futurewalker.Application.PlatformInputMethodEditable.hpp"
+#include "Futurewalker.Application.Win.PlatformInputEditableWin.hpp"
+#include "Futurewalker.Application.PlatformInputEditable.hpp"
+#include "Futurewalker.Application.PlatformKeyEvent.hpp"
 #include "Futurewalker.Application.Key.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
+
+#include "Futurewalker.Core.MonotonicClock.hpp"
 
 #include "Futurewalker.Core.Win.PlatformStringFunctionWin.hpp"
 
@@ -15,7 +18,7 @@
 
 namespace FW_DETAIL_NS
 {
-class PlatformInputMethodTextStoreWin::TextStoreImpl : public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>, ITextStoreACP2, ITfContextOwnerCompositionSink, ITfMouseTrackerACP>
+class PlatformInputMethodTextStoreWin::TextStoreImpl : public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>, ITextStoreACP2, ITfContextOwnerCompositionSink, ITfMouseTrackerACP, ITfKeyTraceEventSink>
 {
 public:
     TextStoreImpl(PlatformInputMethodTextStoreWin& owner);
@@ -56,9 +59,15 @@ public:
     STDMETHODIMP AdviseMouseSink(ITfRangeACP* range, ITfMouseSink* pSink, DWORD* pdwCookie) override;
     STDMETHODIMP UnadviseMouseSink(DWORD dwCookie) override;
 
+    /* ITfKeyTraceEventSink */
+    STDMETHODIMP OnKeyTraceDown(WPARAM wParam, LPARAM lParam) override;
+    STDMETHODIMP OnKeyTraceUp(WPARAM wParam, LPARAM lParam) override;
+
     auto NotifySelectionChange() -> void;
     auto NotifyTextChange(CodeUnit begin, CodeUnit oldEnd, CodeUnit newEnd) -> void;
     auto NotifyLayoutChange() -> void;
+
+    auto CancelProcessKeyDown() -> void;
 
 private:
     PlatformInputMethodTextStoreWin& _owner;
@@ -66,6 +75,8 @@ private:
 private:
     Microsoft::WRL::ComPtr<ITextStoreACPSink> _sink;
     DWORD _sinkMask = 0;
+    WPARAM _keyTraceDownWParam = 0;
+    LPARAM _keyTraceDownLParam = 0;
 };
 
 PlatformInputMethodTextStoreWin::TextStoreImpl::TextStoreImpl(PlatformInputMethodTextStoreWin& owner)
@@ -498,6 +509,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetScreenExt(TsView
 
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnStartComposition(ITfCompositionView* pComposition, BOOL* pfOk)
 {
+    //FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnStartComposition()");
     // TODO: Send notification
     (void)pComposition;
     *pfOk = TRUE;
@@ -506,14 +518,60 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnStartComposition(
 
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition(ITfCompositionView* pComposition, ITfRange* pRangeNew)
 {
-    // TODO: Send notification
+    //FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition()");
     (void)pComposition;
     (void)pRangeNew;
+
+    if (_keyTraceDownWParam != 0 && _keyTraceDownLParam != 0)
+    {
+        auto const wParam = std::exchange(_keyTraceDownWParam, 0);
+        auto const lParam = std::exchange(_keyTraceDownLParam, 0);
+
+        auto const virtualKeyCode = static_cast<DWORD>(wParam);
+        auto const keyFlags = HIWORD(lParam);
+        auto const isRepeat = (keyFlags & KF_REPEAT) != 0;
+        auto const eventCount = LOWORD(lParam);
+
+        // TODO: Get unmodified key.
+        (void)virtualKeyCode;
+
+        auto const timestamp = MonotonicClock::GetNow();
+        auto const key = Key::Process;
+        auto const unmodifiedKey = Key::Unidentified;
+        auto const text = String(); 
+        auto const modifiers = ModifierKeyFlags::None; // TODO: Get actual modifier state.
+
+        for (auto i = 0; i < eventCount; ++i)
+        {
+            try
+            {
+                auto parameter = Event<PlatformKeyEvent::Down>::Make();
+                parameter->SetKey(key);
+                parameter->SetText(text);
+                parameter->SetUnmodifiedKey(unmodifiedKey);
+                parameter->SetModifiers(modifiers);
+                parameter->SetRepeat(isRepeat);
+                parameter->SetTimestamp(timestamp);
+
+                auto event = Event<>(std::move(parameter));
+
+                if (_owner._delegate.sendKeyEventDetached)
+                {
+                    _owner._delegate.sendKeyEventDetached(event);
+                }
+            }
+            catch (...)
+            {
+                FW_DEBUG_ASSERT(false);
+            }
+        }
+    }
     return S_OK;
 }
 
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnEndComposition(ITfCompositionView* pComposition)
 {
+    //FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnEndComposition()");
     // TODO: Send notification
     (void)pComposition;
     return S_OK;
@@ -533,6 +591,23 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::UnadviseMouseSink(D
     // TODO: Implement mouse control.
     (void)dwCookie;
     return E_NOTIMPL;
+}
+
+STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnKeyTraceDown(WPARAM wParam, LPARAM lParam)
+{
+    //FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnKeyTraceDown() wParam: {}, lParam: {}", wParam, lParam);
+    _keyTraceDownWParam = wParam;
+    _keyTraceDownLParam = lParam;
+    return S_OK;
+}
+
+STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnKeyTraceUp(WPARAM wParam, LPARAM lParam)
+{
+    //FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnKeyTraceUp() wParam: {}, lParam: {}", wParam, lParam);
+    (void) wParam;
+    (void) lParam;
+    CancelProcessKeyDown();
+    return S_OK;
 }
 
 auto PlatformInputMethodTextStoreWin::TextStoreImpl::NotifySelectionChange() -> void
@@ -564,12 +639,18 @@ auto PlatformInputMethodTextStoreWin::TextStoreImpl::NotifyLayoutChange() -> voi
     }
 }
 
+auto PlatformInputMethodTextStoreWin::TextStoreImpl::CancelProcessKeyDown() -> void
+{
+    _keyTraceDownWParam = 0;
+    _keyTraceDownLParam = 0;
+}
+
 ///
 /// @brief Make instance.
 ///
-auto PlatformInputMethodTextStoreWin::Make(Shared<PlatformInputMethodContextWin> context, HWND hwnd) -> Shared<PlatformInputMethodTextStoreWin>
+auto PlatformInputMethodTextStoreWin::Make(Delegate const& delegate, Shared<PlatformInputMethodContextWin> context, HWND hwnd) -> Shared<PlatformInputMethodTextStoreWin>
 {
-    auto self = Shared<PlatformInputMethodTextStoreWin>::Make(PassKey<PlatformInputMethodTextStoreWin>(), context, hwnd);
+    auto self = Shared<PlatformInputMethodTextStoreWin>::Make(PassKey<PlatformInputMethodTextStoreWin>(), delegate, context, hwnd);
     self->_self = self;
     return self;
 }
@@ -577,8 +658,9 @@ auto PlatformInputMethodTextStoreWin::Make(Shared<PlatformInputMethodContextWin>
 ///
 /// @brief Constructor.
 ///
-PlatformInputMethodTextStoreWin::PlatformInputMethodTextStoreWin(PassKey<PlatformInputMethodTextStoreWin>, Shared<PlatformInputMethodContextWin> context, HWND hwnd)
-  : _hwnd {hwnd}
+PlatformInputMethodTextStoreWin::PlatformInputMethodTextStoreWin(PassKey<PlatformInputMethodTextStoreWin>, Delegate const& delegate, Shared<PlatformInputMethodContextWin> context, HWND hwnd)
+  : _delegate {delegate}
+  , _hwnd {hwnd}
   , _platformContext {context}
 {
     if (!_platformContext)
@@ -616,12 +698,20 @@ PlatformInputMethodTextStoreWin::PlatformInputMethodTextStoreWin(PassKey<Platfor
         return;
     }
 
-    if (_platformContext)
+    Microsoft::WRL::ComPtr<ITfSource> source;
+    hr = context->GetThreadMgr().As(&source);
+    if (FAILED(hr))
     {
-        // We use AssociateFocus() instead of manually calling SetFocus() on WM_SETFOCUS.
-        // FIXME: Figure out why initial focus set in WM_SETFOCUS is immediately replaced by TSF right before exiting DefWindowProc for WM_ACTIVATE.
-        // This does not happen in TsfPad, so we might be doing something wrong here?
-        _platformContext->AssociateFocus(hwnd, _documentMgr.Get());
+        FW_DEBUG_ASSERT(false);
+        return;
+    }
+
+    DWORD unadviseCookie = 0;
+    hr = source->AdviseSink(IID_ITfKeyTraceEventSink, _textStore.Get(), &unadviseCookie);
+    if (FAILED(hr))
+    {
+        FW_DEBUG_ASSERT(false);
+        return;
     }
 }
 
@@ -679,7 +769,7 @@ auto PlatformInputMethodTextStoreWin::InputKeyFromKeyEvent(String const& key) ->
 ///
 /// @brief Get editable object.
 ///
-auto PlatformInputMethodTextStoreWin::GetEditable() -> Shared<PlatformInputMethodEditableWin>
+auto PlatformInputMethodTextStoreWin::GetEditable() -> Shared<PlatformInputEditableWin>
 {
     return _editable.Lock();
 }
@@ -687,7 +777,7 @@ auto PlatformInputMethodTextStoreWin::GetEditable() -> Shared<PlatformInputMetho
 ///
 /// @brief Set editable object.
 ///
-auto PlatformInputMethodTextStoreWin::SetEditable(Weak<PlatformInputMethodEditableWin> const& editable) -> void
+auto PlatformInputMethodTextStoreWin::SetEditable(Weak<PlatformInputEditableWin> const& editable) -> void
 {
     auto const oldEditable = GetEditable();
     auto const newEditable = editable.Lock();
@@ -712,6 +802,7 @@ auto PlatformInputMethodTextStoreWin::SetEditable(Weak<PlatformInputMethodEditab
         }
         NotifyTextChange(oldTextRange.GetBegin(), oldTextRange.GetEnd(), newTextRange.GetEnd());
         NotifySelectionChange();
+        UpdateDocumentMgrFocus();
     }
 }
 
@@ -749,10 +840,39 @@ auto PlatformInputMethodTextStoreWin::NotifyLayoutChange() -> void
 }
 
 ///
+/// @brief Cancel pending process key down event.
+///
+auto PlatformInputMethodTextStoreWin::CancelProcessKeyDown() -> void
+{
+    if (auto textStore = static_cast<TextStoreImpl*>(_textStore.Get()))
+    {
+        textStore->CancelProcessKeyDown();
+    }
+}
+
+///
 /// @brief Get self.
 ///
 auto PlatformInputMethodTextStoreWin::GetSelf() -> Shared<PlatformInputMethodTextStoreWin>
 {
     return _self.Lock();
+}
+
+///
+/// @brief Update focus association of document manager.
+///
+auto PlatformInputMethodTextStoreWin::UpdateDocumentMgrFocus() -> void
+{
+    // We use AssociateFocus() instead of manually calling SetFocus() on WM_SETFOCUS.
+    // FIXME: Figure out why initial focus set in WM_SETFOCUS is immediately replaced by TSF right before exiting DefWindowProc for WM_ACTIVATE.
+    // This does not happen in TsfPad, so we might be doing something wrong here?
+    if (!_editable.IsExpired())
+    {
+        _platformContext->AssociateFocus(_hwnd, _documentMgr.Get());
+    }
+    else
+    {
+        _platformContext->AssociateFocus(_hwnd, nullptr);
+    }
 }
 }

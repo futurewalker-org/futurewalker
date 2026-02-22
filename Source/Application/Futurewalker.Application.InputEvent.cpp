@@ -4,16 +4,6 @@
 
 namespace FW_DETAIL_NS
 {
-auto InputEvent::Attach::GetInputMethod() const -> Shared<InputMethod>
-{
-    return _inputMethod;
-}
-
-auto InputEvent::Attach::SetInputMethod(Shared<InputMethod> const& inputMethod) -> void
-{
-    _inputMethod = inputMethod;
-}
-
 auto InputEvent::InsertText::GetCancel() const -> Bool
 {
     return _cancel;

@@ -1,9 +1,9 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
-#include "Futurewalker.Application.InputMethodEditable.hpp"
+#include "Futurewalker.Application.InputEditable.hpp"
 #include "Futurewalker.Application.PlatformInputMethod.hpp"
 #include "Futurewalker.Application.PlatformInputMethodContext.hpp"
-#include "Futurewalker.Application.PlatformInputMethodEditable.hpp"
+#include "Futurewalker.Application.PlatformInputEditable.hpp"
 #include "Futurewalker.Application.PlatformInputEvent.hpp"
 #include "Futurewalker.Application.InputEvent.hpp"
 
@@ -17,15 +17,15 @@ namespace FW_DETAIL_NS
 ///
 /// @brief Make new instance.
 ///
-auto InputMethodEditable::Make() -> Shared<InputMethodEditable>
+auto InputEditable::Make() -> Shared<InputEditable>
 {
-    return Shared<InputMethodEditable>::Make(PassKey<InputMethodEditable>());
+    return Shared<InputEditable>::Make(PassKey<InputEditable>());
 }
 
 ///
 /// @brief Constructor.
 ///
-InputMethodEditable::InputMethodEditable(PassKey<InputMethodEditable>)
+InputEditable::InputEditable(PassKey<InputEditable>)
 {
     if (auto inputMethodContext = Locator::GetInstance<PlatformInputMethodContext>())
     {
@@ -45,7 +45,7 @@ InputMethodEditable::InputMethodEditable(PassKey<InputMethodEditable>)
 ///
 /// @return Copy of UTF-8 text.
 ///
-auto InputMethodEditable::GetText() const -> Text
+auto InputEditable::GetText() const -> Text
 {
     if (_platform)
     {
@@ -59,7 +59,7 @@ auto InputMethodEditable::GetText() const -> Text
 ///
 /// @param[in] text New text value.
 ///
-auto InputMethodEditable::SetText(Text const& text) -> void
+auto InputEditable::SetText(Text const& text) -> void
 {
     if (_platform)
     {
@@ -70,7 +70,7 @@ auto InputMethodEditable::SetText(Text const& text) -> void
 ///
 /// @brief Get whole text as string.
 ///
-auto InputMethodEditable::GetString() const -> String
+auto InputEditable::GetString() const -> String
 {
     if (_platform)
     {
@@ -86,7 +86,7 @@ auto InputMethodEditable::GetString() const -> String
 ///
 /// @return Copy of the part of the string.
 ///
-auto InputMethodEditable::GetString(Range<CodePoint> range) const -> String
+auto InputEditable::GetString(Range<CodePoint> range) const -> String
 {
     if (_platform)
     {
@@ -100,7 +100,7 @@ auto InputMethodEditable::GetString(Range<CodePoint> range) const -> String
 ///
 /// @return Range of (0, length of text in code points).
 ///
-auto InputMethodEditable::GetStringRange() const -> Range<CodePoint>
+auto InputEditable::GetStringRange() const -> Range<CodePoint>
 {
     if (_platform)
     {
@@ -114,7 +114,7 @@ auto InputMethodEditable::GetStringRange() const -> Range<CodePoint>
 ///
 /// @return Selected range in code points.
 ///
-auto InputMethodEditable::GetSelectedRange() const -> Range<CodePoint>
+auto InputEditable::GetSelectedRange() const -> Range<CodePoint>
 {
     if (_platform)
     {
@@ -128,7 +128,7 @@ auto InputMethodEditable::GetSelectedRange() const -> Range<CodePoint>
 ///
 /// @param[in] range New selected range in code points.
 ///
-auto InputMethodEditable::SetSelectedRange(Range<CodePoint> const& range) -> void
+auto InputEditable::SetSelectedRange(Range<CodePoint> const& range) -> void
 {
     if (_platform)
     {
@@ -141,7 +141,7 @@ auto InputMethodEditable::SetSelectedRange(Range<CodePoint> const& range) -> voi
 ///
 /// @return Composing range in code points.
 ///
-auto InputMethodEditable::GetComposingRange() const -> Range<CodePoint>
+auto InputEditable::GetComposingRange() const -> Range<CodePoint>
 {
     if (_platform)
     {
@@ -155,7 +155,7 @@ auto InputMethodEditable::GetComposingRange() const -> Range<CodePoint>
 ///
 /// @param[in] range New composing range in code points.
 ///
-auto InputMethodEditable::SetComposingRange(Range<CodePoint> const& range) -> void
+auto InputEditable::SetComposingRange(Range<CodePoint> const& range) -> void
 {
     if (_platform)
     {
@@ -166,30 +166,47 @@ auto InputMethodEditable::SetComposingRange(Range<CodePoint> const& range) -> vo
 ///
 /// @brief
 ///
-auto InputMethodEditable::GetLayoutRect() const -> Rect<Dp>
+auto InputEditable::GetLayoutOffset() const -> Offset<Dp>
 {
-    if (_platform)
-    {
-        return _platform->GetLayoutRect();
-    }
-    return {};
+    return _layoutOffset;
 }
 
 ///
 /// @brief
 ///
-auto InputMethodEditable::SetLayoutRect(Rect<Dp> const& rect) -> void
+auto InputEditable::SetLayoutOffset(Offset<Dp> const& offset) -> void
 {
-    if (_platform)
+    if (_layoutOffset != offset)
     {
-        _platform->SetLayoutRect(rect);
+        _layoutOffset = offset;
+        UpdateLayoutRect();
     }
 }
 
 ///
 /// @brief
 ///
-auto InputMethodEditable::GetLayoutInfo() const -> Graphics::TextLayoutInfo
+auto InputEditable::GetLayoutRect() const -> Rect<Dp>
+{
+    return _layoutRect;
+}
+
+///
+/// @brief
+///
+auto InputEditable::SetLayoutRect(Rect<Dp> const& rect) -> void
+{
+    if (_layoutRect != rect)
+    {
+        _layoutRect = rect;
+        UpdateLayoutRect();
+    }
+}
+
+///
+/// @brief
+///
+auto InputEditable::GetLayoutInfo() const -> Graphics::TextLayoutInfo
 {
     if (_platform)
     {
@@ -201,7 +218,7 @@ auto InputMethodEditable::GetLayoutInfo() const -> Graphics::TextLayoutInfo
 ///
 /// @brief
 ///
-auto InputMethodEditable::SetLayoutInfo(Graphics::TextLayoutInfo const& layoutInfo) -> void
+auto InputEditable::SetLayoutInfo(Graphics::TextLayoutInfo const& layoutInfo) -> void
 {
     if (_platform)
     {
@@ -212,7 +229,7 @@ auto InputMethodEditable::SetLayoutInfo(Graphics::TextLayoutInfo const& layoutIn
 ///
 /// @brief Insert text.
 ///
-auto InputMethodEditable::InsertText(String const& text, CodePoint caretPosition) -> void
+auto InputEditable::InsertText(String const& text, CodePoint caretPosition) -> void
 {
     if (_platform)
     {
@@ -223,7 +240,7 @@ auto InputMethodEditable::InsertText(String const& text, CodePoint caretPosition
 ///
 /// @brief
 ///
-auto InputMethodEditable::DeleteSurroundingText(CodePoint before, CodePoint after) -> void
+auto InputEditable::DeleteSurroundingText(CodePoint before, CodePoint after) -> void
 {
     if (_platform)
     {
@@ -234,7 +251,7 @@ auto InputMethodEditable::DeleteSurroundingText(CodePoint before, CodePoint afte
 ///
 /// @brief
 ///
-auto InputMethodEditable::GetEventReceiver() -> EventReceiver&
+auto InputEditable::GetEventReceiver() -> EventReceiver&
 {
     return *_eventReceiver;
 }
@@ -242,7 +259,7 @@ auto InputMethodEditable::GetEventReceiver() -> EventReceiver&
 ///
 /// @brief
 ///
-auto InputMethodEditable::GetEventReceiver() const -> EventReceiver const&
+auto InputEditable::GetEventReceiver() const -> EventReceiver const&
 {
     return *_eventReceiver;
 }
@@ -250,18 +267,15 @@ auto InputMethodEditable::GetEventReceiver() const -> EventReceiver const&
 ///
 /// @brief
 ///
-auto InputMethodEditable::Attach(PassKey<InputMethod>, Shared<PlatformInputMethod> inputMethod) -> void
+auto InputEditable::GetPlatformObject(PassKey<InputMethod>) -> Shared<PlatformInputEditable>
 {
-    if (inputMethod)
-    {
-        inputMethod->SetEditable(_platform);
-    }
+    return _platform;
 }
 
 ///
 /// @brief
 ///
-auto InputMethodEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool>
+auto InputEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool>
 {
     if (_eventReceiver)
     {
@@ -316,5 +330,13 @@ auto InputMethodEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool
         }
     }
     co_return false;
+}
+
+auto InputEditable::UpdateLayoutRect() -> void
+{
+    if (_platform)
+    {
+        _platform->SetLayoutRect(Rect<Dp>::Offset(_layoutRect, _layoutOffset));
+    }
 }
 }

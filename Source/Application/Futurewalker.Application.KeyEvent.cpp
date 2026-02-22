@@ -123,4 +123,24 @@ auto KeyEvent::Down::SetRepeat(Bool const repeat) -> void
 {
     _repeat = repeat;
 }
+
+auto KeyEvent::Up::GetKey() const -> String
+{
+    return _key;
+}
+
+auto KeyEvent::Up::SetKey(String const& key) -> void
+{
+    _key = key;
+}
+
+auto KeyEvent::Up::GetUnmodifiedKey() const -> String
+{
+    return _unmodifiedKey;
+}
+
+auto KeyEvent::Up::SetUnmodifiedKey(String const& unmodifiedKey) -> void
+{
+    _unmodifiedKey = unmodifiedKey;
+}
 }

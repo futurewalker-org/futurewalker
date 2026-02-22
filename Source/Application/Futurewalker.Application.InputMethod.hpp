@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.InputMethodType.hpp"
-#include "Futurewalker.Application.InputMethodEditableType.hpp"
+#include "Futurewalker.Application.InputEditableType.hpp"
 #include "Futurewalker.Application.PlatformInputMethodType.hpp"
 
 #include "Futurewalker.Core.PassKey.hpp"
@@ -27,7 +27,7 @@ public:
 
     InputMethod(PassKey<InputMethod>, Shared<PlatformInputMethod> const& platform);
 
-    auto SetEditable(Shared<InputMethodEditable> const& editable) -> void;
+    auto SetEditable(Shared<InputEditable> const& editable) -> void;
 
 private:
     Shared<PlatformInputMethod> _platform;

@@ -537,13 +537,17 @@ auto Window::ReceiveWindowEvent(Event<>& event) -> Async<Bool>
     {
         if (_rootView && _platformObject)
         {
-            ResizeRootView(GetClientRect().GetSize());
+            SetRootViewSize(GetClientRect().GetSize());
             UpdateRootView();
         }
     }
     else if (event.Is<WindowEvent::AreaChanged>())
     {
         UpdateAreaRects();
+    }
+    else if (event.Is<WindowEvent::FocusedChanged>())
+    {
+        SetRootViewFocus(event.As<WindowEvent::FocusedChanged>()->IsFocused());
     }
     co_return false;
 }
@@ -759,7 +763,7 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
     UpdateRootViewLayer();
 
     AttachRootView();
-    ResizeRootView(GetClientRect().GetSize());
+    SetRootViewSize(GetClientRect().GetSize());
 }
 
 ///
@@ -945,9 +949,23 @@ auto Window::DetachRootView() -> void
 }
 
 ///
+/// @brief 
+///
+auto Window::SetRootViewFocus(Bool const focused) -> void
+{
+    if (_rootView)
+    {
+        auto focusedChangedEvent = Event<RootViewEvent::FocusedChanged>::Make();
+        focusedChangedEvent->SetFocused(focused);
+        auto rootViewEvent = Event<>(std::move(focusedChangedEvent));
+        _rootView->SendEventDetached(rootViewEvent);
+    }
+}
+
+///
 /// @brief
 ///
-auto Window::ResizeRootView(Size<Dp> const& size) -> void
+auto Window::SetRootViewSize(Size<Dp> const& size) -> void
 {
     if (_rootView)
     {
@@ -1058,7 +1076,7 @@ auto Window::HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>
     if (event.Is<PlatformWindowEvent::VisibleChanged>())
     {
         auto windowEventParameter = Event<WindowEvent::VisibleChanged>();
-        windowEventParameter->SetVisible(IsVisible());
+        windowEventParameter->SetVisible(event.As<PlatformWindowEvent::VisibleChanged>()->IsVisible());
         auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;
@@ -1066,7 +1084,7 @@ auto Window::HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>
     else if (event.Is<PlatformWindowEvent::ActiveChanged>())
     {
         auto windowEventParameter = Event<WindowEvent::ActiveChanged>();
-        windowEventParameter->SetActive(IsActive());
+        windowEventParameter->SetActive(event.As<PlatformWindowEvent::ActiveChanged>()->IsActive());
         auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;
@@ -1074,7 +1092,7 @@ auto Window::HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>
     else if (event.Is<PlatformWindowEvent::FocusedChanged>())
     {
         auto windowEventParameter = Event<WindowEvent::FocusedChanged>();
-        windowEventParameter->SetFocused(IsFocused());
+        windowEventParameter->SetFocused(event.As<PlatformWindowEvent::FocusedChanged>()->IsFocused());
         auto windowEvent = Event<>(windowEventParameter);
         co_await SendEvent(windowEvent);
         co_return true;
@@ -1171,15 +1189,17 @@ auto Window::HandlePlatformKeyEvent(Event<>& event) -> Async<Bool>
         sendingParameter->SetModifiers(parameter->GetModifiers());
         sendingParameter->SetRepeat(parameter->IsRepeat());
         sendingParameter->SetTimestamp(parameter->GetTimestamp());
-        auto sendingEvent = Event<>(sendingParameter);
+        auto sendingEvent = Event<>(std::move(sendingParameter));
         co_return co_await SendEvent(sendingEvent);
     }
     else if (event.Is<PlatformKeyEvent::Up>())
     {
         auto const parameter = event.As<PlatformKeyEvent::Up>();
         auto sendingParameter = Event<KeyEvent::Up>();
+        sendingParameter->SetKey(parameter->GetKey());
+        sendingParameter->SetUnmodifiedKey(parameter->GetUnmodifiedKey());
         sendingParameter->SetTimestamp(parameter->GetTimestamp());
-        auto sendingEvent = Event<>(sendingParameter);
+        auto sendingEvent = Event<>(std::move(sendingParameter));
         co_return co_await SendEvent(sendingEvent);
     }
     co_return false;

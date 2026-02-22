@@ -18,6 +18,7 @@
 #include "Futurewalker.Application.LayoutDirection.hpp"
 #include "Futurewalker.Application.ViewLayerManagerType.hpp"
 #include "Futurewalker.Application.FocusNodeType.hpp"
+#include "Futurewalker.Application.InputEditableType.hpp"
 #include "Futurewalker.Application.HitTestEvent.hpp"
 
 #include "Futurewalker.Animation.AnimationTimer.hpp"
@@ -118,7 +119,8 @@ public:
     auto SetEnabled(Bool const enabled) -> void;
 
     auto IsFocused() const -> Bool;
-    auto SetFocused(Bool const focused) -> void;
+    auto RequestFocus(FocusReason const reason) -> void;
+    auto ReleaseFocus() -> void;
 
     auto IsActive() const -> Bool;
     auto IsAttached() const -> Bool;
@@ -194,6 +196,9 @@ protected:
     auto RemoveLayer(ViewLayerId const id) -> void;
     auto GetLayer(ViewLayerId const id) -> Shared<ViewLayer>;
 
+    auto GetInputEditable() const -> Shared<InputEditable>;
+    auto SetInputEditable(Shared<InputEditable> const& editable) -> void;
+
     auto NotifyRootChanged() -> void;
 
     auto CapturePointer(PointerId const id) -> void;
@@ -239,6 +244,7 @@ private:
     virtual auto RootReleasePointer(PointerId const id, Shared<View> const& view) -> void;
     virtual auto RootCancelInput(Shared<View> const& view) -> void;
     virtual auto RootMakeOwnedWindow(WindowOptions const& options) -> Shared<Window>;
+    virtual auto RootSetInputEditable(Shared<InputEditable> const& editable) -> void;
 
 private:
     auto GetSelfBase() -> Shared<View>;
@@ -283,6 +289,8 @@ private:
     auto NotifyBackingScaleChanged(BackingScale const backingScale) -> void;
     auto NotifyLayoutDirectionChanged(LayoutDirection const layoutDirection) -> void;
 
+    auto ReceiveFocusNodeEvent(Event<>& event) -> Async<Bool>;
+
 private:
     Unique<EventReceiver> _eventReceiver;
     Unique<PropertyStore> _propertyStore;
@@ -298,6 +306,7 @@ private:
     Shared<CommandNode> _commandNode;
     Shared<ViewLayerManager> _layerManager;
     Shared<ViewLayer> _layer;
+    Shared<InputEditable> _inputEditable;
     Bool _visible = true;
     Bool _visibleFromRoot = true;
     Bool _enabled = true;

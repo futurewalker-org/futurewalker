@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.FocusNodeType.hpp"
+#include "Futurewalker.Application.RootFocusNodeType.hpp"
 
 #include "Futurewalker.Event.EventReceiverType.hpp"
 #include "Futurewalker.Event.EventType.hpp"
@@ -26,12 +27,16 @@ public:
     FocusNode(PassKey<FocusNode>);
     virtual ~FocusNode();
 
-    auto RequestFocus() -> void;
+    auto RequestFocus(FocusReason const reason) -> void;
     auto ReleaseFocus() -> void;
 
     auto IsFocused() const -> Bool;
 
+    auto IsFocusable() const -> Bool;
+    auto SetFocusable(Bool const focusable) -> void;
+
     auto GetNextFocus() -> Shared<FocusNode>;
+    auto GetPrevFocus() -> Shared<FocusNode>;
 
     auto AddChild(Shared<FocusNode> const& child, Pointer<FocusNode const> position) -> void;
     auto RemoveChild(Shared<FocusNode> const& child) -> void;
@@ -49,6 +54,8 @@ protected:
     template <Concepts::DerivedFrom<FocusNode> Derived, class... Args>
     static auto MakeDerived(Args&&... args) -> Shared<Derived>;
 
+    auto DispatchKeyEventFromRoot(PassKey<RootFocusNode>, Event<>& event, Shared<FocusNode> const& target) -> Bool;
+
 private:
     auto GetSelf() -> Shared<FocusNode>;
     auto GetSelf() const -> Shared<FocusNode const>;
@@ -64,9 +71,13 @@ private:
     auto AdoptChild(Shared<FocusNode> const& child, Pointer<FocusNode const> position) -> void;
     auto AbandonChild(Shared<FocusNode> const& child) -> void;
 
+    auto DispatchKeyEvent(Event<>& event, Shared<FocusNode> const& target) -> Bool;
+
+    auto Traverse(const Bool forward, Shared<FocusNode> const& prev, Shared<FocusNode> const& start) -> Shared<FocusNode>;
+
 private:
     virtual auto RootGetFocusedNode() const -> Shared<FocusNode>;
-    virtual auto RootRequestFocus(Shared<FocusNode> node) -> void;
+    virtual auto RootRequestFocus(Shared<FocusNode> node, FocusReason const reason) -> void;
     virtual auto RootReleaseFocus(Shared<FocusNode> node) -> void;
 
 private:
@@ -74,6 +85,7 @@ private:
     Weak<FocusNode> _parent;
     FocusNodeList _children;
     Shared<EventReceiver> _eventReceiver;
+    Bool _focusable = false;
 };
 
 ///

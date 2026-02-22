@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.PlatformInputMethodType.hpp"
-#include "Futurewalker.Application.PlatformInputMethodEditable.hpp"
+#include "Futurewalker.Application.PlatformInputEditable.hpp"
 
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Memory.hpp"
@@ -20,7 +20,7 @@ class PlatformInputMethod : NonCopyable
 {
 public:
     virtual ~PlatformInputMethod() = 0;
-    virtual auto SetEditable(Shared<PlatformInputMethodEditable> const& editable) -> void = 0;
+    virtual auto SetEditable(Shared<PlatformInputEditable> const& editable) -> void = 0;
 };
 }
 }

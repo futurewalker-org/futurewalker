@@ -2,7 +2,7 @@
 
 #include "Futurewalker.Application.Win.PlatformInputMethodWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWin.hpp"
-#include "Futurewalker.Application.Win.PlatformInputMethodEditableWin.hpp"
+#include "Futurewalker.Application.Win.PlatformInputEditableWin.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -11,14 +11,11 @@ namespace FW_EXPORT
 ///
 /// @brief Set editable.
 ///
-auto PlatformInputMethodWin::SetEditable(Shared<PlatformInputMethodEditable> const& editable) -> void
+auto PlatformInputMethodWin::SetEditable(Shared<PlatformInputEditable> const& editable) -> void
 {
     if (auto textStore = GetTextStore())
     {
-        if (auto win = editable.TryAs<PlatformInputMethodEditableWin>())
-        {
-            textStore->SetEditable(win);
-        }
+        textStore->SetEditable(editable.TryAs<PlatformInputEditableWin>());
     }
 }
 

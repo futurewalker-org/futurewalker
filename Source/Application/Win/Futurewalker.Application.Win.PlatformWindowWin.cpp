@@ -1025,7 +1025,11 @@ auto PlatformWindowWin::HandleCreate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
         ::SetWindowPos(hWnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOREDRAW | SWP_NOMOVE | SWP_NOSIZE | SWP_NOSENDCHANGING);
 
         // Initialize IME state.
-        _textStore = _context->GetInputMethodContext().MakeTextStore(hWnd);
+        _textStore = _context->GetInputMethodContext().MakeTextStore(
+          {
+              .sendKeyEventDetached = [&](Event<>& event) { return SendKeyEventDetached(event); },
+          },
+          hWnd);
         _inputMethod = Shared<PlatformInputMethodWin>::Make();
         _inputMethod->SetTextStore(_textStore);
 
@@ -1280,7 +1284,9 @@ auto PlatformWindowWin::HandleActivate(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 
             if (!_destructing)
             {
-                auto event = Event<>(Event<PlatformWindowEvent::ActiveChanged>());
+                auto windowEvent = Event<PlatformWindowEvent::ActiveChanged>();
+                windowEvent->SetActive(LOWORD(wParam) != WA_INACTIVE);
+                auto event = Event<>(std::move(windowEvent));
                 SendWindowEventDetached(event);
             }
 
@@ -1402,7 +1408,9 @@ auto PlatformWindowWin::HandleShow(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 
         try
         {
-            auto event = Event<>(Event<PlatformWindowEvent::VisibleChanged>());
+            auto windowEvent = Event<PlatformWindowEvent::VisibleChanged>();
+            windowEvent->SetVisible(wParam != FALSE);
+            auto event = Event<>(std::move(windowEvent));
             SendWindowEventDetached(event);
         }
         catch (...)
@@ -1806,6 +1814,11 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
         auto const unmodifiedKey = keyboardLayout.GetUnmodifiedKey(virtualKeyCode);
         auto const timestamp = MonotonicClock::GetNow();
 
+        if (_textStore)
+        {
+            _textStore->CancelProcessKeyDown();
+        }
+
         for (auto i = 0; i < eventCount; ++i)
         {
             try
@@ -1818,7 +1831,7 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
                 parameter->SetRepeat(isRepeat);
                 parameter->SetTimestamp(timestamp);
 
-                auto event = Event<>(parameter);
+                auto event = Event<>(std::move(parameter));
                 SendKeyEventDetached(event);
             }
             catch (...)
@@ -1854,9 +1867,18 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
     {
         try
         {
+            auto const virtualKeyCode = static_cast<DWORD>(wParam);
+
+            auto& keyboardLayout = _context->GetKeyboardLayout();
+
+            auto const key = keyboardLayout.GetKey(virtualKeyCode, keyboardLayout.GetPlatformModifierState());
+            auto const unmodifiedKey = keyboardLayout.GetUnmodifiedKey(virtualKeyCode);
+
             auto parameter = Event<PlatformKeyEvent::Up>();
+            parameter->SetKey(key);
+            parameter->SetUnmodifiedKey(unmodifiedKey);
             parameter->SetTimestamp(MonotonicClock::GetNow());
-            auto event = Event<>(parameter);
+            auto event = Event<>(std::move(parameter));
             SendKeyEventDetached(event);
         }
         catch (...)
@@ -1938,7 +1960,9 @@ auto PlatformWindowWin::HandleSetFocus(HWND hWnd, UINT msg, WPARAM wParam, LPARA
     {
         try
         {
-            auto event = Event<>(Event<PlatformWindowEvent::FocusedChanged>());
+            auto windowEvent = Event<PlatformWindowEvent::FocusedChanged>();
+            windowEvent->SetFocused(true);
+            auto event = Event<>(std::move(windowEvent));
             SendWindowEventDetached(event);
         }
         catch (...)
@@ -1959,7 +1983,9 @@ auto PlatformWindowWin::HandleKillFocus(HWND hWnd, UINT msg, WPARAM wParam, LPAR
     {
         try
         {
-            auto event = Event<>(Event<PlatformWindowEvent::FocusedChanged>());
+            auto windowEvent = Event<PlatformWindowEvent::FocusedChanged>();
+            windowEvent->SetFocused(false);
+            auto event = Event<>(std::move(windowEvent));
             SendWindowEventDetached(event);
         }
         catch (...)

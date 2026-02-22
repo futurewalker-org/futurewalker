@@ -28,6 +28,79 @@ RootFocusNode::RootFocusNode(PassKey<FocusNode> key)
 }
 
 ///
+/// @brief Set activate state of focus node.
+///
+auto RootFocusNode::SetActive(Bool const active) -> void
+{
+    if (_active != active)
+    {
+        _active = active;
+
+        if (_active)
+        {
+            if (auto const lastFocusedNode = _lastFocusedNode.Lock())
+            {
+                SetFocusedNode(lastFocusedNode, _lastFocusReason);
+            }
+        }
+        else
+        {
+            SetFocusedNode({}, FocusReason::Other);
+        }
+    }
+}
+
+///
+/// @brief Get next focus candidate for keyboard navigation.
+///
+auto RootFocusNode::GetNextFocusCandidate() -> Shared<FocusNode>
+{
+    if (auto focusedNode = GetFocusedNode())
+    {
+        return focusedNode->GetNextFocus();
+    }
+
+    if (auto lastFocusedNode = _lastFocusedNode.Lock())
+    {
+        return lastFocusedNode->GetNextFocus();
+    }
+
+    if (auto nextFocus = GetNextFocus())
+    {
+        if (nextFocus.GetPointer() != this)
+        {
+            return nextFocus;
+        }
+    }
+    return {};
+}
+
+///
+/// @brief Get previous focus candidate for keyboard navigation.
+///
+auto RootFocusNode::GetPrevFocusCandidate() -> Shared<FocusNode>
+{
+    if (auto focusedNode = GetFocusedNode())
+    {
+        return focusedNode->GetPrevFocus();
+    }
+
+    if (auto lastFocusedNode = _lastFocusedNode.Lock())
+    {
+        return lastFocusedNode->GetPrevFocus();
+    }
+
+    if (auto prevFocus = GetPrevFocus())
+    {
+        if (prevFocus.GetPointer() != this)
+        {
+            return prevFocus;
+        }
+    }
+    return {};
+}
+
+///
 /// @brief Get currently focused node.
 ///
 auto RootFocusNode::GetFocusedNode() -> Shared<FocusNode>
@@ -44,11 +117,26 @@ auto RootFocusNode::GetFocusedNode() const -> Shared<FocusNode const>
 }
 
 ///
+/// @brief Dispatch key event to focused node.
+///
+/// @note If there is not focused node, the event will be dispatched to this node.
+///
+auto RootFocusNode::DispatchKeyEvent(Event<>& event) -> Bool
+{
+    if (!DispatchKeyEventFromRoot({}, event, GetFocusedNode()))
+    {
+        return SendEventDetached(event);
+    }
+    return false;
+}
+
+///
 /// @brief Set focused node.
 ///
-auto RootFocusNode::SetFocusedNode(Shared<FocusNode> const& newNode) -> void
+auto RootFocusNode::SetFocusedNode(Shared<FocusNode> const& newNode, FocusReason const reason) -> void
 {
-    auto const oldNode = RootGetFocusedNode();
+    auto const oldNode = _focusedNode.Lock();
+    auto const oldReason = _focusReason;
     if (oldNode != newNode)
     {
         {
@@ -57,6 +145,9 @@ auto RootFocusNode::SetFocusedNode(Shared<FocusNode> const& newNode) -> void
         }
 
         _focusedNode = newNode;
+        _focusReason = reason;
+        _lastFocusedNode = oldNode;
+        _lastFocusReason = oldReason;
 
         if (oldNode)
         {
@@ -66,7 +157,9 @@ auto RootFocusNode::SetFocusedNode(Shared<FocusNode> const& newNode) -> void
 
         if (newNode)
         {
-            auto event = Event<>(Event<FocusEvent::FocusIn>());
+            auto focusEvent = Event<FocusEvent::FocusIn>();
+            focusEvent->SetReason(reason);
+            auto event = Event<>(std::move(focusEvent));
             newNode->SendEventDetached(event);
         }
 
@@ -88,11 +181,11 @@ auto RootFocusNode::RootGetFocusedNode() const -> Shared<FocusNode>
 ///
 /// @brief
 ///
-auto RootFocusNode::RootRequestFocus(Shared<FocusNode> node) -> void
+auto RootFocusNode::RootRequestFocus(Shared<FocusNode> node, FocusReason const reason) -> void
 {
-    if (node)
+    if (node && node->IsFocusable())
     {
-        SetFocusedNode(node);
+        SetFocusedNode(node, reason);
     }
 }
 
@@ -103,11 +196,7 @@ auto RootFocusNode::RootReleaseFocus(Shared<FocusNode> node) -> void
 {
     if (node && node == RootGetFocusedNode())
     {
-        auto next = node->GetNextFocus();
-        if (next != node)
-        {
-            SetFocusedNode(next);
-        }
+        SetFocusedNode({}, FocusReason::Other);
     }
 }
 }

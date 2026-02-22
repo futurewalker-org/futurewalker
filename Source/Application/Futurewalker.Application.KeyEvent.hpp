@@ -64,6 +64,15 @@ private:
 class KeyEvent::Up final : public KeyEvent
 {
 public:
+    auto GetKey() const -> String;
+    auto SetKey(String const& key) -> void;
+
+    auto GetUnmodifiedKey() const -> String;
+    auto SetUnmodifiedKey(String const& unmodifiedKey) -> void;
+
+private:
+    String _key;
+    String _unmodifiedKey;
 };
 }
 }

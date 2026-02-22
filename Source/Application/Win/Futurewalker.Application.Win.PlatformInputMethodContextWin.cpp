@@ -2,7 +2,7 @@
 
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWin.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWin.hpp"
-#include "Futurewalker.Application.Win.PlatformInputMethodEditableWin.hpp"
+#include "Futurewalker.Application.Win.PlatformInputEditableWin.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -48,14 +48,19 @@ PlatformInputMethodContextWin::~PlatformInputMethodContextWin()
     _threadMgr->Deactivate();
 }
 
-auto PlatformInputMethodContextWin::MakeEditable(PlatformInputMethodEditable::Delegate const& delegate) -> Shared<PlatformInputMethodEditable>
+auto PlatformInputMethodContextWin::MakeEditable(PlatformInputEditable::Delegate const& delegate) -> Shared<PlatformInputEditable>
 {
-    return PlatformInputMethodEditableWin::Make(delegate);
+    return PlatformInputEditableWin::Make(delegate);
 }
 
 auto PlatformInputMethodContextWin::GetClientId() const -> TfClientId
 {
     return _clientId;
+}
+
+auto PlatformInputMethodContextWin::GetThreadMgr() const -> Microsoft::WRL::ComPtr<ITfThreadMgr>
+{
+    return _threadMgr;
 }
 
 auto PlatformInputMethodContextWin::CreateDocumentMgr() -> Microsoft::WRL::ComPtr<ITfDocumentMgr>
@@ -80,9 +85,9 @@ auto PlatformInputMethodContextWin::AssociateFocus(HWND hwnd, Pointer<ITfDocumen
     }
 }
 
-auto PlatformInputMethodContextWin::MakeTextStore(HWND hwnd) -> Shared<PlatformInputMethodTextStoreWin>
+auto PlatformInputMethodContextWin::MakeTextStore(PlatformInputMethodTextStoreWin::Delegate const& delegate, HWND hwnd) -> Shared<PlatformInputMethodTextStoreWin>
 {
-    return PlatformInputMethodTextStoreWin::Make(GetSelf(), hwnd);
+    return PlatformInputMethodTextStoreWin::Make(delegate, GetSelf(), hwnd);
 }
 
 auto PlatformInputMethodContextWin::GetSelf() -> Shared<PlatformInputMethodContextWin>

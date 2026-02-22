@@ -133,4 +133,14 @@ auto RootViewEvent::HitTest::GetEvent() -> Event<>&
 {
     return _event;
 }
+
+auto RootViewEvent::FocusedChanged::IsFocused() const -> Bool
+{
+    return _focused;
+}
+
+auto RootViewEvent::FocusedChanged::SetFocused(Bool const focused) -> void
+{
+    _focused = focused;
+}
 }

@@ -1,12 +1,12 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Application.Platform.Prelude.hpp"
+#include "Futurewalker.Application.Prelude.hpp"
 
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-class PlatformInputMethodEditable;
+class InputEditable;
 }
 }

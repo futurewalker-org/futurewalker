@@ -30,13 +30,14 @@ public:
     PlatformInputMethodContextWin(PassKey<PlatformInputMethodContextWin>);
     ~PlatformInputMethodContextWin();
 
-    auto MakeEditable(PlatformInputMethodEditable::Delegate const& delegate) -> Shared<PlatformInputMethodEditable> override;
+    auto MakeEditable(PlatformInputEditable::Delegate const& delegate) -> Shared<PlatformInputEditable> override;
 
     auto GetClientId() const -> TfClientId;
+    auto GetThreadMgr() const -> Microsoft::WRL::ComPtr<ITfThreadMgr>;
     auto CreateDocumentMgr() -> Microsoft::WRL::ComPtr<ITfDocumentMgr>;
     auto AssociateFocus(HWND hwnd, Pointer<ITfDocumentMgr> documentMgr) -> void;
 
-    auto MakeTextStore(HWND hwnd) -> Shared<PlatformInputMethodTextStoreWin>;
+    auto MakeTextStore(PlatformInputMethodTextStoreWin::Delegate const& delegate, HWND hwnd) -> Shared<PlatformInputMethodTextStoreWin>;
 
 private:
     auto GetSelf() -> Shared<PlatformInputMethodContextWin>;

@@ -15,7 +15,7 @@ namespace FW_EXPORT
 class PlatformInputMethodWin : public PlatformInputMethod
 {
 public:
-    auto SetEditable(Shared<PlatformInputMethodEditable> const& editable) -> void override;
+    auto SetEditable(Shared<PlatformInputEditable> const& editable) -> void override;
 
     auto SetTextStore(Weak<PlatformInputMethodTextStoreWin> textStore) -> void;
 

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.FocusEventType.hpp"
+#include "Futurewalker.Application.FocusNodeType.hpp"
 
 #include "Futurewalker.Event.EventParameter.hpp"
 
@@ -26,6 +27,12 @@ public:
 ///
 class FocusEvent::FocusIn final : public FocusEvent
 {
+public:
+    auto GetReason() const -> FocusReason;
+    auto SetReason(FocusReason const reason) -> void;
+
+private:
+    FocusReason _reason = FocusReason::Other;
 };
 
 ///

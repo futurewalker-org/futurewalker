@@ -1,9 +1,9 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Application.Win.PlatformInputMethodEditableWinType.hpp"
+#include "Futurewalker.Application.Win.PlatformInputEditableWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWinType.hpp"
-#include "Futurewalker.Application.PlatformInputMethodEditable.hpp"
+#include "Futurewalker.Application.PlatformInputEditable.hpp"
 
 #include "Futurewalker.Text.TextInputState.hpp"
 
@@ -13,12 +13,12 @@ namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-class PlatformInputMethodEditableWin : public PlatformInputMethodEditable
+class PlatformInputEditableWin : public PlatformInputEditable
 {
 public:
-    static auto Make(Delegate const& delegate) -> Shared<PlatformInputMethodEditableWin>;
+    static auto Make(Delegate const& delegate) -> Shared<PlatformInputEditableWin>;
 
-    PlatformInputMethodEditableWin(PassKey<PlatformInputMethodEditable> key, Delegate const& delegate);
+    PlatformInputEditableWin(PassKey<PlatformInputEditable> key, Delegate const& delegate);
 
     auto SetTextStore(Shared<PlatformInputMethodTextStoreWin> textStore) -> void;
 

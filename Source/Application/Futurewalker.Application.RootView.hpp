@@ -48,8 +48,9 @@ public:
 protected:
     auto Initialize() -> void override;
 
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveFocusEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveViewEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveRootViewEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveKeyEvent(Event<>& event) -> Async<Bool>;
 
     auto UpdateAnimation() -> void;
     auto UpdateLayout() -> void;
@@ -92,6 +93,7 @@ private:
     auto RootReleasePointer(PointerId const id, Shared<View> const& view) -> void override;
     auto RootCancelInput(Shared<View> const& view) -> void override;
     auto RootMakeOwnedWindow(WindowOptions const& options) -> Shared<Window> override;
+    auto RootSetInputEditable(Shared<InputEditable> const& editable) -> void override;
 
 private:
     Bool _attached = false;

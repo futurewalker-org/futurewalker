@@ -1,17 +1,17 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
-#include "Futurewalker.Application.PlatformInputMethodEditable.hpp"
+#include "Futurewalker.Application.PlatformInputEditable.hpp"
 
 namespace FW_DETAIL_NS
 {
-PlatformInputMethodEditable::PlatformInputMethodEditable(PassKey<PlatformInputMethodEditable>, Delegate const& delegate)
+PlatformInputEditable::PlatformInputEditable(PassKey<PlatformInputEditable>, Delegate const& delegate)
   : _delegate {delegate}
 {
 }
 
-PlatformInputMethodEditable::~PlatformInputMethodEditable() = default;
+PlatformInputEditable::~PlatformInputEditable() = default;
 
-auto PlatformInputMethodEditable::SendInputEvent(Event<>& event) -> Async<Bool>
+auto PlatformInputEditable::SendInputEvent(Event<>& event) -> Async<Bool>
 {
     if (_delegate.sendInputevent)
     {
@@ -20,7 +20,7 @@ auto PlatformInputMethodEditable::SendInputEvent(Event<>& event) -> Async<Bool>
     co_return false;
 }
 
-auto PlatformInputMethodEditable::SendInputEventDetached(Event<>& event) -> Bool
+auto PlatformInputEditable::SendInputEventDetached(Event<>& event) -> Bool
 {
     auto const self = GetSelf();
     auto const e = Shared<Event<>>::Make(event);

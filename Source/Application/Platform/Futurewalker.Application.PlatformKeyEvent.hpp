@@ -56,6 +56,15 @@ private:
 class PlatformKeyEvent::Up final : public PlatformKeyEvent
 {
 public:
+    auto GetKey() const -> String;
+    auto SetKey(String const& key) -> void;
+
+    auto GetUnmodifiedKey() const -> String;
+    auto SetUnmodifiedKey(String const& unmodifiedKey) -> void;
+
+private:
+    String _key;
+    String _unmodifiedKey;
 };
 }
 }

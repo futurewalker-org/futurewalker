@@ -31,12 +31,6 @@ public:
 
 class InputEvent::Attach final : public InputEvent
 {
-public:
-    auto GetInputMethod() const -> Shared<InputMethod>;
-    auto SetInputMethod(Shared<InputMethod> const& inputMethod) -> void;
-
-private:
-    Shared<InputMethod> _inputMethod;
 };
 
 class InputEvent::Detach final : public InputEvent

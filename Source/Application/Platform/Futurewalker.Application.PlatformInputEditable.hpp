@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Application.PlatformInputMethodEditableType.hpp"
+#include "Futurewalker.Application.PlatformInputEditableType.hpp"
 
 #include "Futurewalker.Event.hpp"
 
@@ -22,16 +22,16 @@ namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-class PlatformInputMethodEditable : NonCopyable
+class PlatformInputEditable : NonCopyable
 {
 public:
     struct Delegate
     {
         EventFunction sendInputevent;
     };
-    PlatformInputMethodEditable(PassKey<PlatformInputMethodEditable>, Delegate const& delegate);
+    PlatformInputEditable(PassKey<PlatformInputEditable>, Delegate const& delegate);
 
-    virtual ~PlatformInputMethodEditable() = 0;
+    virtual ~PlatformInputEditable() = 0;
 
     virtual auto GetText() const -> Text = 0;
     virtual auto SetText(Text const& text) -> void = 0;
@@ -66,7 +66,7 @@ protected:
     static auto MakeDerived(Args&&... args) -> Shared<Derived>;
 
 private:
-    Weak<PlatformInputMethodEditable> _self;
+    Weak<PlatformInputEditable> _self;
     Delegate _delegate;
 };
 
@@ -74,20 +74,20 @@ private:
 /// @brief Get self.
 ///
 template <class Self>
-auto PlatformInputMethodEditable::GetSelf(this Self& self) -> Shared<Self>
+auto PlatformInputEditable::GetSelf(this Self& self) -> Shared<Self>
 {
-    return static_cast<TypeTraits::PropagateCVRef<Self&, PlatformInputMethodEditable>>(self)._self.Lock().template UnsafeAs<Self>();
+    return static_cast<TypeTraits::PropagateCVRef<Self&, PlatformInputEditable>>(self)._self.Lock().template UnsafeAs<Self>();
 }
 
 ///
 /// @brief Get derived instance.
 ///
 template <class Derived, class... Args>
-auto PlatformInputMethodEditable::MakeDerived(Args&&... args) -> Shared<Derived>
+auto PlatformInputEditable::MakeDerived(Args&&... args) -> Shared<Derived>
 {
-    auto key = PassKey<PlatformInputMethodEditable>();
+    auto key = PassKey<PlatformInputEditable>();
     auto view = Shared<Derived>::Make(key, std::forward<Args>(args)...);
-    static_cast<PlatformInputMethodEditable&>(*view)._self = view;
+    static_cast<PlatformInputEditable&>(*view)._self = view;
     return view;
 }
 }

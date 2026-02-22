@@ -39,6 +39,7 @@ public:
     class Key;
     class Input;
     class HitTest;
+    class FocusedChanged;
 };
 
 class RootViewEvent::Owner final : public RootViewEvent
@@ -136,6 +137,16 @@ public:
 
 private:
     Event<>& _event;
+};
+
+class RootViewEvent::FocusedChanged final : public RootViewEvent
+{
+public:
+    auto IsFocused() const -> Bool;
+    auto SetFocused(Bool const focused) -> void;
+
+private:
+    Bool _focused = false;
 };
 }
 }

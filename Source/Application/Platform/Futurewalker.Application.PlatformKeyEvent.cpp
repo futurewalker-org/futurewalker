@@ -63,4 +63,24 @@ auto PlatformKeyEvent::Down::SetRepeat(Bool const repeat) -> void
 {
     _repeat = repeat;
 }
+
+auto PlatformKeyEvent::Up::GetKey() const -> String
+{
+    return _key;
+}
+
+auto PlatformKeyEvent::Up::SetKey(String const& key) -> void
+{
+    _key = key;
+}
+
+auto PlatformKeyEvent::Up::GetUnmodifiedKey() const -> String
+{
+    return _unmodifiedKey;
+}
+
+auto PlatformKeyEvent::Up::SetUnmodifiedKey(String const& unmodifiedKey) -> void
+{
+    _unmodifiedKey = unmodifiedKey;
+}
 }

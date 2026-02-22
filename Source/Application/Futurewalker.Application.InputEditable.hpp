@@ -1,9 +1,9 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Application.InputMethodEditable.hpp"
+#include "Futurewalker.Application.InputEditable.hpp"
 #include "Futurewalker.Application.InputMethod.hpp"
-#include "Futurewalker.Application.PlatformInputMethodEditableType.hpp"
+#include "Futurewalker.Application.PlatformInputEditableType.hpp"
 #include "Futurewalker.Application.PlatformInputMethodType.hpp"
 
 #include "Futurewalker.Event.EventReceiverType.hpp"
@@ -33,12 +33,14 @@ namespace FW_EXPORT
 ///
 /// @brief Editable interface for IME interaction.
 ///
-class InputMethodEditable : NonCopyable
+/// Bidirectional communication channel between input method and text input controls.
+///
+class InputEditable : NonCopyable
 {
 public:
-    static auto Make() -> Shared<InputMethodEditable>;
+    static auto Make() -> Shared<InputEditable>;
 
-    InputMethodEditable(PassKey<InputMethodEditable>);
+    InputEditable(PassKey<InputEditable>);
 
     auto GetText() const -> Text;
     auto SetText(Text const& text) -> void;
@@ -53,6 +55,9 @@ public:
     auto GetComposingRange() const -> Range<CodePoint>;
     auto SetComposingRange(Range<CodePoint> const& range) -> void;
 
+    auto GetLayoutOffset() const -> Offset<Dp>;
+    auto SetLayoutOffset(Offset<Dp> const& offset) -> void;
+
     auto GetLayoutRect() const -> Rect<Dp>;
     auto SetLayoutRect(Rect<Dp> const& rect) -> void;
 
@@ -65,14 +70,17 @@ public:
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
 
-    auto Attach(PassKey<InputMethod>, Shared<PlatformInputMethod> inputMethod) -> void;
+    auto GetPlatformObject(PassKey<InputMethod>) -> Shared<PlatformInputEditable>;
 
 private:
     auto HandlePlatformInputEvent(Event<>& event) -> Async<Bool>;
+    auto UpdateLayoutRect() -> void;
 
 private:
-    Shared<PlatformInputMethodEditable> _platform;
+    Shared<PlatformInputEditable> _platform;
     Shared<EventReceiver> _eventReceiver;
+    Offset<Dp> _layoutOffset;
+    Rect<Dp> _layoutRect;
 };
 }
 }

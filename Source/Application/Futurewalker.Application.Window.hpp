@@ -214,7 +214,8 @@ private:
     auto AttachRootView() -> void;
     auto DetachRootView() -> void;
 
-    auto ResizeRootView(Size<Dp> const& size) -> void;
+    auto SetRootViewFocus(Bool const focused) -> void;
+    auto SetRootViewSize(Size<Dp> const& size) -> void;
     auto UpdateRootView() -> void;
 
     auto GetClientRect() const -> Rect<Dp>;

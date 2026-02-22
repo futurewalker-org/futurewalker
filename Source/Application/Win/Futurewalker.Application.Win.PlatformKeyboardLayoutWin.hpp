@@ -25,6 +25,7 @@ public:
 
     auto UpdateLayout() -> void;
 
+    auto GetKey(DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> String;
     auto GetUnmodifiedKey(DWORD virtualKeyCode) const -> String;
     auto GetKeyAndText(HWND hWnd, DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> std::pair<String, String>;
     auto GetModifierState() const -> ModifierKeyFlags;

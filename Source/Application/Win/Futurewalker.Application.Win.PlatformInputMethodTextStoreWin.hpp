@@ -3,7 +3,7 @@
 
 #include "Futurewalker.Application.Win.PlatformInputMethodTextStoreWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWinType.hpp"
-#include "Futurewalker.Application.Win.PlatformInputMethodEditableWinType.hpp"
+#include "Futurewalker.Application.Win.PlatformInputEditableWinType.hpp"
 
 #include "Futurewalker.Event.hpp"
 
@@ -30,34 +30,40 @@ namespace FW_EXPORT
 class PlatformInputMethodTextStoreWin : NonCopyable
 {
 public:
-    static auto Make(Shared<PlatformInputMethodContextWin> context, HWND hwnd) -> Shared<PlatformInputMethodTextStoreWin>;
+    struct Delegate
+    {
+        Function<Bool(Event<>&)> sendKeyEventDetached;
+    };
+    static auto Make(Delegate const& delegate, Shared<PlatformInputMethodContextWin> context, HWND hwnd) -> Shared<PlatformInputMethodTextStoreWin>;
 
-    PlatformInputMethodTextStoreWin(PassKey<PlatformInputMethodTextStoreWin>, Shared<PlatformInputMethodContextWin> context, HWND hwnd);
+    PlatformInputMethodTextStoreWin(PassKey<PlatformInputMethodTextStoreWin>, Delegate const& delegate, Shared<PlatformInputMethodContextWin> context, HWND hwnd);
     ~PlatformInputMethodTextStoreWin();
 
     auto InsertTextFromKeyEvent(String const& text) -> void;
     auto InputKeyFromKeyEvent(String const& key) -> void;
 
-    auto GetEditable() -> Shared<PlatformInputMethodEditableWin>;
-    auto SetEditable(Weak<PlatformInputMethodEditableWin> const& client) -> void;
+    auto GetEditable() -> Shared<PlatformInputEditableWin>;
+    auto SetEditable(Weak<PlatformInputEditableWin> const& client) -> void;
 
     auto NotifySelectionChange() -> void;
     auto NotifyTextChange(CodeUnit begin, CodeUnit oldEnd, CodeUnit newEnd) -> void;
     auto NotifyLayoutChange() -> void;
 
-private:
-    auto SendInputEvent(Event<>& event) -> Async<Bool>;
+    auto CancelProcessKeyDown() -> void;
 
+private:
     auto GetSelf() -> Shared<PlatformInputMethodTextStoreWin>;
+    auto UpdateDocumentMgrFocus() -> void;
 
     class TextStoreImpl;
 
 private:
+    Delegate _delegate;
     Weak<PlatformInputMethodTextStoreWin> _self;
     HWND _hwnd = NULL;
     TfEditCookie _editCookie = TF_INVALID_EDIT_COOKIE;
     Shared<PlatformInputMethodContextWin> _platformContext;
-    Weak<PlatformInputMethodEditableWin> _editable;
+    Weak<PlatformInputEditableWin> _editable;
     Microsoft::WRL::ComPtr<ITfDocumentMgr> _documentMgr;
     Microsoft::WRL::ComPtr<ITfContext> _context;
     Microsoft::WRL::ComPtr<ITextStoreACP2> _textStore;

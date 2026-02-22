@@ -73,6 +73,12 @@ class PlatformWindowEvent::BackingScaleChanged final : public PlatformWindowEven
 ///
 class PlatformWindowEvent::VisibleChanged final : public PlatformWindowEvent
 {
+public:
+    auto IsVisible() const -> Bool;
+    auto SetVisible(Bool const visible) -> void;
+
+private:
+    Bool _visible = false;
 };
 
 ///
@@ -80,6 +86,12 @@ class PlatformWindowEvent::VisibleChanged final : public PlatformWindowEvent
 ///
 class PlatformWindowEvent::ActiveChanged final : public PlatformWindowEvent
 {
+public:
+    auto IsActive() const -> Bool;
+    auto SetActive(Bool const active) -> void;
+
+private:
+    Bool _active = false;
 };
 
 ///
@@ -87,10 +99,16 @@ class PlatformWindowEvent::ActiveChanged final : public PlatformWindowEvent
 ///
 class PlatformWindowEvent::FocusedChanged final : public PlatformWindowEvent
 {
+public:
+    auto IsFocused() const -> Bool;
+    auto SetFocused(Bool const focused) -> void;
+
+private:
+    Bool _focused = false;
 };
 
 ///
-/// @brief 
+/// @brief
 ///
 class PlatformWindowEvent::SizeChanged final : public PlatformWindowEvent
 {

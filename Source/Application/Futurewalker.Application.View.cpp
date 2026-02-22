@@ -15,6 +15,9 @@
 #include "Futurewalker.Application.ViewLayer.hpp"
 #include "Futurewalker.Application.ViewLayerManager.hpp"
 #include "Futurewalker.Application.FocusNode.hpp"
+#include "Futurewalker.Application.FocusEvent.hpp"
+#include "Futurewalker.Application.InputEditable.hpp"
+#include "Futurewalker.Application.KeyEvent.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -513,16 +516,17 @@ auto View::IsFocused() const -> Bool
 ///
 /// @brief
 ///
-auto View::SetFocused(Bool const focused) -> void
+auto View::RequestFocus(FocusReason const reason) -> void
 {
-    if (focused)
-    {
-        GetFocusNode().RequestFocus();
-    }
-    else
-    {
-        GetFocusNode().ReleaseFocus();
-    }
+    GetFocusNode().RequestFocus(reason);
+}
+
+///
+/// @brief
+///
+auto View::ReleaseFocus() -> void
+{
+    GetFocusNode().ReleaseFocus();
 }
 
 ///
@@ -838,6 +842,11 @@ auto View::EnterArrangeScope(PassKey<ArrangeScope>, ArrangeParameter const& para
         {
             GetLayer().SetSize(newFrameRect.GetSize());
             InvalidateVisual();
+        }
+
+        if (auto const editable = GetInputEditable())
+        {
+            editable->SetLayoutOffset(LocalToRootPoint({}).As<Offset>());
         }
     }
     catch (...)
@@ -1237,7 +1246,12 @@ auto View::GetFocusTrackingFlags() const -> ViewFocusTrackingFlags
 ///
 auto View::SetFocusTrackingFlags(ViewFocusTrackingFlags const focusTrackingFlags) -> void
 {
-    _focusTrackingFlags = focusTrackingFlags;
+    if (_focusTrackingFlags != focusTrackingFlags)
+    {
+        _focusTrackingFlags = focusTrackingFlags;
+
+        GetFocusNode().SetFocusable((_focusTrackingFlags & ViewFocusTrackingFlags::All) != ViewFocusTrackingFlags::None);
+    }
 }
 
 ///
@@ -1392,6 +1406,45 @@ auto View::RemoveLayer(ViewLayerId const id) -> void
 auto View::GetLayer(ViewLayerId const id) -> Shared<ViewLayer>
 {
     return _drawInfo.GetSubLayer(id);
+}
+
+///
+/// @brief
+///
+auto View::GetInputEditable() const -> Shared<InputEditable>
+{
+    return _inputEditable;
+}
+
+///
+/// @brief Set input editable object.
+///
+auto View::SetInputEditable(Shared<InputEditable> const& editable) -> void
+{
+    if (_inputEditable != editable)
+    {
+        auto const root = GetRoot();
+
+        if (root && _inputEditable)
+        {
+            root->RootSetInputEditable({});
+        }
+
+        _inputEditable = editable;
+
+        if (_inputEditable)
+        {
+            _inputEditable->SetLayoutOffset(LocalToRootPoint({}).As<Offset>());
+        }
+
+        if (root && _inputEditable)
+        {
+            if (IsFocused())
+            {
+                root->RootSetInputEditable(_inputEditable);
+            }
+        }
+    }
 }
 
 ///
@@ -1657,6 +1710,14 @@ auto View::RootMakeOwnedWindow(WindowOptions const& options) -> Shared<Window>
 ///
 /// @brief
 ///
+auto View::RootSetInputEditable(Shared<InputEditable> const& editable) -> void
+{
+    (void)editable;
+}
+
+///
+/// @brief
+///
 auto View::GetSelfBase() -> Shared<View>
 {
     return _self.Lock();
@@ -1764,7 +1825,7 @@ auto View::InitializeSelf(Shared<View> const& self) -> void
     _layerManager = Locator::Resolve<ViewLayerManager>();
     _layer = _layerManager->MakeLayer(ViewLayerKindNormal);
 
-    EventReceiver::Connect(*_focusNode, *this, &View::SendEvent);
+    EventReceiver::Connect(*_focusNode, *this, &View::ReceiveFocusNodeEvent);
 }
 
 ///
@@ -2262,5 +2323,40 @@ auto View::NotifyLayoutDirectionChanged(LayoutDirection const layoutDirection) -
     {
         FW_DEBUG_ASSERT(false);
     }
+}
+
+///
+/// @brief 
+///
+auto View::ReceiveFocusNodeEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<FocusEvent>())
+    {
+        auto const root = GetRoot();
+
+        if (event.Is<FocusEvent::FocusIn>())
+        {
+            if (root)
+            {
+                root->RootSetInputEditable(GetInputEditable());
+            }
+        }
+
+        co_await SendEvent(event);
+
+        if (event.Is<FocusEvent::FocusOut>())
+        {
+            if (root)
+            {
+                root->RootSetInputEditable({});
+            }
+        }
+        co_return true;
+    }
+    else if (event.Is<KeyEvent>())
+    {
+        co_return co_await SendEvent(event);
+    }
+    co_return false;
 }
 }

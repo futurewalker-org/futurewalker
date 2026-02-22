@@ -14,7 +14,9 @@
 #include "Futurewalker.Application.FocusEvent.hpp"
 #include "Futurewalker.Application.KeyEvent.hpp"
 #include "Futurewalker.Application.InputEvent.hpp"
+#include "Futurewalker.Application.InputMethod.hpp" 
 #include "Futurewalker.Application.HitTestEvent.hpp"
+#include "Futurewalker.Application.Key.hpp"
 
 #include "Futurewalker.Animation.RootAnimationTimer.hpp"
 
@@ -95,14 +97,32 @@ auto RootView::Initialize() -> void
 
     AddChildFront(_container);
 
-    EventReceiver::Connect(*this, *this, &RootView::ReceiveEvent);
-    EventReceiver::Connect(*_focusNode, *this, &RootView::ReceiveFocusEvent);
+    EventReceiver::Connect(*this, *this, &RootView::ReceiveViewEvent);
+    EventReceiver::Connect(*this, *this, &RootView::ReceiveRootViewEvent);
+    EventReceiver::Connect(*_focusNode, *this, &RootView::ReceiveKeyEvent);
 }
 
 ///
 /// @brief Handle event.
 ///
-auto RootView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto RootView::ReceiveViewEvent(Event<>& event) -> Async<Bool>
+{
+    if (event.Is<ViewEvent::Attached>())
+    {
+        SetAnimationTimerActive(true);
+        RequestFrame();
+    }
+    else if (event.Is<ViewEvent::Detached>())
+    {
+        SetAnimationTimerActive(false);
+    }
+    co_return false;
+}
+
+///
+/// @brief Handle root view event.
+///
+auto RootView::ReceiveRootViewEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<RootViewEvent::Owner>())
     {
@@ -192,43 +212,33 @@ auto RootView::ReceiveEvent(Event<>& event) -> Async<Bool>
         co_await DispatchHitTestEvent(sourceEvent);
         co_return true;
     }
-    else if (event.Is<ViewEvent::Attached>())
+    else if (event.Is<RootViewEvent::FocusedChanged>())
     {
-        SetAnimationTimerActive(true);
-        RequestFrame();
-    }
-    else if (event.Is<ViewEvent::Detached>())
-    {
-        SetAnimationTimerActive(false);
+        _focusNode->SetActive(event.As<RootViewEvent::FocusedChanged>()->IsFocused());
+        co_return true;
     }
     co_return false;
 }
 
-///
-/// @brief
-///
-auto RootView::ReceiveFocusEvent(Event<>& event) -> Async<Bool>
+auto RootView::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 {
-    if (event.Is<FocusEvent>())
+    if (event.Is<KeyEvent::Down>())
     {
-        if (auto focus = _focusNode->GetFocusedNode())
+        auto parameter = event.As<KeyEvent::Down>();
+        if (parameter->GetUnmodifiedKey() == Key::Tab)
         {
-            if (focus != _focusNode)
+            if ((parameter->GetModifiers() & ModifierKeyFlags::Shift) != ModifierKeyFlags::None)
             {
-                if (_inputMethod)
+                if (auto const prevFocus = _focusNode->GetPrevFocusCandidate())
                 {
-                    if (event.Is<FocusEvent::FocusWillChange>())
-                    {
-                        auto inputEvent = Event<>(Event<InputEvent::Detach>());
-                        co_await focus->SendEvent(inputEvent);
-                    }
-                    else if (event.Is<FocusEvent::FocusDidChange>())
-                    {
-                        auto inputEventParameter = Event<InputEvent::Attach>();
-                        inputEventParameter->SetInputMethod(_inputMethod);
-                        auto inputEvent = Event<>(inputEventParameter);
-                        co_await focus->SendEvent(inputEvent);
-                    }
+                    prevFocus->RequestFocus(FocusReason::Keyboard);
+                }
+            }
+            else
+            {
+                if (auto const nextFocus = _focusNode->GetNextFocusCandidate())
+                {
+                    nextFocus->RequestFocus(FocusReason::Keyboard);
                 }
             }
         }
@@ -441,13 +451,11 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
 ///
 auto RootView::DispatchKeyEvent(Event<>& event) -> Async<void>
 {
-    if (event.Is<KeyEvent>())
+    if (_focusNode)
     {
-        if (auto focus = _focusNode->GetFocusedNode())
-        {
-            co_await focus->SendEvent(event);
-        }
+        _focusNode->DispatchKeyEvent(event);
     }
+    co_return;
 }
 
 ///
@@ -728,5 +736,16 @@ auto RootView::RootMakeOwnedWindow(WindowOptions const& options) -> Shared<Windo
         return _delegate.makeOwnedWindow(options);
     }
     return {};
+}
+
+///
+/// @brief
+///
+auto RootView::RootSetInputEditable(Shared<InputEditable> const& editable) -> void
+{
+    if (_inputMethod)
+    {
+        _inputMethod->SetEditable(editable);
+    }
 }
 }

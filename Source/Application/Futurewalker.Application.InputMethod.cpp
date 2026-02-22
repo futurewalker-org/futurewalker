@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.InputMethod.hpp"
-#include "Futurewalker.Application.InputMethodEditable.hpp"
+#include "Futurewalker.Application.InputEditable.hpp"
 #include "Futurewalker.Application.PlatformInputMethod.hpp"
 
 namespace FW_DETAIL_NS
@@ -25,11 +25,11 @@ InputMethod::InputMethod(PassKey<InputMethod>, Shared<PlatformInputMethod> const
 ///
 /// @brief
 ///
-auto InputMethod::SetEditable(Shared<InputMethodEditable> const& editable) -> void
+auto InputMethod::SetEditable(Shared<InputEditable> const& editable) -> void
 {
-    if (editable)
+    if (_platform)
     {
-        editable->Attach({}, _platform);
+        _platform->SetEditable(editable ? editable->GetPlatformObject({}) : nullptr);
     }
 }
 }
