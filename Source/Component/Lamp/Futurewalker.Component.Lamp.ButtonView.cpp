@@ -3,8 +3,13 @@
 #include "Futurewalker.Component.Lamp.ButtonView.hpp"
 #include "Futurewalker.Component.Lamp.ButtonRenderView.hpp"
 
-#include "Futurewalker.Application.ButtonView.hpp"
-#include "Futurewalker.Application.ButtonViewEvent.hpp"
+#include "Futurewalker.Application.TapGestureView.hpp"
+#include "Futurewalker.Application.HoverGestureView.hpp"
+#include "Futurewalker.Application.ContainerView.hpp"
+#include "Futurewalker.Application.FocusView.hpp"
+#include "Futurewalker.Application.FocusEvent.hpp"
+#include "Futurewalker.Application.KeyEvent.hpp"
+#include "Futurewalker.Application.Key.hpp"
 
 namespace FW_LAMP_DETAIL_NS
 {
@@ -35,9 +40,9 @@ auto ButtonView::MakeWithContent(Shared<View> contentView) -> Shared<ButtonView>
 ///
 auto ButtonView::GetContent() -> Shared<View>
 {
-    if (_buttonView)
+    if (_containerView)
     {
-        return _buttonView->GetContent();
+        return _containerView->GetContent();
     }
     return {};
 }
@@ -49,9 +54,9 @@ auto ButtonView::GetContent() -> Shared<View>
 ///
 auto ButtonView::SetContent(Shared<View> content) -> void
 {
-    if (_buttonView)
+    if (_containerView)
     {
-        _buttonView->SetContent(content);
+        _containerView->SetContent(content);
     }
 }
 
@@ -60,12 +65,9 @@ auto ButtonView::SetContent(Shared<View> content) -> void
 ///
 /// @param flags
 ///
-auto ButtonView::SetActionFlags(ButtonViewActionFlags const flags) -> void
+auto ButtonView::SetActionFlags(Flags<ButtonViewActionFlag> const flags) -> void
 {
-    if (_buttonView)
-    {
-        _buttonView->SetActionFlags(flags);
-    }
+    _actionFlags = flags;
 }
 
 ///
@@ -73,13 +75,9 @@ auto ButtonView::SetActionFlags(ButtonViewActionFlags const flags) -> void
 ///
 /// @return
 ///
-auto ButtonView::GetActionFlags() const -> ButtonViewActionFlags
+auto ButtonView::GetActionFlags() const -> Flags<ButtonViewActionFlag>
 {
-    if (_buttonView)
-    {
-        return _buttonView->GetActionFlags();
-    }
-    return {};
+    return _actionFlags;
 }
 
 ///
@@ -163,6 +161,19 @@ auto ButtonView::SetBorderAlpha(AttributeArg<Channel> const& alpha) -> void
 ///
 /// @brief
 ///
+/// @param width
+///
+auto ButtonView::SetBorderWidth(AttributeArg<Dp> const& width) -> void
+{
+    if (_renderView)
+    {
+        _renderView->SetBorderWidth(width);
+    }
+}
+
+///
+/// @brief
+///
 /// @param color
 ///
 auto ButtonView::SetDisabledBorderColor(AttributeArg<RGBAColor> const& color) -> void
@@ -183,6 +194,50 @@ auto ButtonView::SetDisabledBorderAlpha(AttributeArg<Channel> const& alpha) -> v
     if (_renderView)
     {
         _renderView->SetDisabledBorderAlpha(alpha);
+    }
+}
+
+///
+/// @brief 
+///
+auto ButtonView::SetDisabledBorderWidth(AttributeArg<Dp> const& width) -> void
+{
+    if (_renderView)
+    {
+        _renderView->SetDisabledBorderWidth(width);
+    }
+}
+
+///
+/// @brief 
+///
+auto ButtonView::SetFocusedBorderColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    if (_renderView)
+    {
+        _renderView->SetFocusedBorderColor(color);
+    }
+}
+
+///
+/// @brief 
+///
+auto ButtonView::SetFocusedBorderAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    if (_renderView)
+    {
+        _renderView->SetFocusedBorderAlpha(alpha);
+    }
+}
+
+///
+/// @brief 
+///
+auto ButtonView::SetFocusedBorderWidth(AttributeArg<Dp> const& width) -> void
+{
+    if (_renderView)
+    {
+        _renderView->SetFocusedBorderWidth(width);
     }
 }
 
@@ -241,19 +296,6 @@ auto ButtonView::SetCornerRadius(AttributeArg<CornerRadius> const& radius) -> vo
 ///
 /// @brief
 ///
-/// @param width
-///
-auto ButtonView::SetBorderWidth(AttributeArg<Dp> const& width) -> void
-{
-    if (_renderView)
-    {
-        _renderView->SetBorderWidth(width);
-    }
-}
-
-///
-/// @brief
-///
 ButtonView::ButtonView(PassKey<View> key)
   : View(key)
 {
@@ -264,11 +306,15 @@ ButtonView::ButtonView(PassKey<View> key)
 ///
 auto ButtonView::Initialize() -> void
 {
-    _buttonView = ::FW_NS::ButtonView::Make();
-    _renderView = ButtonRenderView::MakeWithContent(_buttonView);
+    _containerView = ContainerView::Make();
+    _tapGestureView = TapGestureView::MakeWithContent(_containerView);
+    _hoverGestureView = HoverGestureView::MakeWithContent(_tapGestureView);
+    _renderView = ButtonRenderView::MakeWithContent(_hoverGestureView);
     AddChildBack(_renderView);
 
-    EventReceiver::Connect(*_buttonView, *this, &ButtonView::ReceiveEvent);
+    SetFocusTrackingFlags(ViewFocusTrackingFlags::All);
+
+    EventReceiver::Connect(*this, *this, &ButtonView::ReceiveEvent);
 }
 
 ///
@@ -278,54 +324,119 @@ auto ButtonView::Initialize() -> void
 ///
 auto ButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
-    if (event.Is<ButtonViewEvent>())
+    if (event.Is<FocusEvent>())
     {
-        if (event.Is<ButtonViewEvent::Enter>())
+        if (event.Is<FocusEvent::FocusIn>())
         {
-            SetEnter(true);
+            if (_renderView)
+            {
+                _renderView->SetFocused(true, event.As<FocusEvent::FocusIn>()->GetReason());
+            }
         }
-        else if (event.Is<ButtonViewEvent::Leave>())
+        else if (event.Is<FocusEvent::FocusOut>())
         {
-            SetEnter(false);
+            _keyDown = false;
+
+            if (_renderView)
+            {
+                _renderView->SetFocused(false, {});
+            }
         }
-        else if (event.Is<ButtonViewEvent::Down>())
+    }
+    else if (event.Is<KeyEvent>())
+    {
+        if (event.Is<KeyEvent::Down>())
         {
-            SetDown(true);
+            auto const key = event.As<KeyEvent::Down>()->GetKey();
+            auto const unmodifiedKey = event.As<KeyEvent::Down>()->GetUnmodifiedKey();
+            if ((key != Key::Process) && (unmodifiedKey == Key::Enter || unmodifiedKey == Key::Space))
+            {
+                if (!_keyDown && !_tapDown)
+                {
+                    _keyDown = true;
+                    _renderView->SetDown(true);
+                    _renderView->SetFocused(IsFocused(), FocusReason::Keyboard);
+                    auto buttonEvent = Event<>(Event<ButtonViewEvent::Down>());
+                    SendEventDetached(buttonEvent);
+                }
+                co_return true;
+            }
         }
-        else if (event.Is<ButtonViewEvent::Up>())
+        else if (event.Is<KeyEvent::Up>())
         {
-            SetDown(false);
+            auto const key = event.As<KeyEvent::Up>()->GetKey();
+            auto const unmodifiedKey = event.As<KeyEvent::Up>()->GetUnmodifiedKey();
+            if ((key != Key::Process) && (unmodifiedKey == Key::Enter || unmodifiedKey == Key::Space))
+            {
+                if (_keyDown)
+                {
+                    _keyDown = false;
+                    _renderView->SetDown(false);
+                    auto buttonEvent = Event<>(Event<ButtonViewEvent::Press>());
+                    SendEventDetached(buttonEvent);
+                }
+                co_return true;
+            }
         }
-        co_await SendEvent(event);
-        co_return true;
+    }
+    else if (event.Is<ViewEvent::Notify>())
+    {
+        auto const sender = event.As<ViewEvent::Notify>()->GetSender();
+        if (sender == _tapGestureView || sender == _hoverGestureView)
+        {
+            if (event.Is<TapGestureViewEvent>())
+            {
+                if (event.Is<TapGestureViewEvent::Begin>())
+                {
+                    if (!_tapDown && !_keyDown)
+                    {
+                        _tapDown = true;
+                        _renderView->SetDown(true);
+                    }
+                    RequestFocus(FocusReason::Pointer);
+                    auto buttonEvent = Event<>(Event<ButtonViewEvent::Down>());
+                    SendEventDetached(buttonEvent);
+                }
+                else if (event.Is<TapGestureViewEvent::Cancel>())
+                {
+                    _tapDown = false;
+                    _renderView->SetDown(false);
+                    auto buttonEvent = Event<>(Event<ButtonViewEvent::Cancel>());
+                    SendEventDetached(buttonEvent);
+                }
+                else if (event.Is<TapGestureViewEvent::Tap>())
+                {
+                    if (_tapDown)
+                    {
+                        _tapDown = false;
+                        _renderView->SetDown(false);
+                        auto buttonEvent = Event<>(Event<ButtonViewEvent::Press>());
+                        SendEventDetached(buttonEvent);
+                    }
+                }
+                co_return true;
+            }
+            else if (event.Is<HoverGestureViewEvent>())
+            {
+                if (event.Is<HoverGestureViewEvent::Enter>())
+                {
+                    _hoverEnter = true;
+                    _renderView->SetEnter(true);
+                    auto buttonEvent = Event<>(Event<ButtonViewEvent::Enter>());
+                    SendEventDetached(buttonEvent);
+                }
+                else if (event.Is<HoverGestureViewEvent::Leave>())
+                {
+                    _hoverEnter = false;
+                    _renderView->SetEnter(false);
+                    auto buttonEvent = Event<>(Event<ButtonViewEvent::Leave>());
+                    SendEventDetached(buttonEvent);
+                }
+                co_return true;
+            }
+        }
     }
     co_return false;
-}
-
-///
-/// @brief
-///
-/// @param down
-///
-auto ButtonView::SetDown(const Bool down) -> void
-{
-    if (_renderView)
-    {
-        _renderView->SetDown(down);
-    }
-}
-
-///
-/// @brief
-///
-/// @param enter
-///
-auto ButtonView::SetEnter(const Bool enter) -> void
-{
-    if (_renderView)
-    {
-        _renderView->SetEnter(enter);
-    }
 }
 }
 }

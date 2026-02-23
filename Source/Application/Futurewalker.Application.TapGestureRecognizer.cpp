@@ -120,7 +120,7 @@ auto TapGestureRecognizer::InternalRecognizeFirstDown() -> Async<Bool>
                 {
                     _delegate.capturePointer(pointerId);
                 }
-                auto gestureEvent = Event<>(Event<TapGestureEvent::Down>());
+                auto gestureEvent = Event<>(Event<TapGestureEvent::Begin>());
                 SendEventDetached(gestureEvent);
             }
             co_return true;
@@ -163,15 +163,17 @@ auto TapGestureRecognizer::InternalRecognizeFirstUp() -> Async<Bool>
                 _delegate.releasePointer(pointerId);
             }
 
-            auto gestureEvent = Event<>(Event<TapGestureEvent::Up>());
-            SendEventDetached(gestureEvent);
-
             if (Rect<Dp>::Intersect(area, pos))
             {
                 auto tapEventParameter = Event<TapGestureEvent::Tap>();
                 tapEventParameter->SetTapCount(1);
                 auto sendingEvent = Event<>(tapEventParameter);
                 SendEventDetached(sendingEvent);
+            }
+            else
+            {
+                auto gestureEvent = Event<>(Event<TapGestureEvent::Cancel>());
+                SendEventDetached(gestureEvent);
             }
             co_return true;
         }

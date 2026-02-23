@@ -8,6 +8,11 @@
 
 namespace FW_LAMP_DETAIL_NS
 {
+auto TextButtonTheme::Make(Type const type) -> Shared<TextButtonTheme>
+{
+    return Shared<TextButtonTheme>::Make(type);
+}
+
 TextButtonTheme::TextButtonTheme(Type const type)
   : _type(type)
 {

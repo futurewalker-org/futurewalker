@@ -29,11 +29,9 @@ public:
     auto GetContent() -> Shared<View>;
     auto SetContent(Shared<View> const& content) -> void;
 
-    auto IsDown() const -> Bool;
     auto SetDown(Bool const down) -> void;
-
-    auto IsEnter() const -> Bool;
     auto SetEnter(Bool const enter) -> void;
+    auto SetFocused(Bool const focused, FocusReason const reason) -> void;
 
     auto SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void;
@@ -41,13 +39,17 @@ public:
     auto SetDisabledBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetBorderColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetBorderAlpha(AttributeArg<Channel> const& alpha) -> void;
+    auto SetBorderWidth(AttributeArg<Dp> const& width) -> void;
     auto SetDisabledBorderColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetDisabledBorderAlpha(AttributeArg<Channel> const& alpha) -> void;
+    auto SetDisabledBorderWidth(AttributeArg<Dp> const& width) -> void;
+    auto SetFocusedBorderColor(AttributeArg<RGBAColor> const& color) -> void;
+    auto SetFocusedBorderAlpha(AttributeArg<Channel> const& alpha) -> void;
+    auto SetFocusedBorderWidth(AttributeArg<Dp> const& width) -> void;
     auto SetHighlightColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetHoverHighlightAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetPressHighlightAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetCornerRadius(AttributeArg<CornerRadius> const& radius) -> void;
-    auto SetBorderWidth(AttributeArg<Dp> const& width) -> void;
 
 protected:
     auto Initialize() -> void override;
@@ -58,6 +60,8 @@ protected:
 private:
     Bool _down = false;
     Bool _enter = false;
+    Bool _focused = false;
+    FocusReason _focusReason = FocusReason::Other;
     Shared<ContainerView> _container;
     AttributeAccessor<RGBAColor> _backgroundColor;
     AttributeAccessor<Channel> _backgroundAlpha;
@@ -65,13 +69,17 @@ private:
     AttributeAccessor<Channel> _disabledBackgroundAlpha;
     AttributeAccessor<RGBAColor> _borderColor;
     AttributeAccessor<Channel> _borderAlpha;
+    AttributeAccessor<Dp> _borderWidth;
     AttributeAccessor<RGBAColor> _disabledBorderColor;
     AttributeAccessor<Channel> _disabledBorderAlpha;
+    AttributeAccessor<Dp> _disabledBorderWidth;
+    AttributeAccessor<RGBAColor> _focusedBorderColor;
+    AttributeAccessor<Channel> _focusedBorderAlpha;
+    AttributeAccessor<Dp> _focusedBorderWidth;
     AttributeAccessor<RGBAColor> _highlightColor;
     AttributeAccessor<Channel> _hoverHighlightAlpha;
     AttributeAccessor<Channel> _pressHighlightAlpha;
     AttributeAccessor<CornerRadius> _cornerRadius;
-    AttributeAccessor<Dp> _borderWidth;
 };
 }
 }

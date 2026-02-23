@@ -12,24 +12,30 @@ namespace FW_EXPORT
 class TapGestureViewEvent : public ViewEvent::Notify
 {
 public:
-    class Down;
-    class Up;
+    class Begin;
     class Cancel;
     class Tap;
 };
 
-class TapGestureViewEvent::Down final : public TapGestureViewEvent
+///
+/// @brief Notifies that a tap gesture has begun.
+///
+/// @note After this event, either Tap or TapCancel will be sent.
+///
+class TapGestureViewEvent::Begin final : public TapGestureViewEvent
 {
 };
 
-class TapGestureViewEvent::Up final : public TapGestureViewEvent
-{
-};
-
+///
+/// @brief Notifies that a tap gesture has been canceled.
+///
 class TapGestureViewEvent::Cancel final : public TapGestureViewEvent
 {
 };
 
+///
+/// @brief Notifies that a tap gesture has been recognized.
+///
 class TapGestureViewEvent::Tap final : public TapGestureViewEvent
 {
 };

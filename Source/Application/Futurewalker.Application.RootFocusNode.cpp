@@ -45,7 +45,15 @@ auto RootFocusNode::SetActive(Bool const active) -> void
         }
         else
         {
-            SetFocusedNode({}, FocusReason::Other);
+            if (GetFocusedNode())
+            {
+                SetFocusedNode({}, FocusReason::Other);
+            }
+            else
+            {
+                _lastFocusedNode = {};
+                _lastFocusReason = FocusReason::Other;
+            }
         }
     }
 }

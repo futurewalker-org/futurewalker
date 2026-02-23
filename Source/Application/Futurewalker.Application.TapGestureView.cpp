@@ -57,14 +57,9 @@ auto TapGestureView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<TapGestureEvent>())
     {
-        if (event.Is<TapGestureEvent::Down>())
+        if (event.Is<TapGestureEvent::Begin>())
         {
-            auto viewEvent = Event<>(Event<TapGestureViewEvent::Down>());
-            co_await SendEvent(viewEvent);
-        }
-        else if (event.Is<TapGestureEvent::Up>())
-        {
-            auto viewEvent = Event<>(Event<TapGestureViewEvent::Up>());
+            auto viewEvent = Event<>(Event<TapGestureViewEvent::Begin>());
             co_await SendEvent(viewEvent);
         }
         else if (event.Is<TapGestureEvent::Cancel>())

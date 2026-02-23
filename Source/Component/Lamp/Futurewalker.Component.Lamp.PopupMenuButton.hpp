@@ -6,10 +6,10 @@
 #include "Futurewalker.Component.Lamp.PopupMenuButtonStyle.hpp"
 #include "Futurewalker.Component.Lamp.PopupMenuType.hpp"
 #include "Futurewalker.Component.Lamp.ButtonRenderViewType.hpp"
+#include "Futurewalker.Component.Lamp.MenuButtonViewType.hpp"
 
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.Menu.hpp"
-#include "Futurewalker.Application.ButtonViewType.hpp"
 #include "Futurewalker.Application.CornerRadius.hpp"
 #include "Futurewalker.Application.PaddingViewType.hpp"
 
@@ -58,7 +58,7 @@ private:
     PopupMenuAnchorAlignment _anchorAlignment = PopupMenuAnchorAlignment::Start;
     Shared<PopupMenu> _popupMenu;
     Shared<PaddingView> _paddingView;
-    Shared<ButtonRenderView> _buttonRenderView;
+    Shared<MenuButtonView> _buttonView;
 };
 }
 }

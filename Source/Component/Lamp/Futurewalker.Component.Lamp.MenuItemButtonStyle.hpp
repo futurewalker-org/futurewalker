@@ -24,10 +24,14 @@ struct MenuItemButtonStyle : NonConstructible
     FW_STATIC_ATTRIBUTE(Channel, DisabledBackgroundAlpha);
     FW_STATIC_ATTRIBUTE(RGBAColor, BorderColor);
     FW_STATIC_ATTRIBUTE(Channel, BorderAlpha);
+    FW_STATIC_ATTRIBUTE(Dp, BorderWidth);
     FW_STATIC_ATTRIBUTE(RGBAColor, DisabledBorderColor);
     FW_STATIC_ATTRIBUTE(Channel, DisabledBorderAlpha);
+    FW_STATIC_ATTRIBUTE(Dp, DisabledBorderWidth);
+    FW_STATIC_ATTRIBUTE(RGBAColor, FocusedBorderColor);
+    FW_STATIC_ATTRIBUTE(Channel, FocusedBorderAlpha);
+    FW_STATIC_ATTRIBUTE(Dp, FocusedBorderWidth);
     FW_STATIC_ATTRIBUTE(RGBAColor, HighlightColor);
-    FW_STATIC_ATTRIBUTE(Dp, BorderWidth);
     FW_STATIC_ATTRIBUTE(CornerRadius, CornerRadius);
     FW_STATIC_ATTRIBUTE(EdgeInsets, Padding);
     FW_STATIC_ATTRIBUTE(Channel, HoverHighlightAlpha);

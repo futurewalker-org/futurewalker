@@ -16,17 +16,12 @@ namespace FW_EXPORT
 class TapGestureEvent : public GestureEvent
 {
 public:
-    class Down;
-    class Up;
+    class Begin;
     class Cancel;
     class Tap;
 };
 
-class TapGestureEvent::Down final : public TapGestureEvent
-{
-};
-
-class TapGestureEvent::Up final : public TapGestureEvent
+class TapGestureEvent::Begin final : public TapGestureEvent
 {
 };
 

@@ -27,6 +27,8 @@ public:
         Text,
     };
 
+    static auto Make(Type const type) -> Shared<TextButtonTheme>;
+
     explicit TextButtonTheme(Type const type);
 
     auto Apply(AttributeNode& target) -> void override;

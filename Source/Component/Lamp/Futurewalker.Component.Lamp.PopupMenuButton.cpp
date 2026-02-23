@@ -3,6 +3,7 @@
 #include "Futurewalker.Component.Lamp.PopupMenuButton.hpp"
 #include "Futurewalker.Component.Lamp.PopupMenu.hpp"
 #include "Futurewalker.Component.Lamp.ButtonRenderView.hpp"
+#include "Futurewalker.Component.Lamp.MenuButtonView.hpp"
 
 #include "Futurewalker.Application.PaddingView.hpp"
 
@@ -80,78 +81,63 @@ auto PopupMenuButton::Initialize() -> void
     _paddingView = PaddingView::Make();
     _paddingView->SetPadding(PopupMenuButtonStyle::Padding);
 
-    _buttonRenderView = ButtonRenderView::MakeWithContent(_paddingView);
-    _buttonRenderView->SetBackgroundColor(PopupMenuButtonStyle::BackgroundColor);
-    _buttonRenderView->SetBackgroundAlpha(PopupMenuButtonStyle::BackgroundAlpha);
-    _buttonRenderView->SetDisabledBackgroundColor(PopupMenuButtonStyle::DisabledBackgroundColor);
-    _buttonRenderView->SetDisabledBackgroundAlpha(PopupMenuButtonStyle::DisabledBackgroundAlpha);
-    _buttonRenderView->SetBorderColor(PopupMenuButtonStyle::BorderColor);
-    _buttonRenderView->SetBorderAlpha(PopupMenuButtonStyle::BorderAlpha);
-    _buttonRenderView->SetDisabledBorderColor(PopupMenuButtonStyle::DisabledBorderColor);
-    _buttonRenderView->SetDisabledBorderAlpha(PopupMenuButtonStyle::DisabledBorderAlpha);
-    _buttonRenderView->SetHighlightColor(PopupMenuButtonStyle::HighlightColor);
-    _buttonRenderView->SetHoverHighlightAlpha(PopupMenuButtonStyle::HoverHighlightAlpha);
-    _buttonRenderView->SetPressHighlightAlpha(PopupMenuButtonStyle::PressHighlightAlpha);
-    _buttonRenderView->SetCornerRadius(PopupMenuButtonStyle::CornerRadius);
-    _buttonRenderView->SetBorderWidth(PopupMenuButtonStyle::BorderWidth);
-    AddChildBack(_buttonRenderView);
+    _buttonView = MenuButtonView::MakeWithContent(_paddingView);
+    _buttonView->SetBackgroundColor(PopupMenuButtonStyle::BackgroundColor);
+    _buttonView->SetBackgroundAlpha(PopupMenuButtonStyle::BackgroundAlpha);
+    _buttonView->SetDisabledBackgroundColor(PopupMenuButtonStyle::DisabledBackgroundColor);
+    _buttonView->SetDisabledBackgroundAlpha(PopupMenuButtonStyle::DisabledBackgroundAlpha);
+    _buttonView->SetBorderColor(PopupMenuButtonStyle::BorderColor);
+    _buttonView->SetBorderAlpha(PopupMenuButtonStyle::BorderAlpha);
+    _buttonView->SetBorderWidth(PopupMenuButtonStyle::BorderWidth);
+    _buttonView->SetDisabledBorderColor(PopupMenuButtonStyle::DisabledBorderColor);
+    _buttonView->SetDisabledBorderAlpha(PopupMenuButtonStyle::DisabledBorderAlpha);
+    _buttonView->SetDisabledBorderWidth(PopupMenuButtonStyle::DisabledBorderWidth);
+    _buttonView->SetFocusedBorderColor(PopupMenuButtonStyle::FocusedBorderColor);
+    _buttonView->SetFocusedBorderAlpha(PopupMenuButtonStyle::FocusedBorderAlpha);
+    _buttonView->SetFocusedBorderWidth(PopupMenuButtonStyle::FocusedBorderWidth);
+    _buttonView->SetHighlightColor(PopupMenuButtonStyle::HighlightColor);
+    _buttonView->SetHoverHighlightAlpha(PopupMenuButtonStyle::HoverHighlightAlpha);
+    _buttonView->SetPressHighlightAlpha(PopupMenuButtonStyle::PressHighlightAlpha);
+    _buttonView->SetCornerRadius(PopupMenuButtonStyle::CornerRadius);
+    AddChildBack(_buttonView);
 
     EventReceiver::Connect(*this, *this, &PopupMenuButton::ReceiveEvent);
 }
 
 auto PopupMenuButton::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
-    if (IsEnabledFromRoot() && event.Is<PointerEvent>())
+    if (event.Is<MenuButtonViewEvent>())
     {
-        if (event.Is<PointerEvent::Motion::Down>())
+        auto const sender = event.As<MenuButtonViewEvent>()->GetSender();
+        if (sender == _buttonView)
         {
-            SetDown(true);
-            if (!_menu.IsEmpty())
+            if (event.Is<MenuButtonViewEvent::Down>())
             {
-                CreatePopup();
-                UpdatePopup();
+                if (!_menu.IsEmpty())
+                {
+                    CreatePopup();
+                    UpdatePopup();
+                }
+                auto downEvent = Event<>(Event<PopupMenuButtonEvent::Down>());
+                co_await SendEvent(downEvent);
             }
-            auto downEvent = Event<>(Event<PopupMenuButtonEvent::Down>());
-            co_await SendEvent(downEvent);
-        }
-        else if (event.Is<PointerEvent::Motion::Up>())
-        {
-            SetDown(false);
-            auto upEvent = Event<>(Event<PopupMenuButtonEvent::Up>());
-            co_await SendEvent(upEvent);
-        }
-        else if (event.Is<PointerEvent::Motion::Enter>())
-        {
-            SetEnter(true);
-            auto enterEvent = Event<>(Event<PopupMenuButtonEvent::Enter>());
-            co_await SendEvent(enterEvent);
-        }
-        else if (event.Is<PointerEvent::Motion::Leave>())
-        {
-            SetDown(false);
-            SetEnter(false);
-            auto leaveEvent = Event<>(Event<PopupMenuButtonEvent::Leave>());
-            co_await SendEvent(leaveEvent);
-        }
-        else if (event.Is<PointerEvent::Motion::Cancel>())
-        {
-            auto const down = IsDown();
-            auto const enter = IsEnter();
-            SetDown(false);
-            SetEnter(false);
-
-            if (down)
+            else if (event.Is<MenuButtonViewEvent::Up>())
             {
                 auto upEvent = Event<>(Event<PopupMenuButtonEvent::Up>());
                 co_await SendEvent(upEvent);
             }
-            if (enter)
+            else if (event.Is<MenuButtonViewEvent::Enter>())
+            {
+                auto enterEvent = Event<>(Event<PopupMenuButtonEvent::Enter>());
+                co_await SendEvent(enterEvent);
+            }
+            else if (event.Is<MenuButtonViewEvent::Leave>())
             {
                 auto leaveEvent = Event<>(Event<PopupMenuButtonEvent::Leave>());
                 co_await SendEvent(leaveEvent);
             }
+            co_return true;
         }
-        co_return true;
     }
     else if (event.Is<PopupMenuEvent>())
     {
@@ -187,40 +173,6 @@ auto PopupMenuButton::UpdatePopup() -> void
         _popupMenu->SetAnchorEdge(_anchorEdge);
         _popupMenu->SetAnchorAlignment(_anchorAlignment);
         _popupMenu->Show(GetSelf());
-    }
-}
-
-auto PopupMenuButton::IsDown() const -> Bool
-{
-    if (_buttonRenderView)
-    {
-        return _buttonRenderView->IsDown();
-    }
-    return false;
-}
-
-auto PopupMenuButton::IsEnter() const -> Bool
-{
-    if (_buttonRenderView)
-    {
-        return _buttonRenderView->IsEnter();
-    }
-    return false;
-}
-
-auto PopupMenuButton::SetDown(Bool const down) -> void
-{
-    if (_buttonRenderView)
-    {
-        _buttonRenderView->SetDown(down);
-    }
-}
-
-auto PopupMenuButton::SetEnter(Bool const enter) -> void
-{
-    if (_buttonRenderView)
-    {
-        _buttonRenderView->SetEnter(enter);
     }
 }
 }

@@ -88,6 +88,12 @@ template <class T>
 concept Array = std::is_array_v<T>;
 
 ///
+/// @brief scoped enum concept.
+///
+template <class T>
+concept EnumClass = std::is_scoped_enum_v<T>;
+
+///
 /// @brief Non-void type concept.
 ///
 template <class T>

@@ -1,13 +1,17 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Component.Lamp.MenuItemButton.hpp"
-#include "Futurewalker.Component.Lamp.ButtonRenderView.hpp"
+#include "Futurewalker.Component.Lamp.MenuButtonView.hpp"
 #include "Futurewalker.Component.Lamp.MenuViewStyle.hpp"
 #include "Futurewalker.Component.Lamp.IconViewStyle.hpp"
 #include "Futurewalker.Component.Lamp.TextViewStyle.hpp"
 
 #include "Futurewalker.Application.ContainerView.hpp"
 #include "Futurewalker.Application.FlexLayout.hpp"
+#include "Futurewalker.Application.PointerEvent.hpp"
+#include "Futurewalker.Application.FocusEvent.hpp"
+#include "Futurewalker.Application.KeyEvent.hpp"
+#include "Futurewalker.Application.Key.hpp"
 
 namespace FW_LAMP_DETAIL_NS
 {
@@ -30,24 +34,26 @@ MenuItemButton::MenuItemButton(PassKey<View> key)
 
 auto MenuItemButton::Initialize() -> void
 {
-    SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
-
     _container = ContainerView::Make();
 
-    _buttonView = ButtonRenderView::MakeWithContent(_container);
+    _buttonView = MenuButtonView::MakeWithContent(_container);
     _buttonView->SetBackgroundColor(MenuItemButtonStyle::BackgroundColor);
     _buttonView->SetBackgroundAlpha(MenuItemButtonStyle::BackgroundAlpha);
     _buttonView->SetDisabledBackgroundColor(MenuItemButtonStyle::DisabledBackgroundColor);
     _buttonView->SetDisabledBackgroundAlpha(MenuItemButtonStyle::DisabledBackgroundAlpha);
     _buttonView->SetBorderColor(MenuItemButtonStyle::BorderColor);
     _buttonView->SetBorderAlpha(MenuItemButtonStyle::BorderAlpha);
+    _buttonView->SetBorderWidth(MenuItemButtonStyle::BorderWidth);
     _buttonView->SetDisabledBorderColor(MenuItemButtonStyle::DisabledBorderColor);
     _buttonView->SetDisabledBorderAlpha(MenuItemButtonStyle::DisabledBorderAlpha);
+    _buttonView->SetDisabledBorderWidth(MenuItemButtonStyle::DisabledBorderWidth);
+    _buttonView->SetFocusedBorderColor(MenuItemButtonStyle::FocusedBorderColor);
+    _buttonView->SetFocusedBorderAlpha(MenuItemButtonStyle::FocusedBorderAlpha);
+    _buttonView->SetFocusedBorderWidth(MenuItemButtonStyle::FocusedBorderWidth);
     _buttonView->SetHighlightColor(MenuItemButtonStyle::HighlightColor);
     _buttonView->SetHoverHighlightAlpha(MenuItemButtonStyle::HoverHighlightAlpha);
     _buttonView->SetPressHighlightAlpha(MenuItemButtonStyle::PressHighlightAlpha);
     _buttonView->SetCornerRadius(MenuItemButtonStyle::CornerRadius);
-    _buttonView->SetBorderWidth(MenuItemButtonStyle::BorderWidth);
     AddChildBack(_buttonView);
 
     _textColor.BindAndConnectAttribute(*this, &MenuItemButton::ReceiveAttributeEvent, MenuItemButtonStyle::TextColor);
@@ -64,59 +70,33 @@ auto MenuItemButton::Initialize() -> void
 
 auto MenuItemButton::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
-    if (IsEnabledFromRoot() && event.Is<PointerEvent>())
+    if (event.Is<MenuButtonViewEvent>())
     {
-        if (event.Is<PointerEvent::Motion::Down>())
+        auto const sender = event.As<MenuButtonViewEvent>()->GetSender();
+        if (sender == _buttonView)
         {
-            SetDown(true);
-            auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Down>());
-            co_await SendEvent(buttonEvent);
-        }
-        else if (event.Is<PointerEvent::Motion::Up>())
-        {
-            SetDown(false);
-            auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Up>());
-            co_await SendEvent(buttonEvent);
-        }
-        else if (event.Is<PointerEvent::Motion::Enter>())
-        {
-            SetEnter(true);
-            auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Enter>());
-            co_await SendEvent(buttonEvent);
-        }
-        else if (event.Is<PointerEvent::Motion::Leave>())
-        {
-            SetDown(false);
-            SetEnter(false);
-            auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Leave>());
-            co_await SendEvent(buttonEvent);
-        }
-        else if (event.Is<PointerEvent::Motion::Move>())
-        {
-            if (event.As<PointerEvent::Motion::Move>()->GetButtons() != PointerButtonFlags::None)
+            if (event.Is<MenuButtonViewEvent::Down>())
             {
-                SetDown(true);
+                auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Down>());
+                co_await SendEvent(buttonEvent);
             }
-        }
-        else if (event.Is<PointerEvent::Motion::Cancel>())
-        {
-            auto const down = IsDown();
-            auto const enter = IsEnter();
-            SetDown(false);
-            SetEnter(false);
-
-            if (down)
+            else if (event.Is<MenuButtonViewEvent::Up>())
             {
                 auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Up>());
                 co_await SendEvent(buttonEvent);
             }
-            if (enter)
+            else if (event.Is<MenuButtonViewEvent::Enter>())
+            {
+                auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Enter>());
+                co_await SendEvent(buttonEvent);
+            }
+            else if (event.Is<MenuButtonViewEvent::Leave>())
             {
                 auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Leave>());
                 co_await SendEvent(buttonEvent);
             }
+            co_return true;
         }
-        co_return true;
     }
     co_return false;
 }
@@ -154,40 +134,6 @@ auto MenuItemButton::SetContent(Shared<View> const& content) -> void
     if (_container)
     {
         _container->SetContent(content);
-    }
-}
-
-auto MenuItemButton::IsDown() const -> Bool
-{
-    if (_buttonView)
-    {
-        return _buttonView->IsDown();
-    }
-    return false;
-}
-
-auto MenuItemButton::IsEnter() const -> Bool
-{
-    if (_buttonView)
-    {
-        return _buttonView->IsEnter();
-    }
-    return false;
-}
-
-auto MenuItemButton::SetDown(Bool const down) -> void
-{
-    if (_buttonView)
-    {
-        _buttonView->SetDown(down);
-    }
-}
-
-auto MenuItemButton::SetEnter(Bool const enter) -> void
-{
-    if (_buttonView)
-    {
-        _buttonView->SetEnter(enter);
     }
 }
 }

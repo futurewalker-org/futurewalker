@@ -43,11 +43,6 @@ auto ButtonRenderView::SetContent(Shared<View> const& content) -> void
     }
 }
 
-auto ButtonRenderView::IsDown() const -> Bool
-{
-    return _down;
-}
-
 auto ButtonRenderView::SetDown(Bool const down) -> void
 {
     if (_down != down)
@@ -57,16 +52,21 @@ auto ButtonRenderView::SetDown(Bool const down) -> void
     }
 }
 
-auto ButtonRenderView::IsEnter() const -> Bool
-{
-    return _enter;
-}
-
 auto ButtonRenderView::SetEnter(Bool const enter) -> void
 {
     if (_enter != enter)
     {
         _enter = enter;
+        InvalidateVisual();
+    }
+}
+
+auto ButtonRenderView::SetFocused(Bool const focused, FocusReason const focusReason) -> void
+{
+    if (_focused != focused || _focusReason != focusReason)
+    {
+        _focused = focused;
+        _focusReason = focusReason;
         InvalidateVisual();
     }
 }
@@ -101,6 +101,11 @@ auto ButtonRenderView::SetBorderAlpha(AttributeArg<Channel> const& alpha) -> voi
     _borderAlpha.SetAttributeArg(alpha);
 }
 
+auto ButtonRenderView::SetBorderWidth(AttributeArg<Dp> const& width) -> void
+{
+    _borderWidth.SetAttributeArg(width);
+}
+
 auto ButtonRenderView::SetDisabledBorderColor(AttributeArg<RGBAColor> const& color) -> void
 {
     _disabledBorderColor.SetAttributeArg(color);
@@ -109,6 +114,26 @@ auto ButtonRenderView::SetDisabledBorderColor(AttributeArg<RGBAColor> const& col
 auto ButtonRenderView::SetDisabledBorderAlpha(AttributeArg<Channel> const& alpha) -> void
 {
     _disabledBorderAlpha.SetAttributeArg(alpha);
+}
+
+auto ButtonRenderView::SetDisabledBorderWidth(AttributeArg<Dp> const& width) -> void
+{
+    _disabledBorderWidth.SetAttributeArg(width);
+}
+
+auto ButtonRenderView::SetFocusedBorderColor(AttributeArg<RGBAColor> const& color) -> void
+{
+    _focusedBorderColor.SetAttributeArg(color);
+}
+
+auto ButtonRenderView::SetFocusedBorderAlpha(AttributeArg<Channel> const& alpha) -> void
+{
+    _focusedBorderAlpha.SetAttributeArg(alpha);
+}
+
+auto ButtonRenderView::SetFocusedBorderWidth(AttributeArg<Dp> const& width) -> void
+{
+    _focusedBorderWidth.SetAttributeArg(width);
 }
 
 auto ButtonRenderView::SetHighlightColor(AttributeArg<RGBAColor> const& color) -> void
@@ -131,11 +156,6 @@ auto ButtonRenderView::SetCornerRadius(AttributeArg<CornerRadius> const& radius)
     _cornerRadius.SetAttributeArg(radius);
 }
 
-auto ButtonRenderView::SetBorderWidth(AttributeArg<Dp> const& width) -> void
-{
-    _borderWidth.SetAttributeArg(width);
-}
-
 void ButtonRenderView::Initialize()
 {
     _container = ContainerView::Make();
@@ -147,13 +167,17 @@ void ButtonRenderView::Initialize()
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledBackgroundAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBorderColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBorderAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeBorderWidth, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledBorderColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeDisabledBorderAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeDisabledBorderWidth, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeFocusedBorderColor, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeFocusedBorderAlpha, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeFocusedBorderWidth, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeHighlightColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeHoverHighlightAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributePressHighlightAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeBorderWidth, {0});
 
     _backgroundColor.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeBackgroundColor, ButtonViewStyle::BackgroundColor);
     _backgroundAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeBackgroundAlpha, ButtonViewStyle::BackgroundAlpha);
@@ -161,13 +185,17 @@ void ButtonRenderView::Initialize()
     _disabledBackgroundAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeDisabledBackgroundAlpha, ButtonViewStyle::DisabledBackgroundAlpha);
     _borderColor.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeBorderColor, ButtonViewStyle::BorderColor);
     _borderAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeBorderAlpha, ButtonViewStyle::BorderAlpha);
+    _borderWidth.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeBorderWidth, ButtonViewStyle::BorderWidth);
     _disabledBorderColor.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeDisabledBorderColor, ButtonViewStyle::DisabledBorderColor);
     _disabledBorderAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeDisabledBorderAlpha, ButtonViewStyle::DisabledBorderAlpha);
+    _disabledBorderWidth.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeDisabledBorderWidth, ButtonViewStyle::DisabledBorderWidth);
+    _focusedBorderColor.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeFocusedBorderColor, ButtonViewStyle::FocusedBorderColor);
+    _focusedBorderAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeFocusedBorderAlpha, ButtonViewStyle::FocusedBorderAlpha);
+    _focusedBorderWidth.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeFocusedBorderWidth, ButtonViewStyle::FocusedBorderWidth);
     _highlightColor.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeHighlightColor, ButtonViewStyle::HighlightColor);
     _hoverHighlightAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeHoverHighlightAlpha, ButtonViewStyle::HoverHighlightAlpha);
     _pressHighlightAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributePressHighlightAlpha, ButtonViewStyle::PressHighlightAlpha);
     _cornerRadius.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeCornerRadius, ButtonViewStyle::CornerRadius);
-    _borderWidth.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeBorderWidth, ButtonViewStyle::BorderWidth);
 
     EventReceiver::Connect(*this, *this, &ButtonRenderView::ReceiveEvent);
 }
@@ -181,14 +209,21 @@ auto ButtonRenderView::Draw(DrawScope& scope) -> void
 {
     auto colorWithAlpha = [](RGBAColor const& color, Channel const& alpha) { return RGBAColor(color.GetRGBColor(), alpha.GetF64() * color.GetAlpha().GetF64()); };
 
+    auto selectValue = [](auto const enabled, auto const focused, auto const& normalValue, auto const& focusedValue, auto const& disabledValue) {
+        return enabled ? (focused ? focusedValue.GetValueOrDefault() : normalValue.GetValueOrDefault()) : disabledValue.GetValueOrDefault();
+    };
+
+    auto const focusVisible = _focused && _focusReason == FocusReason::Keyboard;
+
     auto const rect = GetContentRect();
-    auto const backgroundColor = IsEnabledFromRoot() ? _backgroundColor.GetValueOrDefault() : _disabledBackgroundColor.GetValueOrDefault();
-    auto const backgroundAlpha = IsEnabledFromRoot() ? _backgroundAlpha.GetValueOrDefault() : _disabledBackgroundAlpha.GetValueOrDefault();
-    auto const borderColor = IsEnabledFromRoot() ? _borderColor.GetValueOrDefault() : _disabledBorderColor.GetValueOrDefault();
-    auto const borderAlpha = IsEnabledFromRoot() ? _borderAlpha.GetValueOrDefault() : _disabledBorderAlpha.GetValueOrDefault();
+    auto const enabled = IsEnabledFromRoot();
+    auto const backgroundColor = selectValue(enabled, _focused, _backgroundColor, _backgroundColor, _disabledBackgroundColor);
+    auto const backgroundAlpha = selectValue(enabled, _focused, _backgroundAlpha, _backgroundAlpha, _disabledBackgroundAlpha);
+    auto const borderColor = selectValue(enabled, focusVisible, _borderColor, _focusedBorderColor, _disabledBorderColor);
+    auto const borderAlpha = selectValue(enabled, focusVisible, _borderAlpha, _focusedBorderAlpha, _disabledBorderAlpha);
+    auto const borderWidth = focusVisible ? _focusedBorderWidth.GetValueOr(0) : _borderWidth.GetValueOr(0);
     auto const highlightColor = _highlightColor.GetValueOrDefault();
     auto const cornerRadius = _cornerRadius.GetValueOrDefault();
-    auto const borderWidth = _borderWidth.GetValueOr(0);
     auto const layoutDirection = GetLayoutDirection();
 
     auto& scene = scope.GetScene();
@@ -196,7 +231,7 @@ auto ButtonRenderView::Draw(DrawScope& scope) -> void
     ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, colorWithAlpha(backgroundColor, backgroundAlpha), layoutDirection);
     ViewDrawFunction::DrawRoundRectBorder(scene, rect, cornerRadius, colorWithAlpha(borderColor, borderAlpha), borderWidth, layoutDirection);
 
-    if (IsEnabledFromRoot())
+    if (enabled)
     {
         auto highlightAlpha = Channel();
         if (_down)

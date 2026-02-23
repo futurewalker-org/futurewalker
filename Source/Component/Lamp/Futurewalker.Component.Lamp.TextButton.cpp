@@ -81,13 +81,17 @@ auto TextButton::Initialize() -> void
     _buttonView->SetDisabledBackgroundAlpha(TextButtonStyle::DisabledBackgroundAlpha);
     _buttonView->SetBorderColor(TextButtonStyle::BorderColor);
     _buttonView->SetBorderAlpha(TextButtonStyle::BorderAlpha);
+    _buttonView->SetBorderWidth(TextButtonStyle::BorderWidth);
     _buttonView->SetDisabledBorderColor(TextButtonStyle::DisabledBorderColor);
     _buttonView->SetDisabledBorderAlpha(TextButtonStyle::DisabledBorderAlpha);
+    _buttonView->SetDisabledBorderWidth(TextButtonStyle::DisabledBorderWidth);
+    _buttonView->SetFocusedBorderColor(TextButtonStyle::FocusedBorderColor);
+    _buttonView->SetFocusedBorderAlpha(TextButtonStyle::FocusedBorderAlpha);
+    _buttonView->SetFocusedBorderWidth(TextButtonStyle::FocusedBorderWidth);
     _buttonView->SetHighlightColor(TextButtonStyle::HighlightColor);
     _buttonView->SetHoverHighlightAlpha(TextButtonStyle::HoverHighlightAlpha);
     _buttonView->SetPressHighlightAlpha(TextButtonStyle::PressHighlightAlpha);
     _buttonView->SetCornerRadius(TextButtonStyle::CornerRadius);
-    _buttonView->SetBorderWidth(TextButtonStyle::BorderWidth);
 
     _textColor.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::TextColor);
     _disabledTextColor.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::DisabledTextColor);

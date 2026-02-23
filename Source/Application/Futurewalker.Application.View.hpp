@@ -263,6 +263,7 @@ private:
 
     auto GetFocusNode() -> FocusNode&;
     auto GetFocusNode() const -> FocusNode const&;
+    auto UpdateFocusable() -> void;
 
     auto GetLayer() -> ViewLayer&;
     auto GetLayer() const -> ViewLayer const&;

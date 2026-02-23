@@ -117,19 +117,47 @@ auto GestureRecognizerView::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<ViewEvent::Attached>())
     {
-        _gestureRecognizer->Start(
-          GestureRecognizer::Delegate {
-              .capturePointer = [&](auto id) { CapturePointer(id); },
-              .releasePointer = [&](auto id) { ReleasePointer(id); },
-          });
+        if (IsEnabledFromRoot())
+        {
+            _gestureRecognizer->Start(
+              GestureRecognizer::Delegate {
+                  .capturePointer = [&](auto id) { CapturePointer(id); },
+                  .releasePointer = [&](auto id) { ReleasePointer(id); },
+              });
+        }
     }
     else if (event.Is<ViewEvent::Detached>())
     {
-        _gestureRecognizer->Stop();
+        if (IsEnabledFromRoot())
+        {
+            _gestureRecognizer->Stop();
+        }
+    }
+    else if (event.Is<ViewEvent::EnabledChanged>())
+    {
+        if (IsAttached())
+        {
+            if (IsEnabledFromRoot())
+            {
+                _gestureRecognizer->Start(
+                  GestureRecognizer::Delegate {
+                      .capturePointer = [&](auto id) { CapturePointer(id); },
+                      .releasePointer = [&](auto id) { ReleasePointer(id); },
+                  });
+            }
+            else
+            {
+                _gestureRecognizer->Stop();
+            }
+        }
     }
     else if (event.Is<PointerEvent>())
     {
-        co_return _gestureRecognizer->Recognize(event.As<PointerEvent>(), GetContentRect());
+        if (IsEnabledFromRoot() && IsAttached())
+        {
+            co_return _gestureRecognizer->Recognize(event.As<PointerEvent>(), GetContentRect());
+        }
+        co_return false;
     }
     co_return false;
 }

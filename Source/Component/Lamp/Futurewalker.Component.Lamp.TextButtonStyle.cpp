@@ -13,10 +13,14 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::DisabledBackgroundColor, 
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::DisabledBackgroundAlpha, ButtonViewStyle::DisabledBackgroundAlpha);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::BorderColor, ButtonViewStyle::BorderColor);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::BorderAlpha, ButtonViewStyle::BorderAlpha);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::BorderWidth, ButtonViewStyle::BorderWidth);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::DisabledBorderColor, ButtonViewStyle::DisabledBorderColor);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::DisabledBorderAlpha, ButtonViewStyle::DisabledBorderAlpha);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::DisabledBorderWidth, ButtonViewStyle::DisabledBorderWidth);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::FocusedBorderColor, ButtonViewStyle::FocusedBorderColor);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::FocusedBorderAlpha, ButtonViewStyle::FocusedBorderAlpha);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::FocusedBorderWidth, ButtonViewStyle::FocusedBorderWidth);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::HighlightColor, ButtonViewStyle::HighlightColor);
-FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::BorderWidth, ButtonViewStyle::BorderWidth);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::CornerRadius, ButtonViewStyle::CornerRadius);
 FW_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(TextButtonStyle::Padding, [](auto const& s, auto const& m) { return s.GetVertical() + m.GetHorizontal(); }, Style::PaddingSmall, Style::PaddingMedium);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::HoverHighlightAlpha, Style::AlphaHighlightHover);

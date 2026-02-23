@@ -4,7 +4,7 @@
 #include "Futurewalker.Component.Lamp.MenuItemButtonType.hpp"
 #include "Futurewalker.Component.Lamp.MenuItemButtonEvent.hpp"
 #include "Futurewalker.Component.Lamp.MenuItemButtonStyle.hpp"
-#include "Futurewalker.Component.Lamp.ButtonRenderViewType.hpp"
+#include "Futurewalker.Component.Lamp.MenuButtonViewType.hpp"
 
 #include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.View.hpp"
@@ -38,14 +38,11 @@ protected:
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 
 private:
-    auto IsDown() const -> Bool;
-    auto IsEnter() const -> Bool;
-    auto SetDown(Bool const down) -> void;
-    auto SetEnter(Bool const enter) -> void;
-
-private:
+    Bool _pointerDown = false;
+    Bool _pointerEnter = false;
+    Bool _keyDown = false;
     Shared<ContainerView> _container;
-    Shared<ButtonRenderView> _buttonView;
+    Shared<MenuButtonView> _buttonView;
     AttributeAccessor<RGBAColor> _iconColor;
     AttributeAccessor<RGBAColor> _iconDisabledColor;
     AttributeAccessor<RGBAColor> _textColor;

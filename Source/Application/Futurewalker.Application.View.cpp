@@ -443,6 +443,8 @@ auto View::SetVisible(Bool const visible) -> void
 
             ForEachChild([&](View& view) { view.NotifyVisibleChanged(visibleFromRoot); });
 
+            UpdateFocusable();
+
             try
             {
                 auto event = Event<>(Event<ViewEvent::VisibleChanged>());
@@ -498,6 +500,8 @@ auto View::SetEnabled(Bool const enabled) -> void
             _enabledFromRoot = enabledFromRoot;
 
             ForEachChild([&](View& view) { view.NotifyEnabledChanged(enabledFromRoot); });
+
+            UpdateFocusable();
 
             auto event = Event<>(Event<ViewEvent::EnabledChanged>());
             SendEventDetached(event);
@@ -1249,8 +1253,7 @@ auto View::SetFocusTrackingFlags(ViewFocusTrackingFlags const focusTrackingFlags
     if (_focusTrackingFlags != focusTrackingFlags)
     {
         _focusTrackingFlags = focusTrackingFlags;
-
-        GetFocusNode().SetFocusable((_focusTrackingFlags & ViewFocusTrackingFlags::All) != ViewFocusTrackingFlags::None);
+        UpdateFocusable();
     }
 }
 
@@ -1879,6 +1882,23 @@ auto View::GetFocusNode() const -> FocusNode const&
 ///
 /// @brief
 ///
+auto View::UpdateFocusable() -> void
+{
+    auto const hasFocusableFlag = (_focusTrackingFlags & ViewFocusTrackingFlags::All) != ViewFocusTrackingFlags::None;
+    auto const enabled = IsEnabledFromRoot();
+    auto const visible = IsVisibleFromRoot();
+    auto const focusable = enabled && visible && hasFocusableFlag;
+    GetFocusNode().SetFocusable(focusable);
+
+    if (!focusable && IsFocused())
+    {
+        ReleaseFocus();
+    }
+}
+
+///
+/// @brief
+///
 auto View::GetLayer() -> ViewLayer&
 {
     if (IsRoot())
@@ -2148,6 +2168,8 @@ auto View::NotifyVisibleChanged(Bool const visible) -> void
 
                 ForEachChild([&](View& view) { view.NotifyVisibleChanged(visible); });
 
+                UpdateFocusable();
+
                 try
                 {
                     auto event = Event<>(Event<ViewEvent::VisibleChanged>());
@@ -2180,6 +2202,8 @@ auto View::NotifyEnabledChanged(Bool const enabled) -> void
                 _enabledFromRoot = enabled;
 
                 ForEachChild([&](View& view) { view.NotifyEnabledChanged(enabled); });
+
+                UpdateFocusable();
 
                 try
                 {

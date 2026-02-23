@@ -13,10 +13,14 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::DisabledBackgroundCol
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::DisabledBackgroundAlpha, Style::AlphaNone);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::BorderColor, ButtonViewStyle::BorderColor);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::BorderAlpha, ButtonViewStyle::BorderAlpha);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::BorderWidth, ButtonViewStyle::BorderWidth);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::DisabledBorderColor, ButtonViewStyle::DisabledBorderColor);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::DisabledBorderAlpha, ButtonViewStyle::DisabledBorderAlpha);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::DisabledBorderWidth, ButtonViewStyle::DisabledBorderWidth);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::FocusedBorderColor, ButtonViewStyle::FocusedBorderColor);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::FocusedBorderAlpha, ButtonViewStyle::FocusedBorderAlpha);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::FocusedBorderWidth, ButtonViewStyle::FocusedBorderWidth);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::HighlightColor, ButtonViewStyle::HighlightColor);
-FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::BorderWidth, ButtonViewStyle::BorderWidth);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::CornerRadius, Style::CornerRadiusSmall);
 FW_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(MenuItemButtonStyle::Padding, [](auto const& s, auto const& m) { return s.GetVertical() + m.GetHorizontal(); }, Style::PaddingExtraSmall, Style::PaddingSmall);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::HoverHighlightAlpha, ButtonViewStyle::HoverHighlightAlpha);
