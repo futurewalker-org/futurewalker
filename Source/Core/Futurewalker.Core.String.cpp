@@ -3,6 +3,8 @@
 #include "Futurewalker.Core.DataFunction.hpp"
 #include "Futurewalker.Core.UnicodeFunction.hpp"
 
+#include <array>
+
 namespace FW_DETAIL_NS
 {
 ///

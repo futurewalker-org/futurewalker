@@ -2,8 +2,6 @@
 #include "Futurewalker.Core.StringFunction.hpp"
 #include "Futurewalker.Core.Exception.hpp"
 
-#include <boost/locale.hpp>
-
 #include <fmt/format.h>
 #include <fmt/xchar.h>
 #include <fmt/args.h>
