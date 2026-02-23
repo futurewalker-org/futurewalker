@@ -3,6 +3,8 @@
 #include "Futurewalker.Component.Lamp.PopupMenu.hpp"
 #include "Futurewalker.Component.Lamp.MenuView.hpp"
 #include "Futurewalker.Component.Lamp.Style.hpp"
+#include "Futurewalker.Component.Lamp.Color.hpp"
+#include "Futurewalker.Component.Lamp.PopupFrameView.hpp"
 
 #include "Futurewalker.Application.Popup.hpp"
 #include "Futurewalker.Application.Screen.hpp"
@@ -199,7 +201,12 @@ auto PopupMenu::CreatePopup(Shared<View> const& sourceView) -> void
     {
         _sourceView = sourceView;
         _popup = Popup::Make({.allowActiveOwnerPopup = true}, sourceView);
-        _popup->SetContent(_menuView);
+        auto frame = PopupFrameView::MakeWithContent(_menuView);
+        frame->SetBlurRadius(Style::Size60);
+        frame->SetCornerRadius(Style::CornerRadiusSmall);
+        frame->SetShadowColor(Color::Neutral10);
+        frame->SetShadowAlpha(0.3);
+        _popup->SetContent(frame);
         _popup->SetBackgroundColor(RGBAColor());
         EventReceiver::Connect(*_popup, *this, &PopupMenu::ReceiveEvent);
     }
@@ -227,11 +234,13 @@ auto PopupMenu::UpdatePopup() -> void
                 {
                     _menuView->SetMenu(_menu);
                 }
-                auto const popupSize = UnitFunction::ConvertDpToVp(_popup->Measure(BoxConstraints::MakeUnconstrained()), screenInfo->displayScale);
+                auto const blurRadius = UnitFunction::ConvertDpToVp(AttributeNode::GetValue<&Style::Size60>(*_menuView).GetValueOr(0), screenInfo->displayScale);
+                auto const popupSizeWithShadow = UnitFunction::ConvertDpToVp(_popup->Measure(BoxConstraints::MakeUnconstrained()), screenInfo->displayScale);
+                auto const popupSize = Size<Vp>(popupSizeWithShadow.GetWidth() - blurRadius * 2, popupSizeWithShadow.GetHeight() - blurRadius * 2);
                 auto const screenRect = screenInfo->workArea;
                 auto const isRtl = sourceView->GetLayoutDirection() == LayoutDirection::RightToLeft;
                 auto const popupPos = CalcPopupPosition(sourceRect, popupSize, screenRect, isRtl);
-                auto const popupRect = Rect<Vp>(popupPos, popupSize);
+                auto const popupRect = Rect<Vp>::Offset(Rect<Vp>(popupPos, popupSizeWithShadow), Offset<Vp>(-blurRadius, -blurRadius));
                 _popup->SetFrameRect(popupRect);
                 _popup->SetVisible(true);
             }
