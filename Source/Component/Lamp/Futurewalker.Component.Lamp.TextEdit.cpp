@@ -48,6 +48,15 @@ auto TextEdit::ReceiveEvent(Event<>& event) -> Async<Bool>
     if (event.Is<ViewEvent::EnabledChanged>())
     {
         UpdateStyle();
+        co_return false;
+    }
+    else if (event.Is<TextEditEvent>())
+    {
+        if (event.Is<TextEditEvent::FocusChanged>())
+        {
+            UpdateStyle();
+        }
+        co_return true;
     }
     co_return false;
 }
@@ -60,8 +69,19 @@ auto TextEdit::UpdateStyle() -> void
         _textEdit->SetBackgroundAlpha(TextEditStyle::BackgroundAlpha);
         _textEdit->SetTextColor(TextEditStyle::TextColor);
         _textEdit->SetTextAlpha(TextEditStyle::TextAlpha);
-        _textEdit->SetBorderColor(TextEditStyle::BorderColor);
-        _textEdit->SetBorderAlpha(TextEditStyle::BorderAlpha);
+
+        if (_textEdit->IsFocused())
+        {
+            _textEdit->SetBorderColor(TextEditStyle::FocusedBorderColor);
+            _textEdit->SetBorderAlpha(TextEditStyle::FocusedBorderAlpha);
+            _textEdit->SetBorderWidth(TextEditStyle::FocusedBorderWidth);
+        }
+        else
+        {
+            _textEdit->SetBorderColor(TextEditStyle::BorderColor);
+            _textEdit->SetBorderAlpha(TextEditStyle::BorderAlpha);
+            _textEdit->SetBorderWidth(TextEditStyle::BorderWidth);
+        }
     }
     else
     {
@@ -71,9 +91,10 @@ auto TextEdit::UpdateStyle() -> void
         _textEdit->SetTextAlpha(TextEditStyle::DisabledTextAlpha);
         _textEdit->SetBorderColor(TextEditStyle::DisabledBorderColor);
         _textEdit->SetBorderAlpha(TextEditStyle::DisabledBorderAlpha);
+        _textEdit->SetBorderWidth(TextEditStyle::DisabledBorderWidth);
     }
-    _textEdit->SetBorderWidth(TextEditStyle::BorderWidth);
     _textEdit->SetCornerRadius(TextEditStyle::BorderRadius);
+    _textEdit->SetPadding(TextEditStyle::Padding);
     _textEdit->SetFontSize(TextEditStyle::FontSize);
     _textEdit->SetFontWeight(TextEditStyle::FontWeight);
     _textEdit->SetFontWidth(TextEditStyle::FontWidth);

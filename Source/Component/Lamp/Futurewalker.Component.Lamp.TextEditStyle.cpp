@@ -16,10 +16,15 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::DisabledTextColor, TextView
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::DisabledTextAlpha, TextViewStyle::DisabledAlpha);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::BorderColor, Style::ColorOutline);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::BorderAlpha, Style::AlphaEnabled);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::BorderWidth, Style::Size10);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::DisabledBorderColor, TextEditStyle::BorderColor);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::DisabledBorderAlpha, Style::AlphaDisabled);
-FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextEditStyle::BorderWidth, {1});
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::DisabledBorderWidth, Style::Size10);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FocusedBorderColor, Style::ColorPrimary);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FocusedBorderAlpha, Style::AlphaEnabled);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FocusedBorderWidth, Style::Size20);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::BorderRadius, Style::CornerRadiusSmall);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::Padding, Style::PaddingExtraSmall);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FontSize, TextViewStyle::FontSize);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FontWeight, TextViewStyle::FontWeight);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextEditStyle::FontWidth, Graphics::FontWidth::Normal());

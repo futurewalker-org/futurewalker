@@ -2,10 +2,11 @@
 #pragma once
 
 #include "Futurewalker.Application.TextEditType.hpp"
+#include "Futurewalker.Application.TextEditEvent.hpp"
 #include "Futurewalker.Application.View.hpp"
-#include "Futurewalker.Application.InputMethodType.hpp"
-#include "Futurewalker.Application.InputMethodEditableType.hpp"
+#include "Futurewalker.Application.InputEditableType.hpp"
 #include "Futurewalker.Application.CornerRadius.hpp"
+#include "Futurewalker.Application.EdgeInsets.hpp"
 
 #include "Futurewalker.Graphics.TextShaperType.hpp"
 #include "Futurewalker.Graphics.ShapedTextType.hpp"
@@ -14,6 +15,7 @@
 #include "Futurewalker.Graphics.FontWidth.hpp"
 #include "Futurewalker.Graphics.FontWeight.hpp"
 #include "Futurewalker.Graphics.FontStyleType.hpp"
+#include "Futurewalker.Graphics.Typeface.hpp"
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
@@ -45,10 +47,9 @@ public:
     auto SetTextAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetBorderColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetBorderAlpha(AttributeArg<Channel> const& alpha) -> void;
-    auto SetDisabledBorderColor(AttributeArg<RGBAColor> const& color) -> void;
-    auto SetDisabledBorderAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetBorderWidth(AttributeArg<Dp> const& width) -> void;
     auto SetCornerRadius(AttributeArg<CornerRadius> const& radius) -> void;
+    auto SetPadding(AttributeArg<EdgeInsets> const& padding) -> void;
     auto SetFontSize(AttributeArg<Graphics::FontSize> const& size) -> void;
     auto SetFontWeight(AttributeArg<Graphics::FontWeight> const& weight) -> void;
     auto SetFontWidth(AttributeArg<Graphics::FontWidth> const& width) -> void;
@@ -67,7 +68,6 @@ protected:
     auto ReceiveFocusEvent(Event<>& event) -> Async<Bool>;
 
 private:
-    auto InternalSetInputMethod(Shared<InputMethod> const& context) -> void;
     auto InternalInsertText(String const& text, CodePoint newSelection) -> void;
     auto InternalGetSelectedRange() -> Range<CodePoint>;
     auto InternalSetSelectedRange(Range<CodePoint> range) -> void;
@@ -81,13 +81,15 @@ private:
     auto InternalDeleteForward() -> void;
     auto InternalInvalidateLayoutCache() -> void;
     auto InternalUpdateLayoutCache() -> void;
-    auto InternalGetBackgroundCololr() const -> RGBAColor;
+    auto InternalInvalidateTypeface() -> void;
+    auto InternalUpdateTypeface() -> void;
+    auto InternalGetBackgroundColor() const -> RGBAColor;
     auto InternalGetTextColor() const -> RGBAColor;
     auto InternalGetBorderColor() const -> RGBAColor;
+    auto InternalGetTypeface() const -> Shared<Graphics::Typeface>;
 
 private:
-    Shared<InputMethod> _inputMethod;
-    Shared<InputMethodEditable> _inputMethodEditable;
+    Shared<InputEditable> _inputEditable;
     AttributeAccessor<RGBAColor> _backgroundColor;
     AttributeAccessor<Channel> _backgroundAlpha;
     AttributeAccessor<RGBAColor> _textColor;
@@ -96,11 +98,13 @@ private:
     AttributeAccessor<Channel> _borderAlpha;
     AttributeAccessor<Dp> _borderWidth;
     AttributeAccessor<CornerRadius> _cornerRadius;
+    AttributeAccessor<EdgeInsets> _padding;
     AttributeAccessor<Graphics::FontSize> _fontSize;
     AttributeAccessor<Graphics::FontWeight> _fontWeight;
     AttributeAccessor<Graphics::FontWidth> _fontWidth;
     AttributeAccessor<Graphics::FontSlant> _fontSlant;
     AttributeAccessor<Graphics::FontFamily> _fontFamily;
+    Shared<Graphics::Typeface> _typeface;
     Shared<Graphics::TextShaper> _textShaper;
     Shared<Graphics::ShapedText> _shapedText;
 };

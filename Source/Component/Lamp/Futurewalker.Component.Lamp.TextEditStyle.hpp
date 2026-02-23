@@ -4,6 +4,7 @@
 #include "Futurewalker.Component.Lamp.Prelude.hpp"
 
 #include "Futurewalker.Application.CornerRadius.hpp"
+#include "Futurewalker.Application.EdgeInsets.hpp"
 
 #include "Futurewalker.Attribute.StaticAttribute.hpp"
 
@@ -35,10 +36,15 @@ struct TextEditStyle : NonConstructible
     FW_STATIC_ATTRIBUTE(Channel, DisabledTextAlpha);
     FW_STATIC_ATTRIBUTE(RGBAColor, BorderColor);
     FW_STATIC_ATTRIBUTE(Channel, BorderAlpha);
+    FW_STATIC_ATTRIBUTE(Dp, BorderWidth);
     FW_STATIC_ATTRIBUTE(RGBAColor, DisabledBorderColor);
     FW_STATIC_ATTRIBUTE(Channel, DisabledBorderAlpha);
-    FW_STATIC_ATTRIBUTE(Dp, BorderWidth);
+    FW_STATIC_ATTRIBUTE(Dp, DisabledBorderWidth);
+    FW_STATIC_ATTRIBUTE(RGBAColor, FocusedBorderColor);
+    FW_STATIC_ATTRIBUTE(Channel, FocusedBorderAlpha);
+    FW_STATIC_ATTRIBUTE(Dp, FocusedBorderWidth);
     FW_STATIC_ATTRIBUTE(CornerRadius, BorderRadius);
+    FW_STATIC_ATTRIBUTE(EdgeInsets, Padding);
     FW_STATIC_ATTRIBUTE(Graphics::FontSize, FontSize);
     FW_STATIC_ATTRIBUTE(Graphics::FontWeight, FontWeight);
     FW_STATIC_ATTRIBUTE(Graphics::FontWidth, FontWidth);

@@ -7,9 +7,9 @@
 #include "Futurewalker.Application.InputEvent.hpp"
 #include "Futurewalker.Application.FocusEvent.hpp"
 #include "Futurewalker.Application.DrawScope.hpp"
+#include "Futurewalker.Application.MeasureScope.hpp"
 #include "Futurewalker.Application.Key.hpp"
-#include "Futurewalker.Application.InputMethod.hpp"
-#include "Futurewalker.Application.InputMethodEditable.hpp"
+#include "Futurewalker.Application.InputEditable.hpp"
 #include "Futurewalker.Application.ViewDrawFunction.hpp" 
 
 #include "Futurewalker.Graphics.Scene.hpp"
@@ -82,6 +82,11 @@ auto TextEdit::SetCornerRadius(AttributeArg<CornerRadius> const& radius) -> void
     _cornerRadius.SetAttributeArg(radius);
 }
 
+auto TextEdit::SetPadding(AttributeArg<EdgeInsets> const& padding) -> void
+{
+    _padding.SetAttributeArg(padding);
+}
+
 auto TextEdit::SetFontSize(AttributeArg<Graphics::FontSize> const& size) -> void
 {
     _fontSize.SetAttributeArg(size);
@@ -113,7 +118,8 @@ auto TextEdit::Initialize() -> void
     SetFocusTrackingFlags(ViewFocusTrackingFlags::All);
 
     _textShaper = Graphics::TextShaper::Make();
-    _inputMethodEditable = InputMethodEditable::Make();
+    _inputEditable = InputEditable::Make();
+    SetInputEditable(_inputEditable);
 
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBackgroundColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBackgroundAlpha, {});
@@ -123,6 +129,7 @@ auto TextEdit::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBorderAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeBorderWidth, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(EdgeInsets, AttributePadding, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSize, AttributeFontSize, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWeight, AttributeFontWeight, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWidth, AttributeFontWidth, {0});
@@ -137,26 +144,30 @@ auto TextEdit::Initialize() -> void
     _borderAlpha.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeBorderAlpha, {});
     _borderWidth.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeBorderWidth, {0});
     _cornerRadius.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeCornerRadius, {});
+    _padding.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributePadding, {});
     _fontSize.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontSize, {0});
     _fontWeight.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontWeight, {0});
     _fontWidth.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontWidth, {0});
     _fontSlant.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontSlant, {});
     _fontFamily.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontFamily, {});
 
-    EventReceiver::Connect(*_inputMethodEditable, *this, &TextEdit::ReceiveInputEvent);
+    EventReceiver::Connect(*_inputEditable, *this, &TextEdit::ReceiveInputEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveInputEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveKeyEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveFocusEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceivePointerEvent);
+
+    InternalUpdateTypeface();
 }
 
 auto TextEdit::Draw(DrawScope& scope) -> void
 {
-    auto const backgroundColor = InternalGetBackgroundCololr();
+    auto const backgroundColor = InternalGetBackgroundColor();
     auto const textColor = InternalGetTextColor();
     auto const borderColor = InternalGetBorderColor();
     auto const borderWidth = _borderWidth.GetValueOr(0);
     auto const cornerRadius = _cornerRadius.GetValueOrDefault();
+    auto const padding = _padding.GetValueOrDefault();
 
     auto& scene = scope.GetScene();
 
@@ -172,8 +183,8 @@ auto TextEdit::Draw(DrawScope& scope) -> void
             {
                 auto const runMetrics = run->GetMetrics();
                 scene.PushTranslate({
-                    .x = offset,
-                    .y = lineMetrics.GetAscent() - runMetrics.GetAscent(),
+                    .x = offset + padding.GetLeading(),
+                    .y = lineMetrics.ascent - runMetrics.ascent + padding.GetTop() + lineMetrics.leading / 2,
                 });
                 scene.AddGlyphRun({
                     .run = run,
@@ -190,15 +201,45 @@ auto TextEdit::Draw(DrawScope& scope) -> void
 
 auto TextEdit::Measure(MeasureScope& scope) -> void
 {
+    InternalUpdateTypeface();
     InternalUpdateLayoutCache();
-    View::Measure(scope);
+
+    auto height = Dp(0);
+    if (_shapedText)
+    {
+        for (auto const line : _shapedText->GetLines())
+        {
+            auto const metrics = line.GetMetrics();
+            height += metrics.ascent + metrics.descent + metrics.leading;
+        }
+    }
+
+    if (height <= 0)
+    {
+        height = 0;
+        if (auto const typeface = InternalGetTypeface())
+        {
+            auto const fontSize = _fontSize.GetValueOr(16);
+            auto const metrics = typeface->GetMetrics(fontSize);
+            height = metrics.ascent + metrics.descent + metrics.leading;
+        }
+    }
+
+    auto const padding = _padding.GetValueOrDefault();
+    height += padding.GetTotalHeight();
+
+    auto const widthConstraints = scope.GetParameter().GetWidthConstraints();
+    auto const heightConstraints = scope.GetParameter().GetHeightConstraints();
+    auto const measuredWidth = widthConstraints.IsBounded() ? widthConstraints.GetMax() : widthConstraints.GetMin();
+    auto const measuredHeight = AxisConstraints::Constrain(heightConstraints, height);
+    scope.SetMeasuredSize(measuredWidth, measuredHeight);
 }
 
 auto TextEdit::Arrange(ArrangeScope& scope) -> void
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        _inputMethodEditable->SetLayoutRect(LocalToRootRect(GetContentRect()));
+        _inputEditable->SetLayoutRect(GetContentRect());
     }
     View::Arrange(scope);
 }
@@ -207,6 +248,7 @@ auto TextEdit::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
+        InternalInvalidateTypeface();
         InternalInvalidateLayoutCache();
         InvalidateLayout();
         InvalidateVisual();
@@ -218,13 +260,13 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<KeyEvent::Down>())
     {
-        FW_DEBUG_LOG_INFO("TextEdit::Down");
-        co_return true;
+        FW_DEBUG_LOG_INFO("TextEdit::Down: {} um={}", event.As<KeyEvent::Down>()->GetKey().ToStdString(), event.As<KeyEvent::Down>()->GetUnmodifiedKey().ToStdString());
+        co_return false;
     }
     else if (event.Is<KeyEvent::Up>())
     {
         FW_DEBUG_LOG_INFO("TextEdit::Up");
-        co_return true;
+        co_return false;
     }
     co_return false;
 }
@@ -234,14 +276,11 @@ auto TextEdit::ReceiveInputEvent(Event<>& event) -> Async<Bool>
     if (event.Is<InputEvent::Attach>())
     {
         FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent SetContext");
-        auto const parameter = event.As<InputEvent::Attach>();
-        InternalSetInputMethod(parameter->GetInputMethod());
         co_return true;
     }
     else if (event.Is<InputEvent::Detach>())
     {
         FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent ReleaseContext");
-        InternalSetInputMethod(nullptr);
         co_return true;
     }
     else if (event.Is<InputEvent::InsertText>())
@@ -270,7 +309,7 @@ auto TextEdit::ReceivePointerEvent(Event<>& event) -> Async<Bool>
         if (event.Is<PointerEvent::Motion::Down>())
         {
             FW_DEBUG_LOG_INFO("TextEdit: Pointer down");
-            SetFocused(true);
+            RequestFocus(FocusReason::Pointer);
         }
         else if (event.Is<PointerEvent::Motion::Up>())
         {
@@ -297,122 +336,115 @@ auto TextEdit::ReceiveFocusEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<FocusEvent::FocusIn>())
     {
-        FW_DEBUG_LOG_INFO("TextEdit: focus in");
         InvalidateVisual();
+        auto notifyEventParameter = Event<TextEditEvent::FocusChanged>();
+        notifyEventParameter->SetFocused(true);
+        auto notifyEvent = Event<>(notifyEventParameter);
+        co_await SendEvent(notifyEvent);
     }
     else if (event.Is<FocusEvent::FocusOut>())
     {
-        FW_DEBUG_LOG_INFO("TextEdit: focus out");
         InvalidateVisual();
+        auto notifyEventParameter = Event<TextEditEvent::FocusChanged>();
+        notifyEventParameter->SetFocused(false);
+        auto notifyEvent = Event<>(notifyEventParameter);
+        co_await SendEvent(notifyEvent);
     }
     co_return false;
 }
 
-auto TextEdit::InternalSetInputMethod(Shared<InputMethod> const& inputMethod) -> void
-{
-    if (_inputMethod != inputMethod)
-    {
-        _inputMethod = inputMethod;
-
-        if (_inputMethod)
-        {
-            _inputMethod->SetEditable(_inputMethodEditable);
-        }
-    }
-}
-
 auto TextEdit::InternalInsertText(String const& text, CodePoint newSelection) -> void
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        _inputMethodEditable->InsertText(text, newSelection);
+        _inputEditable->InsertText(text, newSelection);
         InvalidateVisual();
     }
 }
 
 auto TextEdit::InternalGetSelectedRange() -> Range<CodePoint>
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        return _inputMethodEditable->GetSelectedRange();
+        return _inputEditable->GetSelectedRange();
     }
     return {};
 }
 
 auto TextEdit::InternalSetSelectedRange(Range<CodePoint> range) -> void
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        _inputMethodEditable->SetSelectedRange(range);
+        _inputEditable->SetSelectedRange(range);
     }
 }
 
 auto TextEdit::InternalGetComposingRange() -> Range<CodePoint>
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        return _inputMethodEditable->GetComposingRange();
+        return _inputEditable->GetComposingRange();
     }
     return {};
 }
 
 auto TextEdit::InternalSetComposingRange(Range<CodePoint> range) -> void
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        _inputMethodEditable->SetComposingRange(range);
+        _inputEditable->SetComposingRange(range);
     }
 }
 
 auto TextEdit::InternalGetText() const -> String
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        return _inputMethodEditable->GetString();
+        return _inputEditable->GetString();
     }
     return {};
 }
 
 auto TextEdit::InternalGetText(Range<CodePoint> range) -> String
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        return _inputMethodEditable->GetString(range);
+        return _inputEditable->GetString(range);
     }
     return {};
 }
 
 auto TextEdit::InternalSetText(String const& text) -> void
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        _inputMethodEditable->SetText(Text(text));
+        _inputEditable->SetText(Text(text));
     }
 }
 
 auto TextEdit::InternalGetTextRange() const -> Range<CodePoint>
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        return _inputMethodEditable->GetStringRange();
+        return _inputEditable->GetStringRange();
     }
     return {};
 }
 
 auto TextEdit::InternalDeleteBackward() -> void
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        _inputMethodEditable->DeleteSurroundingText(1, 0);
+        _inputEditable->DeleteSurroundingText(1, 0);
         InvalidateVisual();
     }
 }
 
 auto TextEdit::InternalDeleteForward() -> void
 {
-    if (_inputMethodEditable)
+    if (_inputEditable)
     {
-        _inputMethodEditable->DeleteSurroundingText(0, 1);
+        _inputEditable->DeleteSurroundingText(0, 1);
         InvalidateVisual();
     }
 }
@@ -424,7 +456,7 @@ auto TextEdit::InternalInvalidateLayoutCache() -> void
 
 auto TextEdit::InternalUpdateLayoutCache() -> void
 {
-    if (!_inputMethodEditable || !_textShaper)
+    if (!_inputEditable || !_textShaper)
     {
         FW_DEBUG_ASSERT(false);
         return;
@@ -435,21 +467,35 @@ auto TextEdit::InternalUpdateLayoutCache() -> void
         return;
     }
 
-    auto const fontSize = _fontSize.GetValueOr(16);
-    auto const fontWidth = _fontWidth.GetValueOr(Graphics::FontWidth::Normal());
-    auto const fontWeight = _fontWeight.GetValueOr(Graphics::FontWeight::Normal());
-    auto const fontSlant = _fontSlant.GetValueOrDefault();
-    auto fontStyle = Graphics::FontStyle(fontWeight, fontWidth, fontSlant);
-
-    if (auto const fontManager = Locator::GetInstance<Graphics::FontManager>())
+    if (auto const typeface = InternalGetTypeface())
     {
-        auto const typeface = fontManager->FindTypefaceByFamilyAndStyle(_fontFamily.GetValueOrDefault(), fontStyle);
-        auto const text = _inputMethodEditable->GetText();
-        _shapedText = Shared<Graphics::ShapedText>::Make(_textShaper->ShapeText(text, typeface, fontSize, Dp::Infinity()));
+        auto const text = _inputEditable->GetText();
+        auto const fontSize = _fontSize.GetValueOr(16);
+        _shapedText = Shared<Graphics::ShapedText>::Make(_textShaper->ShapeText(text, typeface, fontSize, Dp::Infinity(), {'L', 'a', 't', 'n'}, Graphics::TextShaper::Direction::DefaultLtr));
     }
 }
 
-auto TextEdit::InternalGetBackgroundCololr() const -> RGBAColor
+auto TextEdit::InternalInvalidateTypeface() -> void
+{
+    _typeface = nullptr;
+}
+
+auto TextEdit::InternalUpdateTypeface() -> void
+{
+    if (!_typeface)
+    {
+        auto const fontWidth = _fontWidth.GetValueOr(Graphics::FontWidth::Normal());
+        auto const fontWeight = _fontWeight.GetValueOr(Graphics::FontWeight::Normal());
+        auto const fontSlant = _fontSlant.GetValueOrDefault();
+        auto fontStyle = Graphics::FontStyle(fontWeight, fontWidth, fontSlant);
+        if (auto const fontManager = Locator::GetInstance<Graphics::FontManager>())
+        {
+            _typeface = fontManager->FindTypefaceByFamilyAndStyle(_fontFamily.GetValueOrDefault(), fontStyle);
+        }
+    }
+}
+
+auto TextEdit::InternalGetBackgroundColor() const -> RGBAColor
 {
     auto const color = _backgroundColor.GetValueOrDefault();
     auto const alpha = _backgroundAlpha.GetValueOrDefault();
@@ -468,5 +514,10 @@ auto TextEdit::InternalGetBorderColor() const -> RGBAColor
     auto const color = _borderColor.GetValueOrDefault();
     auto const alpha = _borderAlpha.GetValueOrDefault();
     return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha().GetF64() * alpha.GetF64());
+}
+
+auto TextEdit::InternalGetTypeface() const -> Shared<Graphics::Typeface>
+{
+    return _typeface;
 }
 }
