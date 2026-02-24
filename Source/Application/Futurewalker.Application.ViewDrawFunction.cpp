@@ -3,6 +3,7 @@
 #include "Futurewalker.Application.ViewDrawFunction.hpp"
 
 #include "Futurewalker.Graphics.Scene.hpp"
+#include "Futurewalker.Graphics.MaskFilter.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -40,6 +41,33 @@ auto ViewDrawFunction::DrawRoundRectBorder(Graphics::Scene& scene, Rect<Dp> cons
             .drawStyle = Graphics::DrawStyle::Stroke,
             .antiAlias = true,
             .strokeWidth = width,
+        });
+    }
+}
+
+///
+/// @brief Draw shadow of round rectangle.
+///
+auto ViewDrawFunction::DrawRoundRectShadow(
+  Graphics::Scene& scene,
+  Rect<Dp> const& rect,
+  CornerRadius const& radius,
+  RGBAColor const& color,
+  Dp const& blurRadius,
+  Graphics::BlurStyle const blurStyle,
+  LayoutDirection const& direction) -> void
+{
+    if (!rect.IsEmpty() && color.GetAlpha() > 0 && blurRadius > 0)
+    {
+        auto path = Graphics::Path();
+        path.AddRoundRect(radius.GetRoundRect(rect, direction));
+
+        scene.AddPath({
+            .path = path,
+            .color = color,
+            .drawStyle = Graphics::DrawStyle::Fill,
+            .antiAlias = true,
+            .maskFilter = Graphics::MaskFilter::MakeBlur(blurStyle, blurRadius / 2),
         });
     }
 }

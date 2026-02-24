@@ -6,7 +6,6 @@ COMPILE_OPTIONS = select({
         "/permissive-",
         "/Zc:__cplusplus",
         "/Zc:preprocessor",
-        "/Zc:u8EscapeEncoding",
     ],
     "//conditions:default" : [],
 })
