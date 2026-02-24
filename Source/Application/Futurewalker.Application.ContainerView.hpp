@@ -2,7 +2,6 @@
 #pragma once
 
 #include "Futurewalker.Application.ContainerViewType.hpp"
-#include "Futurewalker.Application.ContainerViewEvent.hpp"
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.CornerRadius.hpp"
 #include "Futurewalker.Application.ClipViewType.hpp"

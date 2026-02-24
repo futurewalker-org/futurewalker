@@ -6,7 +6,6 @@
 #include "Futurewalker.Application.TapGestureView.hpp"
 #include "Futurewalker.Application.HoverGestureView.hpp"
 #include "Futurewalker.Application.ContainerView.hpp"
-#include "Futurewalker.Application.FocusView.hpp"
 #include "Futurewalker.Application.FocusEvent.hpp"
 #include "Futurewalker.Application.KeyEvent.hpp"
 #include "Futurewalker.Application.Key.hpp"

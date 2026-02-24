@@ -9,7 +9,6 @@
 #include "Futurewalker.Application.TapGestureViewType.hpp"
 #include "Futurewalker.Application.HoverGestureViewType.hpp"
 #include "Futurewalker.Application.ContainerViewType.hpp"
-#include "Futurewalker.Application.FocusViewType.hpp"
 #include "Futurewalker.Application.CornerRadius.hpp"
 #include "Futurewalker.Application.View.hpp"
 
