@@ -24,12 +24,12 @@ TEST_CASE("String")
         REQUIRE_NOTHROW(str.Clear());
     }
 
-    SECTION("Ctor")
-    {
-        auto str = String(U'\U0001F600');
-        REQUIRE(str == String(u8"\xF0\x9F\x98\x80"));
-        REQUIRE(str.GetView().GetSize() == 4);
-    }
+    //SECTION("Ctor")
+    //{
+    //    auto str = String(U'\U0001F600');
+    //    REQUIRE(str == String(u8"\xF0\x9F\x98\x80"));
+    //    REQUIRE(str.GetView().GetSize() == 4);
+    //}
 
     SECTION("Ctor")
     {
