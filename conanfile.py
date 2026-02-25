@@ -1,12 +1,12 @@
 from conan import ConanFile
-from conan.tools.google import Bazel, BazelDeps, BazelToolchain, bazel_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
 
 class Futurewalker(ConanFile):
     name = "Futurewalker"
     version = "0.0.1"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "BazelDeps"
+    generators = "CMakeDeps"
 
     def requirements(self):
         self.requires("boost/[1.87.0]")
@@ -23,13 +23,15 @@ class Futurewalker(ConanFile):
         check_min_cppstd(self, "23")
 
     def generate(self):
-        tc = BazelToolchain(self)
+        tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_EXPORT_COMPILE_COMMANDS"] = "ON"
         tc.generate()
 
     def layout(self):
-        bazel_layout(self, build_folder="build")
+        cmake_layout(self, build_folder="build")
 
     def build(self):
-        bazel = Bazel(self)
-        self.run("bazel {} test //Test/... --config=conan-config --test_output=errors".format(bazel._get_startup_command_options()))
-        self.run("bazel {} build //Example/... --verbose_failures --config=conan-config --test_output=errors".format(bazel._get_startup_command_options()))
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+        cmake.ctest()

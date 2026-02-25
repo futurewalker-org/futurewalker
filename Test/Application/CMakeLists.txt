@@ -1,0 +1,6 @@
+fw_add_test(Application BoxConstraints Futurewalker::Application)
+fw_add_test(Application CornerRadius Futurewalker::Application)
+fw_add_test(Application EdgeInsets Futurewalker::Application)
+fw_add_test(Application View Futurewalker::Application Futurewalker::Test)
+fw_add_test(Application Menu Futurewalker::Application)
+fw_add_test(Application MenuItem Futurewalker::Application)

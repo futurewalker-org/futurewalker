@@ -1,0 +1,6 @@
+add_subdirectory(ComponentGallery)
+add_subdirectory(HelloWorld)
+add_subdirectory(HelloWorldMini)
+add_subdirectory(PointerEventTest)
+add_subdirectory(ThemeViewer)
+add_subdirectory(WindowGeometryTest)
