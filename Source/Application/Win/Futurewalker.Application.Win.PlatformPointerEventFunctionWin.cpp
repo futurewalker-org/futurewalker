@@ -114,11 +114,22 @@ auto PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(PlatformPoin
 
     if (WM_MOUSEFIRST <= msg && msg <= WM_MOUSELAST)
     {
+        auto clientX = GET_X_LPARAM(lParam);
+        auto clientY = GET_Y_LPARAM(lParam);
+        if (msg == WM_MOUSEWHEEL || msg == WM_MOUSEHWHEEL)
+        {
+            auto clientPoint = POINT {clientX, clientY};
+            if (::ScreenToClient(hWnd, &clientPoint))
+            {
+                clientX = clientPoint.x;
+                clientY = clientPoint.y;
+            }
+        }
         auto clientRect = RECT();
         ::GetClientRect(hWnd, &clientRect);
         auto const displayScale = ::GetDpiForWindow(hWnd) / DisplayScale(USER_DEFAULT_SCREEN_DPI);
-        auto const x = UnitFunction::ConvertVpToDp(GET_X_LPARAM(lParam) + clientRect.left, displayScale);
-        auto const y = UnitFunction::ConvertVpToDp(GET_Y_LPARAM(lParam) + clientRect.top, displayScale);
+        auto const x = UnitFunction::ConvertVpToDp(clientX + clientRect.left, displayScale);
+        auto const y = UnitFunction::ConvertVpToDp(clientY + clientRect.top, displayScale);
         parameter.SetPosition({x, y});
         auto const modifiers = ConvertMouseEventParamToModifierKeyFlags(wParam);
         auto const buttons = ConvertMouseEventParamToPointerButtonFlags(wParam);
