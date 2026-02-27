@@ -64,7 +64,7 @@ private:
     std::vector<SInt64> _baseVisualNodeIndexStack;
     std::vector<Shared<PlatformViewLayerVisual>> _baseVisualStack;
     Shared<PlatformViewLayerVisual> _currentVisual;
-    SInt64 _currentFragmentIndex = 0;
+    SInt32 _currentFragmentIndex = 0;
 };
 }
 }

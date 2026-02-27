@@ -170,7 +170,7 @@ auto PlatformViewLayerVisual::AddDisplayListFragment(PlatformViewLayerId layerId
       FragmentInfo {
           .layerId = layerId,
           .type = FragmentType::DisplayList,
-          .index = std::ssize(_displayListFragments),
+          .index = SInt32(std::ssize(_displayListFragments)),
       });
     _displayListFragments.push_back(fragment);
     OnFragmentChanged();
@@ -182,9 +182,10 @@ auto PlatformViewLayerVisual::AddPushNodeFragment(PlatformViewLayerId layerId, P
       FragmentInfo {
           .layerId = layerId,
           .type = FragmentType::PushNode,
-          .index = std::ssize(_pushNodeFragments),
+          .index = SInt32(std::ssize(_pushNodeFragments)),
       });
     _pushNodeFragments.push_back(fragment);
+    _pushNodeIndexStack.push_back(SInt32(std::ssize(_pushNodeFragments) - 1));
     OnFragmentChanged();
 }
 
@@ -194,18 +195,31 @@ auto PlatformViewLayerVisual::AddPopNodeFragment(PlatformViewLayerId layerId) ->
       FragmentInfo {
           .layerId = layerId,
           .type = FragmentType::PopNode,
-          .index = 0,
+          .index = SInt32(std::ssize(_popNodeFragments)),
       });
-    _popNodeFragments.push_back(
-      PopNodeFragment {
-          .pushNodeIndex = std::ssize(_pushNodeFragments) - 1,
-      });
+
+    if (_pushNodeIndexStack.empty())
+    {
+        FW_DEBUG_ASSERT(false);
+        _popNodeFragments.push_back(
+          PopNodeFragment {
+              .pushNodeIndex = 0,
+          });
+    }
+    else
+    {
+        _popNodeFragments.push_back(
+          PopNodeFragment {
+              .pushNodeIndex = _pushNodeIndexStack.back(),
+          });
+        _pushNodeIndexStack.pop_back();
+    }
     OnFragmentChanged();
 }
 
-auto PlatformViewLayerVisual::ReplaceDisplayListFragment(SInt64 const index, DisplayListFragment const& fragment) -> void
+auto PlatformViewLayerVisual::ReplaceDisplayListFragment(SInt32 const index, DisplayListFragment const& fragment) -> void
 {
-    if (0 <= index && index < std::ssize(_fragments))
+    if (0 <= index && index < SInt32(std::ssize(_fragments)))
     {
         auto const& fragmentInfo = _fragments[static_cast<size_t>(index)];
         if (fragmentInfo.type == FragmentType::DisplayList)
@@ -222,9 +236,9 @@ auto PlatformViewLayerVisual::ReplaceDisplayListFragment(SInt64 const index, Dis
     FW_DEBUG_ASSERT(false);
 }
 
-auto PlatformViewLayerVisual::ReplacePushNodeFragment(SInt64 const index, PushNodeFragment const& fragment) -> void
+auto PlatformViewLayerVisual::ReplacePushNodeFragment(SInt32 const index, PushNodeFragment const& fragment) -> void
 {
-    if (0 <= index && index < std::ssize(_fragments))
+    if (0 <= index && index < SInt32(std::ssize(_fragments)))
     {
         auto const& fragmentInfo = _fragments[static_cast<size_t>(index)];
         if (fragmentInfo.type == FragmentType::PushNode)
@@ -249,6 +263,7 @@ auto PlatformViewLayerVisual::ClearFragments() -> void
         _displayListFragments.clear();
         _pushNodeFragments.clear();
         _popNodeFragments.clear();
+        _pushNodeIndexStack.clear();
         OnFragmentChanged();
     }
 }
@@ -264,9 +279,9 @@ auto PlatformViewLayerVisual::ForEachFragment(Function<void(FragmentInfo const&)
     }
 }
 
-auto PlatformViewLayerVisual::GetDisplayListFragment(SInt64 const index) const -> Pointer<DisplayListFragment const>
+auto PlatformViewLayerVisual::GetDisplayListFragment(SInt32 const index) const -> Pointer<DisplayListFragment const>
 {
-    if (0 <= index && index < std::ssize(_displayListFragments))
+    if (0 <= index && index < SInt32(std::ssize(_displayListFragments)))
     {
         return Pointer<DisplayListFragment const>(&_displayListFragments[static_cast<size_t>(index)]);
     }
@@ -274,9 +289,9 @@ auto PlatformViewLayerVisual::GetDisplayListFragment(SInt64 const index) const -
     return nullptr;
 }
 
-auto PlatformViewLayerVisual::GetPushNodeFragment(SInt64 const index) const -> Pointer<PushNodeFragment const>
+auto PlatformViewLayerVisual::GetPushNodeFragment(SInt32 const index) const -> Pointer<PushNodeFragment const>
 {
-    if (0 <= index && index < std::ssize(_pushNodeFragments))
+    if (0 <= index && index < SInt32(std::ssize(_pushNodeFragments)))
     {
         return Pointer<PushNodeFragment const>(&_pushNodeFragments[static_cast<size_t>(index)]);
     }
@@ -284,9 +299,9 @@ auto PlatformViewLayerVisual::GetPushNodeFragment(SInt64 const index) const -> P
     return nullptr;
 }
 
-auto PlatformViewLayerVisual::GetPopNodeFragment(SInt64 const index) const -> Pointer<PopNodeFragment const>
+auto PlatformViewLayerVisual::GetPopNodeFragment(SInt32 const index) const -> Pointer<PopNodeFragment const>
 {
-    if (0 <= index && index < std::ssize(_popNodeFragments))
+    if (0 <= index && index < SInt32(std::ssize(_popNodeFragments)))
     {
         return Pointer<PopNodeFragment const>(&_popNodeFragments[static_cast<size_t>(index)]);
     }
@@ -294,9 +309,9 @@ auto PlatformViewLayerVisual::GetPopNodeFragment(SInt64 const index) const -> Po
     return nullptr;
 }
 
-auto PlatformViewLayerVisual::GetFragmentCount() const -> SInt64
+auto PlatformViewLayerVisual::GetFragmentCount() const -> SInt32
 {
-    return std::ssize(_fragments);
+    return SInt32(std::ssize(_fragments));
 }
 
 auto PlatformViewLayerVisual::Initialize() -> void

@@ -64,7 +64,7 @@ public:
     auto GetBackingScale() const -> BackingScale;
     auto SetBackingScale(BackingScale const backingScale) -> void;
 
-    enum class FragmentType
+    enum class FragmentType : int32_t
     {
         DisplayList,
         PushNode,
@@ -75,7 +75,7 @@ public:
     {
         PlatformViewLayerId layerId = PlatformViewLayerId(0U);
         FragmentType type = FragmentType::DisplayList;
-        SInt64 index = 0;
+        SInt32 index = 0;
     };
 
     struct DisplayListFragment
@@ -100,7 +100,7 @@ public:
 
     struct PopNodeFragment
     {
-        SInt64 pushNodeIndex = 0;
+        SInt32 pushNodeIndex = 0;
         auto operator==(PopNodeFragment const& other) const -> bool = default;
         auto operator!=(PopNodeFragment const& other) const -> bool = default;
     };
@@ -108,14 +108,14 @@ public:
     auto AddDisplayListFragment(PlatformViewLayerId layerId, DisplayListFragment const& fragment) -> void;
     auto AddPushNodeFragment(PlatformViewLayerId layerId, PushNodeFragment const& fragment) -> void;
     auto AddPopNodeFragment(PlatformViewLayerId layerId) -> void;
-    auto ReplaceDisplayListFragment(SInt64 const index, DisplayListFragment const& fragment) -> void;
-    auto ReplacePushNodeFragment(SInt64 const index, PushNodeFragment const& fragment) -> void;
+    auto ReplaceDisplayListFragment(SInt32 const index, DisplayListFragment const& fragment) -> void;
+    auto ReplacePushNodeFragment(SInt32 const index, PushNodeFragment const& fragment) -> void;
     auto ClearFragments() -> void;
     auto ForEachFragment(Function<void(FragmentInfo const&)> const& func) const -> void;
-    auto GetDisplayListFragment(SInt64 const index) const -> Pointer<DisplayListFragment const>;
-    auto GetPushNodeFragment(SInt64 const index) const -> Pointer<PushNodeFragment const>;
-    auto GetPopNodeFragment(SInt64 const index) const -> Pointer<PopNodeFragment const>;
-    auto GetFragmentCount() const -> SInt64;
+    auto GetDisplayListFragment(SInt32 const index) const -> Pointer<DisplayListFragment const>;
+    auto GetPushNodeFragment(SInt32 const index) const -> Pointer<PushNodeFragment const>;
+    auto GetPopNodeFragment(SInt32 const index) const -> Pointer<PopNodeFragment const>;
+    auto GetFragmentCount() const -> SInt32;
 
 protected:
     template <class Self>
@@ -147,6 +147,7 @@ private:
     std::vector<DisplayListFragment> _displayListFragments;
     std::vector<PushNodeFragment> _pushNodeFragments;
     std::vector<PopNodeFragment> _popNodeFragments;
+    std::vector<SInt32> _pushNodeIndexStack;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
 };

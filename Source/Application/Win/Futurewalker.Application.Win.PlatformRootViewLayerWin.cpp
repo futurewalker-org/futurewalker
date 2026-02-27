@@ -73,7 +73,6 @@ auto PlatformRootViewLayerWin::Initialize() -> void
           .renderBegin = [&]() -> void { _dcompVisual->RemoveAllVisuals(); },
           .renderEnd = []() -> void {},
           .renderVisual = [&](Shared<PlatformViewLayerVisual> const& visual) -> void {
-              auto const c = visual->GetFragmentCount();
               if (auto const visualWin = visual.TryAs<PlatformViewLayerVisualWin>())
               {
                   if (auto const dcompVisual = visualWin->GetVisual())
