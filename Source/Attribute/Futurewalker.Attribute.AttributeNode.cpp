@@ -476,10 +476,14 @@ auto AttributeNode::SetAttributeSlotFunction(StaticAttributeBaseRef description,
 ///
 auto AttributeNode::InsertAttributeSlot(StaticAttributeBaseRef description) -> Shared<AttributeSlot>
 {
-    auto const [it, succ] = _slots.emplace(description.Get().GetId(), AttributeSlot::Make(description));
-    auto const [id, slot] = *it;
-    slot->SetOwner(GetSelf());
-    return slot;
+    auto const position = _slots.find(description.Get().GetId());
+    if (position != _slots.end())
+    {
+        return position->second;
+    }
+    auto const it = _slots.try_emplace(position, description.Get().GetId(), AttributeSlot::Make(description));
+    it->second->SetOwner(GetSelf());
+    return it->second;
 }
 
 ///
