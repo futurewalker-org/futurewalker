@@ -121,8 +121,8 @@ auto SizedView::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeWidth, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeHeight, {0});
 
-    _width.BindAndConnectAttributeWithDefaultValue(*this, &SizedView::ReceiveAttributeEvent, AttributeWidth, 0);
-    _height.BindAndConnectAttributeWithDefaultValue(*this, &SizedView::ReceiveAttributeEvent, AttributeHeight, 0);
+    _width.BindAndConnectAttributeWithDefaultValue(*this, &SizedView::ReceiveAttributeEvent, AttributeWidth, -1);
+    _height.BindAndConnectAttributeWithDefaultValue(*this, &SizedView::ReceiveAttributeEvent, AttributeHeight, -1);
 }
 
 ///
@@ -130,15 +130,21 @@ auto SizedView::Initialize() -> void
 ///
 auto SizedView::Measure(MeasureScope& scope) -> void
 {
-    const auto& parameter = scope.GetParameter();
-    const auto& widthConstr = parameter.GetWidthConstraints();
-    const auto& heightConstr = parameter.GetHeightConstraints();
+    auto const& parameter = scope.GetParameter();
+    auto const& widthConstr = parameter.GetWidthConstraints();
+    auto const& heightConstr = parameter.GetHeightConstraints();
 
-    const auto measuredWidth = MeasureAxis(widthConstr, GetLayoutWidth());
-    const auto measuredHeight = MeasureAxis(heightConstr, GetLayoutHeight());
-    scope.SetMeasuredSize(measuredWidth, measuredHeight);
+    auto const measuringWidth = MeasureAxis(widthConstr, GetLayoutWidth());
+    auto const measuringHeight = MeasureAxis(heightConstr, GetLayoutHeight());
 
-    ForEachVisibleChild([&](View& view) { scope.MeasureChild(view, AxisConstraints::MakeExact(measuredWidth), AxisConstraints::MakeExact(measuredHeight)); });
+    auto maxSize = Size<Dp>();
+    ForEachVisibleChild([&](View& view) {
+        auto const measuringWidthConstr = measuringWidth ? AxisConstraints::MakeExact(*measuringWidth) : widthConstr;
+        auto const measuringHeightConstr = measuringHeight ? AxisConstraints::MakeExact(*measuringHeight) : heightConstr;
+        auto const size = scope.MeasureChild(view, measuringWidthConstr, measuringHeightConstr);
+        maxSize = Size<Dp>::Max(maxSize, size);
+    });
+    scope.SetMeasuredSize(maxSize);
 }
 
 auto SizedView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
@@ -153,42 +159,46 @@ auto SizedView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
 ///
 /// @brief Measure axis.
 ///
-auto SizedView::MeasureAxis(const AxisConstraints& c, Dp const v) const -> Dp
+auto SizedView::MeasureAxis(const AxisConstraints& c, Optional<Dp> const& v) const -> Optional<Dp>
 {
-    if (Dp::IsFinite(v))
+    if (v)
     {
-        return AxisConstraints::Constrain(c, ViewLayoutFunction::AlignToPixelGridByRound(v, *this));
+        if (Dp::IsFinite(*v))
+        {
+            return AxisConstraints::Constrain(c, ViewLayoutFunction::AlignToPixelGridByRound(*v, *this));
+        }
+        return c.IsBounded() ? c.GetMax() : c.GetMin();
     }
-    return c.IsBounded() ? c.GetMax() : c.GetMin();
+    return {};
 }
 
 ///
 /// @brief 
 ///
-auto SizedView::GetLayoutWidth() const -> Dp
+auto SizedView::GetLayoutWidth() const -> Optional<Dp>
 {
     if (auto width = _width.GetValue())
     {
-        if (!Dp::IsNaN(*width))
+        if (!Dp::IsNaN(*width) && 0 <= *width)
         {
-            return Dp::Max(0, *width);
+            return *width;
         }
     }
-    return 0;
+    return {};
 }
 
 ///
 /// @brief 
 ///
-auto SizedView::GetLayoutHeight() const -> Dp
+auto SizedView::GetLayoutHeight() const -> Optional<Dp>
 {
     if (auto height = _height.GetValue())
     {
-        if (!Dp::IsNaN(*height))
+        if (!Dp::IsNaN(*height) && 0 <= *height)
         {
-            return Dp::Max(0, *height);
+            return *height;
         }
     }
-    return 0;
+    return {};
 }
 }

@@ -14,6 +14,12 @@ namespace FW_EXPORT
 ///
 /// @brief A layout view which forces fixed width and height to its child.
 ///
+/// ### Layout behavior
+///
+/// If width/height is set to a finite number greater than or equal to zero, the SizedView will force its content to have the specified width/height.  
+/// If width/height is set to positive infinity, the SizedView will fill the available space in that axis.  
+/// Otherwise, the SizedView will size itself to wrap its content in that axis.  
+///
 class SizedView final : public View
 {
 public:
@@ -39,9 +45,9 @@ protected:
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 
 private:
-    auto MeasureAxis(const AxisConstraints& c, Dp const v) const -> Dp;
-    auto GetLayoutWidth() const -> Dp;
-    auto GetLayoutHeight() const -> Dp;
+    auto MeasureAxis(const AxisConstraints& c, Optional<Dp> const& v) const -> Optional<Dp>;
+    auto GetLayoutWidth() const -> Optional<Dp>;
+    auto GetLayoutHeight() const -> Optional<Dp>;
 
 private:
     Shared<ContainerView> _container;
