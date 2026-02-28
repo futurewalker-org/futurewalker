@@ -25,6 +25,7 @@ public:
     static auto MakeUnconstrained() noexcept -> AxisConstraints;
     static auto MakeExact(Dp const value) noexcept -> AxisConstraints;
     static auto MakeMinMax(Dp const min, Dp const max) noexcept -> AxisConstraints;
+    static auto MakeUnbounded(Dp const min) noexcept -> AxisConstraints;
 
     static auto IsNearlyEqual(AxisConstraints const& lhs, AxisConstraints const& rhs, Float64 const tolerance = 1e-6) noexcept -> Bool;
     static auto IsNearlyEqualRelative(AxisConstraints const& lhs, AxisConstraints const& rhs, Float64 const precision = 1e-6, Float64 const minTolerance = 1e-6) noexcept -> Bool;

@@ -36,6 +36,14 @@ auto AxisConstraints::MakeMinMax(Dp const min, Dp const max) noexcept -> AxisCon
 }
 
 ///
+/// @brief Make unbounded (min, infinite) constraints.
+///
+auto AxisConstraints::MakeUnbounded(Dp const min) noexcept -> AxisConstraints
+{
+    return AxisConstraints(min, Dp::Infinity());
+}
+
+///
 /// @brief Returns true if two values are close within absolute tolerance.
 ///
 /// @param lhs

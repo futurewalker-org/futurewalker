@@ -22,6 +22,9 @@ public:
     static auto MakeExact(Dp const width, Dp const height) -> BoxConstraints;
     static auto MakeExact(Size<Dp> const& size) -> BoxConstraints;
     static auto MakeMinMax(Dp const min, Dp const max) -> BoxConstraints;
+    static auto MakeMinMax(Size<Dp> const& minSize, Size<Dp> const& maxSize) -> BoxConstraints;
+    static auto MakeUnbounded(Dp const min) -> BoxConstraints;
+    static auto MakeUnbounded(Size<Dp> const& minSize) -> BoxConstraints;
 
     static auto Constrain(BoxConstraints const& cs, Size<Dp> const& size) -> Size<Dp>;
     static auto Offset(BoxConstraints const& cs, Dp const horizontal, Dp const vertical) -> BoxConstraints;

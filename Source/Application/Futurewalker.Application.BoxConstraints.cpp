@@ -46,6 +46,40 @@ auto BoxConstraints::MakeMinMax(Dp const min, Dp const max) -> BoxConstraints
     return BoxConstraints(cs, cs);
 }
 
+
+///
+/// @brief
+///
+/// @param minSize
+/// @param maxSize
+///
+auto BoxConstraints::MakeMinMax(Size<Dp> const& minSize, Size<Dp> const& maxSize) -> BoxConstraints
+{
+    return BoxConstraints(AxisConstraints::MakeMinMax(minSize.GetWidth(), maxSize.GetWidth()), AxisConstraints::MakeMinMax(minSize.GetHeight(), maxSize.GetHeight()));
+}
+
+
+///
+/// @brief
+///
+/// @param min
+///
+auto BoxConstraints::MakeUnbounded(Dp const min) -> BoxConstraints
+{
+    auto const cs = AxisConstraints::MakeUnbounded(min);
+    return BoxConstraints(cs, cs);
+}
+
+///
+/// @brief
+///
+/// @param minSize
+///
+auto BoxConstraints::MakeUnbounded(Size<Dp> const& minSize) -> BoxConstraints
+{
+    return BoxConstraints(AxisConstraints::MakeUnbounded(minSize.GetWidth()), AxisConstraints::MakeUnbounded(minSize.GetHeight()));
+}
+
 ///
 /// @brief
 ///
