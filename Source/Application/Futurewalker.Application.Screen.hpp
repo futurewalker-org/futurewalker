@@ -22,14 +22,13 @@ class Screen : NonCopyable
 public:
     static auto GetScreens() -> ScreenArray;
     static auto GetPrimaryScreen() -> Shared<Screen>;
-    static auto GetScreenFromWindow(Shared<PlatformWindow> window) -> Shared<Screen>;
     static auto GetScreenFromRect(Rect<Vp> const& rect) -> Shared<Screen>;
 
     static auto IsEqual(const Screen& lhs, const Screen& rhs) -> Bool;
 
     auto GetInfo() const -> Optional<ScreenInfo>;
 
-    Screen(PassKey<Screen>, Shared<PlatformScreen> platformObject);
+    explicit Screen(Shared<PlatformScreen> platformObject);
 
 private:
     Shared<PlatformScreen> _platformObject;

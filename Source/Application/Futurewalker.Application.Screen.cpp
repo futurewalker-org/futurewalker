@@ -22,7 +22,7 @@ auto Screen::GetScreens() -> ScreenArray
     if (auto const context = Locator::GetInstance<PlatformScreenContext>())
     {
         auto const screens = context->GetScreens();
-        return screens | std::ranges::views::transform([](auto&& s) { return Shared<Screen>::Make(PassKey<Screen>(), s); }) | std::ranges::to<std::vector>();
+        return screens | std::ranges::views::transform([](auto&& s) { return Shared<Screen>::Make(s); }) | std::ranges::to<std::vector>();
     }
     return {};
 }
@@ -36,27 +36,9 @@ auto Screen::GetPrimaryScreen() -> Shared<Screen>
     {
         if (auto const platformObject = context->GetPrimaryScreen())
         {
-            return Shared<Screen>::Make(PassKey<Screen>(), platformObject);
+            return Shared<Screen>::Make(platformObject);
         }
     }
-    return {};
-}
-
-///
-/// @brief Get screen from window.
-///
-/// @param[in] window Window
-///
-auto Screen::GetScreenFromWindow(Shared<PlatformWindow> window) -> Shared<Screen>
-{
-    if (auto const context = Locator::GetInstance<PlatformScreenContext>())
-    {
-        if (auto const platformObject = context->GetScreenFromWindow(window))
-        {
-            return Shared<Screen>::Make(PassKey<Screen>(), platformObject);
-        }
-    }
-    FW_DEBUG_LOG_ERROR("Screen::ScreenFromWindow(): Failed to obtain PlatformScreen object");
     return {};
 }
 
@@ -73,7 +55,7 @@ auto Screen::GetScreenFromRect(Rect<Vp> const& rect) -> Shared<Screen>
     {
         if (auto const platformObject = context->GetScreenFromRect(rect))
         {
-            return Shared<Screen>::Make(PassKey<Screen>(), platformObject);
+            return Shared<Screen>::Make(platformObject);
         }
     }
     FW_DEBUG_LOG_ERROR("Screen::GetScreenFromRect(): Failed to obtain PlatformScreen object");
@@ -109,7 +91,7 @@ auto Screen::GetInfo() const -> Optional<ScreenInfo>
 ///
 /// @param platformObject
 ///
-Screen::Screen(PassKey<Screen>, Shared<PlatformScreen> platformObject)
+Screen::Screen(Shared<PlatformScreen> platformObject)
   : _platformObject {std::move(platformObject)}
 {
 }

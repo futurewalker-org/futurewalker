@@ -26,6 +26,7 @@
 #include "Futurewalker.Application.PlatformInputEvent.hpp"
 #include "Futurewalker.Application.PlatformHitTestEvent.hpp"
 #include "Futurewalker.Application.PlatformViewLayerContext.hpp"
+#include "Futurewalker.Application.PlatformScreenContext.hpp"
 
 #include "Futurewalker.Event.EventReceiver.hpp"
 
@@ -337,7 +338,15 @@ auto Window::GetBackingScale() const -> BackingScale
 ///
 auto Window::GetScreen() const -> Shared<Screen>
 {
-    return Screen::GetScreenFromWindow(_platformObject);
+    if (auto const context = Locator::GetInstance<PlatformScreenContext>())
+    {
+        if (auto const platformObject = context->GetScreenFromWindow(_platformObject))
+        {
+            return Shared<Screen>::Make(platformObject);
+        }
+    }
+    FW_DEBUG_LOG_ERROR("Screen::ScreenFromWindow(): Failed to obtain PlatformScreen object");
+    return {};
 }
 
 ///
