@@ -298,7 +298,6 @@ auto PlatformWindowContextWin::InitializeWindow(Shared<PlatformWindowWin> const&
     const auto owner = options.owner ? options.owner.As<PlatformWindowWin>()->GetNativeHandle() : NULL;
     const auto style = GetWindowStyleForOptions(options);
     const auto exStyle = GetWindowExStyleForOptions(options);
-    const auto title = PlatformStringFunctionWin::Utf8ToWide(options.title);
 
     auto createParams = PlatformToplevelWindowCreateParams {
         .window = *window,
@@ -309,7 +308,7 @@ auto PlatformWindowContextWin::InitializeWindow(Shared<PlatformWindowWin> const&
         throw Exception(ErrorCode::InvalidArgument, "Tried to set disabled window as owner");
     }
 
-    const auto hwnd = CreateWindowHandle(_toplevelWindowClass, owner, style, exStyle, title.c_str(), instance, createParams);
+    const auto hwnd = CreateWindowHandle(_toplevelWindowClass, owner, style, exStyle, nullptr, instance, createParams);
 
     FW_DEBUG_LOG_INFO("CreateWindowHandle(): hwnd=0x{:x}", (uintptr_t)hwnd);
 
@@ -322,18 +321,6 @@ auto PlatformWindowContextWin::InitializeWindow(Shared<PlatformWindowWin> const&
     {
         throw Exception(ErrorCode::Failure, "Failed to create window");
     }
-
-    if (options.maximized)
-    {
-        ::ShowWindow(hwnd, SW_MAXIMIZE);
-    }
-
-    if (options.minimized)
-    {
-        ::ShowWindow(hwnd, SW_MINIMIZE);
-    }
-
-    ::ShowWindow(hwnd, options.visible ? SW_SHOW : SW_HIDE);
 }
 
 ///

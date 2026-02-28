@@ -26,17 +26,12 @@ struct PlatformWindowOptions
     WindowBehavior behavior = WindowBehavior::Normal;
     WindowBackgroundStyle backgroundStyle = WindowBackgroundStyle::System;
     Shared<PlatformWindow> owner = nullptr;
-    String title = String();
     Bool closable = true;
     Bool resizable = true;
     Bool minimizable = true;
     Bool hasFrame = true;
     Bool hasTitleBar = true;
-    Bool visible = true;
-    Bool maximized = false;
-    Bool minimized = false;
     Bool allowActiveOwnerPopup = false;
-    BoxConstraints sizeConstraints = BoxConstraints::MakeUnconstrained();
 };
 }
 }
