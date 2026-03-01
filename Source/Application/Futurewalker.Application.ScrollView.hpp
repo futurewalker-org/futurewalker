@@ -18,6 +18,7 @@ class ScrollView : public View
 {
 public:
     static auto Make() -> Shared<ScrollView>;
+    static auto MakeWithContent(Shared<View> const& content) -> Shared<ScrollView>;
 
     ScrollView(PassKey<View> key);
 

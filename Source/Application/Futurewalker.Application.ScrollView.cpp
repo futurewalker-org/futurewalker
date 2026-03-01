@@ -15,6 +15,13 @@ auto ScrollView::Make() -> Shared<ScrollView>
     return View::MakeDerived<ScrollView>();
 }
 
+auto ScrollView::MakeWithContent(Shared<View> const& content) -> Shared<ScrollView>
+{
+    auto scrollView = Make();
+    scrollView->SetContent(content);
+    return scrollView;
+}
+
 ScrollView::ScrollView(PassKey<View> key)
   : View(key)
 {
