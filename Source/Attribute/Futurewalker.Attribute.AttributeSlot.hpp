@@ -29,11 +29,7 @@ public:
     auto GetOwner() -> Shared<AttributeNode>;
     auto SetOwner(Shared<AttributeNode> owner) -> void;
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
-
     auto GetEventReceiver() -> EventReceiver&;  
-    auto GetEventReceiver() const -> EventReceiver const&;
 
     auto AddUpdateNumber(UInt64 const number) -> void;
     auto RemoveUpdateNumber(UInt64 const number) -> Bool;
@@ -44,6 +40,7 @@ public:
     auto SetValueChanged(Bool const changed) -> void;
 
     auto GetDescription() -> StaticAttributeBaseRef;
+    auto SetDescription(StaticAttributeBaseRef const& description) -> void;
 
     auto HasValueCache() const -> Bool;
     auto GetValueCache() const -> Optional<AttributeValue> const&;
@@ -62,7 +59,7 @@ public:
     auto SetValue(StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void;
     auto ClearValue() -> void;
 
-    auto GetValueDependentSlots() -> std::vector<Shared<AttributeSlot>>;
+    auto GetValueDependentSlots() -> std::vector<Weak<AttributeSlot>> const&;
     auto SetValueDependentSlots(std::vector<Shared<AttributeSlot>> const& slots) -> void;
     auto DetachFromValueDependentSlots() -> void;
 
@@ -70,8 +67,12 @@ public:
     auto SetSourceDependentSlot(Shared<AttributeSlot> const& slot) -> void;
     auto DetachFromSourceDependentSlot() -> void;
 
-    auto GetSourceDependantSlots() -> std::vector<Shared<AttributeSlot>>;
-    auto GetValueDependantSlots() -> std::vector<Shared<AttributeSlot>>;
+    auto GetSourceDependantSlotCount() const -> SInt64;
+    auto GetSourceDependantSlots() ->  std::vector<Weak<AttributeSlot>> const&;
+    auto GetValueDependantSlotCount() const -> SInt64;
+    auto GetValueDependantSlots() -> std::vector<Weak<AttributeSlot>> const&;
+
+    auto Reset() -> void; 
 
 private:
     auto SetSelf(Shared<AttributeSlot> const& self) -> void;

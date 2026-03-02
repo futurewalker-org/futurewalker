@@ -108,6 +108,74 @@ TEST_CASE("AttributeNode")
             AttributeNode::SetValue<&Attr2>(*node, 42);
             REQUIRE(*AttributeNode::GetValue<&Attr3>(*node) == 42);
         }
+
+        SECTION("indirect update")
+        {
+            auto node = AttributeNode::Make();
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr2, [](auto a) { return a * 2; }, Attr1);
+            REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 2);
+            AttributeNode::SetValue<&Attr1>(*node, 21);
+            REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 42);
+            auto parent = AttributeNode::Make();
+            parent->AddChild(node);
+            REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 42);
+        }
+
+        SECTION("indirect update")
+        {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](auto a) { return a * 2; }, Attr1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr2, Attr3);
+
+            auto child = AttributeNode::Make();
+            auto parent = AttributeNode::Make();
+            parent->AddChild(child);
+
+            AttributeNode::SetValue<&Attr1>(*child, 21);
+            REQUIRE(*AttributeNode::GetValue<&Attr2>(*child) == 42);
+        }
+
+        SECTION("indirect update")
+        {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 2);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](auto a) { return a * 2; }, Attr1);
+
+            auto node = AttributeNode::Make();
+            AttributeNode::SetReference<&Attr2>(*node, Attr3);
+            AttributeNode::SetValue<&Attr1>(*node, 21);
+            REQUIRE(*AttributeNode::GetValue<&Attr1>(*node) == 21);
+            REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 42);
+            REQUIRE(*AttributeNode::GetValue<&Attr3>(*node) == 42);
+
+            auto parent = AttributeNode::Make();
+            parent->AddChild(node);
+            REQUIRE(*AttributeNode::GetValue<&Attr1>(*node) == 21);
+            REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 42);
+            REQUIRE(*AttributeNode::GetValue<&Attr3>(*node) == 42);
+        }
+
+        SECTION("indirect update")
+        {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 2);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](auto a) { return a * 2; }, Attr1);
+
+            auto child = AttributeNode::Make();
+            AttributeNode::SetReference<&Attr2>(*child, Attr3);
+            REQUIRE(*AttributeNode::GetValue<&Attr2>(*child) == 2);
+
+            auto parent = AttributeNode::Make();
+            parent->AddChild(child);
+
+            AttributeNode::SetValue<&Attr1>(*parent, 21);
+            REQUIRE(*AttributeNode::GetValue<&Attr2>(*child) == 42);
+
+            auto root = AttributeNode::Make();
+            root->AddChild(parent);
+            REQUIRE(*AttributeNode::GetValue<&Attr2>(*child) == 42);
+        }
     }
 
     SECTION("reference to parent node")

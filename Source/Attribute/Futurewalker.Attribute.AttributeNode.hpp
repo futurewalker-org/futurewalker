@@ -7,6 +7,7 @@
 #include "Futurewalker.Attribute.AttributeValue.hpp"
 #include "Futurewalker.Attribute.StaticAttribute.hpp"
 #include "Futurewalker.Attribute.AttributeFunction.hpp"
+#include "Futurewalker.Attribute.AttributeSlotCacheType.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -101,11 +102,10 @@ private:
     auto FindAncestorAttributeSlot(AttributeId const& id) -> Shared<AttributeSlot>;
 
     auto ResolveSource(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
-
     auto ResolveValue(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
 
+    auto RewireSlotOnAddChild(Shared<AttributeSlot> const& slot, Shared<AttributeSlot> const& start, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Bool;
     auto UpdateSlotCacheRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> Bool;
-
     auto NotifyValueChangedRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> void;
 
     static auto CheckReferenceLoop(StaticAttributeBaseRef reference) -> Bool;
@@ -114,6 +114,7 @@ private:
     Weak<AttributeNode> _self;
     Weak<AttributeNode> _parent;
     AttributeNodeList _children;
+    Shared<AttributeSlotCache> _slotCache;
     AttributeSlotMap _slots;
 };
 

@@ -2,6 +2,7 @@
 
 #include "Futurewalker.Attribute.AttributeSlot.hpp"
 #include "Futurewalker.Attribute.StaticAttributeBase.hpp"
+#include "Futurewalker.Attribute.AttributeNode.hpp"
 
 #include "Futurewalker.Base.UniqueIdentifier.hpp"
 #include "Futurewalker.Base.Debug.hpp"
@@ -30,7 +31,6 @@ auto AttributeSlot::Make(StaticAttributeBaseRef description) -> Shared<Attribute
 AttributeSlot::AttributeSlot(PassKey<AttributeSlot>, StaticAttributeBaseRef description)
   : _description {description}
 {
-    _eventReceiver = EventReceiver::Make();
 }
 
 ///
@@ -44,32 +44,12 @@ auto AttributeSlot::GetOwner() -> Shared<AttributeNode>
 ///
 /// @brief
 ///
-auto AttributeSlot::GetTracker() -> Tracker&
-{
-    return _eventReceiver->GetTracker();
-}
-
-///
-/// @brief
-///
-auto AttributeSlot::GetTracker() const -> Tracker const&
-{
-    return _eventReceiver->GetTracker();
-}
-
-///
-/// @brief
-///
 auto AttributeSlot::GetEventReceiver() -> EventReceiver&
 {
-    return *_eventReceiver;
-}
-
-///
-/// @brief
-///
-auto AttributeSlot::GetEventReceiver() const -> EventReceiver const&
-{
+    if (!_eventReceiver)
+    {
+        _eventReceiver = EventReceiver::Make();
+    }
     return *_eventReceiver;
 }
 
@@ -107,7 +87,11 @@ auto AttributeSlot::RemoveUpdateNumber(UInt64 const number) -> Bool
 ///
 auto AttributeSlot::HasEventConnection() const -> Bool
 {
-    return _eventReceiver->HasConnection();
+    if (_eventReceiver)
+    {
+        return _eventReceiver->HasConnection();
+    }
+    return false;
 }
 
 ///
@@ -144,6 +128,16 @@ auto AttributeSlot::SetOwner(Shared<AttributeNode> owner) -> void
 auto AttributeSlot::GetDescription() -> StaticAttributeBaseRef
 {
     return _description;
+}
+
+///
+/// @brief
+///
+/// @param description
+///
+auto AttributeSlot::SetDescription(StaticAttributeBaseRef const& description) -> void
+{
+    _description = description;
 }
 
 ///
@@ -242,40 +236,36 @@ auto AttributeSlot::ClearValue() -> void
 ///
 /// @brief
 ///
-auto AttributeSlot::GetValueDependentSlots() -> std::vector<Shared<AttributeSlot>>
+auto AttributeSlot::GetValueDependentSlots() -> std::vector<Weak<AttributeSlot>> const&
 {
-    auto slots = std::vector<Shared<AttributeSlot>>();
-    slots.reserve(_valueDependentSlots.size());
-    for (auto const& slot : _valueDependentSlots)
-    {
-        if (auto const locked = slot.Lock())
-        {
-            slots.push_back(locked);
-        }
-    }
-    return slots;
+    return _valueDependentSlots;
 }
 
 auto AttributeSlot::SetValueDependentSlots(std::vector<Shared<AttributeSlot>> const& slots) -> void
 {
     DetachFromValueDependentSlots();
 
+    auto const self = GetSelf();
     for (auto const& slot : slots)
     {
-        slot->_valueDependantSlots.push_back(GetSelf());
+        slot->_valueDependantSlots.push_back(self);
         _valueDependentSlots.push_back(slot);
     }
 }
 
 auto AttributeSlot::DetachFromValueDependentSlots() -> void
 {
+    auto const self = GetSelf();
     for (auto const& weakSlot : _valueDependentSlots)
     {
         if (auto const slot = weakSlot.Lock())
         {
             auto& dependantSlots = slot->_valueDependantSlots;
-            auto self = GetSelf();
-            dependantSlots.erase(std::remove_if(dependantSlots.begin(), dependantSlots.end(), [=](Weak<AttributeSlot> const& w) { return w.Lock() == self; }), dependantSlots.end());
+            auto const it = std::remove_if(dependantSlots.begin(), dependantSlots.end(), [&](Weak<AttributeSlot> const& w) { return w.Lock() == self; });
+            if (it != dependantSlots.end())
+            {
+                dependantSlots.erase(it);
+            }
         }
     }
     _valueDependentSlots.clear();
@@ -300,53 +290,82 @@ auto AttributeSlot::SetSourceDependentSlot(Shared<AttributeSlot> const& slot) ->
 
 auto AttributeSlot::DetachFromSourceDependentSlot() -> void
 {
+    auto const self = GetSelf();
     if (auto const slot = _sourceDependentSlot.Lock())
     {
         auto& dependantSlots = slot->_sourceDependantSlots;
-        auto self = GetSelf();
-        dependantSlots.erase(std::remove_if(dependantSlots.begin(), dependantSlots.end(), [=](Weak<AttributeSlot> const& w) { return w.Lock() == self; }), dependantSlots.end());
+        auto const it = std::find_if(dependantSlots.begin(), dependantSlots.end(), [&](Weak<AttributeSlot> const& w) { return w.Lock() == self; });
+        if (it != dependantSlots.end())
+        {
+            dependantSlots.erase(it);
+        }
     }
     _sourceDependentSlot.Reset();
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-auto AttributeSlot::GetValueDependantSlots() -> std::vector<Shared<AttributeSlot>>
+auto AttributeSlot::GetValueDependantSlotCount() const -> SInt64
 {
-    auto slots = std::vector<Shared<AttributeSlot>>();
-    slots.reserve(_valueDependantSlots.size());
-    for (auto const& slot : _valueDependantSlots)
-    {
-        if (auto const locked = slot.Lock())
-        {
-            slots.push_back(locked);
-        }
-    }
-    return slots;
+    return static_cast<SInt64>(_valueDependantSlots.size());
 }
 
 ///
 /// @brief
 ///
-auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Shared<AttributeSlot>>
+auto AttributeSlot::GetValueDependantSlots() -> std::vector<Weak<AttributeSlot>> const&
 {
-    auto slots = std::vector<Shared<AttributeSlot>>();
-    slots.reserve(_sourceDependantSlots.size());
-    for (auto const& slot : _sourceDependantSlots)
-    {
-        if (auto const locked = slot.Lock())
-        {
-            slots.push_back(locked);
-        }
-    }
-    return slots;
+    return _valueDependantSlots;
 }
 
 ///
-/// @brief 
+/// @brief
 ///
-/// @param self 
+auto AttributeSlot::GetSourceDependantSlotCount() const -> SInt64
+{
+    return static_cast<SInt64>(_sourceDependantSlots.size());
+}
+
+///
+/// @brief
+///
+auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Weak<AttributeSlot>> const&
+{
+    return _sourceDependantSlots;
+}
+
+///
+/// @brief
+///
+auto AttributeSlot::Reset() -> void
+{
+    FW_DEBUG_ASSERT(_sourceDependentSlot.Lock() == nullptr);
+    FW_DEBUG_ASSERT(_sourceDependantSlots.empty());
+    FW_DEBUG_ASSERT(_valueDependentSlots.empty());
+    FW_DEBUG_ASSERT(_valueDependantSlots.empty());
+
+    ClearValue();
+    ClearValueCache();
+    ClearReferenceCache();
+    _owner = nullptr;
+    _updateNumbers.clear();
+    _valueChanged = false;
+    _sourceDependentSlot.Reset();
+    _sourceDependantSlots.clear();
+    _valueDependentSlots.clear();
+    _valueDependantSlots.clear();
+
+    if (_eventReceiver)
+    {
+        _eventReceiver->DisconnectAll();
+    }
+}
+
+///
+/// @brief
+///
+/// @param self
 ///
 auto AttributeSlot::SetSelf(Shared<AttributeSlot> const& self) -> void
 {
