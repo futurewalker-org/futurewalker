@@ -314,7 +314,7 @@ auto AttributeSlot::GetValueDependantSlotCount() const -> SInt64
 ///
 /// @brief
 ///
-auto AttributeSlot::GetValueDependantSlots() -> std::vector<Weak<AttributeSlot>> const&
+auto AttributeSlot::GetValueDependantSlots() -> std::vector<Weak<AttributeSlot>>
 {
     return _valueDependantSlots;
 }
@@ -330,7 +330,7 @@ auto AttributeSlot::GetSourceDependantSlotCount() const -> SInt64
 ///
 /// @brief
 ///
-auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Weak<AttributeSlot>> const&
+auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Weak<AttributeSlot>> 
 {
     return _sourceDependantSlots;
 }

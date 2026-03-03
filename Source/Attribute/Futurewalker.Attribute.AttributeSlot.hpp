@@ -68,9 +68,9 @@ public:
     auto DetachFromSourceDependentSlot() -> void;
 
     auto GetSourceDependantSlotCount() const -> SInt64;
-    auto GetSourceDependantSlots() ->  std::vector<Weak<AttributeSlot>> const&;
+    auto GetSourceDependantSlots() ->  std::vector<Weak<AttributeSlot>>;
     auto GetValueDependantSlotCount() const -> SInt64;
-    auto GetValueDependantSlots() -> std::vector<Weak<AttributeSlot>> const&;
+    auto GetValueDependantSlots() -> std::vector<Weak<AttributeSlot>>;
 
     auto Reset() -> void; 
 
