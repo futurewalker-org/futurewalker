@@ -12,19 +12,23 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 ///
-/// @brief A view that draws a box with background and border.
+/// @brief A view that draws a box and border.
 ///
 /// ## Layout behavior
 ///
-/// Under bounded constraints, BoxView will fill the available space.
-/// Under unbounded constraints, BoxView will size itself to zero.
+/// BoxView sizes itself to wrap its content.
 ///
 class BoxView : public View
 {
 public:
     static auto Make() -> Shared<BoxView>;
+    static auto MakeWithContent(Shared<View> const& content) -> Shared<BoxView>;
 
     BoxView(PassKey<View> key);
+
+    auto GetContent() -> Shared<View>;
+    auto GetContent() const -> Shared<View const>;
+    auto SetContent(Shared<View> const& content) -> void;
 
     auto SetBackgroundColor(AttributeArg<RGBAColor> color) -> void;
     auto SetBackgroundAlpha(AttributeArg<Channel> alpha) -> void;
@@ -35,7 +39,6 @@ public:
 
 protected:
     auto Initialize() -> void override;
-    auto Measure(MeasureScope& scope) -> void override;
     auto Draw(DrawScope& scope) -> void override;
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 

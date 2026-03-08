@@ -3,7 +3,6 @@
 #include "Futurewalker.Application.ConstrainedView.hpp"
 #include "Futurewalker.Application.MeasureScope.hpp"
 #include "Futurewalker.Application.ArrangeScope.hpp"
-#include "Futurewalker.Application.ContainerView.hpp" 
 
 namespace FW_DETAIL_NS
 {
@@ -19,18 +18,24 @@ ConstrainedView::ConstrainedView(PassKey<View> key)
 
 auto ConstrainedView::GetContent() -> Shared<View>
 {
-    if (_container)
-    {
-        return _container->GetContent();
-    }
-    return {};
+    return GetChildAt(0);
+}
+
+auto ConstrainedView::GetContent() const -> Shared<View const>
+{
+    return GetChildAt(0);
 }
 
 auto ConstrainedView::SetContent(Shared<View> const& content) -> void
 {
-    if (_container)
+    auto const child = GetContent();
+    if (child != content)
     {
-        _container->SetContent(content);
+        if (child)
+        {
+            child->RemoveFromParent();
+        }
+        AddChildBack(content);
     }
 }
 
@@ -61,43 +66,25 @@ auto ConstrainedView::Initialize() -> void
 
     _widthConstraints.BindAndConnectAttributeWithDefaultValue(*this, &ConstrainedView::ReceiveAttributeEvent, AttributeWidthConstraints, AxisConstraints::MakeUnconstrained());
     _heightConstraints.BindAndConnectAttributeWithDefaultValue(*this, &ConstrainedView::ReceiveAttributeEvent, AttributeHeightConstraints, AxisConstraints::MakeUnconstrained());
-
-    _container = ContainerView::Make();
-    AddChildBack(_container);
 }
 
 auto ConstrainedView::Measure(MeasureScope& scope) -> void
 {
     auto const& parameter = scope.GetParameter();
 
-    auto IntersectConstraints = [](AxisConstraints const& source, AxisConstraints const& mask) {
-        if (mask.GetMax() < source.GetMin())
-        {
-            return AxisConstraints::MakeExact(source.GetMin());
-        }
-
-        if (source.IsBounded() && (source.GetMax() < mask.GetMin()))
-        {
-            return AxisConstraints::MakeExact(source.GetMax());
-        }
-
-        auto const min = Dp::Max(source.GetMin(), mask.GetMin());
-        auto const max = Dp::Min(source.GetMax(), mask.GetMax());
-        return AxisConstraints::MakeMinMax(min, max);
-    };
-
-    auto maxSize = Size<Dp>();
-    ForEachVisibleChild([&](View& child) {
-        auto const childWidth = IntersectConstraints(parameter.GetWidthConstraints(), _widthConstraints.GetValueOrDefault());
-        auto const childHeight = IntersectConstraints(parameter.GetWidthConstraints(), _widthConstraints.GetValueOrDefault());
-        maxSize = Size<Dp>::Max(maxSize, scope.MeasureChild(child, childWidth, childHeight));
-    });
-    scope.SetMeasuredSize(maxSize);
-}
-
-auto ConstrainedView::Arrange(ArrangeScope& scope) -> void
-{
-    View::Arrange(scope);
+    auto const childWidth = IntersectConstraints(parameter.GetWidthConstraints(), _widthConstraints.GetValueOrDefault());
+    auto const childHeight = IntersectConstraints(parameter.GetWidthConstraints(), _widthConstraints.GetValueOrDefault());
+    if (auto const content = GetContent())
+    {
+        auto const size = scope.MeasureChild(content, childWidth, childHeight);
+        scope.SetMeasuredSize(size);
+    }
+    else
+    {
+        auto const measuredWidth = childWidth.GetMin();
+        auto const measuredHeight = childHeight.GetMin();
+        scope.SetMeasuredSize(measuredWidth, measuredHeight);
+    }
 }
 
 auto ConstrainedView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
@@ -108,5 +95,22 @@ auto ConstrainedView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
         co_return true;
     }
     co_return false;
+}
+
+auto ConstrainedView::IntersectConstraints(AxisConstraints const& source, AxisConstraints const& mask) -> AxisConstraints
+{
+    if (mask.GetMax() < source.GetMin())
+    {
+        return AxisConstraints::MakeExact(source.GetMin());
+    }
+
+    if (source.IsBounded() && (source.GetMax() < mask.GetMin()))
+    {
+        return AxisConstraints::MakeExact(source.GetMax());
+    }
+
+    auto const min = Dp::Max(source.GetMin(), mask.GetMin());
+    auto const max = Dp::Min(source.GetMax(), mask.GetMax());
+    return AxisConstraints::MakeMinMax(min, max);
 }
 }

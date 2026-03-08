@@ -3,7 +3,6 @@
 
 #include "Futurewalker.Application.AlignViewType.hpp"
 #include "Futurewalker.Application.Alignment.hpp"
-#include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.View.hpp"
 
 namespace FW_DETAIL_NS
@@ -19,7 +18,8 @@ public:
     static auto Make() -> Shared<AlignView>;
     static auto MakeWithContent(Shared<View> const& content) -> Shared<AlignView>;
 
-    auto GetContent() const -> Shared<View>;
+    auto GetContent() -> Shared<View>;
+    auto GetContent() const -> Shared<View const>;
     auto SetContent(Shared<View> const& content) -> void;
 
     auto GetAlignment() const -> Alignment;
@@ -28,12 +28,10 @@ public:
     AlignView(PassKey<View> key);
 
 protected:
-    auto Initialize() -> void override;
     auto Measure(MeasureScope& scope) -> void override;
     auto Arrange(ArrangeScope& scope) -> void override;
 
 private:
-    Shared<ContainerView> _container;
     Alignment _alignment = Alignment::Center();
 };
 }

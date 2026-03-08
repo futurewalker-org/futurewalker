@@ -12,7 +12,8 @@
 #include "Futurewalker.Application.Menu.hpp"
 #include "Futurewalker.Application.MenuItem.hpp"
 #include "Futurewalker.Application.PaddingView.hpp"
-#include "Futurewalker.Application.ContainerView.hpp"
+#include "Futurewalker.Application.ClipView.hpp"
+#include "Futurewalker.Application.BoxView.hpp"
 #include "Futurewalker.Application.PopupType.hpp"
 
 #include "Futurewalker.Action.CommandObserverType.hpp"
@@ -66,8 +67,9 @@ private:
     auto UpdateEnabled(ItemData const& data) -> void;
 
 private:
-    Shared<ContainerView> _container;
-    Shared<PaddingView> _padding;
+    Shared<BoxView> _boxView;
+    Shared<ClipView> _clipView;
+    Shared<PaddingView> _paddingView;
     Shared<FlexLayout> _flex;
     std::vector<ItemData> _data;
     MenuItemViewBuilder _builder;

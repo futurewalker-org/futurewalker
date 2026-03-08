@@ -3,7 +3,6 @@
 
 #include "Futurewalker.Application.GestureRecognizerViewType.hpp"
 #include "Futurewalker.Application.GestureRecognizerType.hpp" 
-#include "Futurewalker.Application.ContainerView.hpp"
 
 #include "Futurewalker.Application.View.hpp"
 
@@ -35,7 +34,6 @@ protected:
     auto ReceiveEvent(Event<>& event) -> Async<Bool>;
 
 private:
-    Shared<ContainerView> _containerView;
     Shared<GestureRecognizer> _gestureRecognizer;
 };
 }

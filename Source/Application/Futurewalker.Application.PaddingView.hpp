@@ -4,7 +4,6 @@
 #include "Futurewalker.Application.PaddingViewType.hpp"
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.EdgeInsets.hpp"
-#include "Futurewalker.Application.ContainerViewType.hpp"
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
@@ -42,7 +41,6 @@ private:
     auto GetNormalizedPadding() const -> EdgeInsets;
 
 private:
-    Shared<ContainerView> _container;
     AttributeAccessor<EdgeInsets> _padding;
 };
 }

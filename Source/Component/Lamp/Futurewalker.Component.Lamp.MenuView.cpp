@@ -68,9 +68,10 @@ auto MenuView::SetItemViewBuilder(MenuItemViewBuilder const& builder) -> void
 
 auto MenuView::Initialize() -> void
 {
-    _padding = PaddingView::MakeWithPadding(MenuViewStyle::Padding);
-    _container = ContainerView::MakeWithContent(_padding);
-    AddChildBack(_container);
+    _paddingView = PaddingView::MakeWithPadding(MenuViewStyle::Padding);
+    _boxView = BoxView::MakeWithContent(_paddingView);
+    _clipView = ClipView::MakeWithContent(_boxView);
+    AddChildBack(_clipView);
 
     UpdateStyle();
 
@@ -330,20 +331,20 @@ auto MenuView::RebuildView() -> void
         }
         ++i;
     }
-    _padding->SetContent(_flex);
+    _paddingView->SetContent(_flex);
 }
 
 auto MenuView::UpdateStyle() -> void
 {
-    _container->SetCornerRadius(MenuViewStyle::CornerRadius);
+    _clipView->SetCornerRadius(MenuViewStyle::CornerRadius);
 
     if (IsEnabledFromRoot())
     {
-        _container->SetBackgroundColor(MenuViewStyle::BackgroundColor);
+        _boxView->SetBackgroundColor(MenuViewStyle::BackgroundColor);
     }
     else
     {
-        _container->SetBackgroundColor(MenuViewStyle::DisabledBackgroundColor);
+        _boxView->SetBackgroundColor(MenuViewStyle::DisabledBackgroundColor);
     }
 }
 

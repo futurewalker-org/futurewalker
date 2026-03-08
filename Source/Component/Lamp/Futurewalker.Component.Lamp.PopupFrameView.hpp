@@ -4,7 +4,7 @@
 #include "Futurewalker.Component.Lamp.PopupFrameViewType.hpp"
 
 #include "Futurewalker.Application.View.hpp"
-#include "Futurewalker.Application.ContainerViewType.hpp"
+#include "Futurewalker.Application.ClipViewType.hpp"
 #include "Futurewalker.Application.PaddingViewType.hpp"
 #include "Futurewalker.Application.CornerRadius.hpp"
 
@@ -47,7 +47,7 @@ protected:
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
 
 private:
-    Shared<ContainerView> _container;
+    Shared<ClipView> _clip;
     Shared<PaddingView> _padding;
     AttributeAccessor<CornerRadius> _cornerRadius;
     AttributeAccessor<Dp> _blurRadius;

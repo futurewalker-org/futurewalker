@@ -2,7 +2,6 @@
 #pragma once
 
 #include "Futurewalker.Application.ThemeViewType.hpp"
-#include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.ThemeType.hpp"
 
@@ -23,20 +22,16 @@ public:
 
     ThemeView(PassKey<View> key);
 
-    auto GetContent() const -> Shared<View>;
+    auto GetContent() -> Shared<View>;
     auto SetContent(Shared<View> const& content) -> void;
 
     auto GetTheme() const -> Shared<Theme>;
     auto SetTheme(Shared<Theme> const& theme) -> void;
 
-protected:
-    auto Initialize() -> void override;
-
 private:
     auto UpdateTheme() -> void;
 
 private:
-    Shared<ContainerView> _container;
     Shared<Theme> _theme;
 };
 }

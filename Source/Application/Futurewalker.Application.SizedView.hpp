@@ -2,7 +2,6 @@
 #pragma once
 
 #include "Futurewalker.Application.SizedViewType.hpp"
-#include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.View.hpp"
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
@@ -36,6 +35,7 @@ public:
 
     auto SetContent(Shared<View> const& content) -> void;
     auto GetContent() -> Shared<View>;
+    auto GetContent() const -> Shared<View const>;
 
     SizedView(PassKey<View> key);
 
@@ -50,7 +50,6 @@ private:
     auto GetLayoutHeight() const -> Optional<Dp>;
 
 private:
-    Shared<ContainerView> _container;
     AttributeAccessor<Dp> _width;
     AttributeAccessor<Dp> _height;
 };

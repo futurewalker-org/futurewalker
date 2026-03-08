@@ -2,7 +2,6 @@
 
 #include "Futurewalker.Application.ThemeView.hpp"
 #include "Futurewalker.Application.Theme.hpp"
-#include "Futurewalker.Application.ContainerView.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -38,22 +37,24 @@ ThemeView::ThemeView(PassKey<View> key)
 {
 }
 
-auto ThemeView::GetContent() const -> Shared<View>
+auto ThemeView::GetContent() -> Shared<View>
 {
-    if (_container)
-    {
-        return _container->GetContent();
-    }
-    return {};
+    return GetChildAt(0);
 }
 
 auto ThemeView::SetContent(Shared<View> const& content) -> void
 {
-    if (_container)
+    auto const child = GetContent();
+    if (child != content)
     {
-        _container->SetContent(content);
+        if (child)
+        {
+            child->RemoveFromParent();
+        }
+        AddChildBack(content);
     }
 }
+
 auto ThemeView::GetTheme() const -> Shared<Theme>
 {
     return _theme;
@@ -66,12 +67,6 @@ auto ThemeView::SetTheme(Shared<Theme> const& theme) -> void
         _theme = theme;
         UpdateTheme();
     }
-}
-
-auto ThemeView::Initialize() -> void
-{
-    _container = ContainerView::Make();
-    AddChildBack(_container);
 }
 
 auto ThemeView::UpdateTheme() -> void

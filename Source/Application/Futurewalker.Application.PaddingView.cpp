@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.PaddingView.hpp"
-#include "Futurewalker.Application.ContainerView.hpp"
 #include "Futurewalker.Application.MeasureScope.hpp"
 #include "Futurewalker.Application.ArrangeScope.hpp"
 
@@ -46,17 +45,25 @@ auto PaddingView::SetPadding(AttributeArg<EdgeInsets> const& padding) -> void
 
 auto PaddingView::GetContent() -> Shared<View>
 {
-    return _container->GetContent();
+    return GetChildAt(0);
 }
 
 auto PaddingView::GetContent() const -> Shared<View const>
 {
-    return _container->GetContent();
+    return GetChildAt(0);
 }
 
 auto PaddingView::SetContent(Shared<View> const& content) -> void
 {
-    _container->SetContent(content);
+    auto child = GetChildAt(0);
+    if (child != content)
+    {
+        if (child)
+        {
+            child->RemoveFromParent();
+        }
+        AddChildBack(content);
+    }
 }
 
 PaddingView::PaddingView(PassKey<View> key)
@@ -66,9 +73,6 @@ PaddingView::PaddingView(PassKey<View> key)
 
 auto PaddingView::Initialize() -> void
 {
-    _container = ContainerView::Make();
-    AddChildBack(_container);
-
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(EdgeInsets, PaddingAttribute, {});
 
     _padding.BindAndConnectAttributeWithDefaultValue(*this, &PaddingView::ReceiveAttributeEvent, PaddingAttribute, {});
@@ -85,7 +89,12 @@ auto PaddingView::Measure(MeasureScope& scope) -> void
     auto const vertical = padding.GetTop() + padding.GetBottom();
     auto const adjustedWidth = AxisConstraints::Offset(widthConstraints, -horizontal);
     auto const adjustedHeight = AxisConstraints::Offset(heightConstraints, -vertical);
-    auto const childSize = scope.MeasureChild(_container, adjustedWidth, adjustedHeight);
+
+    auto childSize = Size<Dp>();
+    if (auto const content = GetContent())
+    {
+        childSize = scope.MeasureChild(content, adjustedWidth, adjustedHeight);
+    }
 
     auto const measuredWidth = AxisConstraints::Constrain(widthConstraints, childSize.GetWidth() + horizontal);
     auto const measuredHeight = AxisConstraints::Constrain(heightConstraints, childSize.GetHeight() + vertical);
@@ -94,11 +103,14 @@ auto PaddingView::Measure(MeasureScope& scope) -> void
 
 auto PaddingView::Arrange(ArrangeScope& scope) -> void
 {
-    auto const layoutDirection = GetLayoutDirection();
-    auto const padding = GetNormalizedPadding();
-    auto const left = (layoutDirection == LayoutDirection::LeftToRight) ? padding.GetLeading() : padding.GetTrailing();
-    auto const top = padding.GetTop();
-    scope.ArrangeChild(_container, {left, top});
+    if (auto const content = GetContent())
+    {
+        auto const layoutDirection = GetLayoutDirection();
+        auto const padding = GetNormalizedPadding();
+        auto const left = (layoutDirection == LayoutDirection::LeftToRight) ? padding.GetLeading() : padding.GetTrailing();
+        auto const top = padding.GetTop();
+        scope.ArrangeChild(content, {left, top});
+    }
 }
 
 auto PaddingView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>

@@ -12,9 +12,39 @@ auto BoxView::Make() -> Shared<BoxView>
     return View::MakeDerived<BoxView>();
 }
 
+auto BoxView::MakeWithContent(Shared<View> const& content) -> Shared<BoxView>
+{
+    auto view = Make();
+    view->SetContent(content);
+    return view;
+}
+
 BoxView::BoxView(PassKey<View> key)
   : View(key)
 {
+}
+
+auto BoxView::GetContent() -> Shared<View>
+{
+    return GetChildAt(0);
+}
+
+auto BoxView::GetContent() const -> Shared<View const>
+{
+    return GetChildAt(0);
+}
+
+auto BoxView::SetContent(Shared<View> const& content) -> void
+{
+    auto const child = GetChildAt(0);
+    if (child != content)
+    {
+        if (child)
+        {
+            child->RemoveFromParent();
+        }
+        AddChildBack(content);
+    }
 }
 
 auto BoxView::SetBackgroundColor(AttributeArg<RGBAColor> color) -> void
@@ -62,27 +92,6 @@ auto BoxView::Initialize() -> void
     _borderAlpha.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeBorderAlpha, {1});
     _borderWidth.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeBorderWidth, {0});
     _cornerRadius.BindAndConnectAttributeWithDefaultValue(*this, &BoxView::ReceiveAttributeEvent, AttributeCornerRadius, {});
-}
-
-auto BoxView::Measure(MeasureScope& scope) -> void
-{
-    auto const width = scope.GetParameter().GetWidthConstraints();
-    auto const height = scope.GetParameter().GetHeightConstraints();
-
-    auto const measureAxis = [&](auto const& constraints) -> Dp {
-        if (constraints.IsBounded())
-        {
-            return constraints.GetMax();
-        }
-        else
-        {
-            return Dp(0);
-        }
-    };
-
-    auto const measuredWidth = measureAxis(width);
-    auto const measuredHeight = measureAxis(height);
-    scope.SetMeasuredSize(measuredWidth, measuredHeight);
 }
 
 auto BoxView::Draw(DrawScope& scope) -> void

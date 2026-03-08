@@ -28,18 +28,24 @@ ButtonRenderView::ButtonRenderView(PassKey<View> key)
 
 auto ButtonRenderView::GetContent() -> Shared<View>
 {
-    if (_container)
-    {
-        return _container->GetContent();
-    }
-    return {};
+    return GetChildAt(0);
+}
+
+auto ButtonRenderView::GetContent() const -> Shared<View const>
+{
+    return GetChildAt(0);
 }
 
 auto ButtonRenderView::SetContent(Shared<View> const& content) -> void
 {
-    if (_container)
+    auto const child = GetChildAt(0);
+    if (child != content)
     {
-        _container->SetContent(content);
+        if (child)
+        {
+            child->RemoveFromParent();
+        }
+        AddChildBack(content);
     }
 }
 
@@ -158,9 +164,6 @@ auto ButtonRenderView::SetCornerRadius(AttributeArg<CornerRadius> const& radius)
 
 void ButtonRenderView::Initialize()
 {
-    _container = ContainerView::Make();
-    AddChildBack(_container);
-
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeBackgroundColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeBackgroundAlpha, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeDisabledBackgroundColor, {});

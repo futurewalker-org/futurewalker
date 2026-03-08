@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.SizedView.hpp"
-#include "Futurewalker.Application.ContainerView.hpp"
 #include "Futurewalker.Application.MeasureScope.hpp"
 #include "Futurewalker.Application.ArrangeScope.hpp"
 #include "Futurewalker.Application.ViewLayoutFunction.hpp"
@@ -84,9 +83,14 @@ auto SizedView::GetHeight() const -> Dp
 ///
 auto SizedView::SetContent(Shared<View> const& content) -> void
 {
-    if (_container)
+    auto const child = GetChildAt(0);
+    if (child != content)
     {
-        _container->SetContent(content);
+        if (child)
+        {
+            child->RemoveFromParent();
+        }
+        AddChildBack(content);
     }
 }
 
@@ -95,11 +99,15 @@ auto SizedView::SetContent(Shared<View> const& content) -> void
 ///
 auto SizedView::GetContent() -> Shared<View>
 {
-    if (_container)
-    {
-        _container->GetContent();
-    }
-    return {};
+    return GetChildAt(0);
+}
+
+///
+/// @brief
+///
+auto SizedView::GetContent() const -> Shared<View const>
+{
+    return GetChildAt(0);
 }
 
 ///
@@ -115,9 +123,6 @@ SizedView::SizedView(PassKey<View> key)
 ///
 auto SizedView::Initialize() -> void
 {
-    _container = ContainerView::Make();
-    AddChildBack(_container);
-
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeWidth, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeHeight, {0});
 
@@ -137,14 +142,19 @@ auto SizedView::Measure(MeasureScope& scope) -> void
     auto const measuringWidth = MeasureAxis(widthConstr, GetLayoutWidth());
     auto const measuringHeight = MeasureAxis(heightConstr, GetLayoutHeight());
 
-    auto maxSize = Size<Dp>();
-    ForEachVisibleChild([&](View& view) {
+    if (auto const content = GetContent())
+    {
         auto const measuringWidthConstr = measuringWidth ? AxisConstraints::MakeExact(*measuringWidth) : widthConstr;
         auto const measuringHeightConstr = measuringHeight ? AxisConstraints::MakeExact(*measuringHeight) : heightConstr;
-        auto const size = scope.MeasureChild(view, measuringWidthConstr, measuringHeightConstr);
-        maxSize = Size<Dp>::Max(maxSize, size);
-    });
-    scope.SetMeasuredSize(maxSize);
+        auto const size = scope.MeasureChild(content, measuringWidthConstr, measuringHeightConstr);
+        scope.SetMeasuredSize(size);
+    }
+    else
+    {
+        auto const measuredWidth = measuringWidth ? *measuringWidth : widthConstr.GetMin();
+        auto const measuredHeight = measuringHeight ? *measuringHeight : heightConstr.GetMin();
+        scope.SetMeasuredSize(measuredWidth, measuredHeight);
+    }
 }
 
 auto SizedView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>

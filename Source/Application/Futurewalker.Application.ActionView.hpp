@@ -3,7 +3,6 @@
 
 #include "Futurewalker.Application.ActionViewType.hpp"
 #include "Futurewalker.Application.View.hpp" 
-#include "Futurewalker.Application.ContainerViewType.hpp"
 
 #include "Futurewalker.Action.CommandId.hpp"
 #include "Futurewalker.Action.ActionType.hpp"
@@ -25,12 +24,6 @@ public:
 
     auto AddAction(CommandId const& command, Shared<Action> const& action) -> void;
     auto RemoveAction(CommandId const& command) -> void;
-
-protected:
-    auto Initialize() -> void override;
-
-private:
-    Shared<ContainerView> _container;
 };
 }
 }

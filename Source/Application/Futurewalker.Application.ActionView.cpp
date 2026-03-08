@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.ActionView.hpp"
-#include "Futurewalker.Application.ContainerView.hpp"
 
 #include "Futurewalker.Action.CommandNode.hpp"
 
@@ -26,18 +25,19 @@ ActionView::ActionView(PassKey<View> key)
 
 auto ActionView::GetContent() -> Shared<View>
 {
-    if (_container)
-    {
-        return _container->GetContent();
-    }
-    return {};
+    return GetChildAt(0);
 }
 
 auto ActionView::SetContent(Shared<View> content) -> void
 {
-    if (_container)
+    auto const child = GetChildAt(0);
+    if (child != content)
     {
-        _container->SetContent(content);
+        if (child)
+        {
+            child->RemoveFromParent();
+        }
+        AddChildBack(content);
     }
 }
 
@@ -49,11 +49,5 @@ auto ActionView::AddAction(CommandId const& command, Shared<Action> const& actio
 auto ActionView::RemoveAction(CommandId const& command) -> void
 {
     CommandNode::RemoveAction(*this, command);
-}
-
-auto ActionView::Initialize() -> void
-{
-    _container = ContainerView::Make();
-    AddChildBack(_container);
 }
 }

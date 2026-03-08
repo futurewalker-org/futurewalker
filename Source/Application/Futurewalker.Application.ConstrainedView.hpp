@@ -3,7 +3,6 @@
 
 #include "Futurewalker.Application.ConstrainedViewType.hpp"
 #include "Futurewalker.Application.AxisConstraints.hpp"
-#include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.View.hpp" 
 
 #include "Futurewalker.Attribute.AttributeArg.hpp"
@@ -24,6 +23,7 @@ public:
     ConstrainedView(PassKey<View> key);
 
     auto GetContent() -> Shared<View>;
+    auto GetContent() const -> Shared<View const>;
     auto SetContent(Shared<View> const& content) -> void;
 
     auto GetWidthConstraints() const -> AxisConstraints;
@@ -35,13 +35,12 @@ public:
 protected:
     auto Initialize() -> void override;
     auto Measure(MeasureScope& scope) -> void override;
-    auto Arrange(ArrangeScope& scope) -> void override;
 
 private:
     auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto IntersectConstraints(AxisConstraints const& source, AxisConstraints const& mask) -> AxisConstraints;
 
 private:
-    Shared<ContainerView> _container;
     AttributeAccessor<AxisConstraints> _widthConstraints;
     AttributeAccessor<AxisConstraints> _heightConstraints;
 };

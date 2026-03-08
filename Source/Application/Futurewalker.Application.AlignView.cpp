@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.AlignView.hpp"
-#include "Futurewalker.Application.ContainerView.hpp"
 #include "Futurewalker.Application.MeasureScope.hpp"
 #include "Futurewalker.Application.ArrangeScope.hpp"
 #include "Futurewalker.Application.ViewLayoutFunction.hpp"
@@ -31,13 +30,17 @@ auto AlignView::MakeWithContent(Shared<View> const& content) -> Shared<AlignView
 ///
 /// @brief
 ///
-auto AlignView::GetContent() const -> Shared<View>
+auto AlignView::GetContent() -> Shared<View>
 {
-    if (_container)
-    {
-        return _container->GetContent();
-    }
-    return {};
+    return GetChildAt(0);
+}
+
+///
+/// @brief
+///
+auto AlignView::GetContent() const -> Shared<View const>
+{
+    return GetChildAt(0);
 }
 
 ///
@@ -47,9 +50,14 @@ auto AlignView::GetContent() const -> Shared<View>
 ///
 auto AlignView::SetContent(Shared<View> const& content) -> void
 {
-    if (_container)
+    auto const child = GetChildAt(0);
+    if (child != content)
     {
-        _container->SetContent(content);
+        if (child)
+        {
+            child->RemoveFromParent();
+        }
+        AddChildBack(content);
     }
 }
 
@@ -81,15 +89,6 @@ auto AlignView::SetAlignment(Alignment const& alignment) -> void
 AlignView::AlignView(PassKey<View> key)
   : View(key)
 {
-}
-
-///
-/// @brief
-///
-auto AlignView::Initialize() -> void
-{
-    _container = ContainerView::Make();
-    AddChildBack(_container);
 }
 
 ///

@@ -2,7 +2,7 @@
 
 #include "Futurewalker.Component.Lamp.PopupFrameView.hpp"
 
-#include "Futurewalker.Application.ContainerView.hpp"
+#include "Futurewalker.Application.ClipView.hpp"
 #include "Futurewalker.Application.PaddingView.hpp"
 #include "Futurewalker.Application.DrawScope.hpp"
 #include "Futurewalker.Application.ViewDrawFunction.hpp"
@@ -33,18 +33,18 @@ PopupFrameView::PopupFrameView(PassKey<View> key)
 
 auto PopupFrameView::GetContent() -> Shared<View>
 {
-    if (_container)
+    if (_clip)
     {
-        return _container->GetContent();
+        return _clip->GetContent();
     }
     return {};
 }
 
 auto PopupFrameView::SetContent(Shared<View> content) -> void
 {
-    if (_container)
+    if (_clip)
     {
-        _container->SetContent(content);
+        _clip->SetContent(content);
     }
 }
 
@@ -81,9 +81,9 @@ auto PopupFrameView::Initialize() -> void
     _shadowColor.BindAndConnectAttributeWithDefaultValue(*this, &PopupFrameView::ReceiveAttributeEvent, AttributeShadowColor, {});
     _shadowAlpha.BindAndConnectAttributeWithDefaultValue(*this, &PopupFrameView::ReceiveAttributeEvent, AttributeShadowAlpha, {1});
 
-    _container = ContainerView::Make();
-    _container->SetCornerRadius(AttributeCornerRadius);
-    _padding = PaddingView::MakeWithContent(_container);
+    _clip = ClipView::Make();
+    _clip->SetCornerRadius(AttributeCornerRadius);
+    _padding = PaddingView::MakeWithContent(_clip);
     _padding->SetPadding(AttributePadding);
     AddChildBack(_padding);
 }
@@ -94,7 +94,7 @@ auto PopupFrameView::Draw(DrawScope& scope) -> void
     auto const cornerRadius = _cornerRadius.GetValueOrDefault();
     auto const shadowColor = _shadowColor.GetValueOrDefault();
     auto const shadowAlpha = _shadowAlpha.GetValueOrDefault();
-    auto const containerRect = _container->LocalToAncestorRect(_container->GetContentRect(), *this);
+    auto const containerRect = _clip->LocalToAncestorRect(_clip->GetContentRect(), *this);
     auto const direction = GetLayoutDirection();
     auto const blurStyle = Graphics::BlurStyle::Outer;
 

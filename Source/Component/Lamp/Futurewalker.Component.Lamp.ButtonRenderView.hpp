@@ -4,7 +4,6 @@
 #include "Futurewalker.Component.Lamp.ButtonRenderViewType.hpp"
 
 #include "Futurewalker.Application.View.hpp"
-#include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.CornerRadius.hpp"
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
@@ -27,6 +26,7 @@ public:
     ButtonRenderView(PassKey<View> key);
 
     auto GetContent() -> Shared<View>;
+    auto GetContent() const -> Shared<View const>;
     auto SetContent(Shared<View> const& content) -> void;
 
     auto SetDown(Bool const down) -> void;
@@ -62,7 +62,6 @@ private:
     Bool _enter = false;
     Bool _focused = false;
     FocusReason _focusReason = FocusReason::Other;
-    Shared<ContainerView> _container;
     AttributeAccessor<RGBAColor> _backgroundColor;
     AttributeAccessor<Channel> _backgroundAlpha;
     AttributeAccessor<RGBAColor> _disabledBackgroundColor;

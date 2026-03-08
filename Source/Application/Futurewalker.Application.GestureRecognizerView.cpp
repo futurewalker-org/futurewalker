@@ -2,7 +2,6 @@
 
 #include "Futurewalker.Application.GestureRecognizerView.hpp"
 #include "Futurewalker.Application.GestureRecognizer.hpp"
-#include "Futurewalker.Application.ContainerView.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -67,9 +66,14 @@ auto GestureRecognizerView::GetGestureRecognizer() const -> Shared<GestureRecogn
 ///
 auto GestureRecognizerView::SetContent(Shared<View> const& view) -> void
 {
-    if (_containerView)
+    auto const child = GetContent();
+    if (child != view)
     {
-        _containerView->SetContent(view);
+        if (child)
+        {
+            child->RemoveFromParent();
+        }
+        AddChildBack(view);
     }
 }
 
@@ -78,11 +82,7 @@ auto GestureRecognizerView::SetContent(Shared<View> const& view) -> void
 ///
 auto GestureRecognizerView::GetContent() -> Shared<View>
 {
-    if (_containerView)
-    {
-        return _containerView->GetContent();
-    }
-    return {};
+    return GetChildAt(0);
 }
 
 ///
@@ -90,11 +90,7 @@ auto GestureRecognizerView::GetContent() -> Shared<View>
 ///
 auto GestureRecognizerView::GetContent() const -> Shared<View const>
 {
-    if (_containerView)
-    {
-        return _containerView->GetContent();
-    }
-    return {};
+    return GetChildAt(0);
 }
 
 ///
@@ -103,9 +99,6 @@ auto GestureRecognizerView::GetContent() const -> Shared<View const>
 auto GestureRecognizerView::Initialize() -> void
 {
     SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
-
-    _containerView = ContainerView::Make();
-    AddChildBack(_containerView);
 
     EventReceiver::Connect(*this, *this, &GestureRecognizerView::ReceiveEvent);
 }
