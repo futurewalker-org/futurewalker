@@ -1,10 +1,47 @@
-Futurewalker is a (not yet) cross-platform, retained-mode GUI application framework written in C++23.  
+# Futurewalker
 
-It is primarily designed for developing graphics tools.
+A cross-platform, retained-mode GUI framework written in C++23.  
 
-**Futurewalker is currently in early development phase, thus not production ready by any means.**   
+> [!NOTE]  
+> Futurewalker is currently in early development phase.  
+> If you have interest in the project, please try it out and provide feedback!  
 
-If you have interest in the project, please try it out and provide feedback!
+<img src=Documentation/Screenshot/20260309_Gallery_Color.png width=460>
+<img src=Documentation/Screenshot/20260309_Gallery_Buttons.png width=460>
+
+## Overview
+
+* Object oriented, retained-mode API
+* Composable, responsive layout system
+* Customizable styling system
+* Coroutine support
+* GPU accelerated graphics by Skia
+* Styleless core + styled components
+
+## Project goals
+
+The primary goal of this project is to crate a modern GUI framework for complex tool applications, in modern C++.  
+
+It has been a long time since established C++ GUI frameworks like Qt were originally designed, and since then there has been many changes in both C++ language and human-computer interaction.  
+This project is, to some extent, an attempt to apply what was learned from past decades of GUI programming in C++.
+
+More specific goals are:
+
+* Supporting wide range of features required by complex native applications
+* Incorporating modern GUI concepts like responsive layouts, gestures, etc
+* Focusing on flexibility, customizability and extensibility
+* Better safety story compared to other C++ frameworks
+* Better async story compared to other C++ frameworks
+* Supporting multiple platforms, ideally all of popular ones
+* Decent performance and energy efficiency
+
+Non-goals:
+
+* Native look and feel
+* In-game UIs
+* Externally hosted UIs like audio software plugins
+
+## Project status
 
 ### Supported platforms 
 
@@ -12,37 +49,34 @@ If you have interest in the project, please try it out and provide feedback!
 | ---- | ---- |
 | Windows 10 | ❔ Undecided |
 | Windows 11 | 🚧 In Development |
-| macOS | 📝 Planned for 2026~ |
+| macOS | 🚧 Planned for 2026~ |
 | iOS | 📝 Planned for 2027~ |
 | Android | 📝 Planned for 2027~ |
 | Linux | ❔ Undecided |
 | Web | ❔ Undecided |
 
-### Building
+## Building
 
-> NOTE: This is for building tests and examples in this repository.   
-> There's no proper way to develop applications yet. 
+> [!NOTE]  
+> This is for building tests and examples in this repository.  
+> There's no proper way to develop applications yet.  
+
+You can build tests and examples with following steps:
 
 1. Install Conan package manager
 
 ```
-pip install conan
+pip3 install conan
 ```
 
-2. Install Bazel build tool
-
-```
-winget install Bazel
-```
-
-3. Setup local package for Skia
+2. Setup local package for Skia
 
 ```
 git clone https://github.com/mocabe/conan-skia.git
 conan remote add conan_skia ./conan-skia
 ```
 
-4. Build the project
+3. Build the project
 
 ```
 git clone https://github.com/mocabe/futurewalker.git
@@ -50,69 +84,12 @@ cd futurewalker
 conan build . -pr:h=./conan/vs2022_x86_64_Debug.profile --build=missing
 ```
 
-## Hello, World!
+## Documentation
 
-```cpp
-namespace Futurewalker
-{
-class HelloWorldApplication : public Application
-{
-public:
-    static auto Make() -> Shared<HelloWorldApplication>
-    {
-        return Application::MakeDerived<HelloWorldApplication>();
-    }
+> [!NOTE]  
+> TODO
 
-    HelloWorldApplication(PassKey<Application> key)
-      : Application(key, ApplicationOptions {.identifier = u8"com.example.futurewalker.helloworld"})
-    {
-    }
+## License
 
-protected:
-    auto Initialize() -> void override
-    {
-        EventReceiver::Connect(*this, *this, &HelloWorldApplication::ReceiveEvent);
-    }
+Licensed under Mozilla Public License 2.0
 
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>
-    {
-        if (event.Is<ApplicationEvent::Started>())
-        {
-            ApplicationTheme::PushTheme(ThemeBrightness::Light, Shared<Lamp::Theme>::Make(ThemeBrightness::Light));
-            ApplicationTheme::PushTheme(ThemeBrightness::Dark, Shared<Lamp::Theme>::Make(ThemeBrightness::Dark));
-
-            auto const hello = String(u8"Hello, World!");
-
-            auto window = Window::Make({});
-            window->SetTitle(hello);
-            window->SetSize({500, 500});
-            auto text = Lamp::TextView::MakeWithText(hello);
-            AttributeNode::SetValue<&Lamp::TextViewStyle::FontSize>(*text, 42);
-            AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());
-            auto align = AlignView::MakeWithContent(text);
-            window->SetContent(align);
-            window->SetVisible(true);
-
-            co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
-            co_await Exit();
-        }
-        co_return false;
-    }
-};
-
-auto Main() -> Async<ExitCode>
-{
-    try
-    {
-        auto env = Environment();
-        auto app = HelloWorldApplication::Make();
-        co_await app->Run();
-    }
-    catch (...)
-    {
-        co_return ExitCode::Failure;
-    }
-    co_return ExitCode::Success;
-}
-}
-```
