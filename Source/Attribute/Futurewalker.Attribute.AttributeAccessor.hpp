@@ -45,7 +45,7 @@ public:
         _observer = AttributeNode::GetObserver(owner, attribute);
         if (_observer)
         {
-            _connection = EventReceiver::Connect(*_observer, *this, &AttributeAccessor::ReceiveEvent);
+            _connection = _observer->Connect(*this, &AttributeAccessor::ReceiveEvent);
             return true;
         }
         return false;
@@ -81,9 +81,12 @@ public:
     template <class Owner>
     auto BindAttributeWithDefaultValue(Owner& owner, StaticAttributeRef<T> attribute, const T& value) -> Bool
     {
-        if (BindAttribute(owner, attribute))
+        UnbindAttribute();
+        AttributeNode::SetValue(owner, attribute, value);
+        _observer = AttributeNode::GetObserver(owner, attribute);
+        if (_observer)
         {
-            SetValue(value);
+            _connection = _observer->Connect(*this, &AttributeAccessor::ReceiveEvent);
             return true;
         }
         return false;
@@ -120,9 +123,12 @@ public:
     template <class Owner>
     auto BindAttributeWithDefaultReference(Owner& owner, StaticAttributeRef<T> attribute, StaticAttributeRef<T> reference) -> Bool
     {
-        if (BindAttribute(owner, attribute))
+        UnbindAttribute();
+        AttributeNode::SetReference(owner, attribute, reference);
+        _observer = AttributeNode::GetObserver(owner, attribute);
+        if (_observer)
         {
-            SetReference(reference);
+            _connection = _observer->Connect(*this, &AttributeAccessor::ReceiveEvent);
             return true;
         }
         return false;

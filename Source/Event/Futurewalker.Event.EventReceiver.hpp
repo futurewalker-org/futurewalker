@@ -38,6 +38,7 @@ public:
     static auto Connect(Receiver& receiver, Observer&& observer, Function&& function) -> SignalConnection;
 
     auto HasConnection() const -> Bool;
+    auto DisconnectAll() -> void;
 
 public:
     EventReceiver(PassKey<EventReceiver>, Delegate delegate);

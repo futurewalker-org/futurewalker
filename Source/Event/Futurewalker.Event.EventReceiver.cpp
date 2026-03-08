@@ -27,6 +27,14 @@ auto EventReceiver::HasConnection() const -> Bool
 }
 
 ///
+/// @brief Disconnect all connections.
+///
+auto EventReceiver::DisconnectAll() -> void
+{
+    _eventSignal.DisconnectAll();
+}
+
+///
 /// @brief Send event to receiver.
 ///
 EventReceiver::EventReceiver(PassKey<EventReceiver>, Delegate delegate)
@@ -59,11 +67,15 @@ auto EventReceiver::SendEvent(Event<>& event) -> Async<Bool>
 ///
 auto EventReceiver::SendEventDetached(Event<>& event) -> Bool
 {
-    auto const r = Shared<Bool>::Make(false);
-    auto const e = Shared<Event<>>::Make(event);
-    AsyncFunction::SpawnFn([=, this]() -> Async<void> { *r = co_await SendEvent(*e); }).Detach();
-    event = *e;
-    return *r;
+    if (HasConnection())
+    {
+        auto const r = Shared<Bool>::Make(false);
+        auto const e = Shared<Event<>>::Make(event);
+        AsyncFunction::SpawnFn([=, this]() -> Async<void> { *r = co_await SendEvent(*e); }).Detach();
+        event = *e;
+        return *r;
+    }
+    return false;
 }
 
 ///

@@ -236,7 +236,7 @@ auto AttributeSlot::ClearValue() -> void
 ///
 /// @brief
 ///
-auto AttributeSlot::GetValueDependentSlots() -> std::vector<Weak<AttributeSlot>> const&
+auto AttributeSlot::GetValueDependentSlots() const -> SharedArray<Weak<AttributeSlot>>
 {
     return _valueDependentSlots;
 }
@@ -248,27 +248,30 @@ auto AttributeSlot::SetValueDependentSlots(std::vector<Shared<AttributeSlot>> co
     auto const self = GetSelf();
     for (auto const& slot : slots)
     {
-        slot->_valueDependantSlots.push_back(self);
-        _valueDependentSlots.push_back(slot);
+        slot->_valueDependantSlots.PushBack(self);
+        _valueDependentSlots.PushBack(slot);
     }
 }
 
 auto AttributeSlot::DetachFromValueDependentSlots() -> void
 {
     auto const self = GetSelf();
-    for (auto const& weakSlot : _valueDependentSlots)
+    for (auto i = SInt64(0); i < _valueDependentSlots.GetSize(); ++i)
     {
-        if (auto const slot = weakSlot.Lock())
+        if (auto const slot = _valueDependentSlots.GetValueAt(i).Lock())
         {
             auto& dependantSlots = slot->_valueDependantSlots;
-            auto const it = std::remove_if(dependantSlots.begin(), dependantSlots.end(), [&](Weak<AttributeSlot> const& w) { return w.Lock() == self; });
-            if (it != dependantSlots.end())
+            for (auto j = SInt64(0); j < dependantSlots.GetSize(); ++j)
             {
-                dependantSlots.erase(it);
+                if (dependantSlots.GetValueAt(j).Lock() == self)
+                {
+                    dependantSlots.Erase(j);
+                    break;
+                }
             }
         }
     }
-    _valueDependentSlots.clear();
+    _valueDependentSlots.Clear();
 }
 
 auto AttributeSlot::GetSourceDependentSlot() -> Shared<AttributeSlot>
@@ -283,7 +286,7 @@ auto AttributeSlot::SetSourceDependentSlot(Shared<AttributeSlot> const& slot) ->
     if (slot)
     {
         FW_DEBUG_ASSERT(_description.Get().GetId() == slot->GetDescription().Get().GetId());
-        slot->_sourceDependantSlots.push_back(GetSelf());
+        slot->_sourceDependantSlots.PushBack(GetSelf());
         _sourceDependentSlot = slot;
     }
 }
@@ -294,10 +297,13 @@ auto AttributeSlot::DetachFromSourceDependentSlot() -> void
     if (auto const slot = _sourceDependentSlot.Lock())
     {
         auto& dependantSlots = slot->_sourceDependantSlots;
-        auto const it = std::find_if(dependantSlots.begin(), dependantSlots.end(), [&](Weak<AttributeSlot> const& w) { return w.Lock() == self; });
-        if (it != dependantSlots.end())
+        for (auto i = SInt64(0); i < dependantSlots.GetSize(); ++i)
         {
-            dependantSlots.erase(it);
+            if (dependantSlots.GetValueAt(i).Lock() == self)
+            {
+                dependantSlots.Erase(i);
+                break;
+            }
         }
     }
     _sourceDependentSlot.Reset();
@@ -308,13 +314,13 @@ auto AttributeSlot::DetachFromSourceDependentSlot() -> void
 ///
 auto AttributeSlot::GetValueDependantSlotCount() const -> SInt64
 {
-    return static_cast<SInt64>(_valueDependantSlots.size());
+    return _valueDependantSlots.GetSize();
 }
 
 ///
 /// @brief
 ///
-auto AttributeSlot::GetValueDependantSlots() -> std::vector<Weak<AttributeSlot>>
+auto AttributeSlot::GetValueDependantSlots() const -> SharedArray<Weak<AttributeSlot>>
 {
     return _valueDependantSlots;
 }
@@ -324,13 +330,13 @@ auto AttributeSlot::GetValueDependantSlots() -> std::vector<Weak<AttributeSlot>>
 ///
 auto AttributeSlot::GetSourceDependantSlotCount() const -> SInt64
 {
-    return static_cast<SInt64>(_sourceDependantSlots.size());
+    return _sourceDependantSlots.GetSize();
 }
 
 ///
 /// @brief
 ///
-auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Weak<AttributeSlot>> 
+auto AttributeSlot::GetSourceDependantSlots() const -> SharedArray<Weak<AttributeSlot>> 
 {
     return _sourceDependantSlots;
 }
@@ -341,9 +347,9 @@ auto AttributeSlot::GetSourceDependantSlots() -> std::vector<Weak<AttributeSlot>
 auto AttributeSlot::Reset() -> void
 {
     FW_DEBUG_ASSERT(_sourceDependentSlot.Lock() == nullptr);
-    FW_DEBUG_ASSERT(_sourceDependantSlots.empty());
-    FW_DEBUG_ASSERT(_valueDependentSlots.empty());
-    FW_DEBUG_ASSERT(_valueDependantSlots.empty());
+    FW_DEBUG_ASSERT(_sourceDependantSlots.IsEmpty());
+    FW_DEBUG_ASSERT(_valueDependentSlots.IsEmpty());
+    FW_DEBUG_ASSERT(_valueDependantSlots.IsEmpty());
 
     ClearValue();
     ClearValueCache();
@@ -352,9 +358,9 @@ auto AttributeSlot::Reset() -> void
     _updateNumbers.clear();
     _valueChanged = false;
     _sourceDependentSlot.Reset();
-    _sourceDependantSlots.clear();
-    _valueDependentSlots.clear();
-    _valueDependantSlots.clear();
+    _sourceDependantSlots.Clear();
+    _valueDependentSlots.Clear();
+    _valueDependantSlots.Clear();
 
     if (_eventReceiver)
     {

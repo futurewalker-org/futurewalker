@@ -39,7 +39,6 @@ WindowFrame::WindowFrame(PassKey<View> key)
 ///
 auto WindowFrame::Initialize() -> void
 {
-    _areaManager = AttributeNode::GetObserver<&ViewAttribute::AreaManager>(*this);
     _titleBackground = ContainerView::Make();
     _titleContent = ContainerView::Make();
     _background = ContainerView::Make();
@@ -50,8 +49,9 @@ auto WindowFrame::Initialize() -> void
     AddChildBack(_titleContent);
     AddChildBack(_content);
 
-    EventReceiver::Connect(*_areaManager, *this, &WindowFrame::ReceiveAttributeEvent);
     EventReceiver::Connect(*this, *this, &WindowFrame::ReceiveEvent);
+
+    _areaManager.BindAndConnectAttribute(*this, &WindowFrame::ReceiveAttributeEvent, ViewAttribute::AreaManager);
 
     UpdateAreaManager();
 }
@@ -243,14 +243,7 @@ auto WindowFrame::SetTitleContent(Shared<View> content) -> void
 ///
 auto WindowFrame::GetAreaManager() -> Shared<ViewAreaManager>
 {
-    if (_areaManager)
-    {
-        if (auto const manager = _areaManager->GetValue())
-        {
-            return *manager;
-        }
-    }
-    return {};
+    return _areaManager.GetValueOrDefault();
 }
 
 ///
@@ -258,14 +251,7 @@ auto WindowFrame::GetAreaManager() -> Shared<ViewAreaManager>
 ///
 auto WindowFrame::GetAreaManager() const -> Shared<const ViewAreaManager>
 {
-    if (_areaManager)
-    {
-        if (auto const manager = _areaManager->GetValue())
-        {
-            return *manager;
-        }
-    }
-    return {};
+    return _areaManager.GetValueOrDefault();
 }
 
 ///

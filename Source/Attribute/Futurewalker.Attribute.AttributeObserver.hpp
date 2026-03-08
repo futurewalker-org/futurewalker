@@ -41,12 +41,37 @@ public:
       : _node {node}
       , _description {description}
     {
-        _eventReceiver = EventReceiver::Make();
+    }
 
+    ///
+    /// @brief Destructor.
+    ///
+    ~AttributeObserver()
+    {
+        for (auto& connection : _signalConnections)
+        {
+            connection.Disconnect();
+        }
+    }
+
+    ///
+    /// @brief Connect event handler.
+    ///
+    /// @param observer Event observer.
+    /// @param function Event receiver function.
+    ///
+    /// @return Signal connection.
+    ///
+    template <class Observer, class Function>
+    auto Connect(Observer&& observer, Function&& function) -> SignalConnection
+    {
         if (auto const attributeNode = _node.Lock())
         {
-            _signalConnection = AttributeNode::ConnectAttributeEvent(*attributeNode, _description, *this, &AttributeObserver::ReceiveEvent);
+            auto connection = AttributeNode::ConnectAttributeEvent(*attributeNode, _description, std::forward<Observer>(observer), std::forward<Function>(function));
+            _signalConnections.push_back(connection);
+            return connection;
         }
+        return {};
     }
 
     ///
@@ -97,57 +122,10 @@ public:
         }
     }
 
-    ///
-    /// @brief Get tracker.
-    ///
-    auto GetTracker() -> Tracker&
-    {
-        return _eventReceiver->GetTracker();
-    }
-
-    ///
-    /// @brief Get tracker.
-    ///
-    auto GetTracker() const -> Tracker const&
-    {
-        return _eventReceiver->GetTracker();
-    }
-
-    ///
-    /// @brief Get event receiver.
-    ///
-    auto GetEventReceiver() -> EventReceiver& 
-    {
-        return *_eventReceiver;
-    }
-
-    ///
-    /// @brief Get event receiver.
-    ///
-    auto GetEventReceiver() const -> EventReceiver const&
-    {
-        return *_eventReceiver;
-    }
-
 private:
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>
-    {
-        if (event.Is<AttributeEvent::ValueChanged>())
-        {
-            auto const parameter = event.As<AttributeEvent::ValueChanged>();
-            if (parameter->GetId() == _description.Get().GetId())
-            {
-                co_return co_await GetEventReceiver().SendEvent(event);
-            }
-        }
-        co_return false;
-    }
-
-private:
-    Shared<EventReceiver> _eventReceiver;
     Weak<AttributeNode> _node;
     StaticAttributeRef<T> _description;
-    SignalConnection _signalConnection;
+    std::vector<SignalConnection> _signalConnections;
 };
 }
 }

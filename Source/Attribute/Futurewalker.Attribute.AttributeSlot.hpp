@@ -11,6 +11,7 @@
 #include "Futurewalker.Core.Optional.hpp"
 #include "Futurewalker.Core.StaticReference.hpp"
 #include "Futurewalker.Core.NonCopyable.hpp"
+#include "Futurewalker.Core.SharedArray.hpp"
 
 #include <span>
 
@@ -59,7 +60,7 @@ public:
     auto SetValue(StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void;
     auto ClearValue() -> void;
 
-    auto GetValueDependentSlots() -> std::vector<Weak<AttributeSlot>> const&;
+    auto GetValueDependentSlots() const -> SharedArray<Weak<AttributeSlot>>;
     auto SetValueDependentSlots(std::vector<Shared<AttributeSlot>> const& slots) -> void;
     auto DetachFromValueDependentSlots() -> void;
 
@@ -68,9 +69,9 @@ public:
     auto DetachFromSourceDependentSlot() -> void;
 
     auto GetSourceDependantSlotCount() const -> SInt64;
-    auto GetSourceDependantSlots() ->  std::vector<Weak<AttributeSlot>>;
+    auto GetSourceDependantSlots() const -> SharedArray<Weak<AttributeSlot>>;
     auto GetValueDependantSlotCount() const -> SInt64;
-    auto GetValueDependantSlots() -> std::vector<Weak<AttributeSlot>>;
+    auto GetValueDependantSlots() const -> SharedArray<Weak<AttributeSlot>>;
 
     auto Reset() -> void; 
 
@@ -89,10 +90,10 @@ private:
     std::vector<StaticAttributeBaseRef> _referenceCache;
     StaticAttributeComputeFunction _computeFunction;
     StaticAttributeComputeFunction _computeFunctionCache;
-    std::vector<Weak<AttributeSlot>> _valueDependentSlots;
-    std::vector<Weak<AttributeSlot>> _valueDependantSlots;
+    SharedArray<Weak<AttributeSlot>> _valueDependentSlots;
+    SharedArray<Weak<AttributeSlot>> _valueDependantSlots;
     Weak<AttributeSlot> _sourceDependentSlot;
-    std::vector<Weak<AttributeSlot>> _sourceDependantSlots;
+    SharedArray<Weak<AttributeSlot>> _sourceDependantSlots;
     Shared<EventReceiver> _eventReceiver;
 };
 }

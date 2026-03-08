@@ -7,7 +7,7 @@
 #include "Futurewalker.Application.ContainerViewType.hpp"
 #include "Futurewalker.Application.EdgeInsets.hpp"
 
-#include "Futurewalker.Attribute.AttributeObserverType.hpp"
+#include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -54,7 +54,7 @@ private:
     auto UpdateAreaManager() -> void;
 
 private:
-    Unique<AttributeObserver<Shared<ViewAreaManager>>> _areaManager;
+    AttributeAccessor<Shared<ViewAreaManager>> _areaManager;
     Shared<ContainerView> _background;
     Shared<ContainerView> _titleBackground;
     Shared<ContainerView> _contentBackground;

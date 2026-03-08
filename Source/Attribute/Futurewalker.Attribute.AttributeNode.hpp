@@ -91,6 +91,7 @@ private:
     auto IsAncestorOf(ReferenceArg<AttributeNode const> node) const -> Bool;
 
     auto AddAttributeSlot(StaticAttributeBaseRef description) -> Shared<AttributeSlot>;
+    auto AddAttributeSlotWithValue(StaticAttributeBaseRef description, StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> Shared<AttributeSlot>;
     auto ResetAttributeSlot(StaticAttributeBaseRef description) -> void;
     auto SetAttributeSlotValue(StaticAttributeBaseRef description, AttributeValue const& value) -> void;
     auto SetAttributeSlotReference(StaticAttributeBaseRef description, StaticAttributeBaseRef const reference) -> void;
@@ -99,12 +100,17 @@ private:
     auto InsertAttributeSlot(StaticAttributeBaseRef description) -> Shared<AttributeSlot>;
     auto EraseAttributeSlot(StaticAttributeBaseRef description) -> void;
     auto FindAttributeSlot(AttributeId const& id) -> Shared<AttributeSlot>;
+    auto FindAttributeSlot(AttributeId const& id) const -> Shared<AttributeSlot const>;
     auto FindAncestorAttributeSlot(AttributeId const& id) -> Shared<AttributeSlot>;
+
+    auto MeasureMinDistanceToReferencedSlots(StaticAttributeBaseRef reference, SInt32& minDistance) const -> void;
 
     auto ResolveSource(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
     auto ResolveValue(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
+    auto ResolveValueCore(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
+    auto ResolveReferences(StaticAttributeBaseRef reference, SInt32& depth) const -> std::vector<StaticAttributeBaseRef> const&;
 
-    auto RewireSlotOnAddChild(Shared<AttributeSlot> const& slot, Shared<AttributeSlot> const& start, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Bool;
+    auto RewireSlotOnAddChild(Shared<AttributeSlot>& slot, Shared<AttributeSlot> const& start, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Bool;
     auto UpdateSlotCacheRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> Bool;
     auto NotifyValueChangedRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> void;
 
@@ -192,7 +198,6 @@ auto AttributeNode::SetValue(Owner& owner, StaticAttributeRef<T> attribute, U co
     if (CheckReferenceLoop(attribute))
     {
         auto& node = owner.GetAttributeNode();
-        node.AddAttributeSlot(attribute);
         node.SetAttributeSlotValue(attribute, AttributeValue(T(value)));
     }
 }
@@ -226,7 +231,6 @@ auto AttributeNode::SetReference(Owner& owner, StaticAttributeRef<T> attribute, 
     if (CheckReferenceLoop(attribute))
     {
         auto& node = owner.GetAttributeNode();
-        node.AddAttributeSlot(attribute);
         node.SetAttributeSlotReference(attribute, reference);
     }
 }
@@ -261,7 +265,6 @@ auto AttributeNode::SetFunction(Owner& owner, F&& f, StaticAttributeRef<T> attri
     {
         auto const args = std::array {StaticAttributeBaseRef(references)...};
         auto& node = owner.GetAttributeNode();
-        node.AddAttributeSlot(attribute);
         node.SetAttributeSlotFunction(attribute, AttributeFunction::MakeComputeFunction<T, Ts...>(std::forward<F>(f)), args);
     }
 }
