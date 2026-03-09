@@ -12,9 +12,9 @@ include (CTest)
 # Directories
 # ------------------------------------------
 set(FW_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(FW_SOURCE_DIR ${FW_DIR}/Source)
-set(FW_TEST_DIR ${FW_DIR}/Test)
-set(FW_EXAMPLE_DIR ${FW_DIR}/Example)
+set(FW_SOURCE_DIR ${FW_DIR}/src)
+set(FW_TEST_DIR ${FW_DIR}/tests)
+set(FW_EXAMPLE_DIR ${FW_DIR}/examples)
 
 # ------------------------------------------
 # Dependencies

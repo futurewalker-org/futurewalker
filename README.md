@@ -6,7 +6,7 @@ A cross-platform, retained-mode GUI framework written in C++23.
 > Futurewalker is currently in early development phase.  
 > If you have interest in the project, please try it out and provide feedback!  
 
-<img src=Documentation/Screenshot/20260309_Gallery_Color.png width=412> <img src=Documentation/Screenshot/20260309_Gallery_Buttons.png width=412>
+<img src=docs/images/20260309_Gallery_Color.png width=412> <img src=docs/images/20260309_Gallery_Buttons.png width=412>
 
 ## Overview
 
