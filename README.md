@@ -6,8 +6,8 @@ A cross-platform, retained-mode GUI framework written in C++23.
 > Futurewalker is currently in early development phase.  
 > If you have interest in the project, please try it out and provide feedback!  
 
-<img src=Documentation/Screenshot/20260309_Gallery_Color.png width=460>
-<img src=Documentation/Screenshot/20260309_Gallery_Buttons.png width=460>
+<img src=Documentation/Screenshot/20260309_Gallery_Color.png width=412>
+<img src=Documentation/Screenshot/20260309_Gallery_Buttons.png width=412>
 
 ## Overview
 
@@ -20,20 +20,17 @@ A cross-platform, retained-mode GUI framework written in C++23.
 
 ## Project goals
 
-The primary goal of this project is to crate a modern GUI framework for complex tool applications, in modern C++.  
-
-It has been a long time since established C++ GUI frameworks like Qt were originally designed, and since then there has been many changes in both C++ language and human-computer interaction.  
-This project is, to some extent, an attempt to apply what was learned from past decades of GUI programming in C++.
+The primary goal of this project is to crate a modern GUI framework for complex tools applications.
 
 More specific goals are:
 
 * Supporting wide range of features required by complex native applications
 * Incorporating modern GUI concepts like responsive layouts, gestures, etc
 * Focusing on flexibility, customizability and extensibility
-* Better safety story compared to other C++ frameworks
-* Better async story compared to other C++ frameworks
 * Supporting multiple platforms, ideally all of popular ones
 * Decent performance and energy efficiency
+* Better safety story compared to other C++ frameworks
+* Better async story compared to other C++ frameworks
 
 Non-goals:
 
@@ -42,6 +39,9 @@ Non-goals:
 * Externally hosted UIs like audio software plugins
 
 ## Project status
+
+Currently the main focus of development is building underlying machinery for higher level components.  
+Limited amount of UI controls and layouts are available at this moment.
 
 ### Supported platforms 
 
