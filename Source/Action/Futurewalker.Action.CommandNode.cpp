@@ -152,11 +152,11 @@ auto CommandNode::InternalExecute(CommandId const& command) -> Bool
     {
         auto enabled = False;
         auto toggled = False;
-        if (action->State(enabled, toggled))
+        if (action->State(command, enabled, toggled))
         {
             if (enabled)
             {
-                action->Execute();
+                action->Execute(command);
             }
             return true;
         }
@@ -175,7 +175,7 @@ auto CommandNode::InternalIsEnabled(CommandId const& command) -> Bool
     {
         auto enabled = False;
         auto toggled = False;
-        if (action->State(enabled, toggled))
+        if (action->State(command, enabled, toggled))
         {
             return enabled;
         }
@@ -194,7 +194,7 @@ auto CommandNode::InternalIsToggled(CommandId const& command) -> Bool
     {
         auto enabled = False;
         auto toggled = False;
-        if (action->State(enabled, toggled))
+        if (action->State(command, enabled, toggled))
         {
             return toggled;
         }

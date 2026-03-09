@@ -1,33 +1,19 @@
-﻿// SPDX-License-Identifier: MPL-2.0
-
-#include "ColorSchemeView.hpp"
+﻿#include "ColorSchemeView.hpp"
 
 #include <Futurewalker.Application.FlexLayout.hpp>
 #include <Futurewalker.Application.SizedView.hpp>
 #include <Futurewalker.Application.AlignView.hpp>
 #include <Futurewalker.Application.PaddingView.hpp>
+#include <Futurewalker.Application.ContainerView.hpp>
 #include <Futurewalker.Application.BoxView.hpp>
 
 #include <Futurewalker.Component.Lamp.Style.hpp>
 #include <Futurewalker.Component.Lamp.TextView.hpp>
 
-namespace Futurewalker::ThemeViewer
+namespace Futurewalker::ComponentGallery
 {
 namespace
 {
-auto GetThemeName(ThemeBrightness brightness) -> String
-{
-    switch (brightness)
-    {
-        case ThemeBrightness::Light:
-            return u8"Light Theme";
-        case ThemeBrightness::Dark:
-            return u8"Dark Theme";
-        default:
-            return u8"Unknown Theme";
-    }
-}
-
 auto MakeColorTile(Size<Dp> size, StaticAttributeRef<RGBAColor> baseColor, StaticAttributeRef<RGBAColor> onColor, String colorName)
 {
     auto text = Lamp::TextView::MakeWithText(colorName);
@@ -69,13 +55,6 @@ auto ColorSchemeView::Initialize() -> void
     column->SetDirection(FlexLayoutDirection::Column);
     column->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Stretch);
     column->SetCrossAxisSize(FlexLayoutCrossAxisSize::Min);
-
-    auto title = Lamp::TextView::MakeWithText(GetThemeName(_brightness));
-
-    AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*title, Lamp::Style::FontSizeTitleMedium);
-    AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*title, Graphics::FontWeight::Bold());
-    AttributeNode::SetValue<&Lamp::TextViewStyle::HorizontalAlignment>(*title, TextViewHorizontalAlignment::Leading);
-    column->AddChild(title);
 
     auto innerRow = FlexLayout::Make();
     innerRow->SetDirection(FlexLayoutDirection::Row);
@@ -145,14 +124,6 @@ auto ColorSchemeView::Initialize() -> void
         rightColumn->AddChild(SizedView::Make(0, 5));
         rightColumn->AddChild(MakeColorTileSet(Lamp::Style::ColorErrorContainer, u8"Error Container", Lamp::Style::ColorOnErrorContainer, u8"On Error Container"));
     }
-
-    auto padding = PaddingView::MakeWithContent(column);
-    padding->SetPadding(Lamp::Style::PaddingMedium);
-    auto outerContainer = BoxView::MakeWithContent(padding);
-    outerContainer->SetBackgroundColor(Lamp::Style::ColorSurface);
-    outerContainer->SetBorderColor(Lamp::Style::ColorOutline);
-    outerContainer->SetCornerRadius(Lamp::Style::CornerRadiusMedium);
-    outerContainer->SetBorderWidth(1);
-    AddChildBack(outerContainer);
+    AddChildBack(column);
 }
 }

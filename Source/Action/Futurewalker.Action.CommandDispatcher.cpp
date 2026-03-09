@@ -23,11 +23,11 @@ auto CommandDispatcher::Execute(CommandId const& command) -> Bool
         {
             auto enabled = False;
             auto toggled = False;
-            if (action->State(enabled, toggled))
+            if (action->State(command, enabled, toggled))
             {
                 if (enabled)
                 {
-                    action->Execute();
+                    action->Execute(command);
                     return true;
                 }
             }
@@ -52,7 +52,7 @@ auto CommandDispatcher::IsEnabled(CommandId const& command) -> Bool
         {
             auto enabled = False;
             auto toggled = False;
-            if (action->State(enabled, toggled))
+            if (action->State(command, enabled, toggled))
             {
                 return enabled;
             }
@@ -72,7 +72,7 @@ auto CommandDispatcher::IsToggled(CommandId const& command) -> Bool
         {
             auto enabled = False;
             auto toggled = False;
-            if (action->State(enabled, toggled))
+            if (action->State(command, enabled, toggled))
             {
                 return toggled;
             }
@@ -197,11 +197,11 @@ auto CommandDispatcher::InternalSendCommand(CommandId const& command) -> Bool
     {
         auto enabled = False;
         auto toggled = False;
-        if (action->State(enabled, toggled))
+        if (action->State(command, enabled, toggled))
         {
             if (enabled)
             {
-                action->Execute();
+                action->Execute(command);
                 return true;
             }
         }

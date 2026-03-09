@@ -32,6 +32,7 @@ public:
     explicit TextButtonTheme(Type const type);
 
     auto Apply(AttributeNode& target) -> void override;
+    auto Clear(AttributeNode& target) -> void;
 
 private:
     Type _type = Type::Filled;

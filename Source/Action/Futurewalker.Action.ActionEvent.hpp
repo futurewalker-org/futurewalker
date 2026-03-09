@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Action.ActionEventType.hpp"
+#include "Futurewalker.Action.CommandId.hpp" 
 
 #include "Futurewalker.Event.EventParameter.hpp"
 
@@ -13,6 +14,12 @@ namespace FW_EXPORT
 {
 class ActionEvent : public EventParameter
 {
+    CommandId _commandId = 0U;
+
+public:
+    auto GetCommandId() const -> CommandId;
+    auto SetCommandId(CommandId const commandId) -> void;
+
 public:
     class StateChanged;
     class State;
@@ -26,25 +33,11 @@ class ActionEvent::StateChanged final : public ActionEvent
 class ActionEvent::State final : public ActionEvent
 {
 public:
-    auto IsEnabled() const -> Bool
-    {
-        return _enabled;
-    }
+    auto IsEnabled() const -> Bool;
+    auto SetEnabled(Bool const enabled) -> void;
 
-    auto SetEnabled(Bool const enabled) -> void
-    {
-        _enabled = enabled;
-    }
-
-    auto IsToggled() const -> Bool
-    {
-        return _toggled;
-    }
-
-    auto SetToggled(Bool const toggled) -> void
-    {
-        _toggled = toggled;
-    }
+    auto IsToggled() const -> Bool;
+    auto SetToggled(Bool const toggled) -> void;
 
 private:
     Bool _enabled = false;

@@ -17,15 +17,19 @@ Action::Action(PassKey<Action>)
     _eventReceiver = EventReceiver::Make();
 }
 
-auto Action::Execute() -> void
+auto Action::Execute(CommandId const command) -> void
 {
-    auto event = Event<>(Event<ActionEvent::Execute>());
+    auto eventParameter = Event<ActionEvent::Execute>();
+    eventParameter->SetCommandId(command);
+    auto event = Event<>(std::move(eventParameter));
     GetEventReceiver().SendEventDetached(event);
 }
 
-auto Action::State(Bool& enabled, Bool& toggled) -> Bool
+auto Action::State(CommandId const command, Bool& enabled, Bool& toggled) -> Bool
 {
-    auto event = Event<>(Event<ActionEvent::State>());
+    auto eventParameter = Event<ActionEvent::State>();
+    eventParameter->SetCommandId(command);
+    auto event = Event<>(std::move(eventParameter));
     if (GetEventReceiver().SendEventDetached(event))
     {
         if (event.Is<ActionEvent::State>())

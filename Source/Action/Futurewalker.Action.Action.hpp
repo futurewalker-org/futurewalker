@@ -30,8 +30,8 @@ public:
 
     Action(PassKey<Action>);
 
-    auto Execute() -> void;
-    auto State(Bool& enabled, Bool& toggled) -> Bool;
+    auto Execute(CommandId const command) -> void;
+    auto State(CommandId const command, Bool& enabled, Bool& toggled) -> Bool;
 
     auto NotifyStateChanged() -> void;
 
