@@ -77,6 +77,21 @@ auto FlexLayout::AddChild(Shared<View> const& content) -> void
 }
 
 ///
+/// @brief Remove all children from layout.
+///
+auto FlexLayout::RemoveChildren() -> void
+{
+    auto c = GetChildCount();
+    for (auto i = c - 1; 0 <= i; --i)
+    {
+        if (auto child = GetChildAt(i))
+        {
+            child->RemoveFromParent();
+        }
+    }
+}
+
+///
 /// @brief Check if layout contains the specified child.
 ///
 auto FlexLayout::Contains(Shared<View> const& child) const -> Bool
@@ -610,11 +625,11 @@ auto FlexLayout::GetMainAxisLength(EdgeInsets const& margin) const -> Dp
     auto const flexDirection = GetDirection();
     if (flexDirection == FlexLayoutDirection::Column || flexDirection == FlexLayoutDirection::ColumnReverse)
     {
-        return margin.GetTop() + margin.GetBottom();
+        return ViewLayoutFunction::AlignToPixelGridByRound(margin.GetTop(), *this) + ViewLayoutFunction::AlignToPixelGridByRound(margin.GetBottom(), *this);
     }
     else
     {
-        return margin.GetLeading() + margin.GetTrailing();
+        return ViewLayoutFunction::AlignToPixelGridByRound(margin.GetLeading(), *this) + ViewLayoutFunction::AlignToPixelGridByRound(margin.GetTrailing(), *this);
     }
 }
 
