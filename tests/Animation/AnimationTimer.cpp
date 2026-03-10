@@ -15,7 +15,7 @@ TEST_CASE("AnimationTimer")
         REQUIRE(at);
         REQUIRE(!at->IsActive());
         REQUIRE(at->IsEnabled());
-        REQUIRE(at->GetCurrentTime() == MonotonicTime(0));
+        REQUIRE(at->GetCurrentTime() == MonotonicTime());
 
         at->GetTracker();
         at->GetEventReceiver();

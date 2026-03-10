@@ -197,7 +197,10 @@ auto PlatformVsyncProviderWin::GetLastCompletedFrameTime(MonotonicTime& frameTim
         FW_DEBUG_ASSERT(false);
         return false;
     }
-    frameTime = static_cast<float64_t>(stats.targetTime) / frequency.QuadPart;
+    auto const seconds = stats.targetTime / frequency.QuadPart;
+    auto const remainder = stats.targetTime % frequency.QuadPart;
+    auto const nanoseconds = SInt64(seconds * 1'000'000'000 + (remainder * 1'000'000'000) / frequency.QuadPart);
+    frameTime = MonotonicTime::MakeFromNanoseconds(nanoseconds);
     return true;
 }
 

@@ -109,8 +109,10 @@ auto PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(PlatformPoin
     ::QueryPerformanceFrequency(&frequency);
     auto tickCount = LARGE_INTEGER();
     ::QueryPerformanceCounter(&tickCount);
-    auto const timestamp = tickCount.QuadPart;
-    parameter.SetTimestamp(static_cast<float64_t>(timestamp) / frequency.QuadPart);
+    auto const seconds = tickCount.QuadPart / frequency.QuadPart;
+    auto const remainder = tickCount.QuadPart % frequency.QuadPart;
+    auto const nanoseconds = SInt64(seconds * 1'000'000'000 + (remainder * 1'000'000'000) / frequency.QuadPart);
+    parameter.SetTimestamp(MonotonicTime::MakeFromNanoseconds(nanoseconds));
 
     if (WM_MOUSEFIRST <= msg && msg <= WM_MOUSELAST)
     {
@@ -253,7 +255,10 @@ auto PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(PlatformPo
             ::QueryPerformanceCounter(&tickCount);
             timestamp = tickCount.QuadPart;
         }
-        parameter.SetTimestamp(static_cast<float64_t>(timestamp) / frequency.QuadPart);
+        auto const seconds = timestamp / frequency.QuadPart;
+        auto const remainder = timestamp % frequency.QuadPart;
+        auto const nanoseconds = SInt64(seconds * 1'000'000'000 + (remainder * 1'000'000'000) / frequency.QuadPart);
+        parameter.SetTimestamp(MonotonicTime::MakeFromNanoseconds(nanoseconds));
     }
     {
         auto rect = RECT();
