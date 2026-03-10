@@ -135,6 +135,7 @@ TEST_CASE("Shared")
         auto s2 = std::move(s1);
         REQUIRE(!s1);
         REQUIRE(s2);
+        REQUIRE(s1.GetUseCount() == 0);
         REQUIRE(s2.GetUseCount() == 1);
     }
 
@@ -145,6 +146,8 @@ TEST_CASE("Shared")
         REQUIRE(!s1);
         REQUIRE(s2);
         REQUIRE(*s2 == 42);
+        REQUIRE(s1.GetUseCount() == 0);
+        REQUIRE(s2.GetUseCount() == 1);
 
         /*
         // Self move assignment, should be no-op.
@@ -152,6 +155,18 @@ TEST_CASE("Shared")
         REQUIRE(s2);
         REQUIRE(*s2 == 42);
         */
+    }
+
+    SECTION("Move to argument")
+    {
+        auto s1 = Shared<SInt32 const>::Make(42);
+        auto f = [](Shared<SInt32 const> s) {
+            REQUIRE(s);
+            REQUIRE(*s == 42);
+        };
+        f(std::move(s1));
+        REQUIRE(!s1);
+        REQUIRE(s1.GetUseCount() == 0);
     }
 
     SECTION("Convert from Unique")
