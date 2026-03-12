@@ -394,6 +394,7 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
             auto shapedTextsMaxWidth = Dp(0);
             auto shapedTextsWidth = Dp(0);
             auto shapedTextsHeight = Dp(0);
+            auto shapedTextWrapped = False;
 
             auto prevIndex = breakIterator.GetCurrent();
             while (true)
@@ -421,6 +422,10 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
                             shapedTextsIntrinsicWidth = lineWidth;
                         }
                     }
+                    else
+                    {
+                        shapedTextWrapped = true;
+                    }
 
                     for (auto const& line : shapedLine.GetLines())
                     {
@@ -443,7 +448,7 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
                 break;
             }
             _shapedTexts = std::move(shapedTexts);
-            _shapedTextsIntrinsicWidth = shapedTextsIntrinsicWidth;
+            _shapedTextsIntrinsicWidth = shapedTextWrapped ? Dp::Infinity() : shapedTextsIntrinsicWidth;
             _shapedTextsMaxWidth = shapedTextsMaxWidth;
             _shapedTextsWidth = shapedTextsWidth;
             _shapedTextsHeight = shapedTextsHeight;

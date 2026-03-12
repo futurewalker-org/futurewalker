@@ -168,7 +168,7 @@ auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typefac
     auto const scriptRunIterator = SkShapers::HB::ScriptRunIterator(utf8Chars, utf8Bytes, std::bit_cast<SkFourByteTag>(bcp47ScriptTag));
     auto const languageRunIterator = SkShaper::MakeStdLanguageRunIterator(utf8Chars, utf8Bytes);
 
-    auto shaper = SkShapers::HB::ShapeDontWrapOrReorder(unicode, fontMgr);
+    auto shaper = SkShapers::HB::ShaperDrivenWrapper(unicode, fontMgr);
     auto runHandler = SkiaRunHandler(text);
     shaper->shape(utf8Chars, utf8Bytes, *fontRunIterator, *bidiRunIterator, *scriptRunIterator, *languageRunIterator, nullptr, 0, width, &runHandler);
 
