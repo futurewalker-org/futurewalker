@@ -1,6 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
-#include "Futurewalker.Animation.RootAnimationTimer.hpp"
+#include "Futurewalker.Animation.RootAnimationTicker.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -9,9 +9,9 @@ namespace FW_DETAIL_NS
 ///
 /// @param delegate
 ///
-auto RootAnimationTimer::Make(Delegate delegate) -> Shared<RootAnimationTimer>
+auto RootAnimationTicker::Make(Delegate delegate) -> Shared<RootAnimationTicker>
 {
-    return AnimationTimer::MakeDerived<RootAnimationTimer>(std::move(delegate));
+    return AnimationTicker::MakeDerived<RootAnimationTicker>(std::move(delegate));
 }
 
 ///
@@ -20,8 +20,8 @@ auto RootAnimationTimer::Make(Delegate delegate) -> Shared<RootAnimationTimer>
 /// @param key 
 /// @param delegate 
 ///
-RootAnimationTimer::RootAnimationTimer(PassKey<AnimationTimer> key, Delegate delegate)
-  : AnimationTimer(key)
+RootAnimationTicker::RootAnimationTicker(PassKey<AnimationTicker> key, Delegate delegate)
+  : AnimationTicker(key)
   , _delegate {std::move(delegate)}
 {
 }
@@ -31,7 +31,7 @@ RootAnimationTimer::RootAnimationTimer(PassKey<AnimationTimer> key, Delegate del
 ///
 /// @param active
 ///
-auto RootAnimationTimer::SetActive(Bool const active) -> void
+auto RootAnimationTicker::SetActive(Bool const active) -> void
 {
     if (_active != active)
     {
@@ -43,7 +43,7 @@ auto RootAnimationTimer::SetActive(Bool const active) -> void
 ///
 /// @brief
 ///
-auto RootAnimationTimer::UpdateCurrentTime() -> void
+auto RootAnimationTicker::UpdateCurrentTime() -> void
 {
     NotifyRootCurrentTimeChanged();
 }
@@ -51,7 +51,7 @@ auto RootAnimationTimer::UpdateCurrentTime() -> void
 ///
 /// @brief
 ///
-auto RootAnimationTimer::RootIsActive() const -> Bool
+auto RootAnimationTicker::RootIsActive() const -> Bool
 {
     return _active;
 }
@@ -59,7 +59,7 @@ auto RootAnimationTimer::RootIsActive() const -> Bool
 ///
 /// @brief
 ///
-auto RootAnimationTimer::RootGetCurrentTime() const -> MonotonicTime
+auto RootAnimationTicker::RootGetCurrentTime() const -> MonotonicTime
 {
     if (_delegate.getCurrentTime)
     {
@@ -71,7 +71,7 @@ auto RootAnimationTimer::RootGetCurrentTime() const -> MonotonicTime
 ///
 /// @brief
 ///
-auto RootAnimationTimer::RootRequestTick() -> void
+auto RootAnimationTicker::RootRequestTick() -> void
 {
     if (_delegate.requestTick)
     {

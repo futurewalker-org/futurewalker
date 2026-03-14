@@ -11,6 +11,7 @@ namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-class RootAnimationTimer;
+class AnimationTicker;
+using AnimationTickerList = std::list<Shared<AnimationTicker>>;
 }
 }

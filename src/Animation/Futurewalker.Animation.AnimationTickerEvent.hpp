@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Animation.AnimationTimerEventType.hpp"
+#include "Futurewalker.Animation.AnimationTickerEventType.hpp"
 
 #include "Futurewalker.Event.EventParameter.hpp"
 
@@ -14,7 +14,7 @@ namespace FW_EXPORT
 ///
 /// @brief
 ///
-class AnimationTimerEvent : public EventParameter
+class AnimationTickerEvent : public EventParameter
 {
 public:
     class ActiveChanged;
@@ -25,21 +25,21 @@ public:
 ///
 /// @brief
 ///
-class AnimationTimerEvent::ActiveChanged final : public AnimationTimerEvent 
+class AnimationTickerEvent::ActiveChanged final : public AnimationTickerEvent 
 {
 };
 
 ///
 /// @brief
 ///
-class AnimationTimerEvent::EnabledChanged final : public AnimationTimerEvent
+class AnimationTickerEvent::EnabledChanged final : public AnimationTickerEvent
 {
 };
 
 ///
 /// @brief
 ///
-class AnimationTimerEvent::Tick : public AnimationTimerEvent
+class AnimationTickerEvent::Tick : public AnimationTickerEvent
 {
 public:
     auto GetTime() const -> MonotonicTime;

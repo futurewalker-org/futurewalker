@@ -4,6 +4,6 @@ fw_test_suite(
     deps = ["@futurewalker//:Animation"],
     tags = ["Animation"],
     names = [
-        "AnimationTimer",
+        "AnimationTicker",
     ],
 )

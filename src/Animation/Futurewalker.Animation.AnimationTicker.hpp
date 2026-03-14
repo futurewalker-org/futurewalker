@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Animation.AnimationTimerType.hpp"
+#include "Futurewalker.Animation.AnimationTickerType.hpp"
 
 #include "Futurewalker.Dependency.DependencyNodeType.hpp"
 
@@ -25,17 +25,17 @@ namespace FW_EXPORT
 ///
 /// Dispatches tick notification from ticker source to listeners.
 ///
-class AnimationTimer : NonCopyable
+class AnimationTicker : NonCopyable
 {
 public:
-    static auto Make() -> Shared<AnimationTimer>;
+    static auto Make() -> Shared<AnimationTicker>;
 
 public:
-    AnimationTimer(PassKey<AnimationTimer>);
-    virtual ~AnimationTimer();
+    AnimationTicker(PassKey<AnimationTicker>);
+    virtual ~AnimationTicker();
 
-    auto AddChild(Shared<AnimationTimer> timer, Pointer<AnimationTimer const> after) -> void;
-    auto RemoveChild(Shared<AnimationTimer> timer) -> void;
+    auto AddChild(Shared<AnimationTicker> timer, Pointer<AnimationTicker const> after) -> void;
+    auto RemoveChild(Shared<AnimationTicker> timer) -> void;
 
     auto IsActive() const -> Bool;
 
@@ -60,20 +60,20 @@ protected:
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;
 
-    template <Concepts::DerivedFrom<AnimationTimer> Derived, class... Args>
+    template <Concepts::DerivedFrom<AnimationTicker> Derived, class... Args>
     static auto MakeDerived(Args&&... args) -> Shared<Derived>;
 
 private:
-    auto GetSelfBase() -> Shared<AnimationTimer>;
-    auto GetSelfBase() const -> Shared<AnimationTimer const>;
-    auto SetSelfBase(Shared<AnimationTimer> const& self) -> void;
-    auto GetParent() -> Shared<AnimationTimer>;
-    auto GetParent() const -> Shared<AnimationTimer const>;
-    auto SetParent(Shared<AnimationTimer> const& parent) -> void;
+    auto GetSelfBase() -> Shared<AnimationTicker>;
+    auto GetSelfBase() const -> Shared<AnimationTicker const>;
+    auto SetSelfBase(Shared<AnimationTicker> const& self) -> void;
+    auto GetParent() -> Shared<AnimationTicker>;
+    auto GetParent() const -> Shared<AnimationTicker const>;
+    auto SetParent(Shared<AnimationTicker> const& parent) -> void;
     auto IsRoot() const -> Bool;
 
-    auto AdoptChild(Shared<AnimationTimer> const& child, Pointer<AnimationTimer const> after) -> void;
-    auto AbandonChild(Shared<AnimationTimer> const& child) -> void;
+    auto AdoptChild(Shared<AnimationTicker> const& child, Pointer<AnimationTicker const> after) -> void;
+    auto AbandonChild(Shared<AnimationTicker> const& child) -> void;
 
     auto RemoveFromParent() -> void;
 
@@ -84,9 +84,9 @@ private:
     auto SendDependencyNodeActiveChangedEvent(Bool const active) -> void;
     auto SendDependencyNodeEnabledChangedEvent(Bool const enabled) -> void;
 
-    auto SendAnimationTimerTickEvent(MonotonicTime const time) -> void;
-    auto SendAnimationTimerActiveChangedEvent() -> void;
-    auto SendAnimationTimerEnabledChangedEvent() -> void;
+    auto SendAnimationTickerTickEvent(MonotonicTime const time) -> void;
+    auto SendAnimationTickerActiveChangedEvent() -> void;
+    auto SendAnimationTickerEnabledChangedEvent() -> void;
 
 private:
     virtual auto RootIsActive() const -> Bool;
@@ -94,9 +94,9 @@ private:
     virtual auto RootRequestTick() -> void;
 
 private:
-    Weak<AnimationTimer> _self;
-    Weak<AnimationTimer> _parent;
-    AnimationTimerList _children;
+    Weak<AnimationTicker> _self;
+    Weak<AnimationTicker> _parent;
+    AnimationTickerList _children;
     Shared<EventReceiver> _eventReceiver;
     Shared<DependencyNode> _dependencyNode;
     Bool _active = false;
@@ -109,19 +109,19 @@ private:
 /// @brief
 ///
 template <class Self>
-auto AnimationTimer::GetSelf(this Self& self) -> Shared<Self>
+auto AnimationTicker::GetSelf(this Self& self) -> Shared<Self>
 {
-    return static_cast<TypeTraits::PropagateCVRef<Self&, AnimationTimer>>(self).GetSelfBase().template UnsafeAs<Self>();
+    return static_cast<TypeTraits::PropagateCVRef<Self&, AnimationTicker>>(self).GetSelfBase().template UnsafeAs<Self>();
 }
 
 ///
 /// @brief
 ///
-template <Concepts::DerivedFrom<AnimationTimer> Derived, class... Args>
-auto AnimationTimer::MakeDerived(Args&&... args) -> Shared<Derived>
+template <Concepts::DerivedFrom<AnimationTicker> Derived, class... Args>
+auto AnimationTicker::MakeDerived(Args&&... args) -> Shared<Derived>
 {
-    auto derived = Shared<Derived>::Make(PassKey<AnimationTimer>(), std::forward<Args>(args)...);
-    static_cast<AnimationTimer&>(*derived).SetSelfBase(derived);
+    auto derived = Shared<Derived>::Make(PassKey<AnimationTicker>(), std::forward<Args>(args)...);
+    static_cast<AnimationTicker&>(*derived).SetSelfBase(derived);
     return derived;
 }
 }

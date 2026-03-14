@@ -420,7 +420,7 @@ auto View::SetVisible(Bool const visible) -> void
 
         try
         {
-            GetAnimationTimer().SetEnabled(visible);
+            GetAnimationTicker().SetEnabled(visible);
         }
         catch (...)
         {
@@ -1562,17 +1562,17 @@ auto View::RootGetBackingScale() const -> BackingScale
 ///
 /// @brief
 ///
-auto View::RootGetAnimationTimer() -> AnimationTimer&
+auto View::RootGetAnimationTicker() -> AnimationTicker&
 {
-    return *_animationTimer;
+    return *_AnimationTicker;
 }
 
 ///
 /// @brief
 ///
-auto View::RootGetAnimationTimer() const -> AnimationTimer const&
+auto View::RootGetAnimationTicker() const -> AnimationTicker const&
 {
-    return *_animationTimer;
+    return *_AnimationTicker;
 }
 
 ///
@@ -1748,7 +1748,7 @@ auto View::SetParent(Shared<View> const& parent) -> void
         {
             auto const indexAfter = *parent->GetChildIndex(*this) + 1;
             auto const viewAfter = parent->GetChildAt(indexAfter);
-            parent->GetAnimationTimer().AddChild(_animationTimer, viewAfter ? &viewAfter->GetAnimationTimer() : nullptr);
+            parent->GetAnimationTicker().AddChild(_AnimationTicker, viewAfter ? &viewAfter->GetAnimationTicker() : nullptr);
             parent->GetFocusNode().AddChild(_focusNode, viewAfter ? &viewAfter->GetFocusNode() : nullptr);
             parent->GetAttributeNode().AddChild(_attributeNode);
             parent->GetCommandNode().AddChild(_commandNode);
@@ -1758,7 +1758,7 @@ auto View::SetParent(Shared<View> const& parent) -> void
         {
             oldParent->GetAttributeNode().RemoveChild(_attributeNode);
             oldParent->GetFocusNode().RemoveChild(_focusNode);
-            oldParent->GetAnimationTimer().RemoveChild(_animationTimer);
+            oldParent->GetAnimationTicker().RemoveChild(_AnimationTicker);
             oldParent->GetCommandNode().RemoveChild(_commandNode);
             oldParent->GetLayer().RemoveChild(_layer);
         }
@@ -1821,7 +1821,7 @@ auto View::InitializeSelf(Shared<View> const& self) -> void
     _self = self;
     _eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); }});
     _propertyStore = PropertyStore::Make();
-    _animationTimer = AnimationTimer::Make();
+    _AnimationTicker = AnimationTicker::Make();
     _focusNode = FocusNode::Make();
     _attributeNode = AttributeNode::Make();
     _commandNode = CommandNode::Make();
@@ -1834,25 +1834,25 @@ auto View::InitializeSelf(Shared<View> const& self) -> void
 ///
 /// @brief
 ///
-auto View::GetAnimationTimer() -> AnimationTimer&
+auto View::GetAnimationTicker() -> AnimationTicker&
 {
     if (IsRoot())
     {
-        return RootGetAnimationTimer();
+        return RootGetAnimationTicker();
     }
-    return *_animationTimer;
+    return *_AnimationTicker;
 }
 
 ///
 /// @brief
 ///
-auto View::GetAnimationTimer() const -> AnimationTimer const&
+auto View::GetAnimationTicker() const -> AnimationTicker const&
 {
     if (IsRoot())
     {
-        return RootGetAnimationTimer();
+        return RootGetAnimationTicker();
     }
-    return *_animationTimer;
+    return *_AnimationTicker;
 }
 
 ///

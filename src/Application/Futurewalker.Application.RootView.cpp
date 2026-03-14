@@ -18,7 +18,7 @@
 #include "Futurewalker.Application.HitTestEvent.hpp"
 #include "Futurewalker.Application.Key.hpp"
 
-#include "Futurewalker.Animation.RootAnimationTimer.hpp"
+#include "Futurewalker.Animation.RootAnimationTicker.hpp"
 
 #include "Futurewalker.Event.EventReceiver.hpp"
 
@@ -83,7 +83,7 @@ auto RootView::SetContent(Shared<View> view) -> void
 auto RootView::Initialize() -> void
 {
     _viewLayerManager = Locator::Resolve<ViewLayerManager>();
-    _animationTimer = RootAnimationTimer::Make({
+    _AnimationTicker = RootAnimationTicker::Make({
       .requestTick = [&] { return RequestFrame(); },
       .getCurrentTime = [&] { return GetFrameTime(); },
     });
@@ -109,12 +109,12 @@ auto RootView::ReceiveViewEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<ViewEvent::Attached>())
     {
-        SetAnimationTimerActive(true);
+        SetAnimationTickerActive(true);
         RequestFrame();
     }
     else if (event.Is<ViewEvent::Detached>())
     {
-        SetAnimationTimerActive(false);
+        SetAnimationTickerActive(false);
     }
     co_return false;
 }
@@ -252,7 +252,7 @@ auto RootView::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 ///
 auto RootView::UpdateAnimation() -> void
 {
-    _animationTimer->UpdateCurrentTime();
+    _AnimationTicker->UpdateCurrentTime();
 }
 
 ///
@@ -290,9 +290,9 @@ auto RootView::UpdateVisual() -> void
 ///
 /// @brief
 ///
-auto RootView::SetAnimationTimerActive(Bool const active) -> void
+auto RootView::SetAnimationTickerActive(Bool const active) -> void
 {
-    _animationTimer->SetActive(active);
+    _AnimationTicker->SetActive(active);
 }
 
 ///
@@ -568,17 +568,17 @@ auto RootView::RootGetBackingScale() const -> BackingScale
 ///
 /// @brief
 ///
-auto RootView::RootGetAnimationTimer() -> AnimationTimer&
+auto RootView::RootGetAnimationTicker() -> AnimationTicker&
 {
-    return *_animationTimer;
+    return *_AnimationTicker;
 }
 
 ///
 /// @brief
 ///
-auto RootView::RootGetAnimationTimer() const -> AnimationTimer const&
+auto RootView::RootGetAnimationTicker() const -> AnimationTicker const&
 {
-    return *_animationTimer;
+    return *_AnimationTicker;
 }
 
 ///

@@ -1,1 +1,1 @@
-fw_add_test(Animation AnimationTimer Futurewalker::Animation)
+fw_add_test(Animation AnimationTicker Futurewalker::Animation)

@@ -1,17 +1,17 @@
 #include <catch2/catch_all.hpp>
 
-#include <Futurewalker.Animation.AnimationTimer.hpp>
-#include <Futurewalker.Animation.RootAnimationTimer.hpp>
+#include <Futurewalker.Animation.AnimationTicker.hpp>
+#include <Futurewalker.Animation.RootAnimationTicker.hpp>
 
 #include <Futurewalker.Core.MonotonicClock.hpp>
 
 using namespace Futurewalker;
 
-TEST_CASE("AnimationTimer")
+TEST_CASE("AnimationTicker")
 {
     SECTION("Init")
     {
-        auto at = AnimationTimer::Make();
+        auto at = AnimationTicker::Make();
         REQUIRE(at);
         REQUIRE(!at->IsActive());
         REQUIRE(at->IsEnabled());
@@ -24,11 +24,11 @@ TEST_CASE("AnimationTimer")
     SECTION("Child")
     {
         auto requestCount = 0;
-        auto r = RootAnimationTimer::Make(RootAnimationTimer::Delegate {
+        auto r = RootAnimationTicker::Make(RootAnimationTicker::Delegate {
           .requestTick = [&] { ++requestCount; },
           .getCurrentTime = [] { return MonotonicClock::GetNow(); },
         });
-        auto c = AnimationTimer::Make();
+        auto c = AnimationTicker::Make();
 
         r->AddChild(c, nullptr);
 
@@ -57,7 +57,7 @@ TEST_CASE("AnimationTimer")
         REQUIRE(c->IsEnabled());
         REQUIRE(!c->IsEnabledFromRoot());
 
-        auto cc = AnimationTimer::Make();
+        auto cc = AnimationTicker::Make();
         c->AddChild(cc, nullptr);
         REQUIRE(cc->IsEnabled());
         REQUIRE(!cc->IsEnabledFromRoot());

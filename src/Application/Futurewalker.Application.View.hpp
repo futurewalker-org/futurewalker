@@ -21,7 +21,7 @@
 #include "Futurewalker.Application.InputEditableType.hpp"
 #include "Futurewalker.Application.HitTestEvent.hpp"
 
-#include "Futurewalker.Animation.AnimationTimer.hpp"
+#include "Futurewalker.Animation.AnimationTicker.hpp"
 
 #include "Futurewalker.Attribute.AttributeNode.hpp"
 
@@ -226,8 +226,8 @@ private:
     virtual auto RootIsAttached() const -> Bool;
     virtual auto RootGetDisplayScale() const -> DisplayScale;
     virtual auto RootGetBackingScale() const -> BackingScale;
-    virtual auto RootGetAnimationTimer() -> AnimationTimer&;
-    virtual auto RootGetAnimationTimer() const -> AnimationTimer const&;
+    virtual auto RootGetAnimationTicker() -> AnimationTicker&;
+    virtual auto RootGetAnimationTicker() const -> AnimationTicker const&;
     virtual auto RootGetFocusNode() -> FocusNode&;
     virtual auto RootGetFocusNode() const -> FocusNode const&;
     virtual auto RootGetAttributeNode() -> AttributeNode&;
@@ -258,8 +258,8 @@ private:
 
     auto InitializeSelf(Shared<View> const& self) -> void;
 
-    auto GetAnimationTimer() -> AnimationTimer&;
-    auto GetAnimationTimer() const -> AnimationTimer const&;
+    auto GetAnimationTicker() -> AnimationTicker&;
+    auto GetAnimationTicker() const -> AnimationTicker const&;
 
     auto GetFocusNode() -> FocusNode&;
     auto GetFocusNode() const -> FocusNode const&;
@@ -301,7 +301,7 @@ private:
     ViewId _id = 0u;
     ViewLayoutInfo _layoutInfo;
     ViewDrawInfo _drawInfo;
-    Shared<AnimationTimer> _animationTimer;
+    Shared<AnimationTicker> _AnimationTicker;
     Shared<FocusNode> _focusNode;
     Shared<AttributeNode> _attributeNode;
     Shared<CommandNode> _commandNode;

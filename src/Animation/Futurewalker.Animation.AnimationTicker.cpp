@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
-#include "Futurewalker.Animation.AnimationTimer.hpp"
-#include "Futurewalker.Animation.AnimationTimerEvent.hpp"
+#include "Futurewalker.Animation.AnimationTicker.hpp"
+#include "Futurewalker.Animation.AnimationTickerEvent.hpp"
 
 #include "Futurewalker.Dependency.DependencyNode.hpp"
 #include "Futurewalker.Dependency.DependencyNodeEvent.hpp"
@@ -34,15 +34,15 @@ public:
 ///
 /// @brief
 ///
-auto AnimationTimer::Make() -> Shared<AnimationTimer>
+auto AnimationTicker::Make() -> Shared<AnimationTicker>
 {
-    return MakeDerived<AnimationTimer>();
+    return MakeDerived<AnimationTicker>();
 }
 
 ///
 /// @brief
 ///
-AnimationTimer::AnimationTimer(PassKey<AnimationTimer>)
+AnimationTicker::AnimationTicker(PassKey<AnimationTicker>)
 {
     _eventReceiver = EventReceiver::Make();
     _dependencyNode = DependencyNode::Make({.dispatchEvent = [&](auto& e) { return ReceiveEvent(e); }});
@@ -51,7 +51,7 @@ AnimationTimer::AnimationTimer(PassKey<AnimationTimer>)
 ///
 /// @brief
 ///
-AnimationTimer::~AnimationTimer()
+AnimationTicker::~AnimationTicker()
 {
 }
 
@@ -60,7 +60,7 @@ AnimationTimer::~AnimationTimer()
 ///
 /// @param[in] child A child timer to add.
 ///
-auto AnimationTimer::AddChild(Shared<AnimationTimer> timer, Pointer<AnimationTimer const> after) -> void
+auto AnimationTicker::AddChild(Shared<AnimationTicker> timer, Pointer<AnimationTicker const> after) -> void
 {
     if (timer)
     {
@@ -82,7 +82,7 @@ auto AnimationTimer::AddChild(Shared<AnimationTimer> timer, Pointer<AnimationTim
 ///
 /// @param timer 
 ///
-auto AnimationTimer::RemoveChild(Shared<AnimationTimer> timer) -> void
+auto AnimationTicker::RemoveChild(Shared<AnimationTicker> timer) -> void
 {
     if (!timer)
     {
@@ -102,7 +102,7 @@ auto AnimationTimer::RemoveChild(Shared<AnimationTimer> timer) -> void
 ///
 /// @brief
 ///
-auto AnimationTimer::IsActive() const -> Bool
+auto AnimationTicker::IsActive() const -> Bool
 {
     if (IsRoot())
     {
@@ -114,7 +114,7 @@ auto AnimationTimer::IsActive() const -> Bool
 ///
 /// @brief
 ///
-auto AnimationTimer::IsEnabled() const -> Bool
+auto AnimationTicker::IsEnabled() const -> Bool
 {
     return _enabled;
 }
@@ -122,7 +122,7 @@ auto AnimationTimer::IsEnabled() const -> Bool
 ///
 /// @brief
 ///
-auto AnimationTimer::IsEnabledFromRoot() const -> Bool
+auto AnimationTicker::IsEnabledFromRoot() const -> Bool
 {
     return _enabledFromRoot;
 }
@@ -130,7 +130,7 @@ auto AnimationTimer::IsEnabledFromRoot() const -> Bool
 ///
 /// @brief
 ///
-auto AnimationTimer::SetEnabled(Bool const enabled) -> void
+auto AnimationTicker::SetEnabled(Bool const enabled) -> void
 {
     if (_enabled != enabled)
     {
@@ -150,7 +150,7 @@ auto AnimationTimer::SetEnabled(Bool const enabled) -> void
         {
             _enabledFromRoot = enabledFromRoot;
 
-            SendAnimationTimerEnabledChangedEvent();
+            SendAnimationTickerEnabledChangedEvent();
 
             for (auto const& child : _children)
             {
@@ -163,7 +163,7 @@ auto AnimationTimer::SetEnabled(Bool const enabled) -> void
 ///
 /// @brief
 ///
-auto AnimationTimer::RequestTick() -> void
+auto AnimationTicker::RequestTick() -> void
 {
     if (!_tickRequested)
     {
@@ -180,7 +180,7 @@ auto AnimationTimer::RequestTick() -> void
 ///
 /// @brief
 ///
-auto AnimationTimer::GetCurrentTime() const -> MonotonicTime
+auto AnimationTicker::GetCurrentTime() const -> MonotonicTime
 {
     if (auto parent = GetParent())
     {
@@ -192,7 +192,7 @@ auto AnimationTimer::GetCurrentTime() const -> MonotonicTime
 ///
 /// @brief
 ///
-auto AnimationTimer::NotifyRootActiveChanged() -> void
+auto AnimationTicker::NotifyRootActiveChanged() -> void
 {
     if (IsRoot())
     {
@@ -203,7 +203,7 @@ auto AnimationTimer::NotifyRootActiveChanged() -> void
 ///
 /// @brief
 ///
-auto AnimationTimer::NotifyRootCurrentTimeChanged() -> void
+auto AnimationTicker::NotifyRootCurrentTimeChanged() -> void
 {
     if (IsRoot())
     {
@@ -214,7 +214,7 @@ auto AnimationTimer::NotifyRootCurrentTimeChanged() -> void
 ///
 /// @brief
 ///
-auto AnimationTimer::GetSelfBase() -> Shared<AnimationTimer>
+auto AnimationTicker::GetSelfBase() -> Shared<AnimationTicker>
 {
     return _self.Lock();
 }
@@ -222,7 +222,7 @@ auto AnimationTimer::GetSelfBase() -> Shared<AnimationTimer>
 ///
 /// @brief
 ///
-auto AnimationTimer::GetSelfBase() const -> Shared<AnimationTimer const>
+auto AnimationTicker::GetSelfBase() const -> Shared<AnimationTicker const>
 {
     return _self.Lock();
 }
@@ -232,7 +232,7 @@ auto AnimationTimer::GetSelfBase() const -> Shared<AnimationTimer const>
 ///
 /// @param self
 ///
-auto AnimationTimer::SetSelfBase(Shared<AnimationTimer> const& self) -> void
+auto AnimationTicker::SetSelfBase(Shared<AnimationTicker> const& self) -> void
 {
     _self = self;
 }
@@ -240,7 +240,7 @@ auto AnimationTimer::SetSelfBase(Shared<AnimationTimer> const& self) -> void
 ///
 /// @brief
 ///
-auto AnimationTimer::GetParent() -> Shared<AnimationTimer>
+auto AnimationTicker::GetParent() -> Shared<AnimationTicker>
 {
     return _parent.Lock();
 }
@@ -248,7 +248,7 @@ auto AnimationTimer::GetParent() -> Shared<AnimationTimer>
 ///
 /// @brief
 ///
-auto AnimationTimer::GetParent() const -> Shared<AnimationTimer const>
+auto AnimationTicker::GetParent() const -> Shared<AnimationTicker const>
 {
     return _parent.Lock();
 }
@@ -256,7 +256,7 @@ auto AnimationTimer::GetParent() const -> Shared<AnimationTimer const>
 ///
 /// @brief
 ///
-auto AnimationTimer::IsRoot() const -> Bool
+auto AnimationTicker::IsRoot() const -> Bool
 {
     return _parent.IsExpired();
 }
@@ -266,7 +266,7 @@ auto AnimationTimer::IsRoot() const -> Bool
 ///
 /// @param parent
 ///
-auto AnimationTimer::SetParent(Shared<AnimationTimer> const& parent) -> void
+auto AnimationTicker::SetParent(Shared<AnimationTicker> const& parent) -> void
 {
     _parent = parent;
 }
@@ -276,7 +276,7 @@ auto AnimationTimer::SetParent(Shared<AnimationTimer> const& parent) -> void
 ///
 /// @param child
 ///
-auto AnimationTimer::AdoptChild(Shared<AnimationTimer> const& child, Pointer<AnimationTimer const> after) -> void
+auto AnimationTicker::AdoptChild(Shared<AnimationTicker> const& child, Pointer<AnimationTicker const> after) -> void
 {
     child->SetParent(GetSelf());
     _children.insert(std::find_if(_children.begin(), _children.end(), [&](auto const& child) { return child.GetPointer() == after; }), child);
@@ -288,7 +288,7 @@ auto AnimationTimer::AdoptChild(Shared<AnimationTimer> const& child, Pointer<Ani
 ///
 /// @param child
 ///
-auto AnimationTimer::AbandonChild(Shared<AnimationTimer> const& child) -> void
+auto AnimationTicker::AbandonChild(Shared<AnimationTicker> const& child) -> void
 {
     _dependencyNode->RemoveChild(child->_dependencyNode);
     _children.erase(std::find(_children.begin(), _children.end(), child));
@@ -298,7 +298,7 @@ auto AnimationTimer::AbandonChild(Shared<AnimationTimer> const& child) -> void
 ///
 /// @brief
 ///
-auto AnimationTimer::RemoveFromParent() -> void
+auto AnimationTicker::RemoveFromParent() -> void
 {
     if (auto parent = GetParent())
     {
@@ -311,7 +311,7 @@ auto AnimationTimer::RemoveFromParent() -> void
 ///
 /// @brief
 ///
-auto AnimationTimer::SendEvent(Event<>& event) -> Bool
+auto AnimationTicker::SendEvent(Event<>& event) -> Bool
 {
     return GetEventReceiver().SendEventDetached(event);
 }
@@ -321,7 +321,7 @@ auto AnimationTimer::SendEvent(Event<>& event) -> Bool
 ///
 /// @param event
 ///
-auto AnimationTimer::ReceiveEvent(Event<>& event) -> Bool
+auto AnimationTicker::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<DependencyNodeEvent::Notify>())
     {
@@ -334,7 +334,7 @@ auto AnimationTimer::ReceiveEvent(Event<>& event) -> Bool
                 if (_tickRequested)
                 {
                     _tickRequested = false;
-                    SendAnimationTimerTickEvent(notifyEvent.As<DependencyNodeNotifyTick>()->time);
+                    SendAnimationTickerTickEvent(notifyEvent.As<DependencyNodeNotifyTick>()->time);
                     return false;
                 }
             }
@@ -346,7 +346,7 @@ auto AnimationTimer::ReceiveEvent(Event<>& event) -> Bool
             if (_active != active)
             {
                 _active = active;
-                SendAnimationTimerActiveChangedEvent();
+                SendAnimationTickerActiveChangedEvent();
             }
             return false;
         }
@@ -356,7 +356,7 @@ auto AnimationTimer::ReceiveEvent(Event<>& event) -> Bool
             if (_enabled && _enabledFromRoot != enabled)
             {
                 _enabledFromRoot = enabled;
-                SendAnimationTimerEnabledChangedEvent();
+                SendAnimationTickerEnabledChangedEvent();
             }
             return !_enabled;
         }
@@ -367,7 +367,7 @@ auto AnimationTimer::ReceiveEvent(Event<>& event) -> Bool
 ///
 /// @brief
 ///
-auto AnimationTimer::GetTracker() -> Tracker&
+auto AnimationTicker::GetTracker() -> Tracker&
 {
     return _eventReceiver->GetTracker();
 }
@@ -375,7 +375,7 @@ auto AnimationTimer::GetTracker() -> Tracker&
 ///
 /// @brief
 ///
-auto AnimationTimer::GetTracker() const -> Tracker const&
+auto AnimationTicker::GetTracker() const -> Tracker const&
 {
     return _eventReceiver->GetTracker();
 }
@@ -383,7 +383,7 @@ auto AnimationTimer::GetTracker() const -> Tracker const&
 ///
 /// @brief
 ///
-auto AnimationTimer::GetEventReceiver() -> EventReceiver&
+auto AnimationTicker::GetEventReceiver() -> EventReceiver&
 {
     return _eventReceiver->GetEventReceiver();
 }
@@ -391,7 +391,7 @@ auto AnimationTimer::GetEventReceiver() -> EventReceiver&
 ///
 /// @brief
 ///
-auto AnimationTimer::GetEventReceiver() const -> EventReceiver const&
+auto AnimationTicker::GetEventReceiver() const -> EventReceiver const&
 {
     return _eventReceiver->GetEventReceiver();
 }
@@ -399,7 +399,7 @@ auto AnimationTimer::GetEventReceiver() const -> EventReceiver const&
 ///
 /// @brief
 ///
-auto AnimationTimer::SendDependencyNodeTickEvent(MonotonicTime const time) -> void
+auto AnimationTicker::SendDependencyNodeTickEvent(MonotonicTime const time) -> void
 {
     auto parameter = Event<DependencyNodeNotifyTick>();
     parameter->time = time;
@@ -409,7 +409,7 @@ auto AnimationTimer::SendDependencyNodeTickEvent(MonotonicTime const time) -> vo
 ///
 /// @brief
 ///
-auto AnimationTimer::SendDependencyNodeActiveChangedEvent(Bool const active) -> void
+auto AnimationTicker::SendDependencyNodeActiveChangedEvent(Bool const active) -> void
 {
     auto parameter = Event<DependencyNodeNotifyActiveChanged>();
     parameter->active = active;
@@ -419,7 +419,7 @@ auto AnimationTimer::SendDependencyNodeActiveChangedEvent(Bool const active) -> 
 ///
 /// @brief
 ///
-auto AnimationTimer::SendDependencyNodeEnabledChangedEvent(Bool const enabled) -> void
+auto AnimationTicker::SendDependencyNodeEnabledChangedEvent(Bool const enabled) -> void
 {
     auto parameter = Event<DependencyNodeNotifyEnabledChanged>();
     parameter->enabled = enabled;
@@ -429,9 +429,9 @@ auto AnimationTimer::SendDependencyNodeEnabledChangedEvent(Bool const enabled) -
 ///
 /// @brief
 ///
-auto AnimationTimer::SendAnimationTimerTickEvent(MonotonicTime const time) -> void
+auto AnimationTicker::SendAnimationTickerTickEvent(MonotonicTime const time) -> void
 {
-    auto parameter = Event<AnimationTimerEvent::Tick>();
+    auto parameter = Event<AnimationTickerEvent::Tick>();
     parameter->SetTime(time);
     auto timerEvent = Event<>(parameter);
     SendEvent(timerEvent);
@@ -440,25 +440,25 @@ auto AnimationTimer::SendAnimationTimerTickEvent(MonotonicTime const time) -> vo
 ///
 /// @brief
 ///
-auto AnimationTimer::SendAnimationTimerActiveChangedEvent() -> void
+auto AnimationTicker::SendAnimationTickerActiveChangedEvent() -> void
 {
-    auto event = Event<>(Event<AnimationTimerEvent::ActiveChanged>());
+    auto event = Event<>(Event<AnimationTickerEvent::ActiveChanged>());
     SendEvent(event);
 }
 
 ///
 /// @brief
 ///
-auto AnimationTimer::SendAnimationTimerEnabledChangedEvent() -> void
+auto AnimationTicker::SendAnimationTickerEnabledChangedEvent() -> void
 {
-    auto event = Event<>(Event<AnimationTimerEvent::EnabledChanged>());
+    auto event = Event<>(Event<AnimationTickerEvent::EnabledChanged>());
     SendEvent(event);
 }
 
 ///
 /// @brief
 ///
-auto AnimationTimer::RootIsActive() const -> Bool
+auto AnimationTicker::RootIsActive() const -> Bool
 {
     return false;
 }
@@ -466,7 +466,7 @@ auto AnimationTimer::RootIsActive() const -> Bool
 ///
 /// @brief
 ///
-auto AnimationTimer::RootGetCurrentTime() const -> MonotonicTime
+auto AnimationTicker::RootGetCurrentTime() const -> MonotonicTime
 {
     return {};
 }
@@ -474,7 +474,7 @@ auto AnimationTimer::RootGetCurrentTime() const -> MonotonicTime
 ///
 /// @brief
 ///
-auto AnimationTimer::RootRequestTick() -> void
+auto AnimationTicker::RootRequestTick() -> void
 {
 }
 }

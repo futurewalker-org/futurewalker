@@ -10,7 +10,7 @@
 #include "Futurewalker.Application.ViewLayerManagerType.hpp"
 #include "Futurewalker.Application.InputMethodType.hpp" 
 
-#include "Futurewalker.Animation.RootAnimationTimerType.hpp"
+#include "Futurewalker.Animation.RootAnimationTickerType.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -56,7 +56,7 @@ protected:
     auto UpdateLayout() -> void;
     auto UpdateVisual() -> void;
 
-    auto SetAnimationTimerActive(Bool const active) -> void;
+    auto SetAnimationTickerActive(Bool const active) -> void;
     auto RequestFrame() -> void;
     auto GetFrameTime() const -> MonotonicTime;
 
@@ -75,8 +75,8 @@ private:
     auto RootIsAttached() const -> Bool override;
     auto RootGetDisplayScale() const -> DisplayScale override;
     auto RootGetBackingScale() const -> BackingScale override;
-    auto RootGetAnimationTimer() -> AnimationTimer& override;
-    auto RootGetAnimationTimer() const -> AnimationTimer const& override;
+    auto RootGetAnimationTicker() -> AnimationTicker& override;
+    auto RootGetAnimationTicker() const -> AnimationTicker const& override;
     auto RootGetFocusNode() -> FocusNode& override;
     auto RootGetFocusNode() const -> FocusNode const& override;
     auto RootGetAttributeNode() -> AttributeNode& override;
@@ -102,7 +102,7 @@ private:
     BackingScale _backingScale = 1.0;
     Delegate _delegate;
     Shared<ViewLayerManager> _viewLayerManager;
-    Shared<RootAnimationTimer> _animationTimer;
+    Shared<RootAnimationTicker> _AnimationTicker;
     Shared<RootFocusNode> _focusNode;
     Shared<AttributeNode> _parentAttributeNode;
     Shared<AttributeNode> _attributeNode;

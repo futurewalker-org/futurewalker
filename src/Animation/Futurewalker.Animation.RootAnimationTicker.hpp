@@ -1,8 +1,8 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Animation.RootAnimationTimerType.hpp"
-#include "Futurewalker.Animation.AnimationTimer.hpp"
+#include "Futurewalker.Animation.RootAnimationTickerType.hpp"
+#include "Futurewalker.Animation.AnimationTicker.hpp"
 
 #include "Futurewalker.Core.Function.hpp"
 
@@ -10,7 +10,7 @@ namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-class RootAnimationTimer : public AnimationTimer
+class RootAnimationTicker : public AnimationTicker
 {
 public:
     struct Delegate
@@ -18,9 +18,9 @@ public:
         Function<void()> requestTick;
         Function<MonotonicTime()> getCurrentTime;
     };
-    static auto Make(Delegate delegate) -> Shared<RootAnimationTimer>;
+    static auto Make(Delegate delegate) -> Shared<RootAnimationTicker>;
 
-    RootAnimationTimer(PassKey<AnimationTimer> key, Delegate delegate);
+    RootAnimationTicker(PassKey<AnimationTicker> key, Delegate delegate);
 
     auto SetActive(Bool const active) -> void;
     
