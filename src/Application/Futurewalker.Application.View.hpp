@@ -301,7 +301,7 @@ private:
     ViewId _id = 0u;
     ViewLayoutInfo _layoutInfo;
     ViewDrawInfo _drawInfo;
-    Shared<AnimationTicker> _AnimationTicker;
+    Shared<AnimationTicker> _animationTicker;
     Shared<FocusNode> _focusNode;
     Shared<AttributeNode> _attributeNode;
     Shared<CommandNode> _commandNode;

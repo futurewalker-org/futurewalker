@@ -1564,7 +1564,7 @@ auto View::RootGetBackingScale() const -> BackingScale
 ///
 auto View::RootGetAnimationTicker() -> AnimationTicker&
 {
-    return *_AnimationTicker;
+    return *_animationTicker;
 }
 
 ///
@@ -1572,7 +1572,7 @@ auto View::RootGetAnimationTicker() -> AnimationTicker&
 ///
 auto View::RootGetAnimationTicker() const -> AnimationTicker const&
 {
-    return *_AnimationTicker;
+    return *_animationTicker;
 }
 
 ///
@@ -1748,7 +1748,7 @@ auto View::SetParent(Shared<View> const& parent) -> void
         {
             auto const indexAfter = *parent->GetChildIndex(*this) + 1;
             auto const viewAfter = parent->GetChildAt(indexAfter);
-            parent->GetAnimationTicker().AddChild(_AnimationTicker, viewAfter ? &viewAfter->GetAnimationTicker() : nullptr);
+            parent->GetAnimationTicker().AddChild(_animationTicker, viewAfter ? &viewAfter->GetAnimationTicker() : nullptr);
             parent->GetFocusNode().AddChild(_focusNode, viewAfter ? &viewAfter->GetFocusNode() : nullptr);
             parent->GetAttributeNode().AddChild(_attributeNode);
             parent->GetCommandNode().AddChild(_commandNode);
@@ -1758,7 +1758,7 @@ auto View::SetParent(Shared<View> const& parent) -> void
         {
             oldParent->GetAttributeNode().RemoveChild(_attributeNode);
             oldParent->GetFocusNode().RemoveChild(_focusNode);
-            oldParent->GetAnimationTicker().RemoveChild(_AnimationTicker);
+            oldParent->GetAnimationTicker().RemoveChild(_animationTicker);
             oldParent->GetCommandNode().RemoveChild(_commandNode);
             oldParent->GetLayer().RemoveChild(_layer);
         }
@@ -1821,7 +1821,7 @@ auto View::InitializeSelf(Shared<View> const& self) -> void
     _self = self;
     _eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); }});
     _propertyStore = PropertyStore::Make();
-    _AnimationTicker = AnimationTicker::Make();
+    _animationTicker = AnimationTicker::Make();
     _focusNode = FocusNode::Make();
     _attributeNode = AttributeNode::Make();
     _commandNode = CommandNode::Make();
@@ -1840,7 +1840,7 @@ auto View::GetAnimationTicker() -> AnimationTicker&
     {
         return RootGetAnimationTicker();
     }
-    return *_AnimationTicker;
+    return *_animationTicker;
 }
 
 ///
@@ -1852,7 +1852,7 @@ auto View::GetAnimationTicker() const -> AnimationTicker const&
     {
         return RootGetAnimationTicker();
     }
-    return *_AnimationTicker;
+    return *_animationTicker;
 }
 
 ///
