@@ -94,6 +94,16 @@ auto RootViewEvent::Resize::SetSize(Size<Dp> const& size) -> void
     _size = size;
 }
 
+auto RootViewEvent::Frame::GetTargetFrameTime() const -> MonotonicTime
+{
+    return _targetFrameTime;
+}
+
+auto RootViewEvent::Frame::SetTargetFrameTime(MonotonicTime const targetFrameTime) -> void
+{
+    _targetFrameTime = targetFrameTime;
+}
+
 RootViewEvent::Pointer::Pointer(Event<>& event)
   : _event {event}
 {

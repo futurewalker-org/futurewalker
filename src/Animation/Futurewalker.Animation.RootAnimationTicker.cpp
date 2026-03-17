@@ -43,9 +43,9 @@ auto RootAnimationTicker::SetActive(Bool const active) -> void
 ///
 /// @brief
 ///
-auto RootAnimationTicker::UpdateCurrentTime() -> void
+auto RootAnimationTicker::SetTickTime(MonotonicTime const tickTime) -> void
 {
-    NotifyRootCurrentTimeChanged();
+    NotifyRootTickTimeChanged(tickTime);
 }
 
 ///

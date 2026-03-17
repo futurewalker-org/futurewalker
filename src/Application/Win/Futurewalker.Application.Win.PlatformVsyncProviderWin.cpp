@@ -8,6 +8,7 @@
 #include "Futurewalker.Async.AsyncFunction.hpp"
 
 #include "Futurewalker.Core.Exception.hpp"
+#include "Futurewalker.Core.MonotonicClock.hpp"
 
 #include <dcomp.h>
 
@@ -44,14 +45,8 @@ PlatformVsyncProviderWin::PlatformVsyncProviderWin()
 
             if (result == WAIT_OBJECT_0 + count)
             {
-                MonotonicTime frameTime;
-                while (!GetLastCompletedFrameTime(frameTime))
-                {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                }
-
                 const auto frameInfo = PlatformVsyncFrameInfo {
-                  .targetTimestamp = frameTime,
+                    .targetTimestamp = GetCurrentFrameTime(),
                 };
 
                 auto callbacks = this->GetCallbacks();
@@ -83,12 +78,7 @@ PlatformVsyncProviderWin::~PlatformVsyncProviderWin()
 ///
 auto PlatformVsyncProviderWin::GetCurrentFrameTime() const -> MonotonicTime
 {
-    auto frameTime = MonotonicTime();
-    if (GetLastCompletedFrameTime(frameTime))
-    {
-        return frameTime;
-    }
-    return {};
+    return MonotonicClock::GetNow();
 }
 
 ///
@@ -162,46 +152,6 @@ auto PlatformVsyncProviderWin::StopRequested() const -> Bool
 {
     auto lock = std::unique_lock(_mutex);
     return _stop;
-}
-
-///
-/// @brief Get last completed frame time.
-///
-auto PlatformVsyncProviderWin::GetLastCompletedFrameTime(MonotonicTime& frameTime) -> Bool
-{
-    auto frequency = LARGE_INTEGER();
-    if (!::QueryPerformanceFrequency(&frequency))
-    {
-        FW_DEBUG_LOG_ERROR("QueryPerformanceFrequency failed");
-        FW_DEBUG_ASSERT(false);
-        return false;
-    }
-
-    // Get ID of most recently completed frame.
-    // DCompositionGetStatistics() can fail on frames obtained by COMPOSITION_FRAME_ID_CREATED.
-    auto frameId = COMPOSITION_FRAME_ID();
-    HRESULT hr = ::DCompositionGetFrameId(COMPOSITION_FRAME_ID_COMPLETED, &frameId);
-    if (FAILED(hr))
-    {
-        FW_DEBUG_LOG_ERROR("No composition frame ID of type COMPOSITION_FRAME_ID_COMPLETED");
-        FW_DEBUG_ASSERT(false);
-        return false;
-    }
-
-    // Might be possible to query per-output timing info.
-    auto stats = COMPOSITION_FRAME_STATS();
-    hr = ::DCompositionGetStatistics(frameId, &stats, 0, NULL, NULL);
-    if (FAILED(hr))
-    {
-        FW_DEBUG_LOG_ERROR("Failed to get composition frame stats");
-        FW_DEBUG_ASSERT(false);
-        return false;
-    }
-    auto const seconds = stats.targetTime / frequency.QuadPart;
-    auto const remainder = stats.targetTime % frequency.QuadPart;
-    auto const nanoseconds = SInt64(seconds * 1'000'000'000 + (remainder * 1'000'000'000) / frequency.QuadPart);
-    frameTime = MonotonicTime::MakeFromNanoseconds(nanoseconds);
-    return true;
 }
 
 ///

@@ -547,7 +547,7 @@ auto Window::ReceiveWindowEvent(Event<>& event) -> Async<Bool>
         if (_rootView && _platformObject)
         {
             SetRootViewSize(GetClientRect().GetSize());
-            UpdateRootView();
+            UpdateRootView(GetFrameTime());
         }
     }
     else if (event.Is<WindowEvent::AreaChanged>())
@@ -568,7 +568,8 @@ auto Window::ReceiveFrameEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<FrameEvent::Tick>())
     {
-        UpdateRootView();
+        auto const targetTimestamp = event.As<FrameEvent::Tick>()->GetTargetTimestamp();
+        UpdateRootView(targetTimestamp);
     }
     co_return false;
 }
@@ -988,11 +989,12 @@ auto Window::SetRootViewSize(Size<Dp> const& size) -> void
 ///
 /// @brief
 ///
-auto Window::UpdateRootView() -> void
+auto Window::UpdateRootView(MonotonicTime const targetFrameTime) -> void
 {
     if (_rootView)
     {
         auto parameter = Event<RootViewEvent::Frame>();
+        parameter->SetTargetFrameTime(targetFrameTime);
         auto event = Event<>(parameter);
         _rootView->SendEventDetached(event);
 

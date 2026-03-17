@@ -178,7 +178,9 @@ auto AnimationTicker::RequestTick() -> void
 }
 
 ///
-/// @brief
+/// @brief Get current tick time.
+///
+/// @note The time returned by this function may be more recent than the last tick notification.
 ///
 auto AnimationTicker::GetCurrentTime() const -> MonotonicTime
 {
@@ -203,11 +205,11 @@ auto AnimationTicker::NotifyRootActiveChanged() -> void
 ///
 /// @brief
 ///
-auto AnimationTicker::NotifyRootCurrentTimeChanged() -> void
+auto AnimationTicker::NotifyRootTickTimeChanged(MonotonicTime const tickTime) -> void
 {
     if (IsRoot())
     {
-        SendDependencyNodeTickEvent(GetCurrentTime());
+        SendDependencyNodeTickEvent(tickTime);
     }
 }
 

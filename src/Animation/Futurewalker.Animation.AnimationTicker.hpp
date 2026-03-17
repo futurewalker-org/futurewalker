@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Animation.AnimationTickerType.hpp"
+#include "Futurewalker.Animation.AnimationTickerEvent.hpp"
 
 #include "Futurewalker.Dependency.DependencyNodeType.hpp"
 
@@ -55,7 +56,7 @@ public:
 
 protected:
     auto NotifyRootActiveChanged() -> void;
-    auto NotifyRootCurrentTimeChanged() -> void;
+    auto NotifyRootTickTimeChanged(MonotonicTime const tickTime) -> void;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;

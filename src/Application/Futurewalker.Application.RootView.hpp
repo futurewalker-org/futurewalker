@@ -52,7 +52,7 @@ protected:
     auto ReceiveRootViewEvent(Event<>& event) -> Async<Bool>;
     auto ReceiveKeyEvent(Event<>& event) -> Async<Bool>;
 
-    auto UpdateAnimation() -> void;
+    auto UpdateAnimation(MonotonicTime const frameTime) -> void;
     auto UpdateLayout() -> void;
     auto UpdateVisual() -> void;
 
@@ -102,7 +102,7 @@ private:
     BackingScale _backingScale = 1.0;
     Delegate _delegate;
     Shared<ViewLayerManager> _viewLayerManager;
-    Shared<RootAnimationTicker> _AnimationTicker;
+    Shared<RootAnimationTicker> _animationTicker;
     Shared<RootFocusNode> _focusNode;
     Shared<AttributeNode> _parentAttributeNode;
     Shared<AttributeNode> _attributeNode;

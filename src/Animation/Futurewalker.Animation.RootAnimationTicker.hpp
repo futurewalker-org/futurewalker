@@ -23,8 +23,7 @@ public:
     RootAnimationTicker(PassKey<AnimationTicker> key, Delegate delegate);
 
     auto SetActive(Bool const active) -> void;
-    
-    auto UpdateCurrentTime() -> void;
+    auto SetTickTime(MonotonicTime const tickTime) -> void;
 
 protected:
     auto RootIsActive() const -> Bool override;

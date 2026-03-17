@@ -83,7 +83,7 @@ auto RootView::SetContent(Shared<View> view) -> void
 auto RootView::Initialize() -> void
 {
     _viewLayerManager = Locator::Resolve<ViewLayerManager>();
-    _AnimationTicker = RootAnimationTicker::Make({
+    _animationTicker = RootAnimationTicker::Make({
       .requestTick = [&] { return RequestFrame(); },
       .getCurrentTime = [&] { return GetFrameTime(); },
     });
@@ -180,7 +180,7 @@ auto RootView::ReceiveRootViewEvent(Event<>& event) -> Async<Bool>
     }
     else if (event.Is<RootViewEvent::Frame>())
     {
-        UpdateAnimation();
+        UpdateAnimation(event.As<RootViewEvent::Frame>()->GetTargetFrameTime());
         UpdateLayout();
         UpdateVisual();
     }
@@ -250,9 +250,9 @@ auto RootView::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 ///
 /// @brief
 ///
-auto RootView::UpdateAnimation() -> void
+auto RootView::UpdateAnimation(MonotonicTime const frameTime) -> void
 {
-    _AnimationTicker->UpdateCurrentTime();
+    _animationTicker->SetTickTime(frameTime);
 }
 
 ///
@@ -292,7 +292,7 @@ auto RootView::UpdateVisual() -> void
 ///
 auto RootView::SetAnimationTickerActive(Bool const active) -> void
 {
-    _AnimationTicker->SetActive(active);
+    _animationTicker->SetActive(active);
 }
 
 ///
@@ -570,7 +570,7 @@ auto RootView::RootGetBackingScale() const -> BackingScale
 ///
 auto RootView::RootGetAnimationTicker() -> AnimationTicker&
 {
-    return *_AnimationTicker;
+    return *_animationTicker;
 }
 
 ///
@@ -578,7 +578,7 @@ auto RootView::RootGetAnimationTicker() -> AnimationTicker&
 ///
 auto RootView::RootGetAnimationTicker() const -> AnimationTicker const&
 {
-    return *_AnimationTicker;
+    return *_animationTicker;
 }
 
 ///

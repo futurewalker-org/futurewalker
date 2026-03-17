@@ -154,6 +154,9 @@ public:
     auto GetCommandNode() -> CommandNode&;
     auto GetCommandNode() const -> CommandNode const&;
 
+    auto GetAnimationTicker() -> AnimationTicker&;
+    auto GetAnimationTicker() const -> AnimationTicker const&;
+
     auto EnterMeasureScope(PassKey<MeasureScope>, MeasureParameter const& parameter) -> Size<Dp>;
     auto EnterArrangeScope(PassKey<ArrangeScope>, ArrangeParameter const& parameter) -> void;
     auto EnterDrawScope(PassKey<DrawScope>) -> void;
@@ -257,9 +260,6 @@ private:
     auto IsRoot() const -> Bool;
 
     auto InitializeSelf(Shared<View> const& self) -> void;
-
-    auto GetAnimationTicker() -> AnimationTicker&;
-    auto GetAnimationTicker() const -> AnimationTicker const&;
 
     auto GetFocusNode() -> FocusNode&;
     auto GetFocusNode() const -> FocusNode const&;

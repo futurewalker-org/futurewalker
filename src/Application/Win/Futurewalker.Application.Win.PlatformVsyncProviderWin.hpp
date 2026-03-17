@@ -37,7 +37,6 @@ public:
     ~PlatformVsyncProviderWin();
 
     auto GetCurrentFrameTime() const -> MonotonicTime;
-    
     auto PostFrameCallback(Weak<void> data, PlatformVsyncCallbackFunction callback) -> void;
 
 private:
@@ -47,7 +46,6 @@ private:
     auto RequestStop() -> void;
     auto StopRequested() const -> Bool;
 
-    static auto GetLastCompletedFrameTime(MonotonicTime& frameTime) -> Bool;
     static auto DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, std::vector<CallbackData> const callbacks, std::weak_ptr<Blank> const tracker) -> Task<void>;
 
 private:

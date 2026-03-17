@@ -16,6 +16,7 @@
 #include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.MonotonicTime.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -93,6 +94,11 @@ private:
 class RootViewEvent::Frame final : public RootViewEvent
 {
 public:
+    auto GetTargetFrameTime() const -> MonotonicTime;
+    auto SetTargetFrameTime(MonotonicTime const targetFrameTime) -> void;
+
+private:
+    MonotonicTime _targetFrameTime;
 };
 
 class RootViewEvent::Pointer final : public RootViewEvent

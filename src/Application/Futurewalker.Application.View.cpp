@@ -1562,22 +1562,6 @@ auto View::RootGetBackingScale() const -> BackingScale
 ///
 /// @brief
 ///
-auto View::RootGetAnimationTicker() -> AnimationTicker&
-{
-    return *_animationTicker;
-}
-
-///
-/// @brief
-///
-auto View::RootGetAnimationTicker() const -> AnimationTicker const&
-{
-    return *_animationTicker;
-}
-
-///
-/// @brief
-///
 auto View::RootGetFocusNode() -> FocusNode&
 {
     return *_focusNode;
@@ -1621,6 +1605,22 @@ auto View::RootGetCommandNode() -> CommandNode&
 auto View::RootGetCommandNode() const -> CommandNode const&
 {
     return *_commandNode;
+}
+
+///
+/// @brief
+///
+auto View::RootGetAnimationTicker() -> AnimationTicker&
+{
+    return *_animationTicker;
+}
+
+///
+/// @brief
+///
+auto View::RootGetAnimationTicker() const -> AnimationTicker const&
+{
+    return *_animationTicker;
 }
 
 ///

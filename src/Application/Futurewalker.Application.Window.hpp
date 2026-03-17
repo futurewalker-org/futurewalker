@@ -216,7 +216,7 @@ private:
 
     auto SetRootViewFocus(Bool const focused) -> void;
     auto SetRootViewSize(Size<Dp> const& size) -> void;
-    auto UpdateRootView() -> void;
+    auto UpdateRootView(MonotonicTime const targetFrameTime) -> void;
 
     auto GetClientRect() const -> Rect<Dp>;
 
