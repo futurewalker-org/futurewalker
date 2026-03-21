@@ -4,14 +4,24 @@
 
 namespace FW_DETAIL_NS
 {
-auto InputEvent::InsertText::GetCancel() const -> Bool
+auto InputEvent::BeforeInsertText::GetCancel() const -> Bool
 {
     return _cancel;
 }
 
-auto InputEvent::InsertText::SetCancel(Bool cancel) -> void
+auto InputEvent::BeforeInsertText::SetCancel(Bool cancel) -> void
 {
     _cancel = cancel;
+}
+
+auto InputEvent::BeforeInsertText::SetText(String const& text) -> void
+{
+    _text = text;
+}
+
+auto InputEvent::BeforeInsertText::GetText() const -> String
+{
+    return _text;
 }
 
 auto InputEvent::InsertText::GetText() const -> String
@@ -24,14 +34,65 @@ auto InputEvent::InsertText::SetText(String const& text) -> void
     _text = text;
 }
 
-auto InputEvent::DeleteSurroundingText::GetCancel() const -> Bool
+auto InputEvent::BeforeInsertCompositionText::GetText() const -> String
+{
+    return _text;
+}
+
+auto InputEvent::BeforeInsertCompositionText::SetText(String const& text) -> void
+{
+    _text = text;
+}
+
+
+auto InputEvent::InsertCompositionText::GetText() const -> String
+{
+    return _text;
+}
+
+auto InputEvent::InsertCompositionText::SetText(String const& text) -> void
+{
+    _text = text;
+}
+
+auto InputEvent::BeforeInsertLineBreak::GetCancel() const -> Bool
 {
     return _cancel;
 }
 
-auto InputEvent::DeleteSurroundingText::SetCancel(Bool cancel) -> void
+auto InputEvent::BeforeInsertLineBreak::SetCancel(Bool cancel) -> void
 {
     _cancel = cancel;
+}
+
+auto InputEvent::BeforeDeleteSurroundingText::GetCancel() const -> Bool
+{
+    return _cancel;
+}
+
+auto InputEvent::BeforeDeleteSurroundingText::SetCancel(Bool cancel) -> void
+{
+    _cancel = cancel;
+}
+
+auto InputEvent::BeforeDeleteSurroundingText::GetBefore() const -> CodePoint
+{
+    return _before;
+}
+
+auto InputEvent::BeforeDeleteSurroundingText::SetBefore(CodePoint before) -> void
+{
+    _before = before;
+}
+
+auto InputEvent::BeforeDeleteSurroundingText::GetAfter() const -> CodePoint
+{
+    return _after;
+}
+
+auto InputEvent::BeforeDeleteSurroundingText::SetAfter(CodePoint after) -> void
+{
+    _after = after;
 }
 
 auto InputEvent::DeleteSurroundingText::GetBefore() const -> CodePoint
@@ -52,15 +113,5 @@ auto InputEvent::DeleteSurroundingText::GetAfter() const -> CodePoint
 auto InputEvent::DeleteSurroundingText::SetAfter(CodePoint after) -> void
 {
     _after = after;
-}
-
-auto InputEvent::InsertCompositionText::GetText() const -> String
-{
-    return _text;
-}
-
-auto InputEvent::InsertCompositionText::SetText(String const& text) -> void
-{
-    _text = text;
 }
 }

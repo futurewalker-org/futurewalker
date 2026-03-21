@@ -24,8 +24,12 @@ class TextInputState final
 public:
     struct Delegate
     {
-        Function<Bool(String const& text)> beforeInsertText;
-        Function<Bool(CodePoint before, CodePoint after)> beforeDeleteSurroundingText;
+        Function<Bool(String const& text, Bool cancellable)> beforeInsertText;
+        Function<void(String const& text)> insertText;
+        Function<Bool(Bool cancellable)> beforeInsertLineBreak;
+        Function<void()> insertLineBreak;
+        Function<Bool(CodePoint before, CodePoint after, Bool cancellable)> beforeDeleteSurroundingText;
+        Function<void(CodePoint before, CodePoint after)> deleteSurroundingText;
         Function<void(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End)> onTextChange;
         Function<void()> onSelectionChange;
     };
@@ -45,8 +49,9 @@ public:
     auto GetComposingRange() const -> Range<CodePoint>;
     auto SetComposingRange(Range<CodePoint> const& text) -> Bool;
 
-    auto InsertText(String const& text, CodePoint caretPosition, Bool anticipated) -> void;
-    auto DeleteSurroundingText(CodePoint before, CodePoint after, Bool anticipated) -> void;
+    auto InsertText(String const& text, CodePoint caretPosition, Bool anticipated, Bool cancellable) -> void;
+    auto InsertLineBreak(Bool anticipated, Bool cancellable) -> void;
+    auto DeleteSurroundingText(CodePoint before, CodePoint after, Bool anticipated, Bool cancellable) -> void;
 
 public:
     auto GetU16String() const -> U16String;
@@ -58,7 +63,7 @@ public:
     auto GetU16ComposingRange() const -> Range<CodeUnit>;
     auto SetU16ComposingRange(Range<CodeUnit> range) -> void;
 
-    auto InsertU16Text(U16StringView text, CodePoint caretPosition, Bool anticipated) -> void;
+    auto InsertU16Text(U16StringView text, CodePoint caretPosition, Bool anticipated, Bool cancellable) -> void;
 
     auto GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>;
     auto GetRangeFromU8Range(Range<CodeUnit> range) const -> Range<CodePoint>;
@@ -74,11 +79,15 @@ private:
     auto FindU16IndexFromCodePoint(CodePoint codePoint) const -> CodeUnit;
     auto FindU16RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>;
 
-    auto InsertTextCore(CodePoint caretPosition, Bool anticipated, Text const& text) -> void;
+    auto InsertTextCore(CodePoint caretPosition, Bool anticipated, Bool cancellable, Text const& text) -> void;
 
 private:
-    auto BeforeInsertText(String const& text) -> Bool;
-    auto BeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool;
+    auto BeforeInsertText(String const& text, Bool cancellable) -> Bool;
+    auto InsertText(String const& text) -> void;
+    auto BeforeInsertLineBreak(Bool cancellable) -> Bool;
+    auto InsertLineBreak() -> void;
+    auto BeforeDeleteSurroundingText(CodePoint before, CodePoint after, Bool cancellable) -> Bool;
+    auto DeleteSurroundingText(CodePoint before, CodePoint after) -> void;
     auto OnTextChange(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End) -> void;
     auto OnSelectionChange() -> void;
 

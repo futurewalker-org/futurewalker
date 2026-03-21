@@ -52,6 +52,7 @@ public:
     virtual auto SetLayoutInfo(Graphics::TextLayoutInfo const& layoutInfo) -> void = 0;
 
     virtual auto InsertText(String const& text, CodePoint caretPosition) -> void = 0;
+    virtual auto InsertLineBreak() -> void = 0;
     virtual auto DeleteSurroundingText(CodePoint before, CodePoint after) -> void = 0;
 
 

@@ -101,14 +101,46 @@ auto TextInputState::SetComposingRange(Range<CodePoint> const& range) -> Bool
     return true;
 }
 
-auto TextInputState::InsertText(String const& text, CodePoint caretPosition, Bool anticipated) -> void
+auto TextInputState::InsertText(String const& text, CodePoint caretPosition, Bool anticipated, Bool cancellable) -> void
 {
-    InsertTextCore(caretPosition, anticipated, Text(text));
+    InsertTextCore(caretPosition, anticipated, cancellable, Text(text));
 }
 
-auto TextInputState::DeleteSurroundingText(CodePoint before, CodePoint after, Bool anticipated) -> void
+auto TextInputState::InsertLineBreak(Bool anticipated, Bool cancellable) -> void
 {
-    if (BeforeDeleteSurroundingText(before, after))
+    if (BeforeInsertLineBreak(cancellable))
+    {
+        auto const text = Text(String(u8"\n"));
+        auto const selectedRange = GetNormalizedSelectedRange();
+        auto const u16SelectedRange = GetU16NormalizedSelectedRange();
+        _text.Replace(selectedRange, text);
+
+        auto const caretPosition = 1;
+        auto const newPosition = selectedRange.GetBegin() + ((caretPosition > 0) ? text.GetCodePointCount() + caretPosition - 1 : caretPosition);
+        _selectedRange = {newPosition, newPosition};
+
+        if (!anticipated)
+        {
+            OnTextChange(u16SelectedRange.GetBegin(), u16SelectedRange.GetEnd(), u16SelectedRange.GetBegin() + text.GetU16CodeUnitCount());
+            OnSelectionChange();
+        }
+        InsertLineBreak();
+    }
+    else
+    {
+        if (anticipated)
+        {
+            auto const text = Text(String(u8"\n"));
+            auto const u16SelectedRange = GetU16NormalizedSelectedRange();
+            OnTextChange(u16SelectedRange.GetBegin(), u16SelectedRange.GetBegin() + text.GetU16CodeUnitCount(), u16SelectedRange.GetEnd());
+            OnSelectionChange();
+        }
+    }
+}
+
+auto TextInputState::DeleteSurroundingText(CodePoint before, CodePoint after, Bool anticipated, Bool cancellable) -> void
+{
+    if (BeforeDeleteSurroundingText(before, after, cancellable))
     {
         auto const textRange = GetStringRange();
         auto const selectedRange = GetNormalizedSelectedRange();
@@ -144,6 +176,7 @@ auto TextInputState::DeleteSurroundingText(CodePoint before, CodePoint after, Bo
                 OnSelectionChange();
             }
         }
+        DeleteSurroundingText(before, after);
     }
     else
     {
@@ -233,9 +266,9 @@ auto TextInputState::SetU16ComposingRange(Range<CodeUnit> range) -> void
     }
 }
 
-auto TextInputState::InsertU16Text(U16StringView text, CodePoint caretPosition, Bool anticipated) -> void
+auto TextInputState::InsertU16Text(U16StringView text, CodePoint caretPosition, Bool anticipated, Bool cancellable) -> void
 {
-    InsertTextCore(caretPosition, anticipated, Text(text));
+    InsertTextCore(caretPosition, anticipated, cancellable, Text(text));
 }
 
 auto TextInputState::GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>
@@ -296,9 +329,9 @@ auto TextInputState::FindU16RangeFromCodePointRange(Range<CodePoint> range) cons
     return Range<CodeUnit>(b, e);
 }
 
-auto TextInputState::InsertTextCore(CodePoint caretPosition, Bool anticipated, Text const& text) -> void
+auto TextInputState::InsertTextCore(CodePoint caretPosition, Bool anticipated, Bool cancellable, Text const& text) -> void
 {
-    if (BeforeInsertText(text.GetString()))
+    if (BeforeInsertText(text.GetString(), cancellable))
     {
         auto const oldSelection = GetNormalizedSelectedRange();
         auto const oldU16Selection = GetU16NormalizedSelectedRange();
@@ -316,6 +349,7 @@ auto TextInputState::InsertTextCore(CodePoint caretPosition, Bool anticipated, T
                 OnSelectionChange();
             }
         }
+        InsertText(text.GetString());
     }
     else
     {
@@ -328,22 +362,55 @@ auto TextInputState::InsertTextCore(CodePoint caretPosition, Bool anticipated, T
     }
 }
 
-auto TextInputState::BeforeInsertText(String const& text) -> Bool
+auto TextInputState::BeforeInsertText(String const& text, Bool cancellable) -> Bool
 {
     if (_delegate.beforeInsertText)
     {
-        return _delegate.beforeInsertText(text);
+        return _delegate.beforeInsertText(text, cancellable);
     }
     return true;
 }
 
-auto TextInputState::BeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool
+auto TextInputState::InsertText(String const& text) -> void
+{
+    if (_delegate.insertText)
+    {
+        _delegate.insertText(text);
+    }
+}
+
+auto TextInputState::BeforeInsertLineBreak(Bool cancellable) -> Bool
+{
+    if (_delegate.beforeInsertLineBreak)
+    {
+        return _delegate.beforeInsertLineBreak(cancellable);
+    }
+    return true;
+}
+
+auto TextInputState::InsertLineBreak() -> void
+{
+    if (_delegate.insertLineBreak)
+    {
+        _delegate.insertLineBreak();
+    }
+}
+
+auto TextInputState::BeforeDeleteSurroundingText(CodePoint before, CodePoint after, Bool cancellable) -> Bool
 {
     if (_delegate.beforeDeleteSurroundingText)
     {
-        return _delegate.beforeDeleteSurroundingText(before, after);
+        return _delegate.beforeDeleteSurroundingText(before, after, cancellable);
     }
     return true;
+}
+
+auto TextInputState::DeleteSurroundingText(CodePoint before, CodePoint after) -> void
+{
+    if (_delegate.deleteSurroundingText)
+    {
+        _delegate.deleteSurroundingText(before, after);
+    }
 }
 
 auto TextInputState::OnTextChange(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End) -> void

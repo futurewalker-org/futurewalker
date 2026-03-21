@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #include "Futurewalker.Core.StringFunction.hpp"
+#include "Futurewalker.Core.UnicodeFunction.hpp"
 #include "Futurewalker.Core.Exception.hpp"
 
 #include <fmt/format.h>
@@ -69,6 +70,34 @@ auto StringFunction::Join(String const separator, std::span<String const> const 
         result.Append(parts[static_cast<size_t>(i)]);
     }
     return result;
+}
+
+///
+/// @brief Trim end of text range that consists of break and space characters, and return substring of the trimmed range.
+///
+/// @param[in] text The text to trim.
+/// @param[in] begin The index of the beginning of the text range to trim.
+/// @param[in] end The index of the end of the text range to trim.
+///
+/// @return The substring of the trimmed text range.
+///
+auto StringFunction::StripTrailingBreakAndSpace(String const& text, String::IndexType const begin, String::IndexType const end) -> String
+{
+    auto idx = end;
+    while (begin < idx)
+    {
+        auto prevIdx = text.GetPrev(idx);
+        auto c = String::CharType();
+        if (text.GetChar(prevIdx, c))
+        {
+            if (!UnicodeFunction::IsSpace(c) && !UnicodeFunction::IsBreak(c))
+            {
+                return text.GetSubString(begin, idx);
+            }
+        }
+        idx = prevIdx;
+    }
+    return String();
 }
 
 ///

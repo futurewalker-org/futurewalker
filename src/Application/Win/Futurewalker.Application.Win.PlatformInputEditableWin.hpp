@@ -41,6 +41,7 @@ public:
     auto SetLayoutInfo(Graphics::TextLayoutInfo const& layoutInfo) -> void override;
 
     auto InsertText(String const& text, CodePoint caretPosition) -> void override;
+    auto InsertLineBreak() -> void override;
     auto DeleteSurroundingText(CodePoint before, CodePoint after) -> void override;
 
     auto GetU16String() const -> U16String;
@@ -51,13 +52,21 @@ public:
     auto GetU16ComposingRange() const -> Range<CodeUnit>;
     auto SetU16ComposingRange(Range<CodeUnit> range) -> void;
 
-    auto InsertU16String(U16StringView const text, CodePoint caretPosition, Bool anticipated) -> void;
+    auto InsertU16String(U16StringView const text, CodePoint caretPosition, Bool anticipated, Bool cancellable) -> void;
+
+    auto CompositionStart() -> void;
+    auto CompositionUpdate() -> void;
+    auto CompositionEnd() -> void;
 
     auto GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>;
 
 private:
-    auto InternalBeforeInsertText(String const& text) -> Bool;
-    auto InternalBeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool;
+    auto InternalBeforeInsertText(String const& text, Bool cancellable) -> Bool;
+    auto InternalInsertText(String const& text) -> void;
+    auto InternalBeforeInsertLineBreak(Bool cancellable) -> Bool;
+    auto InternalInsertLineBreak() -> void;
+    auto InternalBeforeDeleteSurroundingText(CodePoint before, CodePoint after, Bool cancellable) -> Bool;
+    auto InternalDeleteSurroundingText(CodePoint before, CodePoint after) -> void;
     auto InternalOnTextChange(CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void;
     auto InternalOnSelectionChange() -> void;
 

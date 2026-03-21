@@ -106,4 +106,137 @@ TEST_CASE("StringFunction")
             REQUIRE(StringFunction::Join(u8",", parts) == u8"one,two,three");
         }
     }
+
+    SECTION("StripTrailingBreakAndSpace")
+    {
+        SECTION("No trailing break or space")
+        {
+            String text(u8"hello");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("Trailing single space")
+        {
+            String text(u8"hello ");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("Trailing multiple spaces")
+        {
+            String text(u8"hello   ");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("Trailing line feed")
+        {
+            String text(u8"hello\n");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("Trailing carriage return")
+        {
+            String text(u8"hello\r");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("Trailing CRLF")
+        {
+            String text(u8"hello\r\n");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("Trailing mixed breaks and spaces")
+        {
+            String text(u8"hello \n \r\n ");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("All spaces returns empty")
+        {
+            String text(u8"   ");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"");
+        }
+
+        SECTION("All breaks returns empty")
+        {
+            String text(u8"\n\r\n");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"");
+        }
+
+        SECTION("Single character preserved")
+        {
+            String text(u8"x");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"x");
+        }
+
+        SECTION("Interior spaces preserved")
+        {
+            String text(u8"hello world  ");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello world");
+        }
+
+        SECTION("Interior breaks preserved")
+        {
+            String text(u8"hello\nworld\n");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello\nworld");
+        }
+
+        SECTION("Tab is not stripped")
+        {
+            String text(u8"hello\t");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello\t");
+        }
+
+        SECTION("No-break space U+00A0 is stripped")
+        {
+            String text(u8"hello\u00A0");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("Unicode next line U+0085 is stripped")
+        {
+            String text(u8"hello\u0085");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("Unicode line separator U+2028 is stripped")
+        {
+            String text(u8"hello\u2028");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("Unicode paragraph separator U+2029 is stripped")
+        {
+            String text(u8"hello\u2029");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"hello");
+        }
+
+        SECTION("Subrange from middle to end")
+        {
+            String text(u8"hello world\n");
+            auto begin = text.GetNext(text.GetBegin(), 6);
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, begin, text.GetEnd()) == u8"world");
+        }
+
+        SECTION("Subrange excluding trailing content")
+        {
+            String text(u8"hello world\nfoo");
+            auto end = text.GetNext(text.GetBegin(), 12);
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), end) == u8"hello world");
+        }
+
+        SECTION("Subrange with trailing spaces")
+        {
+            String text(u8"hello world  \nfoo");
+            auto begin = text.GetNext(text.GetBegin(), 6);
+            auto end = text.GetNext(text.GetBegin(), 14);
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, begin, end) == u8"world");
+        }
+
+        SECTION("Multibyte content with trailing break")
+        {
+            String text(u8"\u00E9\u00E0\n");
+            REQUIRE(StringFunction::StripTrailingBreakAndSpace(text, text.GetBegin(), text.GetEnd()) == u8"\u00E9\u00E0");
+        }
+    }
 }

@@ -18,8 +18,12 @@ auto PlatformInputEditableWin::Make(Delegate const& delegate) -> Shared<Platform
 PlatformInputEditableWin::PlatformInputEditableWin(PassKey<PlatformInputEditable> key, Delegate const& delegate)
   : PlatformInputEditable(key, delegate)
   , _state {{
-        .beforeInsertText = [&](String const& text) { return InternalBeforeInsertText(text); },
-        .beforeDeleteSurroundingText = [&](CodePoint before, CodePoint after) { return InternalBeforeDeleteSurroundingText(before, after); },
+        .beforeInsertText = [&](String const& text, Bool cancellable) { return InternalBeforeInsertText(text, cancellable); },
+        .insertText = [&](String const& text) { InternalInsertText(text); },
+        .beforeInsertLineBreak = [&](Bool cancellable) { return InternalBeforeInsertLineBreak(cancellable); },
+        .insertLineBreak = [&]() { InternalInsertLineBreak(); },
+        .beforeDeleteSurroundingText = [&](CodePoint before, CodePoint after, Bool cancellable) { return InternalBeforeDeleteSurroundingText(before, after, cancellable); },
+        .deleteSurroundingText = [&](CodePoint before, CodePoint after) { InternalDeleteSurroundingText(before, after); },
         .onTextChange = [&](CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) { return InternalOnTextChange(u16OldBegin, u16OldEnd, u16NewEnd); },
         .onSelectionChange = [&]() { return InternalOnSelectionChange(); },
     }}
@@ -107,13 +111,19 @@ auto PlatformInputEditableWin::SetLayoutInfo(Graphics::TextLayoutInfo const& lay
 auto PlatformInputEditableWin::InsertText(String const& text, CodePoint caretPosition) -> void
 {
     FW_DEBUG_LOG_INFO("PlatformInputEditableWin::InsertText: caretPosition={}", static_cast<int64_t>(caretPosition));
-    _state.InsertText(text, caretPosition, false);
+    _state.InsertText(text, caretPosition, false, true);
+}
+
+auto PlatformInputEditableWin::InsertLineBreak() -> void
+{
+    FW_DEBUG_LOG_INFO("PlatformInputEditableWin::InsertLineBreak");
+    _state.InsertLineBreak(false, true);
 }
 
 auto PlatformInputEditableWin::DeleteSurroundingText(CodePoint before, CodePoint after) -> void
 {
     FW_DEBUG_LOG_INFO("PlatformInputEditableWin::DeleteSurroundingText: before={}, after={}", static_cast<int64_t>(before), static_cast<int64_t>(after));
-    _state.DeleteSurroundingText(before, after, false);
+    _state.DeleteSurroundingText(before, after, false, true);
 }
 
 auto PlatformInputEditableWin::GetU16String() const -> U16String
@@ -151,29 +161,28 @@ auto PlatformInputEditableWin::SetU16ComposingRange(Range<CodeUnit> range) -> vo
     _state.SetU16ComposingRange(range);
 }
 
-auto PlatformInputEditableWin::InsertU16String(U16StringView const text, CodePoint caretPosition, Bool anticipated) -> void
+auto PlatformInputEditableWin::InsertU16String(U16StringView const text, CodePoint caretPosition, Bool anticipated, Bool cancellable) -> void
 {
     FW_DEBUG_LOG_INFO("PlatformInputEditableWin::InsertU16String: caretPosition={}", static_cast<int64_t>(caretPosition));
-    {
-        auto u8String = _state.GetString();
-        auto u16String = _state.GetU16String();
-        FW_DEBUG_LOG_INFO("PlatformInputEditableWin::InsertU16String: u8string size={}", (int)u8String.GetView().GetSize());
-        FW_DEBUG_LOG_INFO("PlatformInputEditableWin::InsertU16String: u16string size={}", (int)u16String.GetView().GetSize());
-    }
+    _state.InsertU16Text(text, caretPosition, anticipated, cancellable);
+}
 
-    _state.InsertU16Text(text, caretPosition, anticipated);
+auto PlatformInputEditableWin::CompositionStart() -> void
+{
+    auto event = Event<>(Event<PlatformInputEvent::CompositionStart>());
+    SendInputEventDetached(event);
+}
 
-    {
-        auto u8String = _state.GetString();
-        auto u16String = _state.GetU16String();
-        FW_DEBUG_LOG_INFO("PlatformInputEditableWin::InsertU16String: u8string size={}", (int)u8String.GetView().GetSize());
-        FW_DEBUG_LOG_INFO("PlatformInputEditableWin::InsertU16String: u16string size={}", (int)u16String.GetView().GetSize());
-        if (u8String.GetView().GetSize() > 100)
-        {
-            auto t = Text(text);
-            __debugbreak();
-        }
-    }
+auto PlatformInputEditableWin::CompositionUpdate() -> void
+{
+    auto event = Event<>(Event<PlatformInputEvent::CompositionUpdate>());
+    SendInputEventDetached(event);
+}
+
+auto PlatformInputEditableWin::CompositionEnd() -> void
+{
+    auto event = Event<>(Event<PlatformInputEvent::CompositionEnd>());
+    SendInputEventDetached(event);
 }
 
 auto PlatformInputEditableWin::GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>
@@ -181,39 +190,97 @@ auto PlatformInputEditableWin::GetRangeFromU16Range(Range<CodeUnit> range) const
     return _state.GetRangeFromU16Range(range);
 }
 
-auto PlatformInputEditableWin::InternalBeforeInsertText(String const& text) -> Bool
+auto PlatformInputEditableWin::InternalBeforeInsertText(String const& text, Bool cancellable) -> Bool
 {
-    auto parameter = Event<PlatformInputEvent::InsertText>();
-    parameter->SetText(text);
-    auto event = Event<>(parameter);
-    if (SendInputEventDetached(event))
+    if (cancellable)
     {
-        if (event.Is<PlatformInputEvent::InsertText>())
+        auto parameter = Event<PlatformInputEvent::BeforeInsertText>();
+        parameter->SetText(text);
+        auto event = Event<>(parameter);
+        if (SendInputEventDetached(event))
         {
-            parameter = event.As<PlatformInputEvent::InsertText>();
-            return !parameter->GetCancel();
+            if (event.Is<PlatformInputEvent::BeforeInsertText>())
+            {
+                parameter = event.As<PlatformInputEvent::BeforeInsertText>();
+                return !parameter->GetCancel();
+            }
+            return false;
         }
-        return false;
+    }
+    else
+    {
+        auto parameter = Event<PlatformInputEvent::BeforeInsertCompositionText>();
+        parameter->SetText(text);
+        auto event = Event<>(std::move(parameter));
+        SendInputEventDetached(event);
     }
     return true;
 }
 
-auto PlatformInputEditableWin::InternalBeforeDeleteSurroundingText(CodePoint before, CodePoint after) -> Bool
+auto PlatformInputEditableWin::InternalInsertText(String const& text) -> void
 {
-    auto parameter = Event<PlatformInputEvent::DeleteSurroundingText>();
+    auto parameter = Event<PlatformInputEvent::InsertText>();
+    parameter->SetText(text);
+    auto event = Event<>(std::move(parameter));
+    SendInputEventDetached(event);
+}
+
+auto PlatformInputEditableWin::InternalBeforeInsertLineBreak(Bool cancellable) -> Bool
+{
+    FW_DEBUG_ASSERT(cancellable);
+    auto parameter = Event<PlatformInputEvent::BeforeInsertLineBreak>();
+    auto event = Event<>(parameter);
+    if (SendInputEventDetached(event))
+    {
+        if (cancellable)
+        {
+            if (event.Is<PlatformInputEvent::BeforeInsertLineBreak>())
+            {
+                parameter = event.As<PlatformInputEvent::BeforeInsertLineBreak>();
+                return !parameter->GetCancel();
+            }
+            return false;
+        }
+    }
+    return true;
+}
+
+auto PlatformInputEditableWin::InternalInsertLineBreak() -> void
+{
+    auto parameter = Event<PlatformInputEvent::InsertLineBreak>();
+    auto event = Event<>(std::move(parameter));
+    SendInputEventDetached(event);
+}
+
+auto PlatformInputEditableWin::InternalBeforeDeleteSurroundingText(CodePoint before, CodePoint after, Bool cancellable) -> Bool
+{
+    FW_DEBUG_ASSERT(cancellable);
+    auto parameter = Event<PlatformInputEvent::BeforeDeleteSurroundingText>();
     parameter->SetBefore(before);
     parameter->SetAfter(after);
     auto event = Event<>(parameter);
     if (SendInputEventDetached(event))
     {
-        if (event.Is<PlatformInputEvent::DeleteSurroundingText>())
+        if (cancellable)
         {
-            parameter = event.As<PlatformInputEvent::DeleteSurroundingText>();
-            return !parameter->GetCancel();
+            if (event.Is<PlatformInputEvent::BeforeDeleteSurroundingText>())
+            {
+                parameter = event.As<PlatformInputEvent::BeforeDeleteSurroundingText>();
+                return !parameter->GetCancel();
+            }
+            return false;
         }
-        return false;
     }
     return true;
+}
+
+auto PlatformInputEditableWin::InternalDeleteSurroundingText(CodePoint before, CodePoint after) -> void
+{
+    auto parameter = Event<PlatformInputEvent::DeleteSurroundingText>();
+    parameter->SetBefore(before);
+    parameter->SetAfter(after);
+    auto event = Event<>(std::move(parameter));
+    SendInputEventDetached(event);
 }
 
 auto PlatformInputEditableWin::InternalOnTextChange(CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void

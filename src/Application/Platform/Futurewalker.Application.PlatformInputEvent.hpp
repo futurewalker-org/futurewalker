@@ -14,16 +14,21 @@ namespace FW_EXPORT
 class PlatformInputEvent : public EventParameter
 {
 public:
+    class BeforeInsertText;
     class InsertText;
-    class DeleteSurroundingText;
+    class BeforeInsertCompositionText;
     class InsertCompositionText;
+    class BeforeInsertLineBreak;
+    class InsertLineBreak;
+    class BeforeDeleteSurroundingText;
+    class DeleteSurroundingText;
     class SelectionChange;
     class CompositionStart;
     class CompositionEnd;
     class CompositionUpdate;
 };
 
-class PlatformInputEvent::InsertText final : public PlatformInputEvent
+class PlatformInputEvent::BeforeInsertText final : public PlatformInputEvent
 {
 public:
     auto GetCancel() const -> Bool;
@@ -37,7 +42,51 @@ private:
     String _text;
 };
 
-class PlatformInputEvent::DeleteSurroundingText final : public PlatformInputEvent
+class PlatformInputEvent::InsertText final : public PlatformInputEvent
+{
+public:
+    auto GetText() const -> String;
+    auto SetText(String const& text) -> void;
+
+private:
+    String _text;
+};
+
+class PlatformInputEvent::BeforeInsertCompositionText final : public PlatformInputEvent
+{
+public:
+    auto GetText() const -> String;
+    auto SetText(String const& text) -> void;
+
+private:
+    String _text;
+};
+
+class PlatformInputEvent::InsertCompositionText final : public PlatformInputEvent
+{
+public:
+    auto GetText() const -> String;
+    auto SetText(String const& text) -> void;
+
+private:
+    String _text;
+};
+
+class PlatformInputEvent::BeforeInsertLineBreak final : public PlatformInputEvent
+{
+public:
+    auto GetCancel() const -> Bool;
+    auto SetCancel(Bool cancel) -> void;
+
+private:
+    Bool _cancel = false;
+};
+
+class PlatformInputEvent::InsertLineBreak final : public PlatformInputEvent
+{
+};
+
+class PlatformInputEvent::BeforeDeleteSurroundingText final : public PlatformInputEvent
 {
 public:
     auto GetCancel() const -> Bool;
@@ -54,14 +103,17 @@ private:
     CodePoint _after = 0;
 };
 
-class PlatformInputEvent::InsertCompositionText final : public PlatformInputEvent
+class PlatformInputEvent::DeleteSurroundingText final : public PlatformInputEvent
 {
 public:
-    auto GetText() const -> String;
-    auto SetText(String const& text) -> void;
+    auto GetBefore() const -> CodePoint;
+    auto SetBefore(CodePoint before) -> void;
+    auto GetAfter() const -> CodePoint;
+    auto SetAfter(CodePoint after) -> void;
 
 private:
-    String _text;
+    CodePoint _before = 0;
+    CodePoint _after = 0;
 };
 
 class PlatformInputEvent::SelectionChange final : public PlatformInputEvent

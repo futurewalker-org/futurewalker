@@ -269,6 +269,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetText(
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::SetText(DWORD dwFlags, LONG acpStart, LONG acpEnd, const WCHAR* pchText, ULONG cch, TS_TEXTCHANGE* pChange)
 {
     (void)dwFlags;
+    FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::SetText: acpStart={}, acpEnd={}, cch={}", acpStart, acpEnd, cch);
 
     if (auto editable = _owner.GetEditable())
     {
@@ -276,7 +277,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::SetText(DWORD dwFla
         std::memcpy(text.data(), pchText, text.size() * sizeof(char16_t));
 
         editable->SetU16SelectedRange({acpStart, acpEnd}, true);
-        editable->InsertU16String({text.begin(), text.end()}, 1, true);
+        editable->InsertU16String({text.begin(), text.end()}, 1, true, false);
         pChange->acpStart = acpStart;
         pChange->acpOldEnd = acpEnd;
         pChange->acpNewEnd = acpStart + static_cast<LONG>(text.size());
@@ -321,6 +322,8 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::InsertEmbedded(DWOR
 
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::InsertTextAtSelection(DWORD dwFlags, const WCHAR* pchText, ULONG cch, LONG* pacpStart, LONG* pacpEnd, TS_TEXTCHANGE* pChange)
 {
+    FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::InsertTextAtSelection: cch={}", cch);
+
     if (auto const editable = _owner.GetEditable())
     {
         auto const selection = editable->GetU16SelectedRange();
@@ -333,7 +336,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::InsertTextAtSelecti
         }
         else
         {
-            editable->InsertU16String({text.begin(), text.end()}, 1, true);
+            editable->InsertU16String({text.begin(), text.end()}, 1, true, false);
             pChange->acpStart = static_cast<LONG>(selection.GetBegin());
             pChange->acpOldEnd = static_cast<LONG>(selection.GetEnd());
             pChange->acpNewEnd = pChange->acpStart + static_cast<LONG>(text.size());
@@ -509,16 +512,19 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetScreenExt(TsView
 
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnStartComposition(ITfCompositionView* pComposition, BOOL* pfOk)
 {
-    //FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnStartComposition()");
-    // TODO: Send notification
+    FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnStartComposition()");
     (void)pComposition;
+    if (auto const editable = _owner.GetEditable())
+    {
+        editable->CompositionStart();
+    }
     *pfOk = TRUE;
     return S_OK;
 }
 
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition(ITfCompositionView* pComposition, ITfRange* pRangeNew)
 {
-    //FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition()");
+    FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition()");
     (void)pComposition;
     (void)pRangeNew;
 
@@ -566,14 +572,22 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition
             }
         }
     }
+
+    if (auto const editable = _owner.GetEditable())
+    {
+        editable->CompositionUpdate();
+    }
     return S_OK;
 }
 
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnEndComposition(ITfCompositionView* pComposition)
 {
-    //FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnEndComposition()");
-    // TODO: Send notification
+    FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnEndComposition()");
     (void)pComposition;
+    if (auto const editable = _owner.GetEditable())
+    {
+        editable->CompositionEnd();
+    }
     return S_OK;
 }
 
@@ -762,6 +776,10 @@ auto PlatformInputMethodTextStoreWin::InputKeyFromKeyEvent(String const& key) ->
             {
                 editable->InsertText({}, 0);
             }
+        }
+        else if (key == Key::Enter)
+        {
+            editable->InsertLineBreak();
         }
     }
 }

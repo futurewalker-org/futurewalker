@@ -21,36 +21,6 @@
 
 namespace FW_DETAIL_NS
 {
-namespace
-{
-///
-/// @brief Trim end of text range that consists of break and space characters, and return substring of the trimmed range.
-///
-/// @param[in] text The text to trim.
-/// @param[in] begin The index of the beginning of the text range to trim.
-/// @param[in] end The index of the end of the text range to trim.
-///
-/// @return The substring of the trimmed text range.
-///
-auto StripTrailingBreakAndSpace(String const& text, String::IndexType const begin, String::IndexType const end) -> String
-{
-    auto idx = text.GetPrev(end);
-    while (begin < idx)
-    {
-        auto c = String::CharType();
-        if (text.GetChar(idx, c))
-        {
-            if (!UnicodeFunction::IsSpace(c) && !UnicodeFunction::IsBreak(c))
-            {
-                return text.GetSubString(begin, text.GetNext(idx));
-            }
-        }
-        idx = text.GetPrev(idx);
-    }
-    return String();
-}
-}
-
 ///
 /// @brief Create a new TextView instance.
 ///
@@ -408,7 +378,7 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
 
                     // Break characters are not printable. Trim them before passing to the shaper.
                     // We also trim spaces for consistency with soft break.
-                    auto const lineText = StripTrailingBreakAndSpace(text, prevIndex, *nextIndex);
+                    auto const lineText = StringFunction::StripTrailingBreakAndSpace(text, prevIndex, *nextIndex);
                     auto const shapedLine = _shaper->ShapeText(Text(lineText), typeface, fontSize, maxWidth, {'L', 'a', 't', 'n'}, Graphics::TextShaper::Direction::DefaultLtr);
                     if (shapedLine.GetLineCount() == 1)
                     {

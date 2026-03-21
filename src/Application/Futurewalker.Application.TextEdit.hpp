@@ -89,6 +89,7 @@ private:
     auto InternalGetTypeface() const -> Shared<Graphics::Typeface>;
 
 private:
+    std::vector<Graphics::ShapedText> _shapedLines;
     Shared<InputEditable> _inputEditable;
     AttributeAccessor<RGBAColor> _backgroundColor;
     AttributeAccessor<Channel> _backgroundAlpha;
@@ -106,7 +107,6 @@ private:
     AttributeAccessor<Graphics::FontFamily> _fontFamily;
     Shared<Graphics::Typeface> _typeface;
     Shared<Graphics::TextShaper> _textShaper;
-    Shared<Graphics::ShapedText> _shapedText;
 };
 }
 }

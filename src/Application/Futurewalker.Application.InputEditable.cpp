@@ -279,18 +279,82 @@ auto InputEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool>
 {
     if (_eventReceiver)
     {
-        if (event.Is<PlatformInputEvent::InsertText>())
+        if (event.Is<PlatformInputEvent::BeforeInsertText>())
         {
-            auto platformInputEventParameter = event.As<PlatformInputEvent::InsertText>();
-            auto inputEventParameter = Event<InputEvent::InsertText>();
+            auto platformInputEventParameter = event.As<PlatformInputEvent::BeforeInsertText>();
+            auto inputEventParameter = Event<InputEvent::BeforeInsertText>();
             inputEventParameter->SetText(platformInputEventParameter->GetText());
             inputEventParameter->SetCancel(platformInputEventParameter->GetCancel());
             auto inputEvent = Event<>(inputEventParameter);
             if (co_await _eventReceiver->SendEvent(inputEvent))
             {
-                if (inputEvent.Is<InputEvent::InsertText>())
+                if (inputEvent.Is<InputEvent::BeforeInsertText>())
                 {
-                    inputEventParameter = inputEvent.As<InputEvent::InsertText>();
+                    inputEventParameter = inputEvent.As<InputEvent::BeforeInsertText>();
+                    platformInputEventParameter->SetCancel(inputEventParameter->GetCancel());
+                    event = platformInputEventParameter;
+                }
+                co_return true;
+            }
+        }
+        else if (event.Is<PlatformInputEvent::InsertText>())
+        {
+            auto platformInputEventParameter = event.As<PlatformInputEvent::InsertText>();
+            auto inputEventParameter = Event<InputEvent::InsertText>();
+            inputEventParameter->SetText(platformInputEventParameter->GetText());
+            auto inputEvent = Event<>(std::move(inputEventParameter));
+            co_await _eventReceiver->SendEvent(inputEvent);
+        }
+        else if (event.Is<PlatformInputEvent::BeforeInsertCompositionText>())
+        {
+            auto inputEventParameter = Event<InputEvent::BeforeInsertCompositionText>();
+            inputEventParameter->SetText(event.As<PlatformInputEvent::BeforeInsertCompositionText>()->GetText());
+            auto inputEvent = Event<>(std::move(inputEventParameter));
+            co_return co_await _eventReceiver->SendEvent(inputEvent);
+        }
+        else if (event.Is<PlatformInputEvent::InsertCompositionText>())
+        {
+            auto inputEventParameter = Event<InputEvent::InsertCompositionText>();
+            inputEventParameter->SetText(event.As<PlatformInputEvent::InsertCompositionText>()->GetText());
+            auto inputEvent = Event<>(std::move(inputEventParameter));
+            co_return co_await _eventReceiver->SendEvent(inputEvent);
+        }
+        else if (event.Is<PlatformInputEvent::BeforeInsertLineBreak>())
+        {
+            auto platformInputEventParameter = event.As<PlatformInputEvent::BeforeInsertLineBreak>();
+            auto inputEventParameter = Event<InputEvent::BeforeInsertLineBreak>();
+            auto inputEvent = Event<>(inputEventParameter);
+            if (co_await _eventReceiver->SendEvent(inputEvent))
+            {
+                if (inputEvent.Is<InputEvent::BeforeInsertLineBreak>())
+                {
+                    inputEventParameter = inputEvent.As<InputEvent::BeforeInsertLineBreak>();
+                    platformInputEventParameter->SetCancel(inputEventParameter->GetCancel());
+                    event = platformInputEventParameter;
+                }
+                co_return true;
+            }
+        }
+        else if (event.Is<PlatformInputEvent::InsertLineBreak>())
+        {
+            auto platformInputEventParameter = event.As<PlatformInputEvent::InsertLineBreak>();
+            auto inputEventParameter = Event<InputEvent::InsertLineBreak>();
+            auto inputEvent = Event<>(std::move(inputEventParameter));
+            co_await _eventReceiver->SendEvent(inputEvent);
+        }
+        else if (event.Is<PlatformInputEvent::BeforeDeleteSurroundingText>())
+        {
+            auto platformInputEventParameter = event.As<PlatformInputEvent::BeforeDeleteSurroundingText>();
+            auto inputEventParameter = Event<InputEvent::BeforeDeleteSurroundingText>();
+            inputEventParameter->SetBefore(platformInputEventParameter->GetBefore());
+            inputEventParameter->SetAfter(platformInputEventParameter->GetAfter());
+            inputEventParameter->SetCancel(platformInputEventParameter->GetCancel());
+            auto inputEvent = Event<>(inputEventParameter);
+            if (co_await _eventReceiver->SendEvent(inputEvent))
+            {
+                if (inputEvent.Is<InputEvent::BeforeDeleteSurroundingText>())
+                {
+                    inputEventParameter = inputEvent.As<InputEvent::BeforeDeleteSurroundingText>();
                     platformInputEventParameter->SetCancel(inputEventParameter->GetCancel());
                     event = platformInputEventParameter;
                 }
@@ -303,29 +367,27 @@ auto InputEditable::HandlePlatformInputEvent(Event<>& event) -> Async<Bool>
             auto inputEventParameter = Event<InputEvent::DeleteSurroundingText>();
             inputEventParameter->SetBefore(platformInputEventParameter->GetBefore());
             inputEventParameter->SetAfter(platformInputEventParameter->GetAfter());
-            inputEventParameter->SetCancel(platformInputEventParameter->GetCancel());
-            auto inputEvent = Event<>(inputEventParameter);
-            if (co_await _eventReceiver->SendEvent(inputEvent))
-            {
-                if (inputEvent.Is<InputEvent::DeleteSurroundingText>())
-                {
-                    inputEventParameter = inputEvent.As<InputEvent::DeleteSurroundingText>();
-                    platformInputEventParameter->SetCancel(inputEventParameter->GetCancel());
-                    event = platformInputEventParameter;
-                }
-                co_return true;
-            }
-        }
-        else if (event.Is<PlatformInputEvent::InsertCompositionText>())
-        {
-            auto inputEventParameter = Event<InputEvent::InsertCompositionText>();
-            inputEventParameter->SetText(event.As<PlatformInputEvent::InsertCompositionText>()->GetText());
-            auto inputEvent = Event<>(inputEventParameter);
-            co_return co_await _eventReceiver->SendEvent(inputEvent);
+            auto inputEvent = Event<>(std::move(inputEventParameter));
+            co_await _eventReceiver->SendEvent(inputEvent);
         }
         else if (event.Is<PlatformInputEvent::SelectionChange>())
         {
             auto inputEvent = Event<>(Event<InputEvent::SelectionChange>());
+            co_return co_await _eventReceiver->SendEvent(inputEvent);
+        }
+        else if (event.Is<PlatformInputEvent::CompositionStart>())
+        {
+            auto inputEvent = Event<>(Event<InputEvent::CompositionStart>());
+            co_return co_await _eventReceiver->SendEvent(inputEvent);
+        }
+        else if (event.Is<PlatformInputEvent::CompositionUpdate>())
+        {
+            auto inputEvent = Event<>(Event<InputEvent::CompositionUpdate>());
+            co_return co_await _eventReceiver->SendEvent(inputEvent);
+        }
+        else if (event.Is<PlatformInputEvent::CompositionEnd>())
+        {
+            auto inputEvent = Event<>(Event<InputEvent::CompositionEnd>());
             co_return co_await _eventReceiver->SendEvent(inputEvent);
         }
     }

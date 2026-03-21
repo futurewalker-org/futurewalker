@@ -17,6 +17,8 @@
 #include "Futurewalker.Graphics.GlyphRun.hpp"
 #include "Futurewalker.Graphics.FontManager.hpp"
 
+#include "Futurewalker.Text.LineBreakIterator.hpp"
+
 #include "Futurewalker.Base.Locator.hpp"
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -173,25 +175,40 @@ auto TextEdit::Draw(DrawScope& scope) -> void
 
     ViewDrawFunction::DrawRoundRect(scene, GetContentRect(), cornerRadius, backgroundColor, GetLayoutDirection());
 
-    if (_shapedText)
+    auto x = padding.GetLeading();
+    auto y = padding.GetTop();
+    for (auto const& shapedLine : _shapedLines)
     {
-        auto offset = Dp(0);
-        for (auto const& line : _shapedText->GetLines())
+        for (auto const& line : shapedLine.GetLines())
         {
-            auto const lineMetrics = line.GetMetrics();
-            for (auto const& run : line.GetRuns())
+            if (line.GetRunCount() == 0)
             {
-                auto const runMetrics = run->GetMetrics();
-                scene.PushTranslate({
-                    .x = offset + padding.GetLeading(),
-                    .y = lineMetrics.ascent - runMetrics.ascent + padding.GetTop() + lineMetrics.leading / 2,
-                });
-                scene.AddGlyphRun({
-                    .run = run,
-                    .color = textColor,
-                });
-                scene.Pop({});
-                offset += run->GetAdvance();
+                if (auto const typeface = InternalGetTypeface())
+                {
+                    auto const fontSize = _fontSize.GetValueOr(16);
+                    auto const metrics = typeface->GetMetrics(fontSize);
+                    y += metrics.ascent + metrics.descent + metrics.leading;
+                }
+            }
+            else
+            {
+                auto offset = x;
+                auto const lineMetrics = line.GetMetrics();
+                for (auto const& run : line.GetRuns())
+                {
+                    auto const runMetrics = run->GetMetrics();
+                    scene.PushTranslate({
+                        .x = offset,
+                        .y = y + lineMetrics.ascent - runMetrics.ascent + lineMetrics.leading / 2,
+                    });
+                    scene.AddGlyphRun({
+                        .run = run,
+                        .color = textColor,
+                    });
+                    scene.Pop({});
+                    offset += run->GetAdvance();
+                }
+                y += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
             }
         }
     }
@@ -205,23 +222,24 @@ auto TextEdit::Measure(MeasureScope& scope) -> void
     InternalUpdateLayoutCache();
 
     auto height = Dp(0);
-    if (_shapedText)
+    for (auto const& shapedLine : _shapedLines)
     {
-        for (auto const line : _shapedText->GetLines())
+        for (auto const line : shapedLine.GetLines())
         {
-            auto const metrics = line.GetMetrics();
-            height += metrics.ascent + metrics.descent + metrics.leading;
-        }
-    }
-
-    if (height <= 0)
-    {
-        height = 0;
-        if (auto const typeface = InternalGetTypeface())
-        {
-            auto const fontSize = _fontSize.GetValueOr(16);
-            auto const metrics = typeface->GetMetrics(fontSize);
-            height = metrics.ascent + metrics.descent + metrics.leading;
+            if (line.GetRunCount() == 0)
+            {
+                if (auto const typeface = InternalGetTypeface())
+                {
+                    auto const fontSize = _fontSize.GetValueOr(16);
+                    auto const metrics = typeface->GetMetrics(fontSize);
+                    height += metrics.ascent + metrics.descent + metrics.leading;
+                }
+            }
+            else
+            {
+                auto const metrics = line.GetMetrics();
+                height += metrics.ascent + metrics.descent + metrics.leading;
+            }
         }
     }
 
@@ -260,12 +278,11 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<KeyEvent::Down>())
     {
-        FW_DEBUG_LOG_INFO("TextEdit::Down: {} um={}", event.As<KeyEvent::Down>()->GetKey().ToStdString(), event.As<KeyEvent::Down>()->GetUnmodifiedKey().ToStdString());
+        auto const key = event.As<KeyEvent::Down>()->GetKey();
         co_return false;
     }
     else if (event.Is<KeyEvent::Up>())
     {
-        FW_DEBUG_LOG_INFO("TextEdit::Up");
         co_return false;
     }
     co_return false;
@@ -273,31 +290,18 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 
 auto TextEdit::ReceiveInputEvent(Event<>& event) -> Async<Bool>
 {
-    if (event.Is<InputEvent::Attach>())
+    if (event.Is<InputEvent>())
     {
-        FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent SetContext");
-        co_return true;
-    }
-    else if (event.Is<InputEvent::Detach>())
-    {
-        FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent ReleaseContext");
-        co_return true;
-    }
-    else if (event.Is<InputEvent::InsertText>())
-    {
-        FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent InsertText");
-        InternalInvalidateLayoutCache();
-        InvalidateLayout();
-        InvalidateVisual();
-        co_return false;
-    }
-    else if (event.Is<InputEvent::DeleteSurroundingText>())
-    {
-        FW_DEBUG_LOG_INFO("TextEdit::ReceiveInputEvent DeleteSurroundgText");
-        InternalInvalidateLayoutCache();
-        InvalidateLayout();
-        InvalidateVisual();
-        co_return false;
+        if (event.Is<InputEvent::Attach>() || event.Is<InputEvent::Detach>())
+        {
+            co_return true;
+        }
+        else
+        {
+            InternalInvalidateLayoutCache();
+            InvalidateLayout();
+            InvalidateVisual();
+        }
     }
     co_return false;
 }
@@ -451,7 +455,7 @@ auto TextEdit::InternalDeleteForward() -> void
 
 auto TextEdit::InternalInvalidateLayoutCache() -> void
 {
-    _shapedText = nullptr;
+    _shapedLines.clear();
 }
 
 auto TextEdit::InternalUpdateLayoutCache() -> void
@@ -462,17 +466,34 @@ auto TextEdit::InternalUpdateLayoutCache() -> void
         return;
     }
 
-    if (_shapedText)
+    if (!_shapedLines.empty())
     {
         return;
     }
 
-    if (auto const typeface = InternalGetTypeface())
+    auto const text = _inputEditable->GetText().GetString();
+    auto breakIterator = LineBreakIterator("en-US");
+    breakIterator.SetText(text);
+
+    auto const typeface = InternalGetTypeface();
+    auto const fontSize = _fontSize.GetValueOr(16);
+    auto const direction = Graphics::TextShaper::Direction::DefaultLtr;
+    auto const bcp47ScriptTag = Graphics::TextShaper::FourByteTag({'L', 'a', 't', 'n'});
+
+    auto prevIndex = breakIterator.GetCurrent();
+    while (auto nextIndex = breakIterator.GetNext())
     {
-        auto const text = _inputEditable->GetText();
-        auto const fontSize = _fontSize.GetValueOr(16);
-        _shapedText = Shared<Graphics::ShapedText>::Make(_textShaper->ShapeText(text, typeface, fontSize, Dp::Infinity(), {'L', 'a', 't', 'n'}, Graphics::TextShaper::Direction::DefaultLtr));
+        if (breakIterator.GetCurrentBreakCategory() == LineBreakIterator::BreakCategory::Hard)
+        {
+            auto const lineText = StringFunction::StripTrailingBreakAndSpace(text, prevIndex, *nextIndex);
+            auto const shapedLine = _textShaper->ShapeText(Text(lineText), typeface, fontSize, Dp::Infinity(), bcp47ScriptTag, direction);
+            _shapedLines.push_back(shapedLine);
+            prevIndex = *nextIndex;
+        }
     }
+    auto const lineText = StringFunction::StripTrailingBreakAndSpace(text, prevIndex, text.GetEnd());
+    auto const shapedLine = _textShaper->ShapeText(Text(lineText), typeface, fontSize, Dp::Infinity(), bcp47ScriptTag, direction);
+    _shapedLines.push_back(shapedLine);
 }
 
 auto TextEdit::InternalInvalidateTypeface() -> void

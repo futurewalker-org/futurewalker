@@ -4,14 +4,24 @@
 
 namespace FW_DETAIL_NS
 {
-auto PlatformInputEvent::InsertText::GetCancel() const -> Bool
+auto PlatformInputEvent::BeforeInsertText::GetCancel() const -> Bool
 {
     return _cancel;
 }
 
-auto PlatformInputEvent::InsertText::SetCancel(Bool cancel) -> void
+auto PlatformInputEvent::BeforeInsertText::SetCancel(Bool cancel) -> void
 {
     _cancel = cancel;
+}
+
+auto PlatformInputEvent::BeforeInsertText::GetText() const -> String
+{
+    return _text;
+}
+
+auto PlatformInputEvent::BeforeInsertText::SetText(String const& text) -> void
+{
+    _text = text;
 }
 
 auto PlatformInputEvent::InsertText::GetText() const -> String
@@ -24,14 +34,64 @@ auto PlatformInputEvent::InsertText::SetText(String const& text) -> void
     _text = text;
 }
 
-auto PlatformInputEvent::DeleteSurroundingText::GetCancel() const -> Bool
+auto PlatformInputEvent::BeforeInsertCompositionText::GetText() const -> String
+{
+    return _text;
+}
+
+auto PlatformInputEvent::BeforeInsertCompositionText::SetText(String const& text) -> void
+{
+    _text = text;
+}
+
+auto PlatformInputEvent::InsertCompositionText::GetText() const -> String
+{
+    return _text;
+}
+
+auto PlatformInputEvent::InsertCompositionText::SetText(String const& text) -> void
+{
+    _text = text;
+}
+
+auto PlatformInputEvent::BeforeInsertLineBreak::GetCancel() const -> Bool
 {
     return _cancel;
 }
 
-auto PlatformInputEvent::DeleteSurroundingText::SetCancel(Bool cancel) -> void
+auto PlatformInputEvent::BeforeInsertLineBreak::SetCancel(Bool cancel) -> void
 {
     _cancel = cancel;
+}
+
+auto PlatformInputEvent::BeforeDeleteSurroundingText::GetCancel() const -> Bool
+{
+    return _cancel;
+}
+
+auto PlatformInputEvent::BeforeDeleteSurroundingText::SetCancel(Bool cancel) -> void
+{
+    _cancel = cancel;
+}
+
+auto PlatformInputEvent::BeforeDeleteSurroundingText::GetBefore() const -> CodePoint
+{
+    return _before;
+}
+
+auto PlatformInputEvent::BeforeDeleteSurroundingText::SetBefore(CodePoint before) -> void
+{
+    _before = before;
+}
+
+auto PlatformInputEvent::BeforeDeleteSurroundingText::GetAfter() const -> CodePoint
+{
+    return _after;
+}
+
+auto PlatformInputEvent::BeforeDeleteSurroundingText::SetAfter(CodePoint after) -> void
+{
+    _after = after;
 }
 
 auto PlatformInputEvent::DeleteSurroundingText::GetBefore() const -> CodePoint
@@ -52,15 +112,5 @@ auto PlatformInputEvent::DeleteSurroundingText::GetAfter() const -> CodePoint
 auto PlatformInputEvent::DeleteSurroundingText::SetAfter(CodePoint after) -> void
 {
     _after = after;
-}
-
-auto PlatformInputEvent::InsertCompositionText::GetText() const -> String
-{
-    return _text;
-}
-
-auto PlatformInputEvent::InsertCompositionText::SetText(String const& text) -> void
-{
-    _text = text;
 }
 }
