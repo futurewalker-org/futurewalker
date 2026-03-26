@@ -135,7 +135,6 @@ private:
 class InputEvent::SelectionChange final : public InputEvent
 {
 };
-}
 
 class InputEvent::CompositionStart final : public InputEvent
 {
@@ -148,4 +147,5 @@ class InputEvent::CompositionUpdate final : public InputEvent
 class InputEvent::CompositionEnd final : public InputEvent
 {
 };
+}
 }

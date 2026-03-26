@@ -22,6 +22,7 @@ public:
 
     static auto Join(String const separator, std::span<String const> const parts) -> String;
 
+    static auto StripTrailingBreaks(String const& text, String::IndexType const begin, String::IndexType const end) -> String;
     static auto StripTrailingBreakAndSpace(String const& text, String::IndexType const begin, String::IndexType const end) -> String;
 
 private:

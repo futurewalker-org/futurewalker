@@ -86,8 +86,9 @@ public:
     /// @return Index of the glyph in the run.
     ///
     /// @note If the run does not contain a glyph for the given text position, it returns closest index of a glyph.
+    /// @note If the text position is out of bounds, it returns an empty optional.
     ///
-    virtual auto GetGlyphIndex(CodePoint const textPosition) const -> GlyphIndex = 0;
+    virtual auto GetGlyphIndex(CodePoint const textPosition) const -> Optional<GlyphIndex> = 0;
 };
 }
 }

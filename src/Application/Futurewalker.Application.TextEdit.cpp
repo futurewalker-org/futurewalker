@@ -175,41 +175,75 @@ auto TextEdit::Draw(DrawScope& scope) -> void
 
     ViewDrawFunction::DrawRoundRect(scene, GetContentRect(), cornerRadius, backgroundColor, GetLayoutDirection());
 
-    auto x = padding.GetLeading();
-    auto y = padding.GetTop();
-    for (auto const& shapedLine : _shapedLines)
+    if (_arrangeCache)
     {
-        for (auto const& line : shapedLine.GetLines())
+        auto const& arrangedLines = _arrangeCache->arrangedLines;
+
+        // Draw glyph runs.
+        for (auto const& line : arrangedLines)
         {
-            if (line.GetRunCount() == 0)
+            for (auto const& run : line.runs)
             {
-                if (auto const typeface = InternalGetTypeface())
+                scene.PushTranslate({
+                    .x = run.position.GetX(),
+                    .y = run.position.GetY(),
+                });
+                scene.AddGlyphRun({
+                    .run = run.run,
+                    .color = textColor,
+                });
+                scene.Pop({});
+            }
+        }
+
+        // Draw caret.
+        // TODO: Support selection range.
+        auto selection = _selectionEnd;
+        if (IsFocused() && selection.line < std::ssize(arrangedLines))
+        {
+            auto const& lineInfo = arrangedLines[static_cast<size_t>(selection.line)];
+            auto const lineY = lineInfo.position.GetY();
+            auto const lineHeight = lineInfo.metrics.ascent + lineInfo.metrics.descent;
+
+            auto offset = selection.offset;
+
+            auto caretX = padding.GetLeading();
+            auto const caretY = lineY;
+            auto const caretHeight = lineHeight;
+
+            for (auto const& runInfo : lineInfo.runs)
+            {
+                auto const& run = runInfo.run;
+                auto const& runX = runInfo.position.GetX();
+
+                if (run->GetText().GetCodePointCount() < offset)
                 {
-                    auto const fontSize = _fontSize.GetValueOr(16);
-                    auto const metrics = typeface->GetMetrics(fontSize);
-                    y += metrics.ascent + metrics.descent + metrics.leading;
+                    offset -= run->GetText().GetCodePointCount();
+                }
+                else
+                {
+                    auto glyphX = Dp(0);
+                    if (auto const glyphIndex = run->GetGlyphIndex(offset))
+                    {
+                        if (auto const position = run->GetGlyphPosition(*glyphIndex))
+                        {
+                            glyphX = position->GetX();
+                        }
+                    }
+                    else
+                    {
+                        glyphX = run->GetAdvance();
+                    }
+                    caretX = runX + glyphX;
+                    break;
                 }
             }
-            else
-            {
-                auto offset = x;
-                auto const lineMetrics = line.GetMetrics();
-                for (auto const& run : line.GetRuns())
-                {
-                    auto const runMetrics = run->GetMetrics();
-                    scene.PushTranslate({
-                        .x = offset,
-                        .y = y + lineMetrics.ascent - runMetrics.ascent + lineMetrics.leading / 2,
-                    });
-                    scene.AddGlyphRun({
-                        .run = run,
-                        .color = textColor,
-                    });
-                    scene.Pop({});
-                    offset += run->GetAdvance();
-                }
-                y += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
-            }
+
+            auto const caretRect = Rect<Dp>(Point<Dp>(caretX, caretY), Size<Dp>(1, caretHeight));
+            scene.AddRect({
+                .rect = caretRect,
+                .color = textColor,
+            });
         }
     }
 
@@ -219,32 +253,19 @@ auto TextEdit::Draw(DrawScope& scope) -> void
 auto TextEdit::Measure(MeasureScope& scope) -> void
 {
     InternalUpdateTypeface();
-    InternalUpdateLayoutCache();
-
-    auto height = Dp(0);
-    for (auto const& shapedLine : _shapedLines)
-    {
-        for (auto const line : shapedLine.GetLines())
-        {
-            if (line.GetRunCount() == 0)
-            {
-                if (auto const typeface = InternalGetTypeface())
-                {
-                    auto const fontSize = _fontSize.GetValueOr(16);
-                    auto const metrics = typeface->GetMetrics(fontSize);
-                    height += metrics.ascent + metrics.descent + metrics.leading;
-                }
-            }
-            else
-            {
-                auto const metrics = line.GetMetrics();
-                height += metrics.ascent + metrics.descent + metrics.leading;
-            }
-        }
-    }
+    InternalUpdateTextCache();
+    InternalUpdateMeasureCache();
 
     auto const padding = _padding.GetValueOrDefault();
-    height += padding.GetTotalHeight();
+    auto height = padding.GetTotalHeight();
+    if (_measureCache)
+    {
+        for (auto const& shapedLine : _measureCache->shapedLines)
+        {
+            auto const metrics = shapedLine.metrics;
+            height += metrics.ascent + metrics.descent + metrics.leading;
+        }
+    }
 
     auto const widthConstraints = scope.GetParameter().GetWidthConstraints();
     auto const heightConstraints = scope.GetParameter().GetHeightConstraints();
@@ -255,6 +276,8 @@ auto TextEdit::Measure(MeasureScope& scope) -> void
 
 auto TextEdit::Arrange(ArrangeScope& scope) -> void
 {
+    InternalUpdateArrangeCache();
+
     if (_inputEditable)
     {
         _inputEditable->SetLayoutRect(GetContentRect());
@@ -267,7 +290,7 @@ auto TextEdit::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
     if (event.Is<AttributeEvent::ValueChanged>())
     {
         InternalInvalidateTypeface();
-        InternalInvalidateLayoutCache();
+        InternalInvalidateMeasureCache();
         InvalidateLayout();
         InvalidateVisual();
     }
@@ -278,7 +301,6 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<KeyEvent::Down>())
     {
-        auto const key = event.As<KeyEvent::Down>()->GetKey();
         co_return false;
     }
     else if (event.Is<KeyEvent::Up>())
@@ -298,7 +320,7 @@ auto TextEdit::ReceiveInputEvent(Event<>& event) -> Async<Bool>
         }
         else
         {
-            InternalInvalidateLayoutCache();
+            InternalInvalidateTextCache();
             InvalidateLayout();
             InvalidateVisual();
         }
@@ -366,20 +388,28 @@ auto TextEdit::InternalInsertText(String const& text, CodePoint newSelection) ->
     }
 }
 
-auto TextEdit::InternalGetSelectedRange() -> Range<CodePoint>
+auto TextEdit::InternalGetSelectionDirection() const -> TextSelectionDirection
 {
     if (_inputEditable)
     {
-        return _inputEditable->GetSelectedRange();
+        return _inputEditable->GetSelectionDirection();
+    }
+    return TextSelectionDirection::Forward;
+}
+
+auto TextEdit::InternalGetSelectionRange() -> Range<CodePoint>
+{
+    if (_inputEditable)
+    {
+        return _inputEditable->GetSelectionRange();
     }
     return {};
 }
-
-auto TextEdit::InternalSetSelectedRange(Range<CodePoint> range) -> void
+auto TextEdit::InternalSetSelectionRange(Range<CodePoint> const& range, TextSelectionDirection direction) -> void
 {
     if (_inputEditable)
     {
-        _inputEditable->SetSelectedRange(range);
+        _inputEditable->SetSelectionRange(range, direction);
     }
 }
 
@@ -392,7 +422,7 @@ auto TextEdit::InternalGetComposingRange() -> Range<CodePoint>
     return {};
 }
 
-auto TextEdit::InternalSetComposingRange(Range<CodePoint> range) -> void
+auto TextEdit::InternalSetComposingRange(Range<CodePoint> const& range) -> void
 {
     if (_inputEditable)
     {
@@ -453,47 +483,174 @@ auto TextEdit::InternalDeleteForward() -> void
     }
 }
 
-auto TextEdit::InternalInvalidateLayoutCache() -> void
+auto TextEdit::InternalInvalidateTextCache() -> void
 {
-    _shapedLines.clear();
+    _textCache.Reset();
 }
 
-auto TextEdit::InternalUpdateLayoutCache() -> void
+auto TextEdit::InternalUpdateTextCache() -> void
 {
-    if (!_inputEditable || !_textShaper)
-    {
-        FW_DEBUG_ASSERT(false);
-        return;
-    }
-
-    if (!_shapedLines.empty())
+    if (!_inputEditable || _textCache)
     {
         return;
     }
 
-    auto const text = _inputEditable->GetText().GetString();
+    auto const text = _inputEditable->GetText();
+    auto const textString = text.GetString();
     auto breakIterator = LineBreakIterator("en-US");
-    breakIterator.SetText(text);
+    breakIterator.SetText(textString);
 
-    auto const typeface = InternalGetTypeface();
-    auto const fontSize = _fontSize.GetValueOr(16);
-    auto const direction = Graphics::TextShaper::Direction::DefaultLtr;
-    auto const bcp47ScriptTag = Graphics::TextShaper::FourByteTag({'L', 'a', 't', 'n'});
+    auto textCache = TextCache();
+    textCache.text = text;
 
     auto prevIndex = breakIterator.GetCurrent();
     while (auto nextIndex = breakIterator.GetNext())
     {
         if (breakIterator.GetCurrentBreakCategory() == LineBreakIterator::BreakCategory::Hard)
         {
-            auto const lineText = StringFunction::StripTrailingBreakAndSpace(text, prevIndex, *nextIndex);
-            auto const shapedLine = _textShaper->ShapeText(Text(lineText), typeface, fontSize, Dp::Infinity(), bcp47ScriptTag, direction);
-            _shapedLines.push_back(shapedLine);
+            auto const lineText = StringFunction::StripTrailingBreaks(textString, prevIndex, *nextIndex);
+            textCache.lines.emplace_back(CodeUnit(prevIndex), lineText);
             prevIndex = *nextIndex;
         }
     }
-    auto const lineText = StringFunction::StripTrailingBreakAndSpace(text, prevIndex, text.GetEnd());
-    auto const shapedLine = _textShaper->ShapeText(Text(lineText), typeface, fontSize, Dp::Infinity(), bcp47ScriptTag, direction);
-    _shapedLines.push_back(shapedLine);
+    auto const lineText = StringFunction::StripTrailingBreaks(textString, prevIndex, textString.GetEnd());
+    textCache.lines.emplace_back(CodeUnit(prevIndex), lineText);
+
+    _textCache = std::move(textCache);
+
+    InternalInvalidateMeasureCache();
+}
+
+auto TextEdit::InternalInvalidateMeasureCache() -> void
+{
+    _measureCache.Reset();
+}
+
+auto TextEdit::InternalUpdateMeasureCache() -> void
+{
+    if (!_inputEditable || !_textCache || _measureCache)
+    {
+        return;
+    }
+
+    auto const typeface = InternalGetTypeface();
+    auto const fontSize = _fontSize.GetValueOr(16);
+    auto const fontMetrics = typeface->GetMetrics(fontSize);
+    auto const direction = Graphics::TextShaper::Direction::DefaultLtr;
+    auto const bcp47ScriptTag = Graphics::TextShaper::FourByteTag({'L', 'a', 't', 'n'});
+
+    auto measureCache = MeasureCache();
+
+    for (auto const& [textLineOffset, textLine] : _textCache->lines)
+    {
+        auto const shapedText = _textShaper->ShapeText(Text(textLine), typeface, fontSize, Dp::Infinity(), bcp47ScriptTag, direction);
+
+        auto count = CodePoint(0);
+        for (auto const& wrappedLine : shapedText.GetLines())
+        {
+            auto shapedLine = ShapedLine {
+                .start = _textCache->text.GetCodePointIndexByU8Index(textLineOffset) + count,
+                .advance = wrappedLine.GetAdvance(),
+                .metrics = wrappedLine.GetMetrics(),
+                .runs = wrappedLine.GetRuns(),
+            };
+
+            auto const& runs = wrappedLine.GetRuns();
+
+            if (std::ssize(runs) == 0)
+            {
+                shapedLine.metrics = fontMetrics;
+            }
+
+            for (auto const& run : runs)
+            {
+                count += run->GetText().GetCodePointCount();
+            }
+
+            measureCache.shapedLines.push_back(std::move(shapedLine));
+        }
+    }
+
+    auto findSelectionPosition = [&](CodePoint position) -> SelectionPosition {
+        if (measureCache.shapedLines.empty())
+        {
+            return {};
+        }
+
+        auto const lineCount = std::ssize(measureCache.shapedLines);
+        for (auto i = SInt64(0); i < lineCount - 1; ++i)
+        {
+            if (position < measureCache.shapedLines[static_cast<size_t>(i + 1)].start)
+            {
+                return {i, position - measureCache.shapedLines[static_cast<size_t>(i)].start};
+            }
+        }
+        return {lineCount - 1, position - measureCache.shapedLines[static_cast<size_t>(lineCount - 1)].start};
+    };
+    auto const selectionRange = InternalGetSelectionRange();
+    _selectionBegin = findSelectionPosition(selectionRange.GetBegin());
+    _selectionEnd = findSelectionPosition(selectionRange.GetEnd());
+    _measureCache = std::move(measureCache);
+
+    InternalInvalidateArrangeCache();
+}
+
+auto TextEdit::InternalInvalidateArrangeCache() -> void
+{
+    _arrangeCache.Reset();
+}
+
+auto TextEdit::InternalUpdateArrangeCache() -> void
+{
+    if (!_inputEditable || !_measureCache || _arrangeCache)
+    {
+        return;
+    }
+
+    auto const padding = _padding.GetValueOrDefault();
+
+    auto arrangeCache = ArrangeCache();
+
+    auto x = padding.GetLeading();
+    auto y = padding.GetTop();
+    for (auto const& shapedLine : _measureCache->shapedLines)
+    {
+        auto arrangedLine = ArrangedLine {
+            .position = Point<Dp>(x, y),
+            .start = shapedLine.start,
+            .metrics = shapedLine.metrics,
+            .runs = {},
+        };
+
+        if (std::ssize(shapedLine.runs) == 0)
+        {
+            if (auto const typeface = InternalGetTypeface())
+            {
+                auto const fontSize = _fontSize.GetValueOr(16);
+                auto const metrics = typeface->GetMetrics(fontSize);
+                arrangedLine.metrics = metrics;
+                y += metrics.ascent + metrics.descent + metrics.leading;
+            }
+        }
+        else
+        {
+            auto offset = x;
+            auto const& lineMetrics = shapedLine.metrics;
+            for (auto const& run : shapedLine.runs)
+            {
+                auto const runMetrics = run->GetMetrics();
+                arrangedLine.runs.push_back({
+                    .position = Point<Dp>(offset, y + lineMetrics.ascent - runMetrics.ascent + lineMetrics.leading / 2),
+                    .run = run,
+                });
+                offset += run->GetAdvance();
+            }
+            y += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
+        }
+
+        arrangeCache.arrangedLines.push_back(std::move(arrangedLine));
+    }
+    _arrangeCache = std::move(arrangeCache);
 }
 
 auto TextEdit::InternalInvalidateTypeface() -> void

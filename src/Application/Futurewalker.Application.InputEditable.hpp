@@ -18,6 +18,7 @@
 #include "Futurewalker.Graphics.TextLayoutInfo.hpp"
 
 #include "Futurewalker.Text.Text.hpp"
+#include "Futurewalker.Text.TextSelectionDirection.hpp" 
 
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Memory.hpp"
@@ -49,8 +50,9 @@ public:
     auto GetString(Range<CodePoint> range) const -> String;
     auto GetStringRange() const -> Range<CodePoint>;
 
-    auto GetSelectedRange() const -> Range<CodePoint>;
-    auto SetSelectedRange(Range<CodePoint> const& range) -> void;
+    auto GetSelectionDirection() const -> TextSelectionDirection;
+    auto GetSelectionRange() const -> Range<CodePoint>;
+    auto SetSelectionRange(Range<CodePoint> const& range, TextSelectionDirection direction) -> void;
 
     auto GetComposingRange() const -> Range<CodePoint>;
     auto SetComposingRange(Range<CodePoint> const& range) -> void;

@@ -45,7 +45,7 @@ auto PlatformInputEditableWin::SetText(Text const& text) -> void
     _state.SetText(text);
 }
 
-auto PlatformInputEditableWin::GetString(Range<CodePoint> range) const -> String
+auto PlatformInputEditableWin::GetString(Range<CodePoint> const& range) const -> String
 {
     return _state.GetString(range);
 }
@@ -55,24 +55,29 @@ auto PlatformInputEditableWin::GetStringRange() const -> Range<CodePoint>
     return _state.GetStringRange();
 }
 
-auto PlatformInputEditableWin::GetSelectedRange() const -> Range<CodePoint>
+auto PlatformInputEditableWin::GetSelectionDirection() const -> TextSelectionDirection
 {
-    return _state.GetSelectedRange();
+    return _state.GetSelectionDirection();
 }
 
-auto PlatformInputEditableWin::SetSelectedRange(Range<CodePoint> const& range) -> void
+auto PlatformInputEditableWin::GetSelectionRange() const -> Range<CodePoint>
 {
-    _state.SetSelectedRange(range);
+    return _state.GetSelectionRange();
+}
+
+auto PlatformInputEditableWin::SetSelectionRange(Range<CodePoint> const& range, TextSelectionDirection direction) -> void
+{
+    _state.SetSelectionRange(range, direction);
 }
 
 auto PlatformInputEditableWin::GetComposingRange() const -> Range<CodePoint>
 {
-    return _state.GetSelectedRange();
+    return _state.GetComposingRange();
 }
 
 auto PlatformInputEditableWin::SetComposingRange(Range<CodePoint> const& range) -> void
 {
-    _state.SetSelectedRange(range);
+    _state.SetComposingRange(range);
 }
 
 auto PlatformInputEditableWin::GetLayoutRect() const -> Rect<Dp>
@@ -141,14 +146,14 @@ auto PlatformInputEditableWin::GetU16StringRange() const -> Range<CodeUnit>
     return _state.GetU16StringRange();
 }
 
-auto PlatformInputEditableWin::GetU16SelectedRange() const -> Range<CodeUnit>
+auto PlatformInputEditableWin::GetU16SelectionRange() const -> Range<CodeUnit>
 {
-    return _state.GetU16SelectedRange();
+    return _state.GetU16SelectionRange();
 }
 
-auto PlatformInputEditableWin::SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void
+auto PlatformInputEditableWin::SetU16SelectionRange(Range<CodeUnit> const& range, TextSelectionDirection const direction, Bool anticipated) -> void
 {
-    _state.SetU16SelectedRange(range, anticipated);
+    _state.SetU16SelectionRange(range, direction, anticipated);
 }
 
 auto PlatformInputEditableWin::GetU16ComposingRange() const -> Range<CodeUnit>
@@ -156,7 +161,7 @@ auto PlatformInputEditableWin::GetU16ComposingRange() const -> Range<CodeUnit>
     return _state.GetU16ComposingRange();
 }
 
-auto PlatformInputEditableWin::SetU16ComposingRange(Range<CodeUnit> range) -> void
+auto PlatformInputEditableWin::SetU16ComposingRange(Range<CodeUnit> const& range) -> void
 {
     _state.SetU16ComposingRange(range);
 }

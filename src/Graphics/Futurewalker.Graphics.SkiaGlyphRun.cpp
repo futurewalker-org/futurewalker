@@ -50,18 +50,21 @@ auto SkiaGlyphRun::GetCharacterIndex(GlyphIndex const glyphIndex) const -> Optio
     return {};
 }
 
-auto SkiaGlyphRun::GetGlyphIndex(CodePoint const textPosition) const -> GlyphIndex
+auto SkiaGlyphRun::GetGlyphIndex(CodePoint const textPosition) const -> Optional<GlyphIndex>
 {
-    auto const u8TextPosition = _text.GetU8IndexByCodePointIndex(textPosition);
-    for (auto i = GlyphIndex(0); i < _glyphCount; ++i)
+    if (0 <= textPosition)
     {
-        auto const clusterIndex = CodeUnit(_buffer.clusters[static_cast<size_t>(i)]);
-        if (u8TextPosition < clusterIndex)
+        auto const u8TextPosition = _text.GetU8IndexByCodePointIndex(textPosition);
+        for (auto i = GlyphIndex(0); i < _glyphCount; ++i)
         {
-            return GlyphIndex::Max(0, GlyphIndex(i - 1));
+            auto const clusterIndex = CodeUnit(_buffer.clusters[static_cast<size_t>(i)]);
+            if (u8TextPosition < clusterIndex)
+            {
+                return GlyphIndex::Max(0, GlyphIndex(i - 1));
+            }
         }
     }
-    return GlyphIndex(_glyphCount - 1);
+    return {};
 }
 
 auto SkiaGlyphRun::GetMetrics() const -> FontMetrics

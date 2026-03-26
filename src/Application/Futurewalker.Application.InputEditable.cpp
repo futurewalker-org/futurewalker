@@ -110,15 +110,29 @@ auto InputEditable::GetStringRange() const -> Range<CodePoint>
 }
 
 ///
+/// @brief Get selection direction.
+///
+/// @return Selection direction.
+///
+auto InputEditable::GetSelectionDirection() const -> TextSelectionDirection
+{
+    if (_platform)
+    {
+        return _platform->GetSelectionDirection();
+    }
+    return TextSelectionDirection::Forward;
+}
+
+///
 /// @brief Get selected range.
 ///
 /// @return Selected range in code points.
 ///
-auto InputEditable::GetSelectedRange() const -> Range<CodePoint>
+auto InputEditable::GetSelectionRange() const -> Range<CodePoint>
 {
     if (_platform)
     {
-        return _platform->GetSelectedRange();
+        return _platform->GetSelectionRange();
     }
     return {};
 }
@@ -127,12 +141,13 @@ auto InputEditable::GetSelectedRange() const -> Range<CodePoint>
 /// @brief Set new selected range.
 ///
 /// @param[in] range New selected range in code points.
+/// @param[in] direction Selection direction.
 ///
-auto InputEditable::SetSelectedRange(Range<CodePoint> const& range) -> void
+auto InputEditable::SetSelectionRange(Range<CodePoint> const& range, TextSelectionDirection direction) -> void
 {
     if (_platform)
     {
-        return _platform->SetSelectedRange(range);
+        return _platform->SetSelectionRange(range, direction);
     }
 }
 

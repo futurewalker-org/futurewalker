@@ -25,11 +25,12 @@ public:
     auto GetText() const -> Text override;
     auto SetText(Text const& text) -> void override;
 
-    auto GetString(Range<CodePoint> range) const -> String override;
+    auto GetString(Range<CodePoint> const& range) const -> String override;
     auto GetStringRange() const -> Range<CodePoint> override;
 
-    auto GetSelectedRange() const -> Range<CodePoint> override;
-    auto SetSelectedRange(Range<CodePoint> const& range) -> void override;
+    auto GetSelectionDirection() const -> TextSelectionDirection override;
+    auto GetSelectionRange() const -> Range<CodePoint> override;
+    auto SetSelectionRange(Range<CodePoint> const& range, TextSelectionDirection direction) -> void override;
 
     auto GetComposingRange() const -> Range<CodePoint> override;
     auto SetComposingRange(Range<CodePoint> const& range) -> void override;
@@ -47,10 +48,10 @@ public:
     auto GetU16String() const -> U16String;
     auto GetU16String(Range<CodeUnit> range) const -> U16String;
     auto GetU16StringRange() const -> Range<CodeUnit>;
-    auto GetU16SelectedRange() const -> Range<CodeUnit>;
-    auto SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void;
+    auto GetU16SelectionRange() const -> Range<CodeUnit>;
+    auto SetU16SelectionRange(Range<CodeUnit> const& range, TextSelectionDirection const direction, Bool anticipated) -> void;
     auto GetU16ComposingRange() const -> Range<CodeUnit>;
-    auto SetU16ComposingRange(Range<CodeUnit> range) -> void;
+    auto SetU16ComposingRange(Range<CodeUnit> const& range) -> void;
 
     auto InsertU16String(U16StringView const text, CodePoint caretPosition, Bool anticipated, Bool cancellable) -> void;
 

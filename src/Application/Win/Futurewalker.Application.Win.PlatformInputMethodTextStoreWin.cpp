@@ -188,10 +188,11 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetSelection(ULONG 
     {
         if (auto editable = _owner.GetEditable())
         {
-            auto const selectedRange = editable->GetU16SelectedRange();
-            pSelection[0].acpStart = static_cast<LONG>(selectedRange.GetBegin());
-            pSelection[0].acpEnd = static_cast<LONG>(selectedRange.GetEnd());
-            pSelection[0].style.ase = TS_AE_END;
+            auto const selectionDirection = editable->GetSelectionDirection();
+            auto const selectionRange = editable->GetU16SelectionRange();
+            pSelection[0].acpStart = static_cast<LONG>(selectionRange.GetBegin());
+            pSelection[0].acpEnd = static_cast<LONG>(selectionRange.GetEnd());
+            pSelection[0].style.ase = (selectionDirection == TextSelectionDirection::Backward) ? TS_AE_START : TS_AE_END;
             pSelection[0].style.fInterimChar = FALSE;
             *pcFetched = 1;
             return S_OK;
@@ -203,12 +204,14 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetSelection(ULONG 
 
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::SetSelection(ULONG ulCount, const TS_SELECTION_ACP* pSelection)
 {
+    FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::SetSelection()");
     if (pSelection && ulCount > 0)
     {
         if (auto editable = _owner.GetEditable())
         {
             auto const& selection = pSelection[0];
-            editable->SetU16SelectedRange({selection.acpStart, selection.acpEnd}, true);
+            auto const direction = (selection.style.ase == TS_AE_START) ? TextSelectionDirection::Backward : TextSelectionDirection::Forward;
+            editable->SetU16SelectionRange({selection.acpStart, selection.acpEnd}, direction, true);
         }
     }
     return S_OK;
@@ -276,7 +279,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::SetText(DWORD dwFla
         auto text = std::u16string(cch, 0);
         std::memcpy(text.data(), pchText, text.size() * sizeof(char16_t));
 
-        editable->SetU16SelectedRange({acpStart, acpEnd}, true);
+        editable->SetU16SelectionRange({acpStart, acpEnd}, TextSelectionDirection::Forward, true);
         editable->InsertU16String({text.begin(), text.end()}, 1, true, false);
         pChange->acpStart = acpStart;
         pChange->acpOldEnd = acpEnd;
@@ -326,7 +329,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::InsertTextAtSelecti
 
     if (auto const editable = _owner.GetEditable())
     {
-        auto const selection = editable->GetU16SelectedRange();
+        auto const selection = editable->GetU16SelectionRange();
         auto const text = std::u16string_view(reinterpret_cast<const char16_t*>(pchText), cch);
 
         if (dwFlags & TF_IAS_QUERYONLY)
@@ -758,7 +761,7 @@ auto PlatformInputMethodTextStoreWin::InputKeyFromKeyEvent(String const& key) ->
 {
     if (auto const editable = GetEditable())
     {
-        auto const selection = editable->GetU16SelectedRange();
+        auto const selection = editable->GetU16SelectionRange();
         if (key == Key::Backspace || key == Key::Delete)
         {
             if (selection.GetLength() == 0)

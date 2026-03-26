@@ -47,7 +47,7 @@ public:
         std::vector<Shared<GlyphRun>> _runs;
     };
 
-    explicit ShapedText(std::span<Line const> liens);
+    explicit ShapedText(std::span<Line const> lines);
 
     auto GetLineCount() const -> SInt64;
     auto GetLines() const -> std::vector<Line> const&;

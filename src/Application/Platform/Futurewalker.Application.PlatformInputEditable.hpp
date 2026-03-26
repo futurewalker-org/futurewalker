@@ -8,6 +8,7 @@
 #include "Futurewalker.Graphics.TextLayoutInfo.hpp"
 
 #include "Futurewalker.Text.Text.hpp"
+#include "Futurewalker.Text.TextSelectionDirection.hpp"
 
 #include "Futurewalker.Geometry.Rect.hpp"
 
@@ -36,11 +37,12 @@ public:
     virtual auto GetText() const -> Text = 0;
     virtual auto SetText(Text const& text) -> void = 0;
 
-    virtual auto GetString(Range<CodePoint> range) const -> String = 0;
+    virtual auto GetString(Range<CodePoint> const& range) const -> String = 0;
     virtual auto GetStringRange() const -> Range<CodePoint> = 0;
 
-    virtual auto GetSelectedRange() const -> Range<CodePoint> = 0;
-    virtual auto SetSelectedRange(Range<CodePoint> const& range) -> void = 0;
+    virtual auto GetSelectionDirection() const -> TextSelectionDirection = 0;
+    virtual auto GetSelectionRange() const -> Range<CodePoint> = 0;
+    virtual auto SetSelectionRange(Range<CodePoint> const& range, TextSelectionDirection direction) -> void = 0;
 
     virtual auto GetComposingRange() const -> Range<CodePoint> = 0;
     virtual auto SetComposingRange(Range<CodePoint> const& range) -> void = 0;

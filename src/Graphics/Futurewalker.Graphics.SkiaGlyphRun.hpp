@@ -23,7 +23,7 @@ public:
     auto GetGlyph(GlyphIndex const glyphIndex) const -> Optional<GlyphId> override;
     auto GetGlyphPosition(GlyphIndex const glyphIndex) const -> Optional<Point<Dp>> override;
     auto GetCharacterIndex(GlyphIndex const glyphIndex) const -> Optional<CodePoint> override;
-    auto GetGlyphIndex(CodePoint const textPosition) const -> GlyphIndex override;
+    auto GetGlyphIndex(CodePoint const textPosition) const -> Optional<GlyphIndex> override;
 
 public:
     struct Buffer

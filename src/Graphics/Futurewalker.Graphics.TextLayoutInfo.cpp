@@ -173,7 +173,8 @@ auto TextLayoutInfo::GetGlyphIndex(CodePoint const characterIndex) const -> Glyp
             auto const runTextSize = glyphRun->GetText().GetCodePointCount();
             if (characterIndex < runTextSize)
             {
-                return glyphRun->GetGlyphIndex(localPosition) + localGlyphCount;
+                auto const glyphIndex = glyphRun->GetGlyphIndex(localPosition);
+                return glyphIndex.GetValueOr(0) + localGlyphCount;
             }
             localPosition -= runTextSize;
             localGlyphCount += glyphRun->GetGlyphCount();

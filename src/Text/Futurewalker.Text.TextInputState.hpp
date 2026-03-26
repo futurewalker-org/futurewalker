@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Text.TextInputStateType.hpp"
+#include "Futurewalker.Text.TextSelectionDirection.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -11,6 +12,7 @@
 #include "Futurewalker.Core.U16String.hpp"
 #include "Futurewalker.Core.Range.hpp"
 #include "Futurewalker.Core.Function.hpp"
+#include "Futurewalker.Core.NonCopyable.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -19,7 +21,7 @@ namespace FW_EXPORT
 ///
 /// @brief Text input state.
 ///
-class TextInputState final
+class TextInputState : NonCopyable
 {
 public:
     struct Delegate
@@ -39,12 +41,12 @@ public:
     auto SetText(Text const& text) -> void;
 
     auto GetString() const -> String;
-    auto GetString(Range<CodePoint> range) const -> String;
+    auto GetString(Range<CodePoint> const&range) const -> String;
     auto GetStringRange() const -> Range<CodePoint>;
 
-    auto GetSelectedRange() const -> Range<CodePoint>;
-    auto GetNormalizedSelectedRange() const -> Range<CodePoint>;
-    auto SetSelectedRange(Range<CodePoint> const& text) -> Bool;
+    auto GetSelectionRange() const -> Range<CodePoint>;
+    auto GetSelectionDirection() const -> TextSelectionDirection;
+    auto SetSelectionRange(Range<CodePoint> const& text, TextSelectionDirection const direction) -> Bool;
 
     auto GetComposingRange() const -> Range<CodePoint>;
     auto SetComposingRange(Range<CodePoint> const& text) -> Bool;
@@ -57,11 +59,10 @@ public:
     auto GetU16String() const -> U16String;
     auto GetU16String(Range<CodeUnit> range) const -> U16String;
     auto GetU16StringRange() const -> Range<CodeUnit>;
-    auto GetU16SelectedRange() const -> Range<CodeUnit>;
-    auto GetU16NormalizedSelectedRange() const -> Range<CodeUnit>;
-    auto SetU16SelectedRange(Range<CodeUnit> range, Bool anticipated) -> void;
+    auto GetU16SelectionRange() const -> Range<CodeUnit>;
+    auto SetU16SelectionRange(Range<CodeUnit> const& range, TextSelectionDirection const direction, Bool anticipated) -> void;
     auto GetU16ComposingRange() const -> Range<CodeUnit>;
-    auto SetU16ComposingRange(Range<CodeUnit> range) -> void;
+    auto SetU16ComposingRange(Range<CodeUnit> const& range) -> void;
 
     auto InsertU16Text(U16StringView text, CodePoint caretPosition, Bool anticipated, Bool cancellable) -> void;
 
@@ -94,8 +95,9 @@ private:
 private:
     Delegate _delegate;
     Text _text;
+    TextSelectionDirection _selectionDirection = TextSelectionDirection::Forward;
     // NOTE: Bad IMEs might set cursor between surrogate pairs but we currently cannot handle that.
-    Range<CodePoint> _selectedRange;
+    Range<CodePoint> _selectionRange;
     Range<CodePoint> _composingRange;
 };
 }

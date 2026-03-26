@@ -9,15 +9,19 @@
 #include "Futurewalker.Application.EdgeInsets.hpp"
 
 #include "Futurewalker.Graphics.TextShaperType.hpp"
-#include "Futurewalker.Graphics.ShapedTextType.hpp"
+#include "Futurewalker.Graphics.GlyphRunType.hpp"
 #include "Futurewalker.Graphics.FontSize.hpp"
 #include "Futurewalker.Graphics.FontFamily.hpp"
 #include "Futurewalker.Graphics.FontWidth.hpp"
 #include "Futurewalker.Graphics.FontWeight.hpp"
 #include "Futurewalker.Graphics.FontStyleType.hpp"
+#include "Futurewalker.Graphics.FontMetrics.hpp"
 #include "Futurewalker.Graphics.Typeface.hpp"
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
+
+#include "Futurewalker.Text.TextSelectionDirection.hpp"
+#include "Futurewalker.Text.Text.hpp"
 
 #include "Futurewalker.Color.hpp"
 
@@ -69,18 +73,23 @@ protected:
 
 private:
     auto InternalInsertText(String const& text, CodePoint newSelection) -> void;
-    auto InternalGetSelectedRange() -> Range<CodePoint>;
-    auto InternalSetSelectedRange(Range<CodePoint> range) -> void;
+    auto InternalGetSelectionDirection() const -> TextSelectionDirection;
+    auto InternalGetSelectionRange() -> Range<CodePoint>;
+    auto InternalSetSelectionRange(Range<CodePoint> const& range, TextSelectionDirection direction) -> void;
     auto InternalGetComposingRange() -> Range<CodePoint>;
-    auto InternalSetComposingRange(Range<CodePoint> range) -> void;
+    auto InternalSetComposingRange(Range<CodePoint> const& range) -> void;
     auto InternalGetText() const -> String;
     auto InternalGetText(Range<CodePoint> range) -> String;
     auto InternalSetText(String const& text) -> void;
     auto InternalGetTextRange() const -> Range<CodePoint>;
     auto InternalDeleteBackward() -> void;
     auto InternalDeleteForward() -> void;
-    auto InternalInvalidateLayoutCache() -> void;
-    auto InternalUpdateLayoutCache() -> void;
+    auto InternalInvalidateTextCache() -> void;
+    auto InternalUpdateTextCache() -> void;
+    auto InternalInvalidateMeasureCache() -> void;
+    auto InternalUpdateMeasureCache() -> void;
+    auto InternalInvalidateArrangeCache() -> void;
+    auto InternalUpdateArrangeCache() -> void;
     auto InternalInvalidateTypeface() -> void;
     auto InternalUpdateTypeface() -> void;
     auto InternalGetBackgroundColor() const -> RGBAColor;
@@ -89,7 +98,52 @@ private:
     auto InternalGetTypeface() const -> Shared<Graphics::Typeface>;
 
 private:
-    std::vector<Graphics::ShapedText> _shapedLines;
+    struct ShapedLine
+    {
+        CodePoint start;
+        Dp advance;
+        Graphics::FontMetrics metrics;
+        std::vector<Shared<Graphics::GlyphRun>> runs;
+    };
+
+    struct ArrangedRun
+    {
+        Point<Dp> position;
+        Shared<Graphics::GlyphRun> run;
+    };
+
+    struct ArrangedLine
+    {
+        Point<Dp> position;
+        CodePoint start;
+        Graphics::FontMetrics metrics;
+        std::vector<ArrangedRun> runs;
+    };
+
+    struct SelectionPosition
+    {
+        SInt64 line = 0;
+        CodePoint offset = 0;
+    };
+
+    struct TextCache
+    {
+        Text text;
+        std::vector<std::pair<CodeUnit, String>> lines;
+    };
+
+    struct MeasureCache
+    {
+        std::vector<ShapedLine> shapedLines;
+    };
+
+    struct ArrangeCache
+    {
+        std::vector<ArrangedLine> arrangedLines;
+    };
+
+    SelectionPosition _selectionBegin;
+    SelectionPosition _selectionEnd;
     Shared<InputEditable> _inputEditable;
     AttributeAccessor<RGBAColor> _backgroundColor;
     AttributeAccessor<Channel> _backgroundAlpha;
@@ -107,6 +161,9 @@ private:
     AttributeAccessor<Graphics::FontFamily> _fontFamily;
     Shared<Graphics::Typeface> _typeface;
     Shared<Graphics::TextShaper> _textShaper;
+    Optional<TextCache> _textCache;
+    Optional<MeasureCache> _measureCache;
+    Optional<ArrangeCache> _arrangeCache;
 };
 }
 }
