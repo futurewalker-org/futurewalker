@@ -1,0 +1,9 @@
+name: macos-26
+run-name: macos-26
+on: [push]
+jobs:
+  build:
+    uses: ./.github/workflows/main.yml
+    with:
+      runs-on: macos-26
+      profile: ./conan/xcode_Debug.profile
