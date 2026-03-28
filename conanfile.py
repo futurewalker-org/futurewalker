@@ -12,11 +12,12 @@ class Futurewalker(ConanFile):
         self.requires("boost/[1.87.0]")
         self.requires("catch2/[3.8.0]")
         self.requires("fmt/[11.1.3]")
-        self.requires("icu/[74.2]", options={"data_packaging": "library"})
 
         if self.settings.os == "Windows":
+            self.requires("icu/[74.2]")
             self.requires("skia/[145.20260211.0]", options={"use_direct3d":True, "enable_win_unicode":True})
         elif self.settings.os == "Macos":
+            self.requires("icu/[74.2]", options={"data_packaging": "library"})
             self.requires("skia/[145.20260211.0]", options={"use_metal":True})
         else:
             self.requires("skia/[145.20260211.0]")
