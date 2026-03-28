@@ -32,15 +32,15 @@ private:
     auto PushNode(PlatformViewLayerId const& id, Offset<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void;
     auto PopNode() -> void;
     auto FindNextVisual(PlatformViewLayerId const id) -> Shared<PlatformViewLayerVisual>;
-    auto PushVisual(PlatformViewLayerId const id) -> void;
+    auto PushVisual(PlatformViewLayerId const id, DisplayScale const displayScale, BackingScale const backingScale) -> void;
     auto PopVisual() -> void;
-    auto UpdateFragment(Shared<PlatformViewLayer> const& layer) -> void;
+    auto UpdateFragment(PlatformViewLayerId const id, DisplayScale const displayScale, BackingScale const backingScale, Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& displayListOffset) -> void;
     auto UpdateCore(Shared<PlatformViewLayer> const& layer) -> void;
 
 private:
     auto InternalGetCurrentVisual() -> Shared<PlatformViewLayerVisual>;
     auto InternalSetCurrentVisual(Shared<PlatformViewLayerVisual> const& visual) -> void;
-    auto InternalSetCurrentVisualProperties(Shared<PlatformViewLayerVisual> const& visual, SInt64 const target) -> void;
+    auto InternalSetCurrentVisualProperties(Shared<PlatformViewLayerVisual> const& visual, SInt64 const target, DisplayScale const displayScale, BackingScale const backingScale) -> void;
     auto InternalPushBaseVisual(Shared<PlatformViewLayerVisual> const& visual) -> void;
     auto InternalPopBaseVisual() -> void;
     auto InternalGetNodeState(SInt64 const target, Offset<Dp>& offset, Rect<Dp>& clipRect, std::vector<Graphics::Path>& clipPaths, Float64& opacity) const -> void;

@@ -48,6 +48,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
     _surface->SetDisplayScale(GetDisplayScale());
     _surface->SetBackingScale(GetBackingScale());
     _surface->Draw([&](Graphics::Scene& scene) {
+        scene.PushScale({.x = scale, .y = scale});
         for (auto const& clipPath : clipPaths)
         {
             scene.PushClipPath({.path = clipPath, .antiAlias = true});
@@ -59,7 +60,6 @@ auto PlatformViewLayerVisualWin::Render() -> void
                 if (auto const fragment = GetPushNodeFragment(fragmentInfo.index))
                 {
                     scene.PushTranslate({.x = fragment->offset.GetDeltaX(), .y = fragment->offset.GetDeltaY()});
-                    scene.PushScale({.x = scale, .y = scale});
                     scene.PushClipRect({.rect = fragment->clipRect});
 
                     if (fragment->clipPath)
@@ -72,7 +72,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
             {
                 if (auto const fragment = GetPopNodeFragment(fragmentInfo.index))
                 {
-                    scene.Pop({.count = 3});
+                    scene.Pop({.count = 2});
 
                     if (auto const pushFragment = GetPushNodeFragment(fragment->pushNodeIndex))
                     {
@@ -93,8 +93,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
                 }
             }
         });
-        scene.Pop({.count = 1});
-        scene.Pop({.count = std::ssize(clipPaths)});
+        scene.Pop({.count = std::ssize(clipPaths) + 2});
     });
 
     _invalidated = false;

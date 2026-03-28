@@ -28,14 +28,14 @@ auto PlatformViewLayerVisualUpdater::Update(Shared<PlatformViewLayerVisual> cons
     UpdateCore(layer);
 }
 
-auto PlatformViewLayerVisualUpdater::PushVisual(PlatformViewLayerId const id) -> void
+auto PlatformViewLayerVisualUpdater::PushVisual(PlatformViewLayerId const id, DisplayScale const displayScale, BackingScale const backingScale) -> void
 {
     FW_DEBUG_ASSERT(!_nodeStack.empty());
 
     if (auto const nextVisual = InternalRemoveUntilNextVisual(id))
     {
         nextVisual->ClearFragments();
-        InternalSetCurrentVisualProperties(nextVisual, InternalGetCurrentNodeIndex());
+        InternalSetCurrentVisualProperties(nextVisual, InternalGetCurrentNodeIndex(), displayScale, backingScale);
         InternalSetCurrentVisual(nextVisual);
         InternalPushBaseVisual(nextVisual);
         return;
@@ -49,7 +49,7 @@ auto PlatformViewLayerVisualUpdater::PushVisual(PlatformViewLayerId const id) ->
         }
     }
     auto const visual = InternalInsertVisual(id);
-    InternalSetCurrentVisualProperties(visual, InternalGetCurrentNodeIndex());
+    InternalSetCurrentVisualProperties(visual, InternalGetCurrentNodeIndex(), displayScale, backingScale);
     InternalSetCurrentVisual(visual);
     InternalPushBaseVisual(visual);
 }
@@ -94,7 +94,7 @@ auto PlatformViewLayerVisualUpdater::PopNode(PlatformViewLayerId const& id) -> v
     }
 }
 
-auto PlatformViewLayerVisualUpdater::AddFragment(PlatformViewLayerId const id, Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& displayListOffset) -> void
+auto PlatformViewLayerVisualUpdater::AddFragment(PlatformViewLayerId const id, DisplayScale const displayScale, BackingScale const backingScale, Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& displayListOffset) -> void
 {
     auto visual = InternalGetCurrentVisual();
     if (!visual)
@@ -114,7 +114,7 @@ auto PlatformViewLayerVisualUpdater::AddFragment(PlatformViewLayerId const id, S
                   .opacity = node.opacity,
               });
         }
-        InternalSetCurrentVisualProperties(visual, InternalGetCurrentNodeIndex());
+        InternalSetCurrentVisualProperties(visual, InternalGetCurrentNodeIndex(), displayScale, backingScale);
         InternalSetCurrentVisual(visual);
         InternalPushBaseVisual(visual);
     }
@@ -136,15 +136,17 @@ auto PlatformViewLayerVisualUpdater::UpdateCore(Shared<PlatformViewLayer> const&
     auto const clipPath = layer->GetClipPath();
     PushNode(id, offset, clipRect, clipPath, opacity);
 
+    auto const displayScale = layer->GetDisplayScale();
+    auto const backingScale = layer->GetBackingScale();
     auto const needsSurface = layer->ShouldRasterize();
     if (needsSurface)
     {
-        PushVisual(id);
+        PushVisual(id, displayScale, backingScale);
     }
 
     auto const displayList = layer->GetDisplayList();
     auto const displayListOffset = layer->GetDisplayListOffset();
-    AddFragment(id, displayList, displayListOffset);
+    AddFragment(id, displayScale, backingScale, displayList, displayListOffset);
 
     for (auto const& child : layer->GetChildren())
     {
@@ -182,7 +184,7 @@ auto PlatformViewLayerVisualUpdater::InternalSetCurrentVisual(Shared<PlatformVie
     _currentVisual = visual;
 }
 
-auto PlatformViewLayerVisualUpdater::InternalSetCurrentVisualProperties(Shared<PlatformViewLayerVisual> const& visual, SInt64 const target) -> void
+auto PlatformViewLayerVisualUpdater::InternalSetCurrentVisualProperties(Shared<PlatformViewLayerVisual> const& visual, SInt64 const target, DisplayScale const displayScale, BackingScale const backingScale) -> void
 {
     if (visual)
     {
@@ -195,6 +197,8 @@ auto PlatformViewLayerVisualUpdater::InternalSetCurrentVisualProperties(Shared<P
         visual->SetClipRect(clipRect);
         visual->SetClipPaths(clipPaths);
         visual->SetOpacity(opacity);
+        visual->SetDisplayScale(displayScale);
+        visual->SetBackingScale(backingScale);
     }
 }
 
