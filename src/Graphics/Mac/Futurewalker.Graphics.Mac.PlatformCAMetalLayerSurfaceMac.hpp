@@ -35,15 +35,23 @@ class PlatformCAMetalLayerSurfaceMac : NonCopyable
 public:
     PlatformCAMetalLayerSurfaceMac(id<MTLDevice> metalDevice, id<MTLCommandQueue> metalQueue);
 
-    auto Resize(IntPx const width, IntPx const height) -> void;
+    auto SetBackingScale(BackingScale const backingScale) -> void;
+    auto SetDisplayScale(DisplayScale const displayScale) -> void;
+    auto SetSize(Size<Dp> const& size) -> void;
     auto Draw(Function<void(Scene& canvas)> func) -> Bool;
     auto GetMetalLayer() -> CAMetalLayer*;
+
+private:
+    auto ResizeSurface() -> void;
 
 private:
     __strong CAMetalLayer* _metalLayer = nil;
     __strong id<MTLDevice> _metalDevice = nil;
     __strong id<MTLCommandQueue> _metalCommandQueue = nil;
     sk_sp<GrDirectContext> _context;
+    Size<Dp> _size;
+    DisplayScale _displayScale = 1.0;
+    BackingScale _backingScale = 1.0;
 };
 }
 }

@@ -4,6 +4,8 @@
 
 #include "Futurewalker.Graphics.SkiaScene.hpp"
 
+#include "Futurewalker.Unit.UnitFunction.hpp"
+
 namespace FW_GRAPHICS_DETAIL_NS
 {
 PlatformCAMetalLayerSurfaceMac::PlatformCAMetalLayerSurfaceMac(id<MTLDevice> metalDevice, id<MTLCommandQueue> metalCommandQueue)
@@ -25,19 +27,27 @@ PlatformCAMetalLayerSurfaceMac::PlatformCAMetalLayerSurfaceMac(id<MTLDevice> met
     }
 }
 
-auto PlatformCAMetalLayerSurfaceMac::Resize(IntPx const width, IntPx const height) -> void
+auto PlatformCAMetalLayerSurfaceMac::SetBackingScale(BackingScale const backingScale) -> void
 {
-    @autoreleasepool
-    {
-        auto const newSize = CGSizeMake(static_cast<CGFloat>(width), static_cast<CGFloat>(height));
-        [_metalLayer setDrawableSize:newSize];
-    }
+    _backingScale = backingScale;
+}
+
+auto PlatformCAMetalLayerSurfaceMac::SetDisplayScale(DisplayScale const displayScale) -> void
+{
+    _displayScale = displayScale;
+}
+
+auto PlatformCAMetalLayerSurfaceMac::SetSize(Size<Dp> const& size) -> void
+{
+    _size = size;
 }
 
 auto PlatformCAMetalLayerSurfaceMac::Draw(Function<void(Scene& canvas)> func) -> Bool
 {
     @autoreleasepool
     {
+        ResizeSurface();
+
         auto currentDrawable = GrMTLHandle(nullptr);
         auto const colorType = kBGRA_8888_SkColorType;
         auto const colorSpace = sk_sp<SkColorSpace>();
@@ -66,9 +76,13 @@ auto PlatformCAMetalLayerSurfaceMac::Draw(Function<void(Scene& canvas)> func) ->
             }
             _context->flushAndSubmit(surface.get(), GrSyncCpu::kYes);
         }
-        auto const commandBuffer = [_metalCommandQueue commandBuffer];
-        [commandBuffer presentDrawable:(__bridge id<CAMetalDrawable>)currentDrawable];
-        [commandBuffer commit];
+
+        if (currentDrawable)
+        {
+            auto const commandBuffer = [_metalCommandQueue commandBuffer];
+            [commandBuffer presentDrawable:(__bridge id<CAMetalDrawable>)currentDrawable];
+            [commandBuffer commit];
+        }
         return true;
     }
 }
@@ -78,6 +92,16 @@ auto PlatformCAMetalLayerSurfaceMac::GetMetalLayer() -> CAMetalLayer*
     @autoreleasepool
     {
         return _metalLayer;
+    }
+}
+
+auto PlatformCAMetalLayerSurfaceMac::ResizeSurface() -> void
+{
+    @autoreleasepool
+    {
+        auto const sizePx = UnitFunction::ConvertDpToPxRound(_size, _displayScale, _backingScale);
+        [_metalLayer setDrawableSize:CGSizeMake(static_cast<CGFloat>(sizePx.GetWidth()), static_cast<CGFloat>(sizePx.GetHeight()))];
+        [_metalLayer setContentsScale:static_cast<CGFloat>(_backingScale)];
     }
 }
 }
