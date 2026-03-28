@@ -15,7 +15,7 @@ namespace FW_DETAIL_NS
 ///
 auto PlatformDebugMac::Print(StringView const message) -> void
 {
-    auto const utf8Str = StringFunction::ConvertStringToStdString(message);
+    auto const utf8Str = String(message).ToStdString();
     auto const nsStr = [NSString stringWithUTF8String: utf8Str.c_str()];
     ::NSLog(@"%@", nsStr);
 }

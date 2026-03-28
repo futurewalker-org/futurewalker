@@ -13,7 +13,7 @@ auto PlatformStringFunctionMac::ConvertNSStringToString(NSString* str) -> String
 {
     if (str)
     {
-        return StringFunction::ConvertUtf8ToStringUnchecked([str UTF8String]);
+        return String::MakeFromStdString([str UTF8String]);
     }
     return {};
 }
@@ -24,10 +24,7 @@ auto PlatformStringFunctionMac::ConvertNSStringToString(NSString* str) -> String
 __attribute__((ns_returns_retained))
 auto PlatformStringFunctionMac::ConvertStringToNSString(StringView sv) -> NSString*
 {
-    @autoreleasepool
-    {
-        auto const utf8Str = String(sv).ToStdString();
-        return [NSString stringWithUTF8String:utf8Str.c_str()];
-    }
+    auto const utf8Str = String(sv).ToStdString();
+    return [NSString stringWithUTF8String:utf8Str.c_str()];
 }
 }
