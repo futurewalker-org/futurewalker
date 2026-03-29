@@ -116,6 +116,7 @@ public:
     auto GetPushNodeFragment(SInt32 const index) const -> Pointer<PushNodeFragment const>;
     auto GetPopNodeFragment(SInt32 const index) const -> Pointer<PopNodeFragment const>;
     auto GetFragmentCount() const -> SInt32;
+    auto CalcFragmentBounds() const -> Rect<Dp>;
 
 protected:
     template <class Self>

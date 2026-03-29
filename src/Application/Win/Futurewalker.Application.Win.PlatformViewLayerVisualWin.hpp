@@ -42,7 +42,6 @@ public:
 
 private:
     auto Invalidate() -> void;
-    auto CalcFragmentBounds() const -> Rect<Dp>;
     auto Initialize() -> void override;
     auto OnFragmentChanged() -> void override;
     auto OnOffsetChanged() -> void override;

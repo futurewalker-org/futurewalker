@@ -2,6 +2,8 @@
 
 #include "Futurewalker.Application.PlatformViewLayerVisual.hpp"
 
+#include "Futurewalker.Graphics.DisplayList.hpp"
+
 #include "Futurewalker.Base.Debug.hpp"
 
 namespace FW_DETAIL_NS
@@ -312,6 +314,63 @@ auto PlatformViewLayerVisual::GetPopNodeFragment(SInt32 const index) const -> Po
 auto PlatformViewLayerVisual::GetFragmentCount() const -> SInt32
 {
     return SInt32(std::ssize(_fragments));
+}
+
+auto PlatformViewLayerVisual::CalcFragmentBounds() const -> Rect<Dp>
+{
+    auto offsets = std::vector<Offset<Dp>>();
+    auto clipRects = std::vector<Rect<Dp>>();
+
+    offsets.push_back(GetOffset());
+    clipRects.push_back(GetClipRect());
+
+    auto unionRect = Rect<Dp>();
+    ForEachFragment([&](auto const& fragmentInfo) {
+        if (fragmentInfo.type == FragmentType::PushNode)
+        {
+            if (auto const fragment = GetPushNodeFragment(fragmentInfo.index))
+            {
+                auto const currentOffset = offsets.empty() ? Offset<Dp>() : offsets.back();
+                auto const currentClipRect = clipRects.empty() ? GetClipRect() : clipRects.back();
+                offsets.push_back(currentOffset + fragment->offset);
+                clipRects.push_back(Rect<Dp>::Intersect(currentClipRect, Rect<Dp>::Offset(fragment->clipRect, offsets.back())));
+            }
+        }
+        else if (fragmentInfo.type == FragmentType::PopNode)
+        {
+            FW_DEBUG_ASSERT(!offsets.empty());
+            FW_DEBUG_ASSERT(!clipRects.empty());
+            if (!offsets.empty())
+            {
+                offsets.pop_back();
+            }
+            if (!clipRects.empty())
+            {
+                clipRects.pop_back();
+            }
+        }
+        else if (fragmentInfo.type == FragmentType::DisplayList)
+        {
+            if (auto const fragment = GetDisplayListFragment(fragmentInfo.index))
+            {
+                if (fragment->displayList)
+                {
+                    auto const currentOffset = offsets.empty() ? Offset<Dp>() : offsets.back();
+                    auto const currentClipRect = clipRects.empty() ? GetClipRect() : clipRects.back();
+
+                    auto bounds = currentClipRect;
+                    auto const displayListBounds = Rect<Dp>::Offset(fragment->displayList->GetBounds(), currentOffset + fragment->displayListOffset);
+                    if (displayListBounds.IsFinite())
+                    {
+                        bounds = Rect<Dp>::Intersect(bounds, displayListBounds);
+                    }
+                    unionRect = Rect<Dp>::Union(unionRect, bounds);
+                }
+            }
+        }
+    });
+    FW_DEBUG_ASSERT(unionRect.IsFinite());
+    return unionRect;
 }
 
 auto PlatformViewLayerVisual::Initialize() -> void
