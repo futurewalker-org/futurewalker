@@ -20,6 +20,7 @@ enum class ModifierKeyFlags : uint32_t
     Shift = 1 << 0,
     Control = 1 << 1,
     Alt = 1 << 2,
+    Meta = 1 << 3,
 };
 FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(ModifierKeyFlags);
 }

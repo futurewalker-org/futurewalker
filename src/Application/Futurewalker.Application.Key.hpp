@@ -54,6 +54,18 @@ public:
     static String ContextMenu;
     static String Escape;
 
+    /* Device Keys */
+    static String Help;
+    static String PrintScreen;
+    static String Pause;
+    static String Print;
+    static String Clear;
+    static String Select;
+    static String Execute;
+    static String Undo;
+    static String Redo;
+    static String Find;
+
     /* IME Composition Keys */
     static String Dead;
     static String Process;
@@ -71,6 +83,18 @@ public:
     static String F10;
     static String F11;
     static String F12;
+    static String F13;
+    static String F14;
+    static String F15;
+    static String F16;
+    static String F17;
+    static String F18;
+    static String F19;
+    static String F20;
+    static String F21;
+    static String F22;
+    static String F23;
+    static String F24;
 
     /* ASCII Digit Strings */
     static String Digit0;
