@@ -149,6 +149,31 @@ auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
         }
         co_return true;
     }
+    else if (event.Is<PointerEvent::Action::Swipe>())
+    {
+        auto const swipeEvent = event.As<PointerEvent::Action::Swipe>();
+        auto const deltaX = swipeEvent->GetDeltaX();
+        auto const deltaY = swipeEvent->GetDeltaY();
+
+        if ((_direction & ScrollViewDirection::Horizontal) != ScrollViewDirection::None)
+        {
+            if (deltaX != 0)
+            {
+                _offset.SetDeltaX(_offset.GetDeltaX() - deltaX);
+                InvalidateLayout();
+            }
+        }
+        else if ((_direction & ScrollViewDirection::Vertical) != ScrollViewDirection::None)
+        {
+            FW_DEBUG_LOG_INFO("Swipe deltaY: {}", (double)deltaY);
+            if (deltaY != 0)
+            {
+                _offset.SetDeltaY(_offset.GetDeltaY() - deltaY);
+                InvalidateLayout();
+            }
+        }
+        co_return true;
+    }
     co_return false;
 }
 }
