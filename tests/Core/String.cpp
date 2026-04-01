@@ -2,6 +2,8 @@
 
 #include <Futurewalker.Core.String.hpp>
 
+#pragma clang diagnostic ignored "-Wself-move"
+
 using namespace Futurewalker;
 
 TEST_CASE("String")

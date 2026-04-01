@@ -2,6 +2,8 @@
 
 #include "Futurewalker.Attribute.AttributeValue.hpp"
 
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
+
 using namespace Futurewalker;
 
 TEST_CASE("AttributeValue")

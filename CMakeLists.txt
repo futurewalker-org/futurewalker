@@ -54,7 +54,7 @@ target_link_libraries(Futurewalker-Library-icu INTERFACE icu::icu)
 # Common compiler flags
 set(FW_COMPILE_FLAGS
   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX /EHsc /permissive- /Zc:__cplusplus /Zc:preprocessor /external:anglebrackets /external:W0>
-  $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -Werror -g -pedantic -Wshadow -fexperimental-library -fobjc-arc>
+  $<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wall -Wextra -Werror -g -pedantic -Wshadow -fobjc-arc>
   $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra -Werror -g -pedantic -Wshadow-compatible-local>
 )
 
