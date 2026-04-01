@@ -31,6 +31,8 @@ auto PlatformSkiaFontManagerMac::FindTypefaceByFamilyNameAndStyle(String const& 
 
 auto PlatformSkiaFontManagerMac::FindTypefaceByGenericFontKind(GenericFontKind const genericKind, FontStyle const& fontStyle) -> Shared<Typeface>
 {
+    (void)fontStyle;
+
     if (_fontMgr)
     {
         if (genericKind == GenericFontKind::UiSansSerif || genericKind == GenericFontKind::UiSerif || genericKind == GenericFontKind::UiMonospace)
