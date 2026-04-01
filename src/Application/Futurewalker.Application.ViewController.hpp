@@ -27,6 +27,11 @@ public:
     }
 
     ///
+    /// @brief Destructor.
+    ///
+    virtual ~ViewController() = default;
+
+    ///
     /// @brief Get view.
     ///
     /// @note The view will be created when this function is called for the first time.
