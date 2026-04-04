@@ -33,6 +33,7 @@ public:
     auto IsRunning() -> Bool override;
     auto IsActive() -> Bool override;
     auto IsForeground() -> Bool override;
+    auto SetMainMenu(Menu const& menu) -> void override;
 
     auto IsMainThread() const -> Bool;
     auto Schedule() -> AsyncTask<void>;

@@ -154,6 +154,14 @@ auto PlatformApplicationWin::IsForeground() -> Bool
 }
 
 ///
+/// @brief Set main menu.
+///
+auto PlatformApplicationWin::SetMainMenu(Menu const& menu) -> void
+{
+    (void)menu;
+}
+
+///
 /// @brief Check if the current thread is the main thread.
 ///
 auto PlatformApplicationWin::IsMainThread() const -> Bool

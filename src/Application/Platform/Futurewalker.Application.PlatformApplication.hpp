@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Application.PlatformApplicationType.hpp"
+#include "Futurewalker.Application.MenuType.hpp"
 
 #include "Futurewalker.Async.Async.hpp" 
 
@@ -32,6 +33,7 @@ public:
     virtual auto IsRunning() -> Bool = 0;
     virtual auto IsActive() -> Bool = 0;
     virtual auto IsForeground() -> Bool = 0;
+    virtual auto SetMainMenu(Menu const& menu) -> void = 0;
 
 protected:
     virtual auto Initialize() -> void = 0;
