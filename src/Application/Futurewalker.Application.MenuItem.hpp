@@ -26,6 +26,9 @@ public:
     auto GetType() const -> MenuItemType;
     auto SetType(MenuItemType const type) -> void;
 
+    auto GetRole() const -> MenuItemRole;
+    auto SetRole(MenuItemRole const role) -> void;
+
     auto GetId() const -> MenuItemId;
     auto SetId(MenuItemId const id) -> void;
 
@@ -57,6 +60,7 @@ private:
     struct State
     {
         MenuItemType type = MenuItemType::Item;
+        MenuItemRole role = MenuItemRole::Other;
         MenuItemId id = 0u;
         Menu subMenu;
         String title;

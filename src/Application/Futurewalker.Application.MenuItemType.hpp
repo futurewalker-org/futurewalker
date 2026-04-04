@@ -21,5 +21,20 @@ enum class MenuItemType
     Separator,
     SubMenu,
 };
+
+///
+/// @brief Menu item role.
+///
+/// Menu items with specific roles may be moved to system specific locations in the menu.
+///
+enum class MenuItemRole
+{
+    Other,
+    About,       ///< About menu item.
+    AppSpecific, ///< App specific menu item(s).
+    Preferences, ///< Preferences menu item.
+    Services,    ///< Services menu item.
+    Quit,        ///< Quit menu item.
+};
 }
 }

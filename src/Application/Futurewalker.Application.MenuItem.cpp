@@ -23,6 +23,16 @@ auto MenuItem::SetType(MenuItemType const type) -> void
     GetMutableState().type = type;
 }
 
+auto MenuItem::GetRole() const -> MenuItemRole
+{
+    return GetImmutableState()->role;
+}
+
+auto MenuItem::SetRole(MenuItemRole const role) -> void
+{
+    GetMutableState().role = role;
+}
+
 auto MenuItem::GetId() const -> MenuItemId
 {
     if (auto const state = GetImmutableState())
