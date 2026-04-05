@@ -166,7 +166,8 @@ auto PlatformWindow::SendEventDetached(Event<>& event, auto (PlatformWindow::*fu
         event = *e;
         return *r;
     }
-    FW_DEBUG_LOG_WARNING("PlatformWindow::SendEventDetached(): Tried to send event from destructing window, ignoring. [{}]", typeid(*event).name());
+    auto const& eventParameter = *event;
+    FW_DEBUG_LOG_WARNING("PlatformWindow::SendEventDetached(): Tried to send event from destructing window, ignoring. [{}]", typeid(eventParameter).name());
     return false;
 }
 }

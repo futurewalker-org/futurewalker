@@ -54,7 +54,8 @@ public:
             _layout->SetDirection(FlexLayoutDirection::Column);
             _layout->SetMainAxisAlignment(FlexLayoutMainAxisAlignment::Center);
             _layout->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Center);
-            _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"type: {}", String::MakeFromStdString(typeid(*event).name()))));
+            auto const& eventParameter = *event;
+            _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"type: {}", String::MakeFromStdString(typeid(eventParameter).name()))));
             _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"id: {}", (UInt64)event.As<PointerEvent>()->GetPointerId())));
             _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"type: {}", std::to_underlying(event.As<PointerEvent>()->GetPointerType()))));
             _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"timestamp: {}", event.As<PointerEvent>()->GetTimestamp().GetIntervalSinceEpoch().GetIntNanoseconds())));
@@ -232,6 +233,7 @@ protected:
             auto frame = WindowFrame::Make();
             frame->SetContent(TestView::Make());
             window->SetContent(frame);
+            window->SetVisible(true);
             co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
             co_await Exit();
         }
