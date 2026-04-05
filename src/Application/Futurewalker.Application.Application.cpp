@@ -189,6 +189,17 @@ auto Application::Initialize() -> void
 ///
 /// @brief
 ///
+auto Application::SetMainMenu(Menu const& menu) -> void
+{
+    if (_platformObject)
+    {
+        _platformObject->SetMainMenu(menu);
+    }
+}
+
+///
+/// @brief
+///
 auto Application::GetSelfBase() -> Shared<Application>
 {
     return _self.Lock();

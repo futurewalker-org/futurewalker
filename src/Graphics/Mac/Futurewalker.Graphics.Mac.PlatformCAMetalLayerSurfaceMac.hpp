@@ -52,6 +52,7 @@ private:
     Size<Dp> _size;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
+    Bool _needsUpdateSize = true;
 };
 }
 }

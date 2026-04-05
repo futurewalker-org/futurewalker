@@ -5,6 +5,7 @@
 #include "Futurewalker.Application.ApplicationContextType.hpp"
 #include "Futurewalker.Application.ApplicationThemeType.hpp"
 #include "Futurewalker.Application.ViewLayerManagerType.hpp"
+#include "Futurewalker.Application.MenuType.hpp"
 
 #include "Futurewalker.Application.PlatformApplicationType.hpp"
 #include "Futurewalker.Application.PlatformApplicationContextType.hpp"
@@ -60,6 +61,8 @@ public:
 
 protected:
     virtual auto Initialize() -> void;
+
+    auto SetMainMenu(Menu const& menu) -> void;
 
     template <Concepts::DerivedFrom<Application> Derived, class... Args>
     static auto MakeDerived(Args&&... args) -> Shared<Derived>;

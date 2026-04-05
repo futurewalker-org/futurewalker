@@ -6,6 +6,8 @@
 
 #include "Futurewalker.Unit.UnitFunction.hpp"
 
+#include "Futurewalker.Base.Debug.hpp"
+
 namespace FW_GRAPHICS_DETAIL_NS
 {
 PlatformCAMetalLayerSurfaceMac::PlatformCAMetalLayerSurfaceMac(id<MTLDevice> metalDevice, id<MTLCommandQueue> metalCommandQueue)
@@ -19,6 +21,9 @@ PlatformCAMetalLayerSurfaceMac::PlatformCAMetalLayerSurfaceMac(id<MTLDevice> met
         [_metalLayer setPixelFormat:MTLPixelFormatBGRA8Unorm];
         [_metalLayer setOpaque:NO];
 
+        // Synchronize presentation with current CATransaction to avoid desynch between frame buffer and CALayer offset/size changes.
+        [_metalLayer setPresentsWithTransaction:YES];
+
         auto backendContext = GrMtlBackendContext();
         backendContext.fDevice.reset((__bridge void*)_metalDevice);
         backendContext.fQueue.reset((__bridge void*)_metalCommandQueue);
@@ -29,23 +34,40 @@ PlatformCAMetalLayerSurfaceMac::PlatformCAMetalLayerSurfaceMac(id<MTLDevice> met
 
 auto PlatformCAMetalLayerSurfaceMac::SetBackingScale(BackingScale const backingScale) -> void
 {
-    _backingScale = backingScale;
+    if (_backingScale != backingScale)
+    {
+        _backingScale = backingScale;
+        _needsUpdateSize = true;
+    }
 }
 
 auto PlatformCAMetalLayerSurfaceMac::SetDisplayScale(DisplayScale const displayScale) -> void
 {
-    _displayScale = displayScale;
+    if (_displayScale != displayScale)
+    {
+        _displayScale = displayScale;
+        _needsUpdateSize = true;
+    }
 }
 
 auto PlatformCAMetalLayerSurfaceMac::SetSize(Size<Dp> const& size) -> void
 {
-    _size = size;
+    if (_size != size)
+    {
+        _size = size;
+        _needsUpdateSize = true;
+    }
 }
 
 auto PlatformCAMetalLayerSurfaceMac::Draw(Function<void(Scene& canvas)> func) -> Bool
 {
     @autoreleasepool
     {
+        if (!_context)
+        {
+            return false;
+        }
+
         ResizeSurface();
 
         auto currentDrawable = GrMTLHandle(nullptr);
@@ -54,7 +76,7 @@ auto PlatformCAMetalLayerSurfaceMac::Draw(Function<void(Scene& canvas)> func) ->
         auto const origin = kTopLeft_GrSurfaceOrigin;
         auto const surfaceProps = SkSurfaceProps();
         auto const sampleCount = static_cast<int>(1);
-        if (auto const surface = SkSurfaces::WrapCAMetalLayer(_context.get(), (__bridge GrMTLHandle)_metalLayer, origin, sampleCount, colorType, colorSpace, &surfaceProps, &currentDrawable))
+        if (auto surface = SkSurfaces::WrapCAMetalLayer(_context.get(), (__bridge GrMTLHandle)_metalLayer, origin, sampleCount, colorType, colorSpace, &surfaceProps, &currentDrawable))
         {
             if (auto const canvas = surface->getCanvas())
             {
@@ -72,16 +94,37 @@ auto PlatformCAMetalLayerSurfaceMac::Draw(Function<void(Scene& canvas)> func) ->
                 }
                 catch (...)
                 {
+                    FW_DEBUG_ASSERT(false);
                 }
             }
-            _context->flushAndSubmit(surface.get(), GrSyncCpu::kYes);
-        }
 
-        if (currentDrawable)
+            // SkSurfaces::WrapCAMetalLayer() defers drawable acquisition until command submission.
+            _context->flushAndSubmit(surface.get(), GrSyncCpu::kNo);
+
+            if (currentDrawable)
+            {
+                // Skia uses different command buffer from _metalCommandQueue for rendering.
+                // We assume command queue guarantees that command buffer commited early will be scheduled before command buffer commited later.
+                auto const commandBuffer = [_metalCommandQueue commandBuffer];
+                [commandBuffer commit];
+                [commandBuffer waitUntilScheduled];
+
+                // SkSurfaces::WrapCAMetalLayer() returns a drawable as CF pointer via __bridge_retained.
+                // Use __bridge_transfer to transfer ownership back to ARC.
+                auto drawable = (__bridge_transfer id<CAMetalDrawable>)currentDrawable;
+                [drawable present];
+            }
+            else
+            {
+                FW_DEBUG_ASSERT(false);
+                return false;
+            }
+            currentDrawable = nil;
+        }
+        else
         {
-            auto const commandBuffer = [_metalCommandQueue commandBuffer];
-            [commandBuffer presentDrawable:(__bridge id<CAMetalDrawable>)currentDrawable];
-            [commandBuffer commit];
+            FW_DEBUG_ASSERT(false);
+            return false;
         }
         return true;
     }
@@ -99,9 +142,13 @@ auto PlatformCAMetalLayerSurfaceMac::ResizeSurface() -> void
 {
     @autoreleasepool
     {
-        auto const sizePx = UnitFunction::ConvertDpToPxRound(_size, _displayScale, _backingScale);
-        [_metalLayer setDrawableSize:CGSizeMake(static_cast<CGFloat>(sizePx.GetWidth()), static_cast<CGFloat>(sizePx.GetHeight()))];
-        [_metalLayer setContentsScale:static_cast<CGFloat>(_backingScale)];
+        if (_needsUpdateSize)
+        {
+            auto const sizePx = UnitFunction::ConvertDpToPxRound(_size, _displayScale, _backingScale);
+            [_metalLayer setDrawableSize:CGSizeMake(static_cast<CGFloat>(sizePx.GetWidth()), static_cast<CGFloat>(sizePx.GetHeight()))];
+            [_metalLayer setContentsScale:static_cast<CGFloat>(_backingScale)];
+            _needsUpdateSize = false;
+        }
     }
 }
 }

@@ -3,6 +3,13 @@
 #include "Futurewalker.Main.Mac.PlatformMainMac.hpp"
 #include "Futurewalker.Main.Mac.PlatformExitCodeMac.hpp"
 #include "Futurewalker.Main.Main.hpp"
+
+#include "Futurewalker.Application.Mac.PlatformApplicationContextMac.hpp"
+#include "Futurewalker.Application.Mac.PlatformApplicationThemeContextMac.hpp"
+#include "Futurewalker.Application.Mac.PlatformMainThreadMac.hpp"
+#include "Futurewalker.Application.Mac.PlatformWindowContextMac.hpp"
+#include "Futurewalker.Application.Mac.PlatformViewLayerContextMac.hpp"
+#include "Futurewalker.Application.Mac.PlatformScreenContextMac.hpp"
 #include "Futurewalker.Application.Mac.PlatformInputMethodContextMac.hpp"
 
 #include "Futurewalker.Base.Mac.PlatformEnvironmentContextMac.hpp"
@@ -27,6 +34,12 @@ auto PlatformMainMac::Register() -> void
     Locator::Register<PlatformCommandLineMac>();
     Locator::Register<PlatformSystemInfoMac>();
     Locator::Register<PlatformDebugMac>();
+    Locator::Register<PlatformApplicationContextMac>();
+    Locator::Register<PlatformApplicationThemeContextMac>();
+    Locator::Register<PlatformMainThreadMac>();
+    Locator::Register<PlatformWindowContextMac>();
+    Locator::Register<PlatformViewLayerContextMac>();
+    Locator::Register<PlatformScreenContextMac>();
     Locator::Register<PlatformInputMethodContextMac>();
     Locator::Register<Graphics::PlatformSkiaFontManagerMac>();
 }
