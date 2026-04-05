@@ -5,10 +5,13 @@
 #include "Futurewalker.Application.PlatformApplicationContext.hpp"
 #include "Futurewalker.Application.PlatformMainThreadType.hpp"
 #include "Futurewalker.Application.PlatformWindowContextType.hpp"
+#include "Futurewalker.Application.PlatformScreenContextType.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
 
 #include "Futurewalker.Core.PassKey.hpp"
+
+@class PlatformApplicationContextMacDelegate;
 
 namespace FW_DETAIL_NS
 {
@@ -20,9 +23,11 @@ namespace FW_EXPORT
 class PlatformApplicationContextMac : public PlatformApplicationContext
 {
 public:
-    static auto Make(Shared<PlatformMainThread> mainThread, Shared<PlatformWindowContext> windowContext) -> Shared<PlatformApplicationContextMac>;
+    static auto Make(Shared<PlatformMainThread> mainThread, Shared<PlatformWindowContext> windowContext, Shared<PlatformScreenContext> screenContext) -> Shared<PlatformApplicationContextMac>;
 
-    PlatformApplicationContextMac(PassKey<PlatformApplicationContextMac>, Shared<PlatformMainThread> mainThread, Shared<PlatformWindowContext> windowContext);
+    PlatformApplicationContextMac(PassKey<PlatformApplicationContextMac>, Shared<PlatformMainThread> mainThread, Shared<PlatformWindowContext> windowContext, Shared<PlatformScreenContext> screenContext);
+
+    ~PlatformApplicationContextMac();
 
     auto MakePlatformApplication(PlatformApplication::Delegate delegate) -> Shared<PlatformApplication> override;
 
@@ -33,6 +38,8 @@ private:
     Weak<PlatformApplicationContextMac> _self;
     Shared<PlatformMainThread> _mainThread;
     Shared<PlatformWindowContext> _windowContext;
+    Shared<PlatformScreenContext> _screenContext;
+    __strong PlatformApplicationContextMacDelegate* _delegate = nil;
 };
 
 template <>

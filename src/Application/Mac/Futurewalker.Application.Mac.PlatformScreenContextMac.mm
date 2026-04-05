@@ -6,7 +6,7 @@
 
 namespace FW_DETAIL_NS
 {
- namespace
+namespace
 {
 auto GetScreenDisplayId(NSScreen* screen)
 {
@@ -18,6 +18,7 @@ auto GetScreenDisplayId(NSScreen* screen)
     }
 }
 }
+
 auto PlatformScreenContextMac::GetScreens() -> PlatformScreenArray
 {
     return PlatformScreenArray(_screens.begin(), _screens.end());
