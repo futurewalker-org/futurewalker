@@ -25,8 +25,8 @@ PlatformCAMetalLayerSurfaceMac::PlatformCAMetalLayerSurfaceMac(id<MTLDevice> met
         [_metalLayer setPresentsWithTransaction:YES];
 
         auto backendContext = GrMtlBackendContext();
-        backendContext.fDevice.reset((__bridge void*)_metalDevice);
-        backendContext.fQueue.reset((__bridge void*)_metalCommandQueue);
+        backendContext.fDevice.retain((__bridge void*)_metalDevice);
+        backendContext.fQueue.retain((__bridge void*)_metalCommandQueue);
         auto grContextOptions = GrContextOptions();
         _context = GrDirectContexts::MakeMetal(backendContext, grContextOptions);
     }

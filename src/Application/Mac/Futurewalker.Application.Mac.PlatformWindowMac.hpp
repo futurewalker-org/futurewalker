@@ -35,6 +35,8 @@ public:
       PlatformWindowOptions const& options,
       Delegate const& delegate);
 
+    ~PlatformWindowMac();
+
     auto IsVisible() -> Bool override;
     auto SetVisible(Bool const visible) -> void override;
     auto IsActive() -> Bool override;

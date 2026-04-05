@@ -215,8 +215,7 @@ auto PlatformViewLayerVisualMac::Render(NSWindow* window) -> void
 
             if (_needsUpdateContents)
             {
-                auto const metalLayerView = static_cast<PlatformCAMetalLayerView*>(_view);
-                [metalLayerView drawVisual:GetSelf() withDrawableRect:drawableRect];
+                [view drawVisual:GetSelf() withDrawableRect:drawableRect];
                 _needsUpdateContents = false;
             }
         }

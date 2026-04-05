@@ -929,7 +929,16 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
     }
     return NSNotFound;
 }
+@end
 
+@interface PlatformCustomWindow : NSWindow 
+@end
+
+@implementation PlatformCustomWindow
+- (BOOL)canBecomeKeyWindow
+{
+    return YES;
+}
 @end
 
 @interface PlatformWindowDelegate : NSObject <NSWindowDelegate>
@@ -1008,7 +1017,7 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
     if (self)
     {
         auto const style = [self getStyleMaskFrom:options];
-        _window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 500, 500) styleMask:style backing:NSBackingStoreBuffered defer:YES];
+        _window = [[PlatformCustomWindow alloc] initWithContentRect:NSMakeRect(0, 0, 500, 500) styleMask:style backing:NSBackingStoreBuffered defer:YES];
         [_window setReleasedWhenClosed:NO];
         [_window setTitlebarAppearsTransparent:YES];
         [_window setLevel:NSNormalWindowLevel];
@@ -1039,42 +1048,67 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
 
 - (void)windowDidResize:(NSNotification*)notification
 {
-    _callbackOnResize(_data);
+    if (_data && _callbackOnResize)
+    {
+        _callbackOnResize(_data);
+    }
 }
 
 - (void)windowDidMove:(NSNotification*)notification
 {
-    _callbackOnMove(_data);
+    if (_data && _callbackOnMove)
+    {
+        _callbackOnMove(_data);
+    }
 }
 
 - (void)windowDidChangeScreen:(NSNotification*)notification
 {
-    _callbackOnScreenChange(_data);
+    if (_data && _callbackOnScreenChange)
+    {
+        _callbackOnScreenChange(_data);
+    }
 }
 
 - (void)windowDidChangeScreenProfile:(NSNotification*)notification
 {
-    _callbackOnScreenProfileChange(_data);
+    if (_data && _callbackOnScreenProfileChange)
+    {
+        _callbackOnScreenProfileChange(_data);
+    }
 }
 
 - (void)windowDidChangeBackingProperties:(NSNotification*)notification
 {
-    _callbackOnBackingPropertyChange(_data);
+    if (_data && _callbackOnBackingPropertyChange)
+    {
+        _callbackOnBackingPropertyChange(_data);
+    }
 }
 
 - (void)windowDidBecomeKey:(NSNotification*)notification
 {
-    _callbackOnBecomeKey(_data);
+    if (_data && _callbackOnBecomeKey)
+    {
+        _callbackOnBecomeKey(_data);
+    }
 }
 
 - (void)windowDidResignKey:(NSNotification*)notification
 {
-    _callbackOnResignKey(_data);
+    if (_data && _callbackOnResignKey)
+    {
+        _callbackOnResignKey(_data);
+    }
 }
 
 - (BOOL)windowShouldClose:(NSWindow*)sender
 {
-    return _callbackOnShouldClose(_data);
+    if (_data && _callbackOnShouldClose)
+    {
+        return _callbackOnShouldClose(_data);
+    }
+    return YES;
 }
 
 - (BOOL)windowShouldZoom:(NSWindow*)window toFrame:(NSRect)newFrame
@@ -1088,9 +1122,13 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
 
 - (void)windowWillClose:(NSNotification*)notification
 {
+    [_displayLink invalidate];
     _displayLink = nil;
     _window = nil;
-    _callbackOnWillClose(_data);
+    if (_data && _callbackOnWillClose)
+    {
+        _callbackOnWillClose(_data);
+    }
 }
 
 - (void)windowWillMiniaturize:(NSNotification*)notification
@@ -1112,7 +1150,10 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
 - (void)displayLinkDidUpdate:(CADisplayLink*)sender
 {
     [sender setPaused:YES];
-    _callbackOnFrameUpdate(_data, sender);
+    if (_data && _callbackOnFrameUpdate)
+    {
+        _callbackOnFrameUpdate(_data, sender);
+    }
 }
 
 @end
@@ -1140,6 +1181,36 @@ PlatformWindowMac::PlatformWindowMac(
   , _options {options}
   , _sizeConstraints {BoxConstraints::MakeUnconstrained()}
 {
+}
+
+PlatformWindowMac::~PlatformWindowMac()
+{
+    if (_windowContentView)
+    {
+        _windowContentView.data = nullptr;
+        _windowContentView.callbackOnPointer = nullptr;
+        _windowContentView.callbackOnKey = nullptr;
+    }
+
+    if (_windowDelegate)
+    {
+        _windowDelegate.data = nullptr;
+        _windowDelegate.callbackOnResize = nullptr;
+        _windowDelegate.callbackOnMove = nullptr;
+        _windowDelegate.callbackOnScreenChange = nullptr;
+        _windowDelegate.callbackOnScreenProfileChange = nullptr;
+        _windowDelegate.callbackOnBackingPropertyChange = nullptr;
+        _windowDelegate.callbackOnBecomeKey = nullptr;
+        _windowDelegate.callbackOnResignKey = nullptr;
+        _windowDelegate.callbackOnShouldClose = nullptr;
+        _windowDelegate.callbackOnFrameUpdate = nullptr;
+        _windowDelegate.callbackOnWillClose = nullptr;
+    }
+
+    if (!IsClosed())
+    {
+        Destroy();
+    }
 }
 
 auto PlatformWindowMac::IsVisible() -> Bool
@@ -1456,7 +1527,13 @@ auto PlatformWindowMac::Close() -> Async<Bool>
 
 auto PlatformWindowMac::Destroy() -> void
 {
-    //TODO: 
+    @autoreleasepool
+    {
+        if (_windowDelegate.window)
+        {
+            [_windowDelegate.window close];
+        }
+    }
 }
 
 auto PlatformWindowMac::Render() -> void
