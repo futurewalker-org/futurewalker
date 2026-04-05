@@ -165,7 +165,6 @@ auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
         }
         else if ((_direction & ScrollViewDirection::Vertical) != ScrollViewDirection::None)
         {
-            FW_DEBUG_LOG_INFO("Swipe deltaY: {}", (double)deltaY);
             if (deltaY != 0)
             {
                 _offset.SetDeltaY(_offset.GetDeltaY() - deltaY);
