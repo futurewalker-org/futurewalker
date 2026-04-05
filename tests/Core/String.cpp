@@ -2,7 +2,9 @@
 
 #include <Futurewalker.Core.String.hpp>
 
+#if defined(__clang__)
 #pragma clang diagnostic ignored "-Wself-move"
+#endif
 
 using namespace Futurewalker;
 

@@ -2,7 +2,9 @@
 
 #include "Futurewalker.Attribute.AttributeValue.hpp"
 
+#if defined(__clang__)
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#endif
 
 using namespace Futurewalker;
 
