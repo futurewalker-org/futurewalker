@@ -1,5 +1,8 @@
 # Futurewalker
 
+[![windows-2022](https://github.com/futurewalker-org/futurewalker/actions/workflows/windows-2022.yml/badge.svg?event=push)](https://github.com/futurewalker-org/futurewalker/actions/workflows/windows-2022.yml)
+[![macos-26](https://github.com/futurewalker-org/futurewalker/actions/workflows/macos-26.yml/badge.svg?event=push)](https://github.com/futurewalker-org/futurewalker/actions/workflows/macos-26.yml)
+
 A cross-platform GUI framework written in C++23.  
 
 > [!NOTE]  
@@ -50,7 +53,7 @@ Currently only supports Windows 11.
 | ---- | ---- |
 | Windows 10 | ❔ Undecided |
 | Windows 11 | 🚧 In Development |
-| macOS | 🚧 Planned for 2026~ |
+| macOS | 🚧 In Development |
 | iOS | 📝 Planned for 2027~ |
 | Android | 📝 Planned for 2027~ |
 | Linux | ❔ Undecided |
