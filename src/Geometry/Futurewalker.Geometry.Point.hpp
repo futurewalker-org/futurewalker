@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Geometry.PointType.hpp"
-#include "Futurewalker.Geometry.Offset.hpp"
+#include "Futurewalker.Geometry.Vector.hpp"
 
 #include "Futurewalker.Core.Primitive.hpp"
 
@@ -225,10 +225,10 @@ public:
     ///
     /// @param off Amount of offset.
     ///
-    inline constexpr auto operator+=(Offset2<ValueType> const& off) noexcept -> Point2&
+    inline constexpr auto operator+=(Vector2<ValueType> const& off) noexcept -> Point2&
     {
-        _x += off.GetDeltaX();
-        _y += off.GetDeltaY();
+        _x += off.x;
+        _y += off.y;
         return *this;
     }
 
@@ -237,21 +237,21 @@ public:
     ///
     /// @param off Amount of offset.
     ///
-    inline constexpr auto operator-=(Offset2<ValueType> const& off) noexcept -> Point2&
+    inline constexpr auto operator-=(Vector2<ValueType> const& off) noexcept -> Point2&
     {
-        _x -= off.GetDeltaX();
-        _y -= off.GetDeltaY();
+        _x -= off.x;
+        _y -= off.y;
         return *this;
     }
 
-    friend inline constexpr auto operator+(Point2 const& l, Offset2<ValueType> const& r) noexcept
+    friend inline constexpr auto operator+(Point2 const& l, Vector2<ValueType> const& r) noexcept
     {
         auto tmp = l;
         tmp += r;
         return tmp;
     }
 
-    friend inline constexpr auto operator-(Point2 const& l, Offset2<ValueType> const& r) noexcept
+    friend inline constexpr auto operator-(Point2 const& l, Vector2<ValueType> const& r) noexcept
     {
         auto tmp = l;
         tmp -= r;

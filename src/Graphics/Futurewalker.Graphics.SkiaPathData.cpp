@@ -72,11 +72,11 @@ auto SkiaPathData::Clone() const -> Shared<PathData>
     return clone;
 }
 
-auto SkiaPathData::Translate(Offset<Dp> const& offset) -> void
+auto SkiaPathData::Translate(Vector<Dp> const& offset) -> void
 {
-    auto const dx = static_cast<SkScalar>(offset.GetDeltaX());
-    auto const dy = static_cast<SkScalar>(offset.GetDeltaY());
-    _path.offset(dx, dy);
+    auto const x = static_cast<SkScalar>(offset.x);
+    auto const y = static_cast<SkScalar>(offset.y);
+    _path.offset(x, y);
 }
 
 auto SkiaPathData::IsEmpty() const -> Bool

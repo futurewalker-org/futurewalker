@@ -44,7 +44,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
     auto const scale = static_cast<Float64>(displayScale) * static_cast<Float64>(backingScale);
 
     _surface->SetSize(unionRect.GetSize());
-    _surface->SetOffset(unionRect.GetPosition().As<Offset>());
+    _surface->SetOffset(unionRect.GetPosition().As<Vector>());
     _surface->SetDisplayScale(GetDisplayScale());
     _surface->SetBackingScale(GetBackingScale());
     _surface->Draw([&](Graphics::Scene& scene) {
@@ -59,7 +59,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
             {
                 if (auto const fragment = GetPushNodeFragment(fragmentInfo.index))
                 {
-                    scene.PushTranslate({.x = fragment->offset.GetDeltaX(), .y = fragment->offset.GetDeltaY()});
+                    scene.PushTranslate({.x = fragment->offset.x, .y = fragment->offset.y});
                     scene.PushClipRect({.rect = fragment->clipRect});
 
                     if (fragment->clipPath)
@@ -87,7 +87,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
             {
                 if (auto const fragment = GetDisplayListFragment(fragmentInfo.index))
                 {
-                    scene.PushTranslate({.x = fragment->displayListOffset.GetDeltaX(), .y = fragment->displayListOffset.GetDeltaY()});
+                    scene.PushTranslate({.x = fragment->displayListOffset.x, .y = fragment->displayListOffset.y});
                     scene.AddDisplayList({.displayList = fragment->displayList});
                     scene.Pop({.count = 1});
                 }
@@ -126,8 +126,8 @@ auto PlatformViewLayerVisualWin::OnOffsetChanged() -> void
         auto const offset = GetOffset();
         auto const displayScale = GetDisplayScale();
         auto const backingScale = GetBackingScale();
-        _visual->SetOffsetX(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(offset.GetDeltaX(), displayScale, backingScale))));
-        _visual->SetOffsetY(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(offset.GetDeltaY(), displayScale, backingScale))));
+        _visual->SetOffsetX(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(offset.x, displayScale, backingScale))));
+        _visual->SetOffsetY(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(offset.y, displayScale, backingScale))));
     }
 }
 

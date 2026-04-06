@@ -8,7 +8,7 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 template <class>
-class Offset2;
+struct Vector2;
 
 ///
 /// @brief 
@@ -16,6 +16,6 @@ class Offset2;
 /// @tparam T 
 ///
 template <class T>
-using Offset = Offset2<T>;
+using Vector = Vector2<T>;
 }
 }

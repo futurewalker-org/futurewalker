@@ -39,7 +39,7 @@ public:
     auto Close() -> Path&;
 
     auto Translate(Dp const dx, Dp const dy) -> Path&;
-    auto Translate(Offset<Dp> const& offset) -> Path&;
+    auto Translate(Vector<Dp> const& offset) -> Path&;
 
     auto AddRect(Rect<Dp> const& rect) -> Path&;
     auto AddRoundRect(RoundRect<Dp> const& roundRect) -> Path&;

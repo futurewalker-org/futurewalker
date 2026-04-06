@@ -4,7 +4,7 @@
 #include "Futurewalker.Geometry.RectType.hpp"
 #include "Futurewalker.Geometry.Point.hpp"
 #include "Futurewalker.Geometry.Size.hpp"
-#include "Futurewalker.Geometry.Offset.hpp"
+#include "Futurewalker.Geometry.Vector.hpp"
 
 #include "Futurewalker.Core.Primitive.hpp"
 
@@ -76,11 +76,9 @@ public:
     /// @return Offsetted rectangle
     ///
     [[nodiscard]]
-    static inline constexpr auto Offset(Rect2 const& rect, Offset2<ValueType> const& offset) noexcept -> Rect2
+    static inline constexpr auto Offset(Rect2 const& rect, Vector2<ValueType> const& offset) noexcept -> Rect2
     {
-        auto const dx = offset.GetDeltaX();
-        auto const dy = offset.GetDeltaY();
-        return Rect2(rect._l + dx, rect._t + dy, rect._r + dx, rect._b + dy);
+        return Rect2(rect._l + offset.x, rect._t + offset.y, rect._r + offset.x, rect._b + offset.y);
     }
 
     ///

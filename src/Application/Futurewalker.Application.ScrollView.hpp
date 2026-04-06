@@ -39,7 +39,7 @@ private:
     ScrollViewDirection _direction = ScrollViewDirection::None;
     AttributeAccessor<Float64> _horizontalScrollFactor;
     AttributeAccessor<Float64> _verticalScrollFactor;
-    Offset<Dp> _offset;
+    Vector<Dp> _offset;
 };
 }
 }

@@ -50,8 +50,8 @@ public:
     auto GetChildren() -> std::vector<Shared<PlatformViewLayer>>;
     auto GetChildren() const -> std::vector<Shared<PlatformViewLayer const>>;
 
-    auto GetOffset() const -> Offset<Dp>;
-    auto SetOffset(Offset<Dp> const& pos) -> void;
+    auto GetOffset() const -> Vector<Dp>;
+    auto SetOffset(Vector<Dp> const& pos) -> void;
 
     auto GetSize() const -> Size<Dp>;
     auto SetSize(Size<Dp> const& size) -> void;
@@ -71,8 +71,8 @@ public:
     auto GetDisplayList() const -> Shared<Graphics::DisplayList>;
     auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void;
 
-    auto GetDisplayListOffset() const -> Offset<Dp>;
-    auto SetDisplayListOffset(Offset<Dp> const& offset) -> void;
+    auto GetDisplayListOffset() const -> Vector<Dp>;
+    auto SetDisplayListOffset(Vector<Dp> const& offset) -> void;
 
     auto GetDisplayScale() const -> DisplayScale;
     auto GetBackingScale() const -> BackingScale;
@@ -122,12 +122,12 @@ private:
     std::list<Shared<PlatformViewLayer>> _children;
     PlatformViewLayerRenderFlags _renderFlags = PlatformViewLayerRenderFlags::None;
     Size<Dp> _size;
-    Offset<Dp> _offset;
+    Vector<Dp> _offset;
     Optional<Graphics::Path> _clipPath;
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
     Shared<Graphics::DisplayList> _displayList;
-    Offset<Dp> _displayListOffset;
+    Vector<Dp> _displayListOffset;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
     PlatformViewLayerId _id = 0U;

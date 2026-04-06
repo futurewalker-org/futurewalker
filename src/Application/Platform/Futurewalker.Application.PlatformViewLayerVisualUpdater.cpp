@@ -60,7 +60,7 @@ auto PlatformViewLayerVisualUpdater::PopVisual() -> void
     InternalSetCurrentVisual(nullptr);
 }
 
-auto PlatformViewLayerVisualUpdater::PushNode(PlatformViewLayerId const& id, Offset<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void
+auto PlatformViewLayerVisualUpdater::PushNode(PlatformViewLayerId const& id, Vector<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void
 {
     _nodeStack.push_back({
         .id = id,
@@ -94,7 +94,7 @@ auto PlatformViewLayerVisualUpdater::PopNode(PlatformViewLayerId const& id) -> v
     }
 }
 
-auto PlatformViewLayerVisualUpdater::AddFragment(PlatformViewLayerId const id, DisplayScale const displayScale, BackingScale const backingScale, Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& displayListOffset) -> void
+auto PlatformViewLayerVisualUpdater::AddFragment(PlatformViewLayerId const id, DisplayScale const displayScale, BackingScale const backingScale, Shared<Graphics::DisplayList> const& displayList, Vector<Dp> const& displayListOffset) -> void
 {
     auto visual = InternalGetCurrentVisual();
     if (!visual)
@@ -188,7 +188,7 @@ auto PlatformViewLayerVisualUpdater::InternalSetCurrentVisualProperties(Shared<P
 {
     if (visual)
     {
-        auto offset = Offset<Dp>();
+        auto offset = Vector<Dp>();
         auto clipRect = Rect<Dp>();
         auto clipPaths = std::vector<Graphics::Path>();
         auto opacity = Float64(1.0);
@@ -214,9 +214,9 @@ auto PlatformViewLayerVisualUpdater::InternalPopBaseVisual() -> void
     _baseVisualStack.pop_back();
 }
 
-auto PlatformViewLayerVisualUpdater::InternalGetNodeState(SInt64 const target, Offset<Dp>& offset, Rect<Dp>& clipRect, std::vector<Graphics::Path>& clipPaths, Float64& opacity) const -> void
+auto PlatformViewLayerVisualUpdater::InternalGetNodeState(SInt64 const target, Vector<Dp>& offset, Rect<Dp>& clipRect, std::vector<Graphics::Path>& clipPaths, Float64& opacity) const -> void
 {
-    auto totalOffset = Offset<Dp>();
+    auto totalOffset = Vector<Dp>();
     auto accumulatedOpacity = Float64(1.0);
     for (auto i = SInt64(0); i <= target; ++i)
     {

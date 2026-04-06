@@ -57,14 +57,14 @@ public:
     auto GetChildIndex(ReferenceArg<ViewLayer const> layer) const -> Optional<SInt64>;
     auto GetChildAt(SInt64 const index) -> Shared<ViewLayer>;
 
-    auto SetOffset(Offset<Dp> const& offset) -> void;
+    auto SetOffset(Vector<Dp> const& offset) -> void;
     auto SetSize(Size<Dp> const& size) -> void;
     auto SetClipPath(Optional<Graphics::Path> const& path) -> void;
     auto SetClipMode(ViewClipMode const clipMode) -> void;
     auto SetOpacity(Float64 const opacity) -> void;
     auto SetShouldRasterize(Bool const shouldRasterize) -> void;
     auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void;
-    auto SetDisplayListOffset(Offset<Dp> const& offset) -> void;
+    auto SetDisplayListOffset(Vector<Dp> const& offset) -> void;
 
 private:
     auto GetSelf() -> Shared<ViewLayer>;

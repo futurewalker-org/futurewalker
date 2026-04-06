@@ -46,8 +46,8 @@ public:
     auto GetBaseLayerId() const -> PlatformViewLayerId;
     auto SetBaseLayerId(PlatformViewLayerId const layerId) -> void;
 
-    auto GetOffset() const -> Offset<Dp>;
-    auto SetOffset(Offset<Dp> const& offset) -> void;
+    auto GetOffset() const -> Vector<Dp>;
+    auto SetOffset(Vector<Dp> const& offset) -> void;
 
     auto GetClipRect() const -> Rect<Dp>;
     auto SetClipRect(Rect<Dp> const& clipRect) -> void;
@@ -81,7 +81,7 @@ public:
     struct DisplayListFragment
     {
         Shared<Graphics::DisplayList> displayList;
-        Offset<Dp> displayListOffset;
+        Vector<Dp> displayListOffset;
 
         auto operator==(DisplayListFragment const& other) const -> bool = default;
         auto operator!=(DisplayListFragment const& other) const -> bool = default;
@@ -89,7 +89,7 @@ public:
 
     struct PushNodeFragment
     {
-        Offset<Dp> offset;
+        Vector<Dp> offset;
         Rect<Dp> clipRect;
         Optional<Graphics::Path> clipPath;
         Float64 opacity = 1.0;
@@ -140,7 +140,7 @@ private:
     Weak<PlatformViewLayerVisual> _parent;
     std::vector<Shared<PlatformViewLayerVisual>> _children;
     PlatformViewLayerId _baseLayerId = PlatformViewLayerId(0U);
-    Offset<Dp> _offset;
+    Vector<Dp> _offset;
     Rect<Dp> _clipRect;
     std::vector<Graphics::Path> _clipPaths;
     Float64 _opacity = 1.0;

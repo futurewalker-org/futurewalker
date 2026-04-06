@@ -1,4 +1,4 @@
-fw_add_test(Geometry Offset Futurewalker::Geometry Futurewalker::Unit)
+fw_add_test(Geometry Vector Futurewalker::Geometry Futurewalker::Unit)
 fw_add_test(Geometry Point Futurewalker::Geometry Futurewalker::Unit)
 fw_add_test(Geometry Radius Futurewalker::Geometry Futurewalker::Unit)
 fw_add_test(Geometry Rect Futurewalker::Geometry Futurewalker::Unit)

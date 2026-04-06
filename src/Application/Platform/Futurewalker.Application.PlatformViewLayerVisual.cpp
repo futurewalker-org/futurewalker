@@ -58,12 +58,12 @@ auto PlatformViewLayerVisual::SetBaseLayerId(PlatformViewLayerId const layerId) 
     _baseLayerId = layerId;
 }
 
-auto PlatformViewLayerVisual::GetOffset() const -> Offset<Dp>
+auto PlatformViewLayerVisual::GetOffset() const -> Vector<Dp>
 {
     return _offset;
 }
 
-auto PlatformViewLayerVisual::SetOffset(Offset<Dp> const& offset) -> void
+auto PlatformViewLayerVisual::SetOffset(Vector<Dp> const& offset) -> void
 {
     if (_offset != offset)
     {
@@ -318,7 +318,7 @@ auto PlatformViewLayerVisual::GetFragmentCount() const -> SInt32
 
 auto PlatformViewLayerVisual::CalcFragmentBounds() const -> Rect<Dp>
 {
-    auto offsets = std::vector<Offset<Dp>>();
+    auto offsets = std::vector<Vector<Dp>>();
     auto clipRects = std::vector<Rect<Dp>>();
 
     offsets.push_back(GetOffset());
@@ -330,7 +330,7 @@ auto PlatformViewLayerVisual::CalcFragmentBounds() const -> Rect<Dp>
         {
             if (auto const fragment = GetPushNodeFragment(fragmentInfo.index))
             {
-                auto const currentOffset = offsets.empty() ? Offset<Dp>() : offsets.back();
+                auto const currentOffset = offsets.empty() ? Vector<Dp>() : offsets.back();
                 auto const currentClipRect = clipRects.empty() ? GetClipRect() : clipRects.back();
                 offsets.push_back(currentOffset + fragment->offset);
                 clipRects.push_back(Rect<Dp>::Intersect(currentClipRect, Rect<Dp>::Offset(fragment->clipRect, offsets.back())));
@@ -355,7 +355,7 @@ auto PlatformViewLayerVisual::CalcFragmentBounds() const -> Rect<Dp>
             {
                 if (fragment->displayList)
                 {
-                    auto const currentOffset = offsets.empty() ? Offset<Dp>() : offsets.back();
+                    auto const currentOffset = offsets.empty() ? Vector<Dp>() : offsets.back();
                     auto const currentClipRect = clipRects.empty() ? GetClipRect() : clipRects.back();
 
                     auto bounds = currentClipRect;

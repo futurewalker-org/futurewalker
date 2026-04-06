@@ -30,9 +30,9 @@ public:
 private:
     auto PushVisual(PlatformViewLayerId const id, DisplayScale const displayScale, BackingScale const backingScale) -> void;
     auto PopVisual() -> void;
-    auto PushNode(PlatformViewLayerId const& id, Offset<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void;
+    auto PushNode(PlatformViewLayerId const& id, Vector<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void;
     auto PopNode(PlatformViewLayerId const& id) -> void;
-    auto AddFragment(PlatformViewLayerId const id, DisplayScale const displayScale, BackingScale const backingScale, Shared<Graphics::DisplayList> const& displayList, Offset<Dp> const& displayListOffset) -> void;
+    auto AddFragment(PlatformViewLayerId const id, DisplayScale const displayScale, BackingScale const backingScale, Shared<Graphics::DisplayList> const& displayList, Vector<Dp> const& displayListOffset) -> void;
     auto UpdateCore(Shared<PlatformViewLayer> const& layer) -> void;
 
 private:
@@ -42,7 +42,7 @@ private:
     auto InternalSetCurrentVisualProperties(Shared<PlatformViewLayerVisual> const& visual, SInt64 const target, DisplayScale const displayScale, BackingScale const backingScale) -> void;
     auto InternalPushBaseVisual(Shared<PlatformViewLayerVisual> const& visual) -> void;
     auto InternalPopBaseVisual() -> void;
-    auto InternalGetNodeState(SInt64 const target, Offset<Dp>& offset, Rect<Dp>& clipRect, std::vector<Graphics::Path>& clipPaths, Float64& opacity) const -> void;
+    auto InternalGetNodeState(SInt64 const target, Vector<Dp>& offset, Rect<Dp>& clipRect, std::vector<Graphics::Path>& clipPaths, Float64& opacity) const -> void;
     auto InternalGetBaseNodeIndex() const -> SInt64;
     auto InternalGetBaseVisual() const -> Shared<PlatformViewLayerVisual>;
     auto InternalGetCurrentNodeIndex() const -> SInt64;
@@ -52,7 +52,7 @@ private:
     struct NodeInfo
     {
         PlatformViewLayerId id;
-        Offset<Dp> offset;
+        Vector<Dp> offset;
         Rect<Dp> clipRect;
         Optional<Graphics::Path> clipPath; 
         Float64 opacity = 1.0;

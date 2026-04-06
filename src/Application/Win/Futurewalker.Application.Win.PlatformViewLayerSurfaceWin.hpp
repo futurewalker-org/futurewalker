@@ -30,7 +30,7 @@ public:
     PlatformViewLayerSurfaceWin();
 
     auto SetSize(Size<Dp> const& size) -> void;
-    auto SetOffset(Offset<Dp> const& offset) -> void;
+    auto SetOffset(Vector<Dp> const& offset) -> void;
     auto SetDisplayScale(DisplayScale const scale) -> void;
     auto SetBackingScale(BackingScale const scale) -> void;
     auto SetVisual(Microsoft::WRL::ComPtr<IDCompositionVisual3> const& visual) -> void;
@@ -53,7 +53,7 @@ private:
     Size<Dp> _size;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
-    Offset <Dp> _offset;
+    Vector<Dp> _offset;
     Shared<PlatformViewLayerSurfaceContextWin> _context;
     Microsoft::WRL::ComPtr<IDCompositionVisual3> _visual;
     Shared<Graphics::PlatformSwapChainSurfaceWin> _surface;

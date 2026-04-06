@@ -180,7 +180,7 @@ auto ViewDrawInfo::UpdateLayers(ViewLayer& layer) -> void
         {
             // We assume origin of the bounds is properly aligned by layout algorithm.
             auto const bounds = AlignBoundsToPixelGridByExpand(_displayList->GetBounds(), _displayScale, _backingScale);
-            auto const offset = bounds.GetPosition().As<Offset>();
+            auto const offset = bounds.GetPosition().As<Vector>();
 
             drawableLayer->SetOffset(offset);
             drawableLayer->SetSize(bounds.GetSize());

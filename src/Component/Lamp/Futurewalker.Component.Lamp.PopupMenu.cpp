@@ -240,7 +240,7 @@ auto PopupMenu::UpdatePopup() -> void
                 auto const screenRect = screenInfo->workArea;
                 auto const isRtl = sourceView->GetLayoutDirection() == LayoutDirection::RightToLeft;
                 auto const popupPos = CalcPopupPosition(sourceRect, popupSize, screenRect, isRtl);
-                auto const popupRect = Rect<Vp>::Offset(Rect<Vp>(popupPos, popupSizeWithShadow), Offset<Vp>(-blurRadius, -blurRadius));
+                auto const popupRect = Rect<Vp>::Offset(Rect<Vp>(popupPos, popupSizeWithShadow), Vector<Vp>(-blurRadius, -blurRadius));
                 _popup->SetFrameRect(popupRect);
                 _popup->SetVisible(true);
             }

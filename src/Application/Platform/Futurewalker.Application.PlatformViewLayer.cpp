@@ -100,12 +100,12 @@ auto PlatformViewLayer::GetChildren() const -> std::vector<Shared<PlatformViewLa
     return {_children.begin(), _children.end()};
 }
 
-auto PlatformViewLayer::GetOffset() const -> Offset<Dp>
+auto PlatformViewLayer::GetOffset() const -> Vector<Dp>
 {
     return _offset;
 }
 
-auto PlatformViewLayer::SetOffset(Offset<Dp> const& pos) -> void
+auto PlatformViewLayer::SetOffset(Vector<Dp> const& pos) -> void
 {
     if (_offset != pos)
     {
@@ -198,12 +198,12 @@ auto PlatformViewLayer::SetDisplayList(Shared<Graphics::DisplayList> const& disp
     }
 }
 
-auto PlatformViewLayer::GetDisplayListOffset() const -> Offset<Dp>
+auto PlatformViewLayer::GetDisplayListOffset() const -> Vector<Dp>
 {
     return _displayListOffset;
 }
 
-auto PlatformViewLayer::SetDisplayListOffset(Offset<Dp> const& offset) -> void
+auto PlatformViewLayer::SetDisplayListOffset(Vector<Dp> const& offset) -> void
 {
     if (_displayListOffset != offset)
     {

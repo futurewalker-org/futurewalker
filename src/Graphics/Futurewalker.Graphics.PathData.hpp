@@ -30,7 +30,7 @@ public:
     virtual auto AddRoundRect(RoundRect<Dp> const& roundRect) -> void = 0;
     virtual auto AddPath(Path const& path) -> void = 0;
     virtual auto Clone() const -> Shared<PathData> = 0;
-    virtual auto Translate(Offset<Dp> const& offset) -> void = 0;
+    virtual auto Translate(Vector<Dp> const& offset) -> void = 0;
     virtual auto IsEmpty() const -> Bool = 0;
     virtual auto IsEqual(PathData const& other) const -> Bool = 0;
 };

@@ -181,7 +181,7 @@ auto InputEditable::SetComposingRange(Range<CodePoint> const& range) -> void
 ///
 /// @brief
 ///
-auto InputEditable::GetLayoutOffset() const -> Offset<Dp>
+auto InputEditable::GetLayoutOffset() const -> Vector<Dp>
 {
     return _layoutOffset;
 }
@@ -189,7 +189,7 @@ auto InputEditable::GetLayoutOffset() const -> Offset<Dp>
 ///
 /// @brief
 ///
-auto InputEditable::SetLayoutOffset(Offset<Dp> const& offset) -> void
+auto InputEditable::SetLayoutOffset(Vector<Dp> const& offset) -> void
 {
     if (_layoutOffset != offset)
     {

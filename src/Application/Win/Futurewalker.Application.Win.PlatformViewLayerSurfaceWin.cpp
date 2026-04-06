@@ -23,7 +23,7 @@ auto PlatformViewLayerSurfaceWin::SetSize(Size<Dp> const& size) -> void
     _size = size;
 }
 
-auto PlatformViewLayerSurfaceWin::SetOffset(Offset<Dp> const& offset) -> void
+auto PlatformViewLayerSurfaceWin::SetOffset(Vector<Dp> const& offset) -> void
 {
     _offset = offset;
 }
@@ -109,14 +109,14 @@ auto PlatformViewLayerSurfaceWin::GetOffsetX() const -> IntPx
 {
     DisplayScale const displayScale = GetDisplayScale();
     BackingScale const backingScale = GetBackingScale();
-    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_offset.GetDeltaX(), displayScale, backingScale)));
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_offset.x, displayScale, backingScale)));
 }
 
 auto PlatformViewLayerSurfaceWin::GetOffsetY() const -> IntPx
 {
     DisplayScale const displayScale = GetDisplayScale();
     BackingScale const backingScale = GetBackingScale();
-    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_offset.GetDeltaY(), displayScale, backingScale)));
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_offset.y, displayScale, backingScale)));
 }
 
 auto PlatformViewLayerSurfaceWin::ResizeSurface() -> Bool

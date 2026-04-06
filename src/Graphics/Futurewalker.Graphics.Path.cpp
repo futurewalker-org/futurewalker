@@ -65,7 +65,7 @@ auto Path::Translate(Dp const dx, Dp const dy) -> Path&
     return *this;
 }
 
-auto Path::Translate(Offset<Dp> const& offset) -> Path&
+auto Path::Translate(Vector<Dp> const& offset) -> Path&
 {
     GetMutableState().Translate(offset);
     return *this;

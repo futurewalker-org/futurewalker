@@ -21,7 +21,7 @@ public:
     auto AddRoundRect(RoundRect<Dp> const& roundRect) -> void override;
     auto AddPath(Path const& path) -> void override;
     auto Clone() const -> Shared<PathData> override;
-    auto Translate(Offset<Dp> const& offset) -> void override;
+    auto Translate(Vector<Dp> const& offset) -> void override;
     auto IsEmpty() const -> Bool override;
     auto IsEqual(PathData const& other) const noexcept -> Bool override;
 

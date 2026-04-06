@@ -74,14 +74,14 @@ private:
     Weak<PlatformViewLayerWin> _parent;
     PlatformViewLayerWinList _children;
     PlatformViewLayerRenderFlags _renderFlags = PlatformViewLayerRenderFlags::None;
-    Offset<Dp> _offset;
+    Vector<Dp> _offset;
     Size<Dp> _size;
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
     HWND _rootHwnd = NULL;
     HWND _hwnd = NULL;
     Shared<Graphics::DisplayList> _displayList;
-    Offset<Dp> _displayListOffset;
+    Vector<Dp> _displayListOffset;
 };
 }
 }

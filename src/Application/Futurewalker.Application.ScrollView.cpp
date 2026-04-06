@@ -100,19 +100,19 @@ auto ScrollView::Arrange(ArrangeScope& scope) -> void
     if ((_direction & ScrollViewDirection::Horizontal) != ScrollViewDirection::None)
     {
         auto const maxOffset = Dp::Max(0, childSize.GetWidth() - contentRect.GetWidth());
-        auto const deltaX = Dp::Min(Dp::Max(0, _offset.GetDeltaX()), maxOffset);
-        _offset.SetDeltaX(deltaX);
+        auto const deltaX = Dp::Min(Dp::Max(0, _offset.x), maxOffset);
+        _offset.x = deltaX;
     }
     else if ((_direction & ScrollViewDirection::Vertical) != ScrollViewDirection::None)
     {
         auto const maxOffset = Dp::Max(0, childSize.GetHeight() - contentRect.GetHeight());
-        auto const deltaY = Dp::Min(Dp::Max(0, _offset.GetDeltaY()), maxOffset);
-        _offset.SetDeltaY(deltaY);
+        auto const deltaY = Dp::Min(Dp::Max(0, _offset.y), maxOffset);
+        _offset.y = deltaY;
     }
 
     ForEachChild([&](View& view) {
-        auto const x = ViewLayoutFunction::AlignToPixelGridByRound(-_offset.GetDeltaX(), *this);
-        auto const y = ViewLayoutFunction::AlignToPixelGridByRound(-_offset.GetDeltaY(), *this);
+        auto const x = ViewLayoutFunction::AlignToPixelGridByRound(-_offset.x, *this);
+        auto const y = ViewLayoutFunction::AlignToPixelGridByRound(-_offset.y, *this);
         scope.ArrangeChild(view, {x, y});
     });
 }
@@ -134,7 +134,7 @@ auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
             if (deltaX != 0)
             {
                 auto const distance = precision == PointerScrollPrecision::Coarse ? deltaX * Dp(horizontalScrollFactor) : deltaX;
-                _offset.SetDeltaX(_offset.GetDeltaX() - distance);
+                _offset.x -= distance;
                 InvalidateLayout();
             }
         }
@@ -143,7 +143,7 @@ auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
             if (deltaY != 0)
             {
                 auto const distance = precision == PointerScrollPrecision::Coarse ? deltaY * Dp(verticalScrollFactor) : deltaY;
-                _offset.SetDeltaY(_offset.GetDeltaY() - distance);
+                _offset.y -= distance;
                 InvalidateLayout();
             }
         }
@@ -159,7 +159,7 @@ auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
         {
             if (deltaX != 0)
             {
-                _offset.SetDeltaX(_offset.GetDeltaX() - deltaX);
+                _offset.x -= deltaX;
                 InvalidateLayout();
             }
         }
@@ -167,7 +167,7 @@ auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
         {
             if (deltaY != 0)
             {
-                _offset.SetDeltaY(_offset.GetDeltaY() - deltaY);
+                _offset.y -= deltaY;
                 InvalidateLayout();
             }
         }

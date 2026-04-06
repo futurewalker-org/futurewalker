@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Geometry.Offset.hpp"
+#include "Futurewalker.Geometry.Vector.hpp"
 #include "Futurewalker.Geometry.Point.hpp"
 #include "Futurewalker.Geometry.Radius.hpp"
 #include "Futurewalker.Geometry.Rect.hpp"
