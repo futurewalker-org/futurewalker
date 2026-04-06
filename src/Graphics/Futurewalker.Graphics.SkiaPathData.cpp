@@ -8,35 +8,35 @@ namespace FW_GRAPHICS_DETAIL_NS
 {
 auto SkiaPathData::MoveTo(Point<Dp> const& point) -> void
 {
-    auto const x = static_cast<SkScalar>(point.GetX());
-    auto const y = static_cast<SkScalar>(point.GetY());
+    auto const x = static_cast<SkScalar>(point.x);
+    auto const y = static_cast<SkScalar>(point.y);
     _path.moveTo(x, y);
 }
 
 auto SkiaPathData::LineTo(Point<Dp> const& point) -> void
 {
-    auto const x = static_cast<SkScalar>(point.GetX());
-    auto const y = static_cast<SkScalar>(point.GetY());
+    auto const x = static_cast<SkScalar>(point.x);
+    auto const y = static_cast<SkScalar>(point.y);
     _path.lineTo(x, y);
 }
 
 auto SkiaPathData::QuadTo(Point<Dp> const& p1, Point<Dp> const& p2) -> void
 {
-    auto const x1 = static_cast<SkScalar>(p1.GetX());
-    auto const y1 = static_cast<SkScalar>(p1.GetY());
-    auto const x2 = static_cast<SkScalar>(p2.GetX());
-    auto const y2 = static_cast<SkScalar>(p2.GetY());
+    auto const x1 = static_cast<SkScalar>(p1.x);
+    auto const y1 = static_cast<SkScalar>(p1.y);
+    auto const x2 = static_cast<SkScalar>(p2.x);
+    auto const y2 = static_cast<SkScalar>(p2.y);
     _path.quadTo(x1, y1, x2, y2);
 }
 
 auto SkiaPathData::CubicTo(Point<Dp> const& p1, Point<Dp> const& p2, Point<Dp> const& p3) -> void
 {
-    auto const x1 = static_cast<SkScalar>(p1.GetX());
-    auto const y1 = static_cast<SkScalar>(p1.GetY());
-    auto const x2 = static_cast<SkScalar>(p2.GetX());
-    auto const y2 = static_cast<SkScalar>(p2.GetY());
-    auto const x3 = static_cast<SkScalar>(p3.GetX());
-    auto const y3 = static_cast<SkScalar>(p3.GetY());
+    auto const x1 = static_cast<SkScalar>(p1.x);
+    auto const y1 = static_cast<SkScalar>(p1.y);
+    auto const x2 = static_cast<SkScalar>(p2.x);
+    auto const y2 = static_cast<SkScalar>(p2.y);
+    auto const x3 = static_cast<SkScalar>(p3.x);
+    auto const y3 = static_cast<SkScalar>(p3.y);
     _path.cubicTo(x1, y1, x2, y2, x3, y3);
 }
 

@@ -208,7 +208,7 @@ auto Window::LocalToGlobalRect(Rect<Dp> const& rect) const -> Rect<Vp>
 {
     auto const lt = LocalToGlobalPoint(rect.GetTopLeft());
     auto const rb = LocalToGlobalPoint(rect.GetBottomRight());
-    return Rect<Vp>(lt.GetX(), lt.GetY(), rb.GetX(), rb.GetY());
+    return Rect<Vp>(lt.x, lt.y, rb.x, rb.y);
 }
 
 ///
@@ -218,7 +218,7 @@ auto Window::GlobalToLocalRect(Rect<Vp> const& rect) const -> Rect<Dp>
 {
     auto const lt = GlobalToLocalPoint(rect.GetTopLeft());
     auto const rb = GlobalToLocalPoint(rect.GetBottomRight());
-    return Rect<Dp>(lt.GetX(), lt.GetY(), rb.GetX(), rb.GetY());
+    return Rect<Dp>(lt.x, lt.y, rb.x, rb.y);
 }
 
 ///
@@ -227,7 +227,7 @@ auto Window::GlobalToLocalRect(Rect<Vp> const& rect) const -> Rect<Dp>
 auto Window::LocalToRootViewPoint(Point<Dp> const& point) const -> Point<Dp>
 {
     const auto clientRect = GetClientRect();
-    return Point<Dp>(point.GetX() - clientRect.GetLeft(), point.GetY() - clientRect.GetTop());
+    return Point<Dp>(point.x - clientRect.GetLeft(), point.y - clientRect.GetTop());
 }
 
 ///
@@ -236,7 +236,7 @@ auto Window::LocalToRootViewPoint(Point<Dp> const& point) const -> Point<Dp>
 auto Window::RootViewToLocalPoint(Point<Dp> const& point) const -> Point<Dp>
 {
     const auto clientRect = GetClientRect();
-    return Point<Dp>(point.GetX() + clientRect.GetLeft(), point.GetY() + clientRect.GetTop());
+    return Point<Dp>(point.x + clientRect.GetLeft(), point.y + clientRect.GetTop());
 }
 
 ///
@@ -246,7 +246,7 @@ auto Window::LocalToRootViewRect(Rect<Dp> const& rect) const -> Rect<Dp>
 {
     const auto lt = LocalToRootViewPoint(rect.GetTopLeft());
     const auto rb = LocalToRootViewPoint(rect.GetBottomRight());
-    return Rect<Dp>(lt.GetX(), lt.GetY(), rb.GetX(), rb.GetY());
+    return Rect<Dp>(lt.x, lt.y, rb.x, rb.y);
 }
 
 ///
@@ -256,7 +256,7 @@ auto Window::RootViewToLocalRect(Rect<Dp> const& rect) const -> Rect<Dp>
 {
     const auto lt = RootViewToLocalPoint(rect.GetTopLeft());
     const auto rb = RootViewToLocalPoint(rect.GetBottomRight());
-    return Rect<Dp>(lt.GetX(), lt.GetY(), rb.GetX(), rb.GetY());
+    return Rect<Dp>(lt.x, lt.y, rb.x, rb.y);
 }
 
 ///

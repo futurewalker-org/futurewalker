@@ -179,7 +179,7 @@ auto View::LocalToGlobalRect(Rect<Dp> const& rect) const -> Rect<Vp>
 {
     auto const tl = LocalToGlobalPoint(rect.GetTopLeft());
     auto const br = LocalToGlobalPoint(rect.GetBottomRight());
-    return Rect<Vp>(tl.GetX(), tl.GetY(), br.GetX(), br.GetY());
+    return Rect<Vp>(tl.x, tl.y, br.x, br.y);
 }
 
 ///
@@ -189,7 +189,7 @@ auto View::GlobalToLocalRect(Rect<Vp> const& rect) const -> Rect<Dp>
 {
     auto const tl = GlobalToLocalPoint(rect.GetTopLeft());
     auto const br = GlobalToLocalPoint(rect.GetBottomRight());
-    return Rect<Dp>(tl.GetX(), tl.GetY(), br.GetX(), br.GetY());
+    return Rect<Dp>(tl.x, tl.y, br.x, br.y);
 }
 
 ///

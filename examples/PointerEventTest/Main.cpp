@@ -60,7 +60,7 @@ public:
             _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"type: {}", std::to_underlying(event.As<PointerEvent>()->GetPointerType()))));
             _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"timestamp: {}", event.As<PointerEvent>()->GetTimestamp().GetIntervalSinceEpoch().GetIntNanoseconds())));
             _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"primary: {}", event.As<PointerEvent>()->IsPrimaryPointer() ? u8"true" : u8"false")));
-            _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"position: ({}, {})", event.As<PointerEvent>()->GetPosition().GetX(), event.As<PointerEvent>()->GetPosition().GetY())));
+            _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"position: ({}, {})", event.As<PointerEvent>()->GetPosition().x, event.As<PointerEvent>()->GetPosition().y)));
 
             if (event.Is<PointerEvent::Motion::Down>())
             {

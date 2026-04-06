@@ -185,8 +185,8 @@ auto TextEdit::Draw(DrawScope& scope) -> void
             for (auto const& run : line.runs)
             {
                 scene.PushTranslate({
-                    .x = run.position.GetX(),
-                    .y = run.position.GetY(),
+                    .x = run.position.x,
+                    .y = run.position.y,
                 });
                 scene.AddGlyphRun({
                     .run = run.run,
@@ -202,7 +202,7 @@ auto TextEdit::Draw(DrawScope& scope) -> void
         if (IsFocused() && selection.line < std::ssize(arrangedLines))
         {
             auto const& lineInfo = arrangedLines[static_cast<size_t>(selection.line)];
-            auto const lineY = lineInfo.position.GetY();
+            auto const lineY = lineInfo.position.y;
             auto const lineHeight = lineInfo.metrics.ascent + lineInfo.metrics.descent;
 
             auto offset = selection.offset;
@@ -214,7 +214,7 @@ auto TextEdit::Draw(DrawScope& scope) -> void
             for (auto const& runInfo : lineInfo.runs)
             {
                 auto const& run = runInfo.run;
-                auto const& runX = runInfo.position.GetX();
+                auto const& runX = runInfo.position.x;
 
                 if (run->GetText().GetCodePointCount() < offset)
                 {
@@ -227,7 +227,7 @@ auto TextEdit::Draw(DrawScope& scope) -> void
                     {
                         if (auto const position = run->GetGlyphPosition(*glyphIndex))
                         {
-                            glyphX = position->GetX();
+                            glyphX = position->x;
                         }
                     }
                     else

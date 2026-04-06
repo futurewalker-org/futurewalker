@@ -470,8 +470,8 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetTextExt(TsViewCo
 
             auto layoutRect = editable->GetLayoutRect();
 
-            auto const left = layoutRect.GetLeft() + posBegin.GetX();
-            auto const right = layoutRect.GetLeft() + posEnd.GetX();
+            auto const left = layoutRect.GetLeft() + posBegin.x;
+            auto const right = layoutRect.GetLeft() + posEnd.x;
             layoutRect.SetLeft(left);
             layoutRect.SetRight(right);
 

@@ -17,7 +17,7 @@ namespace FW_EXPORT
 /// @tparam Tag Tag type.
 ///
 template <Concepts::FloatingPoint T, class Tag>
-class Point2<Float<T, Tag>>
+struct Point2<Float<T, Tag>>
 {
 public:
     ///
@@ -34,7 +34,7 @@ public:
     ///
     static inline constexpr Bool IsNearlyEquals(Point2 const& lhs, Point2 const& rhs, T const& tolerance = 1e-6) noexcept
     {
-        return ValueType::IsNearlyEqual(lhs._x, rhs._x, tolerance) && ValueType::IsNearlyEqual(lhs._y, rhs._y, tolerance);
+        return ValueType::IsNearlyEqual(lhs.x, rhs.x, tolerance) && ValueType::IsNearlyEqual(lhs.y, rhs.y, tolerance);
     }
 
     ///
@@ -47,7 +47,7 @@ public:
     ///
     static inline constexpr Bool IsNearlyEqualRelative(Point2 const& lhs, Point2 const& rhs, T const& precision = 1e-6, T const& minTolerance = 1e-6) noexcept
     {
-        return ValueType::IsNearlyEqualRelative(lhs._x, rhs._y, precision, minTolerance) && ValueType::IsNearlyEqualRelative(lhs._x, rhs._y, precision, minTolerance);
+        return ValueType::IsNearlyEqualRelative(lhs.x, rhs.x, precision, minTolerance) && ValueType::IsNearlyEqualRelative(lhs.y, rhs.y, precision, minTolerance);
     }
 
     ///
@@ -60,7 +60,7 @@ public:
     ///
     static inline constexpr auto DistanceBetween(Point2 const& lhs, Point2 const& rhs)
     {
-        return ValueType::Sqrt(ValueType::Pow(rhs._x - lhs._x, 2) + ValueType::Pow(rhs._y - lhs._y, 2));
+        return ValueType::Sqrt(ValueType::Pow(rhs.x - lhs.x, 2) + ValueType::Pow(rhs.y - lhs.y, 2));
     }
 
     ///
@@ -73,7 +73,7 @@ public:
     ///
     static inline constexpr auto Min(Point2 const& lhs, Point2 const& rhs) -> Point2
     {
-        return Point2(ValueType::Min(lhs._x, rhs._x), ValueType::Min(lhs._y, rhs._y));
+        return Point2(ValueType::Min(lhs.x, rhs.x), ValueType::Min(lhs.y, rhs.y));
     }
 
     ///
@@ -86,7 +86,7 @@ public:
     ///
     static inline constexpr auto Max(Point2 const& lhs, Point2 const& rhs) -> Point2
     {
-        return Point2(ValueType::Max(lhs._x, rhs._x), ValueType::Max(lhs._y, rhs._y));
+        return Point2(ValueType::Max(lhs.x, rhs.x), ValueType::Max(lhs.y, rhs.y));
     }
 
     ///
@@ -98,7 +98,7 @@ public:
     ///
     static inline constexpr auto Round(Point2 const& point) -> Point2
     {
-        return Point2(ValueType::Round(point._x), ValueType::Round(point._y));
+        return Point2(ValueType::Round(point.x), ValueType::Round(point.y));
     }
 
     ///
@@ -110,7 +110,7 @@ public:
     ///
     static inline constexpr auto Floor(Point2 const& point) -> Point2
     {
-        return Point2(ValueType::Floor(point._x), ValueType::Floor(point._y));
+        return Point2(ValueType::Floor(point.x), ValueType::Floor(point.y));
     }
 
     ///
@@ -122,86 +122,16 @@ public:
     ///
     static inline constexpr auto Ceil(Point2 const& point) -> Point2
     {
-        return Point2(ValueType::Ceil(point._x), ValueType::Ceil(point._y));
+        return Point2(ValueType::Ceil(point.x), ValueType::Ceil(point.y));
     }
 
 public:
-    ///
-    /// @brief Default constructor.
-    ///
-    /// Initializes both X and Y values to zero.
-    ///
-    inline constexpr Point2() = default;
-
-    ///
-    /// @brief Copy constructor.
-    ///
-    inline constexpr Point2(Point2 const&) = default;
-
-    ///
-    /// @brief Copy assignment operator.
-    ///
-    inline constexpr auto operator=(Point2 const&) -> Point2& = default;
-
-    ///
-    /// @brief Construct Point2 from X and Y values.
-    ///
-    /// @param x X value of point.
-    /// @param y Y value of point.
-    ///
-    template <class X, class Y>
-    inline constexpr Point2(const X& x, const Y& y)
-      : _x {x}
-      , _y {y}
-    {
-    }
-
-    ///
-    /// @brief
-    ///
-    /// @return
-    ///
-    inline constexpr auto GetX() const noexcept -> ValueType const&
-    {
-        return _x;
-    }
-
-    ///
-    /// @brief
-    ///
-    /// @return
-    ///
-    inline constexpr auto SetX(ValueType const& x) noexcept -> void
-    {
-        _x = x;
-    }
-
-    ///
-    /// @brief
-    ///
-    /// @return
-    ///
-    inline constexpr auto GetY() const noexcept -> ValueType const&
-    {
-        return _y;
-    }
-
-    ///
-    /// @brief
-    ///
-    /// @return
-    ///
-    inline constexpr auto SetY(ValueType const& y) noexcept -> void
-    {
-        _y = y;
-    }
-
     ///
     /// @brief
     ///
     inline constexpr auto IsFinite() const noexcept -> Bool
     {
-        return ValueType::IsFinite(_x) && ValueType::IsFinite(_y);
+        return ValueType::IsFinite(x) && ValueType::IsFinite(y);
     }
 
     ///
@@ -209,7 +139,7 @@ public:
     ///
     friend inline constexpr bool operator==(Point2 const& l, Point2 const& r)
     {
-        return (l._x == r._x) && (l._y == r._y);
+        return (l.x == r.x) && (l.y == r.y);
     }
 
     ///
@@ -217,7 +147,7 @@ public:
     ///
     friend inline constexpr bool operator!=(Point2 const& l, Point2 const& r)
     {
-        return (l._x != r._x) || (l._y != r._y);
+        return (l.x != r.x) || (l.y != r.y);
     }
 
     ///
@@ -227,8 +157,8 @@ public:
     ///
     inline constexpr auto operator+=(Vector2<ValueType> const& off) noexcept -> Point2&
     {
-        _x += off.x;
-        _y += off.y;
+        x += off.x;
+        y += off.y;
         return *this;
     }
 
@@ -239,8 +169,8 @@ public:
     ///
     inline constexpr auto operator-=(Vector2<ValueType> const& off) noexcept -> Point2&
     {
-        _x -= off.x;
-        _y -= off.y;
+        x -= off.x;
+        y -= off.y;
         return *this;
     }
 
@@ -264,12 +194,18 @@ public:
     template <template <class> class U>
     auto As() const -> U<ValueType>
     {
-        return U<ValueType>(_x, _y);
+        return U<ValueType>(x, y);
     }
 
-private:
-    ValueType _x = static_cast<T>(0);
-    ValueType _y = static_cast<T>(0);
+    ///
+    /// @brief X component.
+    ///
+    ValueType x = static_cast<T>(0);
+
+    ///
+    /// @brief Y component.
+    ///
+    ValueType y = static_cast<T>(0);
 };
 }
 }

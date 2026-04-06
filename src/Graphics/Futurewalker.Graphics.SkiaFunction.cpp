@@ -8,8 +8,8 @@ namespace FW_GRAPHICS_DETAIL_NS
 auto SkiaFunction::PointToSkPoint(Point<Dp> const& point) -> SkPoint
 {
     return {
-        .fX = static_cast<SkScalar>(point.GetX()),
-        .fY = static_cast<SkScalar>(point.GetY()),
+        .fX = static_cast<SkScalar>(point.x),
+        .fY = static_cast<SkScalar>(point.y),
     };
 }
 

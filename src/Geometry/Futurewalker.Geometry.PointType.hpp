@@ -8,7 +8,7 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 template <class>
-class Point2;
+struct Point2;
 
 ///
 /// @brief A two-dimensional point type.

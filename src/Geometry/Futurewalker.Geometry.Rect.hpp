@@ -115,9 +115,9 @@ public:
             return false;
         }
 
-        if ((lhs.GetLeft() <= rhs.GetX() && rhs.GetX() < lhs.GetRight()))
+        if ((lhs.GetLeft() <= rhs.x && rhs.x < lhs.GetRight()))
         {
-            if ((lhs.GetTop() <= rhs.GetY() && rhs.GetY() < lhs.GetBottom()))
+            if ((lhs.GetTop() <= rhs.y && rhs.y < lhs.GetBottom()))
             {
                 return true;
             }
@@ -183,8 +183,8 @@ public:
     /// @param size Size of rectangle
     ///
     inline constexpr Rect2(Point2<ValueType> const& position, Size2<ValueType> const& size)
-      : _l {position.GetX()}
-      , _t {position.GetY()}
+      : _l {position.x}
+      , _t {position.y}
       , _r {_l + size.GetWidth()}
       , _b {_t + size.GetHeight()}
     {
