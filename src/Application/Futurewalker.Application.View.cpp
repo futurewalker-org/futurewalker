@@ -1122,8 +1122,8 @@ auto View::Measure(MeasureScope& scope) -> void
     ForEachVisibleChild([&](View& view) { maxSize = Size<Dp>::Max(maxSize, scope.MeasureChild(view)); });
 
     auto const& parameter = scope.GetParameter();
-    auto const width = AxisConstraints::Constrain(parameter.GetWidthConstraints(), maxSize.GetWidth());
-    auto const height = AxisConstraints::Constrain(parameter.GetHeightConstraints(), maxSize.GetHeight());
+    auto const width = AxisConstraints::Constrain(parameter.GetWidthConstraints(), maxSize.width);
+    auto const height = AxisConstraints::Constrain(parameter.GetHeightConstraints(), maxSize.height);
     scope.SetMeasuredSize(width, height);
 }
 
@@ -1149,7 +1149,7 @@ auto View::Arrange(ArrangeScope& scope) -> void
         else
         {
             auto const size = scope.GetMeasuredSize(view);
-            auto const x = GetContentRect().GetWidth() - size.GetWidth();
+            auto const x = GetContentRect().GetWidth() - size.width;
             scope.ArrangeChild(view, Point<Dp>(x, 0));
         }
     });

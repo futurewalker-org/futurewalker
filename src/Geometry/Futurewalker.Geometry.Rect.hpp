@@ -185,8 +185,8 @@ public:
     inline constexpr Rect2(Point2<ValueType> const& position, Size2<ValueType> const& size)
       : _l {position.x}
       , _t {position.y}
-      , _r {_l + size.GetWidth()}
-      , _b {_t + size.GetHeight()}
+      , _r {_l + size.width}
+      , _b {_t + size.height}
     {
     }
 

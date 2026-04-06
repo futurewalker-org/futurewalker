@@ -95,14 +95,14 @@ auto PlatformViewLayerSurfaceWin::GetSurfaceWidth() const -> IntPx
 {
     DisplayScale const displayScale = GetDisplayScale();
     BackingScale const backingScale = GetBackingScale();
-    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.GetWidth(), displayScale, backingScale)));
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.width, displayScale, backingScale)));
 }
 
 auto PlatformViewLayerSurfaceWin::GetSurfaceHeight() const -> IntPx
 {
     DisplayScale const displayScale = GetDisplayScale();
     BackingScale const backingScale = GetBackingScale();
-    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.GetHeight(), displayScale, backingScale)));
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.height, displayScale, backingScale)));
 }
 
 auto PlatformViewLayerSurfaceWin::GetOffsetX() const -> IntPx

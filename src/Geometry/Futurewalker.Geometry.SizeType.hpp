@@ -9,7 +9,7 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 template <class>
-class Size2;
+struct Size2;
 
 ///
 /// @brief A two-dimensional size type.

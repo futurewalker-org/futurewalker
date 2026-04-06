@@ -593,11 +593,11 @@ auto FlexLayout::GetMainAxisLength(Size<Dp> const& size) const -> Dp
     auto const flexDirection = GetDirection();
     if (flexDirection == FlexLayoutDirection::Column || flexDirection == FlexLayoutDirection::ColumnReverse)
     {
-        return size.GetHeight();
+        return size.height;
     }
     else
     {
-        return size.GetWidth();
+        return size.width;
     }
 }
 
@@ -609,11 +609,11 @@ auto FlexLayout::GetCrossAxisLength(Size<Dp> const& size) const -> Dp
     auto const flexDirection = GetDirection();
     if (flexDirection == FlexLayoutDirection::Column || flexDirection == FlexLayoutDirection::ColumnReverse)
     {
-        return size.GetWidth();
+        return size.width;
     }
     else
     {
-        return size.GetHeight();
+        return size.height;
     }
 }
 

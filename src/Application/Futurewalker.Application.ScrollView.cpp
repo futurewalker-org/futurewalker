@@ -85,8 +85,8 @@ auto ScrollView::Measure(MeasureScope& scope) -> void
     auto childSize = Size<Dp>();
     ForEachVisibleChild([&](View& view) { childSize = Size<Dp>::Max(childSize, scope.MeasureChild(view, childWidth, childHeight)); });
 
-    auto const measuredWidth = width.IsBounded() ? width.GetMax() : AxisConstraints::Constrain(width, childSize.GetWidth());
-    auto const measuredHeight = height.IsBounded() ? height.GetMax() : AxisConstraints::Constrain(height, childSize.GetHeight());
+    auto const measuredWidth = width.IsBounded() ? width.GetMax() : AxisConstraints::Constrain(width, childSize.width);
+    auto const measuredHeight = height.IsBounded() ? height.GetMax() : AxisConstraints::Constrain(height, childSize.height);
     scope.SetMeasuredSize(measuredWidth, measuredHeight);
 }
 
@@ -99,13 +99,13 @@ auto ScrollView::Arrange(ArrangeScope& scope) -> void
 
     if ((_direction & ScrollViewDirection::Horizontal) != ScrollViewDirection::None)
     {
-        auto const maxOffset = Dp::Max(0, childSize.GetWidth() - contentRect.GetWidth());
+        auto const maxOffset = Dp::Max(0, childSize.width - contentRect.GetWidth());
         auto const deltaX = Dp::Min(Dp::Max(0, _offset.x), maxOffset);
         _offset.x = deltaX;
     }
     else if ((_direction & ScrollViewDirection::Vertical) != ScrollViewDirection::None)
     {
-        auto const maxOffset = Dp::Max(0, childSize.GetHeight() - contentRect.GetHeight());
+        auto const maxOffset = Dp::Max(0, childSize.height - contentRect.GetHeight());
         auto const deltaY = Dp::Min(Dp::Max(0, _offset.y), maxOffset);
         _offset.y = deltaY;
     }

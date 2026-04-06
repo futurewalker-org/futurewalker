@@ -263,7 +263,7 @@ auto RootView::UpdateLayout() -> void
     try
     {
         auto const size = _layoutInfo.GetSize();
-        MeasureScope::MeasureView(*this, BoxConstraints::MakeExact(size.GetWidth(), size.GetHeight()));
+        MeasureScope::MeasureView(*this, BoxConstraints::MakeExact(size.width, size.height));
         ArrangeScope::ArrangeView({}, *this);
     }
     catch (...)

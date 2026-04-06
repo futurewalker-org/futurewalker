@@ -27,8 +27,8 @@ auto ViewLayoutFunction::AlignToPixelGridByRound(Point<Dp> const& point, View co
 
 auto ViewLayoutFunction::AlignToPixelGridByRound(Size<Dp> const& size, View const& view) -> Size<Dp>
 {
-    auto const w = AlignToPixelGridByRound(size.GetWidth(), view);
-    auto const h = AlignToPixelGridByRound(size.GetHeight(), view);
+    auto const w = AlignToPixelGridByRound(size.width, view);
+    auto const h = AlignToPixelGridByRound(size.height, view);
     return Size<Dp>(w, h);
 }
 
@@ -65,8 +65,8 @@ auto ViewLayoutFunction::AlignToPixelGridByFloor(Point<Dp> const& point, View co
 
 auto ViewLayoutFunction::AlignToPixelGridByFloor(Size<Dp> const& size, View const& view) -> Size<Dp>
 {
-    auto const w = AlignToPixelGridByFloor(size.GetWidth(), view);
-    auto const h = AlignToPixelGridByFloor(size.GetHeight(), view);
+    auto const w = AlignToPixelGridByFloor(size.width, view);
+    auto const h = AlignToPixelGridByFloor(size.height, view);
     return Size<Dp>(w, h);
 }
 
@@ -103,8 +103,8 @@ auto ViewLayoutFunction::AlignToPixelGridByCeil(Point<Dp> const& point, View con
 
 auto ViewLayoutFunction::AlignToPixelGridByCeil(Size<Dp> const& size, View const& view) -> Size<Dp>
 {
-    auto const w = AlignToPixelGridByCeil(size.GetWidth(), view);
-    auto const h = AlignToPixelGridByCeil(size.GetHeight(), view);
+    auto const w = AlignToPixelGridByCeil(size.width, view);
+    auto const h = AlignToPixelGridByCeil(size.height, view);
     return Size<Dp>(w, h);
 }
 

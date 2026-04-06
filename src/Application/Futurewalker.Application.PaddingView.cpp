@@ -96,8 +96,8 @@ auto PaddingView::Measure(MeasureScope& scope) -> void
         childSize = scope.MeasureChild(content, adjustedWidth, adjustedHeight);
     }
 
-    auto const measuredWidth = AxisConstraints::Constrain(widthConstraints, childSize.GetWidth() + horizontal);
-    auto const measuredHeight = AxisConstraints::Constrain(heightConstraints, childSize.GetHeight() + vertical);
+    auto const measuredWidth = AxisConstraints::Constrain(widthConstraints, childSize.width + horizontal);
+    auto const measuredHeight = AxisConstraints::Constrain(heightConstraints, childSize.height + vertical);
     scope.SetMeasuredSize(measuredWidth, measuredHeight);
 }
 

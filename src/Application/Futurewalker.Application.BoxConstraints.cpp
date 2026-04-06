@@ -31,7 +31,7 @@ auto BoxConstraints::MakeExact(Dp const width, Dp const height) -> BoxConstraint
 ///
 auto BoxConstraints::MakeExact(Size<Dp> const& size) -> BoxConstraints
 {
-    return BoxConstraints(AxisConstraints::MakeExact(size.GetWidth()), AxisConstraints::MakeExact(size.GetHeight()));
+    return BoxConstraints(AxisConstraints::MakeExact(size.width), AxisConstraints::MakeExact(size.height));
 }
 
 ///
@@ -55,7 +55,7 @@ auto BoxConstraints::MakeMinMax(Dp const min, Dp const max) -> BoxConstraints
 ///
 auto BoxConstraints::MakeMinMax(Size<Dp> const& minSize, Size<Dp> const& maxSize) -> BoxConstraints
 {
-    return BoxConstraints(AxisConstraints::MakeMinMax(minSize.GetWidth(), maxSize.GetWidth()), AxisConstraints::MakeMinMax(minSize.GetHeight(), maxSize.GetHeight()));
+    return BoxConstraints(AxisConstraints::MakeMinMax(minSize.width, maxSize.width), AxisConstraints::MakeMinMax(minSize.height, maxSize.height));
 }
 
 
@@ -77,7 +77,7 @@ auto BoxConstraints::MakeUnbounded(Dp const min) -> BoxConstraints
 ///
 auto BoxConstraints::MakeUnbounded(Size<Dp> const& minSize) -> BoxConstraints
 {
-    return BoxConstraints(AxisConstraints::MakeUnbounded(minSize.GetWidth()), AxisConstraints::MakeUnbounded(minSize.GetHeight()));
+    return BoxConstraints(AxisConstraints::MakeUnbounded(minSize.width), AxisConstraints::MakeUnbounded(minSize.height));
 }
 
 ///
@@ -88,7 +88,7 @@ auto BoxConstraints::MakeUnbounded(Size<Dp> const& minSize) -> BoxConstraints
 ///
 auto BoxConstraints::Constrain(BoxConstraints const& cs, Size<Dp> const& size) -> Size<Dp>
 {
-    return Size<Dp>(AxisConstraints::Constrain(cs._width, size.GetWidth()), AxisConstraints::Constrain(cs._height, size.GetHeight()));
+    return Size<Dp>(AxisConstraints::Constrain(cs._width, size.width), AxisConstraints::Constrain(cs._height, size.height));
 }
 
 ///

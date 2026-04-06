@@ -200,8 +200,8 @@ auto TextView::Measure(MeasureScope& scope) -> void
     UpdateLayoutCache(widthConstraints.GetMax());
 
     auto const textSize = GetShapedTextSize();
-    auto const measuredWidth = AxisConstraints::Constrain(widthConstraints, textSize.GetWidth());
-    auto const measuredHeight = AxisConstraints::Constrain(heightConstraints, textSize.GetHeight());
+    auto const measuredWidth = AxisConstraints::Constrain(widthConstraints, textSize.width);
+    auto const measuredHeight = AxisConstraints::Constrain(heightConstraints, textSize.height);
     scope.SetMeasuredSize(measuredWidth, measuredHeight);
 }
 
@@ -225,11 +225,11 @@ auto TextView::Draw(DrawScope& scope) -> void
     auto y = Dp(0);
     if (vAlign == TextViewVerticalAlignment::Bottom)
     {
-        y = rect.GetTop() + rect.GetHeight() - textSize.GetHeight();
+        y = rect.GetTop() + rect.GetHeight() - textSize.height;
     }
     else if (vAlign == TextViewVerticalAlignment::Middle)
     {
-        y = rect.GetTop() + (rect.GetHeight() - textSize.GetHeight()) / 2;
+        y = rect.GetTop() + (rect.GetHeight() - textSize.height) / 2;
     }
 
     for (auto const& shapedText : _shapedTexts)
@@ -347,7 +347,7 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
     }
 
     auto const matchesMaxWidth = Dp::IsNearlyEqual(maxWidth, _shapedTextsMaxWidth);
-    auto const matchesWidth = Dp::IsNearlyEqual(GetShapedTextSize().GetWidth(), maxWidth);
+    auto const matchesWidth = Dp::IsNearlyEqual(GetShapedTextSize().width, maxWidth);
     auto const belowIntrinsicWidth = _shapedTextsIntrinsicWidth < maxWidth;
     if (_shapedTexts.empty() || (!matchesMaxWidth && !matchesWidth && !belowIntrinsicWidth))
     {

@@ -16,7 +16,7 @@ namespace FW_EXPORT
 /// @tparam Tag Tag type
 ///
 template <Concepts::FloatingPoint T, class Tag>
-class Size2<Float<T, Tag>>
+struct Size2<Float<T, Tag>>
 {
 public:
     ///
@@ -33,7 +33,7 @@ public:
     ///
     static inline constexpr auto Normalize(Size2 const& size) -> Size2
     {
-        return Size2(ValueType::Max(ValueType(0), size._w), ValueType::Max(ValueType(0), size._h));
+        return Size2(ValueType::Max(ValueType(0), size.width), ValueType::Max(ValueType(0), size.height));
     }
 
     ///
@@ -46,7 +46,7 @@ public:
     ///
     static inline constexpr auto Min(Size2 const& lhs, Size2 const& rhs) -> Size2
     {
-        return Size2(ValueType::Min(lhs._w, rhs._w), ValueType::Min(lhs._h, rhs._h));
+        return Size2(ValueType::Min(lhs.width, rhs.width), ValueType::Min(lhs.height, rhs.height));
     }
 
     ///
@@ -59,7 +59,7 @@ public:
     ///
     static inline constexpr auto Max(Size2 const& lhs, Size2 const& rhs) -> Size2
     {
-        return Size2(ValueType::Max(lhs._w, rhs._w), ValueType::Max(lhs._h, rhs._h));
+        return Size2(ValueType::Max(lhs.width, rhs.width), ValueType::Max(lhs.height, rhs.height));
     }
 
     ///
@@ -71,7 +71,7 @@ public:
     ///
     static inline constexpr auto Round(Size2 const& size) -> Size2
     {
-        return Size2(ValueType::Round(size._w), ValueType::Round(size._h));
+        return Size2(ValueType::Round(size.width), ValueType::Round(size.height));
     }
 
     ///
@@ -83,7 +83,7 @@ public:
     ///
     static inline constexpr auto Floor(Size2 const& size) -> Size2
     {
-        return Size2(ValueType::Floor(size._w), ValueType::Floor(size._h));
+        return Size2(ValueType::Floor(size.width), ValueType::Floor(size.height));
     }
 
     ///
@@ -95,88 +95,16 @@ public:
     ///
     static inline constexpr auto Ceil(Size2 const& size) -> Size2
     {
-        return Size2(ValueType::Ceil(size._w), ValueType::Ceil(size._h));
+        return Size2(ValueType::Ceil(size.width), ValueType::Ceil(size.height));
     }
 
 public:
-    ///
-    /// @brief Default constructor.
-    ///
-    /// Initializes both Width and Height values to zero.
-    ///
-    inline constexpr Size2() = default;
-
-    ///
-    /// @brief Copy constructor.
-    ///
-    inline constexpr Size2(Size2 const&) = default;
-
-    ///
-    /// @brief Construct from components
-    ///
-    /// @param width Width
-    /// @param height Height
-    ///
-    inline constexpr Size2(ValueType const& width, ValueType const& height)
-      : _w {width}
-      , _h {height}
-    {
-    }
-
-    ///
-    /// @brief Construct square size
-    ///
-    /// @param extent Extent of width and height
-    ///
-    inline constexpr explicit Size2(ValueType const& extent)
-      : _w {extent}
-      , _h {extent}
-    {
-    }
-
-    ///
-    /// @brief Copy assignment operator.
-    ///
-    inline constexpr auto operator=(Size2 const&) -> Size2& = default;
-
-    ///
-    /// @brief Get width.
-    ///
-    inline constexpr auto GetWidth() const noexcept -> ValueType const&
-    {
-        return _w;
-    }
-
-    ///
-    /// @brief Set width.
-    ///
-    inline constexpr void SetWidth(ValueType const& width) noexcept
-    {
-        _w = width;
-    }
-
-    ///
-    /// @brief Get height.
-    ///
-    inline constexpr auto GetHeight() const noexcept -> ValueType const&
-    {
-        return _h;
-    }
-
-    ///
-    /// @brief Set height.
-    ///
-    inline constexpr void SetHeight(ValueType const& height) noexcept
-    {
-        _h = height;
-    }
-
     ///
     /// @brief Returns true if the size is empty
     ///
     inline constexpr auto IsEmpty() const noexcept -> Bool
     {
-        return _w <= ValueType(0) || _h <= ValueType(0);
+        return width <= ValueType(0) || height <= ValueType(0);
     }
 
     ///
@@ -184,16 +112,22 @@ public:
     ///
     inline constexpr auto IsFinite() const noexcept -> Bool
     {
-        return ValueType::IsFinite(_w) && ValueType::IsFinite(_h);
+        return ValueType::IsFinite(width) && ValueType::IsFinite(height);
     }
 
     friend inline constexpr bool operator==(Size2 const&, Size2 const&) = default;
 
     friend inline constexpr bool operator!=(Size2 const&, Size2 const&) = default;
 
-private:
-    ValueType _w = static_cast<T>(0);
-    ValueType _h = static_cast<T>(0);
+    ///
+    /// @brief Width component.
+    ///
+    ValueType width = static_cast<T>(0);
+
+    ///
+    /// @brief Height component.
+    ///
+    ValueType height = static_cast<T>(0);
 };
 }
 }

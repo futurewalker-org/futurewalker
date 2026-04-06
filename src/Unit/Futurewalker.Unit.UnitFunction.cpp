@@ -31,7 +31,7 @@ auto UnitFunction::ConvertPxToVp(Px const& dp, BackingScale const& scale) -> Vp
 ///
 auto UnitFunction::ConvertPxToVp(Size<Px> const& dp, BackingScale const& scale) -> Size<Vp>
 {
-    return Size<Vp>(ConvertPxToVp(dp.GetWidth(), scale), ConvertPxToVp(dp.GetHeight(), scale));
+    return Size<Vp>(ConvertPxToVp(dp.width, scale), ConvertPxToVp(dp.height, scale));
 }
 
 ///
@@ -82,7 +82,7 @@ auto UnitFunction::ConvertPxToVpRound(Px const& px, BackingScale const& scale) -
 ///
 auto UnitFunction::ConvertPxToVpRound(Size<Px> const& px, BackingScale const& scale) -> Size<Vp>
 {
-    return {ConvertPxToVpRound(px.GetWidth(), scale), ConvertPxToVpRound(px.GetHeight(), scale)};
+    return {ConvertPxToVpRound(px.width, scale), ConvertPxToVpRound(px.height, scale)};
 }
 ///
 /// @brief 
@@ -131,7 +131,7 @@ auto UnitFunction::ConvertPxToVpCeil(Px const& px, BackingScale const& scale) ->
 ///
 auto UnitFunction::ConvertPxToVpCeil(Size<Px> const& px, BackingScale const& scale) -> Size<Vp>
 {
-    return {ConvertPxToVpCeil(px.GetWidth(), scale), ConvertPxToVpCeil(px.GetHeight(), scale)};
+    return {ConvertPxToVpCeil(px.width, scale), ConvertPxToVpCeil(px.height, scale)};
 }
 ///
 /// @brief 
@@ -180,7 +180,7 @@ auto UnitFunction::ConvertPxToVpFloor(Px const& px, BackingScale const& scale) -
 ///
 auto UnitFunction::ConvertPxToVpFloor(Size<Px> const& px, BackingScale const& scale) -> Size<Vp>
 {
-    return {ConvertPxToVpFloor(px.GetWidth(), scale), ConvertPxToVpFloor(px.GetHeight(), scale)};
+    return {ConvertPxToVpFloor(px.width, scale), ConvertPxToVpFloor(px.height, scale)};
 }
 ///
 /// @brief 
@@ -230,7 +230,7 @@ auto UnitFunction::ConvertVpToPx(Vp const& sp, BackingScale const& scale) -> Px
 ///
 auto UnitFunction::ConvertVpToPx(Size<Vp> const& sp, BackingScale const& scale) -> Size<Px>
 {
-    return Size<Px>(ConvertVpToPx(sp.GetWidth(), scale), ConvertVpToPx(sp.GetHeight(), scale));
+    return Size<Px>(ConvertVpToPx(sp.width, scale), ConvertVpToPx(sp.height, scale));
 }
 
 ///
@@ -281,7 +281,7 @@ auto UnitFunction::ConvertVpToRound(Vp const& vp, BackingScale const& scale) -> 
 ///
 auto UnitFunction::ConvertVpToRound(Size<Vp> const& vp, BackingScale const& scale) -> Size<Px>
 {
-    return {ConvertVpToRound(vp.GetWidth(), scale), ConvertVpToRound(vp.GetHeight(), scale)};
+    return {ConvertVpToRound(vp.width, scale), ConvertVpToRound(vp.height, scale)};
 }
 ///
 /// @brief 
@@ -330,7 +330,7 @@ auto UnitFunction::ConvertVpToCeil(Vp const& vp, BackingScale const& scale) -> P
 ///
 auto UnitFunction::ConvertVpToCeil(Size<Vp> const& vp, BackingScale const& scale) -> Size<Px>
 {
-    return {ConvertVpToCeil(vp.GetWidth(), scale), ConvertVpToCeil(vp.GetHeight(), scale)};
+    return {ConvertVpToCeil(vp.width, scale), ConvertVpToCeil(vp.height, scale)};
 }
 ///
 /// @brief 
@@ -379,7 +379,7 @@ auto UnitFunction::ConvertVpToFloor(Vp const& vp, BackingScale const& scale) -> 
 ///
 auto UnitFunction::ConvertVpToFloor(Size<Vp> const& vp, BackingScale const& scale) -> Size<Px>
 {
-    return {ConvertVpToFloor(vp.GetWidth(), scale), ConvertVpToFloor(vp.GetHeight(), scale)};
+    return {ConvertVpToFloor(vp.width, scale), ConvertVpToFloor(vp.height, scale)};
 }
 ///
 /// @brief 
@@ -429,7 +429,7 @@ auto UnitFunction::ConvertVpToDp(Vp const& sp, DisplayScale const& scale) -> Dp
 ///
 auto UnitFunction::ConvertVpToDp(Size<Vp> const& sp, DisplayScale const& scale) -> Size<Dp>
 {
-    return Size<Dp>(ConvertVpToDp(sp.GetWidth(), scale), ConvertVpToDp(sp.GetHeight(), scale));
+    return Size<Dp>(ConvertVpToDp(sp.width, scale), ConvertVpToDp(sp.height, scale));
 }
 
 ///
@@ -480,7 +480,7 @@ auto UnitFunction::ConvertVpToRound(Vp const& vp, DisplayScale const& scale) -> 
 ///
 auto UnitFunction::ConvertVpToRound(Size<Vp> const& vp, DisplayScale const& scale) -> Size<Dp>
 {
-    return {ConvertVpToRound(vp.GetWidth(), scale), ConvertVpToRound(vp.GetHeight(), scale)};
+    return {ConvertVpToRound(vp.width, scale), ConvertVpToRound(vp.height, scale)};
 }
 ///
 /// @brief 
@@ -529,7 +529,7 @@ auto UnitFunction::ConvertVpToCeil(Vp const& vp, DisplayScale const& scale) -> D
 ///
 auto UnitFunction::ConvertVpToCeil(Size<Vp> const& vp, DisplayScale const& scale) -> Size<Dp>
 {
-    return {ConvertVpToCeil(vp.GetWidth(), scale), ConvertVpToCeil(vp.GetHeight(), scale)};
+    return {ConvertVpToCeil(vp.width, scale), ConvertVpToCeil(vp.height, scale)};
 }
 ///
 /// @brief 
@@ -578,7 +578,7 @@ auto UnitFunction::ConvertVpToFloor(Vp const& vp, DisplayScale const& scale) -> 
 ///
 auto UnitFunction::ConvertVpToFloor(Size<Vp> const& vp, DisplayScale const& scale) -> Size<Dp>
 {
-    return {ConvertVpToFloor(vp.GetWidth(), scale), ConvertVpToFloor(vp.GetHeight(), scale)};
+    return {ConvertVpToFloor(vp.width, scale), ConvertVpToFloor(vp.height, scale)};
 }
 ///
 /// @brief 
@@ -628,7 +628,7 @@ auto UnitFunction::ConvertDpToVp(Dp const& dp, DisplayScale const& scale) -> Vp
 ///
 auto UnitFunction::ConvertDpToVp(Size<Dp> const& dp, DisplayScale const& scale) -> Size<Vp>
 {
-    return Size<Vp>(ConvertDpToVp(dp.GetWidth(), scale), ConvertDpToVp(dp.GetHeight(), scale));
+    return Size<Vp>(ConvertDpToVp(dp.width, scale), ConvertDpToVp(dp.height, scale));
 }
 
 ///
@@ -679,7 +679,7 @@ auto UnitFunction::ConvertDpToVpRound(Dp const& dp, DisplayScale const& scale) -
 ///
 auto UnitFunction::ConvertDpToVpRound(Size<Dp> const& dp, DisplayScale const& scale) -> Size<Vp>
 {
-    return {ConvertDpToVpRound(dp.GetWidth(), scale), ConvertDpToVpRound(dp.GetHeight(), scale)};
+    return {ConvertDpToVpRound(dp.width, scale), ConvertDpToVpRound(dp.height, scale)};
 }
 ///
 /// @brief 
@@ -728,7 +728,7 @@ auto UnitFunction::ConvertDpToVpCeil(Dp const& dp, DisplayScale const& scale) ->
 ///
 auto UnitFunction::ConvertDpToVpCeil(Size<Dp> const& dp, DisplayScale const& scale) -> Size<Vp>
 {
-    return {ConvertDpToVpCeil(dp.GetWidth(), scale), ConvertDpToVpCeil(dp.GetHeight(), scale)};
+    return {ConvertDpToVpCeil(dp.width, scale), ConvertDpToVpCeil(dp.height, scale)};
 }
 ///
 /// @brief 
@@ -777,7 +777,7 @@ auto UnitFunction::ConvertDpToVpFloor(Dp const& dp, DisplayScale const& scale) -
 ///
 auto UnitFunction::ConvertDpToVpFloor(Size<Dp> const& dp, DisplayScale const& scale) -> Size<Vp>
 {
-    return {ConvertDpToVpFloor(dp.GetWidth(), scale), ConvertDpToVpFloor(dp.GetHeight(), scale)};
+    return {ConvertDpToVpFloor(dp.width, scale), ConvertDpToVpFloor(dp.height, scale)};
 }
 ///
 /// @brief 
@@ -884,7 +884,7 @@ auto UnitFunction::ConvertDpToPxRound(Dp const& dp, DisplayScale const& displayS
 ///
 auto UnitFunction::ConvertDpToPxRound(Size<Dp> const& dp, DisplayScale const& displayScale, BackingScale const& backingScale) -> Size<Px>
 {
-    return {ConvertDpToPxRound(dp.GetWidth(), displayScale, backingScale), ConvertDpToPxRound(dp.GetHeight(), displayScale, backingScale)};
+    return {ConvertDpToPxRound(dp.width, displayScale, backingScale), ConvertDpToPxRound(dp.height, displayScale, backingScale)};
 }
 ///
 /// @brief 
@@ -937,7 +937,7 @@ auto UnitFunction::ConvertDpToPxCeil(Dp const& dp, DisplayScale const& displaySc
 ///
 auto UnitFunction::ConvertDpToPxCeil(Size<Dp> const& dp, DisplayScale const& displayScale, BackingScale const& backingScale) -> Size<Px>
 {
-    return {ConvertDpToPxCeil(dp.GetWidth(), displayScale, backingScale), ConvertDpToPxCeil(dp.GetHeight(), displayScale, backingScale)};
+    return {ConvertDpToPxCeil(dp.width, displayScale, backingScale), ConvertDpToPxCeil(dp.height, displayScale, backingScale)};
 }
 ///
 /// @brief 
@@ -990,7 +990,7 @@ auto UnitFunction::ConvertDpToPxFloor(Dp const& dp, DisplayScale const& displayS
 ///
 auto UnitFunction::ConvertDpToPxFloor(Size<Dp> const& dp, DisplayScale const& displayScale, BackingScale const& backingScale) -> Size<Px>
 {
-    return {ConvertDpToPxFloor(dp.GetWidth(), displayScale, backingScale), ConvertDpToPxFloor(dp.GetHeight(), displayScale, backingScale)};
+    return {ConvertDpToPxFloor(dp.width, displayScale, backingScale), ConvertDpToPxFloor(dp.height, displayScale, backingScale)};
 }
 ///
 /// @brief 
@@ -1099,7 +1099,7 @@ auto UnitFunction::ConvertPxToRound(Px const& px, BackingScale const& backingSca
 ///
 auto UnitFunction::ConvertPxToRound(Size<Px> const& px, BackingScale const& backingScale, DisplayScale const& displayScale) -> Size<Dp>
 {
-    return {ConvertPxToRound(px.GetWidth(), backingScale, displayScale), ConvertPxToRound(px.GetHeight(), backingScale, displayScale)};
+    return {ConvertPxToRound(px.width, backingScale, displayScale), ConvertPxToRound(px.height, backingScale, displayScale)};
 }
 ///
 /// @brief 
@@ -1152,7 +1152,7 @@ auto UnitFunction::ConvertPxToCeil(Px const& px, BackingScale const& backingScal
 ///
 auto UnitFunction::ConvertPxToCeil(Size<Px> const& px, BackingScale const& backingScale, DisplayScale const& displayScale) -> Size<Dp>
 {
-    return {ConvertPxToCeil(px.GetWidth(), backingScale, displayScale), ConvertPxToCeil(px.GetHeight(), backingScale, displayScale)};
+    return {ConvertPxToCeil(px.width, backingScale, displayScale), ConvertPxToCeil(px.height, backingScale, displayScale)};
 }
 ///
 /// @brief 
@@ -1205,7 +1205,7 @@ auto UnitFunction::ConvertPxToFloor(Px const& px, BackingScale const& backingSca
 ///
 auto UnitFunction::ConvertPxToFloor(Size<Px> const& px, BackingScale const& backingScale, DisplayScale const& displayScale) -> Size<Dp>
 {
-    return {ConvertPxToFloor(px.GetWidth(), backingScale, displayScale), ConvertPxToFloor(px.GetHeight(), backingScale, displayScale)};
+    return {ConvertPxToFloor(px.width, backingScale, displayScale), ConvertPxToFloor(px.height, backingScale, displayScale)};
 }
 ///
 /// @brief 

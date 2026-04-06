@@ -70,11 +70,11 @@ auto WindowFrame::Measure(MeasureScope& scope) -> void
     auto const contentHeight = AxisConstraints::Offset(height, -titleBarInsets.GetTop());
     auto const contentSize = scope.MeasureChild(_content, contentWidth, contentHeight);
 
-    auto const measuredWidth = AxisConstraints::Constrain(width, contentSize.GetWidth());
-    auto const measuredHeight = AxisConstraints::Constrain(height, contentSize.GetHeight() + titleBarInsets.GetTop());
+    auto const measuredWidth = AxisConstraints::Constrain(width, contentSize.width);
+    auto const measuredHeight = AxisConstraints::Constrain(height, contentSize.height + titleBarInsets.GetTop());
     auto const measuredSize = Size<Dp>(measuredWidth, measuredHeight);
-    scope.MeasureChild(_background, AxisConstraints::MakeExact(measuredSize.GetWidth()), AxisConstraints::MakeExact(measuredSize.GetHeight()));
-    scope.MeasureChild(_titleBackground, AxisConstraints::MakeExact(measuredSize.GetWidth()), AxisConstraints::MakeExact(titleBarInsets.GetTop()));
+    scope.MeasureChild(_background, AxisConstraints::MakeExact(measuredSize.width), AxisConstraints::MakeExact(measuredSize.height));
+    scope.MeasureChild(_titleBackground, AxisConstraints::MakeExact(measuredSize.width), AxisConstraints::MakeExact(titleBarInsets.GetTop()));
 
     if (width.IsBounded() && height.IsBounded())
     {
@@ -98,7 +98,7 @@ auto WindowFrame::GetTitleBarContentRect(Size<Dp> const& size) const -> Rect<Dp>
     auto const titleBarInsets = GetTitleBarInsets();
     auto boundingRects = GetTitleBarBoundingRects();
     std::sort(boundingRects.begin(), boundingRects.end(), [](auto const& lhs, auto const& rhs) { return lhs.GetLeft() < rhs.GetLeft(); });
-    boundingRects.push_back(Rect<Dp>(size.GetWidth(), Dp(0), size.GetWidth(), titleBarInsets.GetTop()));
+    boundingRects.push_back(Rect<Dp>(size.width, Dp(0), size.width, titleBarInsets.GetTop()));
 
     auto maxWidth = Dp(0);
     auto maxWidthLeft = Dp(0);

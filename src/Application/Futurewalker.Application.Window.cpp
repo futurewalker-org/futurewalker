@@ -429,7 +429,7 @@ auto Window::MeasureSize(BoxConstraints const& constraints) -> Size<Dp>
         auto const clientInsets = _platformObject->GetAreaInsets(WindowArea::Frame);
         auto const cs = BoxConstraints::Offset(constraints, -clientInsets.GetTotalWidth(), -clientInsets.GetTotalHeight());
         auto clientSize = MeasureScope::MeasureView(*_frameView, cs);
-        return Size<Dp>(clientSize.GetWidth() + clientInsets.GetTotalWidth(), clientSize.GetHeight() + clientInsets.GetTotalHeight());
+        return Size<Dp>(clientSize.width + clientInsets.GetTotalWidth(), clientSize.height + clientInsets.GetTotalHeight());
     }
     return {};
 }

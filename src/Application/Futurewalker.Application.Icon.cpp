@@ -91,12 +91,12 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
                 auto const shaper = Graphics::TextShaper::Make();
                 auto const shapedGlyph = shaper->ShapeGlyph(_codePoint, _typeface, 16, {'L', 'a', 't', 'n'}, Graphics::TextShaper::Direction::DefaultLtr);
                 auto const size = GetGlyphSize(shapedGlyph);
-                auto const glyphAspectRatio = Float64(size.GetWidth() / size.GetHeight());
+                auto const glyphAspectRatio = Float64(size.width / size.height);
                 auto const sizeAspectRatio = Float64(rect.GetWidth() / rect.GetHeight());
                 if (glyphAspectRatio > sizeAspectRatio)
                 {
-                    auto const scale = Float64(rect.GetWidth() / size.GetWidth());
-                    auto const offset = (rect.GetHeight() - size.GetHeight() * Dp(scale)) / 2.0;
+                    auto const scale = Float64(rect.GetWidth() / size.width);
+                    auto const offset = (rect.GetHeight() - size.height * Dp(scale)) / 2.0;
                     scene.PushTranslate({.x = 0, .y = offset});
                     scene.PushScale({.x = scale, .y = scale});
                     DrawGlyph(scene, shapedGlyph, color);
@@ -104,8 +104,8 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
                 }
                 else
                 {
-                    auto const scale = Float64(rect.GetHeight() / size.GetHeight());
-                    auto const offset = (rect.GetWidth() - size.GetWidth() * Dp(scale)) / 2.0;
+                    auto const scale = Float64(rect.GetHeight() / size.height);
+                    auto const offset = (rect.GetWidth() - size.width * Dp(scale)) / 2.0;
                     scene.PushTranslate({.x = offset, .y = 0});
                     scene.PushScale({.x = scale, .y = scale});
                     DrawGlyph(scene, shapedGlyph, color);

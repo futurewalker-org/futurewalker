@@ -164,8 +164,8 @@ auto ViewLayoutInfo::SetMeasuredSize(MeasureParameter const& parameter, Size<Dp>
     auto const parameterWidth = parameter.GetWidthConstraints();
     auto const parameterHeight = parameter.GetHeightConstraints();
 
-    auto const width = forceConstraints(parameterWidth, size.GetWidth());
-    auto const height = forceConstraints(parameterHeight, size.GetHeight());
+    auto const width = forceConstraints(parameterWidth, size.width);
+    auto const height = forceConstraints(parameterHeight, size.height);
 
     _measuredSize = {
         .widthConstraints = parameterWidth,

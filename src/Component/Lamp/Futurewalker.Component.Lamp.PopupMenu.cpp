@@ -236,7 +236,7 @@ auto PopupMenu::UpdatePopup() -> void
                 }
                 auto const blurRadius = UnitFunction::ConvertDpToVp(AttributeNode::GetValue<&Style::Size60>(*_menuView).GetValueOr(0), screenInfo->displayScale);
                 auto const popupSizeWithShadow = UnitFunction::ConvertDpToVp(_popup->Measure(BoxConstraints::MakeUnconstrained()), screenInfo->displayScale);
-                auto const popupSize = Size<Vp>(popupSizeWithShadow.GetWidth() - blurRadius * 2, popupSizeWithShadow.GetHeight() - blurRadius * 2);
+                auto const popupSize = Size<Vp>(popupSizeWithShadow.width - blurRadius * 2, popupSizeWithShadow.height - blurRadius * 2);
                 auto const screenRect = screenInfo->workArea;
                 auto const isRtl = sourceView->GetLayoutDirection() == LayoutDirection::RightToLeft;
                 auto const popupPos = CalcPopupPosition(sourceRect, popupSize, screenRect, isRtl);
@@ -266,18 +266,18 @@ auto PopupMenu::CalcPopupPosition(Rect<Vp> const& sourceRect, Size<Vp> const& po
         auto x = Vp(0);
         if ((!rtl && anchorEdge == PopupMenuAnchorEdge::Leading) || (rtl && anchorEdge == PopupMenuAnchorEdge::Trailing))
         {
-            x = sourceRect.GetLeft() - popupSize.GetWidth();
+            x = sourceRect.GetLeft() - popupSize.width;
             x = Vp::Max(screenRect.GetLeft(), x);
         }
         else if ((!rtl && anchorEdge == PopupMenuAnchorEdge::Trailing) || (rtl && anchorEdge == PopupMenuAnchorEdge::Leading))
         {
             x = sourceRect.GetRight();
-            x = Vp::Min(x, screenRect.GetRight() - popupSize.GetWidth());
+            x = Vp::Min(x, screenRect.GetRight() - popupSize.width);
         }
 
         if (rtl)
         {
-            x = Vp::Min(x, screenRect.GetRight() - popupSize.GetWidth());
+            x = Vp::Min(x, screenRect.GetRight() - popupSize.width);
         }
         else
         {
@@ -291,12 +291,12 @@ auto PopupMenu::CalcPopupPosition(Rect<Vp> const& sourceRect, Size<Vp> const& po
         }
         else if (alignment == PopupMenuAnchorAlignment::Center)
         {
-            y = (sourceRect.GetTop() + sourceRect.GetBottom() - popupSize.GetHeight()) / 2;
+            y = (sourceRect.GetTop() + sourceRect.GetBottom() - popupSize.height) / 2;
         }
         else if (alignment == PopupMenuAnchorAlignment::End)
         {
-            y = sourceRect.GetBottom() - popupSize.GetHeight();
-            y = Vp::Min(y, screenRect.GetBottom() - popupSize.GetHeight());
+            y = sourceRect.GetBottom() - popupSize.height;
+            y = Vp::Min(y, screenRect.GetBottom() - popupSize.height);
         }
         y = Vp::Max(y, screenRect.GetTop());
 
@@ -307,12 +307,12 @@ auto PopupMenu::CalcPopupPosition(Rect<Vp> const& sourceRect, Size<Vp> const& po
         auto y = Vp(0);
         if (anchorEdge == PopupMenuAnchorEdge::Top)
         {
-            y = sourceRect.GetTop() - popupSize.GetHeight();
+            y = sourceRect.GetTop() - popupSize.height;
         }
         else if (anchorEdge == PopupMenuAnchorEdge::Bottom)
         {
             y = sourceRect.GetBottom();
-            y = Vp::Min(y, screenRect.GetBottom() - popupSize.GetHeight());
+            y = Vp::Min(y, screenRect.GetBottom() - popupSize.height);
         }
         y = Vp::Max(y, screenRect.GetTop());
 
@@ -320,21 +320,21 @@ auto PopupMenu::CalcPopupPosition(Rect<Vp> const& sourceRect, Size<Vp> const& po
         if ((!rtl && alignment == PopupMenuAnchorAlignment::Start) || (rtl && alignment == PopupMenuAnchorAlignment::End))
         {
             x = sourceRect.GetLeft();
-            x = Vp::Min(x, screenRect.GetRight() - popupSize.GetWidth());
+            x = Vp::Min(x, screenRect.GetRight() - popupSize.width);
         }
         else if ((!rtl && alignment == PopupMenuAnchorAlignment::End) || (rtl && alignment == PopupMenuAnchorAlignment::Start))
         {
-            x = sourceRect.GetRight() - popupSize.GetWidth();
+            x = sourceRect.GetRight() - popupSize.width;
             x = Vp::Max(x, screenRect.GetLeft());
         }
         else if (alignment == PopupMenuAnchorAlignment::Center)
         {
-            x = (sourceRect.GetLeft() + sourceRect.GetRight() - popupSize.GetWidth()) / 2;
+            x = (sourceRect.GetLeft() + sourceRect.GetRight() - popupSize.width) / 2;
         }
 
         if (rtl)
         {
-            x = Vp::Min(x, screenRect.GetRight() - popupSize.GetWidth());
+            x = Vp::Min(x, screenRect.GetRight() - popupSize.width);
         }
         else
         {

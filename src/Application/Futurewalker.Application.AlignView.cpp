@@ -116,8 +116,8 @@ auto AlignView::Measure(MeasureScope& scope) -> void
         return AxisConstraints::Constrain(c, v);
     };
 
-    auto const measuredWidth = measureAxis(width, maxSize.GetWidth());
-    auto const measuredHeight = measureAxis(height, maxSize.GetHeight());
+    auto const measuredWidth = measureAxis(width, maxSize.width);
+    auto const measuredHeight = measureAxis(height, maxSize.height);
     scope.SetMeasuredSize(measuredWidth, measuredHeight);
 }
 
@@ -137,8 +137,8 @@ auto AlignView::Arrange(ArrangeScope& scope) -> void
         auto const xRatio = (alignment.GetX() * reverse + 1) / 2;
         auto const yRatio = (alignment.GetY() + 1) / 2;
 
-        auto const x = contentRect.GetLeft() + (contentRect.GetWidth() - size.GetWidth()) * Dp(xRatio);
-        auto const y = contentRect.GetTop() + (contentRect.GetHeight() - size.GetHeight()) * Dp(yRatio);
+        auto const x = contentRect.GetLeft() + (contentRect.GetWidth() - size.width) * Dp(xRatio);
+        auto const y = contentRect.GetTop() + (contentRect.GetHeight() - size.height) * Dp(yRatio);
         auto const pos = ViewLayoutFunction::AlignToPixelGridByRound(Point<Dp>(x, y), *this);
         scope.ArrangeChild(view, pos);
     });
