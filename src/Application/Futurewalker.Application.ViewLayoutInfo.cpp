@@ -90,7 +90,7 @@ auto ViewLayoutInfo::BeginArrange(ArrangeParameter const& parameter) -> Bool
     if (!_arranging && !_measuring)
     {
         _frameRect = parameter.GetNewFrameRect();
-        _contentRect = Rect<Dp>({}, _frameRect.GetSize());
+        _contentRect = Rect<Dp>::Make({}, _frameRect.GetSize());
 
         if (IsArrangeRequired())
         {

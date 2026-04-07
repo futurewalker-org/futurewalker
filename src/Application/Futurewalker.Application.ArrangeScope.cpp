@@ -36,7 +36,7 @@ auto ArrangeScope::ArrangeChild(ReferenceArg<View> view, Point<Dp> const& positi
     {
         auto parameter = ArrangeParameter();
         parameter.SetOldFrameRect(view->GetFrameRect());
-        parameter.SetNewFrameRect(Rect<Dp>(position, GetMeasuredSize(*view)));
+        parameter.SetNewFrameRect(Rect<Dp>::Make(position, GetMeasuredSize(*view)));
         view->EnterArrangeScope(PassKey<ArrangeScope>(), parameter);
         return;
     }
@@ -66,7 +66,7 @@ auto ArrangeScope::ArrangeView(PassKey<RootView>, View& view) -> void
 {
     auto parameter = ArrangeParameter();
     parameter.SetOldFrameRect(view.GetFrameRect());
-    parameter.SetNewFrameRect(Rect<Dp>(Point<Dp>(), view.GetMeasuredSize(PassKey<ArrangeScope>())));
+    parameter.SetNewFrameRect(Rect<Dp>::Make(Point<Dp>(), view.GetMeasuredSize(PassKey<ArrangeScope>())));
     view.EnterArrangeScope({}, parameter);
 }
 }

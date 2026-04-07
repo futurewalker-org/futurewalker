@@ -37,8 +37,8 @@ auto MakeColorTile(Size<Dp> size, StaticAttributeRef<RGBAColor> baseColor, Stati
     auto container = BoxView::MakeWithContent(align);
     container->SetBackgroundColor(baseColor);
     auto sized = SizedView::MakeWithContent(container);
-    sized->SetWidth(size.GetWidth());
-    sized->SetHeight(size.GetHeight());
+    sized->SetWidth(size.width);
+    sized->SetHeight(size.height);
     return sized;
 }
 

@@ -206,8 +206,8 @@ auto Window::GlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>
 ///
 auto Window::LocalToGlobalRect(Rect<Dp> const& rect) const -> Rect<Vp>
 {
-    auto const lt = LocalToGlobalPoint(rect.GetTopLeft());
-    auto const rb = LocalToGlobalPoint(rect.GetBottomRight());
+    auto const lt = LocalToGlobalPoint(rect.GetCorner<0, 0>());
+    auto const rb = LocalToGlobalPoint(rect.GetCorner<1, 1>());
     return Rect<Vp>(lt.x, lt.y, rb.x, rb.y);
 }
 
@@ -216,8 +216,8 @@ auto Window::LocalToGlobalRect(Rect<Dp> const& rect) const -> Rect<Vp>
 ///
 auto Window::GlobalToLocalRect(Rect<Vp> const& rect) const -> Rect<Dp>
 {
-    auto const lt = GlobalToLocalPoint(rect.GetTopLeft());
-    auto const rb = GlobalToLocalPoint(rect.GetBottomRight());
+    auto const lt = GlobalToLocalPoint(rect.GetCorner<0, 0>());
+    auto const rb = GlobalToLocalPoint(rect.GetCorner<1, 1>());
     return Rect<Dp>(lt.x, lt.y, rb.x, rb.y);
 }
 
@@ -227,7 +227,7 @@ auto Window::GlobalToLocalRect(Rect<Vp> const& rect) const -> Rect<Dp>
 auto Window::LocalToRootViewPoint(Point<Dp> const& point) const -> Point<Dp>
 {
     const auto clientRect = GetClientRect();
-    return Point<Dp>(point.x - clientRect.GetLeft(), point.y - clientRect.GetTop());
+    return Point<Dp>(point.x - clientRect.x0, point.y - clientRect.y0);
 }
 
 ///
@@ -236,7 +236,7 @@ auto Window::LocalToRootViewPoint(Point<Dp> const& point) const -> Point<Dp>
 auto Window::RootViewToLocalPoint(Point<Dp> const& point) const -> Point<Dp>
 {
     const auto clientRect = GetClientRect();
-    return Point<Dp>(point.x + clientRect.GetLeft(), point.y + clientRect.GetTop());
+    return Point<Dp>(point.x + clientRect.x0, point.y + clientRect.y0);
 }
 
 ///
@@ -244,8 +244,8 @@ auto Window::RootViewToLocalPoint(Point<Dp> const& point) const -> Point<Dp>
 ///
 auto Window::LocalToRootViewRect(Rect<Dp> const& rect) const -> Rect<Dp>
 {
-    const auto lt = LocalToRootViewPoint(rect.GetTopLeft());
-    const auto rb = LocalToRootViewPoint(rect.GetBottomRight());
+    const auto lt = LocalToRootViewPoint(rect.GetCorner<0, 0>());
+    const auto rb = LocalToRootViewPoint(rect.GetCorner<1, 1>());
     return Rect<Dp>(lt.x, lt.y, rb.x, rb.y);
 }
 
@@ -254,8 +254,8 @@ auto Window::LocalToRootViewRect(Rect<Dp> const& rect) const -> Rect<Dp>
 ///
 auto Window::RootViewToLocalRect(Rect<Dp> const& rect) const -> Rect<Dp>
 {
-    const auto lt = RootViewToLocalPoint(rect.GetTopLeft());
-    const auto rb = RootViewToLocalPoint(rect.GetBottomRight());
+    const auto lt = RootViewToLocalPoint(rect.GetCorner<0, 0>());
+    const auto rb = RootViewToLocalPoint(rect.GetCorner<1, 1>());
     return Rect<Dp>(lt.x, lt.y, rb.x, rb.y);
 }
 
@@ -1014,12 +1014,12 @@ auto Window::GetClientRect() const -> Rect<Dp>
     {
         auto const clientInsets = _platformObject->GetAreaInsets(WindowArea::Frame);
         auto const size = UnitFunction::ConvertVpToDp(GetFrameRect().GetSize(), GetDisplayScale());
-        auto const localRect = Rect<Dp>({}, size);
+        auto const localRect = Rect<Dp>::Make({}, size);
         return Rect<Dp>(
-          localRect.GetLeft() + clientInsets.GetLeading(),
-          localRect.GetTop() + clientInsets.GetTop(),
-          localRect.GetRight() - clientInsets.GetTrailing(),
-          localRect.GetBottom() - clientInsets.GetBottom());
+          localRect.x0 + clientInsets.GetLeading(),
+          localRect.y0 + clientInsets.GetTop(),
+          localRect.x1 - clientInsets.GetTrailing(),
+          localRect.y1 - clientInsets.GetBottom());
     }
     return {};
 }

@@ -16,10 +16,10 @@ auto SkiaFunction::PointToSkPoint(Point<Dp> const& point) -> SkPoint
 auto SkiaFunction::RectToSkRect(Rect<Dp> const& rect) -> SkRect
 {
     return {
-        .fLeft = static_cast<SkScalar>(rect.GetLeft()),
-        .fTop = static_cast<SkScalar>(rect.GetTop()),
-        .fRight = static_cast<SkScalar>(rect.GetRight()),
-        .fBottom = static_cast<SkScalar>(rect.GetBottom()),
+        .fLeft = static_cast<SkScalar>(rect.x0),
+        .fTop = static_cast<SkScalar>(rect.y0),
+        .fRight = static_cast<SkScalar>(rect.x1),
+        .fBottom = static_cast<SkScalar>(rect.y1),
     };
 }
 

@@ -225,11 +225,11 @@ auto TextView::Draw(DrawScope& scope) -> void
     auto y = Dp(0);
     if (vAlign == TextViewVerticalAlignment::Bottom)
     {
-        y = rect.GetTop() + rect.GetHeight() - textSize.height;
+        y = rect.y0 + rect.GetHeight() - textSize.height;
     }
     else if (vAlign == TextViewVerticalAlignment::Middle)
     {
-        y = rect.GetTop() + (rect.GetHeight() - textSize.height) / 2;
+        y = rect.y0 + (rect.GetHeight() - textSize.height) / 2;
     }
 
     for (auto const& shapedText : _shapedTexts)
@@ -252,11 +252,11 @@ auto TextView::Draw(DrawScope& scope) -> void
             auto x = Dp(0);
             if ((hAlign == TextViewHorizontalAlignment::Leading && isRTL) || (hAlign == TextViewHorizontalAlignment::Trailing && !isRTL))
             {
-                x = rect.GetLeft() + rect.GetWidth() - lineWidth;
+                x = rect.x0 + rect.GetWidth() - lineWidth;
             }
             else if (hAlign == TextViewHorizontalAlignment::Center)
             {
-                x = rect.GetLeft() + (rect.GetWidth() - lineWidth) / 2;
+                x = rect.x0 + (rect.GetWidth() - lineWidth) / 2;
             }
 
             auto const alignedX = ViewLayoutFunction::AlignToPixelGridByRound(x, *this);

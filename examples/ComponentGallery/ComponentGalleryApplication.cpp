@@ -113,7 +113,7 @@ auto ComponentGalleryApplication::ReceiveCommandEvent(Event<>& event) -> Async<B
 
                     auto const width = 400;
                     auto const height = 300;
-                    dialogWindow->SetFrameRect({{windowRect.GetLeft() + (windowRect.GetWidth() - width) / 2, windowRect.GetTop() + (windowRect.GetHeight() - height) / 2}, {width, height}});
+                    dialogWindow->SetFrameRect(Rect<Vp>::Make({windowRect.x0 + (windowRect.GetWidth() - width) / 2, windowRect.y0 + (windowRect.GetHeight() - height) / 2}, {width, height}));
                     dialogWindow->SetBackgroundColor(Lamp::Style::ColorSurface);
                     dialogWindow->SetVisible(true);
                     co_await EventWaiter(*dialogWindow).Wait<WindowEvent::Closed>();

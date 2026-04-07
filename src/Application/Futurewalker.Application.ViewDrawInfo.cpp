@@ -21,10 +21,10 @@ namespace
 ///
 auto AlignBoundsToPixelGridByExpand(Rect<Dp> const& bounds, DisplayScale const displayScale, BackingScale const backingScale) -> Rect<Dp>
 {
-    auto const l = Px::Floor(UnitFunction::ConvertDpToPx(bounds.GetLeft(), displayScale, backingScale));
-    auto const t = Px::Floor(UnitFunction::ConvertDpToPx(bounds.GetTop(), displayScale, backingScale));
-    auto const r = Px::Ceil(UnitFunction::ConvertDpToPx(bounds.GetRight(), displayScale, backingScale));
-    auto const b = Px::Ceil(UnitFunction::ConvertDpToPx(bounds.GetBottom(), displayScale, backingScale));
+    auto const l = Px::Floor(UnitFunction::ConvertDpToPx(bounds.x0, displayScale, backingScale));
+    auto const t = Px::Floor(UnitFunction::ConvertDpToPx(bounds.y0, displayScale, backingScale));
+    auto const r = Px::Ceil(UnitFunction::ConvertDpToPx(bounds.x1, displayScale, backingScale));
+    auto const b = Px::Ceil(UnitFunction::ConvertDpToPx(bounds.y1, displayScale, backingScale));
     return UnitFunction::ConvertPxToDp(Rect<Px>(l, t, r, b), backingScale, displayScale);
 }
 }

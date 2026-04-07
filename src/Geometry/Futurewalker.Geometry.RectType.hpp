@@ -10,7 +10,7 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 template <class>
-class Rect2;
+struct Rect2;
 
 ///
 /// @brief A two-dimensional rectangle type.

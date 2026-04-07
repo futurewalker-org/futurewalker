@@ -258,8 +258,8 @@ auto PlatformWindowWin::GetFrameRect() -> Rect<Vp>
                 monitorInfo.cbSize = sizeof(MONITORINFO);
                 if (::GetMonitorInfoW(monitor, &monitorInfo))
                 {
-                    rect.SetLeft(rect.GetLeft() + monitorInfo.rcWork.left);
-                    rect.SetTop(rect.GetTop() + monitorInfo.rcWork.top);
+                    rect.x0 += monitorInfo.rcWork.left;
+                    rect.y0 += monitorInfo.rcWork.top;
                 }
             }
             return rect;
@@ -288,8 +288,8 @@ auto PlatformWindowWin::SetFrameRect(Rect<Vp> const& rect) -> void
     {
         auto const w = static_cast<int>(Vp::Round(rect.GetWidth()));
         auto const h = static_cast<int>(Vp::Round(rect.GetHeight()));
-        auto x = static_cast<int>(Vp::Round(rect.GetLeft()));
-        auto y = static_cast<int>(Vp::Round(rect.GetTop()));
+        auto x = static_cast<int>(Vp::Round(rect.x0));
+        auto y = static_cast<int>(Vp::Round(rect.y0));
 
         auto placement = WINDOWPLACEMENT();
         placement.length = sizeof(WINDOWPLACEMENT);
@@ -366,8 +366,8 @@ auto PlatformWindowWin::GetRestoredFrameRect() -> Rect<Vp>
                 monitorInfo.cbSize = sizeof(MONITORINFO);
                 if (::GetMonitorInfoW(monitor, &monitorInfo))
                 {
-                    rect.SetLeft(rect.GetLeft() + monitorInfo.rcWork.left);
-                    rect.SetTop(rect.GetTop() + monitorInfo.rcWork.top);
+                    rect.x0 += monitorInfo.rcWork.left;
+                    rect.y0 += monitorInfo.rcWork.top;
                 }
             }
             return rect;
@@ -391,8 +391,8 @@ auto PlatformWindowWin::SetRestoredFrameRect(Rect<Vp> const& rect) -> void
         {
             auto const w = static_cast<int>(Vp::Round(rect.GetWidth()));
             auto const h = static_cast<int>(Vp::Round(rect.GetHeight()));
-            auto x = static_cast<int>(Vp::Round(rect.GetLeft()));
-            auto y = static_cast<int>(Vp::Round(rect.GetTop()));
+            auto x = static_cast<int>(Vp::Round(rect.x0));
+            auto y = static_cast<int>(Vp::Round(rect.y0));
 
             if (!HasWindowStyle(WS_EX_TOOLWINDOW))
             {
@@ -1239,11 +1239,11 @@ auto PlatformWindowWin::HandleGetMinMaxInfo(HWND hWnd, UINT msg, WPARAM wParam, 
             const auto minSize = Size<Vp>::Max(UnitFunction::ConvertDpToVp(_sizeConstraints.GetMinSize(), displayScale), GetSystemMinWindowSize());
             const auto maxSize = Size<Vp>::Min(UnitFunction::ConvertDpToVp(_sizeConstraints.GetMaxSize(), displayScale), GetSystemMaxWindowSize());
 
-            info->ptMinTrackSize.x = static_cast<LONG>(Vp::Ceil(minSize.GetWidth()));
-            info->ptMinTrackSize.y = static_cast<LONG>(Vp::Ceil(minSize.GetHeight()));
+            info->ptMinTrackSize.x = static_cast<LONG>(Vp::Ceil(minSize.width));
+            info->ptMinTrackSize.y = static_cast<LONG>(Vp::Ceil(minSize.height));
 
-            info->ptMaxTrackSize.x = static_cast<LONG>(Vp::Floor(maxSize.GetWidth()));
-            info->ptMaxTrackSize.y = static_cast<LONG>(Vp::Floor(maxSize.GetHeight()));
+            info->ptMaxTrackSize.x = static_cast<LONG>(Vp::Floor(maxSize.width));
+            info->ptMaxTrackSize.y = static_cast<LONG>(Vp::Floor(maxSize.height));
         }
         return 0;
     }

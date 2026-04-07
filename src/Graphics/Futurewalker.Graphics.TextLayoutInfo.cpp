@@ -24,7 +24,7 @@ auto TextLayoutInfo::AddGlyphRun(Point<Dp> const& position, Shared<GlyphRun> con
         auto const metrics = glyphRun->GetMetrics();
         auto const width = glyphRun->GetAdvance();
         auto const height = metrics.ascent + metrics.descent + metrics.leading;
-        _glyphRunBounds = Rect<Dp>::Union(_glyphRunBounds, {position, {width, height}});
+        _glyphRunBounds = Rect<Dp>::Union(_glyphRunBounds, Rect<Dp>::Make(position, {width, height}));
     }
 }
 

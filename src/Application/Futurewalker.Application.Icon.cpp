@@ -86,7 +86,7 @@ auto Icon::MakeFromFont(Graphics::FontFamily const& family, char32_t const& code
 
         auto Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color) const -> void override
         {
-            scene.PushTranslate({.x = rect.GetLeft(), .y = rect.GetTop()});
+            scene.PushTranslate({.x = rect.x0, .y = rect.y0});
             {
                 auto const shaper = Graphics::TextShaper::Make();
                 auto const shapedGlyph = shaper->ShapeGlyph(_codePoint, _typeface, 16, {'L', 'a', 't', 'n'}, Graphics::TextShaper::Direction::DefaultLtr);

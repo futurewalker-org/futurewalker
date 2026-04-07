@@ -97,7 +97,7 @@ auto WindowFrame::GetTitleBarContentRect(Size<Dp> const& size) const -> Rect<Dp>
 {
     auto const titleBarInsets = GetTitleBarInsets();
     auto boundingRects = GetTitleBarBoundingRects();
-    std::sort(boundingRects.begin(), boundingRects.end(), [](auto const& lhs, auto const& rhs) { return lhs.GetLeft() < rhs.GetLeft(); });
+    std::sort(boundingRects.begin(), boundingRects.end(), [](auto const& lhs, auto const& rhs) { return lhs.x0 < rhs.x0; });
     boundingRects.push_back(Rect<Dp>(size.width, Dp(0), size.width, titleBarInsets.GetTop()));
 
     auto maxWidth = Dp(0);
@@ -106,14 +106,14 @@ auto WindowFrame::GetTitleBarContentRect(Size<Dp> const& size) const -> Rect<Dp>
     auto lastRight = Dp(0);
     for (auto const& rect : boundingRects)
     {
-        auto const gap = rect.GetLeft() - lastRight;
+        auto const gap = rect.x0 - lastRight;
         if (gap > maxWidth)
         {
             maxWidth = gap;
             maxWidthLeft = lastRight;
-            maxWidthRight = rect.GetLeft();
+            maxWidthRight = rect.x0;
         }
-        lastRight = rect.GetRight();
+        lastRight = rect.x1;
     }
     return Rect<Dp>(maxWidthLeft, Dp(0), maxWidthRight, titleBarInsets.GetTop());
 }
@@ -128,7 +128,7 @@ auto WindowFrame::Arrange(ArrangeScope& scope) -> void
     scope.ArrangeChild(_background, Point<Dp>());
     scope.ArrangeChild(_content, Point<Dp>(Dp(0), titleBarInsets.GetTop()));
     scope.ArrangeChild(_titleBackground, Point<Dp>());
-    scope.ArrangeChild(_titleContent, titleBarContentRect.GetTopLeft());
+    scope.ArrangeChild(_titleContent, titleBarContentRect.GetCorner<0, 0>());
 }
 
 ///

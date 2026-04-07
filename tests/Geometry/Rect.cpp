@@ -9,16 +9,16 @@ using namespace Futurewalker;
 TEST_CASE("Rect")
 {
     auto r = Rect2<Dp>(1, 2, 3, 4);
-    REQUIRE(r.GetLeft() == 1);
-    REQUIRE(r.GetTop() == 2);
-    REQUIRE(r.GetRight() == 3);
-    REQUIRE(r.GetBottom() == 4);
+    REQUIRE(r.x0 == 1);
+    REQUIRE(r.y0 == 2);
+    REQUIRE(r.x1 == 3);
+    REQUIRE(r.y1 == 4);
 
-    r = Rect2<Dp>(Point<Dp>(1, 2), Size<Dp>(3, 4));
-    REQUIRE(r.GetLeft() == 1);
-    REQUIRE(r.GetTop() == 2);
-    REQUIRE(r.GetRight() == 4);
-    REQUIRE(r.GetBottom() == 6);
+    r = Rect2<Dp>::Make(Point<Dp>(1, 2), Size<Dp>(3, 4));
+    REQUIRE(r.x0 == 1);
+    REQUIRE(r.y0 == 2);
+    REQUIRE(r.x1 == 4);
+    REQUIRE(r.y1 == 6);
 
     REQUIRE(!Rect<Dp>::Infinite().IsFinite());
     REQUIRE(!Rect<Dp>(4, 3, 2, 1).IsSorted());

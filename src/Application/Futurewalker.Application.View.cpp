@@ -177,8 +177,8 @@ auto View::GlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>
 ///
 auto View::LocalToGlobalRect(Rect<Dp> const& rect) const -> Rect<Vp>
 {
-    auto const tl = LocalToGlobalPoint(rect.GetTopLeft());
-    auto const br = LocalToGlobalPoint(rect.GetBottomRight());
+    auto const tl = LocalToGlobalPoint(rect.GetCorner<0, 0>());
+    auto const br = LocalToGlobalPoint(rect.GetCorner<1, 1>());
     return Rect<Vp>(tl.x, tl.y, br.x, br.y);
 }
 
@@ -187,8 +187,8 @@ auto View::LocalToGlobalRect(Rect<Dp> const& rect) const -> Rect<Vp>
 //
 auto View::GlobalToLocalRect(Rect<Vp> const& rect) const -> Rect<Dp>
 {
-    auto const tl = GlobalToLocalPoint(rect.GetTopLeft());
-    auto const br = GlobalToLocalPoint(rect.GetBottomRight());
+    auto const tl = GlobalToLocalPoint(rect.GetCorner<0, 0>());
+    auto const br = GlobalToLocalPoint(rect.GetCorner<1, 1>());
     return Rect<Dp>(tl.x, tl.y, br.x, br.y);
 }
 
@@ -248,7 +248,7 @@ auto View::LocalToAncestorPoint(Point<Dp> const& point, ReferenceArg<View const>
         {
             return result;
         }
-        result = result + (*self).GetFrameRect().GetTopLeft().As<Vector>();
+        result = result + (*self).GetFrameRect().GetCorner<0, 0>().As<Vector>();
         self = (*self).GetParent();
     }
     return result;
@@ -270,7 +270,7 @@ auto View::AncestorToLocalPoint(Point<Dp> const& point, ReferenceArg<View const>
         {
             return result;
         }
-        result = result - (*self).GetFrameRect().GetTopLeft().As<Vector>();
+        result = result - (*self).GetFrameRect().GetCorner<0, 0>().As<Vector>();
         self = (*self).GetParent();
     }
     return result;
@@ -286,7 +286,7 @@ auto View::LocalToAncestorRect(Rect<Dp> const& rect, ReferenceArg<View const> an
 {
     if (ancestor)
     {
-        return Rect<Dp>(LocalToAncestorPoint(rect.GetTopLeft(), *ancestor), rect.GetSize());
+        return Rect<Dp>::Make(LocalToAncestorPoint(rect.GetCorner<0, 0>(), *ancestor), rect.GetSize());
     }
     return rect;
 }
@@ -301,7 +301,7 @@ auto View::AncestorToLocalRect(Rect<Dp> const& rect, ReferenceArg<View const> an
 {
     if (ancestor)
     {
-        return Rect<Dp>(AncestorToLocalPoint(rect.GetTopLeft(), *ancestor), rect.GetSize());
+        return Rect<Dp>::Make(AncestorToLocalPoint(rect.GetCorner<0, 0>(), *ancestor), rect.GetSize());
     }
     return rect;
 }

@@ -132,7 +132,7 @@ auto PlatformViewLayerVisualUpdater::UpdateCore(Shared<PlatformViewLayer> const&
     auto const id = layer->GetId();
     auto const offset = layer->GetOffset();
     auto const opacity = layer->GetOpacity();
-    auto const clipRect = layer->GetClipMode() == ViewClipMode::Bounds ? Rect<Dp>({}, layer->GetSize()) : Rect<Dp>::Infinite();
+    auto const clipRect = layer->GetClipMode() == ViewClipMode::Bounds ? Rect<Dp>::Make({}, layer->GetSize()) : Rect<Dp>::Infinite();
     auto const clipPath = layer->GetClipPath();
     PushNode(id, offset, clipRect, clipPath, opacity);
 

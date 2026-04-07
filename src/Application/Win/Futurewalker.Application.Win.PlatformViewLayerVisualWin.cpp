@@ -53,7 +53,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
         {
             scene.PushClipPath({.path = clipPath, .antiAlias = true});
         }
-        scene.PushTranslate({.x = -unionRect.GetLeft(), .y = -unionRect.GetTop()});
+        scene.PushTranslate({.x = -unionRect.x0, .y = -unionRect.y0});
         ForEachFragment([&](auto const& fragmentInfo) {
             if (fragmentInfo.type == FragmentType::PushNode)
             {
@@ -141,10 +141,10 @@ auto PlatformViewLayerVisualWin::OnClipRectChanged() -> void
         if (clipRect.IsFinite())
         {
             auto const clip = _device->CreateRectangleClip();
-            clip->SetLeft(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(clipRect.GetLeft(), displayScale, backingScale))));
-            clip->SetTop(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(clipRect.GetTop(), displayScale, backingScale))));
-            clip->SetRight(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(clipRect.GetRight(), displayScale, backingScale))));
-            clip->SetBottom(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(clipRect.GetBottom(), displayScale, backingScale))));
+            clip->SetLeft(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(clipRect.x0, displayScale, backingScale))));
+            clip->SetTop(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(clipRect.y0, displayScale, backingScale))));
+            clip->SetRight(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(clipRect.x1, displayScale, backingScale))));
+            clip->SetBottom(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(clipRect.y1, displayScale, backingScale))));
             _visual->SetClip(clip.Get());
         }
         else

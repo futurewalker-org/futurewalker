@@ -137,8 +137,8 @@ auto AlignView::Arrange(ArrangeScope& scope) -> void
         auto const xRatio = (alignment.GetX() * reverse + 1) / 2;
         auto const yRatio = (alignment.GetY() + 1) / 2;
 
-        auto const x = contentRect.GetLeft() + (contentRect.GetWidth() - size.width) * Dp(xRatio);
-        auto const y = contentRect.GetTop() + (contentRect.GetHeight() - size.height) * Dp(yRatio);
+        auto const x = contentRect.x0 + (contentRect.GetWidth() - size.width) * Dp(xRatio);
+        auto const y = contentRect.y0 + (contentRect.GetHeight() - size.height) * Dp(yRatio);
         auto const pos = ViewLayoutFunction::AlignToPixelGridByRound(Point<Dp>(x, y), *this);
         scope.ArrangeChild(view, pos);
     });

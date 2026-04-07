@@ -470,18 +470,18 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetTextExt(TsViewCo
 
             auto layoutRect = editable->GetLayoutRect();
 
-            auto const left = layoutRect.GetLeft() + posBegin.x;
-            auto const right = layoutRect.GetLeft() + posEnd.x;
-            layoutRect.SetLeft(left);
-            layoutRect.SetRight(right);
+            auto const left = layoutRect.x0 + posBegin.x;
+            auto const right = layoutRect.x0 + posEnd.x;
+            layoutRect.x0 = left;
+            layoutRect.x1 = right;
 
             auto const displayScale = static_cast<DisplayScale>(GetDpiForWindow(hwnd)) / USER_DEFAULT_SCREEN_DPI;
             auto const textRect = UnitFunction::ConvertDpToVp(layoutRect, displayScale);
 
-            prc->left = windowRect.left + static_cast<LONG>(textRect.GetLeft());
-            prc->top = windowRect.top + static_cast<LONG>(textRect.GetTop());
-            prc->right = windowRect.left + static_cast<LONG>(textRect.GetRight());
-            prc->bottom = windowRect.top + static_cast<LONG>(textRect.GetBottom());
+            prc->left = windowRect.left + static_cast<LONG>(textRect.x0);
+            prc->top = windowRect.top + static_cast<LONG>(textRect.y0);
+            prc->right = windowRect.left + static_cast<LONG>(textRect.x1);
+            prc->bottom = windowRect.top + static_cast<LONG>(textRect.y1);
 
             // TODO: query caret size.
             if (acpStart == acpEnd || ::IsRectEmpty(prc))

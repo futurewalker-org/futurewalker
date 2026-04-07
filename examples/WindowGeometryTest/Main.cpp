@@ -38,13 +38,13 @@ protected:
         if (event.Is<ApplicationEvent::Started>())
         {
             auto window = Window::Make({});
-            window->SetFrameRect({{100, 100}, {500, 500}});
+            window->SetFrameRect(Rect<Vp>::Make({100, 100}, {500, 500}));
             window->SetVisible(true);
 
             FW_DEBUG_ASSERT(window->GetFrameRect().GetPosition() == Point<Vp>(100, 100));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetSize() == Size<Vp>(500, 500));
 
-            window->SetFrameRect({{150, 150}, {600, 600}});
+            window->SetFrameRect(Rect<Vp>::Make({150, 150}, {600, 600}));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetPosition() == Point<Vp>(150, 150));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetSize() == Size<Vp>(600, 600));
 
@@ -58,7 +58,7 @@ protected:
             FW_DEBUG_ASSERT(window->GetFrameRect().GetSize() == Size<Vp>(600, 600));
             FW_DEBUG_ASSERT(window->IsVisible());
 
-            window->SetFrameRect({{200, 200}, {700, 700}});
+            window->SetFrameRect(Rect<Vp>::Make({200, 200}, {700, 700}));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetPosition() == Point<Vp>(200, 200));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetSize() == Size<Vp>(700, 700));
 
@@ -81,7 +81,7 @@ protected:
             window->SetVisible(false);
             FW_DEBUG_ASSERT(!window->IsVisible());
 
-            window->SetFrameRect({{200, 200}, {700, 700}});
+            window->SetFrameRect(Rect<Vp>::Make({200, 200}, {700, 700}));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetPosition() == Point<Vp>(200, 200));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetSize() == Size<Vp>(700, 700));
             FW_DEBUG_ASSERT(!window->IsVisible());
@@ -99,7 +99,7 @@ protected:
             FW_DEBUG_ASSERT(window->GetFrameRect().GetPosition() != Point<Vp>(200, 200));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetSize() != Size<Vp>(700, 700));
 
-            window->SetFrameRect({{300, 300}, {800, 800}});
+            window->SetFrameRect(Rect<Vp>::Make({300, 300}, {800, 800}));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetPosition() == Point<Vp>(300, 300));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetSize() == Size<Vp>(800, 800));
 
@@ -108,7 +108,7 @@ protected:
             FW_DEBUG_ASSERT(window->GetFrameRect().GetSize() == Size<Vp>(800, 800));
             window->Maximize();
             window->SetVisible(false);
-            window->SetFrameRect({{400, 400}, {1000, 1000}});
+            window->SetFrameRect(Rect<Vp>::Make({400, 400}, {1000, 1000}));
             window->SetVisible(true);
             FW_DEBUG_ASSERT(window->GetFrameRect().GetPosition() == Point<Vp>(400, 400));
             FW_DEBUG_ASSERT(window->GetFrameRect().GetSize() == Size<Vp>(1000, 1000));
@@ -119,12 +119,12 @@ protected:
 
             window->Maximize();
             window->SetVisible(false);
-            window->SetRestoredFrameRect({{0, 0}, {500, 500}});
+            window->SetRestoredFrameRect(Rect<Vp>::Make({0, 0}, {500, 500}));
             window->Restore();
             window->SetVisible(true);
             window->Minimize();
             window->SetVisible(false);
-            window->SetRestoredFrameRect({{500, 500}, {600, 600}});
+            window->SetRestoredFrameRect(Rect<Vp>::Make({500, 500}, {600, 600}));
             window->Restore();
             window->SetVisible(true);
 

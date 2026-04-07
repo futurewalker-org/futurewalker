@@ -239,7 +239,7 @@ auto TextEdit::Draw(DrawScope& scope) -> void
                 }
             }
 
-            auto const caretRect = Rect<Dp>(Point<Dp>(caretX, caretY), Size<Dp>(1, caretHeight));
+            auto const caretRect = Rect<Dp>::Make(Point<Dp>(caretX, caretY), Size<Dp>(1, caretHeight));
             scene.AddRect({
                 .rect = caretRect,
                 .color = textColor,
