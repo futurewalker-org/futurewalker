@@ -26,8 +26,8 @@ auto SkiaFunction::RectToSkRect(Rect<Dp> const& rect) -> SkRect
 auto SkiaFunction::RadiusToSkVector(Radius<Dp> const& radius) -> SkVector
 {
     return {
-        .fX = static_cast<SkScalar>(radius.GetX()),
-        .fY = static_cast<SkScalar>(radius.GetY()),
+        .fX = static_cast<SkScalar>(radius.x),
+        .fY = static_cast<SkScalar>(radius.y),
     };
 }
 
