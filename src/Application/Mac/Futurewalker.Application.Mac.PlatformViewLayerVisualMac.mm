@@ -114,13 +114,13 @@ using namespace Futurewalker;
         {
             scene.PushClipPath({.path = clipPath, .antiAlias = true});
         }
-        scene.PushTranslate({.x = -drawableRect.GetLeft(), .y = -drawableRect.GetTop()});
+        scene.PushTranslate({.x = -drawableRect.x0, .y = -drawableRect.y0});
         visual->ForEachFragment([&](auto const& fragmentInfo) {
             if (fragmentInfo.type == PlatformViewLayerVisual::FragmentType::PushNode)
             {
                 if (auto const fragment = visual->GetPushNodeFragment(fragmentInfo.index))
                 {
-                    scene.PushTranslate({.x = fragment->offset.GetDeltaX(), .y = fragment->offset.GetDeltaY()});
+                    scene.PushTranslate({.x = fragment->offset.x, .y = fragment->offset.y});
                     scene.PushClipRect({.rect = fragment->clipRect});
 
                     if (fragment->clipPath)
@@ -148,7 +148,7 @@ using namespace Futurewalker;
             {
                 if (auto const fragment = visual->GetDisplayListFragment(fragmentInfo.index))
                 {
-                    scene.PushTranslate({.x = fragment->displayListOffset.GetDeltaX(), .y = fragment->displayListOffset.GetDeltaY()});
+                    scene.PushTranslate({.x = fragment->displayListOffset.x, .y = fragment->displayListOffset.y});
                     scene.AddDisplayList({.displayList = fragment->displayList});
                     scene.Pop({.count = 1});
                 }
@@ -187,18 +187,18 @@ auto PlatformViewLayerVisualMac::Render(NSWindow* window) -> void
             if (_needsUpdateGeometry)
             {
                 auto const offset = UnitFunction::ConvertDpToVp(GetOffset().As<Point>(), GetDisplayScale());
-                auto const offsetX = static_cast<CGFloat>(offset.GetX());
-                auto const offsetY = static_cast<CGFloat>(offset.GetY());
+                auto const offsetX = static_cast<CGFloat>(offset.x);
+                auto const offsetY = static_cast<CGFloat>(offset.y);
 
                 auto const clip = UnitFunction::ConvertDpToVp(GetClipRect(), GetDisplayScale());
-                auto const clipX = static_cast<CGFloat>(clip.GetLeft());
-                auto const clipY = static_cast<CGFloat>(clip.GetTop());
+                auto const clipX = static_cast<CGFloat>(clip.x0);
+                auto const clipY = static_cast<CGFloat>(clip.y0);
                 auto const clipWidth = static_cast<CGFloat>(clip.GetWidth());
                 auto const clipHeight = static_cast<CGFloat>(clip.GetHeight());
 
                 auto const bounds = UnitFunction::ConvertDpToVp(drawableRect, GetDisplayScale());
-                auto const boundsX = static_cast<CGFloat>(bounds.GetLeft());
-                auto const boundsY = static_cast<CGFloat>(bounds.GetTop());
+                auto const boundsX = static_cast<CGFloat>(bounds.x0);
+                auto const boundsY = static_cast<CGFloat>(bounds.y0);
                 auto const boundsWidth = static_cast<CGFloat>(bounds.GetWidth());
                 auto const boundsHeight = static_cast<CGFloat>(bounds.GetHeight());
 

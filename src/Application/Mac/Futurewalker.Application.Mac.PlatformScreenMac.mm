@@ -24,22 +24,22 @@ auto PlatformScreenMac::Refresh(CGFloat const mainScreenOrigin) -> void
         {
             auto frame = [_screen frame];
             frame.origin.y = mainScreenOrigin - (frame.origin.y + frame.size.height);
-            screenInfo.bounds = Rect<Vp>(Point<Vp>(frame.origin.x, frame.origin.y), Size<Vp>(frame.size.width, frame.size.height));
+            screenInfo.bounds = Rect<Vp>::Make(Point<Vp>(frame.origin.x, frame.origin.y), Size<Vp>(frame.size.width, frame.size.height));
         }
         {
             auto frame = [_screen visibleFrame];
             frame.origin.y = mainScreenOrigin - (frame.origin.y + frame.size.height);
-            frame.origin.x -= static_cast<CGFloat>(screenInfo.bounds.GetLeft());
-            frame.origin.y -= static_cast<CGFloat>(screenInfo.bounds.GetTop());
-            screenInfo.safeArea = Rect<Vp>(Point<Vp>(frame.origin.x, frame.origin.y), Size<Vp>(frame.size.width, frame.size.height));
+            frame.origin.x -= static_cast<CGFloat>(screenInfo.bounds.x0);
+            frame.origin.y -= static_cast<CGFloat>(screenInfo.bounds.y0);
+            screenInfo.safeArea = Rect<Vp>::Make(Point<Vp>(frame.origin.x, frame.origin.y), Size<Vp>(frame.size.width, frame.size.height));
         }
         {
             auto const insets = [_screen safeAreaInsets];
             auto rect = screenInfo.bounds;
-            rect.SetLeft(rect.GetLeft() + insets.left);
-            rect.SetTop(rect.GetTop() + insets.top);
-            rect.SetRight(rect.GetRight() - insets.right);
-            rect.SetBottom(rect.GetBottom() - insets.bottom);
+            rect.x0 += insets.left;
+            rect.y0 += insets.top;
+            rect.x1 -= insets.right;
+            rect.y1 -= insets.bottom;
             screenInfo.safeArea = rect;
         }
         screenInfo.backingScale = [_screen backingScaleFactor];

@@ -1371,7 +1371,7 @@ auto PlatformWindowMac::GetAreaBounds(WindowArea const windowArea) -> std::vecto
                     if (auto const button = [_windowDelegate.window standardWindowButton:buttonType])
                     {
                         auto const frame = [button convertRect:button.bounds toView:nil];
-                        return Rect<Vp>(Point<Vp>(frame.origin.x, _windowDelegate.window.frame.size.height - (frame.origin.y + frame.size.height)), Size<Vp>(frame.size.width, frame.size.height));
+                        return Rect<Vp>::Make(Point<Vp>(frame.origin.x, _windowDelegate.window.frame.size.height - (frame.origin.y + frame.size.height)), Size<Vp>(frame.size.width, frame.size.height));
                     }
                     return Rect<Vp>();
                 };
@@ -1449,8 +1449,8 @@ auto PlatformWindowMac::SetSizeConstraints(BoxConstraints const& constraints) ->
         {
             auto const minSize = constraints.GetMinSize();
             auto const maxSize = constraints.GetMaxSize();
-            [_windowDelegate.window setMinSize:NSMakeSize(static_cast<CGFloat>(minSize.GetWidth()), static_cast<CGFloat>(minSize.GetHeight()))];
-            [_windowDelegate.window setMaxSize:NSMakeSize(static_cast<CGFloat>(maxSize.GetWidth()), static_cast<CGFloat>(maxSize.GetHeight()))];
+            [_windowDelegate.window setMinSize:NSMakeSize(static_cast<CGFloat>(minSize.width), static_cast<CGFloat>(minSize.height))];
+            [_windowDelegate.window setMaxSize:NSMakeSize(static_cast<CGFloat>(maxSize.width), static_cast<CGFloat>(maxSize.height))];
         }
     }
 }
@@ -1700,7 +1700,7 @@ auto PlatformWindowMac::NativeToVpRect(NSRect const& rect) -> Rect<Vp>
     auto const mainScreenFrame = mainScreen.frame;
     auto const origin = rect.origin;
     auto const size = rect.size;
-    return Rect<Vp>(Point<Vp>(origin.x, mainScreenFrame.size.height - (origin.y + size.height)), Size<Vp>(size.width, size.height));
+    return Rect<Vp>::Make(Point<Vp>(origin.x, mainScreenFrame.size.height - (origin.y + size.height)), Size<Vp>(size.width, size.height));
 }
 
 auto PlatformWindowMac::VpToNativeRect(Rect<Vp> const& rect) -> NSRect
@@ -1709,10 +1709,10 @@ auto PlatformWindowMac::VpToNativeRect(Rect<Vp> const& rect) -> NSRect
     auto const mainScreenFrame = mainScreen.frame;
     auto const position = rect.GetPosition();
     auto const size = rect.GetSize();
-    auto const x = static_cast<CGFloat>(position.GetX());
-    auto const y = static_cast<CGFloat>(position.GetY());
-    auto const w = static_cast<CGFloat>(size.GetWidth());
-    auto const h = static_cast<CGFloat>(size.GetHeight());
+    auto const x = static_cast<CGFloat>(position.x);
+    auto const y = static_cast<CGFloat>(position.y);
+    auto const w = static_cast<CGFloat>(size.width);
+    auto const h = static_cast<CGFloat>(size.height);
     return NSMakeRect(x, mainScreenFrame.size.height - (y + h), w, h);
 }
 }

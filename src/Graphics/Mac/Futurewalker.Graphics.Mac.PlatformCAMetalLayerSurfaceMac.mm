@@ -145,7 +145,7 @@ auto PlatformCAMetalLayerSurfaceMac::ResizeSurface() -> void
         if (_needsUpdateSize)
         {
             auto const sizePx = UnitFunction::ConvertDpToPxRound(_size, _displayScale, _backingScale);
-            [_metalLayer setDrawableSize:CGSizeMake(static_cast<CGFloat>(sizePx.GetWidth()), static_cast<CGFloat>(sizePx.GetHeight()))];
+            [_metalLayer setDrawableSize:CGSizeMake(static_cast<CGFloat>(sizePx.width), static_cast<CGFloat>(sizePx.height))];
             [_metalLayer setContentsScale:static_cast<CGFloat>(_backingScale)];
             _needsUpdateSize = false;
         }

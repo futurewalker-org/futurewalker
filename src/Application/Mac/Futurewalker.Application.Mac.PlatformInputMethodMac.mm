@@ -309,11 +309,11 @@ using namespace FW_NS;
                 auto const metrics = run->GetMetrics();
                 auto const width = run->GetAdvance();
                 auto const height = metrics.ascent + metrics.descent;
-                auto const rect = FW_NS::Rect<Dp>(pos, FW_NS::Size<Dp>(width, height));
-                auto const top = self.view.frame.size.height - (static_cast<CGFloat>(rect.GetTop() + rect.GetHeight()));
+                auto const rect = FW_NS::Rect<Dp>::Make(pos, FW_NS::Size<Dp>(width, height));
+                auto const top = self.view.frame.size.height - (static_cast<CGFloat>(rect.y0 + rect.GetHeight()));
                 auto const bottom = top + static_cast<CGFloat>(rect.GetHeight());
-                auto const left = static_cast<CGFloat>(rect.GetLeft());
-                auto const right = static_cast<CGFloat>(rect.GetLeft());
+                auto const left = static_cast<CGFloat>(rect.x0);
+                auto const right = static_cast<CGFloat>(rect.x1);
                 if (actualRange)
                 {
                     actualRange->location = static_cast<NSUInteger>(layoutInfo.GetGlyphRunCharacterIndex(*runIndex).GetValueOr(i));
@@ -323,8 +323,8 @@ using namespace FW_NS;
             }
         }
         auto const windowFrame = self.view.window.frame;
-        auto const x = windowFrame.origin.x + static_cast<CGFloat>(layoutRect.GetLeft());
-        auto const y = windowFrame.origin.y + windowFrame.size.height - static_cast<CGFloat>(layoutRect.GetBottom());
+        auto const x = windowFrame.origin.x + static_cast<CGFloat>(layoutRect.x0);
+        auto const y = windowFrame.origin.y + windowFrame.size.height - static_cast<CGFloat>(layoutRect.y1);
         return NSMakeRect(x, y, 1, 1);
     }
     return {};
@@ -342,15 +342,15 @@ using namespace FW_NS;
         auto y = Dp(self.view.bounds.size.height - viewPoint.y);
 
         auto const layoutRect = editable->GetLayoutRect();
-        x -= layoutRect.GetLeft();
-        y -= layoutRect.GetTop();
+        x -= layoutRect.x0;
+        y -= layoutRect.y0;
 
         auto const& layoutInfo = editable->GetLayoutInfo();
 
         for (auto i = Graphics::GlyphIndex(0); i < layoutInfo.GetGlyphCount(); ++i)
         {
             auto const pos = layoutInfo.GetGlyphPosition(i).GetValueOrDefault();
-            if (x < pos.GetX())
+            if (x < pos.x)
             {
                 if (i > 0)
                 {

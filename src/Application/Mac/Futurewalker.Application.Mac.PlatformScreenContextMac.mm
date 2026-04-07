@@ -53,7 +53,7 @@ auto PlatformScreenContextMac::GetScreenFromRect(Rect<Vp> const& rect) -> Shared
     @autoreleasepool
     {
         auto const targetRect =
-          NSRectFromCGRect(CGRectMake(static_cast<CGFloat>(rect.GetLeft()), static_cast<CGFloat>(rect.GetBottom()), static_cast<CGFloat>(rect.GetWidth()), static_cast<CGFloat>(rect.GetHeight())));
+          NSRectFromCGRect(CGRectMake(static_cast<CGFloat>(rect.x0), static_cast<CGFloat>(rect.y1), static_cast<CGFloat>(rect.GetWidth()), static_cast<CGFloat>(rect.GetHeight())));
 
         auto closestScreen = Shared<PlatformScreenMac>();
 
