@@ -229,7 +229,43 @@ auto TextView::Draw(DrawScope& scope) -> void
     }
     else if (vAlign == TextViewVerticalAlignment::Middle)
     {
-        y = rect.y0 + (rect.GetHeight() - textSize.height) / 2;
+        auto xHeightMin = Dp::Infinity();
+        auto xHeightMax = Dp(0);
+        auto lineTop = Dp(0);
+        for (auto const& shapedText : _shapedTexts)
+        {
+            for (auto const& line : shapedText.GetLines())
+            {
+                if (line.GetRunCount() == 0)
+                {
+                    if (auto const typeface = GetTypeface())
+                    {
+                        auto const lineMetrics = typeface->GetMetrics(GetFontSize());
+                        xHeightMin = Dp::Min(xHeightMin, lineTop + lineMetrics.ascent - lineMetrics.xHeight);
+                        xHeightMax = Dp::Max(xHeightMax, lineTop + lineMetrics.ascent);
+                        lineTop += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
+                    }
+                }
+                else
+                {
+                    auto const lineMetrics = line.GetMetrics();
+                    xHeightMin = Dp::Min(xHeightMin, lineTop + lineMetrics.ascent - lineMetrics.xHeight);
+                    xHeightMax = Dp::Max(xHeightMax, lineTop + lineMetrics.ascent);
+                    lineTop += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
+                }
+            }
+        }
+
+        if (Dp::IsFinite(xHeightMin) && xHeightMin <= xHeightMax)
+        {
+            auto const xHeightRange = xHeightMax - xHeightMin;
+            y = rect.y0 + (rect.GetHeight() - xHeightRange) / 2;
+            y -= xHeightMin;
+        }
+        else
+        {
+            y = rect.y0 + (rect.GetHeight() - textSize.height) / 2;
+        }
     }
 
     for (auto const& shapedText : _shapedTexts)
