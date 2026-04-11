@@ -5,7 +5,6 @@
 #include "Futurewalker.Core.Primitive.hpp"
 #include "Futurewalker.Core.DynamicCastFunction.hpp"
 #include "Futurewalker.Core.Pointer.hpp"
-#include "Futurewalker.Core.ExceptionFunction.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -171,10 +170,6 @@ public:
     template <Concepts::NonVoid U = T>
     auto operator*() const -> U&
     {
-        if (!_ptr)
-        {
-            ExceptionFunction::ThrowNullDereferenceException();
-        }
         return _ptr.operator*();
     }
 
@@ -183,10 +178,6 @@ public:
     ///
     auto operator->() const -> T*
     {
-        if (!_ptr)
-        {
-            ExceptionFunction::ThrowNullDereferenceException();
-        }
         return _ptr.operator->();
     }
 

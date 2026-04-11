@@ -13,6 +13,5 @@ class ExceptionFunction : NonConstructible
 {
 public:
     [[noreturn]] static auto ThrowDynamicCastException() -> void;
-    [[noreturn]] static auto ThrowNullDereferenceException() -> void;
 };
 }

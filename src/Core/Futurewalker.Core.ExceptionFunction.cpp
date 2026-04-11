@@ -11,10 +11,4 @@ namespace FW_DETAIL_NS
     assert(false);
     throw Exception(ErrorCode::Failure, "Dynamic cast failed");
 }
-
-[[noreturn]] auto ExceptionFunction::ThrowNullDereferenceException() -> void
-{
-    assert(false);
-    throw Exception(ErrorCode::InvalidOperation, "Null pointer dereference.");
-}
 }
