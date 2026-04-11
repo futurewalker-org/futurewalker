@@ -24,6 +24,13 @@ TEST_CASE("Unique")
         REQUIRE(*i == 24);
     }
 
+    SECTION("MakeWithAllocator")
+    {
+        auto i = Unique<SInt32>::MakeWithAllocator(std::allocator<SInt32>{}, 42);
+        REQUIRE(i);
+        REQUIRE(*i == 42);
+    }
+
     SECTION("Default")
     {
         auto const i = Unique<SInt32>();
@@ -99,6 +106,14 @@ TEST_CASE("Shared")
 
         *s = 24;
         REQUIRE(*s == 24);
+    }
+
+    SECTION("MakeWithAllocator")
+    {
+        auto s = Shared<SInt32>::MakeWithAllocator(std::allocator<SInt32>{}, 42);
+        REQUIRE(s);
+        REQUIRE(s.GetUseCount() == 1);
+        REQUIRE(*s == 42);
     }
 
     SECTION("Void instantiation")

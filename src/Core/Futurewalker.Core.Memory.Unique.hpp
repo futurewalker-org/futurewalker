@@ -48,6 +48,18 @@ public:
         return Unique(std::make_shared<T>(std::forward<Args>(args)...));
     }
 
+    ///
+    /// @brief Make unique pointer with custom allocator.
+    ///
+    /// @param[in] alloc Allocator instance.
+    /// @param[in] args Parameters for constructor of T.
+    ///
+    template <class Allocator, class... Args>
+    static auto MakeWithAllocator(Allocator const& alloc, Args&&... args) -> Unique<T>
+    {
+        return Unique(std::allocate_shared<T>(alloc, std::forward<Args>(args)...));
+    }
+
 public:
     ///
     /// @brief Default constructor.

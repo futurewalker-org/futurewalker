@@ -35,10 +35,24 @@ public:
     ///
     /// @brief Allocate and construct Shared<T>.
     ///
+    /// @param[in] args Constructor arguments.
+    ///
     template <class... Args>
     static auto Make(Args&&... args) -> Shared<T>
     {
         return Shared(std::make_shared<T>(std::forward<Args>(args)...));
+    }
+
+    ///
+    /// @brief Allocate and construct Shared<T> with a custom allocator.
+    ///
+    /// @param[in] alloc Allocator instance.
+    /// @param[in] args Constructor arguments.
+    ///
+    template <class Allocator, class... Args>
+    static auto MakeWithAllocator(Allocator const& alloc, Args&&... args) -> Shared<T>
+    {
+        return Shared(std::allocate_shared<T>(alloc, std::forward<Args>(args)...));
     }
 
 public:
