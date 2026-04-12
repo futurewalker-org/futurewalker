@@ -240,11 +240,12 @@ auto AttributeNode::GetParent() const -> Shared<AttributeNode const>
 ///
 auto AttributeNode::GetRoot() -> Shared<AttributeNode>
 {
-    if (auto parent = GetParent())
+    auto node = GetSelf();
+    while (auto parent = node->GetParent())
     {
-        return parent->GetRoot();
+        node = parent;
     }
-    return GetSelf();
+    return node;
 }
 
 ///
@@ -252,11 +253,12 @@ auto AttributeNode::GetRoot() -> Shared<AttributeNode>
 ///
 auto AttributeNode::GetRoot() const -> Shared<AttributeNode const>
 {
-    if (auto parent = GetParent())
+    auto node = GetSelf();
+    while (auto parent = node->GetParent())
     {
-        return parent->GetRoot();
+        node = parent;
     }
-    return GetSelf();
+    return node;
 }
 
 ///
