@@ -10,6 +10,7 @@
 
 #include <array>
 #include <atomic>
+#include <boost/container/small_vector.hpp>
 
 namespace FW_DETAIL_NS
 {
@@ -729,8 +730,8 @@ auto AttributeNode::ResolveValueCore(StaticAttributeBaseRef reference) -> Shared
         auto const& references = reference.Get().GetReferences();
         auto const& computeFunction = reference.Get().GetComputeFunction();
 
-        auto args = std::vector<AttributeValue>();
-        auto dependentSlots = std::vector<Shared<AttributeSlot>>();
+        auto args = boost::container::small_vector<AttributeValue, 4>();
+        auto dependentSlots = boost::container::small_vector<Shared<AttributeSlot>, 4>();
         args.reserve(references.size());
         dependentSlots.reserve(references.size());
         for (auto const& ref : references)
@@ -929,8 +930,8 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot, UInt64 const u
     {
         auto const& references = slot.GetReferences();
 
-        auto args = std::vector<AttributeValue>();
-        auto dependentSlots = std::vector<Shared<AttributeSlot>>();
+        auto args = boost::container::small_vector<AttributeValue, 4>();
+        auto dependentSlots = boost::container::small_vector<Shared<AttributeSlot>, 4>();
         args.reserve(references.size());
         dependentSlots.reserve(references.size());
         for (auto const& reference : references)
@@ -966,8 +967,8 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot, UInt64 const u
             auto const& references = sourceSlot->GetReferenceCache();
             auto const& computeFunction = sourceSlot->GetComputeFunctionCache();
 
-            auto args = std::vector<AttributeValue>();
-            auto dependentSlots = std::vector<Shared<AttributeSlot>>();
+            auto args = boost::container::small_vector<AttributeValue, 4>();
+            auto dependentSlots = boost::container::small_vector<Shared<AttributeSlot>, 4>();
             args.reserve(references.size());
             dependentSlots.reserve(references.size());
             for (auto const& reference : references)
@@ -1001,8 +1002,8 @@ auto AttributeNode::UpdateSlotCacheRecursive(AttributeSlot& slot, UInt64 const u
             auto const& references = description.GetReferences();
             auto const& computeFunction = description.GetComputeFunction();
 
-            auto args = std::vector<AttributeValue>();
-            auto dependentSlots = std::vector<Shared<AttributeSlot>>();
+            auto args = boost::container::small_vector<AttributeValue, 4>();
+            auto dependentSlots = boost::container::small_vector<Shared<AttributeSlot>, 4>();
             args.reserve(references.size());
             dependentSlots.reserve(references.size());
             for (auto const& reference : references)

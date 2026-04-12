@@ -76,7 +76,8 @@ auto AttributeSlot::RemoveUpdateNumber(UInt64 const number) -> Bool
     auto const it = std::find(_updateNumbers.begin(), _updateNumbers.end(), number);
     if (it != _updateNumbers.end())
     {
-        _updateNumbers.erase(it);
+        *it = _updateNumbers.back();
+        _updateNumbers.pop_back();
         return true;
     }
     return false;
@@ -241,7 +242,7 @@ auto AttributeSlot::GetValueDependentSlots() const -> SharedArray<Weak<Attribute
     return _valueDependentSlots;
 }
 
-auto AttributeSlot::SetValueDependentSlots(std::vector<Shared<AttributeSlot>> const& slots) -> void
+auto AttributeSlot::SetValueDependentSlots(std::span<Shared<AttributeSlot> const> const slots) -> void
 {
     DetachFromValueDependentSlots();
 

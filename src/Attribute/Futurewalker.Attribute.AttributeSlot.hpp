@@ -13,6 +13,8 @@
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.SharedArray.hpp"
 
+#include <boost/container/small_vector.hpp>
+
 #include <span>
 
 namespace FW_DETAIL_NS
@@ -61,7 +63,7 @@ public:
     auto ClearValue() -> void;
 
     auto GetValueDependentSlots() const -> SharedArray<Weak<AttributeSlot>>;
-    auto SetValueDependentSlots(std::vector<Shared<AttributeSlot>> const& slots) -> void;
+    auto SetValueDependentSlots(std::span<Shared<AttributeSlot> const> const slots) -> void;
     auto DetachFromValueDependentSlots() -> void;
 
     auto GetSourceDependentSlot() -> Shared<AttributeSlot>;
@@ -73,7 +75,7 @@ public:
     auto GetValueDependantSlotCount() const -> SInt64;
     auto GetValueDependantSlots() const -> SharedArray<Weak<AttributeSlot>>;
 
-    auto Reset() -> void; 
+    auto Reset() -> void;
 
 private:
     auto SetSelf(Shared<AttributeSlot> const& self) -> void;
@@ -82,7 +84,7 @@ private:
 private:
     Weak<AttributeSlot> _self;
     Weak<AttributeNode> _owner;
-    std::vector<UInt64> _updateNumbers;
+    boost::container::small_vector<UInt64, 4> _updateNumbers;
     Bool _valueChanged = false;
     StaticAttributeBaseRef _description;
     Optional<AttributeValue> _valueCache;
