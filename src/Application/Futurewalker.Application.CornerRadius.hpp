@@ -15,7 +15,7 @@ namespace FW_EXPORT
 ///
 /// @brief Corner radius.
 ///
-class CornerRadius
+struct CornerRadius
 {
 public:
     ///
@@ -44,7 +44,7 @@ public:
     ///
     static constexpr auto Offset(CornerRadius const& radius, Dp const offset) noexcept -> CornerRadius
     {
-        return CornerRadius(radius._tl + offset, radius._tt + offset, radius._bt + offset, radius._bl + offset);
+        return CornerRadius(radius.topLeading + offset, radius.topTrailing + offset, radius.bottomTrailing + offset, radius.bottomLeading + offset);
     }
 
 public:
@@ -54,97 +54,21 @@ public:
     ///
     /// @brief Construct from radius 
     ///
-    /// @param tl Top left radius
+    /// @param tl Top leading radius
     /// @param tt Top trailing radius
     /// @param bt Bottom trailing radius
     /// @param bl Bottom leading radius
     ///
     constexpr CornerRadius(Dp const tl, Dp const tt, Dp const bt, Dp const bl)
-      : _tl {tl}
-      , _tt {tt}
-      , _bt {bt}
-      , _bl {bl}
+      : topLeading {Dp::Max(tl, 0)}
+      , topTrailing {Dp::Max(tt, 0)}
+      , bottomTrailing {Dp::Max(bt, 0)}
+      , bottomLeading {Dp::Max(bl, 0)}
     {
-        _tl = Dp::Max(_tl, 0);
-        _tt = Dp::Max(_tt, 0);
-        _bt = Dp::Max(_bt, 0);
-        _bl = Dp::Max(_bl, 0);
     }
 
     constexpr auto operator=(CornerRadius const&) -> CornerRadius& = default;
     constexpr auto operator==(CornerRadius const&) const -> bool = default;
-
-    ///
-    /// @brief 
-    ///
-    constexpr auto GetTopLeading() const -> Dp
-    {
-        return _tl;
-    }
-
-    ///
-    /// @brief 
-    ///
-    /// @param tl 
-    ///
-    constexpr auto SetTopLeading(Dp const tl) -> void
-    {
-        _tl = tl;
-    }
-
-    ///
-    /// @brief 
-    ///
-    constexpr auto GetTopTrailing() const -> Dp
-    {
-        return _tt;
-    }
-
-    ///
-    /// @brief 
-    ///
-    /// @param tt 
-    ///
-    constexpr auto SetTopTrailing(Dp const tt) -> void
-    {
-        _tt = tt;
-    }
-
-    ///
-    /// @brief 
-    ///
-    constexpr auto GetBottomLeading() const -> Dp
-    {
-        return _bl;
-    }
-
-    ///
-    /// @brief 
-    ///
-    /// @param bl 
-    ///
-    constexpr auto SetBottomLeading(Dp const bl) -> void
-    {
-        _bl = bl;
-    }
-
-    ///
-    /// @brief 
-    ///
-    constexpr auto GetBottomTrailing() const -> Dp
-    {
-        return _bt;
-    }
-
-    ///
-    /// @brief 
-    ///
-    /// @param bt 
-    ///
-    constexpr auto SetBottomTrailing(Dp const bt) -> void
-    {
-        _bt = bt;
-    }
 
     ///
     /// @brief Get top left radius.
@@ -153,7 +77,7 @@ public:
     ///
     constexpr auto GetTopLeft(LayoutDirection const& direction) const -> Dp
     {
-        return direction == LayoutDirection::RightToLeft ? _tt : _tl;
+        return direction == LayoutDirection::RightToLeft ? topTrailing : topLeading;
     }
 
     ///
@@ -163,27 +87,27 @@ public:
     ///
     constexpr auto GetTopRight(LayoutDirection const& direction) const -> Dp
     {
-        return direction == LayoutDirection::RightToLeft ? _tl : _tt;
+        return direction == LayoutDirection::RightToLeft ? topLeading : topTrailing;
     }
 
     ///
-    /// @brief Get top left radius.
+    /// @brief Get bottom left radius.
     ///
     /// @param[in] direction Layout direction.
     ///
     constexpr auto GetBottomLeft(LayoutDirection const& direction) const -> Dp
     {
-        return direction == LayoutDirection::RightToLeft ? _bt : _bl;
+        return direction == LayoutDirection::RightToLeft ? bottomTrailing : bottomLeading;
     }
 
     ///
-    /// @brief Get top right radius.
+    /// @brief Get bottom right radius.
     ///
     /// @param[in] direction Layout direction.
     ///
     constexpr auto GetBottomRight(LayoutDirection const& direction) const -> Dp
     {
-        return direction == LayoutDirection::RightToLeft ? _bl : _bt;
+        return direction == LayoutDirection::RightToLeft ? bottomLeading : bottomTrailing;
     }
 
     ///
@@ -204,11 +128,10 @@ public:
         return RoundRect<Dp>(rect, {tl, tl}, {tr, tr}, {br, br}, {bl, bl});
     }
 
-private:
-    Dp _tl = 0;
-    Dp _tt = 0;
-    Dp _bt = 0;
-    Dp _bl = 0;
+    Dp topLeading = 0;
+    Dp topTrailing = 0;
+    Dp bottomTrailing = 0;
+    Dp bottomLeading = 0;
 };
 }
 }

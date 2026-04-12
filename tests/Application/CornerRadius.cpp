@@ -9,10 +9,10 @@ TEST_CASE("CornerRadius")
     SECTION("Init")
     {
         auto const r = CornerRadius();
-        REQUIRE(r.GetTopLeading() == 0);
-        REQUIRE(r.GetTopTrailing() == 0);
-        REQUIRE(r.GetBottomLeading() == 0);
-        REQUIRE(r.GetBottomTrailing() == 0);
+        REQUIRE(r.topLeading == 0);
+        REQUIRE(r.topTrailing == 0);
+        REQUIRE(r.bottomLeading == 0);
+        REQUIRE(r.bottomTrailing == 0);
         REQUIRE(r == r);
         REQUIRE(!(r != r));
     }
@@ -20,10 +20,10 @@ TEST_CASE("CornerRadius")
     SECTION("Init")
     {
         auto const r = CornerRadius(1, 2, 3, 4);
-        REQUIRE(r.GetTopLeading() == 1);
-        REQUIRE(r.GetTopTrailing() == 2);
-        REQUIRE(r.GetBottomTrailing() == 3);
-        REQUIRE(r.GetBottomLeading() == 4);
+        REQUIRE(r.topLeading == 1);
+        REQUIRE(r.topTrailing == 2);
+        REQUIRE(r.bottomTrailing == 3);
+        REQUIRE(r.bottomLeading == 4);
     }
 
     SECTION("Assign")
@@ -36,9 +36,9 @@ TEST_CASE("CornerRadius")
     SECTION("Uniform")
     {
         auto const r = CornerRadius::MakeUniform(3);
-        REQUIRE(r.GetTopLeading() == 3);
-        REQUIRE(r.GetTopTrailing() == 3);
-        REQUIRE(r.GetBottomLeading() == 3);
-        REQUIRE(r.GetBottomTrailing() == 3);
+        REQUIRE(r.topLeading == 3);
+        REQUIRE(r.topTrailing == 3);
+        REQUIRE(r.bottomLeading == 3);
+        REQUIRE(r.bottomTrailing == 3);
     }
 }
