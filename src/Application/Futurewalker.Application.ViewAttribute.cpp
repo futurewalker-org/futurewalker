@@ -5,6 +5,6 @@
 namespace FW_DETAIL_NS
 {
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ViewAttribute::AreaManager, {});
-FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ViewAttribute::HorizontalScrollFactor, {24});
-FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ViewAttribute::VerticalScrollFactor, {24});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ViewAttribute::HorizontalScrollFactor, {32});
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(ViewAttribute::VerticalScrollFactor, {32});
 }
