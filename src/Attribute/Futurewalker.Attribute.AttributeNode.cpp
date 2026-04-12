@@ -682,7 +682,7 @@ auto AttributeNode::ResolveSource(StaticAttributeBaseRef reference) -> Shared<At
 ///
 auto AttributeNode::ResolveValue(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>
 {
-    auto depth = SInt32(0);
+    auto depth = SInt32(std::numeric_limits<int32_t>::max());
     MeasureMinDistanceToReferencedSlots(reference, depth);
     auto node = GetSelf();
     for (auto i = SInt32(0); i < depth; ++i)
