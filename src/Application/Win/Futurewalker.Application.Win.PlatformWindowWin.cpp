@@ -1837,14 +1837,7 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 
             try
             {
-                if (text.IsEmpty())
-                {
-                    if (_textStore)
-                    {
-                        _textStore->InputKeyFromKeyEvent(key);
-                    }
-                }
-                else if (key != Key::Dead)
+                if (!text.IsEmpty() && key != Key::Dead)
                 {
                     if (_textStore)
                     {

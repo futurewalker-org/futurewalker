@@ -301,10 +301,57 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<KeyEvent::Down>())
     {
+        if (_inputEditable)
+        {
+            auto const key = event.As<KeyEvent::Down>()->GetKey();
+            if (key == Key::Enter)
+            {
+                _inputEditable->InsertLineBreak();
+                co_return true;
+            }
+            else if (key == Key::Backspace || key == Key::Delete)
+            {
+                auto const selection = _inputEditable->GetSelectionRange();
+                if (selection.GetLength() == 0)
+                {
+                    if (key == Key::Backspace)
+                    {
+                        _inputEditable->DeleteSurroundingText(1, 0);
+                    }
+                    else
+                    {
+                        _inputEditable->DeleteSurroundingText(0, 1);
+                    }
+                }
+                else
+                {
+                    _inputEditable->InsertText({}, 0);
+                }
+                co_return true;
+            }
+            else if (key == Key::ArrowLeft || key == Key::ArrowRight)
+            {
+                // TODO: Support selection with Shift key.
+                auto const selection = _inputEditable->GetSelectionRange();
+                auto const textRange = _inputEditable->GetStringRange();
+                auto const isRtl = GetLayoutDirection() == LayoutDirection::RightToLeft;
+                auto const isLeftArrow = (key == Key::ArrowLeft);
+                auto const anchorPosition = (isRtl == isLeftArrow) ? selection.GetEnd() : selection.GetBegin();
+                auto const positionOffset = selection.IsEmpty() ? ((isRtl == isLeftArrow) ? 1 : -1) : 0;
+                auto const newCaretPosition = Range<CodePoint>::Clamp(anchorPosition + positionOffset, textRange);
+                _inputEditable->SetSelectionRange({newCaretPosition, newCaretPosition}, TextSelectionDirection::Forward);
+                co_return true;
+            }
+        }
         co_return false;
     }
     else if (event.Is<KeyEvent::Up>())
     {
+        auto const key = event.As<KeyEvent::Up>()->GetKey();
+        if (key == Key::Enter || key == Key::Backspace || key == Key::Delete || key == Key::ArrowLeft || key == Key::ArrowRight)
+        {
+            co_return true;
+        }
         co_return false;
     }
     co_return false;
@@ -420,14 +467,6 @@ auto TextEdit::InternalGetComposingRange() -> Range<CodePoint>
         return _inputEditable->GetComposingRange();
     }
     return {};
-}
-
-auto TextEdit::InternalSetComposingRange(Range<CodePoint> const& range) -> void
-{
-    if (_inputEditable)
-    {
-        _inputEditable->SetComposingRange(range);
-    }
 }
 
 auto TextEdit::InternalGetText() const -> String

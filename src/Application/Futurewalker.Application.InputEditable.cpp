@@ -166,19 +166,6 @@ auto InputEditable::GetComposingRange() const -> Range<CodePoint>
 }
 
 ///
-/// @brief Set new composing range.
-///
-/// @param[in] range New composing range in code points.
-///
-auto InputEditable::SetComposingRange(Range<CodePoint> const& range) -> void
-{
-    if (_platform)
-    {
-        _platform->SetComposingRange(range);
-    }
-}
-
-///
 /// @brief
 ///
 auto InputEditable::GetLayoutOffset() const -> Vector<Dp>
@@ -249,6 +236,17 @@ auto InputEditable::InsertText(String const& text, CodePoint caretPosition) -> v
     if (_platform)
     {
         _platform->InsertText(text, caretPosition);
+    }
+}
+
+///
+/// @brief
+///
+auto InputEditable::InsertLineBreak() -> void
+{
+    if (_platform)
+    {
+        _platform->InsertLineBreak();
     }
 }
 

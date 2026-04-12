@@ -77,7 +77,6 @@ private:
     auto InternalGetSelectionRange() -> Range<CodePoint>;
     auto InternalSetSelectionRange(Range<CodePoint> const& range, TextSelectionDirection direction) -> void;
     auto InternalGetComposingRange() -> Range<CodePoint>;
-    auto InternalSetComposingRange(Range<CodePoint> const& range) -> void;
     auto InternalGetText() const -> String;
     auto InternalGetText(Range<CodePoint> range) -> String;
     auto InternalSetText(String const& text) -> void;

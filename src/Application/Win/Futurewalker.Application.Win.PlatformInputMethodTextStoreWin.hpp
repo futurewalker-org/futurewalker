@@ -40,7 +40,6 @@ public:
     ~PlatformInputMethodTextStoreWin();
 
     auto InsertTextFromKeyEvent(String const& text) -> void;
-    auto InputKeyFromKeyEvent(String const& key) -> void;
 
     auto GetEditable() -> Shared<PlatformInputEditableWin>;
     auto SetEditable(Weak<PlatformInputEditableWin> const& client) -> void;

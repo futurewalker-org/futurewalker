@@ -55,7 +55,6 @@ public:
     auto SetSelectionRange(Range<CodePoint> const& range, TextSelectionDirection direction) -> void;
 
     auto GetComposingRange() const -> Range<CodePoint>;
-    auto SetComposingRange(Range<CodePoint> const& range) -> void;
 
     auto GetLayoutOffset() const -> Vector<Dp>;
     auto SetLayoutOffset(Vector<Dp> const& offset) -> void;
@@ -67,6 +66,7 @@ public:
     auto SetLayoutInfo(Graphics::TextLayoutInfo const& layoutInfo) -> void;
 
     auto InsertText(String const& text, CodePoint caretPosition) -> void;
+    auto InsertLineBreak() -> void;
     auto DeleteSurroundingText(CodePoint before, CodePoint after) -> void;
 
     auto GetEventReceiver() -> EventReceiver&;

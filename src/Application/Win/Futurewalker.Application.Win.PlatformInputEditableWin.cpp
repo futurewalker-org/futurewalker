@@ -24,8 +24,8 @@ PlatformInputEditableWin::PlatformInputEditableWin(PassKey<PlatformInputEditable
         .insertLineBreak = [&]() { InternalInsertLineBreak(); },
         .beforeDeleteSurroundingText = [&](CodePoint before, CodePoint after, Bool cancellable) { return InternalBeforeDeleteSurroundingText(before, after, cancellable); },
         .deleteSurroundingText = [&](CodePoint before, CodePoint after) { InternalDeleteSurroundingText(before, after); },
-        .onTextChange = [&](CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) { return InternalOnTextChange(u16OldBegin, u16OldEnd, u16NewEnd); },
-        .onSelectionChange = [&]() { return InternalOnSelectionChange(); },
+        .onTextChange = [&](Bool anticipated, CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) { return InternalOnTextChange(anticipated, u16OldBegin, u16OldEnd, u16NewEnd); },
+        .onSelectionChange = [&](Bool anticipated) { return InternalOnSelectionChange(anticipated); },
     }}
 {
 }
@@ -288,20 +288,28 @@ auto PlatformInputEditableWin::InternalDeleteSurroundingText(CodePoint before, C
     SendInputEventDetached(event);
 }
 
-auto PlatformInputEditableWin::InternalOnTextChange(CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void
+auto PlatformInputEditableWin::InternalOnTextChange(Bool anticipated, CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void
 {
-    if (auto textStore = GetTextStore())
+    if (!anticipated)
     {
-        textStore->NotifyTextChange(u16OldBegin, u16OldEnd, u16NewEnd);
+        if (auto textStore = GetTextStore())
+        {
+            textStore->NotifyTextChange(u16OldBegin, u16OldEnd, u16NewEnd);
+        }
     }
 }
 
-auto PlatformInputEditableWin::InternalOnSelectionChange() -> void
+auto PlatformInputEditableWin::InternalOnSelectionChange(Bool anticipated) -> void
 {
-    if (auto textStore = GetTextStore())
+    if (!anticipated)
     {
-        textStore->NotifySelectionChange();
+        if (auto textStore = GetTextStore())
+        {
+            textStore->NotifySelectionChange();
+        }
     }
+    auto event = Event<>(Event<PlatformInputEvent::SelectionChange>());
+    SendInputEventDetached(event);
 }
 
 auto PlatformInputEditableWin::GetTextStore() -> Shared<PlatformInputMethodTextStoreWin>

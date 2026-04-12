@@ -578,6 +578,26 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition
 
     if (auto const editable = _owner.GetEditable())
     {
+        if (!pRangeNew && pComposition)
+        {
+            pComposition->GetRange(&pRangeNew);
+        }
+
+        if (pRangeNew)
+        {
+            Microsoft::WRL::ComPtr<ITfRangeACP> rangeACP;
+            auto hr = pRangeNew->QueryInterface(IID_PPV_ARGS(rangeACP.GetAddressOf()));
+            if (SUCCEEDED(hr) && rangeACP)
+            {
+                LONG acpStart = 0;
+                LONG acpEnd = 0;
+                hr = rangeACP->GetExtent(&acpStart, &acpEnd);
+                if (SUCCEEDED(hr))
+                {
+                    editable->SetU16ComposingRange({acpStart, acpEnd});
+                }
+            }
+        }
         editable->CompositionUpdate();
     }
     return S_OK;
@@ -751,39 +771,6 @@ auto PlatformInputMethodTextStoreWin::InsertTextFromKeyEvent(String const& text)
     if (auto const editable = GetEditable())
     {
         editable->InsertText(text, 1);
-    }
-}
-
-///
-/// @brief Emit input event from key event.
-///
-auto PlatformInputMethodTextStoreWin::InputKeyFromKeyEvent(String const& key) -> void
-{
-    if (auto const editable = GetEditable())
-    {
-        auto const selection = editable->GetU16SelectionRange();
-        if (key == Key::Backspace || key == Key::Delete)
-        {
-            if (selection.GetLength() == 0)
-            {
-                if (key == Key::Backspace)
-                {
-                    editable->DeleteSurroundingText(1, 0);
-                }
-                else
-                {
-                    editable->DeleteSurroundingText(0, 1);
-                }
-            }
-            else
-            {
-                editable->InsertText({}, 0);
-            }
-        }
-        else if (key == Key::Enter)
-        {
-            editable->InsertLineBreak();
-        }
     }
 }
 

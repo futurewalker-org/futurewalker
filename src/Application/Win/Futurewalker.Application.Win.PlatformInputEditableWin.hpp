@@ -68,8 +68,8 @@ private:
     auto InternalInsertLineBreak() -> void;
     auto InternalBeforeDeleteSurroundingText(CodePoint before, CodePoint after, Bool cancellable) -> Bool;
     auto InternalDeleteSurroundingText(CodePoint before, CodePoint after) -> void;
-    auto InternalOnTextChange(CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void;
-    auto InternalOnSelectionChange() -> void;
+    auto InternalOnTextChange(Bool anticipated, CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void;
+    auto InternalOnSelectionChange(Bool anticipated) -> void;
 
     auto GetTextStore() -> Shared<PlatformInputMethodTextStoreWin>;
 
