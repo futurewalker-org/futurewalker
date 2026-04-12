@@ -493,7 +493,7 @@ auto PlatformWindowWin::GetAreaInsets(WindowArea const area) -> EdgeInsets
         {
             auto const titleBarHeight = _options.hasTitleBar ? UnitFunction::ConvertVpToDp(GetSystemTitleBarHeight(), GetDisplayScale()) : Dp(0);
             auto clientInsets = GetAreaInsets(WindowArea::Frame);
-            clientInsets.SetTop(clientInsets.GetTop() + titleBarHeight);
+            clientInsets.top += titleBarHeight;
             return clientInsets;
         }
     }

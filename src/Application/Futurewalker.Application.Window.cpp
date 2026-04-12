@@ -1016,10 +1016,10 @@ auto Window::GetClientRect() const -> Rect<Dp>
         auto const size = UnitFunction::ConvertVpToDp(GetFrameRect().GetSize(), GetDisplayScale());
         auto const localRect = Rect<Dp>::Make({}, size);
         return Rect<Dp>(
-          localRect.x0 + clientInsets.GetLeading(),
-          localRect.y0 + clientInsets.GetTop(),
-          localRect.x1 - clientInsets.GetTrailing(),
-          localRect.y1 - clientInsets.GetBottom());
+          localRect.x0 + clientInsets.leading,
+          localRect.y0 + clientInsets.top,
+          localRect.x1 - clientInsets.trailing,
+          localRect.y1 - clientInsets.bottom);
     }
     return {};
 }
@@ -1047,7 +1047,7 @@ auto Window::UpdateAreaRects() -> void
         auto const titleBarRects = _platformObject->GetAreaBounds(WindowArea::TitleBar);
         auto const localTitleBarInsets = EdgeInsets::Max(titleBarInsets - frameInsets, EdgeInsets());
         auto const localTitleBarRects = titleBarRects
-                                        | std::ranges::views::transform([&](auto const& rect) { return Rect<Dp>::Offset(rect, -Vector<Dp>(frameInsets.GetLeading(), frameInsets.GetTop())); })
+                                        | std::ranges::views::transform([&](auto const& rect) { return Rect<Dp>::Offset(rect, -Vector<Dp>(frameInsets.leading, frameInsets.top)); })
                                         | std::ranges::to<std::vector>();
         _areaManager->SetAreaInsets(ViewArea::TitleBar, localTitleBarInsets);
         _areaManager->SetAreaBounds(ViewArea::TitleBar, localTitleBarRects);

@@ -67,14 +67,14 @@ auto WindowFrame::Measure(MeasureScope& scope) -> void
 
     auto const titleBarInsets = GetTitleBarInsets();
     auto const contentWidth = width;
-    auto const contentHeight = AxisConstraints::Offset(height, -titleBarInsets.GetTop());
+    auto const contentHeight = AxisConstraints::Offset(height, -titleBarInsets.top);
     auto const contentSize = scope.MeasureChild(_content, contentWidth, contentHeight);
 
     auto const measuredWidth = AxisConstraints::Constrain(width, contentSize.width);
-    auto const measuredHeight = AxisConstraints::Constrain(height, contentSize.height + titleBarInsets.GetTop());
+    auto const measuredHeight = AxisConstraints::Constrain(height, contentSize.height + titleBarInsets.top);
     auto const measuredSize = Size<Dp>(measuredWidth, measuredHeight);
     scope.MeasureChild(_background, AxisConstraints::MakeExact(measuredSize.width), AxisConstraints::MakeExact(measuredSize.height));
-    scope.MeasureChild(_titleBackground, AxisConstraints::MakeExact(measuredSize.width), AxisConstraints::MakeExact(titleBarInsets.GetTop()));
+    scope.MeasureChild(_titleBackground, AxisConstraints::MakeExact(measuredSize.width), AxisConstraints::MakeExact(titleBarInsets.top));
 
     if (width.IsBounded() && height.IsBounded())
     {
@@ -83,7 +83,7 @@ auto WindowFrame::Measure(MeasureScope& scope) -> void
     }
     else
     {
-        scope.MeasureChild(_titleContent, contentWidth, AxisConstraints::MakeExact(titleBarInsets.GetTop()));
+        scope.MeasureChild(_titleContent, contentWidth, AxisConstraints::MakeExact(titleBarInsets.top));
     }
     scope.SetMeasuredSize(measuredSize);
 }
@@ -98,7 +98,7 @@ auto WindowFrame::GetTitleBarContentRect(Size<Dp> const& size) const -> Rect<Dp>
     auto const titleBarInsets = GetTitleBarInsets();
     auto boundingRects = GetTitleBarBoundingRects();
     std::sort(boundingRects.begin(), boundingRects.end(), [](auto const& lhs, auto const& rhs) { return lhs.x0 < rhs.x0; });
-    boundingRects.push_back(Rect<Dp>(size.width, Dp(0), size.width, titleBarInsets.GetTop()));
+    boundingRects.push_back(Rect<Dp>(size.width, Dp(0), size.width, titleBarInsets.top));
 
     auto maxWidth = Dp(0);
     auto maxWidthLeft = Dp(0);
@@ -115,7 +115,7 @@ auto WindowFrame::GetTitleBarContentRect(Size<Dp> const& size) const -> Rect<Dp>
         }
         lastRight = rect.x1;
     }
-    return Rect<Dp>(maxWidthLeft, Dp(0), maxWidthRight, titleBarInsets.GetTop());
+    return Rect<Dp>(maxWidthLeft, Dp(0), maxWidthRight, titleBarInsets.top);
 }
 
 ///
@@ -126,7 +126,7 @@ auto WindowFrame::Arrange(ArrangeScope& scope) -> void
     auto const titleBarInsets = GetTitleBarInsets();
     auto const titleBarContentRect = GetTitleBarContentRect(scope.GetMeasuredSize(*this));
     scope.ArrangeChild(_background, Point<Dp>());
-    scope.ArrangeChild(_content, Point<Dp>(Dp(0), titleBarInsets.GetTop()));
+    scope.ArrangeChild(_content, Point<Dp>(Dp(0), titleBarInsets.top));
     scope.ArrangeChild(_titleBackground, Point<Dp>());
     scope.ArrangeChild(_titleContent, titleBarContentRect.GetCorner<0, 0>());
 }

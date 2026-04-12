@@ -9,10 +9,10 @@ TEST_CASE("EdgeInsets")
     SECTION("Init")
     {
         auto const e = EdgeInsets();
-        REQUIRE(e.GetLeading() == 0);
-        REQUIRE(e.GetTrailing() == 0);
-        REQUIRE(e.GetTop() == 0);
-        REQUIRE(e.GetBottom() == 0);
+        REQUIRE(e.leading == 0);
+        REQUIRE(e.trailing == 0);
+        REQUIRE(e.top == 0);
+        REQUIRE(e.bottom == 0);
         REQUIRE(e == e);
         REQUIRE(!(e != e));
     }
@@ -20,10 +20,10 @@ TEST_CASE("EdgeInsets")
     SECTION("Init")
     {
         auto const e = EdgeInsets(1, 2, 3, 4);
-        REQUIRE(e.GetLeading() == 1);
-        REQUIRE(e.GetTop() == 2);
-        REQUIRE(e.GetTrailing() == 3);
-        REQUIRE(e.GetBottom() == 4);
+        REQUIRE(e.leading == 1);
+        REQUIRE(e.top == 2);
+        REQUIRE(e.trailing == 3);
+        REQUIRE(e.bottom == 4);
     }
 
     SECTION("Assign")
@@ -36,18 +36,18 @@ TEST_CASE("EdgeInsets")
     SECTION("Symmetric")
     {
         auto const e = EdgeInsets::MakeSymmetric(1, 2);
-        REQUIRE(e.GetLeading() == 1);
-        REQUIRE(e.GetTrailing() == 1);
-        REQUIRE(e.GetTop() == 2);
-        REQUIRE(e.GetBottom() == 2);
+        REQUIRE(e.leading == 1);
+        REQUIRE(e.trailing == 1);
+        REQUIRE(e.top == 2);
+        REQUIRE(e.bottom == 2);
     }
 
     SECTION("Uniform")
     {
         auto const e = EdgeInsets::MakeUniform(1);
-        REQUIRE(e.GetLeading() == 1);
-        REQUIRE(e.GetTrailing() == 1);
-        REQUIRE(e.GetTop() == 1);
-        REQUIRE(e.GetBottom() == 1);
+        REQUIRE(e.leading == 1);
+        REQUIRE(e.trailing == 1);
+        REQUIRE(e.top == 1);
+        REQUIRE(e.bottom == 1);
     }
 }

@@ -85,8 +85,8 @@ auto PaddingView::Measure(MeasureScope& scope) -> void
     auto const& heightConstraints = parameter.GetHeightConstraints();
 
     auto const padding = GetNormalizedPadding();
-    auto const horizontal = padding.GetLeading() + padding.GetTrailing();
-    auto const vertical = padding.GetTop() + padding.GetBottom();
+    auto const horizontal = padding.GetTotalWidth();
+    auto const vertical = padding.GetTotalHeight();
     auto const adjustedWidth = AxisConstraints::Offset(widthConstraints, -horizontal);
     auto const adjustedHeight = AxisConstraints::Offset(heightConstraints, -vertical);
 
@@ -107,8 +107,8 @@ auto PaddingView::Arrange(ArrangeScope& scope) -> void
     {
         auto const layoutDirection = GetLayoutDirection();
         auto const padding = GetNormalizedPadding();
-        auto const left = (layoutDirection == LayoutDirection::LeftToRight) ? padding.GetLeading() : padding.GetTrailing();
-        auto const top = padding.GetTop();
+        auto const left = (layoutDirection == LayoutDirection::LeftToRight) ? padding.leading : padding.trailing;
+        auto const top = padding.top;
         scope.ArrangeChild(content, {left, top});
     }
 }

@@ -100,14 +100,14 @@ auto MenuItemView::UpdatePadding() -> void
 
     if (GetLeadingView())
     {
-        FlexLayout::SetChildMargin(_leadingContainer, EdgeInsets(padding.GetLeading(), 0, 0, 0));
+        FlexLayout::SetChildMargin(_leadingContainer, EdgeInsets(padding.leading, 0, 0, 0));
     }
 
     FlexLayout::SetChildMargin(_middleContainer, padding.GetHorizontal());
 
     if (GetTrailingView())
     {
-        FlexLayout::SetChildMargin(_trailingContainer, EdgeInsets(0, 0, padding.GetTrailing(), 0));
+        FlexLayout::SetChildMargin(_trailingContainer, EdgeInsets(0, 0, padding.trailing, 0));
     }
 }
 }

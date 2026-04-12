@@ -625,11 +625,11 @@ auto FlexLayout::GetMainAxisLength(EdgeInsets const& margin) const -> Dp
     auto const flexDirection = GetDirection();
     if (flexDirection == FlexLayoutDirection::Column || flexDirection == FlexLayoutDirection::ColumnReverse)
     {
-        return ViewLayoutFunction::AlignToPixelGridByRound(margin.GetTop(), *this) + ViewLayoutFunction::AlignToPixelGridByRound(margin.GetBottom(), *this);
+        return ViewLayoutFunction::AlignToPixelGridByRound(margin.top, *this) + ViewLayoutFunction::AlignToPixelGridByRound(margin.bottom, *this);
     }
     else
     {
-        return ViewLayoutFunction::AlignToPixelGridByRound(margin.GetLeading(), *this) + ViewLayoutFunction::AlignToPixelGridByRound(margin.GetTrailing(), *this);
+        return ViewLayoutFunction::AlignToPixelGridByRound(margin.leading, *this) + ViewLayoutFunction::AlignToPixelGridByRound(margin.trailing, *this);
     }
 }
 
@@ -641,11 +641,11 @@ auto FlexLayout::GetCrossAxisLength(EdgeInsets const& margin) const -> Dp
     auto const flexDirection = GetDirection();
     if (flexDirection == FlexLayoutDirection::Column || flexDirection == FlexLayoutDirection::ColumnReverse)
     {
-        return ViewLayoutFunction::AlignToPixelGridByRound(margin.GetLeading(), *this) + ViewLayoutFunction::AlignToPixelGridByRound(margin.GetTrailing(), *this);
+        return ViewLayoutFunction::AlignToPixelGridByRound(margin.leading, *this) + ViewLayoutFunction::AlignToPixelGridByRound(margin.trailing, *this);
     }
     else
     {
-        return ViewLayoutFunction::AlignToPixelGridByRound(margin.GetTop(), *this) + ViewLayoutFunction::AlignToPixelGridByRound(margin.GetBottom(), *this);
+        return ViewLayoutFunction::AlignToPixelGridByRound(margin.top, *this) + ViewLayoutFunction::AlignToPixelGridByRound(margin.bottom, *this);
     }
 }
 
@@ -657,11 +657,11 @@ auto FlexLayout::GetMainAxisOffset(EdgeInsets const& margin) const -> Dp
     auto const flexDirection = GetDirection();
     if (flexDirection == FlexLayoutDirection::Column || flexDirection == FlexLayoutDirection::ColumnReverse)
     {
-        return ViewLayoutFunction::AlignToPixelGridByRound(margin.GetTop(), *this);
+        return ViewLayoutFunction::AlignToPixelGridByRound(margin.top, *this);
     }
     else
     {
-        return ViewLayoutFunction::AlignToPixelGridByRound(margin.GetLeading(), *this);
+        return ViewLayoutFunction::AlignToPixelGridByRound(margin.leading, *this);
     }
 }
 
@@ -673,11 +673,11 @@ auto FlexLayout::GetCrossAxisOffset(EdgeInsets const& margin) const -> Dp
     auto const flexDirection = GetDirection();
     if (flexDirection == FlexLayoutDirection::Column || flexDirection == FlexLayoutDirection::ColumnReverse)
     {
-        return ViewLayoutFunction::AlignToPixelGridByRound(margin.GetLeading(), *this);
+        return ViewLayoutFunction::AlignToPixelGridByRound(margin.leading, *this);
     }
     else
     {
-        return ViewLayoutFunction::AlignToPixelGridByRound(margin.GetTop(), *this);
+        return ViewLayoutFunction::AlignToPixelGridByRound(margin.top, *this);
     }
 }
 

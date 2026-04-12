@@ -7,6 +7,6 @@ namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-class EdgeInsets;
+struct EdgeInsets;
 }
 }

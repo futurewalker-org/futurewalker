@@ -207,7 +207,7 @@ auto TextEdit::Draw(DrawScope& scope) -> void
 
             auto offset = selection.offset;
 
-            auto caretX = padding.GetLeading();
+            auto caretX = padding.leading;
             auto const caretY = lineY;
             auto const caretHeight = lineHeight;
 
@@ -611,8 +611,8 @@ auto TextEdit::InternalUpdateArrangeCache() -> void
 
     auto arrangeCache = ArrangeCache();
 
-    auto x = padding.GetLeading();
-    auto y = padding.GetTop();
+    auto x = padding.leading;
+    auto y = padding.top;
     for (auto const& shapedLine : _measureCache->shapedLines)
     {
         auto arrangedLine = ArrangedLine {
