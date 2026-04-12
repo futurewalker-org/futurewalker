@@ -76,9 +76,15 @@ auto MenuBar::ReceiveViewEvent(Event<>& event) -> Async<Bool>
 
 auto MenuBar::ReceivePopupMenuEvent(Event<>& event) -> Async<Bool>
 {
-    if (event.Is<PopupMenuEvent::Closed>() || event.Is<PopupMenuEvent::Activated>())
+    if (event.Is<PopupMenuEvent::Closed>())
     {
         DestroyPopup();
+    }
+    else if (event.Is<PopupMenuEvent::Activated>())
+    {
+        DestroyPopup();
+        CommandNode::Execute(*this, event.As<PopupMenuEvent::Activated>()->GetCommandId());
+        co_return true;
     }
     co_return false;
 }

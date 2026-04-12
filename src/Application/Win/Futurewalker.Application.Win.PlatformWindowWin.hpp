@@ -159,7 +159,6 @@ private:
     RGBColor _backgroundColor;
     BoxConstraints _sizeConstraints = BoxConstraints::MakeUnconstrained();
     Bool _destructing = false;
-    Bool _closing = false;
     Bool _closed = false;
     Rect<Vp> _systemControlRect;
     Bool _restoreOnShow = false;

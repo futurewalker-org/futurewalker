@@ -63,6 +63,7 @@ protected:
 
 private:
     auto CreatePopup(Shared<View> const& sourceView) -> void;
+    auto DestroyPopup() -> void;
     auto UpdatePopup() -> void;
     auto CalcPopupPosition(Rect<Vp> const& sourceRect, Size<Vp> const& popupSize, Rect<Vp> const& screenRect, Bool const rtl) const -> Point<Vp>;
 

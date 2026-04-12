@@ -5,6 +5,8 @@
 
 #include "Futurewalker.Application.ViewEvent.hpp"
 
+#include "Futurewalker.Action.CommandId.hpp"
+
 namespace FW_LAMP_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -17,6 +19,12 @@ public:
 
 class MenuViewEvent::Activated : public MenuViewEvent
 {
+public:
+    auto GetCommandId() const -> CommandId;
+    auto SetCommandId(CommandId const& commandId) -> void;
+
+private:
+    CommandId _commandId = 0U;
 };
 }
 }

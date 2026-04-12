@@ -175,17 +175,19 @@ auto PopupMenu::ReceiveEvent(Event<>& event) -> Async<Bool>
 {
     if (event.Is<PopupEvent::Closed>())
     {
-        _popup.Reset();
-        _sourceView.Reset();
+        DestroyPopup();
         auto closeEvent = Event<>(Event<PopupMenuEvent::Closed>());
         co_await GetEventReceiver().SendEvent(closeEvent);
         co_return true;
     }
     else if (event.Is<MenuViewEvent::Activated>())
     {
-        auto activatedEvent = Event<>(Event<PopupMenuEvent::Activated>());
-        co_await GetEventReceiver().SendEvent(activatedEvent);
-        co_return true;
+        DestroyPopup();
+        auto const commandId = event.As<MenuViewEvent::Activated>()->GetCommandId();
+        auto activatedEventParameter = Event<PopupMenuEvent::Activated>();
+        activatedEventParameter->SetCommandId(commandId);
+        auto activatedEvent = Event<>(std::move(activatedEventParameter));
+        co_return co_await GetEventReceiver().SendEvent(activatedEvent);
     }
     co_return false;
 }
@@ -210,6 +212,15 @@ auto PopupMenu::CreatePopup(Shared<View> const& sourceView) -> void
         _popup->SetBackgroundColor(RGBAColor());
         EventReceiver::Connect(*_popup, *this, &PopupMenu::ReceiveEvent);
     }
+}
+
+///
+/// @brief Destroys popup instance.
+///
+auto PopupMenu::DestroyPopup() -> void
+{
+    _popup.Reset();
+    _sourceView.Reset();
 }
 
 ///

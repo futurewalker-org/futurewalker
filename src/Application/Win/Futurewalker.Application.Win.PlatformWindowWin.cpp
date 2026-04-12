@@ -644,7 +644,7 @@ auto PlatformWindowWin::Close() -> Async<Bool>
 
         if (close)
         {
-            ::DestroyWindow(_hwnd);
+            Destroy();
         }
         co_return close;
     }
@@ -666,7 +666,7 @@ auto PlatformWindowWin::Destroy() -> void
             }
         }
 
-        if (!::DestroyWindow(_hwnd))
+        if (::DestroyWindow(_hwnd) == 0)
         {
             FW_DEBUG_LOG_ERROR("PlatformWindowWin: DestroyWindow failed");
         }
@@ -1590,7 +1590,7 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 
             if (close)
             {
-                ::DestroyWindow(hWnd);
+                Destroy();
             }
         }
         catch (...)
@@ -1614,33 +1614,29 @@ auto PlatformWindowWin::HandleDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
     }
     else if (msg == WM_NCDESTROY)
     {
-        _closed = true;
-
-        try
+        // Destroy() may be called during WM_CLOSE handling. Check if the window is already closed.
+        if (!_closed)
         {
-            if (const auto owner = _options.owner.TryAs<PlatformWindowWin>())
-            {
-                owner->RemoveOwnedWindow(GetSelf());
-            }
+            _closed = true;
 
-            // Avoid sending event from destructor.
-            if (!_destructing)
+            try
             {
-                auto event = Event<>(Event<PlatformWindowEvent::Closed>());
-
-                if (_closing)
+                if (const auto owner = _options.owner.TryAs<PlatformWindowWin>())
                 {
-                    PostWindowEvent(event);
+                    owner->RemoveOwnedWindow(GetSelf());
                 }
-                else
+
+                // Avoid sending event from destructor.
+                if (!_destructing)
                 {
+                    auto event = Event<>(Event<PlatformWindowEvent::Closed>());
                     SendWindowEventDetached(event);
                 }
             }
-        }
-        catch (...)
-        {
-            FW_DEBUG_ASSERT(false);
+            catch (...)
+            {
+                FW_DEBUG_ASSERT(false);
+            }
         }
         return 0;
     }

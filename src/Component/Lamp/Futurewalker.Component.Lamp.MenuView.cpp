@@ -112,9 +112,13 @@ auto MenuView::ReceiveEvent(Event<>& event) -> Async<Bool>
                         {
                             if (data.item.GetType() == MenuItemType::Item)
                             {
-                                CommandNode::Execute(*this, data.item.GetCommandId());
-                                auto notifyEvent = Event<>(Event<MenuViewEvent::Activated>());
-                                SendEventDetached(notifyEvent);
+                                auto notifyEventParameter = Event<MenuViewEvent::Activated>();
+                                notifyEventParameter->SetCommandId(data.item.GetCommandId());
+                                auto notifyEvent = Event<>(std::move(notifyEventParameter));
+                                if (!SendEventDetached(notifyEvent))
+                                {
+                                    CommandNode::Execute(*this, data.item.GetCommandId());
+                                }
                             }
                         }
                         break;
@@ -153,8 +157,11 @@ auto MenuView::ReceivePopupEvent(Event<>& event) -> Async<Bool>
     else if (event.Is<PopupMenuEvent::Activated>())
     {
         DestroyPopup();
-        auto activatedEvent = Event<>(Event<MenuViewEvent::Activated>());
-        co_await SendEvent(activatedEvent);
+        auto const commandId = event.As<PopupMenuEvent::Activated>()->GetCommandId();
+        auto notifyEventParameter = Event<MenuViewEvent::Activated>();
+        notifyEventParameter->SetCommandId(commandId);
+        auto notifyEvent = Event<>(std::move(notifyEventParameter));
+        co_await SendEvent(notifyEvent);
     }
     co_return false;
 }
