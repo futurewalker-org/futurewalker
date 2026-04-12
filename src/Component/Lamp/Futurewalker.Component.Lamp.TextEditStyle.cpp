@@ -22,7 +22,7 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::DisabledBorderAlpha, Style:
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::DisabledBorderWidth, Style::Size10);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FocusedBorderColor, Style::ColorPrimary);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FocusedBorderAlpha, Style::AlphaEnabled);
-FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FocusedBorderWidth, Style::Size20);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FocusedBorderWidth, Style::Size10);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::BorderRadius, Style::CornerRadiusSmall);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::Padding, Style::PaddingExtraSmall);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FontSize, TextViewStyle::FontSize);
