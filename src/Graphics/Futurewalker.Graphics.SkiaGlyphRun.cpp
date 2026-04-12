@@ -63,6 +63,11 @@ auto SkiaGlyphRun::GetGlyphIndex(CodePoint const textPosition) const -> Optional
                 return GlyphIndex::Max(0, GlyphIndex(i - 1));
             }
         }
+
+        if (u8TextPosition < _text.GetU8CodeUnitCount())
+        {
+            return GlyphIndex(_glyphCount - 1);
+        }
     }
     return {};
 }
