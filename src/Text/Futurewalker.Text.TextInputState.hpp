@@ -32,8 +32,8 @@ public:
         Function<void()> insertLineBreak;
         Function<Bool(CodePoint before, CodePoint after, Bool cancellable)> beforeDeleteSurroundingText;
         Function<void(CodePoint before, CodePoint after)> deleteSurroundingText;
-        Function<void(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End)> onTextChange;
-        Function<void()> onSelectionChange;
+        Function<void(Bool anticipated, CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End)> onTextChange;
+        Function<void(Bool anticipated)> onSelectionChange;
     };
     TextInputState(Delegate const& delegate);
 
@@ -89,8 +89,8 @@ private:
     auto InsertLineBreak() -> void;
     auto BeforeDeleteSurroundingText(CodePoint before, CodePoint after, Bool cancellable) -> Bool;
     auto DeleteSurroundingText(CodePoint before, CodePoint after) -> void;
-    auto OnTextChange(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End) -> void;
-    auto OnSelectionChange() -> void;
+    auto OnTextChange(Bool anticipated, CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End) -> void;
+    auto OnSelectionChange(Bool anticipated) -> void;
 
 private:
     Delegate _delegate;

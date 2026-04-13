@@ -17,10 +17,16 @@ namespace FW_EXPORT
 /// @tparam Tag Tag type
 ///
 template <Concepts::Integral T, class Tag>
-class Range<Integer<T, Tag>>
+struct Range<Integer<T, Tag>>
 {
-public:
+    ///
+    /// @brief Value type.
+    ///
     using ValueType = Integer<T, Tag>;
+
+    ///
+    /// @brief Tag type.
+    ///
     using TagType = Tag;
 
     ///
@@ -32,9 +38,9 @@ public:
     ///
     static constexpr auto Normalize(Range const& range) -> Range
     {
-        if (range._b > range._e)
+        if (range.begin > range.end)
         {
-            return Range(range._e, range._b);
+            return Range(range.end, range.begin);
         }
         return range;
     }
@@ -48,7 +54,7 @@ public:
     ///
     static constexpr auto Reverse(Range const& range) -> Range
     {
-        return Range(range._e, range._b);
+        return Range(range.end, range.begin);
     }
 
     ///
@@ -63,7 +69,7 @@ public:
     ///
     static constexpr auto Clamp(ValueType const& value, Range const& range) -> ValueType
     {
-        return Utility::Clamp(value, range._b, range._e);
+        return Utility::Clamp(value, range.begin, range.end);
     }
 
     ///
@@ -80,66 +86,54 @@ public:
         return Clamp(value, normalized);
     }
 
-    inline constexpr Range() = default;
-    inline constexpr Range(Range const&) = default;
-    inline constexpr auto operator=(Range const&) -> Range& = default;
-
-    template <class B, class E>
-    inline constexpr Range(B const& b, E const& e)
-      : _b {b}
-      , _e {e}
-    {
-    }
-
-    inline constexpr auto GetBegin() const noexcept -> ValueType const&
-    {
-        return _b;
-    }
-
-    inline constexpr auto SetBegin(ValueType const& b) noexcept
-    {
-        _b = b;
-    }
-
-    inline constexpr auto GetEnd() const noexcept -> ValueType const&
-    {
-        return _e;
-    }
-
-    inline constexpr auto SetEnd(ValueType const& e) noexcept
-    {
-        _e = e;
-    }
-
+    ///
+    /// @brief Get length of range.
+    ///
+    /// @return end - begin
+    ///
     inline constexpr auto GetLength() const noexcept -> ValueType
     {
-        return _e - _b;
+        return end - begin;
     }
 
+    ///
+    /// @brief Check if the range is empty.
+    ///
+    /// @return GetLength() == 0
+    ///
+    inline constexpr auto IsEmpty() const noexcept -> Bool
+    {
+        return GetLength() == static_cast<T>(0);
+    }
+
+    ///
+    /// @brief Check if the range is normalized.
+    ///
+    /// @return begin <= end
+    ///
     inline constexpr auto IsNormalized() const noexcept -> Bool
     {
-        return _b <= _e;
+        return begin <= end;
     }
 
     friend inline constexpr bool operator==(Range const& l, Range const& r) noexcept
     {
-        return (l._b == r._b) && (l._e == r._e);
+        return (l.begin == r.begin) && (l.end == r.end);
     }
 
     friend inline constexpr bool operator!=(Range const& l, Range const& r) noexcept
     {
-        return (l._b != r._b) || (l._e != r._e);
+        return (l.begin != r.begin) || (l.end != r.end);
     }
 
     template <template <class> class U>
     auto As() const -> U<ValueType>
     {
-        return U<ValueType>(_b, _e);
+        return U<ValueType>(begin, end);
     }
 
-private:
-    ValueType _b = static_cast<T>(0);
-    ValueType _e = static_cast<T>(0);
+    ValueType begin = static_cast<T>(0);
+    ValueType end = static_cast<T>(0);
 };
 }
 }

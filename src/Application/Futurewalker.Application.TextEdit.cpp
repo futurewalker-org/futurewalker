@@ -336,7 +336,7 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
                 auto const textRange = _inputEditable->GetStringRange();
                 auto const isRtl = GetLayoutDirection() == LayoutDirection::RightToLeft;
                 auto const isLeftArrow = (key == Key::ArrowLeft);
-                auto const anchorPosition = (isRtl == isLeftArrow) ? selection.GetEnd() : selection.GetBegin();
+                auto const anchorPosition = (isRtl == isLeftArrow) ? selection.end : selection.begin;
                 auto const positionOffset = selection.IsEmpty() ? ((isRtl == isLeftArrow) ? 1 : -1) : 0;
                 auto const newCaretPosition = Range<CodePoint>::Clamp(anchorPosition + positionOffset, textRange);
                 _inputEditable->SetSelectionRange({newCaretPosition, newCaretPosition}, TextSelectionDirection::Forward);
@@ -627,8 +627,8 @@ auto TextEdit::InternalUpdateMeasureCache() -> void
         return {lineCount - 1, position - measureCache.shapedLines[static_cast<size_t>(lineCount - 1)].start};
     };
     auto const selectionRange = InternalGetSelectionRange();
-    _selectionBegin = findSelectionPosition(selectionRange.GetBegin());
-    _selectionEnd = findSelectionPosition(selectionRange.GetEnd());
+    _selectionBegin = findSelectionPosition(selectionRange.begin);
+    _selectionEnd = findSelectionPosition(selectionRange.end);
     _measureCache = std::move(measureCache);
 
     InternalInvalidateArrangeCache();

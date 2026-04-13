@@ -106,8 +106,8 @@ auto Text::GetString(Range<CodePoint> range) const -> String
 {
     if (auto const state = GetImmutableState())
     {
-        auto const begin = GetU8IndexByCodePointIndex(range.GetBegin());
-        auto const end = GetU8IndexByCodePointIndex(range.GetEnd());
+        auto const begin = GetU8IndexByCodePointIndex(range.begin);
+        auto const end = GetU8IndexByCodePointIndex(range.end);
         return state->u8String.GetSubString(begin, end);
     }
     return {};
@@ -145,8 +145,8 @@ auto Text::GetU16String(Range<CodePoint> range) const -> U16String
 {
     if (auto const state = GetImmutableState())
     {
-        auto const begin = GetU16IndexByCodePointIndex(range.GetBegin());
-        auto const end = GetU16IndexByCodePointIndex(range.GetEnd());
+        auto const begin = GetU16IndexByCodePointIndex(range.begin);
+        auto const end = GetU16IndexByCodePointIndex(range.end);
         return state->u16String.GetSubString(begin, end);
     }
     return {};
@@ -305,8 +305,8 @@ auto Text::GetSubTextByU8Range(Range<CodeUnit> const& range) const -> Text
 {
     // TODO: optimize
     auto const textRange = Range<CodeUnit>(0, GetU8CodeUnitCount());
-    auto const b = Range<CodeUnit>::Clamp(range.GetBegin(), textRange);
-    auto const e = Range<CodeUnit>::Clamp(range.GetEnd(), textRange);
+    auto const b = Range<CodeUnit>::Clamp(range.begin, textRange);
+    auto const e = Range<CodeUnit>::Clamp(range.end, textRange);
     return Text(GetString().GetSubString(b, e));
 }
 
@@ -317,8 +317,8 @@ auto Text::GetSubTextByU16Range(Range<CodeUnit> const& range) const -> Text
 {
     // TODO: optimize
     auto const textRange = Range<CodeUnit>(0, GetU16CodeUnitCount());
-    auto const b = Range<CodeUnit>::Clamp(range.GetBegin(), textRange);
-    auto const e = Range<CodeUnit>::Clamp(range.GetEnd(), textRange);
+    auto const b = Range<CodeUnit>::Clamp(range.begin, textRange);
+    auto const e = Range<CodeUnit>::Clamp(range.end, textRange);
     return Text(GetString().GetSubString(b, e));
 }
 
@@ -330,7 +330,7 @@ auto Text::GetSubTextByU16Range(Range<CodeUnit> const& range) const -> Text
 ///
 auto Text::Replace(Range<CodePoint> const& range, Text const& text) -> void
 {
-    if (range.GetBegin() < 0 || range.GetBegin() > range.GetEnd() || range.GetEnd() > GetCodePointCount())
+    if (range.begin < 0 || range.begin > range.end || range.end > GetCodePointCount())
     {
         return;
     }
@@ -361,12 +361,12 @@ auto Text::ReplaceU8Core(Range<CodePoint> const& range, String const& u8String, 
 {
     if (auto const selfState = GetMutableState())
     {
-        auto const u8Range = Range<CodeUnit>(GetU8IndexByCodePointIndex(range.GetBegin()), GetU8IndexByCodePointIndex(range.GetEnd()));
-        selfState->u8String.Replace(u8Range.GetBegin(), u8Range.GetEnd(), u8String);
+        auto const u8Range = Range<CodeUnit>(GetU8IndexByCodePointIndex(range.begin), GetU8IndexByCodePointIndex(range.end));
+        selfState->u8String.Replace(u8Range.begin, u8Range.end, u8String);
 
-        auto const replaceBegin = IteratorAt(selfState->utf8Bounds, range.GetBegin());
+        auto const replaceBegin = IteratorAt(selfState->utf8Bounds, range.begin);
         auto const replaceBeginValue = *replaceBegin;
-        auto const replaceEnd = IteratorAt(selfState->utf8Bounds, range.GetEnd() + 1);
+        auto const replaceEnd = IteratorAt(selfState->utf8Bounds, range.end + 1);
         auto const replacedRange = InsertRange(selfState->utf8Bounds, replaceBegin, replaceEnd, u8Bounds.begin(), u8Bounds.end());
 
         for (auto& idx : replacedRange)
@@ -387,12 +387,12 @@ auto Text::ReplaceU16Core(Range<CodePoint> const& range, U16String const& u16Str
 {
     if (auto const selfState = GetMutableState())
     {
-        auto const u16Range = Range<CodeUnit>(GetU16IndexByCodePointIndex(range.GetBegin()), GetU16IndexByCodePointIndex(range.GetEnd()));
-        selfState->u16String.Replace(u16Range.GetBegin(), u16Range.GetEnd(), u16String);
+        auto const u16Range = Range<CodeUnit>(GetU16IndexByCodePointIndex(range.begin), GetU16IndexByCodePointIndex(range.end));
+        selfState->u16String.Replace(u16Range.begin, u16Range.end, u16String);
 
-        auto const replaceBegin = IteratorAt(selfState->utf16Bounds, range.GetBegin());
+        auto const replaceBegin = IteratorAt(selfState->utf16Bounds, range.begin);
         auto const replaceBeginValue = *replaceBegin;
-        auto const replaceEnd = IteratorAt(selfState->utf16Bounds, range.GetEnd() + 1);
+        auto const replaceEnd = IteratorAt(selfState->utf16Bounds, range.end + 1);
         auto const replacedRange = InsertRange(selfState->utf16Bounds, replaceBegin, replaceEnd, u16Bounds.begin(), u16Bounds.end());
 
         for (auto& idx : replacedRange)

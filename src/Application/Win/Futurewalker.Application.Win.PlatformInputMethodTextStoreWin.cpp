@@ -190,8 +190,8 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetSelection(ULONG 
         {
             auto const selectionDirection = editable->GetSelectionDirection();
             auto const selectionRange = editable->GetU16SelectionRange();
-            pSelection[0].acpStart = static_cast<LONG>(selectionRange.GetBegin());
-            pSelection[0].acpEnd = static_cast<LONG>(selectionRange.GetEnd());
+            pSelection[0].acpStart = static_cast<LONG>(selectionRange.begin);
+            pSelection[0].acpEnd = static_cast<LONG>(selectionRange.end);
             pSelection[0].style.ase = (selectionDirection == TextSelectionDirection::Backward) ? TS_AE_START : TS_AE_END;
             pSelection[0].style.fInterimChar = FALSE;
             *pcFetched = 1;
@@ -234,17 +234,17 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetText(
 
         auto const textRange = editable->GetU16StringRange();
 
-        if (queryRange.GetEnd() == -1)
+        if (queryRange.end == -1)
         {
-            queryRange.SetEnd(textRange.GetEnd());
+            queryRange.end = textRange.end;
         }
 
-        if (queryRange.GetEnd() < queryRange.GetBegin())
+        if (queryRange.end < queryRange.begin)
         {
             return TS_E_INVALIDPOS;
         }
 
-        if (queryRange.GetEnd() < textRange.GetBegin() || textRange.GetEnd() < queryRange.GetBegin())
+        if (queryRange.end < textRange.begin || textRange.end < queryRange.begin)
         {
             return TS_E_INVALIDPOS;
         }
@@ -334,14 +334,14 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::InsertTextAtSelecti
 
         if (dwFlags & TF_IAS_QUERYONLY)
         {
-            *pacpStart = static_cast<LONG>(selection.GetBegin());
+            *pacpStart = static_cast<LONG>(selection.begin);
             *pacpEnd = *pacpStart + static_cast<LONG>(text.size());
         }
         else
         {
             editable->InsertU16String({text.begin(), text.end()}, 1, true, false);
-            pChange->acpStart = static_cast<LONG>(selection.GetBegin());
-            pChange->acpOldEnd = static_cast<LONG>(selection.GetEnd());
+            pChange->acpStart = static_cast<LONG>(selection.begin);
+            pChange->acpOldEnd = static_cast<LONG>(selection.end);
             pChange->acpNewEnd = pChange->acpStart + static_cast<LONG>(text.size());
             *pacpStart = pChange->acpNewEnd;
             *pacpEnd = pChange->acpNewEnd;
@@ -422,7 +422,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::GetEndACP(LONG* pac
     if (auto const editable = _owner.GetEditable())
     {
         auto const range = editable->GetU16StringRange();
-        *pacp = static_cast<LONG>(range.GetEnd());
+        *pacp = static_cast<LONG>(range.end);
     }
     return S_OK;
 }
@@ -808,7 +808,7 @@ auto PlatformInputMethodTextStoreWin::SetEditable(Weak<PlatformInputEditableWin>
             newEditable->SetTextStore(GetSelf());
             newTextRange = newEditable->GetU16StringRange();
         }
-        NotifyTextChange(oldTextRange.GetBegin(), oldTextRange.GetEnd(), newTextRange.GetEnd());
+        NotifyTextChange(oldTextRange.begin, oldTextRange.end, newTextRange.end);
         NotifySelectionChange();
         UpdateDocumentMgrFocus();
     }

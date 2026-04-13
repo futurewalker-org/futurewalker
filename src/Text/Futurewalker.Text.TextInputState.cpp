@@ -24,11 +24,11 @@ auto TextInputState::SetText(Text const& text) -> void
     auto const newTextRange = GetU16StringRange();
     auto const newSelectionRange = GetSelectionRange();
 
-    OnTextChange(textRange.GetBegin(), textRange.GetEnd(), newTextRange.GetEnd());
+    OnTextChange(false, textRange.begin, textRange.end, newTextRange.end);
 
     if (selectionRange != newSelectionRange)
     {
-        OnSelectionChange();
+        OnSelectionChange(false);
     }
 }
 
@@ -60,8 +60,8 @@ auto TextInputState::GetSelectionDirection() const -> TextSelectionDirection
 auto TextInputState::SetSelectionRange(Range<CodePoint> const& range, TextSelectionDirection const direction) -> Bool
 {
     auto const textRange = GetStringRange();
-    auto const newBegin = Range<CodePoint>::Clamp(range.GetBegin(), textRange);
-    auto const newEnd = Range<CodePoint>::Clamp(range.GetEnd(), textRange);
+    auto const newBegin = Range<CodePoint>::Clamp(range.begin, textRange);
+    auto const newEnd = Range<CodePoint>::Clamp(range.end, textRange);
     auto const newSelectionRange = Range<CodePoint>::Normalize(Range<CodePoint>(newBegin, newEnd));
     auto const newSelectionDirection = direction == TextSelectionDirection::None ? TextSelectionDirection::Forward : direction;
 
@@ -80,7 +80,7 @@ auto TextInputState::SetSelectionRange(Range<CodePoint> const& range, TextSelect
 
     if (changed)
     {
-        OnSelectionChange();
+        OnSelectionChange(false);
     }
 
     if (range != newSelectionRange)
@@ -98,8 +98,8 @@ auto TextInputState::GetComposingRange() const -> Range<CodePoint>
 auto TextInputState::SetComposingRange(Range<CodePoint> const& range) -> Bool
 {
     auto const textRange = GetStringRange();
-    auto const newBegin = Range<CodePoint>::Clamp(range.GetBegin(), textRange);
-    auto const newEnd = Range<CodePoint>::Clamp(range.GetEnd(), textRange);
+    auto const newBegin = Range<CodePoint>::Clamp(range.begin, textRange);
+    auto const newEnd = Range<CodePoint>::Clamp(range.end, textRange);
     auto const newComposingRange = Range<CodePoint>::Normalize(Range<CodePoint>(newBegin, newEnd));
 
     if (_composingRange != newComposingRange)
@@ -129,25 +129,20 @@ auto TextInputState::InsertLineBreak(Bool anticipated, Bool cancellable) -> void
         _text.Replace(selectionRange, text);
 
         auto const caretPosition = 1;
-        auto const newPosition = selectionRange.GetBegin() + ((caretPosition > 0) ? text.GetCodePointCount() + caretPosition - 1 : caretPosition);
+        auto const newPosition = selectionRange.begin + ((caretPosition > 0) ? text.GetCodePointCount() + caretPosition - 1 : caretPosition);
         _selectionRange = {newPosition, newPosition};
 
-        if (!anticipated)
-        {
-            OnTextChange(u16SelectionRange.GetBegin(), u16SelectionRange.GetEnd(), u16SelectionRange.GetBegin() + text.GetU16CodeUnitCount());
-            OnSelectionChange();
-        }
+        OnTextChange(anticipated, u16SelectionRange.begin, u16SelectionRange.end, u16SelectionRange.begin + text.GetU16CodeUnitCount());
+        OnSelectionChange(anticipated);
+
         InsertLineBreak();
     }
     else
     {
-        if (anticipated)
-        {
-            auto const text = Text(String(u8"\n"));
-            auto const u16SelectionRange = GetU16SelectionRange();
-            OnTextChange(u16SelectionRange.GetBegin(), u16SelectionRange.GetBegin() + text.GetU16CodeUnitCount(), u16SelectionRange.GetEnd());
-            OnSelectionChange();
-        }
+        auto const text = Text(String(u8"\n"));
+        auto const u16SelectionRange = GetU16SelectionRange();
+        OnTextChange(anticipated, u16SelectionRange.begin, u16SelectionRange.begin + text.GetU16CodeUnitCount(), u16SelectionRange.end);
+        OnSelectionChange(anticipated);
     }
 }
 
@@ -158,19 +153,19 @@ auto TextInputState::DeleteSurroundingText(CodePoint before, CodePoint after, Bo
         auto const textRange = GetStringRange();
         auto const selectionRange = GetSelectionRange();
 
-        auto const postBegin = selectionRange.GetEnd();
-        auto const postEnd = Range<CodePoint>::Clamp(selectionRange.GetEnd() + after, textRange);
+        auto const postBegin = selectionRange.end;
+        auto const postEnd = Range<CodePoint>::Clamp(selectionRange.end + after, textRange);
         auto const postEnd16 = FindU16IndexFromCodePoint(postEnd);
         _text.Replace({postBegin, postEnd}, Text());
 
-        auto const preBegin = Range<CodePoint>::Clamp(selectionRange.GetBegin() - before, textRange);
+        auto const preBegin = Range<CodePoint>::Clamp(selectionRange.begin - before, textRange);
         auto const preBegin16 = FindU16IndexFromCodePoint(preBegin);
-        auto const preEnd = selectionRange.GetBegin();
+        auto const preEnd = selectionRange.begin;
         _text.Replace({preBegin, preEnd}, Text());
 
         auto const offset = preEnd - preBegin;
-        auto const newBegin = selectionRange.GetBegin() - offset;
-        auto const newEnd = selectionRange.GetEnd() - offset;
+        auto const newBegin = selectionRange.begin - offset;
+        auto const newEnd = selectionRange.end - offset;
         if (_selectionRange.GetLength() > 0)
         {
             _selectionRange = {newBegin, newEnd};
@@ -180,33 +175,28 @@ auto TextInputState::DeleteSurroundingText(CodePoint before, CodePoint after, Bo
             _selectionRange = {newEnd, newBegin};
         }
 
-        if (!anticipated)
-        {
-            OnTextChange(preBegin16, postEnd16, FindU16IndexFromCodePoint(newEnd));
+        OnTextChange(anticipated, preBegin16, postEnd16, FindU16IndexFromCodePoint(newEnd));
 
-            if (before != 0)
-            {
-                OnSelectionChange();
-            }
+        if (before != 0)
+        {
+            OnSelectionChange(anticipated);
         }
+
         DeleteSurroundingText(before, after);
     }
     else
     {
-        if (anticipated)
-        {
-            auto const textRange = GetStringRange();
-            auto const selectionRange = GetSelectionRange();
-            auto const oldBegin = Range<CodePoint>::Clamp(selectionRange.GetBegin() - before, textRange);
-            auto const oldEnd = Range<CodePoint>::Clamp(oldBegin + selectionRange.GetLength(), textRange);
-            auto const oldRange = FindU16RangeFromCodePointRange({oldBegin, oldEnd});
-            auto const newRange = GetU16SelectionRange();
-            OnTextChange(oldRange.GetBegin(), oldRange.GetEnd(), newRange.GetEnd());
+        auto const textRange = GetStringRange();
+        auto const selectionRange = GetSelectionRange();
+        auto const oldBegin = Range<CodePoint>::Clamp(selectionRange.begin - before, textRange);
+        auto const oldEnd = Range<CodePoint>::Clamp(oldBegin + selectionRange.GetLength(), textRange);
+        auto const oldRange = FindU16RangeFromCodePointRange({oldBegin, oldEnd});
+        auto const newRange = GetU16SelectionRange();
+        OnTextChange(anticipated, oldRange.begin, oldRange.end, newRange.end);
 
-            if (before != 0)
-            {
-                OnSelectionChange();
-            }
+        if (before != 0)
+        {
+            OnSelectionChange(anticipated);
         }
     }
 }
@@ -218,8 +208,8 @@ auto TextInputState::GetU16String() const -> U16String
 
 auto TextInputState::GetU16String(Range<CodeUnit> range) const -> U16String
 {
-    auto const b = _text.GetCodePointIndexByU16Index(range.GetBegin());
-    auto const e = _text.GetCodePointIndexByU16Index(range.GetEnd());
+    auto const b = _text.GetCodePointIndexByU16Index(range.begin);
+    auto const e = _text.GetCodePointIndexByU16Index(range.end);
     return _text.GetU16String({b, e});
 }
 
@@ -231,15 +221,15 @@ auto TextInputState::GetU16StringRange() const -> Range<CodeUnit>
 auto TextInputState::GetU16SelectionRange() const -> Range<CodeUnit>
 {
     auto const range = GetSelectionRange();
-    auto const b = _text.GetU16IndexByCodePointIndex(range.GetBegin());
-    auto const e = _text.GetU16IndexByCodePointIndex(range.GetEnd());
+    auto const b = _text.GetU16IndexByCodePointIndex(range.begin);
+    auto const e = _text.GetU16IndexByCodePointIndex(range.end);
     return {b, e};
 }
 
 auto TextInputState::SetU16SelectionRange(Range<CodeUnit> const& range, TextSelectionDirection const direction, Bool anticipated) -> void
 {
-    auto const b = FindCodePointFromU16Index(range.GetBegin());
-    auto const e = FindCodePointFromU16Index(range.GetEnd());
+    auto const b = FindCodePointFromU16Index(range.begin);
+    auto const e = FindCodePointFromU16Index(range.end);
     auto const newSelectedRange = Range<CodePoint>::Normalize(Range<CodePoint>(b, e));
     auto const newSelectionDirection = direction == TextSelectionDirection::None ? TextSelectionDirection::Forward : direction;
 
@@ -257,34 +247,24 @@ auto TextInputState::SetU16SelectionRange(Range<CodeUnit> const& range, TextSele
         changed = true;
     }
 
-    if (anticipated)
+    if (changed)
     {
-        if (range != GetU16SelectionRange())
-        {
-            OnSelectionChange();
-        }
-    }
-    else
-    {
-        if (changed)
-        {
-            OnSelectionChange();
-        }
+        OnSelectionChange(anticipated);
     }
 }
 
 auto TextInputState::GetU16ComposingRange() const -> Range<CodeUnit>
 {
     auto const range = GetComposingRange();
-    auto const b = _text.GetU16IndexByCodePointIndex(range.GetBegin());
-    auto const e = _text.GetU16IndexByCodePointIndex(range.GetEnd());
+    auto const b = _text.GetU16IndexByCodePointIndex(range.begin);
+    auto const e = _text.GetU16IndexByCodePointIndex(range.end);
     return {b, e};
 }
 
 auto TextInputState::SetU16ComposingRange(Range<CodeUnit> const& range) -> void
 {
-    auto const b = FindCodePointFromU16Index(range.GetBegin());
-    auto const e = FindCodePointFromU16Index(range.GetEnd());
+    auto const b = FindCodePointFromU16Index(range.begin);
+    auto const e = FindCodePointFromU16Index(range.end);
     auto const newComposingRange = Range<CodePoint>::Normalize(Range<CodePoint>(b, e));
 
     if (_composingRange != newComposingRange)
@@ -300,15 +280,15 @@ auto TextInputState::InsertU16Text(U16StringView text, CodePoint caretPosition, 
 
 auto TextInputState::GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>
 {
-    auto const begin = FindCodePointFromU16Index(range.GetBegin());
-    auto const end = FindCodePointFromU16Index(range.GetEnd());
+    auto const begin = FindCodePointFromU16Index(range.begin);
+    auto const end = FindCodePointFromU16Index(range.end);
     return {begin, end};
 }
 
 auto TextInputState::GetRangeFromU8Range(Range<CodeUnit> range) const -> Range<CodePoint>
 {
-    auto const begin = FindCodePointFromU8Index(range.GetBegin());
-    auto const end = FindCodePointFromU8Index(range.GetEnd());
+    auto const begin = FindCodePointFromU8Index(range.begin);
+    auto const end = FindCodePointFromU8Index(range.end);
     return {begin, end};
 }
 
@@ -339,8 +319,8 @@ auto TextInputState::FindU8IndexFromCodePoint(CodePoint codePoint) const -> Code
 
 auto TextInputState::FindU8RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>
 {
-    auto const b = _text.GetU8IndexByCodePointIndex(range.GetBegin());
-    auto const e = _text.GetU8IndexByCodePointIndex(range.GetEnd());
+    auto const b = _text.GetU8IndexByCodePointIndex(range.begin);
+    auto const e = _text.GetU8IndexByCodePointIndex(range.end);
     return Range<CodeUnit>(b, e);
 }
 
@@ -351,8 +331,8 @@ auto TextInputState::FindU16IndexFromCodePoint(CodePoint codePoint) const -> Cod
 
 auto TextInputState::FindU16RangeFromCodePointRange(Range<CodePoint> range) const -> Range<CodeUnit>
 {
-    auto const b = _text.GetU16IndexByCodePointIndex(range.GetBegin());
-    auto const e = _text.GetU16IndexByCodePointIndex(range.GetEnd());
+    auto const b = _text.GetU16IndexByCodePointIndex(range.begin);
+    auto const e = _text.GetU16IndexByCodePointIndex(range.end);
     return Range<CodeUnit>(b, e);
 }
 
@@ -364,28 +344,23 @@ auto TextInputState::InsertTextCore(CodePoint caretPosition, Bool anticipated, B
         auto const oldU16Selection = GetU16SelectionRange();
         _text.Replace(oldSelection, text);
 
-        auto const newPosition = oldSelection.GetBegin() + ((caretPosition > 0) ? text.GetCodePointCount() + caretPosition - 1 : caretPosition);
+        auto const newPosition = oldSelection.begin + ((caretPosition > 0) ? text.GetCodePointCount() + caretPosition - 1 : caretPosition);
         _selectionRange = {newPosition, newPosition};
 
-        if (!anticipated)
-        {
-            OnTextChange(oldU16Selection.GetBegin(), oldU16Selection.GetEnd(), oldU16Selection.GetBegin() + text.GetU16CodeUnitCount());
+        OnTextChange(anticipated, oldU16Selection.begin, oldU16Selection.end, oldU16Selection.begin + text.GetU16CodeUnitCount());
 
-            if (_selectionRange != oldSelection)
-            {
-                OnSelectionChange();
-            }
+        if (_selectionRange != oldSelection)
+        {
+            OnSelectionChange(anticipated);
         }
+
         InsertText(text.GetString());
     }
     else
     {
-        if (anticipated)
-        {
-            auto const u16SelectedRange = GetU16SelectionRange();
-            OnTextChange(u16SelectedRange.GetBegin(), u16SelectedRange.GetBegin() + text.GetU16CodeUnitCount(), u16SelectedRange.GetEnd());
-            OnSelectionChange();
-        }
+        auto const u16SelectedRange = GetU16SelectionRange();
+        OnTextChange(anticipated, u16SelectedRange.begin, u16SelectedRange.begin + text.GetU16CodeUnitCount(), u16SelectedRange.end);
+        OnSelectionChange(anticipated);
     }
 }
 
@@ -440,19 +415,19 @@ auto TextInputState::DeleteSurroundingText(CodePoint before, CodePoint after) ->
     }
 }
 
-auto TextInputState::OnTextChange(CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End) -> void
+auto TextInputState::OnTextChange(Bool anticipated, CodeUnit u16Begin, CodeUnit oldU16End, CodeUnit newU16End) -> void
 {
     if (_delegate.onTextChange)
     {
-        _delegate.onTextChange(u16Begin, oldU16End, newU16End);
+        _delegate.onTextChange(anticipated, u16Begin, oldU16End, newU16End);
     }
 }
 
-auto TextInputState::OnSelectionChange() -> void
+auto TextInputState::OnSelectionChange(Bool anticipated) -> void
 {
     if (_delegate.onSelectionChange)
     {
-        _delegate.onSelectionChange();
+        _delegate.onSelectionChange(anticipated);
     }
 }
 }

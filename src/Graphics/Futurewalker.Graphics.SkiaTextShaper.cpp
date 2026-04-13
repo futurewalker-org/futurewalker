@@ -111,9 +111,9 @@ public:
         auto run = _runs.back().UnsafeAs<SkiaGlyphRun>();
         run->SetFont(info.fFont);
         run->SetAdvance(info.fAdvance.fX);
-        run->SetText(_text.GetSubTextByU8Range({info.utf8Range.begin(), info.utf8Range.end()}));
+        run->SetText(_text.GetSubTextByU8Range({CodeUnit(info.utf8Range.begin()), CodeUnit(info.utf8Range.end())}));
 
-        auto const clusterOffset = static_cast<uint32_t>(info.utf8Range.fBegin);
+        auto const clusterOffset = static_cast<uint32_t>(info.utf8Range.begin());
         SkASSERT(0 <= clusterOffset);
         for (auto i = 0uz; i < info.glyphCount; ++i)
         {

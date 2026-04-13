@@ -8,6 +8,6 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 template <class>
-class Range;
+struct Range;
 }
 }
