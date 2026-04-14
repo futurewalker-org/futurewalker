@@ -47,6 +47,9 @@ public:
     auto InsertLineBreak() -> void override;
     auto DeleteSurroundingText(CodePoint before, CodePoint after) -> void override;
 
+    auto CompositionState(Bool const composing) -> void;
+    auto CompositionUpdate() -> void;
+
 public:
     auto GetU16Text() const -> U16String;
     auto GetU16Text(Range<CodeUnit> range) const -> U16String;
@@ -66,14 +69,15 @@ private:
     auto InternalInsertLineBreak() -> void;
     auto InternalBeforeDeleteSurroundingText(CodePoint before, CodePoint after, Bool cancellable) -> Bool;
     auto InternalDeleteSurroundingText(CodePoint before, CodePoint after) -> void;
-    auto InternalOnTextChange(CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void;
-    auto InternalOnSelectionChange() -> void;
+    auto InternalOnTextChange(Bool anticipated, CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void;
+    auto InternalOnSelectionChange(Bool anticipated) -> void;
 
 private:
     Rect<Dp> _layoutRect;
     TextInputState _inputState;
     Graphics::TextLayoutInfo _layoutInfo;
     __weak NSTextInputContext* _textInputContext = nil;
+    Bool _composing = false;
 };
 }
 }

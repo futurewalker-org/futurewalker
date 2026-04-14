@@ -20,8 +20,8 @@ PlatformInputEditableMac::PlatformInputEditableMac(PassKey<PlatformInputEditable
       .insertLineBreak = [&]() { InternalInsertLineBreak(); },
       .beforeDeleteSurroundingText = [&](CodePoint before, CodePoint after, Bool cancellable) { return InternalBeforeDeleteSurroundingText(before, after, cancellable); },
       .deleteSurroundingText = [&](CodePoint before, CodePoint after) { InternalDeleteSurroundingText(before, after); },
-      .onTextChange = [&](CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) { return InternalOnTextChange(u16OldBegin, u16OldEnd, u16NewEnd); },
-      .onSelectionChange = [&]() { return InternalOnSelectionChange(); },
+      .onTextChange = [&](Bool anticipated, CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) { return InternalOnTextChange(anticipated, u16OldBegin, u16OldEnd, u16NewEnd); },
+      .onSelectionChange = [&](Bool anticipated) { return InternalOnSelectionChange(anticipated); },
     }}
 {
 }
@@ -109,6 +109,40 @@ auto PlatformInputEditableMac::InsertLineBreak() -> void
 auto PlatformInputEditableMac::DeleteSurroundingText(CodePoint before, CodePoint after) -> void
 {
     _inputState.DeleteSurroundingText(before, after, false, true);
+}
+
+auto PlatformInputEditableMac::CompositionState(Bool const composing) -> void
+{
+    if (_composing != composing)
+    {
+        _composing = composing;
+
+        if (_composing)
+        {
+            NSLog(@"Start composing");
+            auto parameter = Event<PlatformInputEvent::CompositionStart>();
+            auto event = Event<>(std::move(parameter));
+            SendInputEventDetached(event);
+        }
+        else
+        {
+            NSLog(@"End composing");
+            auto parameter = Event<PlatformInputEvent::CompositionEnd>();
+            auto event = Event<>(std::move(parameter));
+            SendInputEventDetached(event);
+        }
+    }
+}
+
+auto PlatformInputEditableMac::CompositionUpdate() -> void
+{
+    if (_composing)
+    {
+        NSLog(@"Update composing");
+        auto parameter = Event<PlatformInputEvent::CompositionUpdate>();
+        auto event = Event<>(std::move(parameter));
+        SendInputEventDetached(event);
+    }
 }
 
 auto PlatformInputEditableMac::GetU16Text() const -> U16String
@@ -252,18 +286,25 @@ auto PlatformInputEditableMac::InternalDeleteSurroundingText(CodePoint before, C
     SendInputEventDetached(event);
 }
 
-auto PlatformInputEditableMac::InternalOnTextChange(CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void
+auto PlatformInputEditableMac::InternalOnTextChange(Bool anticipated, CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void
 {
+    (void)anticipated;
     (void)u16OldBegin;
     (void)u16OldEnd;
     (void)u16NewEnd;
 }
 
-auto PlatformInputEditableMac::InternalOnSelectionChange() -> void
+auto PlatformInputEditableMac::InternalOnSelectionChange(Bool anticipated) -> void
 {
     if (@available(macOS 15.4, *))
     {
-        [_textInputContext textInputClientDidUpdateSelection];
+        if (!anticipated)
+        {
+            [_textInputContext textInputClientDidUpdateSelection];
+        }
     }
+    auto parameter = Event<PlatformInputEvent::SelectionChange>();
+    auto event = Event<>(std::move(parameter));
+    SendInputEventDetached(event);
 }
 }

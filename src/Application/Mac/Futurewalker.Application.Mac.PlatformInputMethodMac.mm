@@ -29,6 +29,7 @@ using namespace FW_NS;
 
 - (void)insertText:(id)string replacementRange:(NSRange)replacementRange
 {
+    NSLog(@"insertText: %@, replacementRange: %@", string, NSStringFromRange(replacementRange));
     auto editable = self.inputMethod->GetEditable();
     if (!editable)
     {
@@ -53,7 +54,7 @@ using namespace FW_NS;
         auto data = [insertString dataUsingEncoding:nativeEncoding allowLossyConversion:NO];
         if (replacementRange.location != NSNotFound)
         {
-            editable->SetU16SelectionRange(Range<CodeUnit>(replacementRange.location, replacementRange.location + replacementRange.length), editable->GetSelectionDirection(), true);
+            editable->SetU16SelectionRange({CodeUnit(replacementRange.location), CodeUnit(replacementRange.location + replacementRange.length)}, editable->GetSelectionDirection(), true);
         }
         else if (editable->GetU16ComposingRange().GetLength() != 0)
         {
@@ -89,6 +90,8 @@ using namespace FW_NS;
 
     if (markedString)
     {
+        editable->CompositionState(true);
+
         // Get UTF-16 bytes without BOM.
         static_assert(std::endian::native == std::endian::little);
         auto const nativeEncoding = NSUTF16LittleEndianStringEncoding;
@@ -104,7 +107,7 @@ using namespace FW_NS;
             if (replacementRange.location != NSNotFound)
             {
                 // replacementRange is relative to the composing range.
-                auto const insertBegin = composingRange.GetBegin() + CodeUnit(replacementRange.location);
+                auto const insertBegin = composingRange.begin + CodeUnit(replacementRange.location);
                 auto const insertEnd = insertBegin + CodeUnit(replacementRange.length);
                 editable->SetU16SelectionRange(Range<CodeUnit>(insertBegin, insertEnd), editable->GetSelectionDirection(), true);
             }
@@ -128,14 +131,14 @@ using namespace FW_NS;
             {
                 // composing range has been partially replaced.
                 auto const removedLength = CodeUnit(replacementRange.length);
-                auto const composingBegin = composingRange.GetBegin();
-                auto const composingEnd = composingRange.GetEnd() - removedLength + addedLength;
+                auto const composingBegin = composingRange.begin;
+                auto const composingEnd = composingRange.end - removedLength + addedLength;
                 editable->SetU16ComposingRange({composingBegin, composingEnd});
             }
             else
             {
                 // whole composing range has been replaced.
-                auto const composingBegin = composingRange.GetBegin();
+                auto const composingBegin = composingRange.begin;
                 auto const composingEnd = composingBegin + addedLength;
                 editable->SetU16ComposingRange({composingBegin, composingEnd});
             }
@@ -143,7 +146,7 @@ using namespace FW_NS;
         else
         {
             // composing text has been inserted at selection.
-            auto const composingBegin = selectionRange.GetBegin();
+            auto const composingBegin = selectionRange.begin;
             auto const composingEnd = composingBegin + CodeUnit(stringView.GetSize());
             editable->SetU16ComposingRange({composingBegin, composingEnd});
         }
@@ -151,7 +154,7 @@ using namespace FW_NS;
         if (selectedRange.location != NSNotFound)
         {
             // selectedRange is relative to the start of the inserted text.
-            auto const caretPosition = editable->GetU16SelectionRange().GetBegin();
+            auto const caretPosition = editable->GetU16SelectionRange().begin;
             auto const selecteBegin = caretPosition + CodeUnit(selectedRange.location);
             auto const selecteEnd = selecteBegin + CodeUnit(selectedRange.length);
             editable->SetU16SelectionRange(Range<CodeUnit>(selecteBegin, selecteEnd), editable->GetSelectionDirection(), true);
@@ -172,7 +175,7 @@ using namespace FW_NS;
     auto const composingRange = Range<CodeUnit>::Normalize(editable->GetU16ComposingRange());
     if (composingRange.GetLength() != 0)
     {
-        auto const selectedRange = Range<CodeUnit>(composingRange.GetEnd(), composingRange.GetEnd());
+        auto const selectedRange = Range<CodeUnit>(composingRange.end, composingRange.end);
         editable->SetU16ComposingRange(selectedRange);
         editable->SetU16SelectionRange(selectedRange, editable->GetSelectionDirection(), true);
     }
@@ -185,7 +188,7 @@ using namespace FW_NS;
     if (editable)
     {
         auto const selectionRange = Range<CodeUnit>::Normalize(editable->GetU16SelectionRange());
-        auto const start = static_cast<NSUInteger>(selectionRange.GetBegin());
+        auto const start = static_cast<NSUInteger>(selectionRange.begin);
         auto const length = static_cast<NSUInteger>(selectionRange.GetLength());
         return NSMakeRange(start, length);
     }
@@ -199,7 +202,7 @@ using namespace FW_NS;
     if (editable)
     {
         auto const composingRange = Range<CodeUnit>::Normalize(editable->GetU16ComposingRange());
-        auto const start = static_cast<NSUInteger>(composingRange.GetBegin());
+        auto const start = static_cast<NSUInteger>(composingRange.begin);
         auto const length = static_cast<NSUInteger>(composingRange.GetLength());
         return NSMakeRange(start, length);
     }
@@ -208,75 +211,37 @@ using namespace FW_NS;
 
 - (BOOL)hasMarkedText
 {
-    NSLog(@"hasMarkedText");
     auto editable = self.inputMethod->GetEditable();
     if (editable)
     {
         if (editable->GetU16ComposingRange().GetLength() != 0)
         {
+            NSLog(@"hasMarkedText: YES");
             return YES;
         }
     }
+    NSLog(@"hasMarkedText: NO");
     return NO;
 }
 
 - (void)doCommandBySelector:(SEL)selector
 {
     NSLog(@"doCommandBySelector: %@", NSStringFromSelector(selector));
-
-    if (selector == @selector(deleteBackward:))
-    {
-        [self deleteBackward:self];
-    }
-    else if (selector == @selector(deleteForward:))
-    {
-        [self deleteForward:self];
-    }
-    else if (selector == @selector(insertNewline:))
-    {
-        [self insertNewline:self];
-    }
 }
 
 - (void)deleteBackward:(id)sender
 {
     NSLog(@"deleteBackward: %@", sender);
-    if (auto editable = self.inputMethod->GetEditable())
-    {
-        if (editable->GetSelectionRange().GetLength() != 0)
-        {
-            editable->InsertText({}, 0);
-        }
-        else
-        {
-            editable->DeleteSurroundingText(1, 0);
-        }
-    }
 }
 
 - (void)deleteForward:(id)sender
 {
     NSLog(@"deleteForward: %@", sender);
-    if (auto editable = self.inputMethod->GetEditable())
-    {
-        if (editable->GetSelectionRange().GetLength() != 0)
-        {
-            editable->InsertText({}, 0);
-        }
-        else
-        {
-            editable->DeleteSurroundingText(0, 1);
-        }
-    }
 }
 
 - (void)insertNewline:(id)sender
 {
     NSLog(@"insertNewline: %@", sender);
-    if (auto editable = self.inputMethod->GetEditable())
-    {
-        editable->InsertLineBreak();
-    }
 }
 
 - (nullable NSAttributedString*)attributedSubstringForProposedRange:(NSRange)range actualRange:(nullable NSRangePointer)actualRange
@@ -298,9 +263,9 @@ using namespace FW_NS;
         // FIXME: We currently don't have line informatino so just return rectangle of first glyph run here.
         auto const & layoutRect = editable->GetLayoutRect();
         auto const& layoutInfo = editable->GetLayoutInfo();
-        auto const u8Range = editable->GetRangeFromU16Range(Range<CodeUnit>(range.location, range.location + range.length));
+        auto const u8Range = editable->GetRangeFromU16Range({CodeUnit(range.location), CodeUnit(range.location + range.length)});
 
-        auto const i = u8Range.GetBegin();
+        auto const i = u8Range.begin;
         if (auto const runIndex = layoutInfo.GetGlyphRunIndex(i))
         {
             if (auto const run = layoutInfo.GetGlyphRun(*runIndex))
@@ -356,7 +321,7 @@ using namespace FW_NS;
                 {
                     auto const characterIndex = layoutInfo.GetCharacterIndex(i - 1).GetValueOr(0);
                     auto const u16Range = editable->GetU16RangeFromRange({characterIndex, characterIndex});
-                    return static_cast<NSUInteger>(u16Range.GetBegin());
+                    return static_cast<NSUInteger>(u16Range.begin);
                 }
                 else
                 {
@@ -364,7 +329,7 @@ using namespace FW_NS;
                 }
             }
         }
-        return static_cast<NSUInteger>(editable->GetU16TextRange().GetEnd());
+        return static_cast<NSUInteger>(editable->GetU16TextRange().end);
     }
     return 0;
 }

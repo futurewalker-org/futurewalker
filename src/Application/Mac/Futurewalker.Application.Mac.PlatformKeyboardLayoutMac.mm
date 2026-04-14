@@ -20,7 +20,7 @@ auto PlatformKeyboardLayoutMac::MapControlCharsToNamedKey(NSString* chars) -> St
             {
                 // ASCII control characters.
                 case '\x08':
-                    return Key::Backspace;
+                    return Key::Delete;
                 case '\x09':
                     return Key::Tab;
                 case '\x0D':
@@ -28,7 +28,7 @@ auto PlatformKeyboardLayoutMac::MapControlCharsToNamedKey(NSString* chars) -> St
                 case '\x1B':
                     return Key::Escape;
                 case '\x7F':
-                    return Key::Delete;
+                    return Key::Backspace;
                 // PUA range reserved by OpenStep for function keys.
                 case NSUpArrowFunctionKey:
                     return Key::ArrowUp;

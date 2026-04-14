@@ -741,19 +741,32 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
 {
     @try
     {
+        auto const composingBefore = [self hasMarkedText];
         [[self inputContext] handleEvent:event];
+        auto const composingAfter = [self hasMarkedText];
 
-        if (!self.hasMarkedText)
+        auto keyEventParameter = Event<PlatformKeyEvent::Down>();
+        keyEventParameter->SetKey(PlatformKeyboardLayoutMac::MapControlCharsToNamedKey(event.characters));
+        keyEventParameter->SetUnmodifiedKey(PlatformKeyboardLayoutMac::MapControlCharsToNamedKey([event charactersByApplyingModifiers:0]));
+        keyEventParameter->SetText(PlatformStringFunctionMac::ConvertNSStringToString(event.characters));
+        keyEventParameter->SetModifiers([self modifierFlagsToModifierKeyFlags:event.modifierFlags]);
+        keyEventParameter->SetRepeat(event.isARepeat);
+        keyEventParameter->SetTimestamp(NSTimeIntervalToMonotonicTime(event.timestamp));
+        keyEventParameter->SetComposing(composingBefore || composingAfter);
+        auto keyEvent = Event<>(keyEventParameter);
+        _callbackOnKey(_data, keyEvent);
+
+        if (_inputMethod)
         {
-            auto keyEventParameter = Event<PlatformKeyEvent::Down>();
-            keyEventParameter->SetKey(PlatformKeyboardLayoutMac::MapControlCharsToNamedKey(event.characters));
-            keyEventParameter->SetUnmodifiedKey(PlatformKeyboardLayoutMac::MapControlCharsToNamedKey([event charactersByApplyingModifiers:0]));
-            keyEventParameter->SetText(PlatformStringFunctionMac::ConvertNSStringToString(event.characters));
-            keyEventParameter->SetModifiers([self modifierFlagsToModifierKeyFlags:event.modifierFlags]);
-            keyEventParameter->SetRepeat(event.isARepeat);
-            keyEventParameter->SetTimestamp(NSTimeIntervalToMonotonicTime(event.timestamp));
-            auto keyEvent = Event<>(keyEventParameter);
-            _callbackOnKey(_data, keyEvent);
+            if (auto const editable = _inputMethod->GetEditable())
+            {
+                editable->CompositionUpdate();
+
+                if (!composingAfter)
+                {
+                    editable->CompositionState(false);
+                }
+            }
         }
     }
     @catch (NSException* e)
@@ -771,7 +784,7 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
         keyEventParameter->SetTimestamp(NSTimeIntervalToMonotonicTime(event.timestamp));
         keyEventParameter->SetKey(PlatformKeyboardLayoutMac::MapControlCharsToNamedKey(event.characters));
         keyEventParameter->SetUnmodifiedKey(PlatformKeyboardLayoutMac::MapControlCharsToNamedKey([event charactersByApplyingModifiers:0]));
-
+        keyEventParameter->SetComposing([self hasMarkedText]);
         auto keyEvent = Event<>(keyEventParameter);
         _callbackOnKey(_data, keyEvent);
     }
