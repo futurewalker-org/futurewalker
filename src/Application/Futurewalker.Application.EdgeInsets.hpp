@@ -147,7 +147,6 @@ public:
         return tmp;
     }
 
-    auto operator=(EdgeInsets const&) -> EdgeInsets& = default;
     auto operator==(EdgeInsets const&) const -> bool = default;
 
     Dp leading = 0.0;
