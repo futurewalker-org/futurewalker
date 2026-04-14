@@ -51,9 +51,7 @@ AnimationTicker::AnimationTicker(PassKey<AnimationTicker>)
 ///
 /// @brief
 ///
-AnimationTicker::~AnimationTicker()
-{
-}
+AnimationTicker::~AnimationTicker() = default;
 
 ///
 /// @brief
