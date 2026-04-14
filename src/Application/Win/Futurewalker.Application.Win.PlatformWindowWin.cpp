@@ -1027,7 +1027,7 @@ auto PlatformWindowWin::HandleCreate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
         // Initialize IME state.
         _textStore = _context->GetInputMethodContext().MakeTextStore(
           {
-              .sendKeyEventDetached = [&](Event<>& event) { return SendKeyEventDetached(event); },
+              .onKeyTraceDown = [&](WPARAM wParam, LPARAM lParam) { return HandleKeyTraceDown(wParam, lParam); },
           },
           hWnd);
         _inputMethod = Shared<PlatformInputMethodWin>::Make();
@@ -1826,6 +1826,7 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
                 parameter->SetModifiers(modifiers);
                 parameter->SetRepeat(isRepeat);
                 parameter->SetTimestamp(timestamp);
+                parameter->SetComposing(_textStore ? _textStore->IsComposing() : false);
 
                 auto event = Event<>(std::move(parameter));
                 SendKeyEventDetached(event);
@@ -1867,6 +1868,8 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
             parameter->SetKey(key);
             parameter->SetUnmodifiedKey(unmodifiedKey);
             parameter->SetTimestamp(MonotonicClock::GetNow());
+            parameter->SetComposing(_textStore ? _textStore->IsComposing() : false);
+
             auto event = Event<>(std::move(parameter));
             SendKeyEventDetached(event);
         }
@@ -1881,6 +1884,48 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
         FW_DEBUG_LOG_WARNING("PlatformWindowWin: Unhandled WM_(SYS)CHAR/WM_(SYS)DEADCHAR");
     }
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+
+///
+/// @brief
+///
+/// @param wParam
+/// @param lParam
+///
+auto PlatformWindowWin::HandleKeyTraceDown(WPARAM wParam, LPARAM lParam) -> void
+{
+    auto const virtualKeyCode = static_cast<DWORD>(wParam);
+    auto const keyFlags = HIWORD(lParam);
+    auto const isRepeat = (keyFlags & KF_REPEAT) != 0;
+    auto const eventCount = LOWORD(lParam);
+
+    auto& keyboardLayout = _context->GetKeyboardLayout();
+
+    auto const modifiers = keyboardLayout.GetModifierState();
+    auto const key = keyboardLayout.GetKey(virtualKeyCode, keyboardLayout.GetPlatformModifierState());
+    auto const unmodifiedKey = keyboardLayout.GetUnmodifiedKey(virtualKeyCode);
+    auto const timestamp = MonotonicClock::GetNow();
+
+    for (auto i = 0; i < eventCount; ++i)
+    {
+        try
+        {
+            auto parameter = Event<PlatformKeyEvent::Down>::Make();
+            parameter->SetKey(key);
+            parameter->SetUnmodifiedKey(unmodifiedKey);
+            parameter->SetModifiers(modifiers);
+            parameter->SetRepeat(isRepeat);
+            parameter->SetTimestamp(timestamp);
+            parameter->SetComposing(_textStore ? _textStore->IsComposing() : false);
+
+            auto event = Event<>(std::move(parameter));
+            SendKeyEventDetached(event);
+        }
+        catch (...)
+        {
+            FW_DEBUG_ASSERT(false);
+        }
+    }
 }
 
 ///

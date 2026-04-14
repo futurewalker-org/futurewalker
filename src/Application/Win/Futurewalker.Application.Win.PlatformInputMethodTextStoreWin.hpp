@@ -32,7 +32,7 @@ class PlatformInputMethodTextStoreWin : NonCopyable
 public:
     struct Delegate
     {
-        Function<Bool(Event<>&)> sendKeyEventDetached;
+        Function<void(WPARAM wParam, LPARAM lParam)> onKeyTraceDown;
     };
     static auto Make(Delegate const& delegate, Shared<PlatformInputMethodContextWin> context, HWND hwnd) -> Shared<PlatformInputMethodTextStoreWin>;
 
@@ -49,6 +49,8 @@ public:
     auto NotifyLayoutChange() -> void;
 
     auto CancelProcessKeyDown() -> void;
+
+    auto IsComposing() const -> Bool;
 
 private:
     auto GetSelf() -> Shared<PlatformInputMethodTextStoreWin>;

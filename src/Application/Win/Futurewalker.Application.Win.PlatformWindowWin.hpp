@@ -109,6 +109,7 @@ private:
     auto HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleCaptureChanged(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
+    auto HandleKeyTraceDown(WPARAM wParam, LPARAM lParam) -> void;
     auto HandleInputMethod(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleEraseBackground(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
     auto HandleSetFocus(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;

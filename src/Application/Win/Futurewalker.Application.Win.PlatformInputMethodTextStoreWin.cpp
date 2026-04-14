@@ -69,6 +69,8 @@ public:
 
     auto CancelProcessKeyDown() -> void;
 
+    auto IsComposing() const -> Bool;
+
 private:
     PlatformInputMethodTextStoreWin& _owner;
 
@@ -77,6 +79,7 @@ private:
     DWORD _sinkMask = 0;
     WPARAM _keyTraceDownWParam = 0;
     LPARAM _keyTraceDownLParam = 0;
+    Bool _composing = false;
 };
 
 PlatformInputMethodTextStoreWin::TextStoreImpl::TextStoreImpl(PlatformInputMethodTextStoreWin& owner)
@@ -517,6 +520,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnStartComposition(
 {
     FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnStartComposition()");
     (void)pComposition;
+    _composing = true;
     if (auto const editable = _owner.GetEditable())
     {
         editable->CompositionStart();
@@ -527,7 +531,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnStartComposition(
 
 STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition(ITfCompositionView* pComposition, ITfRange* pRangeNew)
 {
-    FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition()");
+    FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition() pComposition: {}, pRangeNew: {}", !!pComposition, !!pRangeNew);
     (void)pComposition;
     (void)pRangeNew;
 
@@ -536,43 +540,9 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnUpdateComposition
         auto const wParam = std::exchange(_keyTraceDownWParam, 0);
         auto const lParam = std::exchange(_keyTraceDownLParam, 0);
 
-        auto const virtualKeyCode = static_cast<DWORD>(wParam);
-        auto const keyFlags = HIWORD(lParam);
-        auto const isRepeat = (keyFlags & KF_REPEAT) != 0;
-        auto const eventCount = LOWORD(lParam);
-
-        // TODO: Get unmodified key.
-        (void)virtualKeyCode;
-
-        auto const timestamp = MonotonicClock::GetNow();
-        auto const key = Key::Process;
-        auto const unmodifiedKey = Key::Unidentified;
-        auto const text = String(); 
-        auto const modifiers = ModifierKeyFlags::None; // TODO: Get actual modifier state.
-
-        for (auto i = 0; i < eventCount; ++i)
+        if (_owner._delegate.onKeyTraceDown)
         {
-            try
-            {
-                auto parameter = Event<PlatformKeyEvent::Down>::Make();
-                parameter->SetKey(key);
-                parameter->SetText(text);
-                parameter->SetUnmodifiedKey(unmodifiedKey);
-                parameter->SetModifiers(modifiers);
-                parameter->SetRepeat(isRepeat);
-                parameter->SetTimestamp(timestamp);
-
-                auto event = Event<>(std::move(parameter));
-
-                if (_owner._delegate.sendKeyEventDetached)
-                {
-                    _owner._delegate.sendKeyEventDetached(event);
-                }
-            }
-            catch (...)
-            {
-                FW_DEBUG_ASSERT(false);
-            }
+            _owner._delegate.onKeyTraceDown(wParam, lParam);
         }
     }
 
@@ -607,6 +577,7 @@ STDMETHODIMP PlatformInputMethodTextStoreWin::TextStoreImpl::OnEndComposition(IT
 {
     FW_DEBUG_LOG_INFO("PlatformInputMethodTextStoreWin::TextStoreImpl::OnEndComposition()");
     (void)pComposition;
+    _composing = false;
     if (auto const editable = _owner.GetEditable())
     {
         editable->CompositionEnd();
@@ -680,6 +651,11 @@ auto PlatformInputMethodTextStoreWin::TextStoreImpl::CancelProcessKeyDown() -> v
 {
     _keyTraceDownWParam = 0;
     _keyTraceDownLParam = 0;
+}
+
+auto PlatformInputMethodTextStoreWin::TextStoreImpl::IsComposing() const -> Bool
+{
+    return _composing;
 }
 
 ///
@@ -856,6 +832,18 @@ auto PlatformInputMethodTextStoreWin::CancelProcessKeyDown() -> void
     {
         textStore->CancelProcessKeyDown();
     }
+}
+
+///
+/// @brief Check if currently composing.
+///
+auto PlatformInputMethodTextStoreWin::IsComposing() const -> Bool
+{
+    if (auto textStore = static_cast<TextStoreImpl*>(_textStore.Get()))
+    {
+        return textStore->IsComposing();
+    }
+    return false;
 }
 
 ///

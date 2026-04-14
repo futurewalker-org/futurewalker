@@ -299,17 +299,31 @@ auto TextEdit::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
 
 auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
 {
-    if (event.Is<KeyEvent::Down>())
+    if (event.Is<KeyEvent>())
     {
-        if (_inputEditable)
+        if (!_inputEditable)
         {
-            auto const key = event.As<KeyEvent::Down>()->GetKey();
-            if (key == Key::Enter)
+            co_return false;
+        }
+
+        if (event.As<KeyEvent>()->IsComposing())
+        {
+            co_return true;
+        }
+
+        auto const key = event.As<KeyEvent>()->GetKey();
+
+        if (key == Key::Enter)
+        {
+            if (event.Is<KeyEvent::Down>())
             {
                 _inputEditable->InsertLineBreak();
-                co_return true;
             }
-            else if (key == Key::Backspace || key == Key::Delete)
+            co_return true;
+        }
+        else if (key == Key::Backspace || key == Key::Delete)
+        {
+            if (event.Is<KeyEvent::Down>())
             {
                 auto const selection = _inputEditable->GetSelectionRange();
                 if (selection.GetLength() == 0)
@@ -327,9 +341,12 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
                 {
                     _inputEditable->InsertText({}, 0);
                 }
-                co_return true;
             }
-            else if (key == Key::ArrowLeft || key == Key::ArrowRight)
+            co_return true;
+        }
+        else if (key == Key::ArrowLeft || key == Key::ArrowRight)
+        {
+            if (event.Is<KeyEvent::Down>())
             {
                 // TODO: Support selection with Shift key.
                 auto const selection = _inputEditable->GetSelectionRange();
@@ -340,19 +357,9 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
                 auto const positionOffset = selection.IsEmpty() ? ((isRtl == isLeftArrow) ? 1 : -1) : 0;
                 auto const newCaretPosition = Range<CodePoint>::Clamp(anchorPosition + positionOffset, textRange);
                 _inputEditable->SetSelectionRange({newCaretPosition, newCaretPosition}, TextSelectionDirection::Forward);
-                co_return true;
             }
-        }
-        co_return false;
-    }
-    else if (event.Is<KeyEvent::Up>())
-    {
-        auto const key = event.As<KeyEvent::Up>()->GetKey();
-        if (key == Key::Enter || key == Key::Backspace || key == Key::Delete || key == Key::ArrowLeft || key == Key::ArrowRight)
-        {
             co_return true;
         }
-        co_return false;
     }
     co_return false;
 }

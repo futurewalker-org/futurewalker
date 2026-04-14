@@ -18,15 +18,27 @@ namespace FW_EXPORT
 class KeyEvent : public EventParameter
 {
 public:
+    auto GetKey() const -> String;
+    auto SetKey(String const& key) -> void;
+
+    auto GetUnmodifiedKey() const -> String;
+    auto SetUnmodifiedKey(String const& unmodifiedKey) -> void;
+
     auto GetTimestamp() const -> MonotonicTime;
     auto SetTimestamp(MonotonicTime const timestamp) -> void;
+
+    auto IsComposing() const -> Bool;
+    auto SetComposing(Bool const composing) -> void;
 
 public:
     class Down;
     class Up;
 
-public:
+private:
+    String _key;
+    String _unmodifiedKey;
     MonotonicTime _timestamp;
+    Bool _composing = false;
 };
 
 ///
@@ -35,12 +47,6 @@ public:
 class KeyEvent::Down final : public KeyEvent
 {
 public:
-    auto GetKey() const -> String;
-    auto SetKey(String const& key) -> void;
-
-    auto GetUnmodifiedKey() const -> String;
-    auto SetUnmodifiedKey(String const& unmodifiedKey) -> void;
-
     auto GetText() const -> String;
     auto SetText(String const& text) -> void;
 
@@ -51,8 +57,6 @@ public:
     auto SetRepeat(Bool const repeat) -> void;
 
 private:
-    String _key;
-    String _unmodifiedKey;
     String _text;
     ModifierKeyFlags _modifiers = ModifierKeyFlags::None;
     Bool _repeat = false;
@@ -63,16 +67,6 @@ private:
 ///
 class KeyEvent::Up final : public KeyEvent
 {
-public:
-    auto GetKey() const -> String;
-    auto SetKey(String const& key) -> void;
-
-    auto GetUnmodifiedKey() const -> String;
-    auto SetUnmodifiedKey(String const& unmodifiedKey) -> void;
-
-private:
-    String _key;
-    String _unmodifiedKey;
 };
 }
 }

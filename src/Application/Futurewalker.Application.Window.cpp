@@ -1200,6 +1200,7 @@ auto Window::HandlePlatformKeyEvent(Event<>& event) -> Async<Bool>
         sendingParameter->SetModifiers(parameter->GetModifiers());
         sendingParameter->SetRepeat(parameter->IsRepeat());
         sendingParameter->SetTimestamp(parameter->GetTimestamp());
+        sendingParameter->SetComposing(parameter->IsComposing());
         auto sendingEvent = Event<>(std::move(sendingParameter));
         co_return co_await SendEvent(sendingEvent);
     }
@@ -1210,6 +1211,7 @@ auto Window::HandlePlatformKeyEvent(Event<>& event) -> Async<Bool>
         sendingParameter->SetKey(parameter->GetKey());
         sendingParameter->SetUnmodifiedKey(parameter->GetUnmodifiedKey());
         sendingParameter->SetTimestamp(parameter->GetTimestamp());
+        sendingParameter->SetComposing(parameter->IsComposing());
         auto sendingEvent = Event<>(std::move(sendingParameter));
         co_return co_await SendEvent(sendingEvent);
     }

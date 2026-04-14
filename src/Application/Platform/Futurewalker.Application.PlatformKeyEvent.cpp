@@ -4,6 +4,26 @@
 
 namespace FW_DETAIL_NS
 {
+auto PlatformKeyEvent::GetKey() const -> String
+{
+    return _key;
+}
+
+auto PlatformKeyEvent::SetKey(String const& key) -> void
+{
+    _key = key;
+}
+
+auto PlatformKeyEvent::GetUnmodifiedKey() const -> String
+{
+    return _unmodifiedKey;
+}
+
+auto PlatformKeyEvent::SetUnmodifiedKey(String const& unmodifiedKey) -> void
+{
+    _unmodifiedKey = unmodifiedKey;
+}
+
 auto PlatformKeyEvent::GetTimestamp() const -> MonotonicTime
 {
     return _timestamp;
@@ -14,24 +34,14 @@ auto PlatformKeyEvent::SetTimestamp(MonotonicTime const timestamp) -> void
     _timestamp = timestamp;
 }
 
-auto PlatformKeyEvent::Down::GetKey() const -> String
+auto PlatformKeyEvent::IsComposing() const -> Bool
 {
-    return _key;
+    return _composing;
 }
 
-auto PlatformKeyEvent::Down::SetKey(String const& key) -> void
+auto PlatformKeyEvent::SetComposing(Bool const composing) -> void
 {
-    _key = key;
-}
-
-auto PlatformKeyEvent::Down::GetUnmodifiedKey() const -> String
-{
-    return _unmodifiedKey;
-}
-
-auto PlatformKeyEvent::Down::SetUnmodifiedKey(String const& unmodifiedKey) -> void
-{
-    _unmodifiedKey = unmodifiedKey;
+    _composing = composing;
 }
 
 auto PlatformKeyEvent::Down::GetText() const -> String
@@ -62,25 +72,5 @@ auto PlatformKeyEvent::Down::IsRepeat() const -> Bool
 auto PlatformKeyEvent::Down::SetRepeat(Bool const repeat) -> void
 {
     _repeat = repeat;
-}
-
-auto PlatformKeyEvent::Up::GetKey() const -> String
-{
-    return _key;
-}
-
-auto PlatformKeyEvent::Up::SetKey(String const& key) -> void
-{
-    _key = key;
-}
-
-auto PlatformKeyEvent::Up::GetUnmodifiedKey() const -> String
-{
-    return _unmodifiedKey;
-}
-
-auto PlatformKeyEvent::Up::SetUnmodifiedKey(String const& unmodifiedKey) -> void
-{
-    _unmodifiedKey = unmodifiedKey;
 }
 }
