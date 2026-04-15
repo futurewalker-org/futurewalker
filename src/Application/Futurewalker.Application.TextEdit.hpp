@@ -17,6 +17,7 @@
 #include "Futurewalker.Graphics.FontStyleType.hpp"
 #include "Futurewalker.Graphics.FontMetrics.hpp"
 #include "Futurewalker.Graphics.Typeface.hpp"
+#include "Futurewalker.Graphics.SceneType.hpp"
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
@@ -96,7 +97,6 @@ private:
     auto InternalGetBorderColor() const -> RGBAColor;
     auto InternalGetTypeface() const -> Shared<Graphics::Typeface>;
 
-private:
     struct ShapedLine
     {
         CodePoint start;
@@ -115,6 +115,7 @@ private:
     {
         Point<Dp> position;
         CodePoint start;
+        Dp advance;
         Graphics::FontMetrics metrics;
         std::vector<ArrangedRun> runs;
     };
@@ -123,6 +124,7 @@ private:
     {
         SInt64 line = 0;
         CodePoint offset = 0;
+        auto operator==(SelectionPosition const&) const -> bool = default;
     };
 
     struct TextCache
@@ -141,6 +143,11 @@ private:
         std::vector<ArrangedLine> arrangedLines;
     };
 
+    auto InternalDrawLines(Graphics::Scene& scene, std::vector<ArrangedLine> const& arrangedLines) const -> void;
+    auto InternalDrawCaret(Graphics::Scene& scene, SelectionPosition const& selection, std::vector<ArrangedLine> const& arrangedLines) const -> void;
+    auto InternalDrawSelectionHighlight(Graphics::Scene& scene, SelectionPosition const& selectionBegin, SelectionPosition const& selectionEnd, std::vector<ArrangedLine> const& arrangedLines) const -> void;
+
+private:
     SelectionPosition _selectionBegin;
     SelectionPosition _selectionEnd;
     Shared<InputEditable> _inputEditable;

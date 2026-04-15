@@ -165,7 +165,6 @@ auto TextEdit::Initialize() -> void
 auto TextEdit::Draw(DrawScope& scope) -> void
 {
     auto const backgroundColor = InternalGetBackgroundColor();
-    auto const textColor = InternalGetTextColor();
     auto const borderColor = InternalGetBorderColor();
     auto const borderWidth = _borderWidth.GetValueOr(0);
     auto const cornerRadius = _cornerRadius.GetValueOrDefault();
@@ -178,72 +177,15 @@ auto TextEdit::Draw(DrawScope& scope) -> void
     if (_arrangeCache)
     {
         auto const& arrangedLines = _arrangeCache->arrangedLines;
-
-        // Draw glyph runs.
-        for (auto const& line : arrangedLines)
+        if (_selectionBegin == _selectionEnd)
         {
-            for (auto const& run : line.runs)
-            {
-                scene.PushTranslate({
-                    .x = run.position.x,
-                    .y = run.position.y,
-                });
-                scene.AddGlyphRun({
-                    .run = run.run,
-                    .color = textColor,
-                });
-                scene.Pop({});
-            }
+            InternalDrawLines(scene, arrangedLines);
+            InternalDrawCaret(scene, _selectionBegin, arrangedLines);
         }
-
-        // Draw caret.
-        // TODO: Support selection range.
-        auto selection = _selectionEnd;
-        if (IsFocused() && selection.line < std::ssize(arrangedLines))
+        else
         {
-            auto const& lineInfo = arrangedLines[static_cast<size_t>(selection.line)];
-            auto const lineY = lineInfo.position.y;
-            auto const lineHeight = lineInfo.metrics.ascent + lineInfo.metrics.descent;
-
-            auto offset = selection.offset;
-
-            auto caretX = padding.leading;
-            auto const caretY = lineY;
-            auto const caretHeight = lineHeight;
-
-            for (auto const& runInfo : lineInfo.runs)
-            {
-                auto const& run = runInfo.run;
-                auto const& runX = runInfo.position.x;
-
-                if (run->GetText().GetCodePointCount() < offset)
-                {
-                    offset -= run->GetText().GetCodePointCount();
-                }
-                else
-                {
-                    auto glyphX = Dp(0);
-                    if (auto const glyphIndex = run->GetGlyphIndex(offset))
-                    {
-                        if (auto const position = run->GetGlyphPosition(*glyphIndex))
-                        {
-                            glyphX = position->x;
-                        }
-                    }
-                    else
-                    {
-                        glyphX = run->GetAdvance();
-                    }
-                    caretX = runX + glyphX;
-                    break;
-                }
-            }
-
-            auto const caretRect = Rect<Dp>::Make(Point<Dp>(caretX, caretY), Size<Dp>(1, caretHeight));
-            scene.AddRect({
-                .rect = caretRect,
-                .color = textColor,
-            });
+            InternalDrawSelectionHighlight(scene, _selectionBegin, _selectionEnd, arrangedLines);
+            InternalDrawLines(scene, arrangedLines);
         }
     }
 
@@ -348,18 +290,60 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
         {
             if (event.Is<KeyEvent::Down>())
             {
-                // TODO: Support selection with Shift key.
+                auto const modifiers = event.As<KeyEvent::Down>()->GetModifiers();
                 auto const selection = _inputEditable->GetSelectionRange();
+                auto const selectionDirection = _inputEditable->GetSelectionDirection();
                 auto const textRange = _inputEditable->GetStringRange();
                 auto const isRtl = GetLayoutDirection() == LayoutDirection::RightToLeft;
+                auto const isShift = (modifiers & ModifierKeyFlags::Shift) != ModifierKeyFlags::None;
                 auto const isLeftArrow = (key == Key::ArrowLeft);
-                auto const anchorPosition = (isRtl == isLeftArrow) ? selection.end : selection.begin;
-                auto const positionOffset = selection.IsEmpty() ? ((isRtl == isLeftArrow) ? 1 : -1) : 0;
-                auto const newCaretPosition = Range<CodePoint>::Clamp(anchorPosition + positionOffset, textRange);
-                _inputEditable->SetSelectionRange({newCaretPosition, newCaretPosition}, TextSelectionDirection::Forward);
+
+                // FIXME: Offset should be based on grapheme cluster.
+                auto const basePositionOffset = (isRtl == isLeftArrow) ? 1 : -1;
+
+                if (isShift)
+                {
+                    if (selection.IsEmpty())
+                    {
+                        if (isRtl == isLeftArrow)
+                        {
+                            auto const anchorPosition = selection.end;
+                            auto const newCaretPosition = Range<CodePoint>::Clamp(anchorPosition + basePositionOffset, textRange);
+                            _inputEditable->SetSelectionRange({selection.begin, newCaretPosition}, TextSelectionDirection::Forward);
+                        }
+                        else
+                        {
+                            auto const anchorPosition = selection.begin;
+                            auto const newCaretPosition = Range<CodePoint>::Clamp(anchorPosition + basePositionOffset, textRange);
+                            _inputEditable->SetSelectionRange({newCaretPosition, selection.end}, TextSelectionDirection::Backward);
+                        }
+                    }
+                    else
+                    {
+                        if (selectionDirection == TextSelectionDirection::Forward)
+                        {
+                            auto const anchorPosition = selection.end;
+                            auto const newCaretPosition = Range<CodePoint>::Clamp(anchorPosition + basePositionOffset, textRange);
+                            _inputEditable->SetSelectionRange({selection.begin, newCaretPosition}, selectionDirection);
+                        }
+                        else
+                        {
+                            auto const anchorPosition = selection.begin;
+                            auto const newCaretPosition = Range<CodePoint>::Clamp(anchorPosition + basePositionOffset, textRange);
+                            _inputEditable->SetSelectionRange({newCaretPosition, selection.end}, selectionDirection);
+                        }
+                    }
+                }
+                else
+                {
+                    auto const anchorPosition = (isRtl == isLeftArrow) ? selection.end : selection.begin;
+                    auto const positionOffset = selection.IsEmpty() ? basePositionOffset : 0;
+                    auto const newCaretPosition = Range<CodePoint>::Clamp(anchorPosition + positionOffset, textRange);
+                    _inputEditable->SetSelectionRange({newCaretPosition, newCaretPosition}, TextSelectionDirection::Forward);
+                }
             }
-            co_return true;
         }
+        co_return true;
     }
     co_return false;
 }
@@ -664,6 +648,7 @@ auto TextEdit::InternalUpdateArrangeCache() -> void
         auto arrangedLine = ArrangedLine {
             .position = Point<Dp>(x, y),
             .start = shapedLine.start,
+            .advance = shapedLine.advance,
             .metrics = shapedLine.metrics,
             .runs = {},
         };
@@ -675,6 +660,7 @@ auto TextEdit::InternalUpdateArrangeCache() -> void
                 auto const fontSize = _fontSize.GetValueOr(16);
                 auto const metrics = typeface->GetMetrics(fontSize);
                 arrangedLine.metrics = metrics;
+                arrangedLine.advance = Dp(0);
                 y += metrics.ascent + metrics.descent + metrics.leading;
             }
         }
@@ -691,6 +677,7 @@ auto TextEdit::InternalUpdateArrangeCache() -> void
                 });
                 offset += run->GetAdvance();
             }
+            arrangedLine.advance = offset - x;
             y += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
         }
 
@@ -743,5 +730,169 @@ auto TextEdit::InternalGetBorderColor() const -> RGBAColor
 auto TextEdit::InternalGetTypeface() const -> Shared<Graphics::Typeface>
 {
     return _typeface;
+}
+
+auto TextEdit::InternalDrawLines(Graphics::Scene& scene, std::vector<ArrangedLine> const& arrangedLines) const -> void
+{
+    auto const textColor = InternalGetTextColor();
+    for (auto const& line : arrangedLines)
+    {
+        for (auto const& run : line.runs)
+        {
+            scene.PushTranslate({
+                .x = run.position.x,
+                .y = run.position.y,
+            });
+            scene.AddGlyphRun({
+                .run = run.run,
+                .color = textColor,
+            });
+            scene.Pop({});
+        }
+    }
+}
+
+auto TextEdit::InternalDrawCaret(Graphics::Scene& scene, SelectionPosition const& selection, std::vector<ArrangedLine> const& arrangedLines) const -> void
+{
+    if (IsFocused() && selection.line < std::ssize(arrangedLines))
+    {
+        auto const padding = _padding.GetValueOrDefault();
+        auto const caretColor = InternalGetBorderColor(); // TODO: Make this configurable
+
+        auto const& lineInfo = arrangedLines[static_cast<size_t>(selection.line)];
+        auto const lineY = lineInfo.position.y;
+        auto const lineHeight = lineInfo.metrics.ascent + lineInfo.metrics.descent;
+
+        auto offset = selection.offset;
+
+        auto caretX = padding.leading;
+        auto const caretY = lineY;
+        auto const caretHeight = lineHeight;
+
+        for (auto const& runInfo : lineInfo.runs)
+        {
+            auto const& run = runInfo.run;
+            auto const& runX = runInfo.position.x;
+
+            if (run->GetText().GetCodePointCount() < offset)
+            {
+                offset -= run->GetText().GetCodePointCount();
+            }
+            else
+            {
+                auto glyphX = Dp(0);
+                if (auto const glyphIndex = run->GetGlyphIndex(offset))
+                {
+                    if (auto const position = run->GetGlyphPosition(*glyphIndex))
+                    {
+                        glyphX = position->x;
+                    }
+                }
+                else
+                {
+                    glyphX = run->GetAdvance();
+                }
+                caretX = runX + glyphX;
+                break;
+            }
+        }
+
+        auto const caretRect = Rect<Dp>::Make(Point<Dp>(caretX, caretY), Size<Dp>(1, caretHeight));
+        scene.AddRect({
+            .rect = caretRect,
+            .color = caretColor,
+        });
+    }
+}
+
+auto TextEdit::InternalDrawSelectionHighlight(Graphics::Scene& scene, SelectionPosition const& selectionBegin, SelectionPosition const& selectionEnd, std::vector<ArrangedLine> const& arrangedLines) const -> void
+{
+    auto const selectionColor = InternalGetBorderColor().WithAlphaMultiplied(0.25); // TODO: Make this configurable
+
+    auto const lineBegin = SInt64::Max(0, selectionBegin.line);
+    auto const lineEnd = SInt64::Min(std::ssize(arrangedLines) - 1, selectionEnd.line);
+
+    for (auto lineIndex = lineBegin; lineIndex <= lineEnd; ++lineIndex)
+    {
+        auto const& lineInfo = arrangedLines[static_cast<size_t>(lineIndex)];
+        auto const lineY = lineInfo.position.y;
+        auto const lineHeight = lineInfo.metrics.ascent + lineInfo.metrics.descent;
+
+        auto selectionStartX = lineInfo.position.x;
+        if (lineIndex == selectionBegin.line)
+        {
+            auto offset = selectionBegin.offset;
+            for (auto const& runInfo : lineInfo.runs)
+            {
+                auto const& run = runInfo.run;
+                auto const& runX = runInfo.position.x;
+
+                if (run->GetText().GetCodePointCount() < offset)
+                {
+                    offset -= run->GetText().GetCodePointCount();
+                }
+                else
+                {
+                    auto glyphX = Dp(0);
+                    if (auto const glyphIndex = run->GetGlyphIndex(offset))
+                    {
+                        if (auto const position = run->GetGlyphPosition(*glyphIndex))
+                        {
+                            glyphX = position->x;
+                        }
+                    }
+                    else
+                    {
+                        glyphX = run->GetAdvance();
+                    }
+                    selectionStartX = runX + glyphX;
+                    break;
+                }
+            }
+        }
+
+        auto selectionEndX = lineInfo.position.x;
+        if (lineIndex == selectionEnd.line)
+        {
+            auto offset = selectionEnd.offset;
+            for (auto const& runInfo : lineInfo.runs)
+            {
+                auto const& run = runInfo.run;
+                auto const& runX = runInfo.position.x;
+
+                if (run->GetText().GetCodePointCount() < offset)
+                {
+                    offset -= run->GetText().GetCodePointCount();
+                }
+                else
+                {
+                    auto glyphX = Dp(0);
+                    if (auto const glyphIndex = run->GetGlyphIndex(offset))
+                    {
+                        if (auto const position = run->GetGlyphPosition(*glyphIndex))
+                        {
+                            glyphX = position->x;
+                        }
+                    }
+                    else
+                    {
+                        glyphX = run->GetAdvance();
+                    }
+                    selectionEndX = runX + glyphX;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            selectionEndX = lineInfo.position.x + lineInfo.advance;
+        }
+
+        auto const selectionRect = Rect<Dp>::Make(Point<Dp>(selectionStartX, lineY), Size<Dp>(selectionEndX - selectionStartX, lineHeight));
+        scene.AddRect({
+            .rect = selectionRect,
+            .color = selectionColor,
+        });
+    }
 }
 }
