@@ -168,7 +168,6 @@ auto TextEdit::Draw(DrawScope& scope) -> void
     auto const borderColor = InternalGetBorderColor();
     auto const borderWidth = _borderWidth.GetValueOr(0);
     auto const cornerRadius = _cornerRadius.GetValueOrDefault();
-    auto const padding = _padding.GetValueOrDefault();
 
     auto& scene = scope.GetScene();
 
