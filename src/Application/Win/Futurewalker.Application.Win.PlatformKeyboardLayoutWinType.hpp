@@ -3,15 +3,13 @@
 
 #include "Futurewalker.Application.Win.Prelude.hpp"
 
-#include "Futurewalker.Core.EnumClassFlag.hpp" 
-
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
 class PlatformKeyboardLayoutWin;
 
-enum class PlatformModifierFlagsWin
+enum class PlatformModifierFlagWin
 {
     None = 0,
     Shift = 1 << 0,
@@ -20,6 +18,5 @@ enum class PlatformModifierFlagsWin
     RAlt = 1 << 3, // AltGr = Control + RAlt
     All = Shift | Control | LAlt | RAlt,
 };
-FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(PlatformModifierFlagsWin);
 }
 }

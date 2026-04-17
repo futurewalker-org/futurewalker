@@ -54,12 +54,12 @@ auto PlatformKeyEvent::Down::SetText(String const& text) -> void
     _text = text;
 }
 
-auto PlatformKeyEvent::Down::GetModifiers() const -> ModifierKeyFlags
+auto PlatformKeyEvent::Down::GetModifiers() const -> Flags<ModifierKeyFlag>
 {
     return _modifiers;
 }
 
-auto PlatformKeyEvent::Down::SetModifiers(ModifierKeyFlags const modifiers) -> void
+auto PlatformKeyEvent::Down::SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void
 {
     _modifiers = modifiers;
 }

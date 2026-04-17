@@ -187,7 +187,7 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
         motionEvent->SetTimestamp(NSTimeIntervalToMonotonicTime(event.timestamp));
         motionEvent->SetPrimaryPointer(false); // TODO: Implement primary pointer logic
         motionEvent->SetPosition({locationInView.x, self.bounds.size.height - locationInView.y});
-        motionEvent->SetButtons(PointerButtonFlags::Button1);
+        motionEvent->SetButtons(PointerButtonFlag::Button1);
         motionEvent->SetModifiers(modifiers);
 
         auto sendingEvent = Event<>(motionEvent);
@@ -216,50 +216,50 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
     return PointerType::Other;
 }
 
-- (ModifierKeyFlags)modifierFlagsToModifierKeyFlags:(NSEventModifierFlags)modifierFlags
+- (Flags<ModifierKeyFlag>)modifierFlagsToModifierKeyFlags:(NSEventModifierFlags)modifierFlags
 {
-    auto flags = ModifierKeyFlags::None;
+    auto flags = Flags(ModifierKeyFlag::None);
     if (modifierFlags & NSEventModifierFlagShift)
     {
-        flags |= ModifierKeyFlags::Shift;
+        flags |= ModifierKeyFlag::Shift;
     }
     if (modifierFlags & NSEventModifierFlagControl)
     {
-        flags |= ModifierKeyFlags::Control;
+        flags |= ModifierKeyFlag::Control;
     }
     if (modifierFlags & NSEventModifierFlagOption)
     {
-        flags |= ModifierKeyFlags::Alt;
+        flags |= ModifierKeyFlag::Alt;
     }
     if (modifierFlags & NSEventModifierFlagCommand)
     {
-        flags |= ModifierKeyFlags::Meta;
+        flags |= ModifierKeyFlag::Meta;
     }
     return flags;
 }
 
-- (PointerButtonFlags)pressedMouseButtonsToButtonState
+- (Flags<PointerButtonFlag>)pressedMouseButtonsToButtonState
 {
-    PointerButtonFlags buttonState = PointerButtonFlags::None;
+    auto buttonState = Flags(PointerButtonFlag::None);
     if (NSEvent.pressedMouseButtons & (1 << 0))
     {
-        buttonState |= PointerButtonFlags::Button1;
+        buttonState |= PointerButtonFlag::Button1;
     }
     if (NSEvent.pressedMouseButtons & (1 << 1))
     {
-        buttonState |= PointerButtonFlags::Button2;
+        buttonState |= PointerButtonFlag::Button2;
     }
     if (NSEvent.pressedMouseButtons & (1 << 2))
     {
-        buttonState |= PointerButtonFlags::Button3;
+        buttonState |= PointerButtonFlag::Button3;
     }
     if (NSEvent.pressedMouseButtons & (1 << 3))
     {
-        buttonState |= PointerButtonFlags::ButtonX1;
+        buttonState |= PointerButtonFlag::ButtonX1;
     }
     if (NSEvent.pressedMouseButtons & (1 << 4))
     {
-        buttonState |= PointerButtonFlags::ButtonX2;
+        buttonState |= PointerButtonFlag::ButtonX2;
     }
     return buttonState;
 }

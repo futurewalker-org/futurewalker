@@ -11,6 +11,7 @@
 #include "Futurewalker.Event.Event.hpp"
 
 #include "Futurewalker.Core.MonotonicTime.hpp"
+#include "Futurewalker.Core.Flags.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -84,8 +85,8 @@ protected:
         Float64 pressure = 0;
         Float64 tangentialPressure = 0;
         PointerButton button = PointerButton::Unknown;
-        PointerButtonFlags buttonState = PointerButtonFlags::None;
-        ModifierKeyFlags modifierState = ModifierKeyFlags::None;
+        Flags<PointerButtonFlag> buttonState = PointerButtonFlag::None;
+        Flags<ModifierKeyFlag> modifierState = ModifierKeyFlag::None;
     };
 };
 
@@ -119,11 +120,11 @@ public:
     auto GetButton() const -> PointerButton;
     auto SetButton(PointerButton const button) -> void;
 
-    auto GetButtons() const -> PointerButtonFlags;
-    auto SetButtons(PointerButtonFlags const buttons) -> void;
+    auto GetButtons() const -> Flags<PointerButtonFlag>;
+    auto SetButtons(Flags<PointerButtonFlag> const buttons) -> void;
 
-    auto GetModifiers() const -> ModifierKeyFlags;
-    auto SetModifiers(ModifierKeyFlags const modifiers) -> void;
+    auto GetModifiers() const -> Flags<ModifierKeyFlag>;
+    auto SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void;
 
 private:
     MotionState _state;
@@ -159,11 +160,11 @@ public:
     auto GetButton() const -> PointerButton;
     auto SetButton(PointerButton const button) -> void;
 
-    auto GetButtons() const -> PointerButtonFlags;
-    auto SetButtons(PointerButtonFlags const buttons) -> void;
+    auto GetButtons() const -> Flags<PointerButtonFlag>;
+    auto SetButtons(Flags<PointerButtonFlag> const buttons) -> void;
 
-    auto GetModifiers() const -> ModifierKeyFlags;
-    auto SetModifiers(ModifierKeyFlags const modifiers) -> void;
+    auto GetModifiers() const -> Flags<ModifierKeyFlag>;
+    auto SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void;
 
 private:
     MotionState _state;
@@ -199,11 +200,11 @@ public:
     auto GetButton() const -> PointerButton;
     auto SetButton(PointerButton const button) -> void;
 
-    auto GetButtons() const -> PointerButtonFlags;
-    auto SetButtons(PointerButtonFlags const buttons) -> void;
+    auto GetButtons() const -> Flags<PointerButtonFlag>;
+    auto SetButtons(Flags<PointerButtonFlag> const buttons) -> void;
 
-    auto GetModifiers() const -> ModifierKeyFlags;
-    auto SetModifiers(ModifierKeyFlags const modifiers) -> void;
+    auto GetModifiers() const -> Flags<ModifierKeyFlag>;
+    auto SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void;
 
 private:
     MotionState _state;
@@ -355,15 +356,15 @@ public:
     auto GetPrecision() const -> PointerScrollPrecision;
     auto SetPrecision(PointerScrollPrecision const precision) -> void;
 
-    auto GetModifiers() const -> ModifierKeyFlags;
-    auto SetModifiers(ModifierKeyFlags const modifiers) -> void;
+    auto GetModifiers() const -> Flags<ModifierKeyFlag>;
+    auto SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void;
 
 private:
     PointerActionPhase _phase = PointerActionPhase::None;
     Dp _deltaX = 0.0;
     Dp _deltaY = 0.0;
     PointerScrollPrecision _precision = PointerScrollPrecision::Coarse;
-    ModifierKeyFlags _modifiers = ModifierKeyFlags::None;
+    Flags<ModifierKeyFlag> _modifiers = ModifierKeyFlag::None;
 };
 
 ///

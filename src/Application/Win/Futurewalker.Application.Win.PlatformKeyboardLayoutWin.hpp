@@ -7,6 +7,7 @@
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.Optional.hpp"
+#include "Futurewalker.Core.Flags.hpp"
 
 #include <unordered_map>
 #include <string>
@@ -25,20 +26,20 @@ public:
 
     auto UpdateLayout() -> void;
 
-    auto GetKey(DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> String;
+    auto GetKey(DWORD virtualKeyCode, Flags<PlatformModifierFlagWin> modifiers) const -> String;
     auto GetUnmodifiedKey(DWORD virtualKeyCode) const -> String;
-    auto GetKeyAndText(HWND hWnd, DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> std::pair<String, String>;
-    auto GetModifierState() const -> ModifierKeyFlags;
-    auto GetPlatformModifierState() const -> PlatformModifierFlagsWin;
+    auto GetKeyAndText(HWND hWnd, DWORD virtualKeyCode, Flags<PlatformModifierFlagWin> modifiers) const -> std::pair<String, String>;
+    auto GetModifierState() const -> Flags<ModifierKeyFlag>;
+    auto GetPlatformModifierState() const -> Flags<PlatformModifierFlagWin>;
 
 private:
-    auto MapVirtualKeyCodeToChars(DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> Optional<std::wstring>;
+    auto MapVirtualKeyCodeToChars(DWORD virtualKeyCode, Flags<PlatformModifierFlagWin> modifiers) const -> Optional<std::wstring>;
     auto MapVirtualKeyCodeToNamedKey(DWORD virtualKeyCode) const -> Optional<String>;
     auto MapControlCharsToNamedKey(std::wstring_view chars) const -> Optional<String>;
 
 private:
     HKL _hkl = NULL;
-    std::unordered_map<PlatformModifierFlagsWin, std::vector<std::wstring>> _map;
+    std::unordered_map<PlatformModifierFlagWin, std::vector<std::wstring>> _map;
 };
 }
 }

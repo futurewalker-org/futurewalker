@@ -11,18 +11,18 @@ namespace FW_DETAIL_NS
 ///
 /// @return Array of modifier key strings.
 ///
-auto KeyFunction::GetModifierKeyStrings(ModifierKeyFlags const modifiers) -> std::vector<String>
+auto KeyFunction::GetModifierKeyStrings(Flags<ModifierKeyFlag> const modifiers) -> std::vector<String>
 {
     auto modifierString = std::vector<String>();
-    if ((modifiers & ModifierKeyFlags::Shift) != ModifierKeyFlags::None)
+    if ((modifiers & ModifierKeyFlag::Shift) != ModifierKeyFlag::None)
     {
         modifierString.push_back(String(u8"Shift"));
     }
-    if ((modifiers & ModifierKeyFlags::Control) != ModifierKeyFlags::None)
+    if ((modifiers & ModifierKeyFlag::Control) != ModifierKeyFlag::None)
     {
         modifierString.push_back(String(u8"Ctrl"));
     }
-    if ((modifiers & ModifierKeyFlags::Alt) != ModifierKeyFlags::None)
+    if ((modifiers & ModifierKeyFlag::Alt) != ModifierKeyFlag::None)
     {
         modifierString.push_back(String(u8"Alt"));
     }

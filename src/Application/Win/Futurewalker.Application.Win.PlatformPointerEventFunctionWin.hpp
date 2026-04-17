@@ -12,11 +12,11 @@ namespace FW_EXPORT
 {
 struct PlatformPointerEventFunctionWin : public NonConstructible
 {
-    static auto ConvertMouseEventParamToPointerButtonFlags(WPARAM const wParam) -> PointerButtonFlags;
-    static auto ConvertMouseEventParamToModifierKeyFlags(WPARAM const wParam) -> ModifierKeyFlags;
+    static auto ConvertMouseEventParamToPointerButtonFlags(WPARAM const wParam) -> Flags<PointerButtonFlag>;
+    static auto ConvertMouseEventParamToModifierKeyFlags(WPARAM const wParam) -> Flags<ModifierKeyFlag>;
 
     static auto ConvertPointerButtonChangeTypeToPointerButton(UINT32 const pointerChange) -> PointerButton; 
-    static auto ConvertPointerFlagsToPointerButtonFlags(UINT32 const pointerFlags) -> PointerButtonFlags;
+    static auto ConvertPointerFlagsToPointerButtonFlags(UINT32 const pointerFlags) -> Flags<PointerButtonFlag>;
 
     static auto SetPointerEventParamsForMouse(PlatformPointerEvent& parameter, HWND hWnd, UINT const msg, WPARAM const wParam, LPARAM const lParam) -> void;
     static auto SetPointerMotionEventParamsForMouse(PlatformPointerEvent::Motion& parameter, UINT const msg, WPARAM const wParam, LPARAM const lParam) -> void;

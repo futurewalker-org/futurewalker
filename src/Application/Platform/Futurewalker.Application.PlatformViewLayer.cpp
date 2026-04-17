@@ -170,12 +170,12 @@ auto PlatformViewLayer::SetOpacity(Float64 const opacity) -> void
     }
 }
 
-auto PlatformViewLayer::GetRenderFlags() const -> PlatformViewLayerRenderFlags
+auto PlatformViewLayer::GetRenderFlags() const -> Flags<PlatformViewLayerRenderFlag>
 {
     return _renderFlags;
 }
 
-auto PlatformViewLayer::SetRenderFlags(PlatformViewLayerRenderFlags const renderFlags) -> void
+auto PlatformViewLayer::SetRenderFlags(Flags<PlatformViewLayerRenderFlag> const renderFlags) -> void
 {
     if (_renderFlags != renderFlags)
     {
@@ -248,7 +248,7 @@ auto PlatformViewLayer::NotifyRootChanged() -> void
 auto PlatformViewLayer::ShouldRasterize() const -> Bool
 {
     auto const renderFlags = GetRenderFlags();
-    auto const shouldRasterize = (renderFlags & PlatformViewLayerRenderFlags::Rasterize) != PlatformViewLayerRenderFlags::None;
+    auto const shouldRasterize = (renderFlags & PlatformViewLayerRenderFlag::Rasterize) != PlatformViewLayerRenderFlag::None;
     return IsRoot() || shouldRasterize;
 }
 

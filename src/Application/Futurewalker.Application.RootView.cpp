@@ -227,7 +227,7 @@ auto RootView::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
         auto parameter = event.As<KeyEvent::Down>();
         if (parameter->GetUnmodifiedKey() == Key::Tab)
         {
-            if ((parameter->GetModifiers() & ModifierKeyFlags::Shift) != ModifierKeyFlags::None)
+            if ((parameter->GetModifiers() & ModifierKeyFlag::Shift) != ModifierKeyFlag::None)
             {
                 if (auto const prevFocus = _focusNode->GetPrevFocusCandidate())
                 {
@@ -343,7 +343,7 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
 
                 auto outEventParameter = Event<PointerEvent::Motion::Out>();
                 static_cast<PointerEvent::Motion&>(*outEventParameter) = *parameter.As<PointerEvent::Motion>();
-                DispatchPointerEventFromRoot(PassKey<RootView>(), outEventParameter, overView, PointerPhaseFlags::Target);
+                DispatchPointerEventFromRoot(PassKey<RootView>(), outEventParameter, overView, PointerPhaseFlag::Target);
 
                 for (auto const& oldEnterView : oldEnterViews)
                 {
@@ -351,7 +351,7 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
                     {
                         auto leaveEventParameter = Event<PointerEvent::Motion::Leave>();
                         static_cast<PointerEvent::Motion&>(*leaveEventParameter) = *parameter.As<PointerEvent::Motion>();
-                        DispatchPointerEventFromRoot(PassKey<RootView>(), leaveEventParameter, oldEnterView, PointerPhaseFlags::Target);
+                        DispatchPointerEventFromRoot(PassKey<RootView>(), leaveEventParameter, oldEnterView, PointerPhaseFlag::Target);
                     }
                 }
             }
@@ -382,7 +382,7 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
 
         if (targetView)
         {
-            if (auto const interceptView = DispatchPointerEventFromRoot(PassKey<RootView>(), event.As<PointerEvent>(), targetView, PointerPhaseFlags::Capture))
+            if (auto const interceptView = DispatchPointerEventFromRoot(PassKey<RootView>(), event.As<PointerEvent>(), targetView, PointerPhaseFlag::Capture))
             {
                 targetView = interceptView;
             }
@@ -400,7 +400,7 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
             {
                 auto outEventParameter = Event<PointerEvent::Motion::Out>();
                 PointerEvent::Copy(*outEventParameter, *parameter);
-                DispatchPointerEventFromRoot(PassKey<RootView>(), outEventParameter, overView, PointerPhaseFlags::Target);
+                DispatchPointerEventFromRoot(PassKey<RootView>(), outEventParameter, overView, PointerPhaseFlag::Target);
             }
 
             for (auto const& oldEnterView : oldEnterViews)
@@ -412,7 +412,7 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
                     {
                         auto leaveEventParameter = Event<PointerEvent::Motion::Leave>();
                         PointerEvent::Copy(*leaveEventParameter, *parameter);
-                        DispatchPointerEventFromRoot(PassKey<RootView>(), leaveEventParameter, oldEnterView, PointerPhaseFlags::Target);
+                        DispatchPointerEventFromRoot(PassKey<RootView>(), leaveEventParameter, oldEnterView, PointerPhaseFlag::Target);
                     }
                 }
             }
@@ -426,7 +426,7 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
                     {
                         auto enterEventParameter = Event<PointerEvent::Motion::Enter>();
                         PointerEvent::Copy(*enterEventParameter, *parameter);
-                        DispatchPointerEventFromRoot(PassKey<RootView>(), enterEventParameter, newEnterView, PointerPhaseFlags::Target);
+                        DispatchPointerEventFromRoot(PassKey<RootView>(), enterEventParameter, newEnterView, PointerPhaseFlag::Target);
                     }
                 }
             }
@@ -435,13 +435,13 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
             {
                 auto targetEventParameter = Event<PointerEvent::Motion::Over>();
                 PointerEvent::Copy(*targetEventParameter, *parameter);
-                DispatchPointerEventFromRoot(PassKey<RootView>(), targetEventParameter, targetView, PointerPhaseFlags::Target);
+                DispatchPointerEventFromRoot(PassKey<RootView>(), targetEventParameter, targetView, PointerPhaseFlag::Target);
             }
         }
 
         if (targetView)
         {
-            DispatchPointerEventFromRoot(PassKey<RootView>(), event.As<PointerEvent>(), targetView, PointerPhaseFlags::Target | PointerPhaseFlags::Bubble);
+            DispatchPointerEventFromRoot(PassKey<RootView>(), event.As<PointerEvent>(), targetView, Flags(PointerPhaseFlag::Target) | PointerPhaseFlag::Bubble);
         }
     }
 }

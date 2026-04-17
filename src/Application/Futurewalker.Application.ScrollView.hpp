@@ -7,6 +7,8 @@
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
+#include "Futurewalker.Core.Flags.hpp"
+
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -25,8 +27,8 @@ public:
     auto SetContent(Shared<View> const& content) -> void;
     auto GetContent() -> Shared<View>;
 
-    auto GetDirection() const -> ScrollViewDirection;
-    auto SetDirection(ScrollViewDirection const direction) -> void;
+    auto GetDirection() const -> Flags<ScrollViewDirection>;
+    auto SetDirection(Flags<ScrollViewDirection> const direction) -> void;
 
 protected:
     auto Initialize() -> void override;
@@ -36,7 +38,7 @@ protected:
 
 private:
     Shared<ContainerView> _containerView;
-    ScrollViewDirection _direction = ScrollViewDirection::None;
+    Flags<ScrollViewDirection> _direction = ScrollViewDirection::None;
     AttributeAccessor<Float64> _horizontalScrollFactor;
     AttributeAccessor<Float64> _verticalScrollFactor;
     Vector<Dp> _offset;

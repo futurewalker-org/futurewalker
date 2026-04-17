@@ -111,7 +111,7 @@ auto KeyEvent::Down::SetText(String const& text) -> void
 ///
 /// @brief Get modifier keys.
 ///
-auto KeyEvent::Down::GetModifiers() const -> ModifierKeyFlags
+auto KeyEvent::Down::GetModifiers() const -> Flags<ModifierKeyFlag>
 {
     return _modifiers;
 }
@@ -119,7 +119,7 @@ auto KeyEvent::Down::GetModifiers() const -> ModifierKeyFlags
 ///
 /// @brief Set modifier keys.
 ///
-auto KeyEvent::Down::SetModifiers(ModifierKeyFlags const modifiers) -> void
+auto KeyEvent::Down::SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void
 {
     _modifiers = modifiers;
 }

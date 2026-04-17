@@ -23,7 +23,7 @@ struct RecognizerEvent final : EventParameter
 ///
 /// @brief Set allowed buttons for tap gesture recognition.
 ///
-auto TapGestureRecognizer::SetAllowedButtons(PointerButtonFlags const buttons) -> void
+auto TapGestureRecognizer::SetAllowedButtons(Flags<PointerButtonFlag> const buttons) -> void
 {
     _allowedButtons = buttons;
 }
@@ -31,7 +31,7 @@ auto TapGestureRecognizer::SetAllowedButtons(PointerButtonFlags const buttons) -
 ///
 /// @brief Set allowed actions for tap gesture recognition.
 ///
-auto TapGestureRecognizer::SetAllowedActions(TapGestureActionFlags const actions) -> void
+auto TapGestureRecognizer::SetAllowedActions(Flags<TapGestureActionFlag> const actions) -> void
 {
     _allowedActions = actions;
 }

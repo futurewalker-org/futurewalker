@@ -30,8 +30,8 @@ MenuButtonView::MenuButtonView(PassKey<View> key)
 
 auto MenuButtonView::Initialize() -> void
 {
-    SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
-    SetFocusTrackingFlags(ViewFocusTrackingFlags::All);
+    SetPointerTrackingFlags(ViewPointerTrackingFlag::All);
+    SetFocusTrackingFlags(ViewFocusTrackingFlag::All);
 
     _container = ContainerView::Make();
     _buttonView = ButtonRenderView::MakeWithContent(_container);
@@ -245,7 +245,7 @@ auto MenuButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
             }
             else if (event.Is<PointerEvent::Motion::Move>())
             {
-                if (event.As<PointerEvent::Motion::Move>()->GetButtons() != PointerButtonFlags::None)
+                if (event.As<PointerEvent::Motion::Move>()->GetButtons() != PointerButtonFlag::None)
                 {
                     if (!_pointerDown)
                     {

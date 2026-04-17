@@ -4,7 +4,6 @@
 #include "Futurewalker.Event.hpp"
 
 #include "Futurewalker.Core.Identifier.hpp"
-#include "Futurewalker.Core.EnumClassFlag.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -28,14 +27,13 @@ enum class PointerType
 ///
 /// @brief Phase of pointer event propagation.
 ///
-enum class PointerPhaseFlags
+enum class PointerPhaseFlag
 {
     None = 0,
     Capture = 1 << 0, ///< Event being sent during propagation from root to target.
     Bubble = 1 << 1,  //!< Event being sent during propagation from target to root.
     Target = 1 << 2,  //!< Event being sent to target.
 };
-FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(PointerPhaseFlags);
 
 ///
 /// @brief Phase of pointer actions.
@@ -76,7 +74,7 @@ enum class PointerButton
 ///
 /// @brief Flags for pointer buttons.
 ///
-enum class PointerButtonFlags : uint32_t
+enum class PointerButtonFlag : uint32_t
 {
     None = 0,
     Button1 = 1 << 1,  // Mouse left button or pen tip.
@@ -87,6 +85,5 @@ enum class PointerButtonFlags : uint32_t
     Barrel = 1 << 6,   // Pen barrel button.
     Eraser = 1 << 7,   // Pen eraser button.
 };
-FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(PointerButtonFlags);
 }
 }

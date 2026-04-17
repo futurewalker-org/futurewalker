@@ -311,7 +311,7 @@ auto ButtonView::Initialize() -> void
     _renderView = ButtonRenderView::MakeWithContent(_hoverGestureView);
     AddChildBack(_renderView);
 
-    SetFocusTrackingFlags(ViewFocusTrackingFlags::All);
+    SetFocusTrackingFlags(ViewFocusTrackingFlag::All);
 
     EventReceiver::Connect(*this, *this, &ButtonView::ReceiveEvent);
 }

@@ -76,7 +76,7 @@ PopupMenuButton::PopupMenuButton(PassKey<View> key)
 
 auto PopupMenuButton::Initialize() -> void
 {
-    SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
+    SetPointerTrackingFlags(ViewPointerTrackingFlag::All);
 
     _paddingView = PaddingView::Make();
     _paddingView->SetPadding(PopupMenuButtonStyle::Padding);

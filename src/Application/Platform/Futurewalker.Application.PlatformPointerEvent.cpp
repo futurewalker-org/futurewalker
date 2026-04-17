@@ -186,22 +186,22 @@ auto PlatformPointerEvent::SetPosition(Point<Dp> const& position) -> void
     _position = position;
 }
 
-auto PlatformPointerEvent::GetButtons() const -> PointerButtonFlags
+auto PlatformPointerEvent::GetButtons() const -> Flags<PointerButtonFlag>
 {
     return _buttonState;
 }
 
-auto PlatformPointerEvent::SetButtons(PointerButtonFlags const buttons) -> void
+auto PlatformPointerEvent::SetButtons(Flags<PointerButtonFlag> const buttons) -> void
 {
     _buttonState = buttons;
 }
 
-auto PlatformPointerEvent::GetModifiers() const -> ModifierKeyFlags
+auto PlatformPointerEvent::GetModifiers() const -> Flags<ModifierKeyFlag>
 {
     return _modifierState;
 }
 
-auto PlatformPointerEvent::SetModifiers(ModifierKeyFlags const modifiers) -> void
+auto PlatformPointerEvent::SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void
 {
     _modifierState = modifiers;
 }
@@ -582,12 +582,12 @@ auto PlatformPointerEvent::Action::Scroll::SetPrecision(PointerScrollPrecision c
     _precision = precision;
 }
 
-auto PlatformPointerEvent::Action::Scroll::GetModifiers() const -> ModifierKeyFlags
+auto PlatformPointerEvent::Action::Scroll::GetModifiers() const -> Flags<ModifierKeyFlag>
 {
     return _modifiers;
 }
 
-auto PlatformPointerEvent::Action::Scroll::SetModifiers(ModifierKeyFlags const modifiers) -> void
+auto PlatformPointerEvent::Action::Scroll::SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void
 {
     _modifiers = modifiers;
 }

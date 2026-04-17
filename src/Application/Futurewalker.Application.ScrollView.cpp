@@ -37,12 +37,12 @@ auto ScrollView::GetContent() -> Shared<View>
     return _containerView->GetContent();
 }
 
-auto ScrollView::GetDirection() const -> ScrollViewDirection
+auto ScrollView::GetDirection() const -> Flags<ScrollViewDirection>
 {
     return _direction;
 }
 
-auto ScrollView::SetDirection(ScrollViewDirection const direction) -> void
+auto ScrollView::SetDirection(Flags<ScrollViewDirection> const direction) -> void
 {
     if (_direction != direction)
     {
@@ -53,7 +53,7 @@ auto ScrollView::SetDirection(ScrollViewDirection const direction) -> void
 
 auto ScrollView::Initialize() -> void
 {
-    SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
+    SetPointerTrackingFlags(ViewPointerTrackingFlag::All);
 
     _containerView = ContainerView::Make();
     AddChildBack(_containerView);

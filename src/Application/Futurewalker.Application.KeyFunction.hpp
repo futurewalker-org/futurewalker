@@ -5,6 +5,7 @@
 
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.NonConstructible.hpp"
+#include "Futurewalker.Core.Flags.hpp"
 
 #include <vector>
 
@@ -17,7 +18,7 @@ namespace FW_EXPORT
 ///
 struct KeyFunction : NonConstructible
 {
-    static auto GetModifierKeyStrings(ModifierKeyFlags const modifiers) -> std::vector<String>;
+    static auto GetModifierKeyStrings(Flags<ModifierKeyFlag> const modifiers) -> std::vector<String>;
 };
 }
 }

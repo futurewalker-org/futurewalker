@@ -32,7 +32,7 @@ public:
 
     auto Initialize() -> void override
     {
-        SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
+        SetPointerTrackingFlags(ViewPointerTrackingFlag::All);
         EventReceiver::Connect(*this, *this, &TestView::ReceiveEvent);
     }
 
@@ -72,36 +72,36 @@ public:
                 _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"tangential_pressure: {}", event.As<PointerEvent::Motion::Down>()->GetTangentialPressure())));
                 _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"button: {}", std::to_underlying(event.As<PointerEvent::Motion::Down>()->GetButton()))));
 
-                if ((event.As<PointerEvent::Motion::Down>()->GetButtons() & PointerButtonFlags::Button1) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Down>()->GetButtons() & PointerButtonFlag::Button1) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: Button1"));
                 }
-                if ((event.As<PointerEvent::Motion::Down>()->GetButtons() & PointerButtonFlags::Button2) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Down>()->GetButtons() & PointerButtonFlag::Button2) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: Button2"));
                 }
-                if ((event.As<PointerEvent::Motion::Down>()->GetButtons() & PointerButtonFlags::Button3) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Down>()->GetButtons() & PointerButtonFlag::Button3) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: Button3"));
                 }
-                if ((event.As<PointerEvent::Motion::Down>()->GetButtons() & PointerButtonFlags::ButtonX1) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Down>()->GetButtons() & PointerButtonFlag::ButtonX1) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: ButtonX1"));
                 }
-                if ((event.As<PointerEvent::Motion::Down>()->GetButtons() & PointerButtonFlags::ButtonX2) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Down>()->GetButtons() & PointerButtonFlag::ButtonX2) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: ButtonX2"));
                 }
 
-                if ((event.As<PointerEvent::Motion::Down>()->GetModifiers() & ModifierKeyFlags::Alt) != ModifierKeyFlags::None) 
+                if ((event.As<PointerEvent::Motion::Down>()->GetModifiers() & ModifierKeyFlag::Alt) != ModifierKeyFlag::None) 
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"modifier: Alt"));
                 }
-                if ((event.As<PointerEvent::Motion::Down>()->GetModifiers() & ModifierKeyFlags::Control) != ModifierKeyFlags::None) 
+                if ((event.As<PointerEvent::Motion::Down>()->GetModifiers() & ModifierKeyFlag::Control) != ModifierKeyFlag::None) 
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"modifier: Control"));
                 }
-                if ((event.As<PointerEvent::Motion::Down>()->GetModifiers() & ModifierKeyFlags::Shift) != ModifierKeyFlags::None) 
+                if ((event.As<PointerEvent::Motion::Down>()->GetModifiers() & ModifierKeyFlag::Shift) != ModifierKeyFlag::None) 
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"modifier: Shift"));
                 }
@@ -116,36 +116,36 @@ public:
                 _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"tangential_pressure: {}", event.As<PointerEvent::Motion::Up>()->GetTangentialPressure())));
                 _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"button: {}", std::to_underlying(event.As<PointerEvent::Motion::Up>()->GetButton()))));
 
-                if ((event.As<PointerEvent::Motion::Up>()->GetButtons() & PointerButtonFlags::Button1) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Up>()->GetButtons() & PointerButtonFlag::Button1) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: Button1"));
                 }
-                if ((event.As<PointerEvent::Motion::Up>()->GetButtons() & PointerButtonFlags::Button2) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Up>()->GetButtons() & PointerButtonFlag::Button2) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: Button2"));
                 }
-                if ((event.As<PointerEvent::Motion::Up>()->GetButtons() & PointerButtonFlags::Button3) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Up>()->GetButtons() & PointerButtonFlag::Button3) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: Button3"));
                 }
-                if ((event.As<PointerEvent::Motion::Up>()->GetButtons() & PointerButtonFlags::ButtonX1) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Up>()->GetButtons() & PointerButtonFlag::ButtonX1) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: ButtonX1"));
                 }
-                if ((event.As<PointerEvent::Motion::Up>()->GetButtons() & PointerButtonFlags::ButtonX2) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Up>()->GetButtons() & PointerButtonFlag::ButtonX2) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: ButtonX2"));
                 }
                 
-                if ((event.As<PointerEvent::Motion::Up>()->GetModifiers() & ModifierKeyFlags::Alt) != ModifierKeyFlags::None) 
+                if ((event.As<PointerEvent::Motion::Up>()->GetModifiers() & ModifierKeyFlag::Alt) != ModifierKeyFlag::None) 
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"modifier: Alt"));
                 }
-                if ((event.As<PointerEvent::Motion::Up>()->GetModifiers() & ModifierKeyFlags::Control) != ModifierKeyFlags::None) 
+                if ((event.As<PointerEvent::Motion::Up>()->GetModifiers() & ModifierKeyFlag::Control) != ModifierKeyFlag::None) 
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"modifier: Control"));
                 }
-                if ((event.As<PointerEvent::Motion::Up>()->GetModifiers() & ModifierKeyFlags::Shift) != ModifierKeyFlags::None) 
+                if ((event.As<PointerEvent::Motion::Up>()->GetModifiers() & ModifierKeyFlag::Shift) != ModifierKeyFlag::None) 
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"modifier: Shift"));
                 }
@@ -160,36 +160,36 @@ public:
                 _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"tangential_pressure: {}", event.As<PointerEvent::Motion::Move>()->GetTangentialPressure())));
                 _layout->AddChild(Lamp::TextView::MakeWithText(StringFunction::Format(u8"button: {}", std::to_underlying(event.As<PointerEvent::Motion::Move>()->GetButton()))));
 
-                if ((event.As<PointerEvent::Motion::Move>()->GetButtons() & PointerButtonFlags::Button1) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Move>()->GetButtons() & PointerButtonFlag::Button1) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: Button1"));
                 }
-                if ((event.As<PointerEvent::Motion::Move>()->GetButtons() & PointerButtonFlags::Button2) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Move>()->GetButtons() & PointerButtonFlag::Button2) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: Button2"));
                 }
-                if ((event.As<PointerEvent::Motion::Move>()->GetButtons() & PointerButtonFlags::Button3) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Move>()->GetButtons() & PointerButtonFlag::Button3) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: Button3"));
                 }
-                if ((event.As<PointerEvent::Motion::Move>()->GetButtons() & PointerButtonFlags::ButtonX1) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Move>()->GetButtons() & PointerButtonFlag::ButtonX1) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: ButtonX1"));
                 }
-                if ((event.As<PointerEvent::Motion::Move>()->GetButtons() & PointerButtonFlags::ButtonX2) != PointerButtonFlags::None)
+                if ((event.As<PointerEvent::Motion::Move>()->GetButtons() & PointerButtonFlag::ButtonX2) != PointerButtonFlag::None)
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"button: ButtonX2"));
                 }
 
-                if ((event.As<PointerEvent::Motion::Move>()->GetModifiers() & ModifierKeyFlags::Alt) != ModifierKeyFlags::None) 
+                if ((event.As<PointerEvent::Motion::Move>()->GetModifiers() & ModifierKeyFlag::Alt) != ModifierKeyFlag::None) 
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"modifier: Alt"));
                 }
-                if ((event.As<PointerEvent::Motion::Move>()->GetModifiers() & ModifierKeyFlags::Control) != ModifierKeyFlags::None) 
+                if ((event.As<PointerEvent::Motion::Move>()->GetModifiers() & ModifierKeyFlag::Control) != ModifierKeyFlag::None) 
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"modifier: Control"));
                 }
-                if ((event.As<PointerEvent::Motion::Move>()->GetModifiers() & ModifierKeyFlags::Shift) != ModifierKeyFlags::None) 
+                if ((event.As<PointerEvent::Motion::Move>()->GetModifiers() & ModifierKeyFlag::Shift) != ModifierKeyFlag::None) 
                 {
                     _layout->AddChild(Lamp::TextView::MakeWithText(u8"modifier: Shift"));
                 }

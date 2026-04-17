@@ -43,32 +43,30 @@ auto PlatformKeyboardLayoutWin::UpdateLayout() -> void
 
     auto mappedCount = SInt32(0);
 
-    for (auto i = 0; i <= std::to_underlying(PlatformModifierFlagsWin::All); ++i)
+    for (auto i = 0; i <= std::to_underlying(PlatformModifierFlagWin::All); ++i)
     {
-        auto const modifiers = static_cast<PlatformModifierFlagsWin>(i);
+        auto const modifiers = static_cast<PlatformModifierFlagWin>(i);
 
         _map[modifiers] = std::vector<std::wstring>(256);
 
         auto keyboardState = std::array<BYTE, 256>();
 
-        static_assert((static_cast<PlatformModifierFlagsWin>(1) & PlatformModifierFlagsWin::Shift) != PlatformModifierFlagsWin::None);
-
-        if ((modifiers & PlatformModifierFlagsWin::Shift) != PlatformModifierFlagsWin::None)
+        if ((Flags(modifiers) & PlatformModifierFlagWin::Shift) != PlatformModifierFlagWin::None)
         {
             keyboardState[VK_SHIFT] |= 0x80;
         }
 
-        if ((modifiers & PlatformModifierFlagsWin::Control) != PlatformModifierFlagsWin::None)
+        if ((Flags(modifiers) & PlatformModifierFlagWin::Control) != PlatformModifierFlagWin::None)
         {
             keyboardState[VK_CONTROL] |= 0x80;
         }
 
-        if ((modifiers & PlatformModifierFlagsWin::LAlt) != PlatformModifierFlagsWin::None)
+        if ((Flags(modifiers) & PlatformModifierFlagWin::LAlt) != PlatformModifierFlagWin::None)
         {
             keyboardState[VK_LMENU] |= 0x80;
         }
 
-        if ((modifiers & PlatformModifierFlagsWin::RAlt) != PlatformModifierFlagsWin::None)
+        if ((Flags(modifiers) & PlatformModifierFlagWin::RAlt) != PlatformModifierFlagWin::None)
         {
             keyboardState[VK_RMENU] |= 0x80;
         }
@@ -111,7 +109,7 @@ auto PlatformKeyboardLayoutWin::UpdateLayout() -> void
 ///
 /// @note Does not consume WM_(SYS)CHAR events in message loop.
 ///
-auto PlatformKeyboardLayoutWin::GetKey(DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> String
+auto PlatformKeyboardLayoutWin::GetKey(DWORD virtualKeyCode, Flags<PlatformModifierFlagWin> modifiers) const -> String
 {
     if (auto namedKey = MapVirtualKeyCodeToNamedKey(virtualKeyCode))
     {
@@ -121,29 +119,29 @@ auto PlatformKeyboardLayoutWin::GetKey(DWORD virtualKeyCode, PlatformModifierFla
     // Search printable representation by dropping modifiers except Shift or AltGr.
     // This behavior follows W3C UI Events KeyEvent specification.
 
-    auto const shift = PlatformModifierFlagsWin::Shift;
-    auto const altGr = PlatformModifierFlagsWin::Control & PlatformModifierFlagsWin::RAlt;
+    auto const shift = Flags(PlatformModifierFlagWin::Shift);
+    auto const altGr = Flags(PlatformModifierFlagWin::Control) | PlatformModifierFlagWin::RAlt;
 
-    auto modifierCombinations = std::vector<PlatformModifierFlagsWin>();
+    auto modifierCombinations = std::vector<Flags<PlatformModifierFlagWin>>();
 
     modifierCombinations.push_back(modifiers);
 
-    if ((modifiers & (shift | altGr)) != PlatformModifierFlagsWin::None)
+    if ((modifiers & (shift | altGr)) != PlatformModifierFlagWin::None)
     {
         modifierCombinations.push_back(shift | altGr);
     }
 
-    if ((modifiers & shift) != PlatformModifierFlagsWin::None)
+    if ((modifiers & shift) != PlatformModifierFlagWin::None)
     {
         modifierCombinations.push_back(shift);
     }
 
-    if ((modifiers & altGr) != PlatformModifierFlagsWin::None)
+    if ((modifiers & altGr) != PlatformModifierFlagWin::None)
     {
         modifierCombinations.push_back(altGr);
     }
 
-    modifierCombinations.push_back(PlatformModifierFlagsWin::None);
+    modifierCombinations.push_back(PlatformModifierFlagWin::None);
 
     for (auto const& fallbackModifiers : modifierCombinations)
     {
@@ -160,7 +158,7 @@ auto PlatformKeyboardLayoutWin::GetKey(DWORD virtualKeyCode, PlatformModifierFla
 ///
 auto PlatformKeyboardLayoutWin::GetUnmodifiedKey(DWORD virtualKeyCode) const -> String
 {
-    if (auto const chars = MapVirtualKeyCodeToChars(virtualKeyCode, PlatformModifierFlagsWin::None))
+    if (auto const chars = MapVirtualKeyCodeToChars(virtualKeyCode, PlatformModifierFlagWin::None))
     {
         if (auto namedKey = MapControlCharsToNamedKey(*chars))
         {
@@ -183,7 +181,7 @@ auto PlatformKeyboardLayoutWin::GetUnmodifiedKey(DWORD virtualKeyCode) const -> 
 ///
 /// @note Consumes WM_(SYS)CHAR events in message loop.
 ///
-auto PlatformKeyboardLayoutWin::GetKeyAndText(HWND hWnd, DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> std::pair<String, String>
+auto PlatformKeyboardLayoutWin::GetKeyAndText(HWND hWnd, DWORD virtualKeyCode, Flags<PlatformModifierFlagWin> modifiers) const -> std::pair<String, String>
 {
     // Collect WM_CHAR and WM_DEACHAR posted by TranslateMessage().
     auto chars = std::wstring();
@@ -269,48 +267,48 @@ auto PlatformKeyboardLayoutWin::GetKeyAndText(HWND hWnd, DWORD virtualKeyCode, P
 ///
 /// @brief Get current state of modifier keys.
 ///
-auto PlatformKeyboardLayoutWin::GetModifierState() const -> ModifierKeyFlags
+auto PlatformKeyboardLayoutWin::GetModifierState() const -> Flags<ModifierKeyFlag>
 {
-    auto flags = ModifierKeyFlags::None;
+    auto flags = Flags(ModifierKeyFlag::None);
     auto testAndSet = [&](auto vkc, auto flag) {
         if (::GetKeyState(vkc) & 0x8000)
         {
             flags |= flag;
         }
     };
-    testAndSet(VK_SHIFT, ModifierKeyFlags::Shift);
-    testAndSet(VK_CONTROL, ModifierKeyFlags::Control);
-    testAndSet(VK_MENU, ModifierKeyFlags::Alt);
+    testAndSet(VK_SHIFT, ModifierKeyFlag::Shift);
+    testAndSet(VK_CONTROL, ModifierKeyFlag::Control);
+    testAndSet(VK_MENU, ModifierKeyFlag::Alt);
     return flags;
 }
 
 ///
 /// @brief Get current state of modifier keys.
 ///
-auto PlatformKeyboardLayoutWin::GetPlatformModifierState() const -> PlatformModifierFlagsWin
+auto PlatformKeyboardLayoutWin::GetPlatformModifierState() const -> Flags<PlatformModifierFlagWin>
 {
-    auto flags = PlatformModifierFlagsWin::None;
+    auto flags = Flags(PlatformModifierFlagWin::None);
     auto testAndSet = [&](auto vkc, auto flag) {
         if (::GetKeyState(vkc) & 0x8000)
         {
             flags |= flag;
         }
     };
-    testAndSet(VK_SHIFT, PlatformModifierFlagsWin::Shift);
-    testAndSet(VK_CONTROL, PlatformModifierFlagsWin::Control);
-    testAndSet(VK_LMENU, PlatformModifierFlagsWin::LAlt);
-    testAndSet(VK_RMENU, PlatformModifierFlagsWin::RAlt);
+    testAndSet(VK_SHIFT, PlatformModifierFlagWin::Shift);
+    testAndSet(VK_CONTROL, PlatformModifierFlagWin::Control);
+    testAndSet(VK_LMENU, PlatformModifierFlagWin::LAlt);
+    testAndSet(VK_RMENU, PlatformModifierFlagWin::RAlt);
     return flags;
 }
 
 ///
 /// @brief Map virtual key code to chars.
 ///
-auto PlatformKeyboardLayoutWin::MapVirtualKeyCodeToChars(DWORD virtualKeyCode, PlatformModifierFlagsWin modifiers) const -> Optional<std::wstring>
+auto PlatformKeyboardLayoutWin::MapVirtualKeyCodeToChars(DWORD virtualKeyCode, Flags<PlatformModifierFlagWin> modifiers) const -> Optional<std::wstring>
 {
     if (0 <= virtualKeyCode && virtualKeyCode < 256)
     {
-        auto const it = _map.find(modifiers);
+        auto const it = _map.find(static_cast<PlatformModifierFlagWin>(modifiers));
         if (it != _map.end())
         {
             if (virtualKeyCode < std::ssize(it->second))

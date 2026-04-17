@@ -192,10 +192,10 @@ auto ViewLayer::SetShouldRasterize(Bool const shouldRasterize) -> void
 {
     if (_platformLayer)
     {
-        auto renderFlags = PlatformViewLayerRenderFlags::None;
+        auto renderFlags = Flags(PlatformViewLayerRenderFlag::None);
         if (shouldRasterize)
         {
-            renderFlags |= PlatformViewLayerRenderFlags::Rasterize;
+            renderFlags |= PlatformViewLayerRenderFlag::Rasterize;
         }
         _platformLayer->SetRenderFlags(renderFlags);
     }

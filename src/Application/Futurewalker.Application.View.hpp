@@ -35,6 +35,7 @@
 #include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.ReferenceArg.hpp"
 #include "Futurewalker.Core.NonCopyable.hpp"
+#include "Futurewalker.Core.Flags.hpp"
 
 #include "Futurewalker.Event.EventType.hpp"
 #include "Futurewalker.Event.EventReceiverType.hpp"
@@ -178,11 +179,11 @@ protected:
 
     auto IsPointerInteractive() const -> Bool;
 
-    auto GetPointerTrackingFlags() const -> ViewPointerTrackingFlags;
-    auto SetPointerTrackingFlags(ViewPointerTrackingFlags const pointerTrackingFlags) -> void;
+    auto GetPointerTrackingFlags() const -> Flags<ViewPointerTrackingFlag>;
+    auto SetPointerTrackingFlags(Flags<ViewPointerTrackingFlag> const pointerTrackingFlags) -> void;
 
-    auto GetFocusTrackingFlags() const -> ViewFocusTrackingFlags;
-    auto SetFocusTrackingFlags(ViewFocusTrackingFlags const focusTrackingFlags) -> void;
+    auto GetFocusTrackingFlags() const -> Flags<ViewFocusTrackingFlag>;
+    auto SetFocusTrackingFlags(Flags<ViewFocusTrackingFlag> const focusTrackingFlags) -> void;
 
     auto GetChildCount() const -> SInt64;
     auto GetChildIndex(ReferenceArg<View const> view) const -> Optional<SInt64>;
@@ -209,7 +210,7 @@ protected:
 
     auto CancelInput() -> void;
 
-    auto DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, PointerPhaseFlags const phase) -> Shared<View>;
+    auto DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, Flags<PointerPhaseFlag> const phase) -> Shared<View>;
     auto DispatchHitTestEventFromRoot(PassKey<RootView>, Event<HitTestEvent>& event) -> void;
 
     template <class Self>
@@ -274,7 +275,7 @@ private:
     auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
     auto DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
     auto DispatchNotifyBubbleEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
-    auto DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, PointerPhaseFlags const phase) -> Shared<View>;
+    auto DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, Flags<PointerPhaseFlag> const phase) -> Shared<View>;
 
     auto Attach() -> void;
     auto Detach() -> void;
@@ -316,8 +317,8 @@ private:
     Bool _attached = false;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
-    ViewPointerTrackingFlags _pointerTrackingFlags = ViewPointerTrackingFlags::None;
-    ViewFocusTrackingFlags _focusTrackingFlags = ViewFocusTrackingFlags::None;
+    Flags<ViewPointerTrackingFlag> _pointerTrackingFlags = ViewPointerTrackingFlag::None;
+    Flags<ViewFocusTrackingFlag> _focusTrackingFlags = ViewFocusTrackingFlag::None;
 };
 
 ///

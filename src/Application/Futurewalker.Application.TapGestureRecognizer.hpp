@@ -8,6 +8,7 @@
 
 #include "Futurewalker.Core.MonotonicTime.hpp"
 #include "Futurewalker.Core.Optional.hpp"
+#include "Futurewalker.Core.Flags.hpp"
 
 #include "Futurewalker.Async.AsyncFunction.hpp"
 
@@ -27,8 +28,8 @@ public:
     auto Stop() -> void override;
     auto Recognize(const Event<PointerEvent>& event, const Rect<Dp>& area) -> Bool override;
 
-    auto SetAllowedButtons(PointerButtonFlags const buttons) -> void;
-    auto SetAllowedActions(TapGestureActionFlags const actions) -> void;
+    auto SetAllowedButtons(Flags<PointerButtonFlag> const buttons) -> void;
+    auto SetAllowedActions(Flags<TapGestureActionFlag> const actions) -> void;
 
 private:
     auto InternalRecognize() -> Async<void>;
@@ -36,8 +37,8 @@ private:
     auto InternalRecognizeFirstUp() -> Async<Bool>;
 
 private:
-    PointerButtonFlags _allowedButtons = PointerButtonFlags::Button1;
-    TapGestureActionFlags _allowedActions = TapGestureActionFlags::SingleTap;
+    Flags<PointerButtonFlag> _allowedButtons = PointerButtonFlag::Button1;
+    Flags<TapGestureActionFlag> _allowedActions = TapGestureActionFlag::SingleTap;
     Delegate _delegate;
     Optional<TaskHandle<void>> _taskHandle;
 };

@@ -10,6 +10,7 @@
 
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.Flags.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -50,8 +51,8 @@ public:
     auto GetAccessKey() const -> String;
     auto SetAccessKey(String const& key) -> void;
 
-    auto GetAccessKeyModifiers() const -> ModifierKeyFlags;
-    auto SetAccessKeyModifiers(ModifierKeyFlags const modifiers) -> void;
+    auto GetAccessKeyModifiers() const -> Flags<ModifierKeyFlag>;
+    auto SetAccessKeyModifiers(Flags<ModifierKeyFlag> const modifiers) -> void;
 
     auto GetCommandId() const -> CommandId;
     auto SetCommandId(CommandId const commandId) -> void;
@@ -68,7 +69,7 @@ private:
         Icon leadingIcon;
         Icon trailingIcon;
         String accessKey;
-        ModifierKeyFlags accessKeyModifiers = ModifierKeyFlags::None;
+        Flags<ModifierKeyFlag> accessKeyModifiers = ModifierKeyFlag::None;
         CommandId commandId = 0U;
     };
     Shared<State> _state;

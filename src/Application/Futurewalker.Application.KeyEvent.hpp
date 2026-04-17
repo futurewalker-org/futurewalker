@@ -7,6 +7,7 @@
 
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.MonotonicTime.hpp"
+#include "Futurewalker.Core.Flags.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -50,15 +51,15 @@ public:
     auto GetText() const -> String;
     auto SetText(String const& text) -> void;
 
-    auto GetModifiers() const -> ModifierKeyFlags;
-    auto SetModifiers(ModifierKeyFlags const modifiers) -> void;
+    auto GetModifiers() const -> Flags<ModifierKeyFlag>;
+    auto SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void;
 
     auto IsRepeat() const -> Bool;
     auto SetRepeat(Bool const repeat) -> void;
 
 private:
     String _text;
-    ModifierKeyFlags _modifiers = ModifierKeyFlags::None;
+    Flags<ModifierKeyFlag> _modifiers = ModifierKeyFlag::None;
     Bool _repeat = false;
 };
 

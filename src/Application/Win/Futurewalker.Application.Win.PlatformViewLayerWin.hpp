@@ -73,7 +73,7 @@ private:
     Shared<PlatformDCompositionDeviceWin> _dcompDevice;
     Weak<PlatformViewLayerWin> _parent;
     PlatformViewLayerWinList _children;
-    PlatformViewLayerRenderFlags _renderFlags = PlatformViewLayerRenderFlags::None;
+    Flags<PlatformViewLayerRenderFlag> _renderFlags = PlatformViewLayerRenderFlag::None;
     Vector<Dp> _offset;
     Size<Dp> _size;
     ViewClipMode _clipMode = ViewClipMode::None;

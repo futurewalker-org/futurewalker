@@ -116,8 +116,8 @@ auto TextEdit::SetFontFamily(AttributeArg<Graphics::FontFamily> const& family) -
 
 auto TextEdit::Initialize() -> void
 {
-    SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
-    SetFocusTrackingFlags(ViewFocusTrackingFlags::All);
+    SetPointerTrackingFlags(ViewPointerTrackingFlag::All);
+    SetFocusTrackingFlags(ViewFocusTrackingFlag::All);
 
     _textShaper = Graphics::TextShaper::Make();
     _inputEditable = InputEditable::Make();
@@ -294,7 +294,7 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
                 auto const selectionDirection = _inputEditable->GetSelectionDirection();
                 auto const textRange = _inputEditable->GetStringRange();
                 auto const isRtl = GetLayoutDirection() == LayoutDirection::RightToLeft;
-                auto const isShift = (modifiers & ModifierKeyFlags::Shift) != ModifierKeyFlags::None;
+                auto const isShift = (modifiers & ModifierKeyFlag::Shift) != ModifierKeyFlag::None;
                 auto const isLeftArrow = (key == Key::ArrowLeft);
 
                 // FIXME: Offset should be based on grapheme cluster.

@@ -98,7 +98,7 @@ auto GestureRecognizerView::GetContent() const -> Shared<View const>
 ///
 auto GestureRecognizerView::Initialize() -> void
 {
-    SetPointerTrackingFlags(ViewPointerTrackingFlags::All);
+    SetPointerTrackingFlags(ViewPointerTrackingFlag::All);
 
     EventReceiver::Connect(*this, *this, &GestureRecognizerView::ReceiveEvent);
 }

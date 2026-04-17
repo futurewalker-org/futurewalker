@@ -12,6 +12,7 @@
 #include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Core.MonotonicTime.hpp" 
+#include "Futurewalker.Core.Flags.hpp" 
 
 namespace FW_DETAIL_NS
 {
@@ -41,11 +42,11 @@ public:
     auto GetPosition() const -> Point<Dp>;
     auto SetPosition(Point<Dp> const& position) -> void;
 
-    auto GetButtons() const -> PointerButtonFlags;
-    auto SetButtons(PointerButtonFlags const buttons) -> void;
+    auto GetButtons() const -> Flags<PointerButtonFlag>;
+    auto SetButtons(Flags<PointerButtonFlag> const buttons) -> void;
 
-    auto GetModifiers() const -> ModifierKeyFlags;
-    auto SetModifiers(ModifierKeyFlags const modifiers) -> void;
+    auto GetModifiers() const -> Flags<ModifierKeyFlag>;
+    auto SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void;
 
 public:
     class Motion;
@@ -57,8 +58,8 @@ private:
     MonotonicTime _timestamp;
     Bool _isPrimaryPointer = false;
     Point<Dp> _position;
-    PointerButtonFlags _buttonState = PointerButtonFlags::None;
-    ModifierKeyFlags _modifierState = ModifierKeyFlags::None;
+    Flags<PointerButtonFlag> _buttonState = PointerButtonFlag::None;
+    Flags<ModifierKeyFlag> _modifierState = ModifierKeyFlag::None;
 };
 
 class PlatformPointerEvent::Motion : public PlatformPointerEvent
@@ -262,14 +263,14 @@ public:
     auto GetPrecision() const -> PointerScrollPrecision;
     auto SetPrecision(PointerScrollPrecision const precision) -> void;
 
-    auto GetModifiers() const -> ModifierKeyFlags;
-    auto SetModifiers(ModifierKeyFlags const modifiers) -> void;
+    auto GetModifiers() const -> Flags<ModifierKeyFlag>;
+    auto SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void;
 
 private:
     Dp _deltaX = 0.0;
     Dp _deltaY = 0.0;
     PointerScrollPrecision _precision = PointerScrollPrecision::Coarse;
-    ModifierKeyFlags _modifiers = ModifierKeyFlags::None;
+    Flags<ModifierKeyFlag> _modifiers = ModifierKeyFlag::None;
 };
 }
 }

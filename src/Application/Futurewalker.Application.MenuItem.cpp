@@ -131,16 +131,16 @@ auto MenuItem::SetAccessKey(String const& key) -> void
     GetMutableState().accessKey = key;
 }
 
-auto MenuItem::GetAccessKeyModifiers() const -> ModifierKeyFlags
+auto MenuItem::GetAccessKeyModifiers() const -> Flags<ModifierKeyFlag>
 {
     if (auto const state = GetImmutableState())
     {
         return state->accessKeyModifiers;
     }
-    return ModifierKeyFlags::None;
+    return ModifierKeyFlag::None;
 }
 
-auto MenuItem::SetAccessKeyModifiers(ModifierKeyFlags const modifiers) -> void
+auto MenuItem::SetAccessKeyModifiers(Flags<ModifierKeyFlag> const modifiers) -> void
 {
     GetMutableState().accessKeyModifiers = modifiers;
 }

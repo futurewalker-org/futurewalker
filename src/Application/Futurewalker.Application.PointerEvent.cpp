@@ -255,7 +255,7 @@ auto PointerEvent::Motion::Down::SetButton(PointerButton const button) -> void
 ///
 /// @brief Get button state.
 ///
-auto PointerEvent::Motion::Down::GetButtons() const -> PointerButtonFlags
+auto PointerEvent::Motion::Down::GetButtons() const -> Flags<PointerButtonFlag>
 {
     return _state.buttonState;
 }
@@ -265,7 +265,7 @@ auto PointerEvent::Motion::Down::GetButtons() const -> PointerButtonFlags
 ///
 /// @param buttons Button state flags.
 ///
-auto PointerEvent::Motion::Down::SetButtons(PointerButtonFlags const buttons) -> void
+auto PointerEvent::Motion::Down::SetButtons(Flags<PointerButtonFlag> const buttons) -> void
 {
     _state.buttonState = buttons;
 }
@@ -273,7 +273,7 @@ auto PointerEvent::Motion::Down::SetButtons(PointerButtonFlags const buttons) ->
 ///
 /// @brief Get modifier state.
 ///
-auto PointerEvent::Motion::Down::GetModifiers() const -> ModifierKeyFlags
+auto PointerEvent::Motion::Down::GetModifiers() const -> Flags<ModifierKeyFlag>
 {
     return _state.modifierState;
 }
@@ -283,7 +283,7 @@ auto PointerEvent::Motion::Down::GetModifiers() const -> ModifierKeyFlags
 ///
 /// @param modifiers Modifier state flags.
 ///
-auto PointerEvent::Motion::Down::SetModifiers(ModifierKeyFlags const modifiers) -> void
+auto PointerEvent::Motion::Down::SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void
 {
     _state.modifierState = modifiers;
 }
@@ -435,7 +435,7 @@ auto PointerEvent::Motion::Up::SetButton(PointerButton const button) -> void
 ///
 /// @brief Get button state.
 ///
-auto PointerEvent::Motion::Up::GetButtons() const -> PointerButtonFlags
+auto PointerEvent::Motion::Up::GetButtons() const -> Flags<PointerButtonFlag>
 {
     return _state.buttonState;
 }
@@ -445,7 +445,7 @@ auto PointerEvent::Motion::Up::GetButtons() const -> PointerButtonFlags
 ///
 /// @param buttons Button state flags.
 ///
-auto PointerEvent::Motion::Up::SetButtons(PointerButtonFlags const buttons) -> void
+auto PointerEvent::Motion::Up::SetButtons(Flags<PointerButtonFlag> const buttons) -> void
 {
     _state.buttonState = buttons;
 }
@@ -453,7 +453,7 @@ auto PointerEvent::Motion::Up::SetButtons(PointerButtonFlags const buttons) -> v
 ///
 /// @brief Get modifier state.
 ///
-auto PointerEvent::Motion::Up::GetModifiers() const -> ModifierKeyFlags
+auto PointerEvent::Motion::Up::GetModifiers() const -> Flags<ModifierKeyFlag>
 {
     return _state.modifierState;
 }
@@ -463,7 +463,7 @@ auto PointerEvent::Motion::Up::GetModifiers() const -> ModifierKeyFlags
 ///
 /// @param modifiers Modifier state flags.
 ///
-auto PointerEvent::Motion::Up::SetModifiers(ModifierKeyFlags const modifiers) -> void
+auto PointerEvent::Motion::Up::SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void
 {
     _state.modifierState = modifiers;
 }
@@ -615,7 +615,7 @@ auto PointerEvent::Motion::Move::SetButton(PointerButton const button) -> void
 ///
 /// @brief Get button state.
 ///
-auto PointerEvent::Motion::Move::GetButtons() const -> PointerButtonFlags
+auto PointerEvent::Motion::Move::GetButtons() const -> Flags<PointerButtonFlag>
 {
     return _state.buttonState;
 }
@@ -625,7 +625,7 @@ auto PointerEvent::Motion::Move::GetButtons() const -> PointerButtonFlags
 ///
 /// @param buttons Button state flags.
 ///
-auto PointerEvent::Motion::Move::SetButtons(PointerButtonFlags const buttons) -> void
+auto PointerEvent::Motion::Move::SetButtons(Flags<PointerButtonFlag> const buttons) -> void
 {
     _state.buttonState = buttons;
 }
@@ -633,7 +633,7 @@ auto PointerEvent::Motion::Move::SetButtons(PointerButtonFlags const buttons) ->
 ///
 /// @brief Get modifier state.
 ///
-auto PointerEvent::Motion::Move::GetModifiers() const -> ModifierKeyFlags
+auto PointerEvent::Motion::Move::GetModifiers() const -> Flags<ModifierKeyFlag>
 {
     return _state.modifierState;
 }
@@ -643,7 +643,7 @@ auto PointerEvent::Motion::Move::GetModifiers() const -> ModifierKeyFlags
 ///
 /// @param modifiers Modifier state flags.
 ///
-auto PointerEvent::Motion::Move::SetModifiers(ModifierKeyFlags const modifiers) -> void
+auto PointerEvent::Motion::Move::SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void
 {
     _state.modifierState = modifiers;
 }
@@ -859,7 +859,7 @@ auto PointerEvent::Action::Scroll::SetPrecision(PointerScrollPrecision const pre
 ///
 /// @brief Get modifier state.
 ///
-auto PointerEvent::Action::Scroll::GetModifiers() const -> ModifierKeyFlags
+auto PointerEvent::Action::Scroll::GetModifiers() const -> Flags<ModifierKeyFlag>
 {
     return _modifiers;
 }
@@ -869,7 +869,7 @@ auto PointerEvent::Action::Scroll::GetModifiers() const -> ModifierKeyFlags
 ///
 /// @param modifierState Modifier state flags.
 ///
-auto PointerEvent::Action::Scroll::SetModifiers(ModifierKeyFlags const modifiers) -> void
+auto PointerEvent::Action::Scroll::SetModifiers(Flags<ModifierKeyFlag> const modifiers) -> void
 {
     _modifiers = modifiers;
 }

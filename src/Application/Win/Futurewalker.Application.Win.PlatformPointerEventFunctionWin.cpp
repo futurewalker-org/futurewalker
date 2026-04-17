@@ -6,44 +6,44 @@
 
 namespace FW_DETAIL_NS
 {
-auto PlatformPointerEventFunctionWin::ConvertMouseEventParamToPointerButtonFlags(WPARAM const wParam) -> PointerButtonFlags
+auto PlatformPointerEventFunctionWin::ConvertMouseEventParamToPointerButtonFlags(WPARAM const wParam) -> Flags<PointerButtonFlag>
 {
-    auto buttons = PointerButtonFlags::None;
+    auto buttons = Flags(PointerButtonFlag::None);
     auto const low = LOWORD(wParam);
     if (low & MK_LBUTTON)
     {
-        buttons |= PointerButtonFlags::Button1;
+        buttons |= PointerButtonFlag::Button1;
     }
     if (low & MK_RBUTTON)
     {
-        buttons |= PointerButtonFlags::Button2;
+        buttons |= PointerButtonFlag::Button2;
     }
     if (low & MK_MBUTTON)
     {
-        buttons |= PointerButtonFlags::Button3;
+        buttons |= PointerButtonFlag::Button3;
     }
     if (low & MK_XBUTTON1)
     {
-        buttons |= PointerButtonFlags::ButtonX1;
+        buttons |= PointerButtonFlag::ButtonX1;
     }
     if (low & MK_XBUTTON2)
     {
-        buttons |= PointerButtonFlags::ButtonX2;
+        buttons |= PointerButtonFlag::ButtonX2;
     }
     return buttons;
 }
 
-auto PlatformPointerEventFunctionWin::ConvertMouseEventParamToModifierKeyFlags(WPARAM const wParam) -> ModifierKeyFlags
+auto PlatformPointerEventFunctionWin::ConvertMouseEventParamToModifierKeyFlags(WPARAM const wParam) -> Flags<ModifierKeyFlag>
 {
-    auto modifiers = ModifierKeyFlags::None;
+    auto modifiers = Flags(ModifierKeyFlag::None);
     auto const low = LOWORD(wParam);
     if (low & MK_CONTROL)
     {
-        modifiers |= ModifierKeyFlags::Control;
+        modifiers |= ModifierKeyFlag::Control;
     }
     if (low & MK_SHIFT)
     {
-        modifiers |= ModifierKeyFlags::Shift;
+        modifiers |= ModifierKeyFlag::Shift;
     }
     return modifiers;
 }
@@ -74,28 +74,28 @@ auto PlatformPointerEventFunctionWin::ConvertPointerButtonChangeTypeToPointerBut
     return button;
 }
 
-auto PlatformPointerEventFunctionWin::ConvertPointerFlagsToPointerButtonFlags(UINT32 const pointerFlags) -> PointerButtonFlags
+auto PlatformPointerEventFunctionWin::ConvertPointerFlagsToPointerButtonFlags(UINT32 const pointerFlags) -> Flags<PointerButtonFlag>
 {
-    auto buttons = PointerButtonFlags::None;
+    auto buttons = Flags(PointerButtonFlag::None);
     if (pointerFlags & POINTER_FLAG_FIRSTBUTTON)
     {
-        buttons |= PointerButtonFlags::Button1;
+        buttons |= PointerButtonFlag::Button1;
     }
     if (pointerFlags & POINTER_FLAG_SECONDBUTTON)
     {
-        buttons |= PointerButtonFlags::Button2;
+        buttons |= PointerButtonFlag::Button2;
     }
     if (pointerFlags & POINTER_FLAG_THIRDBUTTON)
     {
-        buttons |= PointerButtonFlags::Button3;
+        buttons |= PointerButtonFlag::Button3;
     }
     if (pointerFlags & POINTER_FLAG_FOURTHBUTTON)
     {
-        buttons |= PointerButtonFlags::ButtonX1;
+        buttons |= PointerButtonFlag::ButtonX1;
     }
     if (pointerFlags & POINTER_FLAG_FIFTHBUTTON)
     {
-        buttons |= PointerButtonFlags::ButtonX2;
+        buttons |= PointerButtonFlag::ButtonX2;
     }
     return buttons;
 }

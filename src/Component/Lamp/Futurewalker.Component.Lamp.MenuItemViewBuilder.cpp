@@ -15,7 +15,7 @@ namespace FW_LAMP_DETAIL_NS
 {
 namespace
 {
-auto GetAccessKeyString(String const& accessKey, ModifierKeyFlags const modifiers) -> String
+auto GetAccessKeyString(String const& accessKey, Flags<ModifierKeyFlag> const modifiers) -> String
 {
     auto parts = std::vector<String>();
     auto modifierStrings = KeyFunction::GetModifierKeyStrings(modifiers);

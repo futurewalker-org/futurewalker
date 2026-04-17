@@ -145,7 +145,7 @@ auto View::FindPointerTrackingView(Event<PointerEvent> const& event) -> Shared<V
     auto view = FindViewByPosition(position);
     while (view)
     {
-        if (view->GetPointerTrackingFlags() != ViewPointerTrackingFlags::None)
+        if (view->GetPointerTrackingFlags() != ViewPointerTrackingFlag::None)
         {
             return view;
         }
@@ -965,7 +965,7 @@ auto View::EnterHitTestScope(PassKey<HitTestScope> key, HitTestParameter const& 
 ///
 /// @return The view that consumed the event.
 ///
-auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, PointerPhaseFlags const phase) -> Shared<View>
+auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, Flags<PointerPhaseFlag> const phase) -> Shared<View>
 {
     try
     {
@@ -976,7 +976,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
             return {};
         }
 
-        auto dispatch = [](View& view, Event<PointerEvent> pointerEvent, Shared<View> const& target, PointerPhaseFlags const phase) {
+        auto dispatch = [](View& view, Event<PointerEvent> pointerEvent, Shared<View> const& target, Flags<PointerPhaseFlag> const phase) {
             auto const offset = view.GetFrameRect().GetPosition().As<Vector>();
             pointerEvent->SetPosition(pointerEvent->GetPosition() - offset);
             return view.DispatchPointerEvent(pointerEvent, target, phase);
@@ -984,7 +984,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
 
         if (target == self)
         {
-            if ((phase & PointerPhaseFlags::Target) != PointerPhaseFlags::None)
+            if ((phase & PointerPhaseFlag::Target) != PointerPhaseFlag::None)
             {
                 auto targetEvent = Event<>(pointerEvent);
                 if (SendEventDetached(targetEvent))
@@ -995,7 +995,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
         }
         else
         {
-            if ((phase & PointerPhaseFlags::Capture) != PointerPhaseFlags::None)
+            if ((phase & PointerPhaseFlag::Capture) != PointerPhaseFlag::None)
             {
                 auto pointerInterceptEventParameter = Event<PointerEvent::Forecast>();
                 PointerEvent::Copy(*pointerInterceptEventParameter, *pointerEvent);
@@ -1033,7 +1033,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
 
         if (target != self)
         {
-            if ((phase & PointerPhaseFlags::Bubble) != PointerPhaseFlags::None)
+            if ((phase & PointerPhaseFlag::Bubble) != PointerPhaseFlag::None)
             {
                 auto targetEvent = Event<>(pointerEvent);
                 if (SendEventDetached(targetEvent))
@@ -1218,13 +1218,13 @@ auto View::InvalidateVisual() -> void
 ///
 auto View::IsPointerInteractive() const -> Bool
 {
-    return _pointerTrackingFlags != ViewPointerTrackingFlags::None;
+    return _pointerTrackingFlags != ViewPointerTrackingFlag::None;
 }
 
 ///
 /// @brief Get tracking flags.
 ///
-auto View::GetPointerTrackingFlags() const -> ViewPointerTrackingFlags
+auto View::GetPointerTrackingFlags() const -> Flags<ViewPointerTrackingFlag>
 {
     return _pointerTrackingFlags;
 }
@@ -1232,7 +1232,7 @@ auto View::GetPointerTrackingFlags() const -> ViewPointerTrackingFlags
 ///
 /// @brief Set tracking flags.
 ///
-auto View::SetPointerTrackingFlags(ViewPointerTrackingFlags const pointerTrackingFlags) -> void
+auto View::SetPointerTrackingFlags(Flags<ViewPointerTrackingFlag> const pointerTrackingFlags) -> void
 {
     _pointerTrackingFlags = pointerTrackingFlags;
 }
@@ -1240,7 +1240,7 @@ auto View::SetPointerTrackingFlags(ViewPointerTrackingFlags const pointerTrackin
 ///
 /// @brief Get tracking flags.
 ///
-auto View::GetFocusTrackingFlags() const -> ViewFocusTrackingFlags
+auto View::GetFocusTrackingFlags() const -> Flags<ViewFocusTrackingFlag>
 {
     return _focusTrackingFlags;
 }
@@ -1248,7 +1248,7 @@ auto View::GetFocusTrackingFlags() const -> ViewFocusTrackingFlags
 ///
 /// @brief Set tracking flags.
 ///
-auto View::SetFocusTrackingFlags(ViewFocusTrackingFlags const focusTrackingFlags) -> void
+auto View::SetFocusTrackingFlags(Flags<ViewFocusTrackingFlag> const focusTrackingFlags) -> void
 {
     if (_focusTrackingFlags != focusTrackingFlags)
     {
@@ -1510,7 +1510,7 @@ auto View::CancelInput() -> void
 ///
 /// @return The view that consumed the event.
 ///
-auto View::DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, PointerPhaseFlags const phase) -> Shared<View>
+auto View::DispatchPointerEventFromRoot(PassKey<RootView>, Event<PointerEvent> const& event, Shared<View> const& target, Flags<PointerPhaseFlag> const phase) -> Shared<View>
 {
     return DispatchPointerEvent(event, target, phase);
 }
@@ -1884,7 +1884,7 @@ auto View::GetFocusNode() const -> FocusNode const&
 ///
 auto View::UpdateFocusable() -> void
 {
-    auto const hasFocusableFlag = (_focusTrackingFlags & ViewFocusTrackingFlags::All) != ViewFocusTrackingFlags::None;
+    auto const hasFocusableFlag = (_focusTrackingFlags & ViewFocusTrackingFlag::All) != ViewFocusTrackingFlag::None;
     auto const enabled = IsEnabledFromRoot();
     auto const visible = IsVisibleFromRoot();
     auto const focusable = enabled && visible && hasFocusableFlag;

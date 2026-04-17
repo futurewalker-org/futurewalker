@@ -18,6 +18,7 @@
 #include "Futurewalker.Core.TypeTraits.hpp"
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.Optional.hpp"
+#include "Futurewalker.Core.Flags.hpp"
 
 #include <vector>
 
@@ -65,8 +66,8 @@ public:
     auto GetOpacity() const -> Float64;
     auto SetOpacity(Float64 const opacity) -> void;
 
-    auto GetRenderFlags() const -> PlatformViewLayerRenderFlags;
-    auto SetRenderFlags(PlatformViewLayerRenderFlags const renderFlags) -> void;
+    auto GetRenderFlags() const -> Flags<PlatformViewLayerRenderFlag>;
+    auto SetRenderFlags(Flags<PlatformViewLayerRenderFlag> const renderFlags) -> void;
 
     auto GetDisplayList() const -> Shared<Graphics::DisplayList>;
     auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void;
@@ -120,7 +121,7 @@ private:
     Weak<PlatformViewLayer> _self;
     Weak<PlatformViewLayer> _parent;
     std::list<Shared<PlatformViewLayer>> _children;
-    PlatformViewLayerRenderFlags _renderFlags = PlatformViewLayerRenderFlags::None;
+    Flags<PlatformViewLayerRenderFlag> _renderFlags = PlatformViewLayerRenderFlag::None;
     Size<Dp> _size;
     Vector<Dp> _offset;
     Optional<Graphics::Path> _clipPath;

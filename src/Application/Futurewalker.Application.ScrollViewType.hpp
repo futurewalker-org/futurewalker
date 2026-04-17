@@ -3,8 +3,6 @@
 
 #include "Futurewalker.Application.Prelude.hpp"
 
-#include "Futurewalker.Core.EnumClassFlag.hpp"
-
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -17,6 +15,5 @@ enum class ScrollViewDirection
     Horizontal = 1 << 0,
     Vertical = 1 << 1,
 };
-FW_ENABLE_ENUM_CLASS_BITWISE_OPERATORS(ScrollViewDirection);
 }
 }
