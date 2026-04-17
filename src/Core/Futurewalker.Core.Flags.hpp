@@ -117,3 +117,21 @@ private:
 };
 }
 }
+
+template <class E>
+struct std::hash<FW_NS::Flags<E>>
+{
+    constexpr auto operator()(FW_NS::Flags<E> const& v) const noexcept -> size_t
+    {
+        return std::hash<std::underlying_type_t<E>>()(static_cast<std::underlying_type_t<E>>(v));
+    }
+};
+
+template <class E>
+struct boost::hash<FW_NS::Flags<E>>
+{
+    constexpr auto operator()(FW_NS::Flags<E> const& v) const noexcept -> size_t
+    {
+        return std::hash<std::underlying_type_t<E>>()(static_cast<std::underlying_type_t<E>>(v));
+    }
+};

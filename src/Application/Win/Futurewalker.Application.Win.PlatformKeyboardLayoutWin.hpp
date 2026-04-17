@@ -39,7 +39,7 @@ private:
 
 private:
     HKL _hkl = NULL;
-    std::unordered_map<PlatformModifierFlagWin, std::vector<std::wstring>> _map;
+    std::unordered_map<Flags<PlatformModifierFlagWin>, std::vector<std::wstring>> _map;
 };
 }
 }
