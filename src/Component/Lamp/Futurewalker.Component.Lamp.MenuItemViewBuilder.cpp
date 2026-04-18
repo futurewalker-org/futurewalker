@@ -74,13 +74,13 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
         }
         else if (type == MenuItemType::Separator)
         {
-            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(Dp, AttributeLeadingMargin, [](auto const& padding) { return padding.leading; }, MenuItemViewStyle::Padding);
-            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(Dp, AttributeTrailingMargin, [](auto const& padding) { return padding.trailing; }, MenuItemViewStyle::Padding);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(Dp, AttributeStartMargin, [](auto const& padding) { return padding.leading; }, MenuItemViewStyle::Padding);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(Dp, AttributeEndMargin, [](auto const& padding) { return padding.trailing; }, MenuItemViewStyle::Padding);
             auto separator = Separator::Make();
             separator->SetAlpha(Style::AlphaOpaque);
             separator->SetColor(Style::ColorOutlineVariant);
-            separator->SetLeadingMargin(AttributeLeadingMargin);
-            separator->SetTrailingMargin(AttributeTrailingMargin);
+            separator->SetStartMargin(AttributeStartMargin);
+            separator->SetEndMargin(AttributeEndMargin);
             separator->SetLayoutThickness(Style::Size60);
             separator->SetDrawingThickness(Style::Size20);
             return separator;

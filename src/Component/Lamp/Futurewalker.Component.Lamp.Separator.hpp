@@ -34,11 +34,11 @@ public:
     auto GetDrawingThickness() const -> Dp;
     auto SetDrawingThickness(AttributeArg<Dp> const& thickness) -> void;
 
-    auto GetLeadingMargin() const -> Dp;
-    auto SetLeadingMargin(AttributeArg<Dp> const& margin) -> void;
+    auto GetStartMargin() const -> Dp;
+    auto SetStartMargin(AttributeArg<Dp> const& margin) -> void;
 
-    auto GetTrailingMargin() const -> Dp;
-    auto SetTrailingMargin(AttributeArg<Dp> const& margin) -> void;
+    auto GetEndMargin() const -> Dp;
+    auto SetEndMargin(AttributeArg<Dp> const& margin) -> void;
 
     auto GetColor() const -> RGBAColor;
     auto SetColor(AttributeArg<RGBAColor> const& color) -> void;
@@ -63,8 +63,8 @@ private:
     AttributeAccessor<Dp> _drawingThickness;
     AttributeAccessor<RGBAColor> _color;
     AttributeAccessor<Channel> _alpha;
-    AttributeAccessor<Dp> _leadingMargin;
-    AttributeAccessor<Dp> _trailingMargin;
+    AttributeAccessor<Dp> _startMargin;
+    AttributeAccessor<Dp> _endMargin;
     AttributeAccessor<CornerRadius> _cornerRadius;
     Shared<SizedView> _sizedView;
 };

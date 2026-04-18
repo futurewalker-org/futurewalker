@@ -49,24 +49,24 @@ auto Separator::SetDrawingThickness(AttributeArg<Dp> const& thickness) -> void
     _drawingThickness.SetAttributeArg(thickness);
 }
 
-auto Separator::GetLeadingMargin() const -> Dp
+auto Separator::GetStartMargin() const -> Dp
 {
-    return _leadingMargin.GetValueOr(0);
+    return _startMargin.GetValueOr(0);
 }
 
-auto Separator::SetLeadingMargin(AttributeArg<Dp> const& margin) -> void
+auto Separator::SetStartMargin(AttributeArg<Dp> const& margin) -> void
 {
-    _leadingMargin.SetAttributeArg(margin);
+    _startMargin.SetAttributeArg(margin);
 }
 
-auto Separator::GetTrailingMargin() const -> Dp
+auto Separator::GetEndMargin() const -> Dp
 {
-    return _trailingMargin.GetValueOr(0);
+    return _endMargin.GetValueOr(0);
 }
 
-auto Separator::SetTrailingMargin(AttributeArg<Dp> const& margin) -> void
+auto Separator::SetEndMargin(AttributeArg<Dp> const& margin) -> void
 {
-    _trailingMargin.SetAttributeArg(margin);
+    _endMargin.SetAttributeArg(margin);
 }
 
 auto Separator::GetColor() const -> RGBAColor
@@ -106,8 +106,8 @@ auto Separator::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeDrawingThickness, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, AttributeColor, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Channel, AttributeAlpha, {});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeLeadingMargin, {0});
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeTrailingMargin, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeStartMargin, {0});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Dp, AttributeEndMargin, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(CornerRadius, AttributeCornerRadius, {});
 
     _orientation.BindAndConnectAttributeWithDefaultValue(*this, &Separator::ReceiveAttributeEvent, AttributeOrientation, SeparatorOrientation::Horizontal);
@@ -115,8 +115,8 @@ auto Separator::Initialize() -> void
     _drawingThickness.BindAndConnectAttributeWithDefaultValue(*this, &Separator::ReceiveAttributeEvent, AttributeDrawingThickness, {0});
     _color.BindAndConnectAttributeWithDefaultValue(*this, &Separator::ReceiveAttributeEvent, AttributeColor, {});
     _alpha.BindAndConnectAttributeWithDefaultValue(*this, &Separator::ReceiveAttributeEvent, AttributeAlpha, {});
-    _leadingMargin.BindAndConnectAttributeWithDefaultValue(*this, &Separator::ReceiveAttributeEvent, AttributeLeadingMargin, {0});
-    _trailingMargin.BindAndConnectAttributeWithDefaultValue(*this, &Separator::ReceiveAttributeEvent, AttributeTrailingMargin, {0});
+    _startMargin.BindAndConnectAttributeWithDefaultValue(*this, &Separator::ReceiveAttributeEvent, AttributeStartMargin, {0});
+    _endMargin.BindAndConnectAttributeWithDefaultValue(*this, &Separator::ReceiveAttributeEvent, AttributeEndMargin, {0});
     _cornerRadius.BindAndConnectAttributeWithDefaultValue(*this, &Separator::ReceiveAttributeEvent, AttributeCornerRadius, {});
 
     _sizedView = SizedView::Make();
@@ -133,25 +133,25 @@ auto Separator::Draw(DrawScope& scope) -> void
     auto const thickness = GetDrawingThickness();
     auto const color = GetColor().WithAlphaMultiplied(GetAlpha());
     auto const cornerRadius = GetCornerRadius();
-    auto const leadingMargin = GetLeadingMargin();
-    auto const trailingMargin = GetTrailingMargin();
+    auto const startMargin = GetStartMargin();
+    auto const endMargin = GetEndMargin();
 
     auto const layoutDirection = GetLayoutDirection();
     auto const contentRect = GetContentRect();
 
-    auto const totalMargin = leadingMargin + trailingMargin;
+    auto const totalMargin = startMargin + endMargin;
 
     auto drawingRect = Rect<Dp>();
     if (orientation == SeparatorOrientation::Horizontal)
     {
-        auto const x = contentRect.x0 + leadingMargin;
+        auto const x = contentRect.x0 + (layoutDirection == LayoutDirection::LeftToRight ? startMargin : endMargin);
         auto const y = contentRect.y0 + (contentRect.GetHeight() - thickness) / 2;
         drawingRect = Rect<Dp>(x, y, x + contentRect.GetWidth() - totalMargin, y + thickness);
     }
     else
     {
         auto const x = contentRect.x0 + (contentRect.GetWidth() - thickness) / 2;
-        auto const y = contentRect.y0 + leadingMargin;
+        auto const y = contentRect.y0 + startMargin;
         drawingRect = Rect<Dp>(x, y, x + thickness, y + contentRect.GetHeight() - totalMargin);
     }
 
