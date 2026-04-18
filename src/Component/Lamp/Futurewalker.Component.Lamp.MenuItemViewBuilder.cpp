@@ -4,6 +4,7 @@
 #include "Futurewalker.Component.Lamp.MenuItemView.hpp"
 #include "Futurewalker.Component.Lamp.TextView.hpp"
 #include "Futurewalker.Component.Lamp.IconView.hpp"
+#include "Futurewalker.Component.Lamp.Separator.hpp"
 #include "Futurewalker.Component.Lamp.Style.hpp"
 
 #include "Futurewalker.Application.MenuItem.hpp"
@@ -73,7 +74,16 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
         }
         else if (type == MenuItemType::Separator)
         {
-            // TODO;
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(Dp, AttributeLeadingMargin, [](auto const& padding) { return padding.leading; }, MenuItemViewStyle::Padding);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(Dp, AttributeTrailingMargin, [](auto const& padding) { return padding.trailing; }, MenuItemViewStyle::Padding);
+            auto separator = Separator::Make();
+            separator->SetAlpha(Style::AlphaOpaque);
+            separator->SetColor(Style::ColorOutlineVariant);
+            separator->SetLeadingMargin(AttributeLeadingMargin);
+            separator->SetTrailingMargin(AttributeTrailingMargin);
+            separator->SetLayoutThickness(Style::Size60);
+            separator->SetDrawingThickness(Style::Size20);
+            return separator;
         }
         else
         {
