@@ -68,7 +68,7 @@ public:
     virtual auto Maximize() -> void = 0;
     virtual auto Restore() -> void = 0;
     virtual auto IsClosed() -> Bool = 0;
-    virtual auto Close() -> Async<Bool> = 0;
+    virtual auto RequestClose() -> Async<Bool> = 0;
     virtual auto Destroy() -> void = 0;
     virtual auto Render() -> void = 0;
     virtual auto RequestFrame() -> void = 0;

@@ -70,7 +70,7 @@ public:
     auto Maximize() -> void override;
     auto Restore() -> void override;
     auto IsClosed() -> Bool override;
-    auto Close() -> Async<Bool> override;
+    auto RequestClose() -> Async<Bool> override;
     auto Destroy() -> void override;
     auto Render() -> void override;
     auto RequestFrame() -> void override;

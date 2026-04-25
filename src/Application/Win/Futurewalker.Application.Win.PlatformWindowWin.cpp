@@ -626,7 +626,7 @@ auto PlatformWindowWin::IsClosed() -> Bool
 ///
 /// @brief
 ///
-auto PlatformWindowWin::Close() -> Async<Bool>
+auto PlatformWindowWin::RequestClose() -> Async<Bool>
 {
     if (!IsClosed())
     {

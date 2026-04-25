@@ -1526,7 +1526,7 @@ auto PlatformWindowMac::IsClosed() -> Bool
     }
 }
 
-auto PlatformWindowMac::Close() -> Async<Bool>
+auto PlatformWindowMac::RequestClose() -> Async<Bool>
 {
     @autoreleasepool
     {

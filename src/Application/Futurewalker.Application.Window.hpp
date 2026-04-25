@@ -154,7 +154,7 @@ public:
     auto Restore() -> void;
 
     auto IsClosed() const -> Bool;
-    auto Close() -> Async<Bool>;
+    auto RequestClose() -> Async<Bool>;
 
     auto GetContent() -> Shared<View>;
     auto SetContent(Shared<View> content) -> void;

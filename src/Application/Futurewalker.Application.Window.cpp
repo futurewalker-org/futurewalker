@@ -457,11 +457,11 @@ auto Window::IsClosed() const -> Bool
 ///
 /// @brief Request to close the window.
 ///
-auto Window::Close() -> Async<Bool>
+auto Window::RequestClose() -> Async<Bool>
 {
     if (!IsClosed())
     {
-        co_return co_await _platformObject->Close();
+        co_return co_await _platformObject->RequestClose();
     }
     co_return true;
 }

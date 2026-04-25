@@ -74,7 +74,7 @@ auto Popup::Close() -> Async<void>
 {
     if (_window)
     {
-        co_await _window->Close();
+        co_await _window->RequestClose();
     }
 }
 
