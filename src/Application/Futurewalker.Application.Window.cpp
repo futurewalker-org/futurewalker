@@ -72,7 +72,7 @@ Window::~Window()
     if (_platformObject)
     {
         _platformObject->SetDelegate({});
-        _platformObject->Destroy();
+        _platformObject->Close();
     }
     DetachRootView();
     DetachCommandNode();

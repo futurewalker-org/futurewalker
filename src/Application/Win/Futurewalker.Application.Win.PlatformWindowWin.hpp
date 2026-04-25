@@ -71,7 +71,7 @@ public:
     auto Restore() -> void override;
     auto IsClosed() -> Bool override;
     auto RequestClose() -> Async<Bool> override;
-    auto Destroy() -> void override;
+    auto Close() -> void override;
     auto Render() -> void override;
     auto RequestFrame() -> void override;
     auto GetFrameTime() -> MonotonicTime override;

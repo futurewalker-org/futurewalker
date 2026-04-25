@@ -91,7 +91,7 @@ PlatformWindowWin::~PlatformWindowWin()
 
     if (!IsClosed())
     {
-        Destroy();
+        Close();
     }
 }
 
@@ -644,7 +644,7 @@ auto PlatformWindowWin::RequestClose() -> Async<Bool>
 
         if (close)
         {
-            Destroy();
+            Close();
         }
         co_return close;
     }
@@ -654,7 +654,7 @@ auto PlatformWindowWin::RequestClose() -> Async<Bool>
 ///
 /// @brief
 ///
-auto PlatformWindowWin::Destroy() -> void
+auto PlatformWindowWin::Close() -> void
 {
     if (_hwnd)
     {
@@ -1590,7 +1590,7 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 
             if (close)
             {
-                Destroy();
+                Close();
             }
         }
         catch (...)

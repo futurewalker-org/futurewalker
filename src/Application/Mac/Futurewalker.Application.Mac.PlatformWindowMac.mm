@@ -1222,7 +1222,7 @@ PlatformWindowMac::~PlatformWindowMac()
 
     if (!IsClosed())
     {
-        Destroy();
+        Close();
     }
 }
 
@@ -1538,7 +1538,7 @@ auto PlatformWindowMac::RequestClose() -> Async<Bool>
     }
 }
 
-auto PlatformWindowMac::Destroy() -> void
+auto PlatformWindowMac::Close() -> void
 {
     @autoreleasepool
     {
