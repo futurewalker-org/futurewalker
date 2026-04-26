@@ -33,6 +33,7 @@ public:
     static auto Make() -> Shared<AttributeNode>;
 
     AttributeNode(PassKey<AttributeNode>);
+    ~AttributeNode();
 
     auto AddChild(Shared<AttributeNode> const& child) -> void;
     auto RemoveChild(Shared<AttributeNode> const& child) -> void;

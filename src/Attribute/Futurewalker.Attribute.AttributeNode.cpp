@@ -42,6 +42,94 @@ AttributeNode::AttributeNode(PassKey<AttributeNode>)
 }
 
 ///
+/// @brief Destructor.
+///
+AttributeNode::~AttributeNode()
+{
+    try
+    {
+        for (auto const& child : _children)
+        {
+            child->_parent = nullptr;
+        }
+
+        auto const updateNumber = GetNextUpdateNumber();
+        auto notifySlots = std::vector<Shared<AttributeSlot>>();
+        auto slots = std::move(_slots);
+        for (auto const& [id, slot] : slots)
+        {
+            // Detach dependencies for later recycling.
+            slot->DetachFromSourceDependentSlot();
+            slot->DetachFromValueDependentSlots();
+            {
+                auto const sourceDependantSlots = slot->GetSourceDependantSlots();
+                for (auto i = SInt64(0); i < sourceDependantSlots.GetSize(); ++i)
+                {
+                    if (auto const dependantSlot = sourceDependantSlots.GetValueAt(i).Lock())
+                    {
+                        // Since reference count of this node is already zero, slots owned by this node will be skipped.
+                        if (auto const node = dependantSlot->GetOwner())
+                        {
+                            dependantSlot->DetachFromSourceDependentSlot();
+
+                            if (auto const nodeParent = node->GetParent())
+                            {
+                                if (auto const sourceSlot = nodeParent->ResolveSource(dependantSlot->GetDescription()))
+                                {
+                                    dependantSlot->SetSourceDependentSlot(sourceSlot);
+                                }
+                            }
+
+                            if (node->UpdateSlotCacheRecursive(*dependantSlot, updateNumber) || dependantSlot->GetValueChanged())
+                            {
+                                notifySlots.push_back(dependantSlot);
+                            }
+                        }
+                    }
+                }
+            }
+            {
+                auto const valueDependantSlots = slot->GetValueDependantSlots();
+                for (auto i = SInt64(0); i < valueDependantSlots.GetSize(); ++i)
+                {
+                    if (auto const valueDependantSlot = valueDependantSlots.GetValueAt(i).Lock())
+                    {
+                        if (auto const node = valueDependantSlot->GetOwner())
+                        {
+                            if (node->UpdateSlotCacheRecursive(*valueDependantSlot, updateNumber) || valueDependantSlot->GetValueChanged())
+                            {
+                                notifySlots.push_back(valueDependantSlot);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (auto& [_, slot] : slots)
+        {
+            _slotCache->RecycleSlot(std::move(slot));
+        }
+        slots.clear();
+
+        for (auto const& slot : notifySlots)
+        {
+            if (auto const owner = slot->GetOwner())
+            {
+                owner->NotifyValueChangedRecursive(*slot, updateNumber);
+            }
+        }
+        notifySlots.clear();
+
+        _children.clear();
+    }
+    catch (...)
+    {
+        FW_DEBUG_ASSERT(false);
+    }
+}
+
+///
 /// @brief Add child node.
 ///
 /// @param[in] child Attribute node.

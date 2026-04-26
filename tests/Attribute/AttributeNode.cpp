@@ -466,4 +466,49 @@ TEST_CASE("AttributeNode")
             REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child2) == 24);
         }
     }
+
+    SECTION("Destroying parent node")
+    {
+        FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
+        FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr2, Attr1);
+
+        auto root = AttributeNode::Make();
+        auto parent = AttributeNode::Make();
+        auto child = AttributeNode::Make();
+        auto descendant = AttributeNode::Make();
+
+        root->AddChild(parent);
+        child->AddChild(descendant);
+
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 1);
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*descendant) == 1);
+
+        AttributeNode::SetValue<&Attr1>(*root, 42);
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 42);
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*descendant) == 1);
+
+        parent->AddChild(child);
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 42);
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*descendant) == 42);
+
+        root.Reset();
+        child.Reset();
+        descendant.Reset();
+
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 1);
+
+        root = AttributeNode::Make();
+        child = AttributeNode::Make();
+        descendant = AttributeNode::Make();
+        AttributeNode::SetValue<&Attr1>(*root, 42);
+
+        root->AddChild(parent);
+        child->AddChild(descendant);
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 42);
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*descendant) == 1);
+
+        parent->AddChild(child);
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 42);
+        REQUIRE(*AttributeNode::GetValue<&Attr2>(*descendant) == 42);
+    }
 }
