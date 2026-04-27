@@ -66,7 +66,7 @@ public:
         {
             if (0 <= index && index < std::ssize(*state))
             {
-                state->erase(state->begin() + static_cast<size_t>(index));
+                state->erase(state->begin() + static_cast<typename State::difference_type>(index));
             }
         }
     }
