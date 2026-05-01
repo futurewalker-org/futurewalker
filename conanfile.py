@@ -12,6 +12,7 @@ class Futurewalker(ConanFile):
         self.requires("boost/[1.87.0]")
         self.requires("catch2/[3.8.0]")
         self.requires("fmt/[11.1.3]")
+        self.requires("xerces-c/[3.3.0]")
 
         if self.settings.os == "Windows":
             self.requires("icu/[74.2]")

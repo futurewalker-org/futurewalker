@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="HelloWorld" uuid="9edad212-e6cb-4eac-a153-2b9b7ba6a93e" primary-locale="en-us">
+    <application id="org.futurewalker.example.HelloWorld" version="1.0.0"/>
+</module>
