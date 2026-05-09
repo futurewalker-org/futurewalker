@@ -2,17 +2,34 @@
 
 #include "Futurewalker.Base.Win.PlatformFilesystemWin.hpp"
 
+#include <boost/dll/runtime_symbol_info.hpp>
 
 namespace FW_DETAIL_NS
 {
 auto PlatformFilesystemWin::GetCurrentDirectoryPath() -> Path
 {
-    return {}; // FIXME
+    try
+    {
+        auto const path = std::filesystem::current_path();
+        return Path::MakeFromNativeString(path.native());
+    }
+    catch (...)
+    {
+        throw Exception(ErrorCode::Failure);
+    }
 }
 
 auto PlatformFilesystemWin::GetCurrentExecutablePath() -> Path
 {
-    return {}; // FIXME
+    try
+    {
+        auto const path = boost::dll::program_location();
+        return Path::MakeFromNativeString(path.native());
+    }
+    catch (...)
+    {
+        throw Exception(ErrorCode::Failure);
+    }
 }
 
 auto Locator::Resolver<PlatformFilesystemWin>::Resolve() -> Shared<PlatformFilesystemWin>
