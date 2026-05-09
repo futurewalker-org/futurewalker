@@ -19,7 +19,12 @@ namespace FW_EXPORT
 class PlatformEnvironmentContextWin final : public PlatformEnvironmentContext
 {
 public:
-    PlatformEnvironmentContextWin(Shared<PlatformDebug> debug, Shared<PlatformSystemInfo> systemInfo, Shared<PlatformCommandLine> commandLine, Shared<PlatformInstanceHandleWin> instanceHandle);
+    PlatformEnvironmentContextWin(
+      Shared<PlatformDebug> debug,
+      Shared<PlatformSystemInfo> systemInfo,
+      Shared<PlatformCommandLine> commandLine,
+      Shared<PlatformFilesystem> filesystem,
+      Shared<PlatformInstanceHandleWin> instanceHandle);
 
 private:
     Shared<PlatformInstanceHandleWin> _instanceHandle;

@@ -7,8 +7,12 @@
 
 namespace FW_DETAIL_NS
 {
-PlatformEnvironmentContextMac::PlatformEnvironmentContextMac(Shared<PlatformDebug> debug, Shared<PlatformSystemInfo> systemInfo, Shared<PlatformCommandLine> commandLine)
-  : PlatformEnvironmentContext(debug, systemInfo, commandLine)
+PlatformEnvironmentContextMac::PlatformEnvironmentContextMac(
+  Shared<PlatformDebug> debug,
+  Shared<PlatformSystemInfo> systemInfo,
+  Shared<PlatformCommandLine> commandLine,
+  Shared<PlatformFilesystem> filesystem)
+  : PlatformEnvironmentContext(debug, systemInfo, commandLine, filesystem)
 {
 }
 
@@ -17,6 +21,7 @@ auto Locator::Resolver<PlatformEnvironmentContextMac>::Resolve() -> Shared<Platf
     auto debug = Locator::Resolve<PlatformDebug>();
     auto systemInfo = Locator::Resolve<PlatformSystemInfo>();
     auto commandLine = Locator::Resolve<PlatformCommandLine>();
-    return Shared<PlatformEnvironmentContextMac>::Make(debug, systemInfo, commandLine);
+    auto filesystem = Locator::Resolve<PlatformFilesystem>();
+    return Shared<PlatformEnvironmentContextMac>::Make(debug, systemInfo, commandLine, filesystem);
 }
 }
