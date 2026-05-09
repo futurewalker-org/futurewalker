@@ -242,6 +242,50 @@ function(fw_add_binary NAME TYPE)
 
 endfunction()
 
+# Add reousrce files to the target
+function (fw_add_resources NAME)
+  set(RESOURCE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Resource")
+  set(RESOURCE_DST_DIR "${CMAKE_CURRENT_BINARY_DIR}/Resource")
+  set(RESOURCE_CACHE_NAME "${NAME}.cache.xml")
+  set(RESOURCE_DEPFILE_NAME "${NAME}.d")
+  set(RESOURCE_CACHE_PATH "${RESOURCE_DST_DIR}/${RESOURCE_CACHE_NAME}")
+  set(RESOURCE_DEPFILE_PATH "${RESOURCE_DST_DIR}/${RESOURCE_DEPFILE_NAME}")
+
+  # Custom command for resource compiler
+  add_custom_command(
+    OUTPUT ${RESOURCE_CACHE_PATH}
+    DEPENDS resource-compiler
+    COMMAND resource-compiler --generate "${RESOURCE_SRC_DIR}" --cache "${RESOURCE_CACHE_PATH}" --depfile "${RESOURCE_DEPFILE_PATH}" --header "${RESOURCE_DST_DIR}/ResourceID"
+    DEPFILE ${RESOURCE_DEPFILE_PATH}
+  )
+
+  set(RESOURCE_CUSTOM_TARGET_NAME "${NAME}-RunGenerateResources")
+  set(RESOURCE_LIBRARY_NAME "${NAME}-GenerateResources")
+
+  # We need interface library since it only generates headers.
+  add_custom_target(${RESOURCE_CUSTOM_TARGET_NAME} DEPENDS ${RESOURCE_CACHE_PATH})
+  add_library(${RESOURCE_LIBRARY_NAME} INTERFACE)
+  target_sources(${RESOURCE_LIBRARY_NAME} INTERFACE
+    FILE_SET HEADERS
+    BASE_DIRS ${RESOURCE_DST_DIR}
+  )
+  add_dependencies(${RESOURCE_LIBRARY_NAME} ${RESOURCE_CUSTOM_TARGET_NAME})
+  target_link_libraries(${NAME} PUBLIC ${RESOURCE_LIBRARY_NAME})
+  
+  # Set transitive link property for bundling
+  set_target_properties(${RESOURCE_LIBRARY_NAME} PROPERTIES INTERFACE_FW_RESOURCE_CACHE_PATH "${RESOURCE_CACHE_PATH}")
+  set_target_properties(${RESOURCE_LIBRARY_NAME} PROPERTIES TRANSITIVE_LINK_PROPERTIES "FW_RESOURCE_CACHE_PATH")
+endfunction()
+
+# Generate resource bundle file
+function(fw_bundle_resources NAME)
+  set(RESOURCE_BUNDLE_PATH "${CMAKE_CURRENT_BINARY_DIR}/Resource/${NAME}.dat")
+  add_custom_command(
+    TARGET ${NAME} POST_BUILD
+    COMMAND resource-compiler --bundle "$<JOIN:$<TARGET_PROPERTY:${NAME},FW_RESOURCE_CACHE_PATH>, >" --output ${RESOURCE_BUNDLE_PATH}
+    VERBATIM)
+endfunction()
+
 # Add Test target.
 function (fw_add_test LABEL NAME)
   set(TARGET Test-${LABEL}-${NAME})

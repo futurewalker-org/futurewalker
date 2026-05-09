@@ -12,3 +12,7 @@ fw_link_libraries(${ExampleName} PUBLIC
   Futurewalker::Component::Lamp
   Futurewalker::Main
 )
+
+fw_add_resources(${ExampleName})
+
+fw_bundle_resources(${ExampleName})
