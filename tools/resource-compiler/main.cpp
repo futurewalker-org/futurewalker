@@ -1,14 +1,23 @@
 ﻿#include <xercesc/dom/DOM.hpp>
 #include <xercesc/parsers/XercesDOMParser.hpp>
+#include <xercesc/sax/SAXParseException.hpp>
+#include <xercesc/sax/HandlerBase.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/util/XMLString.hpp>
+#include <xercesc/dom/DOMDocument.hpp>
+#include <xercesc/dom/DOMElement.hpp>
+#include <xercesc/dom/DOMImplementationLS.hpp>
+#include <xercesc/dom/DOMImplementation.hpp>
+#include <xercesc/framework/LocalFileFormatTarget.hpp>
 
 #include <boost/nowide/args.hpp>
 #include <boost/program_options.hpp>
 #include <boost/uuid.hpp>
 #include <boost/variant2.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <filesystem>
+#include <fstream>
 #include <print>
 #include <string>
 #include <set>
@@ -18,33 +27,48 @@
 #include <vector>
 #include <ranges>
 #include <iostream>
+#include <map>
+
+#include <unicode/ustring.h>
 
 namespace fs = std::filesystem;
 namespace po = boost::program_options;
 
 namespace
 {
-struct StringEntity
+struct StringValue
 {
-    std::u16string id;     /// Identifier of the entity. Must be dot-separated string (e.g. "HelloWorld.MainWindow.Title").
     std::u16string locale; /// Locale of the entity, in IETF BCP 47 format (e.g., "en-US", "ja-JP").
     std::u16string value;  /// Value of the string entity.
 };
 
-struct FileEntity
+struct FileValue
 {
-    std::u16string id;     /// Identifier of the entity. Must be dot-separated string (e.g. "HelloWorld.MainWindow.Title").
     std::u16string locale; /// Locale of the entity, in IETF BCP 47 format (e.g., "en-US", "ja-JP").
     std::u16string path;   /// Path to the file for the file entity.
 };
 
+struct StringEntity
+{
+    std::u16string id;   /// Identifier of the entity. Must be dot-separated string (e.g. "HelloWorld.MainWindow.Title").
+    uint32_t number = 0; /// Resource number. Used as identifier to query entity from resource bundle.
+    std::vector<StringValue> values;
+};
+
+struct FileEntity
+{
+    std::u16string id;   /// Identifier of the entity. Must be dot-separated string (e.g. "HelloWorld.MainWindow.Title").
+    uint32_t number = 0; /// Resource number. Used as identifier to query entity from resource bundle.
+    std::vector<FileValue> values;
+};
+
 struct ModuleData
 {
-    std::u16string name;               /// Display name of the module.
-    boost::uuids::uuid uuid;           /// Unique identifier of the module, in UUID format.
-    std::u16string primary_locale;     /// Primary locale of the module, in IETF BCP 47 format (e.g., "en-US", "ja-JP").
-    std::vector<StringEntity> strings; /// List of string entities in the module.
-    std::vector<FileEntity> files;     /// List of file entities in the module
+    std::u16string name;                            /// Display name of the module.
+    boost::uuids::uuid uuid;                        /// Unique identifier of the module, in UUID format.
+    std::u16string primary_locale;                  /// Primary locale of the module, in IETF BCP 47 format (e.g., "en-US", "ja-JP").
+    std::map<std::u16string, StringEntity> strings; /// List of string entities in the module.
+    std::map<std::u16string, FileEntity> files;     /// List of file entities in the module
 };
 
 auto string_to_xml(std::u16string const& str) -> XMLCh const*
@@ -57,21 +81,62 @@ auto xml_to_string(XMLCh const* xml_ch) -> std::u16string
     return std::u16string(reinterpret_cast<char16_t const*>(xml_ch));
 }
 
-auto xml_to_narrow_string(XMLCh const* xml_ch) -> std::string
+auto string_to_utf8(std::u16string const& str) -> std::string
 {
-    return boost::nowide::narrow(xml_to_string(xml_ch));
+    auto src = str.data();
+    auto srcLength = static_cast<int32_t>(str.size());
+    auto ec = UErrorCode();
+    auto dstLength = int32_t(0);
+    u_strToUTF8(nullptr, 0, &dstLength, src, srcLength, &ec);
+    ec = U_ZERO_ERROR;
+    auto dst = std::string();
+    dst.resize(static_cast<size_t>(dstLength));
+    u_strToUTF8(dst.data(), dstLength, nullptr, src, srcLength, &ec);
+    return dst;
+}
+
+auto utf8_to_string(std::string const& str) -> std::u16string
+{
+    auto src = str.data();
+    auto srcLength = static_cast<int32_t>(str.size());
+    auto ec = UErrorCode();
+    auto dstLength = int32_t(0);
+    u_strFromUTF8(nullptr, 0, &dstLength, src, srcLength, &ec);
+    ec = U_ZERO_ERROR;
+    auto dst = std::u16string();
+    dst.resize(static_cast<size_t>(dstLength));
+    u_strFromUTF8(dst.data(), dstLength, nullptr, src, srcLength, &ec);
+    return dst;
+}
+
+auto xml_to_utf8(XMLCh const* xml_ch) -> std::string
+{
+    return string_to_utf8(xml_to_string(xml_ch));
 }
 
 auto string_to_uuid(std::u16string const& str) -> boost::uuids::uuid
 {
     try
     {
-        std::string str_utf8 = boost::nowide::narrow(str);
+        std::string str_utf8 = string_to_utf8(str);
         return boost::uuids::string_generator()(str_utf8);
     }
     catch (const std::exception& e)
     {
         return boost::uuids::uuid();
+    }
+}
+
+auto string_to_unsigned_int(std::u16string const& str) -> uint32_t
+{
+    try
+    {
+        auto utf8 = string_to_utf8(str);
+        return static_cast<uint32_t>(std::stoul(utf8));
+    }
+    catch (...)
+    {
+        return 0;
     }
 }
 
@@ -105,8 +170,13 @@ auto validate_entity_id(const std::u16string& id) -> bool
     return true;
 }
 
-auto validate_locale(const std::u16string& locale) -> bool
+auto validate_locale(const std::u16string& locale, bool allow_empty) -> bool
 {
+    if (allow_empty && locale.empty())
+    {
+        return true;
+    }
+
     auto const parts = locale | std::ranges::views::split(u'-') | std::ranges::to<std::vector<std::u16string>>();
     if (parts.size() != 2)
     {
@@ -141,14 +211,14 @@ auto parse_module_file(const fs::path& module_xml_path, std::u16string& name, bo
     {
         parser.parse(module_xml_path.string().c_str());
     }
-    catch (const xercesc::XMLException& e)
+    catch (const xercesc::SAXException& e)
     {
-        std::println("Error: XML parse error in {}: {}", module_xml_path.string(), xml_to_narrow_string(e.getMessage()));
+        std::println("Error: XML parse error in {}: {}", module_xml_path.string(), xml_to_utf8(e.getMessage()));
         return false;
     }
-    catch (const xercesc::DOMException& e)
+    catch (...)
     {
-        std::println("Error: DOM error in {}: {}", module_xml_path.string(), xml_to_narrow_string(e.getMessage()));
+        std::println("Error: Unknown exception during parsing XML file {}", module_xml_path.string());
         return false;
     }
 
@@ -163,7 +233,7 @@ auto parse_module_file(const fs::path& module_xml_path, std::u16string& name, bo
     auto root_name = xml_to_string(root->getTagName());
     if (root_name != u"module")
     {
-        std::println("Error: Root element must be <module>, got <{}>", boost::nowide::narrow(root_name));
+        std::println("Error: Root element must be <module>, got <{}>", string_to_utf8(root_name));
         return false;
     }
 
@@ -180,13 +250,13 @@ auto parse_module_file(const fs::path& module_xml_path, std::u16string& name, bo
     auto module_uuid = string_to_uuid(module_uuid_str);
     if (module_uuid.is_nil())
     {
-        std::println("Error: <module> has invalid 'uuid' attribute: {}", boost::nowide::narrow(module_uuid_str));
+        std::println("Error: <module> has invalid 'uuid' attribute: {}", string_to_utf8(module_uuid_str));
         return false;
     }
 
-    if (!validate_locale(module_primary_locale))
+    if (!validate_locale(module_primary_locale, false))
     {
-        std::println("Error: <module> has invalid 'primary-locale' attribute: {}", boost::nowide::narrow(module_primary_locale));
+        std::println("Error: <module> has invalid 'primary-locale' attribute: {}", string_to_utf8(module_primary_locale));
         return false;
     }
 
@@ -196,12 +266,13 @@ auto parse_module_file(const fs::path& module_xml_path, std::u16string& name, bo
     return true;
 }
 
-auto parse_entity_base(xercesc::DOMElement const* element, std::u16string const& prefix, std::u16string const& default_locale) -> std::optional<std::pair<std::u16string, std::u16string>>
+auto parse_entity_base(xercesc::DOMElement const* element, std::u16string const& prefix, std::u16string const& default_locale)
+  -> std::optional<std::pair<std::u16string, std::u16string>>
 {
     auto id = xml_to_string(element->getAttribute(string_to_xml(u"id")));
     if (!validate_entity_id(id))
     {
-        std::println("Error: Invalid entity id: {}", boost::nowide::narrow(id));
+        std::println("Error: Invalid entity id: {}", string_to_utf8(id));
         return std::nullopt;
     }
 
@@ -210,20 +281,19 @@ auto parse_entity_base(xercesc::DOMElement const* element, std::u16string const&
         id = prefix + u"." + id;
     }
 
-    auto locale = xml_to_string(element->getAttribute(string_to_xml(u"locale")));
-    if (locale.empty())
+    auto locale = std::u16string();
+    if (auto locale_attribute_node = element->getAttributeNode(string_to_xml(u"locale")))
     {
-        if (default_locale.empty())
-        {
-            auto const tag_name = xml_to_string(element->getTagName());
-            std::println("Error: <{}> with id '{}' is missing 'locale' attribute and no default locale is specified", boost::nowide::narrow(tag_name), boost::nowide::narrow(id));
-            return std::nullopt;
-        }
+        locale = xml_to_string(locale_attribute_node->getNodeValue());
+    }
+    else
+    {
         locale = default_locale;
     }
-    else if (!validate_locale(locale))
+
+    if (!validate_locale(locale, true))
     {
-        std::println("Error: Invalid locale: {}", boost::nowide::narrow(locale));
+        std::println("Error: Invalid locale: {}", string_to_utf8(locale));
         return std::nullopt;
     }
     return std::make_pair(std::move(id), std::move(locale));
@@ -231,10 +301,12 @@ auto parse_entity_base(xercesc::DOMElement const* element, std::u16string const&
 
 auto parse_entity(
   xercesc::DOMElement const* element,
+  fs::path const& base_path,
   std::u16string const& prefix,
   std::u16string const& default_locale,
-  std::vector<StringEntity>& string_entities,
-  std::vector<FileEntity>& file_entities) -> bool
+  std::map<std::u16string, StringEntity>& string_entities,
+  std::map<std::u16string, FileEntity>& file_entities,
+  std::vector<fs::path>& dependent_files) -> bool
 {
     auto const tag_name = xml_to_string(element->getTagName());
     if (tag_name == u"string")
@@ -248,9 +320,8 @@ auto parse_entity(
         auto [id, locale] = std::move(*entity_base);
         auto value = xml_to_string(element->getTextContent());
 
-        string_entities.push_back(
-          StringEntity {
-              .id = std::move(id),
+        string_entities[id].values.push_back(
+          StringValue {
               .locale = std::move(locale),
               .value = std::move(value),
           });
@@ -263,41 +334,70 @@ auto parse_entity(
             return false;
         }
         auto [id, locale] = std::move(*entity_base);
-        auto path = xml_to_string(element->getTextContent());
+        auto path = fs::path(xml_to_string(element->getTextContent()));
 
-        file_entities.push_back(
-          FileEntity {
-              .id = std::move(id),
+        if (path.is_relative())
+        {
+            path = base_path / path;
+        }
+
+        path = path.lexically_normal();
+
+        if (!fs::exists(path))
+        {
+            std::println("<file>: file path does not exist: {}", path.string());
+            return false;
+        }
+
+        if (!fs::is_regular_file(path))
+        {
+            std::println("<file>: file path is not regular file: {}", path.string());
+            return false;
+        }
+
+        file_entities[id].values.push_back(
+          FileValue {
               .locale = std::move(locale),
-              .path = std::move(path),
+              .path = path.u16string(),
           });
+
+        dependent_files.push_back(path);
     }
     return true;
 }
 
-auto parse_resource_file(const fs::path& resource_xml_path, std::u16string const& primary_locale, std::vector<StringEntity>& string_entities, std::vector<FileEntity>& file_entities) -> bool
+auto parse_resource_file(
+  const fs::path& resource_xml_path,
+  std::u16string const& primary_locale,
+  std::map<std::u16string, StringEntity>& string_entities,
+  std::map<std::u16string, FileEntity>& file_entities,
+  std::vector<fs::path>& dependent_files) -> bool
 {
     std::println("Parsing resource file: {}", resource_xml_path.string());
 
+    auto handler = xercesc::HandlerBase();
     auto parser = xercesc::XercesDOMParser();
     parser.setValidationScheme(xercesc::XercesDOMParser::Val_Never);
     parser.setDoNamespaces(false);
     parser.setDoSchema(false);
+    parser.setErrorHandler(&handler);
 
     try
     {
         parser.parse(resource_xml_path.string().c_str());
     }
-    catch (const xercesc::XMLException& e)
+    catch (const xercesc::SAXException& e)
     {
-        std::println("Error: XML parse error in {}: {}", resource_xml_path.string(), xml_to_narrow_string(e.getMessage()));
-        false;
-    }
-    catch (const xercesc::DOMException& e)
-    {
-        std::println("Error: DOM error in {}: {}", resource_xml_path.string(), xml_to_narrow_string(e.getMessage()));
+        std::println("Error: XML parse error in {}: {}", resource_xml_path.string(), xml_to_utf8(e.getMessage()));
         return false;
     }
+    catch (...)
+    {
+        std::println("Error: Unknown exception during parsing XML file {}", resource_xml_path.string());
+        return false;
+    }
+
+    dependent_files.push_back(resource_xml_path);
 
     auto doc = parser.getDocument();
     auto root = (doc != nullptr) ? doc->getDocumentElement() : nullptr;
@@ -310,34 +410,210 @@ auto parse_resource_file(const fs::path& resource_xml_path, std::u16string const
     auto root_name = xml_to_string(root->getTagName());
     if (root_name != u"resources")
     {
-        std::println("Error: Root element must be <resources>, got <{}>", xml_to_narrow_string(root->getTagName()));
+        std::println("Error: Root element must be <resources>, got <{}>", xml_to_utf8(root->getTagName()));
         return false;
     }
 
     auto const prefix = xml_to_string(root->getAttribute(string_to_xml(u"prefix")));
     if (!prefix.empty() && !validate_entity_id(prefix))
     {
-        std::println("Error: Invalid prefix: {}", boost::nowide::narrow(prefix));
+        std::println("Error: Invalid prefix: {}", string_to_utf8(prefix));
         return false;
     }
 
     auto const locale = xml_to_string(root->getAttribute(string_to_xml(u"locale")));
-    if (!locale.empty() && !validate_locale(locale))
+    if (!locale.empty() && !validate_locale(locale, true))
     {
-        std::println("Error: Invalid locale: {}", boost::nowide::narrow(locale));
+        std::println("Error: Invalid locale: {}", string_to_utf8(locale));
         return false;
     }
+
+    auto base_path = resource_xml_path.parent_path();
 
     auto child_element = root->getFirstElementChild();
     while (child_element)
     {
-        if (!parse_entity(child_element, prefix, locale, string_entities, file_entities))
+        if (!parse_entity(child_element, base_path, prefix, locale, string_entities, file_entities, dependent_files))
         {
             return false;
         }
         child_element = child_element->getNextElementSibling();
     }
     return true;
+}
+
+auto find_child_elements(xercesc::DOMElement* element, std::u16string_view const& tag, std::vector<xercesc::DOMElement*>& elements)
+{
+    auto child = element->getFirstElementChild();
+    while (child)
+    {
+        auto child_name = xml_to_string(child->getTagName());
+        if (child_name == tag)
+        {
+            elements.push_back(child);
+        }
+        child = child->getNextElementSibling();
+    }
+}
+
+auto parse_cache_file(fs::path const& cache_xml_path, ModuleData& module_data) -> bool
+{
+    std::println("Parsing cache file: {}", cache_xml_path.string());
+
+    auto handler = xercesc::HandlerBase();
+    auto parser = xercesc::XercesDOMParser();
+    parser.setValidationScheme(xercesc::XercesDOMParser::Val_Never);
+    parser.setDoNamespaces(false);
+    parser.setDoSchema(false);
+    parser.setErrorHandler(&handler);
+
+    try
+    {
+        parser.parse(cache_xml_path.string().c_str());
+    }
+    catch (const xercesc::SAXException& e)
+    {
+        std::println("Error: XML parse error in {}: {}", cache_xml_path.string(), xml_to_utf8(e.getMessage()));
+        return false;
+    }
+    catch (...)
+    {
+        std::println("Error: Unknown exception during parsing XML file {}", cache_xml_path.string());
+        return false;
+    }
+
+    auto document = parser.getDocument();
+    auto root = document->getDocumentElement();
+
+    auto root_name = xml_to_string(root->getTagName());
+    if (root_name != u"module")
+    {
+        std::println("Error: Root element must be <module>, got <{}>", string_to_utf8(root_name));
+        return false;
+    }
+
+    auto module_name = xml_to_string(root->getAttribute(string_to_xml(u"name")));
+    auto module_uuid_str = xml_to_string(root->getAttribute(string_to_xml(u"uuid")));
+    auto module_primary_locale = xml_to_string(root->getAttribute(string_to_xml(u"primary-locale")));
+
+    module_data.name = module_name;
+    module_data.uuid = string_to_uuid(module_uuid_str);
+    module_primary_locale = module_primary_locale;
+
+    auto resources_elements = std::vector<xercesc::DOMElement*>();
+    find_child_elements(root, u"resources", resources_elements);
+
+    for (auto const& resources_element : resources_elements)
+    {
+        auto resource_elements = std::vector<xercesc::DOMElement*>();
+        find_child_elements(resources_element, u"resource", resource_elements);
+
+        for (auto const& resource_element : resource_elements)
+        {
+            auto id = xml_to_string(resource_element->getAttribute(string_to_xml(u"id")));
+            auto number = xml_to_string(resource_element->getAttribute(string_to_xml(u"number")));
+            auto type = xml_to_string(resource_element->getAttribute(string_to_xml(u"type")));
+
+            auto value_elements = std::vector<xercesc::DOMElement*>();
+            find_child_elements(resource_element, type, value_elements);
+
+            if (type == u"string")
+            {
+                auto entity = StringEntity();
+                entity.id = id;
+                entity.number = string_to_unsigned_int(number);
+                for (auto const& value_element : value_elements)
+                {
+                    auto value = xml_to_string(value_element->getTextContent());
+                    auto locale = xml_to_string(value_element->getAttribute(string_to_xml(u"locale")));
+                    auto string_value = StringValue();
+                    string_value.value = value;
+                    string_value.locale = locale;
+                    entity.values.push_back(string_value);
+                }
+                module_data.strings.emplace(id, entity);
+            }
+            else if (type == u"file")
+            {
+                auto entity = FileEntity();
+                entity.id = id;
+                entity.number = string_to_unsigned_int(number);
+                for (auto const& value_element : value_elements)
+                {
+                    auto path = xml_to_string(value_element->getTextContent());
+                    auto locale = xml_to_string(value_element->getAttribute(string_to_xml(u"locale")));
+                    auto file_value = FileValue();
+                    file_value.path = path;
+                    file_value.locale = locale;
+                    entity.values.push_back(file_value);
+                }
+                module_data.files.emplace(id, entity);
+            }
+        }
+    }
+
+    return true;
+}
+
+auto assign_entity_numbers(ModuleData& module_data, std::map<std::u16string, uint32_t> const& entity_number_mapping)
+{
+    std::println("generate_entity_numbers");
+
+    auto current_number = 1;
+    auto result = std::map<std::u16string, uint32_t>();
+
+    auto get_next_number = [&]() {
+        while (true)
+        {
+            bool found = false;
+            for (auto const& [id, number] : entity_number_mapping)
+            {
+                if (number == current_number)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                current_number++;
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+        return current_number++;
+    };
+
+    for (auto& [id, entity] : module_data.strings)
+    {
+        auto const it = entity_number_mapping.find(id);
+        if (it != entity_number_mapping.end())
+        {
+            entity.number = it->second;
+        }
+        else
+        {
+            entity.number = get_next_number();
+        }
+    }
+
+    for (auto& [id, entity] : module_data.files)
+    {
+        auto const it = entity_number_mapping.find(id);
+        if (it != entity_number_mapping.end())
+        {
+            entity.number = it->second;
+        }
+        else
+        {
+            entity.number = get_next_number();
+        }
+    }
+    return result;
 }
 
 auto validate_module_data(const ModuleData& module_data) -> bool
@@ -351,43 +627,294 @@ auto validate_module_data(const ModuleData& module_data) -> bool
         auto [it, inserted] = id_type.try_emplace(id, type);
         if (!inserted && it->second != type)
         {
-            std::println("Error: Entity id '{}' is used as both '{}' and '{}'", boost::nowide::narrow(id), it->second, type);
+            std::println("Error: Entity id '{}' is used as both '{}' and '{}'", string_to_utf8(id), it->second, type);
             return false;
         }
         if (!seen.insert(std::pair(id, locale)).second)
         {
-            std::println("Error: Duplicate entity id '{}' for locale '{}'", boost::nowide::narrow(id), boost::nowide::narrow(locale));
+            std::println("Error: Duplicate entity id '{}' for locale '{}'", string_to_utf8(id), string_to_utf8(locale));
             return false;
         }
         return true;
     };
 
-    for (auto const& entity : module_data.strings)
+    for (auto const& [id, entity] : module_data.strings)
     {
-        if (!check(entity.id, entity.locale, "string"))
+        for (auto const& value : entity.values)
         {
-            return false;
+            if (!check(id, value.locale, "string"))
+            {
+                return false;
+            }
         }
     }
-    for (auto const& entity : module_data.files)
+    for (auto const& [id, entity] : module_data.files)
     {
-        if (!check(entity.id, entity.locale, "file"))
+        for (auto const& value : entity.values)
         {
-            return false;
+            if (!check(id, value.locale, "file"))
+            {
+                return false;
+            }
         }
     }
     return true;
 }
 
-auto analyze_resources(const std::string& source_directory, const std::string& cache_path, const std::string& depfile_path, const std::string& header_path) -> int
+template <class DOMObjectType>
+using unique_dom_ptr = std::unique_ptr<DOMObjectType, decltype([](DOMObjectType* obj) { if (obj) { obj->release(); } })>;
+
+template <class DOMObjectType>
+auto wrap_dom_ptr(DOMObjectType* ptr)
+{
+    return unique_dom_ptr<DOMObjectType>(ptr);
+}
+
+auto write_cache_file(fs::path const& cache_xml_path, ModuleData const& module_data) -> bool
+{
+    std::println("write_cache_file: {}", cache_xml_path.string());
+
+    try
+    {
+        fs::create_directories(cache_xml_path.parent_path());
+    }
+    catch (...)
+    {
+        std::println("Failed to create directories for path {}", cache_xml_path.string());
+    }
+
+    auto impl = xercesc::DOMImplementation::getImplementation();
+
+    auto doc = wrap_dom_ptr(impl->createDocument(nullptr, string_to_xml(u"module"), nullptr));
+
+    auto const uuid_string = utf8_to_string(to_string(module_data.uuid));
+    auto const root_node = doc->getDocumentElement();
+    root_node->setAttribute(string_to_xml(u"name"), string_to_xml(module_data.name));
+    root_node->setAttribute(string_to_xml(u"uuid"), string_to_xml(uuid_string));
+    root_node->setAttribute(string_to_xml(u"primary-locale"), string_to_xml(module_data.primary_locale));
+
+    auto resources_node = doc->createElement(string_to_xml(u"resources"));
+
+    for (auto const& [id, entity] : module_data.strings)
+    {
+        auto const entity_node = doc->createElement(string_to_xml(u"resource"));
+        auto const number_string = utf8_to_string(std::to_string(entity.number));
+        entity_node->setAttribute(string_to_xml(u"id"), string_to_xml(id));
+        entity_node->setAttribute(string_to_xml(u"number"), string_to_xml(number_string));
+        entity_node->setAttribute(string_to_xml(u"type"), string_to_xml(u"string"));
+        for (auto const& value : entity.values)
+        {
+            auto const string_node = doc->createElement(string_to_xml(u"string"));
+            string_node->setTextContent(string_to_xml(value.value));
+            string_node->setAttribute(string_to_xml(u"locale"), string_to_xml(value.locale));
+            entity_node->appendChild(string_node);
+        }
+        resources_node->appendChild(entity_node);
+    }
+
+    for (auto const& [id, entity] : module_data.files)
+    {
+        auto const entity_node = doc->createElement(string_to_xml(u"resource"));
+        auto const number_string = utf8_to_string(std::to_string(entity.number));
+        entity_node->setAttribute(string_to_xml(u"id"), string_to_xml(id));
+        entity_node->setAttribute(string_to_xml(u"number"), string_to_xml(number_string));
+        entity_node->setAttribute(string_to_xml(u"type"), string_to_xml(u"file"));
+        for (auto const& value : entity.values)
+        {
+            auto const string_node = doc->createElement(string_to_xml(u"file"));
+            string_node->setTextContent(string_to_xml(value.path));
+            string_node->setAttribute(string_to_xml(u"locale"), string_to_xml(value.locale));
+            entity_node->appendChild(string_node);
+        }
+        resources_node->appendChild(entity_node);
+    }
+
+    root_node->appendChild(resources_node);
+
+    auto fileTarget = xercesc::LocalFileFormatTarget(cache_xml_path.string().c_str());
+    auto output = wrap_dom_ptr(impl->createLSOutput());
+    output->setByteStream(&fileTarget);
+    auto serializer = wrap_dom_ptr(impl->createLSSerializer());
+    serializer->getDomConfig()->setParameter(xercesc::XMLUni::fgDOMWRTFormatPrettyPrint, true);
+    serializer->getDomConfig()->setParameter(xercesc::XMLUni::fgDOMWRTXercesPrettyPrint, false);
+    serializer->write(doc.get(), output.get());
+    return true;
+}
+
+auto write_depfile(fs::path const& depfile_path, fs::path const& cache_xml_path, std::vector<fs::path> const& generated_files, std::vector<fs::path> const& dependent_files) -> bool
+{
+    std::println("write_depfile: {}", depfile_path.string());
+
+    try
+    {
+        fs::create_directories(depfile_path.parent_path());
+    }
+    catch (...)
+    {
+        std::println("Failed to create directories for path {}", cache_xml_path.string());
+    }
+
+    std::ofstream depfile(depfile_path);
+    if (!depfile)
+    {
+        std::println("Error: Failed to open depfile for writing: {}", depfile_path.string());
+        return false;
+    }
+
+    for (auto const& gen : generated_files)
+    {
+        depfile << gen.string();
+        depfile << " ";
+    }
+    depfile << ":";
+    for (auto const& dep : dependent_files)
+    {
+        depfile << " ";
+        depfile << dep.string();
+    }
+    depfile << "\n";
+
+    return true;
+}
+
+struct Tree
+{
+    uint32_t number = 0;
+    std::map<std::u16string, std::unique_ptr<Tree>> nodes;
+
+    auto is_leaf() const -> bool
+    {
+        return nodes.empty();
+    }
+
+    auto has_leaf() const -> bool
+    {
+        for (auto const& [_, node] : nodes)
+        {
+            if (node->is_leaf())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    auto node_at(std::u16string const& key) -> Tree&
+    {
+        auto& node = nodes[key];
+        if (!node)
+        {
+            node = std::make_unique<Tree>();
+        }
+        return *node;
+    }
+};
+
+auto insert_entity_node(Tree& tree, std::u16string const& id, uint32_t number)
+{
+    auto const components = id | std::ranges::views::split(u'.') | std::ranges::to<std::vector<std::u16string>>();
+    auto tree_node = &tree;
+    for (auto const& component : components)
+    {
+        tree_node = &tree_node->node_at(component);
+    }
+    tree_node->number = number;
+}
+
+auto enumerate_node_with_leaves(Tree& tree, std::vector<std::u16string>& path_stack, auto f) -> void
+{
+    if (tree.has_leaf())
+    {
+        f(tree, path_stack);
+    }
+
+    for (auto const& [key, node] : tree.nodes)
+    {
+        path_stack.push_back(key);
+        enumerate_node_with_leaves(*node, path_stack, f);
+        path_stack.pop_back();
+    }
+}
+
+auto write_header_file(fs::path const& header_path, ModuleData const& module_data, std::vector<fs::path>& generated_files) -> bool
+{
+    try
+    {
+        fs::create_directories(header_path);
+    }
+    catch (...)
+    {
+        std::println("Failed to create header path directory at {}", header_path.string());
+        return false;
+    }
+
+    auto tree = Tree();
+
+    for (auto const& [id, entity] : module_data.strings)
+    {
+        insert_entity_node(tree, id, entity.number);
+    }
+    for (auto const& [id, entity] : module_data.files)
+    {
+        insert_entity_node(tree, id, entity.number);
+    }
+
+    auto result = true;
+    auto path_stack = std::vector<std::u16string>();
+    enumerate_node_with_leaves(tree, path_stack, [&](Tree const& tree, std::vector<std::u16string> const& path_stack) {
+        auto filename_path = std::string();
+        auto namespace_path = std::string();
+        for (auto const& p : path_stack)
+        {
+            if (!filename_path.empty())
+            {
+                filename_path += '.';
+            }
+            filename_path += string_to_utf8(p);
+
+            if (!namespace_path.empty())
+            {
+                namespace_path += "::";
+            }
+            namespace_path += string_to_utf8(p);
+        }
+
+        auto const header_file_path = header_path / (filename_path + ".hpp");
+        {
+            std::ofstream header_file(header_file_path);
+            if (!header_file)
+            {
+                std::println("Error: Failed to open header file for writing: {}", header_file_path.string());
+                result = false;
+                return;
+            }
+
+            header_file << "#include <cstdint>\n\n";
+            header_file << "namespace Futurewalker::ResourceID::" << namespace_path << "\n";
+            header_file << "{\n";
+            for (auto const& [id, node] : tree.nodes)
+            {
+                if (node->is_leaf())
+                {
+                    header_file << "inline constexpr auto " << string_to_utf8(id) << " = uint32_t(" << node->number << ");\n";
+                }
+            }
+            header_file << "}\n";
+        }
+        generated_files.push_back(header_file_path);
+    });
+    return result;
+}
+
+auto analyze_resources(const std::string& source_directory, const std::string& cache_xml_path, const std::string& depfile_path, const std::string& header_directory) -> int
 {
     std::println("Analyzing resources in directory: {}", source_directory);
-    std::println("Cache path: {}", cache_path);
+    std::println("Cache path: {}", cache_xml_path);
     std::println("Depfile path: {}", depfile_path);
-    std::println("Header path: {}", header_path);
+    std::println("Header path: {}", header_directory);
 
     // Find .module.xml file in source_directory, or return error if not found or multiple found.
-    auto source_path = fs::path(source_directory);
+    auto source_path = fs::absolute(fs::path(source_directory)).lexically_normal();
     if (!fs::exists(source_path) || !fs::is_directory(source_path))
     {
         std::println("Error: Source directory does not exist or is not a directory: {}", source_directory);
@@ -436,11 +963,16 @@ auto analyze_resources(const std::string& source_directory, const std::string& c
     };
 
     // Parse other .xml files in source_directory to collect resource entities.
+    auto dependent_files = std::vector<fs::path>();
+    auto generated_files = std::vector<fs::path>();
+    dependent_files.push_back(module_xml_path);
+    generated_files.push_back(cache_xml_path);
+
     for (auto const& entry : fs::recursive_directory_iterator(source_path))
     {
         if (entry.is_regular_file() && entry.path().filename().string().ends_with("resource.xml"))
         {
-            if (!parse_resource_file(entry.path(), primary_locale, module_data.strings, module_data.files))
+            if (!parse_resource_file(entry.path(), primary_locale, module_data.strings, module_data.files, dependent_files))
             {
                 std::println("Error: Failed to parse resource file: {}", entry.path().string());
                 return 1;
@@ -448,19 +980,25 @@ auto analyze_resources(const std::string& source_directory, const std::string& c
         }
     }
 
-    std::println("Finished analyzing resources for module: {}", boost::nowide::narrow(module_data.name));
-    std::println("Module name: {}", boost::nowide::narrow(name));
+    std::println("Finished analyzing resources for module: {}", string_to_utf8(module_data.name));
+    std::println("Module name: {}", string_to_utf8(name));
     std::println("Module UUID: {}", boost::uuids::to_string(uuid));
-    std::println("Module primary locale: {}", boost::nowide::narrow(primary_locale));
+    std::println("Module primary locale: {}", string_to_utf8(primary_locale));
 
-    for (const auto& string_entity : module_data.strings)
+    for (const auto& [id, entity] : module_data.strings)
     {
-        std::println("String entity: id={}, locale={}, value={}", boost::nowide::narrow(string_entity.id), boost::nowide::narrow(string_entity.locale), boost::nowide::narrow(string_entity.value));
+        for (auto const& value : entity.values)
+        {
+            std::println("String entity: id={}", string_to_utf8(id), string_to_utf8(value.locale), string_to_utf8(value.value));
+        }
     }
 
-    for (const auto& file_entity : module_data.files)
+    for (const auto& [id, entity] : module_data.files)
     {
-        std::println("File entity: id={}, locale={}, path={}", boost::nowide::narrow(file_entity.id), boost::nowide::narrow(file_entity.locale), boost::nowide::narrow(file_entity.path));
+        for (auto const& value : entity.values)
+        {
+            std::println("File entity: id={}, locale={}, path={}", string_to_utf8(id), string_to_utf8(value.locale), string_to_utf8(value.path));
+        }
     }
 
     if (!validate_module_data(module_data))
@@ -470,27 +1008,327 @@ auto analyze_resources(const std::string& source_directory, const std::string& c
 
     // Parse cache file if exist.
     // We need entity ID -> numeric ID mapping to be stable across runs, so we will reuse IDs from previous cache if possible.
-    std::unordered_map<std::u16string, uint32_t> entity_id_mapping;
-    if (!cache_path.empty())
+    std::map<std::u16string, uint32_t> entity_number_mapping;
+    if (!cache_xml_path.empty())
     {
-        if (!parse_cache_file(cache_path, entity_id_mapping))
+        if (!cache_xml_path.ends_with(".cache.xml"))
         {
-            std::println("Warning: Failed to parse cache file: {}", cache_path);
+            std::println("Error: Failed to load cache file at {}. Filename of cache files should be *.cache.xml", cache_xml_path);
+            return 1;
+        }
+
+        if (fs::exists(cache_xml_path))
+        {
+            if (fs::is_regular_file(cache_xml_path))
+            {
+                auto cache_module_data = ModuleData();
+                if (parse_cache_file(cache_xml_path, cache_module_data))
+                {
+                    for (auto const& [id, entity] : cache_module_data.strings)
+                    {
+                        entity_number_mapping[id] = entity.number;
+                    }
+                    for (auto const& [id, entity] : cache_module_data.files)
+                    {
+                        entity_number_mapping[id] = entity.number;
+                    }
+                }
+                else
+                {
+                    std::println("Warning: Failed to parse cache file: {}", cache_xml_path);
+                    entity_number_mapping = {};
+                }
+            }
+            else
+            {
+                std::println("Error: Failed to load cache file at {}. Cache path is not a regular file", cache_xml_path);
+                return 1;
+            }
         }
     }
 
-    // Generate numeric IDs for entities and save to cache file, and also generate depfile and header file if paths are specified.
+    assign_entity_numbers(module_data, entity_number_mapping);
+
+    if (!cache_xml_path.empty())
+    {
+        if (!write_cache_file(cache_xml_path, module_data))
+        {
+            std::println("Error: Failed to write cache file at {}", cache_xml_path);
+            return 1;
+        }
+    }
+
+    if (!header_directory.empty())
+    {
+        if (!write_header_file(header_directory, module_data, generated_files))
+        {
+            std::println("Error: Failed to write headers file at directory {}", header_directory);
+            return 1;
+        }
+    }
+
+    if (!depfile_path.empty())
+    {
+        if (!write_depfile(depfile_path, cache_xml_path, generated_files, dependent_files))
+        {
+            std::println("Error: Failed to write depfile at {}", depfile_path);
+            return 1;
+        }
+    }
 
     return 0;
 }
 
-auto compile_resources(const std::vector<std::string>& cache_paths, const std::string& output_path) -> int
+struct BundleHeader
 {
+    uint8_t signature[4]; // "FWRB"
+    uint32_t version;     // LE Version
+    uint32_t options;     // LE Options
+    uint32_t module_ptr;  // LE Offset of first module data chunk.
+};
+
+struct BundleModuleChunk
+{
+    uint32_t chunk_size;         // LE Chunk size.
+    uint32_t name_ptr;           // LE offset of name string chunk.
+    uint32_t primary_locale_ptr; // LE Offset of locale string chunk.
+    uint8_t uuid[16];            // UUID of the module.
+    uint32_t resources_ptr;      // LE offset of first resources chunk.
+    uint32_t next_ptr;           // LE Offset of next module chunk.
+};
+
+enum class BundleResourcesChunkType : uint32_t
+{
+    String = 1,
+    File = 2,
+};
+
+struct BundleResourcesChunk
+{
+    uint32_t chunk_size;   // LE Chunk size.
+    uint32_t id_ptr;       // LE Offset of ID string chunk.
+    uint32_t number;       // LE Resource number.
+    uint32_t type;         // LE Resource type.
+    uint32_t resource_ptr; // LE Offset of first resource data chunk.
+    uint32_t next_ptr;     // LE Offsert of next resources chunk.
+};
+
+struct BundleStringResourceChunk
+{
+    uint32_t chunk_size; // LE Chunk size.
+    uint32_t locale_ptr; // LE Offset of locale string chunk.
+    uint32_t value_ptr;  // LE Offset of value string chunk.
+    uint32_t next_ptr;   // LE Offset of next resource data chunk.
+};
+
+struct BundleFileResourceChunk
+{
+    uint32_t chunk_size; // LE Chunk size.
+    uint32_t locale_ptr; // LE Offset of locale string chunk.
+    uint32_t data_ptr;   // LE Offset of data chunk.
+    uint32_t next_ptr;   // LE Offset of next resource data chunk.
+};
+
+struct BundleDataChunk
+{
+    uint32_t chunk_size; // LE Chunk size.
+    uint8_t data[];      // Variable length data.
+};
+
+auto write_string(std::ofstream& stream, std::u16string const& string)
+{
+    auto p = stream.tellp();
+    auto const utf8 = string_to_utf8(string);
+    stream << uint32_t(4 + utf8.length()); // chunk_size
+    stream << utf8; // data
+    return static_cast<uint32_t>(p);
+}
+
+auto write_file(std::ofstream& stream, fs::path const& file_path) -> uint32_t
+{
+    auto p = stream.tellp();
+    auto file = std::ifstream(file_path);
+    file.seekg(0, std::ios_base::end);
+    auto const file_size = static_cast<uint32_t>(file.tellg());
+    file.seekg(0, std::ios_base::beg);
+    stream << uint32_t(4 + file_size);
+    stream << file.rdbuf();
+    return static_cast<uint32_t>(p);
+}
+
+using EntityVariant = std::variant<StringEntity, FileEntity>;
+
+auto get_bundle_resource_type(EntityVariant const& entity) -> BundleResourcesChunkType
+{
+    if (std::holds_alternative<StringEntity>(entity))
+    {
+        return BundleResourcesChunkType::String;
+    }
+    else if (std::holds_alternative<FileEntity>(entity))
+    {
+        return BundleResourcesChunkType::File;
+    }
+    assert(false);
+    return {};
+}
+
+auto write_resource_value(std::ofstream& stream, size_t i, std::vector<StringValue> const& values) -> uint32_t
+{
+    if (i >= values.size())
+    {
+        return 0;
+    }
+
+    auto const& value = values[i];
+    auto p = stream.tellp();
+    stream.seekp(sizeof(BundleStringResourceChunk), std::ios_base::cur);
+    auto next_ptr = write_resource_value(stream, i + 1, values);
+    auto locale_ptr = write_string(stream, value.locale);
+    auto value_ptr = write_string(stream, value.value);
+    auto q = stream.tellp();
+    stream.seekp(p);
+    stream << uint32_t(sizeof(BundleStringResourceChunk));
+    stream << locale_ptr;
+    stream << value_ptr;
+    stream << next_ptr;
+    stream.seekp(q);
+    return static_cast<uint32_t>(p);
+}
+
+auto write_resource_value(std::ofstream& stream, size_t i, std::vector<FileValue> const& values) -> uint32_t
+{
+    if (i >= values.size())
+    {
+        return 0;
+    }
+
+    auto const& value = values[i];
+    auto p = stream.tellp();
+    stream.seekp(sizeof(BundleStringResourceChunk), std::ios_base::cur);
+    auto next_ptr = write_resource_value(stream, i + 1, values);
+    auto locale_ptr = write_string(stream, value.locale);
+    auto value_ptr = write_file(stream, value.path);
+    auto q = stream.tellp();
+    stream.seekp(p);
+    stream << uint32_t(sizeof(BundleStringResourceChunk));
+    stream << locale_ptr;
+    stream << value_ptr;
+    stream << next_ptr;
+    stream.seekp(q);
+    return static_cast<uint32_t>(p);
+}
+
+auto write_resources_entities(std::ofstream& stream, size_t index, std::vector<EntityVariant> const& entities) -> uint32_t
+{
+    if (index >= entities.size())
+    {
+        return 0;
+    }
+
+    auto const& entity = entities[index];
+    auto p = stream.tellp();
+    stream.seekp(sizeof(BundleResourcesChunk), std::ios_base::cur);
+    auto next_ptr = write_resources_entities(stream, index + 1, entities);
+    auto resource_ptr = std::visit([&](auto const& e) { return write_resource_value(stream, 0, e.values); }, entity);
+    auto id_ptr = write_string(stream, std::visit([](auto const& e) { return e.id; }, entity));
+    auto q = stream.tellp();
+    stream.seekp(p);
+    stream << uint32_t(sizeof(BundleResourcesChunk));
+    stream << id_ptr;
+    stream << std::visit([](auto const& e) { return e.number; }, entity);
+    stream << uint32_t(get_bundle_resource_type(entity));
+    stream << resource_ptr;
+    stream << next_ptr;
+    stream.seekp(q);
+    return static_cast<uint32_t>(p);
+}
+
+auto write_resources(std::ofstream& stream, ModuleData const& module_data) -> uint32_t
+{
+    std::vector<EntityVariant> entities;
+    entities.reserve(module_data.strings.size() + module_data.files.size());
+    for (auto const& [id, entity] : module_data.strings)
+    {
+        entities.emplace_back(entity);
+    }
+    for (auto const& [id, entity] : module_data.files)
+    {
+        entities.emplace_back(entity);
+    }
+    return write_resources_entities(stream, 0, entities);
+}
+
+auto write_bundle_module(std::ofstream& stream, size_t index, std::vector<ModuleData> const& module_data_list) -> uint32_t
+{
+    if (index >= module_data_list.size())
+    {
+        return 0;
+    }
+
+    auto const& module_data = module_data_list[index];
+    auto p = stream.tellp();
+    stream.seekp(sizeof(BundleModuleChunk), std::ios_base::cur);
+    auto next_ptr = write_bundle_module(stream, index + 1, module_data_list);
+    auto resources_ptr = write_resources(stream, module_data);
+    auto name_ptr = write_string(stream, module_data.name);
+    auto primary_locale_ptr = write_string(stream, module_data.primary_locale);
+    auto q = stream.tellp();
+    stream.seekp(p);
+    stream << uint32_t(sizeof(BundleModuleChunk));
+    stream << name_ptr;
+    stream << primary_locale_ptr;
+    for (auto const& data : module_data.uuid)
+    {
+        stream << data;
+    }
+    stream << resources_ptr;
+    stream << next_ptr;
+    stream.seekp(q);
+    return static_cast<uint32_t>(p);
+}
+
+auto write_bundle_modules(std::ofstream& stream, std::vector<ModuleData> const& module_data_list) -> uint32_t
+{
+    return write_bundle_module(stream, 0, module_data_list);
+}
+
+auto write_bundle_header(std::ofstream& stream, std::vector<ModuleData> const& module_data_list)
+{
+    auto p = stream.tellp();
+    stream.seekp(sizeof(BundleHeader), std::ios_base::cur);
+    auto const modules_ptr = write_bundle_modules(stream, module_data_list);
+    stream.seekp(p);
+    stream << "FWRB";
+    stream << uint32_t(1);
+    stream << uint32_t(0);
+    stream << modules_ptr;
+}
+
+auto compile_resources(std::vector<std::string> cache_paths, const std::string& output_path) -> int
+{
+    cache_paths.erase(std::unique(cache_paths.begin(), cache_paths.end()), cache_paths.end());
+
+    std::vector<ModuleData> module_data_list;
     for (const auto& cache_path : cache_paths)
     {
-        std::println("Compiling resources from cache: {}", cache_path);
+        auto module_data = ModuleData();
+        if (parse_cache_file(cache_path, module_data))
+        {
+            std::println("Parsed module from cache: {}", string_to_utf8(module_data.name));
+            module_data_list.push_back(std::move(module_data));
+        }
     }
     std::println("Output path: {}", output_path);
+
+    std::ofstream bundle_file(output_path, std::ios::binary);
+    if (!bundle_file)
+    {
+        std::println("Failed to open output file: {}", output_path);
+        return 1;
+    }
+
+    write_bundle_header(bundle_file, module_data_list);
+
     return 0;
 }
 
@@ -499,8 +1337,8 @@ auto print_usage() -> void
     std::println("Usage:");
     std::println("  resource-compiler --help");
     std::println("  resource-compiler --version");
-    std::println("  resource-compiler --analyze <source directory> [--cache PATH] [--depfile PATH] [--header PATH]");
-    std::println("  resource-compiler --compile <cache-path>... --output PATH");
+    std::println("  resource-compiler --generate <source directory> [--cache PATH] [--depfile PATH] [--header PATH]");
+    std::println("  resource-compiler --bundle <cache-path>... --output PATH");
 }
 
 auto print_version() -> void
@@ -508,7 +1346,7 @@ auto print_version() -> void
     std::println("Futurewalker Resource Compiler version 1.0");
 }
 
-auto run_analyze(const std::vector<std::string>& args) -> int
+auto run_generate(const std::vector<std::string>& args) -> int
 {
     auto source_directory = std::string();
     auto cache_path = std::string();
@@ -546,7 +1384,7 @@ auto run_analyze(const std::vector<std::string>& args) -> int
     return analyze_resources(source_directory, cache_path, depfile_path, header_path);
 }
 
-auto run_compile(const std::vector<std::string>& args) -> int
+auto run_bundle(const std::vector<std::string>& args) -> int
 {
     auto cache_paths = std::vector<std::string>();
     auto output_path = std::string();
@@ -620,13 +1458,13 @@ auto main(int argc, char* argv[]) -> int
         print_version();
         return 0;
     }
-    if (command == "--analyze")
+    if (command == "--generate")
     {
-        return run_analyze(rest);
+        return run_generate(rest);
     }
-    if (command == "--compile")
+    if (command == "--bundle")
     {
-        return run_compile(rest);
+        return run_bundle(rest);
     }
     std::println("Unknown command: {}", command);
     return 1;
