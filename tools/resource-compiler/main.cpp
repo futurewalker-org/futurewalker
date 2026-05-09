@@ -28,6 +28,7 @@
 #include <ranges>
 #include <iostream>
 #include <map>
+#include <variant>
 
 #include <unicode/ustring.h>
 
