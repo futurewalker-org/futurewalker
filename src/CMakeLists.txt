@@ -1,4 +1,5 @@
 add_subdirectory(Core)
+add_subdirectory(Resource)
 add_subdirectory(Base)
 add_subdirectory(Async)
 add_subdirectory(Signal)
