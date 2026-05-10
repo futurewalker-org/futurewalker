@@ -59,6 +59,8 @@ public:
 
     auto Clear() -> void;
 
+    auto AsStdFilesystemPath() const -> std::filesystem::path;
+
 private:
     explicit Path(std::filesystem::path path);
     std::filesystem::path _path;

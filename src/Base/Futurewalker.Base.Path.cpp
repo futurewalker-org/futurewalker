@@ -157,6 +157,11 @@ auto Path::Clear() -> void
     _path.clear();
 }
 
+auto Path::AsStdFilesystemPath() const -> std::filesystem::path
+{
+    return _path;
+}
+
 Path::Path(std::filesystem::path path)
   : _path {std::move(path)}
 {
