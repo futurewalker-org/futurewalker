@@ -9,6 +9,8 @@
 
 #include "Futurewalker.Core.PropertyStore.hpp"
 
+#include <memory_resource>
+
 namespace FW_DETAIL_NS
 {
 ///
@@ -18,32 +20,23 @@ namespace FW_DETAIL_NS
 ///
 auto AttributeSlot::Make(StaticAttributeBaseRef description) -> Shared<AttributeSlot>
 {
-    auto slot = Shared<AttributeSlot>::Make(PassKey<AttributeSlot>(), description);
+    static auto _pool = std::pmr::synchronized_pool_resource();
+    auto allocator = std::pmr::polymorphic_allocator<AttributeSlot>(&_pool);
+    auto slot = Shared<AttributeSlot>::MakeWithAllocator(allocator, PassKey<AttributeSlot>(), description);
     slot->SetSelf(slot);
     return slot;
 }
 
-///
-/// @brief 
-///
-/// @param description 
-///
 AttributeSlot::AttributeSlot(PassKey<AttributeSlot>, StaticAttributeBaseRef description)
   : _description {description}
 {
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetOwner() -> Shared<AttributeNode>
 {
     return _owner.Lock();
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetEventReceiver() -> EventReceiver&
 {
     if (!_eventReceiver)
@@ -53,11 +46,6 @@ auto AttributeSlot::GetEventReceiver() -> EventReceiver&
     return *_eventReceiver;
 }
 
-///
-/// @brief
-///
-/// @param number
-///
 auto AttributeSlot::AddUpdateNumber(UInt64 const number) -> void
 {
     if (std::find(_updateNumbers.begin(), _updateNumbers.end(), number) == _updateNumbers.end())
@@ -66,11 +54,6 @@ auto AttributeSlot::AddUpdateNumber(UInt64 const number) -> void
     }
 }
 
-///
-/// @brief 
-///
-/// @param number 
-///
 auto AttributeSlot::RemoveUpdateNumber(UInt64 const number) -> Bool
 {
     auto const it = std::find(_updateNumbers.begin(), _updateNumbers.end(), number);
@@ -83,9 +66,26 @@ auto AttributeSlot::RemoveUpdateNumber(UInt64 const number) -> Bool
     return false;
 }
 
-///
-/// @brief
-///
+auto AttributeSlot::GetCacheUpdateNumber() const -> UInt64
+{
+    return _cacheUpdateNumber;
+}
+
+auto AttributeSlot::SetCacheUpdateNumber(UInt64 const number) -> void
+{
+    _cacheUpdateNumber = number;
+}
+
+auto AttributeSlot::GetRewireUpdateNumber() const -> UInt64
+{
+    return _rewireUpdateNumber;
+}
+
+auto AttributeSlot::SetRewireUpdateNumber(UInt64 number) -> void
+{
+    _rewireUpdateNumber = number;
+}
+
 auto AttributeSlot::HasEventConnection() const -> Bool
 {
     if (_eventReceiver)
@@ -95,73 +95,41 @@ auto AttributeSlot::HasEventConnection() const -> Bool
     return false;
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetValueChanged() const -> Bool
 {
     return _valueChanged;
 }
 
-///
-/// @brief
-///
-/// @param changed
-///
 auto AttributeSlot::SetValueChanged(Bool const changed) -> void
 {
     _valueChanged = changed;
 }
 
-///
-/// @brief
-///
-/// @param owner
-///
 auto AttributeSlot::SetOwner(Shared<AttributeNode> owner) -> void
 {
     _owner = owner;
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetDescription() -> StaticAttributeBaseRef
 {
     return _description;
 }
 
-///
-/// @brief
-///
-/// @param description
-///
 auto AttributeSlot::SetDescription(StaticAttributeBaseRef const& description) -> void
 {
     _description = description;
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::HasValueCache() const -> Bool
 {
     return _valueCache.HasValue();
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetValueCache() const -> Optional<AttributeValue> const&
 {
     return _valueCache;
 }
 
-///
-/// @brief 
-///
-/// @param value 
-///
 auto AttributeSlot::SetValueCache(AttributeValue const& value) -> Bool
 {
     if (!_valueCache || (*_valueCache != value))
@@ -172,71 +140,69 @@ auto AttributeSlot::SetValueCache(AttributeValue const& value) -> Bool
     return false;
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::ClearValueCache() -> void
 {
     _valueCache.Reset();
 }
 
-auto AttributeSlot::GetReferenceCache() const -> std::vector<StaticAttributeBaseRef> const&
+auto AttributeSlot::GetReferenceCache() const -> boost::container::small_vector<StaticAttributeBaseRef, 4> const&
 {
     return _referenceCache;
 }
 
-auto AttributeSlot::SetReferenceCache(std::vector<StaticAttributeBaseRef> const& references) -> void
+auto AttributeSlot::SetReferenceCache(std::span<StaticAttributeBaseRef const> const references) -> Bool
 {
-    _referenceCache = references;
+    if (!std::ranges::equal(_referenceCache, references, [](auto l, auto r) { return l.GetPointer() == r.GetPointer(); }))
+    {
+        _referenceCache.assign(references.begin(), references.end());
+        return true;
+    }
+    return false;
 }
 
-///
-/// @brief 
-///
 auto AttributeSlot::ClearReferenceCache() -> void
 {
     _referenceCache.clear();
 }
 
-auto AttributeSlot::GetComputeFunctionCache() const -> StaticAttributeComputeFunction const&
+auto AttributeSlot::GetComputeFunctionCache() const -> AttributeComputeFunction const&
 {
     return _computeFunctionCache;
 }
 
-auto AttributeSlot::SetComputeFunctionCache(StaticAttributeComputeFunction const& computeFunction) -> void
+auto AttributeSlot::SetComputeFunctionCache(AttributeComputeFunction const& computeFunction) -> Bool
 {
-    _computeFunctionCache = computeFunction;
+    if (_computeFunctionCache != computeFunction)
+    {
+        _computeFunctionCache = computeFunction;
+        return true;
+    }
+    return false;
 }
 
-auto AttributeSlot::GetReferences() -> std::vector<StaticAttributeBaseRef> const&
+auto AttributeSlot::GetReferences() -> boost::container::small_vector<StaticAttributeBaseRef, 4> const&
 {
     return _references;
 }
 
-auto AttributeSlot::GetComputeFunction() const -> StaticAttributeComputeFunction const&
+auto AttributeSlot::GetComputeFunction() const -> AttributeComputeFunction const&
 {
     return _computeFunction;
 }
 
-auto AttributeSlot::SetValue(StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void
+auto AttributeSlot::SetValue(AttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void
 {
     FW_DEBUG_ASSERT(computeFunction);
     _computeFunction = computeFunction;
     _references.assign(references.begin(), references.end());
 }
 
-///
-/// @brief Clear value.
-///
 auto AttributeSlot::ClearValue() -> void
 {
     _computeFunction = {};
     _references.clear();
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetValueDependentSlots() const -> SharedArray<Weak<AttributeSlot>>
 {
     return _valueDependentSlots;
@@ -266,13 +232,18 @@ auto AttributeSlot::DetachFromValueDependentSlots() -> void
             {
                 if (dependantSlots.GetValueAt(j).Lock() == self)
                 {
-                    dependantSlots.Erase(j);
+                    dependantSlots.EraseUnordered(j);
                     break;
                 }
             }
         }
     }
     _valueDependentSlots.Clear();
+}
+
+auto AttributeSlot::HasSourceDependentSlot() const noexcept -> Bool
+{
+    return !_sourceDependentSlot.IsExpired();
 }
 
 auto AttributeSlot::GetSourceDependentSlot() -> Shared<AttributeSlot>
@@ -302,7 +273,7 @@ auto AttributeSlot::DetachFromSourceDependentSlot() -> void
         {
             if (dependantSlots.GetValueAt(i).Lock() == self)
             {
-                dependantSlots.Erase(i);
+                dependantSlots.EraseUnordered(i);
                 break;
             }
         }
@@ -310,41 +281,26 @@ auto AttributeSlot::DetachFromSourceDependentSlot() -> void
     _sourceDependentSlot.Reset();
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetValueDependantSlotCount() const -> SInt64
 {
     return _valueDependantSlots.GetSize();
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetValueDependantSlots() const -> SharedArray<Weak<AttributeSlot>>
 {
     return _valueDependantSlots;
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetSourceDependantSlotCount() const -> SInt64
 {
     return _sourceDependantSlots.GetSize();
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetSourceDependantSlots() const -> SharedArray<Weak<AttributeSlot>> 
 {
     return _sourceDependantSlots;
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::Reset() -> void
 {
     FW_DEBUG_ASSERT(_sourceDependentSlot.Lock() == nullptr);
@@ -369,19 +325,11 @@ auto AttributeSlot::Reset() -> void
     }
 }
 
-///
-/// @brief
-///
-/// @param self
-///
 auto AttributeSlot::SetSelf(Shared<AttributeSlot> const& self) -> void
 {
     _self = self;
 }
 
-///
-/// @brief
-///
 auto AttributeSlot::GetSelf() -> Shared<AttributeSlot>
 {
     return _self.Lock();

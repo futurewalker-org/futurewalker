@@ -54,6 +54,18 @@ public:
         return Boolean(!_value);
     }
 
+    inline constexpr auto operator|=(Boolean const& other) noexcept -> Boolean&
+    {
+        _value |= other._value;
+        return *this;
+    }
+
+    inline constexpr auto operator&=(Boolean const& other) noexcept -> Boolean&
+    {
+        _value &= other._value;
+        return *this;
+    }
+
 public:
     friend inline constexpr bool operator==(Boolean const& l, Boolean const& r) noexcept
     {

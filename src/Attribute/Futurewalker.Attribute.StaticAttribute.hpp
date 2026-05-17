@@ -4,7 +4,7 @@
 #include "Futurewalker.Attribute.StaticAttributeType.hpp"
 #include "Futurewalker.Attribute.StaticAttributeBase.hpp"
 #include "Futurewalker.Attribute.AttributeValue.hpp"
-#include "Futurewalker.Attribute.AttributeFunction.hpp"
+#include "Futurewalker.Attribute.AttributeComputeFunction.hpp"
 
 #include "Futurewalker.Base.UniqueIdentifier.hpp"
 
@@ -48,7 +48,7 @@ public:
 #if FW_ENABLE_DEBUG
           name,
 #endif
-          [value](auto const&) { return AttributeValue(value); },
+          AttributeComputeFunction::MakeValue(AttributeValue(value)),
           {});
     }
 
@@ -69,7 +69,7 @@ public:
 #if FW_ENABLE_DEBUG
           name,
 #endif
-          [](auto const& references) -> AttributeValue { return references[0]; },
+          AttributeComputeFunction::MakeFunction([](std::span<AttributeValue const> const references) -> AttributeValue { return references[0]; }),
           {&reference, 1});
     }
 
@@ -85,14 +85,14 @@ public:
 #if FW_ENABLE_DEBUG
       Pointer<char const> name,
 #endif
-      F&& f) -> StaticAttribute<T>
+      F f) -> StaticAttribute<T>
     {
         auto constexpr references = std::array {StaticAttributeBaseRef(*References)...};
         return StaticAttribute<T>(
 #if FW_ENABLE_DEBUG
           name,
 #endif
-          AttributeFunction::MakeComputeFunction<T, typename std::remove_reference_t<decltype(*References)>::ValueType...>(std::forward<F>(f)),
+          AttributeComputeFunction::MakeFunctionWrapper<T, typename std::remove_reference_t<decltype(*References)>::ValueType...>(f),
           references);
     }
 
@@ -103,7 +103,7 @@ private:
 #if FW_ENABLE_DEBUG
       Pointer<char const> name,
 #endif
-      StaticAttributeComputeFunction const& computeFunction,
+      AttributeComputeFunction const& computeFunction,
       std::span<StaticAttributeBaseRef const> const references)
       : StaticAttributeBase {
 #if FW_ENABLE_DEBUG

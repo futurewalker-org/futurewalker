@@ -12,7 +12,7 @@ namespace FW_DETAIL_NS
 ///
 /// @param value
 ///
-StaticAttributeBase::StaticAttributeBase(Pointer<char const> str, StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references)
+StaticAttributeBase::StaticAttributeBase(Pointer<char const> str, AttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references)
   : _name {str}
   , _computeFunction {computeFunction}
   , _references {references.begin(), references.end()}
@@ -20,7 +20,7 @@ StaticAttributeBase::StaticAttributeBase(Pointer<char const> str, StaticAttribut
     FW_DEBUG_ASSERT(_computeFunction);
 }
 #else
-StaticAttributeBase::StaticAttributeBase(StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references)
+StaticAttributeBase::StaticAttributeBase(AttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references)
   : _computeFunction {computeFunction}
   , _references {references.begin(), references.end()}
 {
@@ -38,12 +38,12 @@ auto StaticAttributeBase::GetId() const noexcept -> AttributeId
     return static_cast<AttributeId>(_uniqueId);
 }
 
-auto StaticAttributeBase::GetReferences() const noexcept -> std::vector<StaticAttributeBaseRef> const&
+auto StaticAttributeBase::GetReferences() const noexcept -> boost::container::small_vector<StaticAttributeBaseRef, 4> const&
 {
     return _references;
 }
 
-auto StaticAttributeBase::GetComputeFunction() const noexcept -> StaticAttributeComputeFunction const&
+auto StaticAttributeBase::GetComputeFunction() const noexcept -> AttributeComputeFunction const&
 {
     return _computeFunction;
 }

@@ -5,6 +5,7 @@
 
 #include "Futurewalker.Core.StaticReference.hpp"
 #include "Futurewalker.Core.Function.hpp"
+#include "Futurewalker.Core.Pointer.hpp"
 
 #include <variant>
 #include <span>
@@ -13,5 +14,4 @@ namespace FW_DETAIL_NS
 {
 class StaticAttributeBase;
 using StaticAttributeBaseRef = StaticReference<StaticAttributeBase const>;
-using StaticAttributeComputeFunction = Function<AttributeValue(std::span<AttributeValue const> const references)>;
 }

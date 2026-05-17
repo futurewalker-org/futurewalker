@@ -6,7 +6,6 @@
 #include "Futurewalker.Attribute.AttributeSlot.hpp"
 #include "Futurewalker.Attribute.AttributeValue.hpp"
 #include "Futurewalker.Attribute.StaticAttribute.hpp"
-#include "Futurewalker.Attribute.AttributeFunction.hpp"
 #include "Futurewalker.Attribute.AttributeSlotCacheType.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
@@ -17,8 +16,12 @@
 #include "Futurewalker.Core.StaticPointer.hpp"
 #include "Futurewalker.Core.PropertyStore.hpp"
 #include "Futurewalker.Core.ReferenceArg.hpp"
+#include "Futurewalker.Core.Flags.hpp"
 
 #include "Futurewalker.Event.EventReceiverType.hpp"
+
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/container/flat_map.hpp>
 
 namespace FW_DETAIL_NS
 {
@@ -92,11 +95,12 @@ private:
     auto IsAncestorOf(ReferenceArg<AttributeNode const> node) const -> Bool;
 
     auto AddAttributeSlot(StaticAttributeBaseRef description) -> Shared<AttributeSlot>;
-    auto AddAttributeSlotWithValue(StaticAttributeBaseRef description, StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> Shared<AttributeSlot>;
+    auto AddAttributeSlotCore(StaticAttributeBaseRef description, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Shared<AttributeSlot>;
+    auto AddAttributeSlotWithValue(StaticAttributeBaseRef description, AttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> Shared<AttributeSlot>;
     auto ResetAttributeSlot(StaticAttributeBaseRef description) -> void;
     auto SetAttributeSlotValue(StaticAttributeBaseRef description, AttributeValue const& value) -> void;
     auto SetAttributeSlotReference(StaticAttributeBaseRef description, StaticAttributeBaseRef const reference) -> void;
-    auto SetAttributeSlotFunction(StaticAttributeBaseRef description, StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void;
+    auto SetAttributeComputeFunction(StaticAttributeBaseRef description, AttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void;
 
     auto InsertAttributeSlot(StaticAttributeBaseRef description) -> Shared<AttributeSlot>;
     auto EraseAttributeSlot(StaticAttributeBaseRef description) -> void;
@@ -106,14 +110,21 @@ private:
 
     auto MeasureMinDistanceToReferencedSlots(StaticAttributeBaseRef reference, SInt32& minDistance) const -> void;
 
-    auto ResolveSource(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
-    auto ResolveValue(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
-    auto ResolveValueCore(StaticAttributeBaseRef reference) -> Shared<AttributeSlot>;
-    auto ResolveReferences(StaticAttributeBaseRef reference, SInt32& depth) const -> std::vector<StaticAttributeBaseRef> const&;
+    auto ResolveSource(StaticAttributeBaseRef reference, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Shared<AttributeSlot>;
+    auto ResolveValue(StaticAttributeBaseRef reference, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Shared<AttributeSlot>;
+    auto ResolveValueCore(StaticAttributeBaseRef reference, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Shared<AttributeSlot>;
+    auto ResolveReferences(StaticAttributeBaseRef reference, SInt32& depth) const -> boost::container::small_vector<StaticAttributeBaseRef, 4> const&;
 
+    enum class UpdateFlag
+    {
+        None = 0,
+        Full = 1 << 0, // Traverse entire value dependency graph.
+    };
     auto RewireSlotOnAddChild(Shared<AttributeSlot>& slot, Shared<AttributeSlot> const& start, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Bool;
-    auto UpdateSlotCacheRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> Bool;
+    auto UpdateSlotCacheRecursive(AttributeSlot& slot, Flags<UpdateFlag> const flags, UInt64 cacheUpdateNumber, UInt64 const notifyUpdateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Bool;
     auto NotifyValueChangedRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> void;
+
+    static auto NotifyValueChangedRecursiveAll(std::vector<Weak<AttributeSlot>> const& notifySlots, UInt64 const updateNumber) -> void;
 
     static auto CheckReferenceLoop(StaticAttributeBaseRef reference) -> Bool;
 
@@ -122,7 +133,7 @@ private:
     Weak<AttributeNode> _parent;
     AttributeNodeList _children;
     Shared<AttributeSlotCache> _slotCache;
-    AttributeSlotMap _slots;
+    boost::unordered_flat_map<AttributeId, Shared<AttributeSlot>> _slots;
 };
 
 ///
@@ -266,7 +277,7 @@ auto AttributeNode::SetFunction(Owner& owner, F&& f, StaticAttributeRef<T> attri
     {
         auto const args = std::array {StaticAttributeBaseRef(references)...};
         auto& node = owner.GetAttributeNode();
-        node.SetAttributeSlotFunction(attribute, AttributeFunction::MakeComputeFunction<T, Ts...>(std::forward<F>(f)), args);
+        node.SetAttributeComputeFunction(attribute, AttributeComputeFunction::MakeFunctionWrapper<T, Ts...>(std::forward<F>(f)), args);
     }
 }
 

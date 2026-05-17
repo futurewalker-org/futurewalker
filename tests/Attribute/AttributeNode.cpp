@@ -113,7 +113,7 @@ TEST_CASE("AttributeNode")
         {
             auto node = AttributeNode::Make();
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
-            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr2, [](auto a) { return a * 2; }, Attr1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr2, [](SInt32 a) { return a * 2; }, Attr1);
             REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 2);
             AttributeNode::SetValue<&Attr1>(*node, 21);
             REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 42);
@@ -125,7 +125,7 @@ TEST_CASE("AttributeNode")
         SECTION("indirect update")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
-            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](auto a) { return a * 2; }, Attr1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](SInt32 a) { return a * 2; }, Attr1);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr2, Attr3);
 
             auto child = AttributeNode::Make();
@@ -140,7 +140,7 @@ TEST_CASE("AttributeNode")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 2);
-            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](auto a) { return a * 2; }, Attr1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](SInt32 a) { return a * 2; }, Attr1);
 
             auto node = AttributeNode::Make();
             AttributeNode::SetReference<&Attr2>(*node, Attr3);
@@ -160,7 +160,7 @@ TEST_CASE("AttributeNode")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 2);
-            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](auto a) { return a * 2; }, Attr1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](SInt32 a) { return a * 2; }, Attr1);
 
             auto child = AttributeNode::Make();
             AttributeNode::SetReference<&Attr2>(*child, Attr3);
@@ -244,7 +244,11 @@ TEST_CASE("AttributeNode")
 
         auto node = AttributeNode::Make();
         auto child = AttributeNode::Make();
+        auto child1 = AttributeNode::Make();
+        auto child2 = AttributeNode::Make();
         node->AddChild(child);
+        child->AddChild(child1);
+        child1->AddChild(child2);
 
         SECTION("simple get")
         {
@@ -273,6 +277,51 @@ TEST_CASE("AttributeNode")
             REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*child) == 0);
         }
 
+        SECTION("simple set on parent + indirect update")
+        {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, IndirectAttribute, ReferencingAttribute);
+
+            AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
+
+            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*child) == 24);
+
+            // Create value dependency to ReferencingAttribute on child.
+            REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child) == 24);
+
+            AttributeNode::SetValue<&IntegerAttribute>(*child, 0);
+
+            REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child) == 0);
+        }
+
+        SECTION("simple set on parent + indirect update on grandchild")
+        {
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, IndirectAttribute, ReferencingAttribute);
+
+            AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
+
+            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*child) == 24);
+
+            SECTION("child1")
+            {
+                // Create value dependency to ReferencingAttribute on child.
+                REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child1) == 24);
+
+                AttributeNode::SetValue<&IntegerAttribute>(*child1, 0);
+
+                REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child1) == 0);
+            }
+
+            SECTION("child2")
+            {
+                // Create value dependency to ReferencingAttribute on child.
+                REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child2) == 24);
+
+                AttributeNode::SetValue<&IntegerAttribute>(*child1, 0);
+
+                REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child2) == 0);
+            }
+        }
+
         SECTION("via observer 1")
         {
             {
@@ -295,7 +344,7 @@ TEST_CASE("AttributeNode")
         SECTION("simple compute")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 21);
-            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](auto a) { return a * 2; }, Attr1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](SInt32 a) { return a * 2; }, Attr1);
             auto node = AttributeNode::Make();
             REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 42);
             AttributeNode::SetValue<&Attr1>(*node, 10);
@@ -305,7 +354,7 @@ TEST_CASE("AttributeNode")
         SECTION("simple compute")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 2);
-            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](auto a, auto b) { return a * b; }, Attr1, Attr1);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](SInt32 a, SInt32 b) { return a * b; }, Attr1, Attr1);
             auto node = AttributeNode::Make();
             REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 4);
             AttributeNode::SetValue<&Attr1>(*node, 10);
@@ -316,7 +365,7 @@ TEST_CASE("AttributeNode")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 10);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 32);
-            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](auto a, auto b) { return a + b; }, Attr1, Attr2);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](SInt32 a, SInt32 b) { return a + b; }, Attr1, Attr2);
             auto node = AttributeNode::Make();
             REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 42);
             AttributeNode::SetValue<&Attr1>(*node, 24);
@@ -329,7 +378,7 @@ TEST_CASE("AttributeNode")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 21);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr2, Attr1);
-            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](auto a) { return a * 2; }, Attr2);
+            FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](SInt32 a) { return a * 2; }, Attr2);
             auto node = AttributeNode::Make();
             REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 42);
             AttributeNode::SetValue<&Attr1>(*node, 10);
@@ -345,7 +394,7 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 0);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 42);
             auto node = AttributeNode::Make();
-            AttributeNode::SetFunction<&Attr1>(*node, [](auto a) { return a * 2; }, StaticAttributeRef(Attr2));
+            AttributeNode::SetFunction<&Attr1>(*node, [](SInt32 a) { return a * 2; }, StaticAttributeRef(Attr2));
             REQUIRE(*AttributeNode::GetValue<&Attr1>(*node) == 84);
         }
     }
