@@ -15,8 +15,8 @@ auto AttributeComputeFunction::MakeFunction(AttributeValue (*f)(std::span<Attrib
 {
     return AttributeComputeFunction(
       ComputeFunction {
-          .original = f,
-          .wrapper = [](void* original, std::span<AttributeValue const> const references) -> AttributeValue { return static_cast<decltype(f)>(original)(references); },
+          .original = reinterpret_cast<void(*)()>(f),
+          .wrapper = [](void (*original)(), std::span<AttributeValue const> const references) -> AttributeValue { return reinterpret_cast<decltype(f)>(original)(references); },
       });
 }
 

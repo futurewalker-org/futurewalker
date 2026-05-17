@@ -35,8 +35,8 @@ public:
 private:
     struct ComputeFunction
     {
-        void* original = nullptr;
-        AttributeValue (*wrapper)(void* original, std::span<AttributeValue const> const references) = nullptr;
+        void (*original)() = nullptr;
+        AttributeValue (*wrapper)(void(*original)(), std::span<AttributeValue const> const references) = nullptr;
         auto operator==(ComputeFunction const& other) const noexcept -> bool;
     };
     explicit AttributeComputeFunction(ComputeFunction const& computeFunction);
@@ -61,8 +61,8 @@ auto AttributeComputeFunction::MakeFunctionWrapper(F f) -> AttributeComputeFunct
 
     return AttributeComputeFunction(
       ComputeFunction {
-          .original = fp,
-          .wrapper = [](void* original, std::span<AttributeValue const> const args) { return AttributeValue(T(mapper(indices, args, static_cast<decltype(fp)>(original)))); },
+          .original = reinterpret_cast<void(*)()>(fp),
+          .wrapper = [](void (*original)(), std::span<AttributeValue const> const args) { return AttributeValue(T(mapper(indices, args, reinterpret_cast<decltype(fp)>(original)))); },
       });
 }
 }
