@@ -17,7 +17,7 @@ public:
     explicit FileInputStream(Path const& path);
 
     auto IsOpen() const -> Bool;
-    auto SetPosition(SInt64 const position, SeekDirection const direction) -> Optional<SInt64> override;
+    auto SetPosition(SInt64 const position, SeekPosition const origin) -> Optional<SInt64> override;
     auto GetPosition() -> Optional<SInt64> override;
     auto Read(std::span<uint8_t> buffer) -> Optional<SInt64> override;
 

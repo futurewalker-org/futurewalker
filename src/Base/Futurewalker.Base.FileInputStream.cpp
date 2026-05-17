@@ -7,15 +7,15 @@ namespace FW_DETAIL_NS
 {
 namespace
 {
-auto ToSeekdir(SeekDirection const dir) -> std::ios_base::seekdir
+auto ToSeekdir(SeekPosition const dir) -> std::ios_base::seekdir
 {
     switch (dir)
     {
-        case SeekDirection::Begin:
+        case SeekPosition::Begin:
             return std::ios_base::beg;
-        case SeekDirection::Current:
+        case SeekPosition::Current:
             return std::ios_base::cur;
-        case SeekDirection::End:
+        case SeekPosition::End:
             return std::ios_base::end;
         default: {
             FW_DEBUG_ASSERT(false);
@@ -32,7 +32,7 @@ auto ToSeekdir(SeekDirection const dir) -> std::ios_base::seekdir
 ///
 FileInputStream::FileInputStream(Path const& path)
 {
-    _stream.open(path.AsStdFilesystemPath());
+    _stream.open(path.AsStdFilesystemPath(), std::ios_base::in | std::ios_base::binary);
 }
 
 ///
@@ -51,12 +51,12 @@ auto FileInputStream::IsOpen() const -> Bool
 ///
 /// @return New position or null if error.
 ///
-auto FileInputStream::SetPosition(SInt64 const position, SeekDirection const direction) -> Optional<SInt64>
+auto FileInputStream::SetPosition(SInt64 const position, SeekPosition const origin) -> Optional<SInt64>
 {
     if (!_stream.bad())
     {
         _stream.setstate(_stream.rdstate() & ~std::ios::failbit);
-        _stream.seekg(static_cast<int64_t>(position), ToSeekdir(direction));
+        _stream.seekg(static_cast<int64_t>(position), ToSeekdir(origin));
         if (!_stream.fail())
         {
             auto const pos = _stream.tellg();
