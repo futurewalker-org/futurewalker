@@ -5,7 +5,7 @@
 
 namespace FW_DETAIL_NS
 {
-namespace FW_EXPORT 
+namespace FW_EXPORT
 {
 class CommandLine;
 }
