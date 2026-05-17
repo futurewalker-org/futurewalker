@@ -4,6 +4,8 @@
 #include "Futurewalker.Action.Action.hpp"
 #include "Futurewalker.Action.CommandEvent.hpp"
 
+#include "Futurewalker.Base.Debug.hpp"
+
 namespace FW_DETAIL_NS
 {
 auto CommandNode::Make() -> Shared<CommandNode>
@@ -11,30 +13,67 @@ auto CommandNode::Make() -> Shared<CommandNode>
     return CommandNode::MakeDerived<CommandNode>();
 }
 
-CommandNode::CommandNode(PassKey<CommandNode>)
+CommandNode::CommandNode(PassKey<CommandNode> key)
+  : CommandNode(key, false)
+{
+}
+
+CommandNode::CommandNode(PassKey<CommandNode>, Bool rootCanExecute)
+  : _rootCanExecute(rootCanExecute)
 {
     _eventReceiver = EventReceiver::Make();
 }
 
-CommandNode::~CommandNode() noexcept = default;
+CommandNode::~CommandNode() noexcept
+{
+    try
+    {
+        for (auto const& child : _children)
+        {
+            child->_parent = nullptr;
+        }
+
+        if (CanExecute())
+        {
+            for (auto const& child : _children)
+            {
+                child->InternalNotifyStateChanged();
+            }
+        }
+        _children.clear();
+    }
+    catch (...)
+    {
+        FW_DEBUG_ASSERT(false);
+    }
+}
 
 auto CommandNode::AddChild(Shared<CommandNode> const& child) -> void
 {
     if (child)
     {
-        child->_parent = GetSelf();
-        _children.push_back(child);
-        child->InternalNotifyStateChanged();
+        if (WouldFormCycle(child))
+        {
+            FW_DEBUG_ASSERT(false);
+            return;
+        }
+
+        child->RemoveFromParent();
+
+        AdoptChild(child);
+
+        if (CanExecute())
+        {
+            child->InternalNotifyStateChanged();
+        }
     }
 }
 
 auto CommandNode::RemoveChild(Shared<CommandNode> const& child) -> void
 {
-    if (child)
+    if (child && child->GetParent() == GetSelf())
     {
-        _children.remove(child);
-        child->_parent.Reset();
-        child->InternalNotifyStateChanged();
+        child->RemoveFromParent();
     }
 }
 
@@ -98,6 +137,57 @@ auto CommandNode::GetParent() const -> Shared<CommandNode const>
     return _parent.Lock();
 }
 
+auto CommandNode::RemoveFromParent() -> void
+{
+    if (auto const parent = GetParent())
+    {
+        parent->AbandonChild(GetSelf());
+
+        if (parent->CanExecute())
+        {
+            InternalNotifyStateChanged();
+        }
+    }
+}
+
+auto CommandNode::AdoptChild(Shared<CommandNode> const& child) -> void
+{
+    child->_parent = GetSelf();
+    _children.push_back(child);
+}
+
+auto CommandNode::AbandonChild(Shared<CommandNode> const& child) -> void
+{
+    child->_parent = nullptr;
+    _children.remove(child);
+}
+
+auto CommandNode::WouldFormCycle(Shared<CommandNode> const& child) const -> Bool
+{
+    for (auto ancestor = GetSelf(); ancestor; ancestor = ancestor->GetParent())
+    {
+        if (ancestor == child)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+auto CommandNode::CanExecute() const -> Bool
+{
+    if (!_actionMap.empty())
+    {
+        return true;
+    }
+
+    if (auto const parent = GetParent())
+    {
+        return parent->CanExecute();
+    }
+    return _rootCanExecute;
+}
+
 auto CommandNode::InternalFindAction(CommandId const& command) -> Shared<Action>
 {
     if (auto const it = _actionMap.find(command); it != _actionMap.end())
@@ -107,16 +197,26 @@ auto CommandNode::InternalFindAction(CommandId const& command) -> Shared<Action>
     return nullptr;
 }
 
+auto CommandNode::PruneExpiredObservers(std::vector<Tracked<CommandObserver>>& observers) -> void
+{
+    std::erase_if(observers, [](auto const& tracked) { return tracked.IsExpired(); });
+}
+
 auto CommandNode::InternalNotifyStateChanged(CommandId const& command) -> void
 {
     if (auto it = _observerMap.find(command); it != _observerMap.end())
     {
-        auto const& observers = it->second;
-        if (std::any_of(observers.begin(), observers.end(), [](auto const& tracked) { return !tracked.IsExpired(); }))
+        PruneExpiredObservers(it->second);
+
+        if (it->second.empty())
+        {
+            _observerMap.erase(it);
+        }
+        else
         {
             auto stateEvent = Event<CommandEvent::StateChanged>();
             stateEvent->SetCommandId(command);
-            auto event = Event<>(stateEvent);
+            auto event = Event<>(std::move(stateEvent));
             GetEventReceiver().SendEventDetached(event);
         }
     }
@@ -129,15 +229,22 @@ auto CommandNode::InternalNotifyStateChanged(CommandId const& command) -> void
 
 auto CommandNode::InternalNotifyStateChanged() -> void
 {
-    for (auto const& [command, observers] : _observerMap)
+    for (auto it = _observerMap.begin(); it != _observerMap.end();)
     {
-        if (std::any_of(observers.begin(), observers.end(), [](auto const& tracked) { return !tracked.IsExpired(); }))
+        PruneExpiredObservers(it->second);
+
+        if (it->second.empty())
         {
-            auto stateEvent = Event<CommandEvent::StateChanged>();
-            stateEvent->SetCommandId(command);
-            auto event = Event<>(stateEvent);
-            GetEventReceiver().SendEventDetached(event);
+            it = _observerMap.erase(it);
+            continue;
         }
+
+        auto stateEvent = Event<CommandEvent::StateChanged>();
+        stateEvent->SetCommandId(it->first);
+        auto event = Event<>(std::move(stateEvent));
+        GetEventReceiver().SendEventDetached(event);
+
+        ++it;
     }
 
     for (auto const& child : _children)
@@ -209,8 +316,11 @@ auto CommandNode::InternalIsToggled(CommandId const& command) -> Bool
 
 auto CommandNode::InternalGetObserver(CommandId const& command) -> Unique<CommandObserver>
 {
+    auto& observers = _observerMap[command];
+    PruneExpiredObservers(observers);
+
     auto observer = Unique<CommandObserver>::Make(PassKey<CommandNode>(), GetSelf(), command);
-    _observerMap[command].push_back(Tracked(observer));
+    observers.push_back(Tracked(observer));
     return observer;
 }
 
@@ -229,20 +339,6 @@ auto CommandNode::InternalRemoveAction(CommandId const& command) -> void
     {
         _actionMap.erase(command);
         InternalNotifyStateChanged(command);
-    }
-}
-
-auto CommandNode::InternalIsBlocking() const -> Bool
-{
-    return _blocking;
-}
-
-auto CommandNode::InternalSetBlocking(Bool const blocking) -> void
-{
-    if (_blocking != blocking)
-    {
-        _blocking = blocking;
-        InternalNotifyStateChanged();
     }
 }
 

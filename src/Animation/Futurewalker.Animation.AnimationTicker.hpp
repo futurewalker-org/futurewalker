@@ -4,8 +4,6 @@
 #include "Futurewalker.Animation.AnimationTickerType.hpp"
 #include "Futurewalker.Animation.AnimationTickerEvent.hpp"
 
-#include "Futurewalker.Dependency.DependencyNodeType.hpp"
-
 #include "Futurewalker.Event.EventType.hpp"
 #include "Futurewalker.Event.EventReceiver.hpp" 
 
@@ -79,11 +77,10 @@ private:
     auto RemoveFromParent() -> void;
 
     auto SendEvent(Event<>& event) -> Bool;
-    auto ReceiveEvent(Event<>& event) -> Bool;
 
-    auto SendDependencyNodeTickEvent(MonotonicTime const time) -> void;
-    auto SendDependencyNodeActiveChangedEvent(Bool const active) -> void;
-    auto SendDependencyNodeEnabledChangedEvent(Bool const enabled) -> void;
+    auto NotifyTick(MonotonicTime const time) -> void;
+    auto NotifyActiveChanged(Bool const active) -> void;
+    auto NotifyEnabledChanged(Bool const enabled) -> void;
 
     auto SendAnimationTickerTickEvent(MonotonicTime const time) -> void;
     auto SendAnimationTickerActiveChangedEvent() -> void;
@@ -99,7 +96,6 @@ private:
     Weak<AnimationTicker> _parent;
     AnimationTickerList _children;
     Shared<EventReceiver> _eventReceiver;
-    Shared<DependencyNode> _dependencyNode;
     Bool _active = false;
     Bool _enabled = true;
     Bool _enabledFromRoot = true;

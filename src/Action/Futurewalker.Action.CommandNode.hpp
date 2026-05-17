@@ -40,11 +40,6 @@ public:
     template <class Owner>
     static auto RemoveAction(Owner& owner, CommandId const& command) -> void;
 
-    template <class Owner>
-    static auto IsBlocking(Owner& owner) -> Bool;
-    template <class Owner>
-    static auto SetBlocking(Owner& owner, Bool const blocking) -> void;
-
     CommandNode() = delete;
     CommandNode(PassKey<CommandNode>);
     virtual ~CommandNode() noexcept;
@@ -64,6 +59,8 @@ public:
     auto NotifyStateChanged(PassKey<CommandDispatcherContext>, CommandId const& command) -> void;
 
 protected:
+    CommandNode(PassKey<CommandNode>, Bool rootCanExecute);
+
     template <class Derived, class... Args>
     static auto MakeDerived(Args&&... args) -> Shared<Derived>;
 
@@ -76,6 +73,15 @@ private:
     auto GetParent() -> Shared<CommandNode>;
     auto GetParent() const -> Shared<CommandNode const>;
 
+    auto RemoveFromParent() -> void;
+
+    auto AdoptChild(Shared<CommandNode> const& child) -> void;
+    auto AbandonChild(Shared<CommandNode> const& child) -> void;
+
+    auto WouldFormCycle(Shared<CommandNode> const& child) const -> Bool;
+
+    auto CanExecute() const -> Bool;
+
     auto InternalFindAction(CommandId const& command) -> Shared<Action>;
     auto InternalNotifyStateChanged(CommandId const& command) -> void;
     auto InternalNotifyStateChanged() -> void;
@@ -85,11 +91,10 @@ private:
     auto InternalIsToggled(CommandId const& command) -> Bool;
     auto InternalGetObserver(CommandId const& command) -> Unique<CommandObserver>;
 
+    static auto PruneExpiredObservers(std::vector<Tracked<CommandObserver>>& observers) -> void;
+
     auto InternalAddAction(CommandId const& command, Shared<Action> const& action) -> void;
     auto InternalRemoveAction(CommandId const& command) -> void;
-
-    auto InternalIsBlocking() const -> Bool;
-    auto InternalSetBlocking(Bool const blocking) -> void;
 
 private:
     virtual auto RootIsEnabled(CommandId const& command) -> Bool;
@@ -101,7 +106,7 @@ private:
     Weak<CommandNode> _parent;
     CommandNodeList _children;
     Unique<EventReceiver> _eventReceiver;
-    Bool _blocking = false;
+    Bool _rootCanExecute = false;
     HashMap<CommandId, Shared<Action>> _actionMap;
     HashMap<CommandId, std::vector<Tracked<CommandObserver>>> _observerMap;
 };
@@ -146,20 +151,6 @@ auto CommandNode::RemoveAction(Owner& owner, CommandId const& command) -> void
 {
     auto& node = owner.GetCommandNode();
     return node.InternalRemoveAction(command);
-}
-
-template <class Owner>
-auto CommandNode::IsBlocking(Owner& owner) -> Bool
-{
-    auto& node = owner.GetCommandNode();
-    return node.InternalIsBlocking();
-}
-
-template <class Owner>
-auto CommandNode::SetBlocking(Owner& owner, Bool const blocking) -> void
-{
-    auto& node = owner.GetCommandNode();
-    return node.InternalSetBlocking(blocking);
 }
 
 ///

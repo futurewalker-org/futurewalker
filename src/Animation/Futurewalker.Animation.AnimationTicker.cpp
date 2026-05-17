@@ -3,34 +3,12 @@
 #include "Futurewalker.Animation.AnimationTicker.hpp"
 #include "Futurewalker.Animation.AnimationTickerEvent.hpp"
 
-#include "Futurewalker.Dependency.DependencyNode.hpp"
-#include "Futurewalker.Dependency.DependencyNodeEvent.hpp"
-
 #include "Futurewalker.Event.EventReceiver.hpp"
+
+#include "Futurewalker.Base.Debug.hpp"
 
 namespace FW_DETAIL_NS
 {
-namespace
-{
-class DependencyNodeNotifyTick final : public EventParameter
-{
-public:
-    MonotonicTime time;
-};
-
-class DependencyNodeNotifyActiveChanged final : public EventParameter
-{
-public:
-    Bool active = false;
-};
-
-class DependencyNodeNotifyEnabledChanged final : public EventParameter
-{
-public:
-    Bool enabled = false;
-};
-}
-
 ///
 /// @brief
 ///
@@ -45,7 +23,6 @@ auto AnimationTicker::Make() -> Shared<AnimationTicker>
 AnimationTicker::AnimationTicker(PassKey<AnimationTicker>)
 {
     _eventReceiver = EventReceiver::Make();
-    _dependencyNode = DependencyNode::Make({.dispatchEvent = [&](auto& e) { return ReceiveEvent(e); }});
 }
 
 ///
@@ -57,21 +34,22 @@ AnimationTicker::~AnimationTicker() = default;
 /// @brief
 ///
 /// @param[in] child A child timer to add.
+/// @param[in] position Position to add new child.
 ///
-auto AnimationTicker::AddChild(Shared<AnimationTicker> timer, Pointer<AnimationTicker const> after) -> void
+auto AnimationTicker::AddChild(Shared<AnimationTicker> timer, Pointer<AnimationTicker const> position) -> void
 {
     if (timer)
     {
         timer->RemoveFromParent();
 
-        AdoptChild(timer, after);
+        AdoptChild(timer, position);
 
         if (timer->_tickRequested)
         {
             RequestTick();
         }
-        timer->SendDependencyNodeEnabledChangedEvent(IsEnabledFromRoot());
-        timer->SendDependencyNodeActiveChangedEvent(IsActive());
+        timer->NotifyEnabledChanged(IsEnabledFromRoot());
+        timer->NotifyActiveChanged(IsActive());
     }
 }
 
@@ -82,18 +60,9 @@ auto AnimationTicker::AddChild(Shared<AnimationTicker> timer, Pointer<AnimationT
 ///
 auto AnimationTicker::RemoveChild(Shared<AnimationTicker> timer) -> void
 {
-    if (!timer)
+    if (timer && timer->GetParent() == GetSelf())
     {
-        return;
-    }
-
-    for (auto const& child : _children)
-    {
-        if (timer == child)
-        {
-            child->RemoveFromParent();
-            return;
-        }
+        timer->RemoveFromParent();
     }
 }
 
@@ -148,11 +117,19 @@ auto AnimationTicker::SetEnabled(Bool const enabled) -> void
         {
             _enabledFromRoot = enabledFromRoot;
 
-            SendAnimationTickerEnabledChangedEvent();
-
             for (auto const& child : _children)
             {
-                child->SendDependencyNodeEnabledChangedEvent(enabledFromRoot);
+                child->NotifyEnabledChanged(enabledFromRoot);
+            }
+
+            SendAnimationTickerEnabledChangedEvent();
+        }
+
+        if (_enabled && _tickRequested)
+        {
+            if (auto const parent = GetParent())
+            {
+                parent->RequestTick();
             }
         }
     }
@@ -196,7 +173,7 @@ auto AnimationTicker::NotifyRootActiveChanged() -> void
 {
     if (IsRoot())
     {
-        SendDependencyNodeActiveChangedEvent(IsActive());
+        NotifyActiveChanged(IsActive());
     }
 }
 
@@ -207,7 +184,7 @@ auto AnimationTicker::NotifyRootTickTimeChanged(MonotonicTime const tickTime) ->
 {
     if (IsRoot())
     {
-        SendDependencyNodeTickEvent(tickTime);
+        NotifyTick(tickTime);
     }
 }
 
@@ -274,13 +251,13 @@ auto AnimationTicker::SetParent(Shared<AnimationTicker> const& parent) -> void
 ///
 /// @brief
 ///
-/// @param child
+/// @param[in] child New child node.
+/// @param[in] position Position to add new child.
 ///
-auto AnimationTicker::AdoptChild(Shared<AnimationTicker> const& child, Pointer<AnimationTicker const> after) -> void
+auto AnimationTicker::AdoptChild(Shared<AnimationTicker> const& child, Pointer<AnimationTicker const> position) -> void
 {
     child->SetParent(GetSelf());
-    _children.insert(std::find_if(_children.begin(), _children.end(), [&](auto const& child) { return child.GetPointer() == after; }), child);
-    _dependencyNode->AddChild(child->_dependencyNode, after ? after->_dependencyNode.GetPointer() : nullptr);
+    _children.insert(std::find_if(_children.begin(), _children.end(), [&](auto const& c) { return c.GetPointer() == position; }), child);
 }
 
 ///
@@ -290,7 +267,6 @@ auto AnimationTicker::AdoptChild(Shared<AnimationTicker> const& child, Pointer<A
 ///
 auto AnimationTicker::AbandonChild(Shared<AnimationTicker> const& child) -> void
 {
-    _dependencyNode->RemoveChild(child->_dependencyNode);
     _children.erase(std::find(_children.begin(), _children.end(), child));
     child->SetParent(nullptr);
 }
@@ -303,8 +279,8 @@ auto AnimationTicker::RemoveFromParent() -> void
     if (auto parent = GetParent())
     {
         parent->AbandonChild(GetSelf());
-        SendDependencyNodeActiveChangedEvent(IsActive());
-        SendDependencyNodeEnabledChangedEvent(IsEnabled());
+        NotifyActiveChanged(IsActive());
+        NotifyEnabledChanged(IsEnabled());
     }
 }
 
@@ -314,54 +290,6 @@ auto AnimationTicker::RemoveFromParent() -> void
 auto AnimationTicker::SendEvent(Event<>& event) -> Bool
 {
     return GetEventReceiver().SendEventDetached(event);
-}
-
-///
-/// @brief
-///
-/// @param event
-///
-auto AnimationTicker::ReceiveEvent(Event<>& event) -> Bool
-{
-    if (event.Is<DependencyNodeEvent::Notify>())
-    {
-        auto const notifyEvent = event.As<DependencyNodeEvent::Notify>()->GetEvent();
-
-        if (notifyEvent.Is<DependencyNodeNotifyTick>())
-        {
-            if (IsActive() && IsEnabledFromRoot())
-            {
-                if (_tickRequested)
-                {
-                    _tickRequested = false;
-                    SendAnimationTickerTickEvent(notifyEvent.As<DependencyNodeNotifyTick>()->time);
-                    return false;
-                }
-            }
-            return true;
-        }
-        else if (notifyEvent.Is<DependencyNodeNotifyActiveChanged>())
-        {
-            auto const active = notifyEvent.As<DependencyNodeNotifyActiveChanged>()->active;
-            if (_active != active)
-            {
-                _active = active;
-                SendAnimationTickerActiveChangedEvent();
-            }
-            return false;
-        }
-        else if (notifyEvent.Is<DependencyNodeNotifyEnabledChanged>())
-        {
-            auto const enabled = notifyEvent.As<DependencyNodeNotifyEnabledChanged>()->enabled;
-            if (_enabled && _enabledFromRoot != enabled)
-            {
-                _enabledFromRoot = enabled;
-                SendAnimationTickerEnabledChangedEvent();
-            }
-            return !_enabled;
-        }
-    }
-    return false;
 }
 
 ///
@@ -399,31 +327,63 @@ auto AnimationTicker::GetEventReceiver() const -> EventReceiver const&
 ///
 /// @brief
 ///
-auto AnimationTicker::SendDependencyNodeTickEvent(MonotonicTime const time) -> void
+auto AnimationTicker::NotifyTick(MonotonicTime const time) -> void
 {
-    auto parameter = Event<DependencyNodeNotifyTick>();
-    parameter->time = time;
-    _dependencyNode->NotifyWithEvent(parameter);
+    if (_tickRequested)
+    {
+        FW_DEBUG_ASSERT(IsActive());
+
+        if (IsEnabledFromRoot())
+        {
+            _tickRequested = false;
+
+            SendAnimationTickerTickEvent(time);
+
+            for (auto const& child : _children)
+            {
+                child->NotifyTick(time);
+            }
+        }
+    }
 }
 
 ///
 /// @brief
 ///
-auto AnimationTicker::SendDependencyNodeActiveChangedEvent(Bool const active) -> void
+auto AnimationTicker::NotifyActiveChanged(Bool const active) -> void
 {
-    auto parameter = Event<DependencyNodeNotifyActiveChanged>();
-    parameter->active = active;
-    _dependencyNode->NotifyWithEvent(parameter);
+    if (_active != active)
+    {
+        _active = active;
+
+        for (auto const& child : _children)
+        {
+            child->NotifyActiveChanged(active);
+        }
+
+        SendAnimationTickerActiveChangedEvent();
+    }
 }
 
 ///
 /// @brief
 ///
-auto AnimationTicker::SendDependencyNodeEnabledChangedEvent(Bool const enabled) -> void
+auto AnimationTicker::NotifyEnabledChanged(Bool const enabled) -> void
 {
-    auto parameter = Event<DependencyNodeNotifyEnabledChanged>();
-    parameter->enabled = enabled;
-    _dependencyNode->NotifyWithEvent(parameter);
+    if (_enabled)
+    {
+        if (_enabledFromRoot != enabled)
+        {
+            _enabledFromRoot = enabled;
+
+            for (auto const& child : _children)
+            {
+                child->NotifyEnabledChanged(enabled);
+            }
+
+            SendAnimationTickerEnabledChangedEvent();
+        }
+    }
 }
 
 ///
@@ -433,7 +393,7 @@ auto AnimationTicker::SendAnimationTickerTickEvent(MonotonicTime const time) -> 
 {
     auto parameter = Event<AnimationTickerEvent::Tick>();
     parameter->SetTime(time);
-    auto timerEvent = Event<>(parameter);
+    auto timerEvent = Event<>(std::move(parameter));
     SendEvent(timerEvent);
 }
 

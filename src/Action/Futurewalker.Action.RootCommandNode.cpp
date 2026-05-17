@@ -11,7 +11,7 @@ auto RootCommandNode::Make() -> Shared<RootCommandNode>
 }
 
 RootCommandNode::RootCommandNode(PassKey<CommandNode> key)
-  : CommandNode(key)
+  : CommandNode(key, true)
 {
 }
 
