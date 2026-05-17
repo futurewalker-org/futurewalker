@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Core.Primitive.hpp"
-#include "Futurewalker.Core.SeekDirection.hpp"
+#include "Futurewalker.Core.SeekPosition.hpp"
 #include "Futurewalker.Core.Optional.hpp"
 
 #include <span>
@@ -20,11 +20,11 @@ public:
     /// @brief Set current reading position of the stream.
     ///
     /// @param[in] position New position of the stream.
-    /// @param[in] direction How to interpret `position` argument.
+    /// @param[in] origin Origin of position movement.
     ///
     /// @return New position or null if error.
     ///
-    virtual auto SetPosition(SInt64 const position, SeekDirection const direction) -> Optional<SInt64> = 0;
+    virtual auto SetPosition(SInt64 const position, SeekPosition const origin) -> Optional<SInt64> = 0;
 
     ///
     /// @brief Get current reading position of the stream.

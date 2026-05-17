@@ -8,9 +8,9 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 ///
-/// @brief Stream seek direction.
+/// @brief Stream seek position.
 ///
-enum class SeekDirection
+enum class SeekPosition
 {
     Begin,
     Current,
