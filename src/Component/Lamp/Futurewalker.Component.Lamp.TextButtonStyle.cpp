@@ -22,7 +22,7 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::FocusedBorderAlpha, Butto
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::FocusedBorderWidth, ButtonViewStyle::FocusedBorderWidth);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::HighlightColor, ButtonViewStyle::HighlightColor);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::CornerRadius, ButtonViewStyle::CornerRadius);
-FW_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(TextButtonStyle::Padding, [](auto const& s, auto const& m) { return s.GetVertical() + m.GetHorizontal(); }, Style::PaddingSmall, Style::PaddingMedium);
+FW_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(TextButtonStyle::Padding, [](EdgeInsets const& s, EdgeInsets const& m) { return s.GetVertical() + m.GetHorizontal(); }, Style::PaddingSmall, Style::PaddingMedium);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::HoverHighlightAlpha, Style::AlphaHighlightHover);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::PressHighlightAlpha, Style::AlphaHighlightPress);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextColor, Style::ColorOnSecondaryContainer);

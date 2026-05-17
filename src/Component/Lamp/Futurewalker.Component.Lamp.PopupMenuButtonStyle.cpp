@@ -21,7 +21,7 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(PopupMenuButtonStyle::FocusedBorderAlpha, 
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(PopupMenuButtonStyle::FocusedBorderWidth, ButtonViewStyle::FocusedBorderWidth);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(PopupMenuButtonStyle::HighlightColor, ButtonViewStyle::HighlightColor);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(PopupMenuButtonStyle::CornerRadius, Style::CornerRadiusSmall);
-FW_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(PopupMenuButtonStyle::Padding, [](auto const& s, auto const& m) { return s.GetVertical() + m.GetHorizontal(); }, Style::PaddingSmall, Style::PaddingMedium);
+FW_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(PopupMenuButtonStyle::Padding, [](EdgeInsets const& s, EdgeInsets const& m) { return s.GetVertical() + m.GetHorizontal(); }, Style::PaddingSmall, Style::PaddingMedium);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(PopupMenuButtonStyle::HoverHighlightAlpha, ButtonViewStyle::HoverHighlightAlpha);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(PopupMenuButtonStyle::PressHighlightAlpha, ButtonViewStyle::PressHighlightAlpha);
 }

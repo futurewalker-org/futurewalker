@@ -25,7 +25,7 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::PressHighlightAlpha, Style:
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(MenuViewStyle::BorderWidth, 0.0);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::Padding, Style::PaddingExtraSmall);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::CornerRadius, Style::CornerRadiusExtraSmall);
-FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::ItemPadding, Style::PaddingSmall);
+FW_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(MenuViewStyle::ItemPadding, [](EdgeInsets const& h, EdgeInsets const& v) { return h.GetHorizontal() + v.GetVertical(); }, Style::PaddingMedium, Style::PaddingSmall);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::ItemSpacing, Style::SpaceExtraSmall);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuViewStyle::ItemCornerRadius, Style::CornerRadiusExtraSmall);
 }
