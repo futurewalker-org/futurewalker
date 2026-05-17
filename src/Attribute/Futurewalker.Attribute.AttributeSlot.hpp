@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Attribute.AttributeSlotType.hpp"
+#include "Futurewalker.Attribute.AttributeComputeFunction.hpp"
 #include "Futurewalker.Attribute.AttributeValue.hpp"
 #include "Futurewalker.Attribute.StaticAttributeBaseType.hpp"
 #include "Futurewalker.Attribute.AttributeNodeType.hpp"
@@ -37,6 +38,12 @@ public:
     auto AddUpdateNumber(UInt64 const number) -> void;
     auto RemoveUpdateNumber(UInt64 const number) -> Bool;
 
+    auto GetCacheUpdateNumber() const -> UInt64;
+    auto SetCacheUpdateNumber(UInt64 const number) -> void;
+
+    auto GetRewireUpdateNumber() const -> UInt64;
+    auto SetRewireUpdateNumber(UInt64 number) -> void;
+
     auto HasEventConnection() const -> Bool;
 
     auto GetValueChanged() const -> Bool;
@@ -50,22 +57,23 @@ public:
     auto SetValueCache(AttributeValue const& value) -> Bool;
     auto ClearValueCache() -> void;
 
-    auto GetReferenceCache() const -> std::vector<StaticAttributeBaseRef> const&;
-    auto SetReferenceCache(std::vector<StaticAttributeBaseRef> const& references) -> void;
+    auto GetReferenceCache() const -> boost::container::small_vector<StaticAttributeBaseRef, 4> const&;
+    auto SetReferenceCache(std::span<StaticAttributeBaseRef const> const references) -> Bool;
     auto ClearReferenceCache() -> void;
 
-    auto GetComputeFunctionCache() const -> StaticAttributeComputeFunction const&;
-    auto SetComputeFunctionCache(StaticAttributeComputeFunction const& computeFunction) -> void;
+    auto GetComputeFunctionCache() const -> AttributeComputeFunction const&;
+    auto SetComputeFunctionCache(AttributeComputeFunction const& computeFunction) -> Bool;
 
-    auto GetReferences() -> std::vector<StaticAttributeBaseRef> const&;
-    auto GetComputeFunction() const -> StaticAttributeComputeFunction const&;
-    auto SetValue(StaticAttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void;
+    auto GetReferences() -> boost::container::small_vector<StaticAttributeBaseRef, 4> const&;
+    auto GetComputeFunction() const -> AttributeComputeFunction const&;
+    auto SetValue(AttributeComputeFunction const& computeFunction, std::span<StaticAttributeBaseRef const> const references) -> void;
     auto ClearValue() -> void;
 
     auto GetValueDependentSlots() const -> SharedArray<Weak<AttributeSlot>>;
     auto SetValueDependentSlots(std::span<Shared<AttributeSlot> const> const slots) -> void;
     auto DetachFromValueDependentSlots() -> void;
 
+    auto HasSourceDependentSlot() const noexcept -> Bool;
     auto GetSourceDependentSlot() -> Shared<AttributeSlot>;
     auto SetSourceDependentSlot(Shared<AttributeSlot> const& slot) -> void;
     auto DetachFromSourceDependentSlot() -> void;
@@ -85,13 +93,15 @@ private:
     Weak<AttributeSlot> _self;
     Weak<AttributeNode> _owner;
     boost::container::small_vector<UInt64, 4> _updateNumbers;
+    UInt64 _cacheUpdateNumber = 0U;
+    UInt64 _rewireUpdateNumber = 0U;
     Bool _valueChanged = false;
     StaticAttributeBaseRef _description;
     Optional<AttributeValue> _valueCache;
-    std::vector<StaticAttributeBaseRef> _references;
-    std::vector<StaticAttributeBaseRef> _referenceCache;
-    StaticAttributeComputeFunction _computeFunction;
-    StaticAttributeComputeFunction _computeFunctionCache;
+    boost::container::small_vector<StaticAttributeBaseRef, 4> _references;
+    boost::container::small_vector<StaticAttributeBaseRef, 4> _referenceCache;
+    AttributeComputeFunction _computeFunction;
+    AttributeComputeFunction _computeFunctionCache;
     SharedArray<Weak<AttributeSlot>> _valueDependentSlots;
     SharedArray<Weak<AttributeSlot>> _valueDependantSlots;
     Weak<AttributeSlot> _sourceDependentSlot;
