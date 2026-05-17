@@ -628,7 +628,7 @@ auto Theme::ApplyApplicationStyle(AttributeNode& target) -> void
     AttributeNode::SetValue<&Style::FontWeightDisplayMedium>(target, 400);
     AttributeNode::SetValue<&Style::FontWeightDisplayLarge>(target, 400);
 
-    auto constexpr makeUniformCornerRadius = [](auto s) { return CornerRadius::MakeUniform(s); };
+    auto constexpr makeUniformCornerRadius = [](Dp s) { return CornerRadius::MakeUniform(s); };
     AttributeNode::SetFunction<&Style::CornerRadiusNone>(target, makeUniformCornerRadius, StaticAttributeRef(Style::SizeNone));
     AttributeNode::SetFunction<&Style::CornerRadiusExtraSmall>(target, makeUniformCornerRadius, StaticAttributeRef(Style::Size40));
     AttributeNode::SetFunction<&Style::CornerRadiusSmall>(target, makeUniformCornerRadius, StaticAttributeRef(Style::Size80));
@@ -671,7 +671,7 @@ auto Theme::ApplyApplicationStyle(AttributeNode& target) -> void
     AttributeNode::SetReference<&Style::SpaceLarge>(target, Style::Size240);
     AttributeNode::SetReference<&Style::SpaceExtraLarge>(target, Style::Size320);
 
-    auto constexpr makeUniformPadding = [](auto s) { return EdgeInsets::MakeUniform(s); };
+    auto constexpr makeUniformPadding = [](Dp s) { return EdgeInsets::MakeUniform(s); };
     AttributeNode::SetFunction<&Style::PaddingNone>(target, makeUniformPadding, StaticAttributeRef(Style::SizeNone));
     AttributeNode::SetFunction<&Style::PaddingExtraSmall>(target, makeUniformPadding, StaticAttributeRef(Style::Size40));
     AttributeNode::SetFunction<&Style::PaddingSmall>(target, makeUniformPadding, StaticAttributeRef(Style::Size80));

@@ -22,7 +22,7 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::FocusedBorderAlpha, B
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::FocusedBorderWidth, ButtonViewStyle::FocusedBorderWidth);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::HighlightColor, ButtonViewStyle::HighlightColor);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::CornerRadius, Style::CornerRadiusSmall);
-FW_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(MenuItemButtonStyle::Padding, [](auto const& s, auto const& m) { return s.GetVertical() + m.GetHorizontal(); }, Style::PaddingExtraSmall, Style::PaddingSmall);
+FW_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(MenuItemButtonStyle::Padding, [](EdgeInsets const& s, EdgeInsets const& m) { return s.GetVertical() + m.GetHorizontal(); }, Style::PaddingExtraSmall, Style::PaddingSmall);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::HoverHighlightAlpha, ButtonViewStyle::HoverHighlightAlpha);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::PressHighlightAlpha, ButtonViewStyle::PressHighlightAlpha);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(MenuItemButtonStyle::TextColor, MenuViewStyle::TextColor);
