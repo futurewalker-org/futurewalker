@@ -71,6 +71,23 @@ public:
         }
     }
 
+    auto EraseUnordered(IndexType const index) -> void
+    {
+        if (auto const state = GetMutableState())
+        {
+            auto const size = std::ssize(*state);
+            if (0 <= index && index < size)
+            {
+                auto const last = size - 1;
+                if (index != last)
+                {
+                    (*state)[static_cast<size_t>(index)] = std::move(state->back());
+                }
+                state->pop_back();
+            }
+        }
+    }
+
     auto Clear() -> void
     {
         if (auto const state = GetMutableState())
