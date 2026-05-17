@@ -136,7 +136,7 @@ auto MenuBar::BuildView() -> void
         _row = nullptr;
     }
 
-    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(EdgeInsets, AttributeItemPadding, [](auto p1, auto p2) { return p1.GetHorizontal() + p2.GetVertical(); }, Style::PaddingSmall, Style::PaddingExtraSmall);
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(EdgeInsets, AttributeItemPadding, [](EdgeInsets const& p1, EdgeInsets const& p2) { return p1.GetHorizontal() + p2.GetVertical(); }, Style::PaddingSmall, Style::PaddingExtraSmall);
 
     auto row = FlexLayout::Make();
     row->SetDirection(FlexLayoutDirection::Row);
