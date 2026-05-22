@@ -192,9 +192,9 @@ protected:
     auto GetChildren() -> ViewArray;
     auto GetChildren() const -> ConstViewArray;
 
-    auto AddChildAt(Shared<View> view, SInt64 const index) -> void;
-    auto AddChildBack(Shared<View> view) -> void;
-    auto AddChildFront(Shared<View> view) -> void;
+    auto AddChildAt(Shared<View> const& view, SInt64 const index) -> void;
+    auto AddChildBack(Shared<View> const& view) -> void;
+    auto AddChildFront(Shared<View> const& view) -> void;
 
     auto AddLayer(ViewLayerKind const kind) -> ViewLayerId;
     auto RemoveLayer(ViewLayerId const id) -> void;

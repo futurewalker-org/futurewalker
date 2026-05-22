@@ -1330,7 +1330,7 @@ auto View::GetChildren() const -> ConstViewArray
 ///
 /// @note When `view` is already added, this function fails.
 ///
-auto View::AddChildAt(Shared<View> view, SInt64 const index) -> void
+auto View::AddChildAt(Shared<View> const& view, SInt64 const index) -> void
 {
     Shared<View> self = GetSelf();
 
@@ -1339,7 +1339,7 @@ auto View::AddChildAt(Shared<View> view, SInt64 const index) -> void
         return;
     }
 
-    if (view->GetParent() == GetSelf())
+    if (view->GetParent() == self)
     {
         return;
     }
@@ -1363,7 +1363,7 @@ auto View::AddChildAt(Shared<View> view, SInt64 const index) -> void
 ///
 /// @brief Add child view to back (topmost).
 ///
-auto View::AddChildBack(Shared<View> view) -> void
+auto View::AddChildBack(Shared<View> const& view) -> void
 {
     AddChildAt(view, GetChildCount());
 }
@@ -1371,7 +1371,7 @@ auto View::AddChildBack(Shared<View> view) -> void
 ///
 /// @brief Add child view to front (bottommost).
 ///
-auto View::AddChildFront(Shared<View> view) -> void
+auto View::AddChildFront(Shared<View> const& view) -> void
 {
     AddChildAt(view, 0);
 }
