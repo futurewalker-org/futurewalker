@@ -90,9 +90,16 @@ public:
 
     auto Clear() -> void
     {
-        if (auto const state = GetMutableState())
+        if (_state)
         {
-            state->clear();
+            if (_state.GetUseCount() == 1)
+            {
+                _state->clear();
+            }
+            else
+            {
+                _state.Reset();
+            }
         }
     }
 
