@@ -57,12 +57,9 @@ auto FocusNode::AddChild(Shared<FocusNode> const& child, Pointer<FocusNode const
 
 auto FocusNode::RemoveChild(Shared<FocusNode> const& child) -> void
 {
-    if (child)
+    if (child && child->GetParent() == GetSelf())
     {
-        if (child->GetParent() == GetSelf())
-        {
-            AbandonChild(child);
-        }
+        AbandonChild(child);
     }
 }
 

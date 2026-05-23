@@ -39,7 +39,7 @@ ViewLayer::ViewLayer(PassKey<ViewLayer>, Shared<PlatformViewLayer> const& platfo
 /// @note `layer` will be removed from current parent.
 /// @note When `after` is not a child of this layer, `layer` will become last (topmost) child of this layer.
 ///
-auto ViewLayer::AddChild(Shared<ViewLayer> layer, Pointer<ViewLayer const> after) -> void
+auto ViewLayer::AddChild(Shared<ViewLayer> const& layer, Pointer<ViewLayer const> const& after) -> void
 {
     if (layer)
     {
@@ -56,20 +56,11 @@ auto ViewLayer::AddChild(Shared<ViewLayer> layer, Pointer<ViewLayer const> after
 ///
 /// @param layer
 ///
-auto ViewLayer::RemoveChild(Shared<ViewLayer> layer) -> void
+auto ViewLayer::RemoveChild(Shared<ViewLayer> const& layer) -> void
 {
-    if (!layer)
+    if (layer && layer->GetParent() == GetSelf())
     {
-        return;
-    }
-
-    for (const auto& child : _children)
-    {
-        if (child == layer)
-        {
-            child->RemoveFromParent();
-            return;
-        }
+        layer->RemoveFromParent();
     }
 }
 
