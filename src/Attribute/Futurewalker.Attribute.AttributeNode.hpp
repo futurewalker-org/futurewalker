@@ -20,7 +20,7 @@
 
 #include "Futurewalker.Event.EventReceiverType.hpp"
 
-#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unordered_map.hpp>
 #include <boost/container/flat_map.hpp>
 
 namespace FW_DETAIL_NS
