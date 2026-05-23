@@ -212,6 +212,8 @@ auto AttributeSlot::SetValueDependentSlots(std::span<Shared<AttributeSlot> const
 {
     DetachFromValueDependentSlots();
 
+    _valueDependentSlots.Reserve(std::ssize(slots));
+
     auto const self = GetSelf();
     for (auto const& slot : slots)
     {

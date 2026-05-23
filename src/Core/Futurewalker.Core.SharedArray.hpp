@@ -48,6 +48,11 @@ public:
         GetOrCreateMutableState().push_back(std::move(value));
     }
 
+    auto Reserve(SInt64 const& capacity) -> void
+    {
+        GetOrCreateMutableState().reserve(static_cast<size_t>(capacity));
+    }
+
     auto GetValueAt(IndexType const index) const -> T const&
     {
         if (auto const state = GetImmutableState())
