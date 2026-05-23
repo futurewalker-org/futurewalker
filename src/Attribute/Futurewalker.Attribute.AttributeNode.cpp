@@ -1006,14 +1006,15 @@ auto AttributeNode::RewireSlotOnAddChildCore(Shared<AttributeSlot>&& slot, Share
             slot->DetachFromValueDependentSlots();
             child->EraseAttributeSlot(slot->GetDescription());
 
-            auto const sourceDependantSlots = slot->GetSourceDependantSlots();
-            auto const valueDependantSlots = slot->GetValueDependantSlots();
+            auto sourceDependantSlots = slot->GetSourceDependantSlots();
+            auto valueDependantSlots = slot->GetValueDependantSlots();
 
+            slot->UnsafeClearSourceDependantSlots();
             for (auto i = SInt64(0); i < sourceDependantSlots.GetSize(); ++i)
             {
                 if (auto const sourceDependantSlot = sourceDependantSlots.GetValueAt(i).Lock())
                 {
-                    sourceDependantSlot->SetSourceDependentSlot(sourceSlot);
+                    sourceDependantSlot->UnsafeSetSourceDependentSlot(sourceSlot);
                 }
             }
 
@@ -1051,6 +1052,9 @@ auto AttributeNode::RewireSlotOnAddChildCore(Shared<AttributeSlot>&& slot, Share
 
             if (slot.GetUseCount() == 1)
             {
+                // Try to reuse capacity of vector.
+                sourceDependantSlots.Clear();
+                slot->UnsafeSetSourceDependantSlots(std::move(sourceDependantSlots));
                 _slotCache->RecycleSlot(std::move(slot));
             }
             else
@@ -1126,7 +1130,7 @@ auto AttributeNode::UpdateSlotCacheRecursive(
 
     slot.DetachFromValueDependentSlots();
 
-    if (auto const function = slot.GetComputeFunction())
+    if (auto const& function = slot.GetComputeFunction())
     {
         auto const& references = slot.GetReferences();
 
