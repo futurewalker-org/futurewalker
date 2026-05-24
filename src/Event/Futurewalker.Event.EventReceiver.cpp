@@ -23,7 +23,11 @@ auto EventReceiver::Make(Delegate delegate) -> Unique<EventReceiver>
 ///
 auto EventReceiver::HasConnection() const -> Bool
 {
-    return !_eventSignal.IsEmpty();
+    if (_eventSignal)
+    {
+        return !_eventSignal->IsEmpty();
+    }
+    return false;
 }
 
 ///
@@ -31,7 +35,10 @@ auto EventReceiver::HasConnection() const -> Bool
 ///
 auto EventReceiver::DisconnectAll() -> void
 {
-    _eventSignal.DisconnectAll();
+    if (_eventSignal)
+    {
+        _eventSignal->DisconnectAll();
+    }
 }
 
 ///
@@ -102,6 +109,22 @@ auto EventReceiver::GetEventReceiver() const -> EventReceiver const&
 ///
 auto EventReceiver::DispatchEvent(Event<>& event) -> Async<Bool>
 {
-    co_return co_await _eventSignal(event);
+    if (_eventSignal)
+    {
+        co_return co_await (*_eventSignal)(event);
+    }
+    co_return false;
+}
+
+///
+/// @brief Get reference to signal if exists, or create new one.
+///
+auto EventReceiver::GetSignal() -> EventSignal&
+{
+    if (!_eventSignal)
+    {
+        _eventSignal.Emplace();
+    }
+    return *_eventSignal;
 }
 }

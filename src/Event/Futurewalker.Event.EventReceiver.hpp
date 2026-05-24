@@ -11,6 +11,7 @@
 #include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Function.hpp"
+#include "Futurewalker.Core.Optional.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -50,10 +51,11 @@ public:
 
 private:
     auto DispatchEvent(Event<>& event) -> Async<Bool>;
+    auto GetSignal() -> EventSignal&;
 
 private:
     Delegate _delegate;
-    EventSignal _eventSignal;
+    Optional<EventSignal> _eventSignal;
 };
 
 ///
@@ -67,7 +69,7 @@ auto EventReceiver::Connect(Receiver& receiver, Function&& function) -> SignalCo
 {
     auto& eventReceiver = receiver.GetEventReceiver();
     auto slot = [function](Event<>& event) -> Lazy<Bool> { return AsyncFunction::Fn([=, &event]() -> Lazy<Bool> { co_return co_await std::invoke(function, event); }); };
-    return SignalFunction::Connect(eventReceiver._eventSignal, std::move(slot), SignalConnectPosition::front);
+    return SignalFunction::Connect(eventReceiver.GetSignal(), std::move(slot), SignalConnectPosition::front);
 }
 
 ///
@@ -93,7 +95,7 @@ auto EventReceiver::Connect(Receiver& receiver, Observer&& observer, Function&& 
             co_return false;
         });
     };
-    return SignalFunction::Connect(eventReceiver._eventSignal, observer, std::move(slot), SignalConnectPosition::front);
+    return SignalFunction::Connect(eventReceiver.GetSignal(), observer, std::move(slot), SignalConnectPosition::front);
 }
 }
 }
