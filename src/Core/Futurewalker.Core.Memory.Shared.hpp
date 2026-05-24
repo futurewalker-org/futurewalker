@@ -25,7 +25,7 @@ class Shared final
     template <class U>
     friend class Tracked;
 
-    auto GetWeak() const
+    inline auto GetWeak() const noexcept
     {
         return std::weak_ptr(_ptr);
     }
@@ -37,7 +37,7 @@ public:
     /// @param[in] args Constructor arguments.
     ///
     template <class... Args>
-    static auto Make(Args&&... args) -> Shared<T>
+    inline static auto Make(Args&&... args) -> Shared<T>
     {
         return Shared(std::make_shared<T>(std::forward<Args>(args)...));
     }
@@ -49,7 +49,7 @@ public:
     /// @param[in] args Constructor arguments.
     ///
     template <class Allocator, class... Args>
-    static auto MakeWithAllocator(Allocator const& alloc, Args&&... args) -> Shared<T>
+    inline static auto MakeWithAllocator(Allocator const& alloc, Args&&... args) -> Shared<T>
     {
         return Shared(std::allocate_shared<T>(alloc, std::forward<Args>(args)...));
     }
@@ -66,7 +66,7 @@ public:
     ///
     /// @note Exists for interop with STL.
     ///
-    explicit Shared(std::shared_ptr<T> sp) noexcept
+    inline explicit Shared(std::shared_ptr<T> sp) noexcept
       : _ptr {std::move(sp)}
     {
     }
@@ -74,7 +74,7 @@ public:
     ///
     /// @brief Move constructor.
     ///
-    Shared(Shared&& other) noexcept
+    inline Shared(Shared&& other) noexcept
       : _ptr {std::move(other._ptr)}
     {
     }
@@ -82,10 +82,9 @@ public:
     ///
     /// @brief Move assignment operator.
     ///
-    Shared& operator=(Shared&& other) noexcept
+    inline auto operator=(Shared&& other) noexcept -> Shared&
     {
-        auto tmp = std::move(other);
-        Swap(tmp);
+        _ptr = std::move(other._ptr);
         return *this;
     }
 
@@ -93,7 +92,7 @@ public:
     /// @brief Construct from other shared.
     ///
     template <class U>
-    Shared(Shared<U> other) noexcept
+    inline Shared(Shared<U> other) noexcept
       : _ptr {std::move(other._ptr)}
     {
     }
@@ -105,7 +104,7 @@ public:
     /// @param[in] p Pointer to alias.
     ///
     template <class U>
-    Shared(Shared<U> r, T* p) noexcept
+    inline Shared(Shared<U> r, T* p) noexcept
       : _ptr {std::move(r._ptr), p}
     {
     }
@@ -114,7 +113,7 @@ public:
     /// @brief Assign from other.
     ///
     template <class U>
-    Shared& operator=(Shared<U> other) noexcept
+    inline auto operator=(Shared<U> other) noexcept -> Shared&
     {
         _ptr = std::move(other._ptr);
         return *this;
@@ -124,7 +123,7 @@ public:
     /// @brief Construct from other shared.
     ///
     template <class U>
-    Shared(Unique<U>&& other) noexcept
+    inline Shared(Unique<U>&& other) noexcept
       : _ptr {std::move(other._ptr)}
     {
     }
@@ -133,7 +132,7 @@ public:
     /// @brief Assign other shared.
     ///
     template <class U>
-    Shared& operator=(Unique<U>&& other) noexcept
+    inline auto operator=(Unique<U>&& other) noexcept -> Shared&
     {
         _ptr = std::move(other._ptr);
         return *this;
@@ -142,7 +141,7 @@ public:
     ///
     /// @brief Construct from nullptr_t.
     ///
-    Shared(std::nullptr_t) noexcept
+    inline Shared(std::nullptr_t) noexcept
       : _ptr {nullptr}
     {
     }
@@ -150,7 +149,7 @@ public:
     ///
     /// @brief Assign nullptr_t.
     ///
-    Shared& operator=(std::nullptr_t) noexcept
+    inline auto operator=(std::nullptr_t) noexcept -> Shared&
     {
         _ptr = nullptr;
         return *this;
@@ -159,7 +158,7 @@ public:
     ///
     /// @brief Get pointer.
     ///
-    auto GetPointer() const noexcept -> Pointer<T>
+    inline auto GetPointer() const noexcept -> Pointer<T>
     {
         return _ptr.get();
     }
@@ -168,7 +167,7 @@ public:
     /// @brief Dereference.
     ///
     template <Concepts::NonVoid U = T>
-    auto operator*() const -> U&
+    inline auto operator*() const noexcept -> U&
     {
         return _ptr.operator*();
     }
@@ -176,7 +175,7 @@ public:
     ///
     /// @brief Access member of contained value.
     ///
-    auto operator->() const -> T*
+    inline auto operator->() const noexcept -> T*
     {
         return _ptr.operator->();
     }
@@ -184,7 +183,7 @@ public:
     ///
     /// @brief Convert to boolean.
     ///
-    explicit operator bool() const noexcept
+    inline explicit operator bool() const noexcept
     {
         return _ptr.operator bool();
     }
@@ -192,7 +191,7 @@ public:
     ///
     /// @brief Get reference count.
     ///
-    auto GetUseCount() const noexcept -> SInt64
+    inline auto GetUseCount() const noexcept -> SInt64
     {
         return _ptr.use_count();
     }
@@ -200,7 +199,7 @@ public:
     ///
     /// @brief Reset.
     ///
-    auto Reset() noexcept -> void
+    inline auto Reset() noexcept -> void
     {
         _ptr.reset();
     }
@@ -208,7 +207,7 @@ public:
     ///
     /// @brief Swap.
     ///
-    auto Swap(Shared& other) noexcept -> void
+    inline auto Swap(Shared& other) noexcept -> void
     {
         if (this != &other)
         {
@@ -220,7 +219,7 @@ public:
     /// @brief Compare based on ownership.
     ///
     template <class U>
-    auto IsOwnerBefore(Shared<U> const& other) const -> Bool
+    inline auto IsOwnerBefore(Shared<U> const& other) const noexcept -> Bool
     {
         return _ptr.owner_before(other._ptr);
     }
@@ -233,7 +232,7 @@ public:
     /// @note Null returns false for all type of U.
     ///
     template <class U>
-    auto Is() const noexcept -> Bool
+    inline auto Is() const noexcept -> Bool
     {
         return DynamicCastFunction::Is<U>(_ptr);
     }
@@ -248,7 +247,7 @@ public:
     /// @throw Exception when owning object is not an instance of U.
     ///
     template <class U>
-    auto As() const -> Shared<U>
+    inline auto As() const -> Shared<U>
     {
         return Shared<U>(DynamicCastFunction::As<U>(_ptr));
     }
@@ -261,7 +260,7 @@ public:
     /// @return
     ///
     template <class U>
-    auto TryAs() const noexcept -> Shared<U>
+    inline auto TryAs() const noexcept -> Shared<U>
     {
         return Shared<U>(DynamicCastFunction::TryAs<U>(_ptr));
     }
@@ -274,7 +273,7 @@ public:
     /// @return
     ///
     template <class U>
-    auto UnsafeAs() const noexcept -> Shared<U>
+    inline auto UnsafeAs() const noexcept -> Shared<U>
     {
         return Shared<U>(DynamicCastFunction::UnsafeAs<U>(_ptr));
     }
