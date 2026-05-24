@@ -262,9 +262,9 @@ public:
         return *_eventReceiver;
     }
 
-    auto GetTracker() -> Tracker&
+    auto GetTracker() -> Weak<void>
     {
-        return _eventReceiver->GetTracker();
+        return _eventReceiver;
     }
 
 private:

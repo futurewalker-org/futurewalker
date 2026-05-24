@@ -469,17 +469,17 @@ auto Window::RequestClose() -> Async<Bool>
 ///
 /// @brief Get tracker of the window.
 ///
-auto Window::GetTracker() -> Tracker&
+auto Window::GetTracker() -> Weak<void>
 {
-    return GetEventReceiver().GetTracker();
+    return _self;
 }
 
 ///
 /// @brief Get tracker of the window.
 ///
-auto Window::GetTracker() const -> Tracker const&
+auto Window::GetTracker() const -> Weak<void const>
 {
-    return GetEventReceiver().GetTracker();
+    return _self;
 }
 
 ///

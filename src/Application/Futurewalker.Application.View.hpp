@@ -140,8 +140,8 @@ public:
 
     auto MakeOwnedWindow(WindowOptions options) -> Shared<Window>;
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
+    auto GetTracker() -> Weak<void>;
+    auto GetTracker() const -> Weak<void const>;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
@@ -294,8 +294,8 @@ private:
     auto ReceiveFocusNodeEvent(Event<>& event) -> Async<Bool>;
 
 private:
+    PropertyStore _propertyStore;
     Unique<EventReceiver> _eventReceiver;
-    Unique<PropertyStore> _propertyStore;
     Weak<View> _self;
     Weak<View> _parent;
     ViewList _children;

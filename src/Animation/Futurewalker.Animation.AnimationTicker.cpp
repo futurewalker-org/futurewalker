@@ -22,7 +22,6 @@ auto AnimationTicker::Make() -> Shared<AnimationTicker>
 ///
 AnimationTicker::AnimationTicker(PassKey<AnimationTicker>)
 {
-    _eventReceiver = EventReceiver::Make();
 }
 
 ///
@@ -295,17 +294,17 @@ auto AnimationTicker::SendEvent(Event<>& event) -> Bool
 ///
 /// @brief
 ///
-auto AnimationTicker::GetTracker() -> Tracker&
+auto AnimationTicker::GetTracker() -> Weak<void>
 {
-    return _eventReceiver->GetTracker();
+    return _self;
 }
 
 ///
 /// @brief
 ///
-auto AnimationTicker::GetTracker() const -> Tracker const&
+auto AnimationTicker::GetTracker() const -> Weak<void const>
 {
-    return _eventReceiver->GetTracker();
+    return _self;
 }
 
 ///
@@ -313,7 +312,7 @@ auto AnimationTicker::GetTracker() const -> Tracker const&
 ///
 auto AnimationTicker::GetEventReceiver() -> EventReceiver&
 {
-    return _eventReceiver->GetEventReceiver();
+    return _eventReceiver;
 }
 
 ///
@@ -321,7 +320,7 @@ auto AnimationTicker::GetEventReceiver() -> EventReceiver&
 ///
 auto AnimationTicker::GetEventReceiver() const -> EventReceiver const&
 {
-    return _eventReceiver->GetEventReceiver();
+    return _eventReceiver;
 }
 
 ///

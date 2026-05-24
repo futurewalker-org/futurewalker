@@ -24,8 +24,6 @@
 #include "Futurewalker.Event.EventType.hpp"
 #include "Futurewalker.Event.EventReceiverType.hpp"
 
-#include "Futurewalker.Signal.TrackerType.hpp"
-
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -47,8 +45,8 @@ public:
     auto IsActive() const -> Bool;
     auto IsForeground() const -> Bool;
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
+    auto GetTracker() -> Weak<void>;
+    auto GetTracker() const -> Weak<void const>;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;

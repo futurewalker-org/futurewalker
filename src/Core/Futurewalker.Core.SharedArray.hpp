@@ -50,7 +50,10 @@ public:
 
     auto Reserve(SInt64 const& capacity) -> void
     {
-        GetOrCreateMutableState().reserve(static_cast<size_t>(capacity));
+        if (capacity > 0)
+        {
+            GetOrCreateMutableState().reserve(static_cast<size_t>(capacity));
+        }
     }
 
     auto GetValueAt(IndexType const index) const -> T const&

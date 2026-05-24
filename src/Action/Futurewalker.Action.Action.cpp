@@ -9,12 +9,13 @@ namespace FW_DETAIL_NS
 {
 auto Action::Make() -> Shared<Action>
 {
-    return Shared<Action>::Make(PassKey<Action>());
+    auto action = Shared<Action>::Make(PassKey<Action>());
+    action->_self = action;
+    return action;
 }
 
 Action::Action(PassKey<Action>)
 {
-    _eventReceiver = EventReceiver::Make();
 }
 
 auto Action::Execute(CommandId const command) -> void
@@ -49,23 +50,23 @@ auto Action::NotifyStateChanged() -> void
     GetEventReceiver().SendEventDetached(event);
 }
 
-auto Action::GetTracker() -> Tracker&
+auto Action::GetTracker() -> Weak<void>
 {
-    return _eventReceiver->GetTracker();
+    return _self;
 }
 
-auto Action::GetTracker() const -> Tracker const&
+auto Action::GetTracker() const -> Weak<void const>
 {
-    return _eventReceiver->GetTracker();
+    return _self;
 }
 
 auto Action::GetEventReceiver() -> EventReceiver&
 {
-    return *_eventReceiver;
+    return _eventReceiver;
 }
 
 auto Action::GetEventReceiver() const -> EventReceiver const&
 {
-    return *_eventReceiver;
+    return _eventReceiver;
 }
 }

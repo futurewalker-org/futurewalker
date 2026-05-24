@@ -15,7 +15,7 @@ namespace FW_DETAIL_NS
 ///
 auto EventReceiver::Make(Delegate delegate) -> Unique<EventReceiver>
 {
-    return Unique<EventReceiver>::Make(PassKey<EventReceiver>(), std::move(delegate));
+    return Unique<EventReceiver>::Make(std::move(delegate));
 }
 
 ///
@@ -37,10 +37,9 @@ auto EventReceiver::DisconnectAll() -> void
 ///
 /// @brief Send event to receiver.
 ///
-EventReceiver::EventReceiver(PassKey<EventReceiver>, Delegate delegate)
+EventReceiver::EventReceiver(Delegate delegate)
   : _delegate {std::move(delegate)}
 {
-    _tracker = Tracker::Make();
 }
 
 ///
@@ -76,22 +75,6 @@ auto EventReceiver::SendEventDetached(Event<>& event) -> Bool
         return *r;
     }
     return false;
-}
-
-///
-/// @brief Get tracker.
-///
-auto EventReceiver::GetTracker() -> Tracker&
-{
-    return *_tracker;
-}
-
-///
-/// @brief Get tracker.
-///
-auto EventReceiver::GetTracker() const -> Tracker const&
-{
-    return *_tracker;
 }
 
 ///

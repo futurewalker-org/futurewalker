@@ -4,7 +4,6 @@
 #include "Futurewalker.Event.Event.hpp"
 #include "Futurewalker.Event.EventSignal.hpp"
 
-#include "Futurewalker.Signal.Tracker.hpp"
 #include "Futurewalker.Signal.SignalConnection.hpp"
 #include "Futurewalker.Signal.SignalFunction.hpp"
 
@@ -41,13 +40,10 @@ public:
     auto DisconnectAll() -> void;
 
 public:
-    EventReceiver(PassKey<EventReceiver>, Delegate delegate);
+    explicit EventReceiver(Delegate delegate = {});
 
     auto SendEvent(Event<>& event) -> Async<Bool>;
     auto SendEventDetached(Event<>& event) -> Bool;
-
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
@@ -57,7 +53,6 @@ private:
 
 private:
     Delegate _delegate;
-    Shared<Tracker> _tracker;
     EventSignal _eventSignal;
 };
 
@@ -89,7 +84,7 @@ auto EventReceiver::Connect(Receiver& receiver, Observer&& observer, Function&& 
     auto slot = [function]<class T>(T&& observer, Event<>& event) -> Lazy<Bool> {
         // Observer may be destroyed when returned task is awaited, so we need to track it.
         // Function also need to be copied since slot can be destroyed.
-        auto tracker = Tracker::Track(observer);
+        auto tracker = observer.GetTracker();
         return AsyncFunction::Fn([=, &observer, &event]() -> Lazy<Bool> {
             if (!tracker.IsExpired())
             {

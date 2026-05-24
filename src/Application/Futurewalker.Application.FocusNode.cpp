@@ -22,7 +22,6 @@ auto FocusNode::Make() -> Shared<FocusNode>
 
 FocusNode::FocusNode(PassKey<FocusNode>)
 {
-    _eventReceiver = EventReceiver::Make();
 }
 
 FocusNode::~FocusNode() = default;
@@ -105,12 +104,12 @@ auto FocusNode::GetChildren() const -> FocusNodeList const&
 
 auto FocusNode::GetEventReceiver() -> EventReceiver&
 {
-    return *_eventReceiver;
+    return _eventReceiver;
 }
 
 auto FocusNode::GetEventReceiver() const -> EventReceiver const&
 {
-    return *_eventReceiver;
+    return _eventReceiver;
 }
 
 auto FocusNode::SendEvent(Event<>& event) -> Async<Bool>

@@ -35,14 +35,15 @@ public:
 
     auto NotifyStateChanged() -> void;
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
+    auto GetTracker() -> Weak<void>;
+    auto GetTracker() const -> Weak<void const>;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
 
 private:
-    Unique<EventReceiver> _eventReceiver;
+    Weak<Action> _self;
+    EventReceiver _eventReceiver;
 };
 
 ///

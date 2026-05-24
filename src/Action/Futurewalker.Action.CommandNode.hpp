@@ -47,8 +47,8 @@ public:
     auto AddChild(Shared<CommandNode> const& child) -> void;
     auto RemoveChild(Shared<CommandNode> const& child) -> void;
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
+    auto GetTracker() -> Weak<void>;
+    auto GetTracker() const -> Weak<void const>;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
@@ -105,7 +105,7 @@ private:
     Weak<CommandNode> _self;
     Weak<CommandNode> _parent;
     CommandNodeList _children;
-    Unique<EventReceiver> _eventReceiver;
+    EventReceiver _eventReceiver;
     Bool _rootCanExecute = false;
     HashMap<CommandId, Shared<Action>> _actionMap;
     HashMap<CommandId, std::vector<Tracked<CommandObserver>>> _observerMap;

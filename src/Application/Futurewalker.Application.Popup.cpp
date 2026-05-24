@@ -187,17 +187,17 @@ auto Popup::GetEventReceiver() const -> EventReceiver const&
 ///
 /// @brief
 ///
-auto Popup::GetTracker() -> Tracker&
+auto Popup::GetTracker() -> Weak<void>
 {
-    return GetEventReceiver().GetTracker();
+    return _eventReceiver;
 }
 
 ///
 /// @brief
 ///
-auto Popup::GetTracker() const -> Tracker const&
+auto Popup::GetTracker() const -> Weak<void const>
 {
-    return GetEventReceiver().GetTracker();
+    return _eventReceiver;
 }
 
 ///

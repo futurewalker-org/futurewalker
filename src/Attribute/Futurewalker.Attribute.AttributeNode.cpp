@@ -1290,12 +1290,15 @@ auto AttributeNode::NotifyValueChangedRecursive(AttributeSlot& slot, UInt64 cons
         {
             slot.SetValueChanged(false);
 
-            if (auto const owner = slot.GetOwner())
+            if (slot.HasEventConnection())
             {
-                auto parameter = Event<AttributeEvent::ValueChanged>();
-                parameter->SetId(slot.GetDescription().Get().GetId());
-                auto event = Event<>(std::move(parameter));
-                slot.GetEventReceiver().SendEventDetached(event);
+                if (auto const owner = slot.GetOwner())
+                {
+                    auto parameter = Event<AttributeEvent::ValueChanged>();
+                    parameter->SetId(slot.GetDescription().Get().GetId());
+                    auto event = Event<>(std::move(parameter));
+                    slot.GetEventReceiver().SendEventDetached(event);
+                }
             }
         }
 

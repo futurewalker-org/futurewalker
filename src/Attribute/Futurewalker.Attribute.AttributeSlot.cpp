@@ -39,11 +39,7 @@ auto AttributeSlot::GetOwner() -> Shared<AttributeNode>
 
 auto AttributeSlot::GetEventReceiver() -> EventReceiver&
 {
-    if (!_eventReceiver)
-    {
-        _eventReceiver = EventReceiver::Make();
-    }
-    return *_eventReceiver;
+    return _eventReceiver;
 }
 
 auto AttributeSlot::AddUpdateNumber(UInt64 const number) -> void
@@ -88,11 +84,7 @@ auto AttributeSlot::SetRewireUpdateNumber(UInt64 number) -> void
 
 auto AttributeSlot::HasEventConnection() const -> Bool
 {
-    if (_eventReceiver)
-    {
-        return _eventReceiver->HasConnection();
-    }
-    return false;
+    return _eventReceiver.HasConnection();
 }
 
 auto AttributeSlot::GetValueChanged() const -> Bool
@@ -336,11 +328,7 @@ auto AttributeSlot::Reset() -> void
     _sourceDependantSlots.Clear();
     _valueDependentSlots.Clear();
     _valueDependantSlots.Clear();
-
-    if (_eventReceiver)
-    {
-        _eventReceiver->DisconnectAll();
-    }
+    _eventReceiver.DisconnectAll();
 }
 
 auto AttributeSlot::SetSelf(Shared<AttributeSlot> const& self) -> void

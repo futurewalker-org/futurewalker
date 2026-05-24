@@ -17,17 +17,17 @@ auto EventWaiter::WaitEvent() -> Async<Event<>>
 ///
 /// @brief Get tracker.
 ///
-auto EventWaiter::GetTracker() -> Tracker&
+auto EventWaiter::GetTracker() -> Weak<void>
 {
-    return *_tracker;
+    return _tracker;
 }
 
 ///
 /// @brief Get tracker.
 ///
-auto EventWaiter::GetTracker() const -> Tracker const&
+auto EventWaiter::GetTracker() const -> Weak<void const>
 {
-    return *_tracker;
+    return _tracker;
 }
 
 ///

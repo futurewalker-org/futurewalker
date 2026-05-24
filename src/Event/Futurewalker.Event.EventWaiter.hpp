@@ -21,12 +21,12 @@ public:
     template <class Receiver>
     explicit EventWaiter(Receiver& receiver)
     {
-        _tracker = Tracker::Make();
+        _tracker = Shared<int>::Make();
         EventReceiver::Connect(receiver, *this, &EventWaiter::ReceiveEvent);
     }
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
+    auto GetTracker() -> Weak<void>;
+    auto GetTracker() const -> Weak<void const>;
 
     template <class T>
     auto Wait() -> Async<Event<T>>
@@ -46,7 +46,7 @@ private:
     auto ReceiveEvent(Event<>& event) -> Async<Bool>;
 
 private:
-    Shared<Tracker> _tracker;
+    Shared<void> _tracker;
     AsyncBroadcastChannel<Event<>> _channel;
 };
 }

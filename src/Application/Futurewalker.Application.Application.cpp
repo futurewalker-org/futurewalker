@@ -118,17 +118,17 @@ auto Application::SendEvent(Event<>& event) -> Async<Bool>
 ///
 /// @brief Get tracker.
 ///
-auto Application::GetTracker() -> Tracker&
+auto Application::GetTracker() -> Weak<void>
 {
-    return GetEventReceiver().GetTracker();
+    return _self;
 }
 
 ///
 /// @brief Get tracker.
 ///
-auto Application::GetTracker() const -> Tracker const&
+auto Application::GetTracker() const -> Weak<void const>
 {
-    return GetEventReceiver().GetTracker();
+    return _self;
 }
 
 ///
