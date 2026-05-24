@@ -60,6 +60,7 @@ auto View::Make() -> Shared<View>
 /// @brief Constructor.
 ///
 View::View(PassKey<View>)
+  : _eventReceiver({.dispatchEvent = [this](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); }})
 {
 }
 
@@ -699,7 +700,7 @@ auto View::GetTracker() const -> Weak<void const>
 ///
 auto View::GetEventReceiver() -> EventReceiver&
 {
-    return *_eventReceiver;
+    return _eventReceiver;
 }
 
 ///
@@ -707,7 +708,7 @@ auto View::GetEventReceiver() -> EventReceiver&
 ///
 auto View::GetEventReceiver() const -> EventReceiver const&
 {
-    return *_eventReceiver;
+    return _eventReceiver;
 }
 
 ///
@@ -1819,7 +1820,6 @@ auto View::IsRoot() const -> Bool
 auto View::InitializeSelf(Shared<View> const& self) -> void
 {
     _self = self;
-    _eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); }});
     _animationTicker = AnimationTicker::Make();
     _focusNode = FocusNode::Make();
     _attributeNode = AttributeNode::Make();

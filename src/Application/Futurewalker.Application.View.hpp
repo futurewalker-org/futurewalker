@@ -295,7 +295,7 @@ private:
 
 private:
     PropertyStore _propertyStore;
-    Unique<EventReceiver> _eventReceiver;
+    EventReceiver _eventReceiver;
     Weak<View> _self;
     Weak<View> _parent;
     ViewList _children;
