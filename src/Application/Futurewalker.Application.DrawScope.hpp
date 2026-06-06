@@ -51,7 +51,6 @@ private:
     auto EndRecording() -> Shared<Graphics::DisplayList>;
 
 private:
-    View& _view;
     DrawParameter _parameter;
     Shared<Graphics::SceneRecorder> _recordingSurface;
     Shared<Graphics::Scene> _recordingCanvas;

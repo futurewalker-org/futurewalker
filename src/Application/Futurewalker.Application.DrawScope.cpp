@@ -14,9 +14,8 @@ namespace FW_DETAIL_NS
 /// @param view
 /// @param parameter
 ///
-DrawScope::DrawScope(PassKey<View>, View& view, DrawParameter const& parameter)
-  : _view {view}
-  , _parameter {parameter}
+DrawScope::DrawScope(PassKey<View>, View&, DrawParameter const& parameter)
+  : _parameter {parameter}
 {
 }
 
