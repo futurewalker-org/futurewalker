@@ -9,6 +9,8 @@
 #include "Futurewalker.Base.Win.PlatformCommandLineWin.hpp"
 #include "Futurewalker.Base.Win.PlatformSystemInfoWin.hpp"
 #include "Futurewalker.Base.Win.PlatformDebugWin.hpp"
+#include "Futurewalker.Base.Win.PlatformFilesystemWin.hpp"
+#include "Futurewalker.Base.Win.PlatformLocaleContextWin.hpp"
 #include "Futurewalker.Base.Locator.hpp"
 
 #include "Futurewalker.Application.Win.PlatformApplicationContextWin.hpp"
@@ -40,6 +42,8 @@ auto PlatformMainWin::Register(HINSTANCE instanceHandle) -> void
     Locator::Register<PlatformCommandLineWin>();
     Locator::Register<PlatformSystemInfoWin>();
     Locator::Register<PlatformDebugWin>();
+    Locator::Register<PlatformFilesystemWin>();
+    Locator::Register<PlatformLocaleContextWin>();
     Locator::Register<PlatformMainThreadWin>();
     Locator::Register<PlatformApplicationContextWin>();
     Locator::Register<PlatformApplicationThemeContextWin>();

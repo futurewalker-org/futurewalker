@@ -5,10 +5,17 @@
 
 namespace FW_DETAIL_NS
 {
-PlatformEnvironmentContext::PlatformEnvironmentContext(Shared<PlatformDebug> debug, Shared<PlatformSystemInfo> systemInfo, Shared<PlatformCommandLine> commandLine)
+PlatformEnvironmentContext::PlatformEnvironmentContext(
+  Shared<PlatformDebug> debug,
+  Shared<PlatformSystemInfo> systemInfo,
+  Shared<PlatformCommandLine> commandLine,
+  Shared<PlatformFilesystem> filesystem,
+  Shared<PlatformLocaleContext> localeContext)
   : _debug {debug}
   , _systemInfo {systemInfo}
   , _commandLine {commandLine}
+  , _filesystem {filesystem}
+  , _localeContext {localeContext}
 {
 }
 

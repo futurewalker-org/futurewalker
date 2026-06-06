@@ -5,6 +5,8 @@
 #include "Futurewalker.Base.PlatformDebug.hpp"
 #include "Futurewalker.Base.PlatformSystemInfo.hpp"
 #include "Futurewalker.Base.PlatformCommandLine.hpp"
+#include "Futurewalker.Base.PlatformFilesystem.hpp"
+#include "Futurewalker.Base.PlatformLocaleContext.hpp"
 
 #include "Futurewalker.Core.Memory.hpp"
 
@@ -18,7 +20,7 @@ namespace FW_EXPORT
 class PlatformEnvironmentContext
 {
 public:
-    PlatformEnvironmentContext(Shared<PlatformDebug> debug, Shared<PlatformSystemInfo> systemInfo, Shared<PlatformCommandLine> commandLine);
+    PlatformEnvironmentContext(Shared<PlatformDebug> debug, Shared<PlatformSystemInfo> systemInfo, Shared<PlatformCommandLine> commandLine, Shared<PlatformFilesystem> filesystem, Shared<PlatformLocaleContext> localeContext);
 
     virtual ~PlatformEnvironmentContext() = 0;
 
@@ -26,6 +28,8 @@ private:
     Shared<PlatformDebug> _debug;
     Shared<PlatformSystemInfo> _systemInfo;
     Shared<PlatformCommandLine> _commandLine;
+    Shared<PlatformFilesystem> _filesystem;
+    Shared<PlatformLocaleContext> _localeContext;
 };
 }
 }
