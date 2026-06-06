@@ -29,7 +29,7 @@ public:
     ///
     /// @brief Construct from rvalue.
     ///
-    Weak(Weak&& other) noexcept
+    inline Weak(Weak&& other) noexcept
     {
         Swap(other);
     }
@@ -37,7 +37,7 @@ public:
     ///
     /// @brief Assign rvalue.
     ///
-    Weak& operator=(Weak&& other) noexcept
+    inline auto operator=(Weak&& other) noexcept -> Weak&
     {
         auto tmp = std::move(other);
         Swap(tmp);
@@ -47,7 +47,7 @@ public:
     ///
     /// @brief Construct from nullptr.
     ///
-    Weak(std::nullptr_t) noexcept
+    inline Weak(std::nullptr_t) noexcept
       : _weak {}
     {
     }
@@ -56,7 +56,7 @@ public:
     /// @brief Copy from other weak.
     ///
     template <class U>
-    Weak(Weak<U> const& other)
+    inline Weak(Weak<U> const& other) noexcept
       : _weak {other._weak}
     {
     }
@@ -65,7 +65,7 @@ public:
     /// @brief Assign other weak.
     ///
     template <class U>
-    Weak& operator=(Weak<U> const& other)
+    inline auto operator=(Weak<U> const& other) noexcept -> Weak&
     {
         _weak = other._weak;
         return *this;
@@ -75,7 +75,7 @@ public:
     /// @brief Construct from shared<T>.
     ///
     template <class U>
-    Weak(Shared<U> const& u)
+    inline Weak(Shared<U> const& u) noexcept
       : _weak {u._ptr}
     {
     }
@@ -83,7 +83,7 @@ public:
     ///
     /// @brief Check if weak reference is invalid.
     ///
-    Bool IsExpired() const
+    inline auto IsExpired() const noexcept -> Bool
     {
         return _weak.expired();
     }
@@ -91,7 +91,7 @@ public:
     ///
     /// @brief Reset.
     ///
-    void Reset() noexcept
+    inline auto Reset() noexcept -> void
     {
         _weak.reset();
     }
@@ -99,7 +99,7 @@ public:
     ///
     /// @brief Swap.
     ///
-    void Swap(Weak& other) noexcept
+    inline auto Swap(Weak& other) noexcept -> void
     {
         if (this != &other)
         {
@@ -111,7 +111,7 @@ public:
     /// @brief Compare based on ownership.
     ///
     template <class U>
-    Bool IsOwnerBefore(Weak<U> const& other) const
+    inline auto IsOwnerBefore(Weak<U> const& other) const -> Bool
     {
         return _weak.owner_before(other._weak);
     }
@@ -119,7 +119,7 @@ public:
     ///
     /// @brief Upgrade weak reference to shared reference.
     ///
-    [[nodiscard]] auto Lock() const -> Shared<T>
+    [[nodiscard]] inline auto Lock() const -> Shared<T>
     {
         return Shared(_weak.lock());
     }

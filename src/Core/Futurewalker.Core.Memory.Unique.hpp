@@ -25,12 +25,12 @@ class Unique final : NonCopyable
     template <class U>
     friend class Tracked;
 
-    explicit Unique(std::shared_ptr<T>&& up) noexcept
+    inline explicit Unique(std::shared_ptr<T>&& up) noexcept
       : _ptr {std::move(up)}
     {
     }
 
-    auto GetWeak() const
+    inline auto GetWeak() const noexcept
     {
         return std::weak_ptr(_ptr);
     }
@@ -42,7 +42,7 @@ public:
     /// @param[in] args Parameters for constructor of T.
     ///
     template <class... Args>
-    static auto Make(Args&&... args) -> Unique<T>
+    inline static auto Make(Args&&... args) -> Unique<T>
     {
         return Unique(std::make_shared<T>(std::forward<Args>(args)...));
     }
@@ -54,7 +54,7 @@ public:
     /// @param[in] args Parameters for constructor of T.
     ///
     template <class Allocator, class... Args>
-    static auto MakeWithAllocator(Allocator const& alloc, Args&&... args) -> Unique<T>
+    inline static auto MakeWithAllocator(Allocator const& alloc, Args&&... args) -> Unique<T>
     {
         return Unique(std::allocate_shared<T>(alloc, std::forward<Args>(args)...));
     }
@@ -68,7 +68,7 @@ public:
     ///
     /// @brief Construct from std::unique_ptr.
     ///
-    explicit Unique(std::unique_ptr<T>&& up) noexcept
+    inline explicit Unique(std::unique_ptr<T>&& up) noexcept
       : _ptr {std::move(up)}
     {
     }
@@ -76,18 +76,20 @@ public:
     ///
     /// @brief Move constructor.
     ///
-    Unique(Unique&& other) noexcept
+    inline Unique(Unique&& other) noexcept
+        : _ptr {std::move(other._ptr)}
     {
-        Swap(other);
     }
 
     ///
     /// @brief Move assignment operator.
     ///
-    Unique& operator=(Unique&& other) noexcept
+    inline auto operator=(Unique&& other) noexcept -> Unique&
     {
-        auto tmp = std::move(other);
-        Swap(tmp);
+        if (this != &other)
+        {
+            _ptr = std::move(other._ptr);
+        }
         return *this;
     }
 
@@ -95,7 +97,7 @@ public:
     /// @brief Construct from other Unique.
     ///
     template <class U>
-    Unique(Unique<U>&& other) noexcept
+    inline Unique(Unique<U>&& other) noexcept
       : _ptr {std::move(other._ptr)}
     {
     }
@@ -104,7 +106,7 @@ public:
     /// @brief Assign from other Unique.
     ///
     template <class U>
-    Unique& operator=(Unique<U>&& other) noexcept
+    inline auto operator=(Unique<U>&& other) noexcept -> Unique&
     {
         _ptr = std::move(other._ptr);
         return *this;
@@ -113,7 +115,7 @@ public:
     ///
     /// @brief Construct from nullptr_t.
     ///
-    Unique(std::nullptr_t) noexcept
+    inline Unique(std::nullptr_t) noexcept
       : _ptr {nullptr}
     {
     }
@@ -121,7 +123,7 @@ public:
     ///
     /// @brief Assign nullptr_t.
     ///
-    Unique& operator=(std::nullptr_t) noexcept
+    inline auto operator=(std::nullptr_t) noexcept -> Unique&
     {
         _ptr = nullptr;
         return *this;
@@ -130,7 +132,7 @@ public:
     ///
     /// @brief Get pointer.
     ///
-    auto GetPointer() const noexcept -> T*
+    inline auto GetPointer() const noexcept -> T*
     {
         return _ptr.get();
     }
@@ -139,7 +141,7 @@ public:
     /// @brief Dereference.
     ///
     template <Concepts::NonVoid U = T>
-    auto operator*() const noexcept -> U&
+    inline auto operator*() const noexcept -> U&
     {
         return _ptr.operator*();
     }
@@ -147,7 +149,7 @@ public:
     ///
     /// @brief Access member of object.
     ///
-    auto operator->() const noexcept -> T*
+    inline auto operator->() const noexcept -> T*
     {
         return _ptr.operator->();
     }
@@ -155,7 +157,7 @@ public:
     ///
     /// @brief Convert to boolean value.
     ///
-    explicit operator bool() const noexcept
+    inline explicit operator bool() const noexcept
     {
         return static_cast<bool>(_ptr);
     }
@@ -163,7 +165,7 @@ public:
     ///
     /// @brief Reset.
     ///
-    void Reset() noexcept
+    inline auto Reset() noexcept -> void
     {
         _ptr.reset();
     }
@@ -171,7 +173,7 @@ public:
     ///
     /// @brief Swap.
     ///
-    void Swap(Unique& other) noexcept
+    inline auto Swap(Unique& other) noexcept -> void
     {
         if (this != &other)
         {
@@ -187,7 +189,7 @@ public:
     /// @note Null returns false for all type of U.
     ///
     template <class U>
-    auto Is() const noexcept -> Bool
+    inline auto Is() const noexcept -> Bool
     {
         return DynamicCastFunction::Is<U>(_ptr);
     }
@@ -202,7 +204,7 @@ public:
     /// @throw Exception when owning object is not an instance of U.
     ///
     template <class U>
-    auto As() && -> Unique<U>
+    inline auto As() && -> Unique<U>
     {
         return Unique<U>(DynamicCastFunction::As<U>(_ptr));
     }
@@ -215,7 +217,7 @@ public:
     /// @return
     ///
     template <class U>
-    auto TryAs() && noexcept -> Unique<U>
+    inline auto TryAs() && noexcept -> Unique<U>
     {
         return Unique<U>(DynamicCastFunction::TryAs<U>(_ptr));
     }
@@ -228,7 +230,7 @@ public:
     /// @return
     ///
     template <class U>
-    auto UnsafeAs() && noexcept -> Unique<U>
+    inline auto UnsafeAs() && noexcept -> Unique<U>
     {
         return Unique<U>(DynamicCastFunction::UnsafeAs<U>(_ptr));
     }

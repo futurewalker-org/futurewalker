@@ -48,6 +48,14 @@ public:
         GetOrCreateMutableState().push_back(std::move(value));
     }
 
+    auto Reserve(SInt64 const& capacity) -> void
+    {
+        if (capacity > 0)
+        {
+            GetOrCreateMutableState().reserve(static_cast<size_t>(capacity));
+        }
+    }
+
     auto GetValueAt(IndexType const index) const -> T const&
     {
         if (auto const state = GetImmutableState())
@@ -90,9 +98,16 @@ public:
 
     auto Clear() -> void
     {
-        if (auto const state = GetMutableState())
+        if (_state)
         {
-            state->clear();
+            if (_state.GetUseCount() == 1)
+            {
+                _state->clear();
+            }
+            else
+            {
+                _state.Reset();
+            }
         }
     }
 
