@@ -37,14 +37,14 @@ auto CommandObserver::IsCommandToggled() const -> Bool
     return false;
 }
 
-auto CommandObserver::GetTracker() -> Tracker&
+auto CommandObserver::GetTracker() -> Weak<void>
 {
-    return _eventReceiver->GetTracker();
+    return _eventReceiver;
 }
 
-auto CommandObserver::GetTracker() const -> Tracker const&
+auto CommandObserver::GetTracker() const -> Weak<void const>
 {
-    return _eventReceiver->GetTracker();
+    return _eventReceiver;
 }
 
 auto CommandObserver::GetEventReceiver() -> EventReceiver&

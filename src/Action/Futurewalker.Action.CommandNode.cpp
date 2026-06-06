@@ -21,7 +21,6 @@ CommandNode::CommandNode(PassKey<CommandNode> key)
 CommandNode::CommandNode(PassKey<CommandNode>, Bool rootCanExecute)
   : _rootCanExecute(rootCanExecute)
 {
-    _eventReceiver = EventReceiver::Make();
 }
 
 CommandNode::~CommandNode() noexcept
@@ -77,24 +76,24 @@ auto CommandNode::RemoveChild(Shared<CommandNode> const& child) -> void
     }
 }
 
-auto CommandNode::GetTracker() -> Tracker&
+auto CommandNode::GetTracker() -> Weak<void>
 {
-    return _eventReceiver->GetTracker();
+    return _self;
 }
 
-auto CommandNode::GetTracker() const -> Tracker const&
+auto CommandNode::GetTracker() const -> Weak<void const>
 {
-    return _eventReceiver->GetTracker();
+    return _self;
 }
 
 auto CommandNode::GetEventReceiver() -> EventReceiver&
 {
-    return *_eventReceiver;
+    return _eventReceiver;
 }
 
 auto CommandNode::GetEventReceiver() const -> EventReceiver const&
 {
-    return *_eventReceiver;
+    return _eventReceiver;
 }
 
 auto CommandNode::GetCommandNode() -> CommandNode&

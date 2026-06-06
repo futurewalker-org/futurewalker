@@ -4,7 +4,6 @@
 #include "Futurewalker.Signal.SignalType.hpp"
 #include "Futurewalker.Signal.SignalConnection.hpp"
 #include "Futurewalker.Signal.SignalCombiner.hpp"
-#include "Futurewalker.Signal.Tracker.hpp"
 
 #include "Futurewalker.Core.Primitive.hpp"
 #include "Futurewalker.Core.NonCopyable.hpp"
@@ -116,7 +115,7 @@ public:
     ///
     /// @brief Connect with automatic tracking.
     ///
-    auto Connect(Weak<Tracker> t, SlotFunctionType slot, SignalConnectPosition pos) -> SignalConnection
+    auto Connect(Weak<void> t, SlotFunctionType slot, SignalConnectPosition pos) -> SignalConnection
     {
         return SignalConnection(_signal.connect(SlotType(std::move(slot)).track_foreign(SignalWeakWrapper(t)), InternalGetBoostConnectPosition(pos)));
     }
@@ -124,7 +123,7 @@ public:
     ///
     /// @brief Connect with automatic tracking.
     ///
-    auto Connect(Weak<Tracker const> t, SlotFunctionType slot, SignalConnectPosition pos) -> SignalConnection
+    auto Connect(Weak<void const> t, SlotFunctionType slot, SignalConnectPosition pos) -> SignalConnection
     {
         return SignalConnection(_signal.connect(SlotType(std::move(slot)).track_foreign(SignalWeakWrapper(t)), InternalGetBoostConnectPosition(pos)));
     }

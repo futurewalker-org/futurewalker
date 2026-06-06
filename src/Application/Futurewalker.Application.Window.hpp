@@ -17,8 +17,6 @@
 #include "Futurewalker.Application.PlatformViewLayerType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerContextType.hpp"
 
-#include "Futurewalker.Signal.TrackerType.hpp"
-
 #include "Futurewalker.Event.EventReceiverType.hpp"
 #include "Futurewalker.Event.EventType.hpp"
 
@@ -163,8 +161,8 @@ public:
 
     auto SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void;
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
+    auto GetTracker() -> Weak<void>;
+    auto GetTracker() const -> Weak<void const>;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;

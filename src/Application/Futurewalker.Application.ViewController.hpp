@@ -23,7 +23,6 @@ public:
     ///
     ViewController(PassKey<ViewController>)
     {
-        _eventReceiver = EventReceiver::Make();
     }
 
     ///
@@ -57,22 +56,22 @@ public:
 
     auto GetEventReceiver() -> EventReceiver&
     {
-        return *_eventReceiver;
+        return _eventReceiver;
     }
 
     auto GetEventReceiver() const -> EventReceiver const&
     {
-        return *_eventReceiver;
+        return _eventReceiver;
     }
 
-    auto GetTracker() -> Tracker&
+    auto GetTracker() -> Weak<void>
     {
-        return _eventReceiver->GetTracker();
+        return _self;
     }
 
-    auto GetTracker() const -> Tracker const&
+    auto GetTracker() const -> Weak<void const>
     {
-        return _eventReceiver->GetTracker();
+        return _self;
     }
 
     template <class Self>
@@ -99,7 +98,7 @@ private:
 private:
     Weak<ViewController> _self;
     Shared<ViewType> _view;
-    Unique<EventReceiver> _eventReceiver;
+    EventReceiver _eventReceiver;
 };
 }
 }

@@ -31,7 +31,7 @@ TEST_CASE("EventReceiver")
 
             TestClass1()
             {
-                m_eventReceiver = EventReceiver::Make();
+                _eventReceiver = EventReceiver::Make();
             }
 
             auto ReceiveEvent(Event<>&) -> Async<Bool>
@@ -40,18 +40,18 @@ TEST_CASE("EventReceiver")
                 co_return true;
             }
 
-            auto GetTracker() -> Tracker&
+            auto GetTracker() -> Weak<void>
             {
-                return GetEventReceiver().GetTracker();
+                return _eventReceiver;
             }
 
             auto GetEventReceiver() -> EventReceiver&
             {
-                return *m_eventReceiver;
+                return *_eventReceiver;
             }
 
         private:
-            Shared<EventReceiver> m_eventReceiver;
+            Shared<EventReceiver> _eventReceiver;
         };
 
         auto testClass = Shared<TestClass1>::Make();
@@ -72,7 +72,7 @@ TEST_CASE("EventReceiver")
         {
             TestClass2()
             {
-                m_eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event<>& e, EventFunction const& d) -> Async<Bool> { co_return co_await DispatchEvent(e, d); }});
+                _eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event<>& e, EventFunction const& d) -> Async<Bool> { co_return co_await DispatchEvent(e, d); }});
             }
 
             auto SendEvent(Event<>& event) -> Async<Bool>
@@ -90,18 +90,18 @@ TEST_CASE("EventReceiver")
                 co_return true;
             }
 
-            auto GetTracker() -> Tracker&
+            auto GetTracker() -> Weak<void>
             {
-                return GetEventReceiver().GetTracker();
+                return _eventReceiver;
             }
 
             auto GetEventReceiver() -> EventReceiver&
             {
-                return *m_eventReceiver;
+                return *_eventReceiver;
             }
 
         private:
-            Shared<EventReceiver> m_eventReceiver;
+            Shared<EventReceiver> _eventReceiver;
         };
 
         auto testClass = Shared<TestClass2>::Make();

@@ -7,8 +7,6 @@
 #include "Futurewalker.Event.EventType.hpp"
 #include "Futurewalker.Event.EventReceiver.hpp" 
 
-#include "Futurewalker.Signal.Tracker.hpp"
-
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.MonotonicTime.hpp"
 #include "Futurewalker.Core.PassKey.hpp"
@@ -46,8 +44,8 @@ public:
 
     auto GetCurrentTime() const -> MonotonicTime;
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
+    auto GetTracker() -> Weak<void>;
+    auto GetTracker() const -> Weak<void const>;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
@@ -95,7 +93,7 @@ private:
     Weak<AnimationTicker> _self;
     Weak<AnimationTicker> _parent;
     AnimationTickerList _children;
-    Shared<EventReceiver> _eventReceiver;
+    EventReceiver _eventReceiver;
     Bool _active = false;
     Bool _enabled = true;
     Bool _enabledFromRoot = true;

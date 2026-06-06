@@ -60,6 +60,7 @@ auto View::Make() -> Shared<View>
 /// @brief Constructor.
 ///
 View::View(PassKey<View>)
+  : _eventReceiver({.dispatchEvent = [this](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); }})
 {
 }
 
@@ -681,17 +682,17 @@ auto View::MakeOwnedWindow(WindowOptions options) -> Shared<Window>
 ///
 /// @brief 
 ///
-auto View::GetTracker() -> Tracker&
+auto View::GetTracker() -> Weak<void>
 {
-    return _eventReceiver->GetTracker();
+    return _self;
 }
 
 ///
 /// @brief 
 ///
-auto View::GetTracker() const -> Tracker const&
+auto View::GetTracker() const -> Weak<void const>
 {
-    return _eventReceiver->GetTracker();
+    return _self;
 }
 
 ///
@@ -699,7 +700,7 @@ auto View::GetTracker() const -> Tracker const&
 ///
 auto View::GetEventReceiver() -> EventReceiver&
 {
-    return _eventReceiver->GetEventReceiver();
+    return _eventReceiver;
 }
 
 ///
@@ -707,7 +708,7 @@ auto View::GetEventReceiver() -> EventReceiver&
 ///
 auto View::GetEventReceiver() const -> EventReceiver const&
 {
-    return _eventReceiver->GetEventReceiver();
+    return _eventReceiver;
 }
 
 ///
@@ -715,7 +716,7 @@ auto View::GetEventReceiver() const -> EventReceiver const&
 ///
 auto View::GetPropertyStore() -> PropertyStore&
 {
-    return _propertyStore->GetPropertyStore();
+    return _propertyStore;
 }
 
 ///
@@ -723,7 +724,7 @@ auto View::GetPropertyStore() -> PropertyStore&
 ///
 auto View::GetPropertyStore() const -> PropertyStore const&
 {
-    return _propertyStore->GetPropertyStore();
+    return _propertyStore;
 }
 
 ///
@@ -1330,7 +1331,7 @@ auto View::GetChildren() const -> ConstViewArray
 ///
 /// @note When `view` is already added, this function fails.
 ///
-auto View::AddChildAt(Shared<View> view, SInt64 const index) -> void
+auto View::AddChildAt(Shared<View> const& view, SInt64 const index) -> void
 {
     Shared<View> self = GetSelf();
 
@@ -1339,7 +1340,7 @@ auto View::AddChildAt(Shared<View> view, SInt64 const index) -> void
         return;
     }
 
-    if (view->GetParent() == GetSelf())
+    if (view->GetParent() == self)
     {
         return;
     }
@@ -1363,7 +1364,7 @@ auto View::AddChildAt(Shared<View> view, SInt64 const index) -> void
 ///
 /// @brief Add child view to back (topmost).
 ///
-auto View::AddChildBack(Shared<View> view) -> void
+auto View::AddChildBack(Shared<View> const& view) -> void
 {
     AddChildAt(view, GetChildCount());
 }
@@ -1371,7 +1372,7 @@ auto View::AddChildBack(Shared<View> view) -> void
 ///
 /// @brief Add child view to front (bottommost).
 ///
-auto View::AddChildFront(Shared<View> view) -> void
+auto View::AddChildFront(Shared<View> const& view) -> void
 {
     AddChildAt(view, 0);
 }
@@ -1819,8 +1820,6 @@ auto View::IsRoot() const -> Bool
 auto View::InitializeSelf(Shared<View> const& self) -> void
 {
     _self = self;
-    _eventReceiver = EventReceiver::Make({.dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); }});
-    _propertyStore = PropertyStore::Make();
     _animationTicker = AnimationTicker::Make();
     _focusNode = FocusNode::Make();
     _attributeNode = AttributeNode::Make();

@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Signal.Tracker.hpp"
 #include "Futurewalker.Signal.SignalConnection.hpp"
 #include "Futurewalker.Signal.Signal.hpp"
 #include "Futurewalker.Core.Concepts.hpp"
@@ -17,7 +16,7 @@ namespace FW_EXPORT
 template <class T, class F, class R, class... Ts>
 concept SignalConnectableMember = requires (T& t, F f, Ts&&... args)
 {
-  { Tracker::Track(t) };
+  { t.GetTracker() };
   { std::invoke(f, t, std::forward<Ts>(args)...) } -> SameAs<R>;
 };
 
@@ -27,7 +26,7 @@ concept SignalConnectableMember = requires (T& t, F f, Ts&&... args)
 template <class T, class F, class R, class... Ts>
 concept SignalConnectableFree = requires (T& t, F f, Ts&&...args)
 {
-  { Tracker::Track(t) };
+  { t.GetTracker() };
   { std::invoke(f, std::forward<Ts>(args)...) } -> SameAs<R>;
 };
 }
@@ -81,7 +80,7 @@ public:
     static auto Connect(Signal<R(ArgTypes...), Combiner>& sig, T& t, F f, SignalConnectPosition pos) -> SignalConnection
     {
         auto slot = [f, &t](ArgTypes&&... args) { return std::invoke(f, t, std::forward<ArgTypes>(args)...); };
-        return sig.Connect(Tracker::Track(t), slot, pos);
+        return sig.Connect(t.GetTracker(), slot, pos);
     }
 
     ///
@@ -97,7 +96,7 @@ public:
     static auto Connect(Signal<R(ArgTypes...), Combiner>& sig, T& t, F f, SignalConnectPosition pos) -> SignalConnection
     {
         auto slot = [f](ArgTypes&&... args) { return std::invoke(f, std::forward<ArgTypes>(args)...); };
-        return sig.Connect(Tracker::Track(t), slot, pos);
+        return sig.Connect(t.GetTracker(), slot, pos);
     }
 };
 }

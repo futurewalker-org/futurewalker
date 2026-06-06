@@ -27,8 +27,8 @@ public:
     auto IsCommandEnabled() const -> Bool;
     auto IsCommandToggled() const -> Bool;
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
+    auto GetTracker() -> Weak<void>;
+    auto GetTracker() const -> Weak<void const>;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
@@ -39,7 +39,7 @@ private:
 private:
     Weak<CommandNode> _commandNode;
     CommandId _commandId;
-    Unique<EventReceiver> _eventReceiver;
+    Shared<EventReceiver> _eventReceiver;
 };
 }
 }

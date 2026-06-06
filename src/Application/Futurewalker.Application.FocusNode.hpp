@@ -4,7 +4,7 @@
 #include "Futurewalker.Application.FocusNodeType.hpp"
 #include "Futurewalker.Application.RootFocusNodeType.hpp"
 
-#include "Futurewalker.Event.EventReceiverType.hpp"
+#include "Futurewalker.Event.EventReceiver.hpp"
 #include "Futurewalker.Event.EventType.hpp"
 
 #include "Futurewalker.Core.NonCopyable.hpp"
@@ -84,7 +84,7 @@ private:
     Weak<FocusNode> _self;
     Weak<FocusNode> _parent;
     FocusNodeList _children;
-    Shared<EventReceiver> _eventReceiver;
+    EventReceiver _eventReceiver;
     Bool _focusable = false;
 };
 

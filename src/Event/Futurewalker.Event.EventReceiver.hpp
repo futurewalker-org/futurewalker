@@ -4,7 +4,6 @@
 #include "Futurewalker.Event.Event.hpp"
 #include "Futurewalker.Event.EventSignal.hpp"
 
-#include "Futurewalker.Signal.Tracker.hpp"
 #include "Futurewalker.Signal.SignalConnection.hpp"
 #include "Futurewalker.Signal.SignalFunction.hpp"
 
@@ -12,6 +11,7 @@
 #include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Function.hpp"
+#include "Futurewalker.Core.Optional.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -41,24 +41,21 @@ public:
     auto DisconnectAll() -> void;
 
 public:
-    EventReceiver(PassKey<EventReceiver>, Delegate delegate);
+    explicit EventReceiver(Delegate delegate = {});
 
     auto SendEvent(Event<>& event) -> Async<Bool>;
     auto SendEventDetached(Event<>& event) -> Bool;
-
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
 
 private:
     auto DispatchEvent(Event<>& event) -> Async<Bool>;
+    auto GetSignal() -> EventSignal&;
 
 private:
     Delegate _delegate;
-    Shared<Tracker> _tracker;
-    EventSignal _eventSignal;
+    Optional<EventSignal> _eventSignal;
 };
 
 ///
@@ -72,7 +69,7 @@ auto EventReceiver::Connect(Receiver& receiver, Function&& function) -> SignalCo
 {
     auto& eventReceiver = receiver.GetEventReceiver();
     auto slot = [function](Event<>& event) -> Lazy<Bool> { return AsyncFunction::Fn([=, &event]() -> Lazy<Bool> { co_return co_await std::invoke(function, event); }); };
-    return SignalFunction::Connect(eventReceiver._eventSignal, std::move(slot), SignalConnectPosition::front);
+    return SignalFunction::Connect(eventReceiver.GetSignal(), std::move(slot), SignalConnectPosition::front);
 }
 
 ///
@@ -89,7 +86,7 @@ auto EventReceiver::Connect(Receiver& receiver, Observer&& observer, Function&& 
     auto slot = [function]<class T>(T&& observer, Event<>& event) -> Lazy<Bool> {
         // Observer may be destroyed when returned task is awaited, so we need to track it.
         // Function also need to be copied since slot can be destroyed.
-        auto tracker = Tracker::Track(observer);
+        auto tracker = observer.GetTracker();
         return AsyncFunction::Fn([=, &observer, &event]() -> Lazy<Bool> {
             if (!tracker.IsExpired())
             {
@@ -98,7 +95,7 @@ auto EventReceiver::Connect(Receiver& receiver, Observer&& observer, Function&& 
             co_return false;
         });
     };
-    return SignalFunction::Connect(eventReceiver._eventSignal, observer, std::move(slot), SignalConnectPosition::front);
+    return SignalFunction::Connect(eventReceiver.GetSignal(), observer, std::move(slot), SignalConnectPosition::front);
 }
 }
 }

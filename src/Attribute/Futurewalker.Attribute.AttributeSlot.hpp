@@ -106,6 +106,6 @@ private:
     SharedArray<Weak<AttributeSlot>> _valueDependantSlots;
     Weak<AttributeSlot> _sourceDependentSlot;
     SharedArray<Weak<AttributeSlot>> _sourceDependantSlots;
-    Shared<EventReceiver> _eventReceiver;
+    EventReceiver _eventReceiver;
 };
 }

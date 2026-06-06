@@ -15,8 +15,6 @@
 
 #include "Futurewalker.Color.RGBAColor.hpp"
 
-#include "Futurewalker.Signal.TrackerType.hpp"
-
 #include "Futurewalker.Unit.hpp"
 
 #include "Futurewalker.Async.Async.hpp"
@@ -61,8 +59,8 @@ public:
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;
 
-    auto GetTracker() -> Tracker&;
-    auto GetTracker() const -> Tracker const&;
+    auto GetTracker() -> Weak<void>;
+    auto GetTracker() const -> Weak<void const>;
 
 private:
     auto Initialize() -> void;

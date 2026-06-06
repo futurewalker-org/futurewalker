@@ -33,7 +33,7 @@ public:
       , _targetValue {initialValue}
       , _currentValue {initialValue}
     {
-        _tracker = Tracker::Make();
+        _tracker = Shared<int>::Make();
     }
 
     ///
@@ -161,14 +161,14 @@ public:
         }
     }
 
-    auto GetTracker() -> Tracker&
+    auto GetTracker() -> Weak<void>
     {
-        return *_tracker;
+        return _tracker;
     }
 
-    auto GetTracker() const -> Tracker const&
+    auto GetTracker() const -> Weak<void const>
     {
-        return *_tracker;
+        return _tracker;
     }
 
 private:
@@ -262,7 +262,7 @@ private:
     ScopedSignalConnection _connection;
     Function<void()> _updateCallback;
     Function<void()> _completionCallback;
-    Shared<Tracker> _tracker;
+    Shared<void> _tracker;
 };
 }
 }
