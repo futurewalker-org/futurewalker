@@ -2,3 +2,5 @@
 #pragma once
 
 #include "Futurewalker.Core.Prelude.hpp"
+
+#import <AppKit/AppKit.h>

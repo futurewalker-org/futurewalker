@@ -9,7 +9,6 @@
 
 #include "Futurewalker.Core.MonotonicTime.hpp"
 
-#import <AppKit/AppKit.h>
 #import <QuartzCore/QuartzCore.h>
 
 @class PlatformWindowDelegate;

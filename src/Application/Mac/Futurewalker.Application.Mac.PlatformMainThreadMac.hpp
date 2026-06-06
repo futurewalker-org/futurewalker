@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
+#include "Futurewalker.Application.Mac.Prelude.hpp"
+
 #include "Futurewalker.Application.PlatformMainThread.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"

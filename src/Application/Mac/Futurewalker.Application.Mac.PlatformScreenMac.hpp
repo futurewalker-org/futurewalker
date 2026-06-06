@@ -4,8 +4,6 @@
 #include "Futurewalker.Application.Mac.PlatformScreenMacType.hpp"
 #include "Futurewalker.Application.PlatformScreen.hpp"
 
-#include <AppKit/AppKit.h>
-
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
