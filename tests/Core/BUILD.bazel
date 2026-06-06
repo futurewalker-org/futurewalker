@@ -20,5 +20,6 @@ fw_test_suite(
         "TypeId",
         "TypeTraits",
         "U16String",
+        "Uuid",
     ],
 )
