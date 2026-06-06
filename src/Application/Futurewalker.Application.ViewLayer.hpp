@@ -50,8 +50,8 @@ public:
 
     virtual ~ViewLayer() = default;
 
-    auto AddChild(Shared<ViewLayer> layer, Pointer<ViewLayer const> after) -> void;
-    auto RemoveChild(Shared<ViewLayer> layer) -> void;
+    auto AddChild(Shared<ViewLayer> const& layer, Pointer<ViewLayer const> const& after) -> void;
+    auto RemoveChild(Shared<ViewLayer> const& layer) -> void;
 
     auto GetChildCount() const -> SInt64;
     auto GetChildIndex(ReferenceArg<ViewLayer const> layer) const -> Optional<SInt64>;
