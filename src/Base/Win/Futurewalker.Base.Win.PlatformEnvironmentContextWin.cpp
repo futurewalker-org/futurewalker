@@ -18,8 +18,9 @@ PlatformEnvironmentContextWin::PlatformEnvironmentContextWin(
   Shared<PlatformSystemInfo> systemInfo,
   Shared<PlatformCommandLine> commandLine,
   Shared<PlatformFilesystem> filesystem,
+  Shared<PlatformLocaleContext> localeContext,
   Shared<PlatformInstanceHandleWin> instanceHandle)
-  : PlatformEnvironmentContext(debug, systemInfo, commandLine, filesystem)
+  : PlatformEnvironmentContext(debug, systemInfo, commandLine, filesystem, localeContext)
   , _instanceHandle {instanceHandle}
 {
 }
@@ -33,7 +34,8 @@ auto Locator::Resolver<PlatformEnvironmentContextWin>::Resolve() -> Shared<Platf
     auto systemInfo = Locator::Resolve<PlatformSystemInfo>();
     auto commandLine = Locator::Resolve<PlatformCommandLine>();
     auto filesystem = Locator::Resolve<PlatformFilesystem>();
+    auto localeContext = Locator::Resolve<PlatformLocaleContext>();
     auto instanceHandle = Locator::ResolveWithDefault<PlatformInstanceHandleWin>();
-    return Shared<PlatformEnvironmentContextWin>::Make(debug, systemInfo, commandLine, filesystem, instanceHandle);
+    return Shared<PlatformEnvironmentContextWin>::Make(debug, systemInfo, commandLine, filesystem, localeContext, instanceHandle);
 }
 }

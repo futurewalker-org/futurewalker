@@ -100,7 +100,7 @@ auto FileInputStream::GetPosition() -> Optional<SInt64>
 ///
 /// @note This function blocks until either buffer becomes full or it can no longer read data.
 ///
-auto FileInputStream::Read(std::span<uint8_t> buffer) -> Optional<SInt64>
+auto FileInputStream::Read(std::span<std::byte> buffer) -> Optional<SInt64>
 {
     if (!_stream.bad() && !_stream.eof())
     {

@@ -24,6 +24,7 @@ public:
       Shared<PlatformSystemInfo> systemInfo,
       Shared<PlatformCommandLine> commandLine,
       Shared<PlatformFilesystem> filesystem,
+      Shared<PlatformLocaleContext> localeContext,
       Shared<PlatformInstanceHandleWin> instanceHandle);
 
 private:

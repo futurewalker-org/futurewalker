@@ -1,6 +1,6 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
-#include "HelloWorldApplication.hpp"
+#include "HelloWorld.Application.hpp"
 
 #include <Futurewalker.Base.Environment.hpp>
 
@@ -13,7 +13,7 @@ auto Main() -> Async<ExitCode>
     try
     {
         auto env = Environment();
-        auto app = HelloWorld::HelloWorldApplication::Make();
+        auto app = HelloWorld::Application::Make();
         co_await app->Run();
     }
     catch (...)

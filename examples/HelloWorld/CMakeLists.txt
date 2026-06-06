@@ -9,6 +9,7 @@ fw_add_binary(${ExampleName} Windowed)
 fw_link_libraries(${ExampleName} PUBLIC 
   Futurewalker::Config
   Futurewalker::Application
+  Futurewalker::Resource
   Futurewalker::Component::Lamp
   Futurewalker::Main
 )

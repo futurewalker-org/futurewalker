@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources prefix="HelloWorld" locale="ko-KR">
+    <string id="Hello">안녕하세요, 세계!</string>
+</resources>

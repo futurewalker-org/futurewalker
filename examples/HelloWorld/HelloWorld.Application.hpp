@@ -5,12 +5,12 @@
 
 namespace Futurewalker::HelloWorld
 {
-class HelloWorldApplication : public Application
+class Application final : public Futurewalker::Application
 {
 public:
-    static auto Make() -> Shared<HelloWorldApplication>;
+    static auto Make() -> Shared<Application>;
 
-    HelloWorldApplication(PassKey<Application> key);
+    Application(PassKey<Futurewalker::Application> key);
 
 protected:
     auto Initialize() -> void override;

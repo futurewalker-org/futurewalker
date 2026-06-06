@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources prefix="HelloWorld" locale="en-us">
-    <string id="Hello" locale="en-us">Hello, World!</string>
-    <string id="Hello" locale="ja-jp">こんにちは、世界!</string>
-</resources>

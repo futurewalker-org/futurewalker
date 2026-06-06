@@ -19,7 +19,7 @@ public:
     auto IsOpen() const -> Bool;
     auto SetPosition(SInt64 const position, SeekPosition const origin) -> Optional<SInt64> override;
     auto GetPosition() -> Optional<SInt64> override;
-    auto Read(std::span<uint8_t> buffer) -> Optional<SInt64> override;
+    auto Read(std::span<std::byte> buffer) -> Optional<SInt64> override;
 
 private:
     std::ifstream _stream;

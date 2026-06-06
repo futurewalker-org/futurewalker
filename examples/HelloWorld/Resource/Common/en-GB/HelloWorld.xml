@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources locale="en-GB">
+<!-- This file is intentionally left blank to demonstrate that the en-GB localization will fallback to primary-locale (i.e. en-US) with locale truncation lookup. -->
+<!-- Even though there's no localized content for en-GB, it will be listed as a supported locale because of this file. -->
+</resources>

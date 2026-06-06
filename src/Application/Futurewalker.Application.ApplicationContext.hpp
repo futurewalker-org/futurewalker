@@ -3,6 +3,8 @@
 
 #include "Futurewalker.Application.ApplicationContextType.hpp"
 
+#include "Futurewalker.Resource.ResourceManagerType.hpp"
+
 #include "Futurewalker.Graphics.FontManager.hpp"
 
 #include "Futurewalker.Attribute.AttributeNodeType.hpp"
@@ -17,13 +19,14 @@ namespace FW_DETAIL_NS
 class ApplicationContext : NonCopyable
 {
 public:
-    ApplicationContext(Shared<Graphics::FontManager> const& fontManager);
+    ApplicationContext(Shared<Graphics::FontManager> const& fontManager, Shared<ResourceManager> const& resourceManager);
 
     auto GetAttributeNode() -> AttributeNode&;
     auto GetAttributeNode() const ->  AttributeNode const&;
 
 private:
     Shared<AttributeNode> _attributeNode;
+    Shared<ResourceManager> _resourceManager;
     Shared<Graphics::FontManager> _fontManager;
 };
 

@@ -19,7 +19,7 @@ auto Path::MakeFromString(String const& string) -> Path
 ///
 /// @brief Construct Path from native format path string.
 ///
-auto Path::MakeFromNativeString(std::string_view native) -> Path
+auto Path::MakeFromNativeString(std::string_view const native) -> Path
 {
     return Path(native);
 }
@@ -27,9 +27,17 @@ auto Path::MakeFromNativeString(std::string_view native) -> Path
 ///
 /// @brief Construct Path from native format path string.
 ///
-auto Path::MakeFromNativeString(std::wstring_view native) -> Path
+auto Path::MakeFromNativeString(std::wstring_view const native) -> Path
 {
     return Path(native);
+}
+
+///
+/// @brief Construct Path from std::filesystem::path.
+///
+auto Path::MakeFromStdFilesystemPath(std::filesystem::path const& path) -> Path
+{
+    return Path(path);
 }
 
 ///

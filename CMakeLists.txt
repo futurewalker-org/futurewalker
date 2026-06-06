@@ -255,7 +255,7 @@ function (fw_add_resources NAME)
   add_custom_command(
     OUTPUT ${RESOURCE_CACHE_PATH}
     DEPENDS resource-compiler
-    COMMAND resource-compiler --generate "${RESOURCE_SRC_DIR}" --cache "${RESOURCE_CACHE_PATH}" --depfile "${RESOURCE_DEPFILE_PATH}" --header "${RESOURCE_DST_DIR}/ResourceID"
+    COMMAND resource-compiler --generate "${RESOURCE_SRC_DIR}/Common" --cache "${RESOURCE_CACHE_PATH}" --depfile "${RESOURCE_DEPFILE_PATH}" --header "${RESOURCE_DST_DIR}/Resource"
     DEPFILE ${RESOURCE_DEPFILE_PATH}
   )
 
@@ -279,7 +279,7 @@ endfunction()
 
 # Generate resource bundle file
 function(fw_bundle_resources NAME)
-  set(RESOURCE_BUNDLE_PATH "${CMAKE_CURRENT_BINARY_DIR}/Resource/${NAME}.dat")
+  set(RESOURCE_BUNDLE_PATH "$<TARGET_FILE_DIR:${NAME}>/Resource/${NAME}.dat")
   add_custom_command(
     TARGET ${NAME} POST_BUILD
     COMMAND resource-compiler --bundle "$<JOIN:$<TARGET_PROPERTY:${NAME},FW_RESOURCE_CACHE_PATH>, >" --output ${RESOURCE_BUNDLE_PATH}

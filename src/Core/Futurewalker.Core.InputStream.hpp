@@ -42,7 +42,7 @@ public:
     ///
     /// @note This function blocks until either buffer becomes full or it can no longer read data.
     ///
-    virtual auto Read(std::span<uint8_t> buffer) -> Optional<SInt64> = 0;
+    virtual auto Read(std::span<std::byte> buffer) -> Optional<SInt64> = 0;
 };
 }
 }

@@ -68,9 +68,16 @@ struct ModuleData
     std::u16string name;                            /// Display name of the module.
     boost::uuids::uuid uuid;                        /// Unique identifier of the module, in UUID format.
     std::u16string primary_locale;                  /// Primary locale of the module, in IETF BCP 47 format (e.g., "en-US", "ja-JP").
+    std::set<std::u16string> locales;               /// List of supported locales in the module, in IETF BCP 47 format (e.g., "en-US", "ja-JP").
     std::map<std::u16string, StringEntity> strings; /// List of string entities in the module.
     std::map<std::u16string, FileEntity> files;     /// List of file entities in the module
 };
+
+template <class T>
+auto stream_write(std::ofstream& stream, T const& value)
+{
+    stream.write(reinterpret_cast<const char*>(&value), sizeof(T));
+}
 
 auto string_to_xml(std::u16string const& str) -> XMLCh const*
 {
@@ -142,6 +149,7 @@ auto string_to_unsigned_int(std::u16string const& str) -> uint32_t
 }
 
 auto is_alpha = [](char16_t ch) -> bool { return (u'a' <= ch && ch <= u'z') || (u'A' <= ch && ch <= u'Z'); };
+auto is_upper_alpha = [](char16_t ch) -> bool { return (u'A' <= ch && ch <= u'Z'); };
 auto is_digit = [](char16_t ch) -> bool { return (u'0' <= ch && ch <= u'9'); };
 auto is_dot = [](char16_t ch) -> bool { return ch == u'.'; };
 
@@ -192,7 +200,7 @@ auto validate_locale(const std::u16string& locale, bool allow_empty) -> bool
         return false;
     }
 
-    if (region.size() != 2 || !std::all_of(region.begin(), region.end(), is_alpha))
+    if (region.size() != 2 || !std::all_of(region.begin(), region.end(), is_upper_alpha))
     {
         return false;
     }
@@ -267,8 +275,7 @@ auto parse_module_file(const fs::path& module_xml_path, std::u16string& name, bo
     return true;
 }
 
-auto parse_entity_base(xercesc::DOMElement const* element, std::u16string const& prefix, std::u16string const& default_locale)
-  -> std::optional<std::pair<std::u16string, std::u16string>>
+auto parse_entity_base(xercesc::DOMElement const* element, std::u16string const& prefix) -> std::optional<std::u16string>
 {
     auto id = xml_to_string(element->getAttribute(string_to_xml(u"id")));
     if (!validate_entity_id(id))
@@ -281,30 +288,14 @@ auto parse_entity_base(xercesc::DOMElement const* element, std::u16string const&
     {
         id = prefix + u"." + id;
     }
-
-    auto locale = std::u16string();
-    if (auto locale_attribute_node = element->getAttributeNode(string_to_xml(u"locale")))
-    {
-        locale = xml_to_string(locale_attribute_node->getNodeValue());
-    }
-    else
-    {
-        locale = default_locale;
-    }
-
-    if (!validate_locale(locale, true))
-    {
-        std::println("Error: Invalid locale: {}", string_to_utf8(locale));
-        return std::nullopt;
-    }
-    return std::make_pair(std::move(id), std::move(locale));
+    return id;
 }
 
 auto parse_entity(
   xercesc::DOMElement const* element,
   fs::path const& base_path,
   std::u16string const& prefix,
-  std::u16string const& default_locale,
+  std::u16string const& locale,
   std::map<std::u16string, StringEntity>& string_entities,
   std::map<std::u16string, FileEntity>& file_entities,
   std::vector<fs::path>& dependent_files) -> bool
@@ -312,29 +303,29 @@ auto parse_entity(
     auto const tag_name = xml_to_string(element->getTagName());
     if (tag_name == u"string")
     {
-        auto entity_base = parse_entity_base(element, prefix, default_locale);
+        auto entity_base = parse_entity_base(element, prefix);
         if (!entity_base)
         {
             return false;
         }
 
-        auto [id, locale] = std::move(*entity_base);
+        auto id = std::move(*entity_base);
         auto value = xml_to_string(element->getTextContent());
 
         string_entities[id].values.push_back(
           StringValue {
-              .locale = std::move(locale),
+              .locale = locale,
               .value = std::move(value),
           });
     }
     else if (tag_name == u"file")
     {
-        auto entity_base = parse_entity_base(element, prefix, default_locale);
+        auto entity_base = parse_entity_base(element, prefix);
         if (!entity_base)
         {
             return false;
         }
-        auto [id, locale] = std::move(*entity_base);
+        auto id = std::move(*entity_base);
         auto path = fs::path(xml_to_string(element->getTextContent()));
 
         if (path.is_relative())
@@ -358,7 +349,7 @@ auto parse_entity(
 
         file_entities[id].values.push_back(
           FileValue {
-              .locale = std::move(locale),
+              .locale = locale,
               .path = path.u16string(),
           });
 
@@ -370,6 +361,7 @@ auto parse_entity(
 auto parse_resource_file(
   const fs::path& resource_xml_path,
   std::u16string const& primary_locale,
+  std::set<std::u16string>& locales,
   std::map<std::u16string, StringEntity>& string_entities,
   std::map<std::u16string, FileEntity>& file_entities,
   std::vector<fs::path>& dependent_files) -> bool
@@ -428,6 +420,7 @@ auto parse_resource_file(
         std::println("Error: Invalid locale: {}", string_to_utf8(locale));
         return false;
     }
+    locales.insert(locale);
 
     auto base_path = resource_xml_path.parent_path();
 
@@ -499,7 +492,22 @@ auto parse_cache_file(fs::path const& cache_xml_path, ModuleData& module_data) -
 
     module_data.name = module_name;
     module_data.uuid = string_to_uuid(module_uuid_str);
-    module_primary_locale = module_primary_locale;
+    module_data.primary_locale = module_primary_locale;
+
+    auto locales_elements = std::vector<xercesc::DOMElement*>();
+    find_child_elements(root, u"locales", locales_elements);
+
+    for (auto const& locales_element : locales_elements)
+    {
+        auto locale_elements = std::vector<xercesc::DOMElement*>();
+        find_child_elements(locales_element, u"locale", locale_elements);
+
+        for (auto const& locale_element : locale_elements)
+        {
+            auto locale = xml_to_string(locale_element->getTextContent());
+            module_data.locales.insert(locale);
+        }
+    }
 
     auto resources_elements = std::vector<xercesc::DOMElement*>();
     find_child_elements(root, u"resources", resources_elements);
@@ -558,36 +566,13 @@ auto parse_cache_file(fs::path const& cache_xml_path, ModuleData& module_data) -
 
 auto assign_entity_numbers(ModuleData& module_data, std::map<std::u16string, uint32_t> const& entity_number_mapping)
 {
-    std::println("generate_entity_numbers");
-
-    auto current_number = 1;
     auto result = std::map<std::u16string, uint32_t>();
 
-    auto get_next_number = [&]() {
-        while (true)
-        {
-            bool found = false;
-            for (auto const& [id, number] : entity_number_mapping)
-            {
-                if (number == current_number)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found)
-            {
-                current_number++;
-                continue;
-            }
-            else
-            {
-                break;
-            }
-        }
-        return current_number++;
-    };
+    auto max_id = 0u;
+    for (auto const& [id, entity] : module_data.strings)
+    {
+        max_id = std::max(max_id, entity.number);
+    }
 
     for (auto& [id, entity] : module_data.strings)
     {
@@ -598,7 +583,7 @@ auto assign_entity_numbers(ModuleData& module_data, std::map<std::u16string, uin
         }
         else
         {
-            entity.number = get_next_number();
+            entity.number = ++max_id;
         }
     }
 
@@ -611,7 +596,7 @@ auto assign_entity_numbers(ModuleData& module_data, std::map<std::u16string, uin
         }
         else
         {
-            entity.number = get_next_number();
+            entity.number = ++max_id;
         }
     }
     return result;
@@ -619,8 +604,8 @@ auto assign_entity_numbers(ModuleData& module_data, std::map<std::u16string, uin
 
 auto validate_module_data(const ModuleData& module_data) -> bool
 {
-    // Validate that entities with same id must have unique locale and a consistent type.
-    auto seen = std::set<std::pair<std::u16string, std::u16string>>();
+    // Validate that entities with same id have unique locale and a consistent type.
+    auto seen = std::multimap<std::u16string, std::u16string>();
     auto id_type = std::unordered_map<std::u16string, std::string_view>();
 
     auto check = [&seen, &id_type](std::u16string const& id, std::u16string const& locale, std::string_view type) -> bool
@@ -631,11 +616,15 @@ auto validate_module_data(const ModuleData& module_data) -> bool
             std::println("Error: Entity id '{}' is used as both '{}' and '{}'", string_to_utf8(id), it->second, type);
             return false;
         }
-        if (!seen.insert(std::pair(id, locale)).second)
+
+        auto [begin, end] = seen.equal_range(id);
+        if (std::find_if(begin, end, [&locale](const auto& pair) { return pair.second == locale; }) != end)
         {
             std::println("Error: Duplicate entity id '{}' for locale '{}'", string_to_utf8(id), string_to_utf8(locale));
             return false;
         }
+        seen.emplace(id, locale);
+
         return true;
     };
 
@@ -658,6 +647,18 @@ auto validate_module_data(const ModuleData& module_data) -> bool
                 return false;
             }
         }
+    }
+
+    auto it = seen.begin();
+    while (it != seen.end())
+    {
+        auto upper_bound = seen.upper_bound(it->first);
+        if (std::find(it, upper_bound, std::make_pair(it->first, module_data.primary_locale)) == upper_bound)
+        {
+            std::println("Error: Entity id '{}' is missing for primary locale '{}'", string_to_utf8(it->first), string_to_utf8(module_data.primary_locale));
+            return false;
+        }
+        it = upper_bound;
     }
     return true;
 }
@@ -693,6 +694,15 @@ auto write_cache_file(fs::path const& cache_xml_path, ModuleData const& module_d
     root_node->setAttribute(string_to_xml(u"name"), string_to_xml(module_data.name));
     root_node->setAttribute(string_to_xml(u"uuid"), string_to_xml(uuid_string));
     root_node->setAttribute(string_to_xml(u"primary-locale"), string_to_xml(module_data.primary_locale));
+
+    auto locales_node = doc->createElement(string_to_xml(u"locales"));
+    for (auto const& locale : module_data.locales)
+    {
+        auto locale_node = doc->createElement(string_to_xml(u"locale"));
+        locale_node->setTextContent(string_to_xml(locale));
+        locales_node->appendChild(locale_node);
+    }
+    root_node->appendChild(locales_node);
 
     auto resources_node = doc->createElement(string_to_xml(u"resources"));
 
@@ -781,6 +791,7 @@ auto write_depfile(fs::path const& depfile_path, fs::path const& cache_xml_path,
 struct Tree
 {
     uint32_t number = 0;
+    boost::uuids::uuid uuid;
     std::map<std::u16string, std::unique_ptr<Tree>> nodes;
 
     auto is_leaf() const -> bool
@@ -800,6 +811,11 @@ struct Tree
         return false;
     }
 
+    auto has_uuid() const
+    {
+        return !uuid.is_nil();
+    }
+
     auto node_at(std::u16string const& key) -> Tree&
     {
         auto& node = nodes[key];
@@ -810,6 +826,17 @@ struct Tree
         return *node;
     }
 };
+
+auto insert_module_node(Tree& tree, std::u16string const& id, boost::uuids::uuid const& uuid)
+{
+    auto const components = id | std::ranges::views::split(u'.') | std::ranges::to<std::vector<std::u16string>>();
+    auto tree_node = &tree;
+    for (auto const& component : components)
+    {
+        tree_node = &tree_node->node_at(component);
+    }
+    tree_node->uuid = uuid;
+}
 
 auto insert_entity_node(Tree& tree, std::u16string const& id, uint32_t number)
 {
@@ -824,7 +851,7 @@ auto insert_entity_node(Tree& tree, std::u16string const& id, uint32_t number)
 
 auto enumerate_node_with_leaves(Tree& tree, std::vector<std::u16string>& path_stack, auto f) -> void
 {
-    if (tree.has_leaf())
+    if (tree.has_leaf() || tree.has_uuid())
     {
         f(tree, path_stack);
     }
@@ -835,6 +862,20 @@ auto enumerate_node_with_leaves(Tree& tree, std::vector<std::u16string>& path_st
         enumerate_node_with_leaves(*node, path_stack, f);
         path_stack.pop_back();
     }
+}
+
+auto concat_path_stack(std::vector<std::u16string> const& path_stack, std::string_view delim)
+{
+    auto path = std::string();
+    for (auto const& p : path_stack)
+    {
+        if (!path.empty())
+        {
+            path += delim;
+        }
+        path += string_to_utf8(p);
+    }
+    return path;
 }
 
 auto write_header_file(fs::path const& header_path, ModuleData const& module_data, std::vector<fs::path>& generated_files) -> bool
@@ -851,6 +892,8 @@ auto write_header_file(fs::path const& header_path, ModuleData const& module_dat
 
     auto tree = Tree();
 
+    insert_module_node(tree, module_data.name, module_data.uuid);
+
     for (auto const& [id, entity] : module_data.strings)
     {
         insert_entity_node(tree, id, entity.number);
@@ -863,21 +906,11 @@ auto write_header_file(fs::path const& header_path, ModuleData const& module_dat
     auto result = true;
     auto path_stack = std::vector<std::u16string>();
     enumerate_node_with_leaves(tree, path_stack, [&](Tree const& tree, std::vector<std::u16string> const& path_stack) {
-        auto filename_path = std::string();
-        auto namespace_path = std::string();
-        for (auto const& p : path_stack)
+        auto const namespace_path = concat_path_stack(path_stack, "::");
+        auto filename_path = concat_path_stack(path_stack, ".");
+        if (filename_path.empty())
         {
-            if (!filename_path.empty())
-            {
-                filename_path += '.';
-            }
-            filename_path += string_to_utf8(p);
-
-            if (!namespace_path.empty())
-            {
-                namespace_path += "::";
-            }
-            namespace_path += string_to_utf8(p);
+            filename_path = string_to_utf8(module_data.name);
         }
 
         auto const header_file_path = header_path / (filename_path + ".hpp");
@@ -890,14 +923,53 @@ auto write_header_file(fs::path const& header_path, ModuleData const& module_dat
                 return;
             }
 
-            header_file << "#include <cstdint>\n\n";
-            header_file << "namespace Futurewalker::ResourceID::" << namespace_path << "\n";
+            header_file << "#include <Futurewalker.Core.Uuid.hpp>\n\n";
+
+            if (!tree.uuid.is_nil())
+            {
+                auto module_path_stack = path_stack;
+                if (!module_path_stack.empty())
+                {
+                    auto module_id = module_path_stack.back();
+                    module_path_stack.pop_back();
+                    auto const module_namespace_path = concat_path_stack(module_path_stack, "::");
+
+                    header_file << "namespace Futurewalker::M";
+                    if (module_namespace_path.empty())
+                    {
+                        header_file << "\n";
+                    }
+                    else
+                    {
+                        header_file << "::" << module_namespace_path << "\n";
+                    }
+                    header_file << "{\n";
+                    header_file << "inline constexpr auto " << string_to_utf8(module_id) << " = Uuid {";
+                    for (int i = 0; i < 16; ++i)
+                    {
+                        auto const val = tree.uuid.data()[i];
+                        header_file << (int)val << ",";
+                    }
+                    header_file << "};\n";
+                    header_file << "}\n";
+                }
+            }
+
+            header_file << "namespace Futurewalker::R";
+            if (namespace_path.empty())
+            {
+                header_file << "\n";
+            }
+            else
+            {
+                header_file << "::" << namespace_path << "\n";
+            }
             header_file << "{\n";
             for (auto const& [id, node] : tree.nodes)
             {
-                if (node->is_leaf())
+                if (node->is_leaf() && node->number != 0)
                 {
-                    header_file << "inline constexpr auto " << string_to_utf8(id) << " = uint32_t(" << node->number << ");\n";
+                    header_file << "inline constexpr auto " << string_to_utf8(id) << " = UInt32(" << node->number << "U);\n";
                 }
             }
             header_file << "}\n";
@@ -921,12 +993,27 @@ auto analyze_resources(const std::string& source_directory, const std::string& c
         std::println("Error: Source directory does not exist or is not a directory: {}", source_directory);
         return 1;
     }
-    auto module_files = std::vector<fs::path>();
+
+    auto module_files = std::vector<std::pair<fs::path, ModuleData>>();
     for (const auto& entry : fs::directory_iterator(source_path))
     {
-        if (entry.is_regular_file() && entry.path().filename().string().ends_with(".module.xml"))
+        if (entry.is_regular_file() && entry.path().filename().string().ends_with(".xml"))
         {
-            module_files.push_back(entry.path());
+            auto const path = entry.path();
+            auto name = std::u16string();
+            auto uuid = boost::uuids::uuid();
+            auto primary_locale = std::u16string();
+            if (parse_module_file(path, name, uuid, primary_locale))
+            {
+                auto module_data = ModuleData {
+                    .name = std::move(name),
+                    .uuid = uuid,
+                    .primary_locale = std::move(primary_locale),
+                    .strings = {},
+                    .files = {},
+                };
+                module_files.push_back({path, std::move(module_data)});
+            }
         }
     }
     if (module_files.empty())
@@ -939,29 +1026,7 @@ auto analyze_resources(const std::string& source_directory, const std::string& c
         std::println("Error: Multiple .module.xml files found in {}", source_directory);
         return 1;
     }
-    const auto& module_xml_path = module_files.front();
-
-    // Parse .module.xml file and extract resource module information.
-    // Module is described by a <module> element, which has the following attributes:
-    // - name: Display name of the module.
-    // - uuid: Unique identifier of the module, in UUID format.
-    // - primary-locale: Primary locale of the module, in IETF BCP 47 format (e.g., "en-US", "ja-JP").
-    auto name = std::u16string();
-    auto uuid = boost::uuids::uuid();
-    auto primary_locale = std::u16string();
-    if (!parse_module_file(module_xml_path, name, uuid, primary_locale))
-    {
-        return 1;
-    }
-
-    // Store extracted information in g_modules.
-    auto module_data = ModuleData {
-        .name = std::move(name),
-        .uuid = uuid,
-        .primary_locale = std::move(primary_locale),
-        .strings = {},
-        .files = {},
-    };
+    auto& [module_xml_path, module_data] = module_files[0];
 
     // Parse other .xml files in source_directory to collect resource entities.
     auto dependent_files = std::vector<fs::path>();
@@ -971,9 +1036,14 @@ auto analyze_resources(const std::string& source_directory, const std::string& c
 
     for (auto const& entry : fs::recursive_directory_iterator(source_path))
     {
-        if (entry.is_regular_file() && entry.path().filename().string().ends_with("resource.xml"))
+        if (entry.is_regular_file() && entry.path().filename().string().ends_with(".xml"))
         {
-            if (!parse_resource_file(entry.path(), primary_locale, module_data.strings, module_data.files, dependent_files))
+            if (entry.path() == module_xml_path)
+            {
+                continue;
+            }
+
+            if (!parse_resource_file(entry.path(), module_data.primary_locale, module_data.locales, module_data.strings, module_data.files, dependent_files))
             {
                 std::println("Error: Failed to parse resource file: {}", entry.path().string());
                 return 1;
@@ -982,9 +1052,14 @@ auto analyze_resources(const std::string& source_directory, const std::string& c
     }
 
     std::println("Finished analyzing resources for module: {}", string_to_utf8(module_data.name));
-    std::println("Module name: {}", string_to_utf8(name));
-    std::println("Module UUID: {}", boost::uuids::to_string(uuid));
-    std::println("Module primary locale: {}", string_to_utf8(primary_locale));
+    std::println("Module name: {}", string_to_utf8(module_data.name));
+    std::println("Module UUID: {}", boost::uuids::to_string(module_data.uuid));
+    std::println("Module primary locale: {}", string_to_utf8(module_data.primary_locale));
+
+    for (const auto& locale : module_data.locales)
+    {
+        std::println("Locale: {}", string_to_utf8(locale));
+    }
 
     for (const auto& [id, entity] : module_data.strings)
     {
@@ -1094,8 +1169,16 @@ struct BundleModuleChunk
     uint32_t name_ptr;           // LE offset of name string chunk.
     uint32_t primary_locale_ptr; // LE Offset of locale string chunk.
     uint8_t uuid[16];            // UUID of the module.
+    uint32_t locales_ptr;        // LE offset of first locale chunk.
     uint32_t resources_ptr;      // LE offset of first resources chunk.
     uint32_t next_ptr;           // LE Offset of next module chunk.
+};
+
+struct BundleLocaleChunk
+{
+    uint32_t chunk_size; // LE Chunk size.
+    uint32_t locale_ptr; // LE Offset of locale string chunk.
+    uint32_t next_ptr;   // LE Offset of next locale chunk.
 };
 
 enum class BundleResourcesChunkType : uint32_t
@@ -1111,7 +1194,7 @@ struct BundleResourcesChunk
     uint32_t number;       // LE Resource number.
     uint32_t type;         // LE Resource type.
     uint32_t resource_ptr; // LE Offset of first resource data chunk.
-    uint32_t next_ptr;     // LE Offsert of next resources chunk.
+    uint32_t next_ptr;     // LE Offset of next resources chunk.
 };
 
 struct BundleStringResourceChunk
@@ -1140,19 +1223,19 @@ auto write_string(std::ofstream& stream, std::u16string const& string)
 {
     auto p = stream.tellp();
     auto const utf8 = string_to_utf8(string);
-    stream << uint32_t(4 + utf8.length()); // chunk_size
-    stream << utf8; // data
+    stream_write(stream, uint32_t(4 + utf8.length())); // chunk_size
+    stream.write(reinterpret_cast<char const*>(utf8.data()), utf8.length()); // data
     return static_cast<uint32_t>(p);
 }
 
 auto write_file(std::ofstream& stream, fs::path const& file_path) -> uint32_t
 {
     auto p = stream.tellp();
-    auto file = std::ifstream(file_path);
+    auto file = std::ifstream(file_path, std::ios_base::binary);
     file.seekg(0, std::ios_base::end);
     auto const file_size = static_cast<uint32_t>(file.tellg());
     file.seekg(0, std::ios_base::beg);
-    stream << uint32_t(4 + file_size);
+    stream_write(stream, uint32_t(4 + file_size));
     stream << file.rdbuf();
     return static_cast<uint32_t>(p);
 }
@@ -1188,10 +1271,10 @@ auto write_resource_value(std::ofstream& stream, size_t i, std::vector<StringVal
     auto value_ptr = write_string(stream, value.value);
     auto q = stream.tellp();
     stream.seekp(p);
-    stream << uint32_t(sizeof(BundleStringResourceChunk));
-    stream << locale_ptr;
-    stream << value_ptr;
-    stream << next_ptr;
+    stream_write(stream, uint32_t(sizeof(BundleStringResourceChunk)));
+    stream_write(stream, locale_ptr);
+    stream_write(stream, value_ptr);
+    stream_write(stream, next_ptr);
     stream.seekp(q);
     return static_cast<uint32_t>(p);
 }
@@ -1211,10 +1294,10 @@ auto write_resource_value(std::ofstream& stream, size_t i, std::vector<FileValue
     auto value_ptr = write_file(stream, value.path);
     auto q = stream.tellp();
     stream.seekp(p);
-    stream << uint32_t(sizeof(BundleStringResourceChunk));
-    stream << locale_ptr;
-    stream << value_ptr;
-    stream << next_ptr;
+    stream_write(stream, uint32_t(sizeof(BundleStringResourceChunk)));
+    stream_write(stream, locale_ptr);
+    stream_write(stream, value_ptr);
+    stream_write(stream, next_ptr);
     stream.seekp(q);
     return static_cast<uint32_t>(p);
 }
@@ -1234,12 +1317,12 @@ auto write_resources_entities(std::ofstream& stream, size_t index, std::vector<E
     auto id_ptr = write_string(stream, std::visit([](auto const& e) { return e.id; }, entity));
     auto q = stream.tellp();
     stream.seekp(p);
-    stream << uint32_t(sizeof(BundleResourcesChunk));
-    stream << id_ptr;
-    stream << std::visit([](auto const& e) { return e.number; }, entity);
-    stream << uint32_t(get_bundle_resource_type(entity));
-    stream << resource_ptr;
-    stream << next_ptr;
+    stream_write(stream, uint32_t(sizeof(BundleResourcesChunk)));
+    stream_write(stream, id_ptr);
+    stream_write(stream, std::visit([](auto const& e) { return e.number; }, entity));
+    stream_write(stream, uint32_t(get_bundle_resource_type(entity)));
+    stream_write(stream, resource_ptr);
+    stream_write(stream, next_ptr);
     stream.seekp(q);
     return static_cast<uint32_t>(p);
 }
@@ -1259,6 +1342,33 @@ auto write_resources(std::ofstream& stream, ModuleData const& module_data) -> ui
     return write_resources_entities(stream, 0, entities);
 }
 
+auto write_bundle_locale(std::ofstream& stream, size_t index, std::vector<std::u16string> const& locales) -> uint32_t
+{
+    if (index >= locales.size())
+    {
+        return 0;
+    }
+
+    auto const& locale = locales[index];
+    auto p = stream.tellp();
+    stream.seekp(sizeof(BundleLocaleChunk), std::ios_base::cur);
+    auto next_ptr = write_bundle_locale(stream, index + 1, locales);
+    auto locale_ptr = write_string(stream, locale);
+    auto q = stream.tellp();
+    stream.seekp(p);
+    stream_write(stream, uint32_t(sizeof(BundleLocaleChunk)));
+    stream_write(stream, locale_ptr);
+    stream_write(stream, next_ptr);
+    stream.seekp(q);
+    return static_cast<uint32_t>(p);
+}
+
+auto write_bundle_locales(std::ofstream& stream, ModuleData const& module_data) -> uint32_t
+{
+    std::vector<std::u16string> locales(module_data.locales.begin(), module_data.locales.end());
+    return write_bundle_locale(stream, 0, locales);
+}
+
 auto write_bundle_module(std::ofstream& stream, size_t index, std::vector<ModuleData> const& module_data_list) -> uint32_t
 {
     if (index >= module_data_list.size())
@@ -1270,20 +1380,22 @@ auto write_bundle_module(std::ofstream& stream, size_t index, std::vector<Module
     auto p = stream.tellp();
     stream.seekp(sizeof(BundleModuleChunk), std::ios_base::cur);
     auto next_ptr = write_bundle_module(stream, index + 1, module_data_list);
+    auto locales_ptr = write_bundle_locales(stream, module_data);
     auto resources_ptr = write_resources(stream, module_data);
     auto name_ptr = write_string(stream, module_data.name);
     auto primary_locale_ptr = write_string(stream, module_data.primary_locale);
     auto q = stream.tellp();
     stream.seekp(p);
-    stream << uint32_t(sizeof(BundleModuleChunk));
-    stream << name_ptr;
-    stream << primary_locale_ptr;
+    stream_write(stream, uint32_t(sizeof(BundleModuleChunk)));
+    stream_write(stream, name_ptr);
+    stream_write(stream, primary_locale_ptr);
     for (auto const& data : module_data.uuid)
     {
-        stream << data;
+        stream_write(stream, data);
     }
-    stream << resources_ptr;
-    stream << next_ptr;
+    stream_write(stream, locales_ptr);
+    stream_write(stream, resources_ptr);
+    stream_write(stream, next_ptr);
     stream.seekp(q);
     return static_cast<uint32_t>(p);
 }
@@ -1299,13 +1411,13 @@ auto write_bundle_header(std::ofstream& stream, std::vector<ModuleData> const& m
     stream.seekp(sizeof(BundleHeader), std::ios_base::cur);
     auto const modules_ptr = write_bundle_modules(stream, module_data_list);
     stream.seekp(p);
-    stream << "FWRB";
-    stream << uint32_t(1);
-    stream << uint32_t(0);
-    stream << modules_ptr;
+    stream.write("FWRB", 4);
+    stream_write(stream, uint32_t(1));
+    stream_write(stream, uint32_t(0));
+    stream_write(stream, modules_ptr);
 }
 
-auto compile_resources(std::vector<std::string> cache_paths, const std::string& output_path) -> int
+auto compile_resources(std::vector<std::string> cache_paths, const std::filesystem::path& output_path) -> int
 {
     cache_paths.erase(std::unique(cache_paths.begin(), cache_paths.end()), cache_paths.end());
 
@@ -1319,12 +1431,22 @@ auto compile_resources(std::vector<std::string> cache_paths, const std::string& 
             module_data_list.push_back(std::move(module_data));
         }
     }
-    std::println("Output path: {}", output_path);
+    std::println("Output path: {}", output_path.string());
+
+    try
+    {
+        fs::create_directories(output_path.parent_path());
+    }
+    catch (...)
+    {
+        std::println("Failed to create directories for path {}", output_path.parent_path().string());
+        return 1;
+    }
 
     std::ofstream bundle_file(output_path, std::ios::binary);
     if (!bundle_file)
     {
-        std::println("Failed to open output file: {}", output_path);
+        std::println("Failed to open output file: {}", output_path.string());
         return 1;
     }
 

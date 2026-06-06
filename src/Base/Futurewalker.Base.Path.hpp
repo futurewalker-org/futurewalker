@@ -21,8 +21,9 @@ class Path
 {
 public:
     static auto MakeFromString(String const& string) -> Path;
-    static auto MakeFromNativeString(std::string_view native) -> Path;
-    static auto MakeFromNativeString(std::wstring_view native) -> Path;
+    static auto MakeFromNativeString(std::string_view const native) -> Path;
+    static auto MakeFromNativeString(std::wstring_view const native) -> Path;
+    static auto MakeFromStdFilesystemPath(std::filesystem::path const& path) -> Path;
 
     Path() = default;
 
@@ -60,6 +61,9 @@ public:
     auto Clear() -> void;
 
     auto AsStdFilesystemPath() const -> std::filesystem::path;
+
+    auto operator==(Path const&) const -> bool = default;
+    auto operator!=(Path const&) const -> bool = default;
 
 private:
     explicit Path(std::filesystem::path path);
