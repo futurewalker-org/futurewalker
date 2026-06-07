@@ -14,6 +14,7 @@ include (CTest)
 set(FW_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(FW_SOURCE_DIR ${FW_DIR}/src)
 set(FW_TEST_DIR ${FW_DIR}/tests)
+set(FW_TOOL_DIR ${FW_DIR}/tools)
 set(FW_EXAMPLE_DIR ${FW_DIR}/examples)
 
 # ------------------------------------------
@@ -26,6 +27,7 @@ add_library(Futurewalker-Library-boost INTERFACE)
 add_library(Futurewalker::Library::boost ALIAS Futurewalker-Library-boost)
 target_link_libraries(Futurewalker-Library-boost INTERFACE Boost::headers)
 target_link_libraries(Futurewalker-Library-boost INTERFACE Boost::disable_autolinking)
+target_link_libraries(Futurewalker-Library-boost INTERFACE Boost::program_options)
 
 # fmt
 find_package(fmt CONFIG REQUIRED)
@@ -42,10 +44,17 @@ add_library(Futurewalker-Library-skia INTERFACE)
 add_library(Futurewalker::Library::skia ALIAS Futurewalker-Library-skia)
 target_link_libraries(Futurewalker-Library-skia INTERFACE skia::skia)
 
+# ICU
 find_package(icu CONFIG REQUIRED)
 add_library(Futurewalker-Library-icu INTERFACE)
 add_library(Futurewalker::Library::icu ALIAS Futurewalker-Library-icu)
 target_link_libraries(Futurewalker-Library-icu INTERFACE icu::icu)
+
+# xerces-c
+find_package(XercesC CONFIG REQUIRED)
+add_library(Futurewalker-Library-XercesC INTERFACE)
+add_library(Futurewalker::Library::XercesC ALIAS Futurewalker-Library-XercesC)
+target_link_libraries(Futurewalker-Library-XercesC INTERFACE XercesC::XercesC)
 
 # ------------------------------------------
 # Flags
@@ -256,6 +265,7 @@ endfunction()
 
 add_subdirectory(${FW_SOURCE_DIR})
 add_subdirectory(${FW_EXAMPLE_DIR})
+add_subdirectory(${FW_TOOL_DIR})
 
 if(BUILD_TESTING)
   add_subdirectory(${FW_TEST_DIR})
