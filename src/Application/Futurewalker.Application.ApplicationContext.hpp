@@ -28,6 +28,7 @@ private:
     Shared<AttributeNode> _attributeNode;
     Shared<ResourceManager> _resourceManager;
     Shared<Graphics::FontManager> _fontManager;
+    Shared<ResourceManager> _resourceManager;
 };
 
 template <>

@@ -240,6 +240,59 @@ function(fw_add_binary NAME TYPE)
   # Set C++ standard version
   set_target_properties(${_exe_name} PROPERTIES CXX_STANDARD ${CMAKE_CXX_STANDARD})
 
+  # Pin the output dir to one predictable, $<CONFIG>-uniform layout so other rules can generated name files next to the executable.
+  set_target_properties(${_exe_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>")
+
+endfunction()
+
+# Add resource files to the target
+function (fw_add_resources NAME)
+  set(_resource_src_dir "${CMAKE_CURRENT_SOURCE_DIR}/Resource")
+  set(_resource_dst_dir "${CMAKE_CURRENT_BINARY_DIR}/Resource")
+  set(_resource_cache_path "${_resource_dst_dir}/${NAME}.cache.xml")
+  set(_resource_depfile_path "${_resource_dst_dir}/${NAME}.d")
+
+  # Custom command for resource compiler
+  add_custom_command(
+    OUTPUT ${_resource_cache_path}
+    DEPENDS resource-compiler
+    COMMAND resource-compiler --generate "${_resource_src_dir}/Common" --cache "${_resource_cache_path}" --depfile "${_resource_depfile_path}" --header "${_resource_dst_dir}/Resource"
+    DEPFILE ${_resource_depfile_path}
+  )
+
+  set(_resource_custom_target_name "${NAME}-RunGenerateResources")
+  set(_resource_library_name "${NAME}-GenerateResources")
+
+  # We need interface library since it only generates headers.
+  add_custom_target(${_resource_custom_target_name} DEPENDS ${_resource_cache_path})
+  add_library(${_resource_library_name} INTERFACE)
+  target_sources(${_resource_library_name} INTERFACE
+    FILE_SET HEADERS
+    BASE_DIRS ${_resource_dst_dir}
+  )
+  add_dependencies(${_resource_library_name} ${_resource_custom_target_name})
+  target_link_libraries(${NAME} PUBLIC ${_resource_library_name})
+
+  # Expose the cache path as a custom transitive property so dependents can collect it for bundling.
+  set_target_properties(${_resource_library_name} PROPERTIES INTERFACE_FW_RESOURCE_CACHE_PATH "${_resource_cache_path}")
+  set_target_properties(${_resource_library_name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "FW_RESOURCE_CACHE_PATH")
+endfunction()
+
+# Bundle resources next to the executable.
+# Tracked as a build output depending on the caches, so it is only re-bundled when a resource changes.
+function(fw_bundle_resources NAME)
+  # ';'-list, expands to one positional cache-path argument each.
+  set(_resource_cache_paths "$<TARGET_PROPERTY:${NAME},FW_RESOURCE_CACHE_PATH>")
+
+  # Must match the RUNTIME_OUTPUT_DIRECTORY pinned by fw_add_binary.
+  set(_resource_bundle_path "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/Resource/${NAME}.dat")
+  add_custom_command(
+    OUTPUT ${_resource_bundle_path}
+    DEPENDS resource-compiler ${_resource_cache_paths}
+    COMMAND resource-compiler --bundle ${_resource_cache_paths} --output ${_resource_bundle_path}
+    VERBATIM)
+
+  add_custom_target(${NAME}-BundleResources ALL DEPENDS ${_resource_bundle_path})
 endfunction()
 
 # Add reousrce files to the target

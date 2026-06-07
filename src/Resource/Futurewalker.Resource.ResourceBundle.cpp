@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Resource.ResourceBundle.hpp"
-#include "Futurewalker.Resource.Resource.hpp" 
+#include "Futurewalker.Resource.Resource.hpp"
 
 #include "Futurewalker.Base.LocaleFunction.hpp"
 #include "Futurewalker.Base.Debug.hpp"
@@ -115,8 +115,9 @@ auto LoadResourceDataChunkAsString(FileInputStream& stream, UInt32 const offset,
 {
     stream.SetPosition(offset, SeekPosition::Begin);
     auto dataChunk = ResourceBundleDataChunk();
-    stream.Read({(std::byte*)&dataChunk.chunk_size, sizeof(dataChunk.chunk_size)});
-    auto buffer = std::vector<std::byte>(dataChunk.chunk_size - sizeof(dataChunk.chunk_size));
+    auto const chunkSizeBytes = static_cast<uint32_t>(sizeof(dataChunk.chunk_size));
+    stream.Read({(std::byte*)&dataChunk.chunk_size, chunkSizeBytes});
+    auto buffer = std::vector<std::byte>(std::max(dataChunk.chunk_size, chunkSizeBytes) - chunkSizeBytes);
     stream.Read({buffer.data(), buffer.size()});
     value = String::MakeFromStdString({(char const*)buffer.data(), buffer.size()});
 }
@@ -339,12 +340,12 @@ auto ResourceBundle::SetPreferredLocales(std::span<Locale const> preferredLocale
     }
 }
 
-//
+///
 /// @brief Load string resource for given locale.
-//
+///
 /// @param[in] resourcesChunk Resources chunk.
 /// @param[in] locale locale.
-//
+///
 auto ResourceBundle::InternalLoadStringResource(ResourceBundleResourcesChunk const& resourcesChunk, Locale const& locale) -> Optional<String>
 {
     auto dataOffset = resourcesChunk.resource_ptr;
