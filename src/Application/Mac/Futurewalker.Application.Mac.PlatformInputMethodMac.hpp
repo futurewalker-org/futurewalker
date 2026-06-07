@@ -28,7 +28,6 @@ public:
     auto GetTextInputClient() -> id<NSTextInputClient>;
 
 private:
-    __weak NSView* _view = nil;
     __weak NSTextInputContext* _inputContext = nil;
     __strong id<NSTextInputClient> _textInputClient = nil;
     Shared<PlatformInputEditableMac> _editable;
