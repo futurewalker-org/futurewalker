@@ -169,7 +169,7 @@ auto PlatformWindow::SendEventDetached(Event<>& event, auto (PlatformWindow::*fu
 
     if constexpr (BuildConfig::IsDebug())
     {
-        auto const& eventParameter = *event;
+        [[maybe_unused]] auto const& eventParameter = *event;
         FW_DEBUG_LOG_WARNING("PlatformWindow::SendEventDetached(): Tried to send event from destructing window, ignoring. [{}]", typeid(eventParameter).name());
     }
     return false;

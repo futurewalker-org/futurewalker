@@ -42,7 +42,7 @@ using StaticAttributeRef = StaticReference<StaticAttribute<T> const>;
 #define FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(type, attribute, func, ...) static StaticAttribute<type> const attribute = StaticAttribute<type>::MakeWithDefaultFunction<FW_IMPL_STATIC_ATTRIBUTE_FOR_EACH(FW_IMPL_STATIC_ATTRIBUTE_ADDR, __VA_ARGS__)>(#attribute, func)
 #else
 // For public attribute declarations and definitions.
-#define FW_STATIC_ATTRIBUTE(type, attribute) static StaticAttribute<type> const attribute;
+#define FW_STATIC_ATTRIBUTE(type, attribute) static StaticAttribute<type> const attribute
 #define FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(attribute, reference) std::add_const_t<decltype(attribute)> attribute = decltype(attribute)::MakeWithDefaultReference<&reference>()
 #define FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(attribute, value) std::add_const_t<decltype(attribute)> attribute = decltype(attribute)::MakeWithDefaultValue(value)
 #define FW_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(attribute, func, ...) std::add_const_t<decltype(attribute)> attribute = decltype(attribute)::MakeWithDefaultFunction<FW_IMPL_STATIC_ATTRIBUTE_FOR_EACH(FW_IMPL_STATIC_ATTRIBUTE_ADDR, __VA_ARGS__)>(func)
