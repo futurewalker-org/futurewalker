@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources prefix="HelloWorld" locale="es-ES">
+    <string id="Hello">¡Hola, Mundo!</string>
+</resources>
