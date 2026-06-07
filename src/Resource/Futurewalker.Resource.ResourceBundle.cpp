@@ -115,8 +115,9 @@ auto LoadResourceDataChunkAsString(FileInputStream& stream, UInt32 const offset,
 {
     stream.SetPosition(offset, SeekPosition::Begin);
     auto dataChunk = ResourceBundleDataChunk();
-    stream.Read({(std::byte*)&dataChunk.chunk_size, sizeof(dataChunk.chunk_size)});
-    auto buffer = std::vector<std::byte>(std::max(dataChunk.chunk_size, sizeof(dataChunk.chunk_size)) - sizeof(dataChunk.chunk_size));
+    auto const chunkSizeBytes = static_cast<uint32_t>(sizeof(dataChunk.chunk_size));
+    stream.Read({(std::byte*)&dataChunk.chunk_size, chunkSizeBytes});
+    auto buffer = std::vector<std::byte>(std::max(dataChunk.chunk_size, chunkSizeBytes) - chunkSizeBytes);
     stream.Read({buffer.data(), buffer.size()});
     value = String::MakeFromStdString({(char const*)buffer.data(), buffer.size()});
 }
