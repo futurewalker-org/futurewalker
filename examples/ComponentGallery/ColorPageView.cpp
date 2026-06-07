@@ -53,7 +53,7 @@ auto MakeColorSchemeViewContainer(String const text, ThemeBrightness brightness)
     space->SetHeight(Lamp::Style::Size100);
     innerColumn->AddChild(space);
 
-    auto colorView = ColorSchemeView::Make(brightness);
+    auto colorView = ColorSchemeView::Make();
     auto colorViewAlign = AlignView::MakeWithContent(colorView);
     colorViewAlign->SetAlignment(Alignment::MiddleLeading());
     auto colorTheme = ThemeView::MakeWithContent(colorViewAlign);

@@ -38,14 +38,13 @@ auto MakeColorTileSet(StaticAttributeRef<RGBAColor> baseColor, String baseColorN
 }
 }
 
-auto ColorSchemeView::Make(ThemeBrightness brightness) -> Shared<ColorSchemeView>
+auto ColorSchemeView::Make() -> Shared<ColorSchemeView>
 {
-    return View::MakeDerived<ColorSchemeView>(brightness);
+    return View::MakeDerived<ColorSchemeView>();
 }
 
-ColorSchemeView::ColorSchemeView(PassKey<View> key, ThemeBrightness brightness)
+ColorSchemeView::ColorSchemeView(PassKey<View> key)
   : View(key)
-  , _brightness {brightness}
 {
 }
 
