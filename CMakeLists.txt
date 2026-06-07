@@ -275,7 +275,8 @@ function (fw_add_resources NAME)
 
   # Expose the cache path as a custom transitive property so dependents can collect it for bundling.
   set_target_properties(${_resource_library_name} PROPERTIES INTERFACE_FW_RESOURCE_CACHE_PATH "${_resource_cache_path}")
-  set_target_properties(${_resource_library_name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "FW_RESOURCE_CACHE_PATH")
+  set_target_properties(${_resource_library_name} PROPERTIES INTERFACE_FW_RESOURCE_CACHE_TARGET_NAME "${_resource_custom_target_name}")
+  set_target_properties(${_resource_library_name} PROPERTIES TRANSITIVE_LINK_PROPERTIES "FW_RESOURCE_CACHE_PATH;FW_RESOURCE_CACHE_TARGET_NAME")
 endfunction()
 
 # Bundle resources next to the executable.
@@ -283,16 +284,18 @@ endfunction()
 function(fw_bundle_resources NAME)
   # ';'-list, expands to one positional cache-path argument each.
   set(_resource_cache_paths "$<TARGET_PROPERTY:${NAME},FW_RESOURCE_CACHE_PATH>")
+  set(_resource_cache_target_name "$<TARGET_PROPERTY:${NAME},FW_RESOURCE_CACHE_TARGET_NAME>")
 
   # Must match the RUNTIME_OUTPUT_DIRECTORY pinned by fw_add_binary.
   set(_resource_bundle_path "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/Resource/${NAME}.dat")
   add_custom_command(
     OUTPUT ${_resource_bundle_path}
-    DEPENDS resource-compiler ${_resource_cache_paths}
+    DEPENDS resource-compiler ${_resource_cache_target_name}
     COMMAND resource-compiler --bundle ${_resource_cache_paths} --output ${_resource_bundle_path}
     VERBATIM)
 
-  add_custom_target(${NAME}-BundleResources ALL DEPENDS ${_resource_bundle_path})
+  set(_resource_custom_target_name "${NAME}-RunBundleResources")
+  add_custom_target(${_resource_custom_target_name} ALL DEPENDS ${_resource_bundle_path})
 endfunction()
 
 # Add reousrce files to the target

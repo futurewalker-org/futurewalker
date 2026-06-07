@@ -772,15 +772,14 @@ auto WriteDepfile(fs::path const& depfilePath, fs::path const& cacheXmlPath, std
     for (auto const& gen : generatedFiles)
     {
         depfile << gen.string();
-        depfile << " ";
+        depfile << ":";
+        for (auto const& dep : dependentFiles)
+        {
+            depfile << " ";
+            depfile << dep.string();
+        }
+        depfile << "\n";
     }
-    depfile << ":";
-    for (auto const& dep : dependentFiles)
-    {
-        depfile << " ";
-        depfile << dep.string();
-    }
-    depfile << "\n";
 
     return true;
 }
