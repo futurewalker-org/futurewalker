@@ -84,7 +84,10 @@ public:
     ///
     inline auto operator=(Shared&& other) noexcept -> Shared&
     {
-        _ptr = std::move(other._ptr);
+        if (this != &other)
+        {
+            _ptr = std::move(other._ptr);
+        }
         return *this;
     }
 

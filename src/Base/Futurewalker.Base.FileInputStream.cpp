@@ -55,7 +55,7 @@ auto FileInputStream::SetPosition(SInt64 const position, SeekPosition const orig
 {
     if (!_stream.bad())
     {
-        _stream.setstate(_stream.rdstate() & ~std::ios::failbit);
+        _stream.clear(_stream.rdstate() & ~std::ios::failbit);
         _stream.seekg(static_cast<int64_t>(position), ToSeekdir(origin));
         if (!_stream.fail())
         {
@@ -78,7 +78,7 @@ auto FileInputStream::GetPosition() -> Optional<SInt64>
 {
     if (!_stream.bad())
     {
-        _stream.setstate(_stream.rdstate() & ~std::ios::failbit);
+        _stream.clear(_stream.rdstate() & ~std::ios::failbit);
         auto const pos = _stream.tellg();
         if (!_stream.fail())
         {
@@ -104,7 +104,7 @@ auto FileInputStream::Read(std::span<std::byte> buffer) -> Optional<SInt64>
 {
     if (!_stream.bad() && !_stream.eof())
     {
-        _stream.setstate(_stream.rdstate() & ~std::ios::failbit);
+        _stream.clear(_stream.rdstate() & ~std::ios::failbit);
         _stream.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
         // read() sets failbit | eofbit when EOF is reached.
         if (!_stream.fail() || _stream.eof())

@@ -8,8 +8,6 @@
 #include "Futurewalker.Core.Function.hpp"
 #include "Futurewalker.Core.Memory.hpp"
 
-#include <AppKit/AppKit.h>
-
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT

@@ -10,10 +10,6 @@
 #include "Futurewalker.Core.StringFunction.hpp"
 #include "Futurewalker.Core.Exception.hpp"
 
-#include <unicode/locid.h>
-
-#include <unicode/localematcher.h>
-
 namespace FW_DETAIL_NS
 {
 auto Locale::GetPreferredUILocales() -> std::vector<Locale>
@@ -38,7 +34,7 @@ auto Locale::GetSystemLocale() -> Locale
 {
     if (auto const context = Locator::GetInstance<PlatformLocaleContext>())
     {
-        if (auto const platformLocale = context->GetSystemLocale())
+        if (auto platformLocale = context->GetSystemLocale())
         {
             return Locale(std::move(platformLocale));
         }
@@ -47,11 +43,11 @@ auto Locale::GetSystemLocale() -> Locale
     return Locale(nullptr);
 }
 
-auto Locale::Make(String const& language, String const& script, String const& country) -> Optional<Locale>
+auto Locale::Make(String const& language, String const& country, String const& variant) -> Optional<Locale>
 {
     if (auto const context = Locator::GetInstance<PlatformLocaleContext>())
     {
-        if (auto const platformLocale = context->MakeLocale(language, script, country))
+        if (auto platformLocale = context->MakeLocale(language, country, variant))
         {
             return Locale(std::move(platformLocale));
         }
@@ -63,7 +59,7 @@ auto Locale::MakeFromLanguageTag(String const& languageTag) -> Optional<Locale>
 {
     if (auto const context = Locator::GetInstance<PlatformLocaleContext>())
     {
-        if (auto const platformLocale = context->MakeLocaleFromLanguageTag(languageTag))
+        if (auto platformLocale = context->MakeLocaleFromLanguageTag(languageTag))
         {
             return Locale(std::move(platformLocale));
         }

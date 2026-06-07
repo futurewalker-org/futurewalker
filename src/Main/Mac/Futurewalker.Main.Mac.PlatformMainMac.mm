@@ -16,6 +16,8 @@
 #include "Futurewalker.Base.Mac.PlatformCommandLineMac.hpp"
 #include "Futurewalker.Base.Mac.PlatformSystemInfoMac.hpp"
 #include "Futurewalker.Base.Mac.PlatformDebugMac.hpp"
+#include "Futurewalker.Base.Mac.PlatformFilesystemMac.hpp"
+#include "Futurewalker.Base.Mac.PlatformLocaleContextMac.hpp"
 #include "Futurewalker.Base.Locator.hpp"
 
 #include "Futurewalker.Graphics.Mac.PlatformSkiaFontManagerMac.hpp"
@@ -34,6 +36,8 @@ auto PlatformMainMac::Register() -> void
     Locator::Register<PlatformCommandLineMac>();
     Locator::Register<PlatformSystemInfoMac>();
     Locator::Register<PlatformDebugMac>();
+    Locator::Register<PlatformFilesystemMac>();
+    Locator::Register<PlatformLocaleContextMac>();
     Locator::Register<PlatformApplicationContextMac>();
     Locator::Register<PlatformApplicationThemeContextMac>();
     Locator::Register<PlatformMainThreadMac>();

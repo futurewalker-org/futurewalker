@@ -6,13 +6,13 @@
 
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.Optional.hpp"
-#include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.Memory.hpp"
 
 #include <boost/functional/hash.hpp>
 
 #include <memory>
 #include <functional>
+#include <vector>
 
 namespace FW_DETAIL_NS
 {
@@ -25,7 +25,7 @@ public:
     static auto GetSystemLocale() -> Locale;
 
 public:
-    static auto Make(String const& language, String const& script, String const& country) -> Optional<Locale>;
+    static auto Make(String const& language, String const& country, String const& variant) -> Optional<Locale>;
     static auto MakeFromLanguageTag(String const& languageTag) -> Optional<Locale>;
 
     explicit Locale(Shared<PlatformLocale> platformLocale);

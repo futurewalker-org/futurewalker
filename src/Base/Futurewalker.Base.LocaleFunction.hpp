@@ -13,7 +13,7 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 ///
-/// @brief 
+/// @brief Locale functions.
 ///
 struct LocaleFunction : NonConstructible
 {

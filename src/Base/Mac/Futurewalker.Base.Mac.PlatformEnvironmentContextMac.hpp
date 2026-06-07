@@ -17,7 +17,7 @@ namespace FW_EXPORT
 class PlatformEnvironmentContextMac final : public PlatformEnvironmentContext
 {
 public:
-    PlatformEnvironmentContextMac(Shared<PlatformDebug> debug, Shared<PlatformSystemInfo> systemInfo, Shared<PlatformCommandLine> commandLine, Shared<PlatformFilesystem> filesystem);
+    PlatformEnvironmentContextMac(Shared<PlatformDebug> debug, Shared<PlatformSystemInfo> systemInfo, Shared<PlatformCommandLine> commandLine, Shared<PlatformFilesystem> filesystem, Shared<PlatformLocaleContext> localeContext);
 };
 
 template <>

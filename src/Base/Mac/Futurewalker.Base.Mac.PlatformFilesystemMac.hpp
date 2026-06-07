@@ -10,7 +10,7 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 ///
-/// @brief Platform debug printer.
+/// @brief macOS implementation of PlatformFilesystem.
 ///
 class PlatformFilesystemMac : public PlatformFilesystem
 {

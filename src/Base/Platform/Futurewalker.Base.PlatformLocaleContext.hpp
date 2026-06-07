@@ -18,7 +18,7 @@ class PlatformLocaleContext : NonCopyable
 {
 public:
     virtual ~PlatformLocaleContext() = 0;
-    virtual auto MakeLocale(String const& language, String const& script, String const& country) -> Shared<PlatformLocale>;
+    virtual auto MakeLocale(String const& language, String const& country, String const& variant) -> Shared<PlatformLocale>;
     virtual auto MakeLocaleFromLanguageTag(String const& languageTag) -> Shared<PlatformLocale>;
     virtual auto GetSystemLocale() -> Shared<PlatformLocale>;
     virtual auto GetPreferredUILocales() -> std::vector<Shared<PlatformLocale>>;

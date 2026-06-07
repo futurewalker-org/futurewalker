@@ -10,7 +10,7 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 ///
-/// @brief Platform debug printer.
+/// @brief Windows implementation of PlatformFilesystem.
 ///
 class PlatformFilesystemWin : public PlatformFilesystem
 {

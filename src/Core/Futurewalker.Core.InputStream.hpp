@@ -2,8 +2,9 @@
 #pragma once
 
 #include "Futurewalker.Core.Primitive.hpp"
-#include "Futurewalker.Core.SeekPosition.hpp"
 #include "Futurewalker.Core.Optional.hpp"
+
+#include "Futurewalker.Core.SeekPosition.hpp"
 
 #include <span>
 

@@ -4,8 +4,6 @@
 
 #include "Futurewalker.Core.StringFunction.hpp"
 
-#import <AppKit/AppKit.h>
-
 namespace FW_DETAIL_NS
 {
 ///

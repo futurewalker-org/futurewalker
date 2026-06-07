@@ -86,7 +86,10 @@ public:
     ///
     inline auto operator=(Unique&& other) noexcept -> Unique&
     {
-        _ptr = std::move(other._ptr);
+        if (this != &other)
+        {
+            _ptr = std::move(other._ptr);
+        }
         return *this;
     }
 

@@ -2,8 +2,6 @@
 
 #include "Futurewalker.Application.Mac.PlatformMainThreadMac.hpp"
 
-#import <AppKit/AppKit.h>
-
 #include <coroutine>
 
 namespace FW_DETAIL_NS

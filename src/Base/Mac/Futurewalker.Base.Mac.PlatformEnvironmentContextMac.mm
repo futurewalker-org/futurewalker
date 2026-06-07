@@ -11,8 +11,9 @@ PlatformEnvironmentContextMac::PlatformEnvironmentContextMac(
   Shared<PlatformDebug> debug,
   Shared<PlatformSystemInfo> systemInfo,
   Shared<PlatformCommandLine> commandLine,
-  Shared<PlatformFilesystem> filesystem)
-  : PlatformEnvironmentContext(debug, systemInfo, commandLine, filesystem)
+  Shared<PlatformFilesystem> filesystem,
+  Shared<PlatformLocaleContext> localeContext)
+  : PlatformEnvironmentContext(debug, systemInfo, commandLine, filesystem, localeContext)
 {
 }
 
@@ -22,6 +23,7 @@ auto Locator::Resolver<PlatformEnvironmentContextMac>::Resolve() -> Shared<Platf
     auto systemInfo = Locator::Resolve<PlatformSystemInfo>();
     auto commandLine = Locator::Resolve<PlatformCommandLine>();
     auto filesystem = Locator::Resolve<PlatformFilesystem>();
-    return Shared<PlatformEnvironmentContextMac>::Make(debug, systemInfo, commandLine, filesystem);
+    auto localeContext = Locator::Resolve<PlatformLocaleContext>();
+    return Shared<PlatformEnvironmentContextMac>::Make(debug, systemInfo, commandLine, filesystem, localeContext);
 }
 }

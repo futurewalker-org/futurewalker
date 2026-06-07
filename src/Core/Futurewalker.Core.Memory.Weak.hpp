@@ -111,7 +111,7 @@ public:
     /// @brief Compare based on ownership.
     ///
     template <class U>
-    inline auto IsOwnerBefore(Weak<U> const& other) const -> void
+    inline auto IsOwnerBefore(Weak<U> const& other) const -> Bool
     {
         return _weak.owner_before(other._weak);
     }

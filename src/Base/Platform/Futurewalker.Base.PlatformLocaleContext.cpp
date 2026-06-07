@@ -71,9 +71,9 @@ private:
 
 PlatformLocaleContext::~PlatformLocaleContext() = default;
 
-auto PlatformLocaleContext::MakeLocale(String const& language, String const& script, String const& country) -> Shared<PlatformLocale>
+auto PlatformLocaleContext::MakeLocale(String const& language, String const& country, String const& variant) -> Shared<PlatformLocale>
 {
-    auto locale = icu::Locale(language.ToStdString().c_str(), country.ToStdString().c_str(), script.ToStdString().c_str());
+    auto locale = icu::Locale(language.ToStdString().c_str(), country.ToStdString().c_str(), variant.ToStdString().c_str());
     if (!locale.isBogus())
     {
         return Shared<PlatformLocaleIcu>::Make(std::move(locale));
@@ -84,7 +84,7 @@ auto PlatformLocaleContext::MakeLocale(String const& language, String const& scr
 auto PlatformLocaleContext::MakeLocaleFromLanguageTag(String const& languageTag) -> Shared<PlatformLocale>
 {
     auto err = U_ZERO_ERROR;
-    auto locale = icu::Locale::forLanguageTag(languageTag.ToStdU8String(), err);
+    auto locale = icu::Locale::forLanguageTag(languageTag.ToStdString(), err);
     if (U_SUCCESS(err))
     {
         return Shared<PlatformLocaleIcu>::Make(std::move(locale));

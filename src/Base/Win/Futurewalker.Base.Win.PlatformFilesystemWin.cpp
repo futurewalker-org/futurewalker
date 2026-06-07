@@ -2,6 +2,8 @@
 
 #include "Futurewalker.Base.Win.PlatformFilesystemWin.hpp"
 
+#include "Futurewalker.Core.Exception.hpp"
+
 #include <boost/dll/runtime_symbol_info.hpp>
 
 namespace FW_DETAIL_NS
@@ -11,7 +13,7 @@ auto PlatformFilesystemWin::GetCurrentDirectoryPath() -> Path
     try
     {
         auto const path = std::filesystem::current_path();
-        return Path::MakeFromNativeString(path.native());
+        return Path::MakeFromStdFilesystemPath(path);
     }
     catch (...)
     {

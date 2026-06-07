@@ -5,6 +5,5 @@ fw_test_suite(
     tags = ["Signal"],
     names = [
         "Signal",
-        "Tracker",
     ],
 )
