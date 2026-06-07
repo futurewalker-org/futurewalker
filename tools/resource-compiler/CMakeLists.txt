@@ -1,5 +1,9 @@
 add_executable(resource-compiler
+    bundle.cpp
+    cache.cpp
+    generate.cpp
     main.cpp
+    string.cpp
 )
 target_link_libraries(resource-compiler
     Futurewalker::Library::XercesC
