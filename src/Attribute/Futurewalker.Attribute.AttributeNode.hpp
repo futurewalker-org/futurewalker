@@ -20,8 +20,7 @@
 
 #include "Futurewalker.Event.EventReceiverType.hpp"
 
-#include <boost/unordered/unordered_flat_map.hpp>
-#include <boost/container/flat_map.hpp>
+#include <boost/unordered/unordered_map.hpp>
 
 namespace FW_DETAIL_NS
 {
@@ -120,7 +119,11 @@ private:
         None = 0,
         Full = 1 << 0, // Traverse entire value dependency graph.
     };
-    auto RewireSlotOnAddChild(Shared<AttributeSlot>& slot, Shared<AttributeSlot> const& start, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Bool;
+    using SlotMap = boost::unordered_map<AttributeId, Shared<AttributeSlot>>;
+    auto RewireSlotOnAddChildAtIterator(SlotMap::iterator& it, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Bool;
+    auto RewireSlotOnAddChild(Shared<AttributeSlot>& slot, Shared<AttributeSlot> const& start, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> void;
+    auto RewireSlotOnAddChildCore(Shared<AttributeSlot>&& slot, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> void;
+    auto RewireValueDependantSlotsOnAddChild(Shared<AttributeSlot> const& slot, Shared<AttributeSlot> const& start, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> void;
     auto UpdateSlotCacheRecursive(AttributeSlot& slot, Flags<UpdateFlag> const flags, UInt64 cacheUpdateNumber, UInt64 const notifyUpdateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Bool;
     auto NotifyValueChangedRecursive(AttributeSlot& slot, UInt64 const updateNumber) -> void;
 
@@ -133,7 +136,7 @@ private:
     Weak<AttributeNode> _parent;
     AttributeNodeList _children;
     Shared<AttributeSlotCache> _slotCache;
-    boost::unordered_flat_map<AttributeId, Shared<AttributeSlot>> _slots;
+    SlotMap _slots;
 };
 
 ///

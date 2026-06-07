@@ -83,11 +83,16 @@ public:
     auto GetValueDependantSlotCount() const -> SInt64;
     auto GetValueDependantSlots() const -> SharedArray<Weak<AttributeSlot>>;
 
+    auto UnsafeClearSourceDependantSlots() -> void;
+    auto UnsafeSetSourceDependantSlots(SharedArray<Weak<AttributeSlot>> slots) -> void;
+    auto UnsafeSetSourceDependentSlot(Shared<AttributeSlot> const& slot) -> void;
+
     auto Reset() -> void;
 
 private:
     auto SetSelf(Shared<AttributeSlot> const& self) -> void;
     auto GetSelf() -> Shared<AttributeSlot>;
+    auto GetWeakSelf() -> Weak<AttributeSlot>;
 
 private:
     Weak<AttributeSlot> _self;

@@ -204,10 +204,11 @@ auto AttributeSlot::SetValueDependentSlots(std::span<Shared<AttributeSlot> const
 {
     DetachFromValueDependentSlots();
 
-    auto const self = GetSelf();
+    _valueDependentSlots.Reserve(std::ssize(slots));
+
     for (auto const& slot : slots)
     {
-        slot->_valueDependantSlots.PushBack(self);
+        slot->_valueDependantSlots.PushBack(GetWeakSelf());
         _valueDependentSlots.PushBack(slot);
     }
 }
@@ -250,7 +251,7 @@ auto AttributeSlot::SetSourceDependentSlot(Shared<AttributeSlot> const& slot) ->
     if (slot)
     {
         FW_DEBUG_ASSERT(_description.Get().GetId() == slot->GetDescription().Get().GetId());
-        slot->_sourceDependantSlots.PushBack(GetSelf());
+        slot->_sourceDependantSlots.PushBack(GetWeakSelf());
         _sourceDependentSlot = slot;
     }
 }
@@ -293,6 +294,23 @@ auto AttributeSlot::GetSourceDependantSlots() const -> SharedArray<Weak<Attribut
     return _sourceDependantSlots;
 }
 
+auto AttributeSlot::UnsafeClearSourceDependantSlots() -> void
+{
+    _sourceDependantSlots.Clear();
+}
+
+auto AttributeSlot::UnsafeSetSourceDependantSlots(SharedArray<Weak<AttributeSlot>> slots) -> void
+{
+    _sourceDependantSlots = std::move(slots);
+}
+
+auto AttributeSlot::UnsafeSetSourceDependentSlot(Shared<AttributeSlot> const& slot) -> void
+{
+    FW_DEBUG_ASSERT(_description.Get().GetId() == slot->GetDescription().Get().GetId());
+    slot->_sourceDependantSlots.PushBack(GetWeakSelf());
+    _sourceDependentSlot = slot;
+}
+
 auto AttributeSlot::Reset() -> void
 {
     FW_DEBUG_ASSERT(_sourceDependentSlot.Lock() == nullptr);
@@ -321,5 +339,10 @@ auto AttributeSlot::SetSelf(Shared<AttributeSlot> const& self) -> void
 auto AttributeSlot::GetSelf() -> Shared<AttributeSlot>
 {
     return _self.Lock();
+}
+
+auto AttributeSlot::GetWeakSelf() -> Weak<AttributeSlot>
+{
+    return _self;
 }
 }

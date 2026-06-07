@@ -54,15 +54,16 @@ auto AttributeComputeFunction::MakeFunctionWrapper(F f) -> AttributeComputeFunct
 {
     using types = std::tuple<References...>;
     static auto constexpr indices = std::make_index_sequence<sizeof...(References)>();
-    static auto constexpr mapper = []<size_t... Seq>(std::index_sequence<Seq...>, auto& args, auto f) { return f(*args[Seq].template GetValue<std::tuple_element_t<Seq, types>>()...); };
+    static auto constexpr argumentMapper = []<size_t... Seq>(std::index_sequence<Seq...>, auto& args, auto f) { return f(*args[Seq].template GetValue<std::tuple_element_t<Seq, types>>()...); };
 
-    // f needs to be convertible to function pointer.
+    // You might have passed generic lambda object to this function, which is unsupported.
+    // `f` needs to be stateless and convertible to function pointer.
     auto const fp = +f;
 
     return AttributeComputeFunction(
       ComputeFunction {
           .original = reinterpret_cast<void(*)()>(fp),
-          .wrapper = [](void (*original)(), std::span<AttributeValue const> const args) { return AttributeValue(T(mapper(indices, args, reinterpret_cast<decltype(fp)>(original)))); },
+          .wrapper = [](void (*original)(), std::span<AttributeValue const> const args) { return AttributeValue(T(argumentMapper(indices, args, reinterpret_cast<decltype(fp)>(original)))); },
       });
 }
 }

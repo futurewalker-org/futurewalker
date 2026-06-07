@@ -151,28 +151,18 @@ auto AttributeNode::AddChild(Shared<AttributeNode> const& child) -> void
     auto const updateNumber = GetNextUpdateNumber();
     auto notifySlots = std::vector<Weak<AttributeSlot>>();
 
-    while (true)
+    // Walk through child slots and rewire each slot.
+    // For each iteration, the slot itself and its value dependant slots may be erased.
+    // We assume `it` will not be invalidated unless the element itself is erased from the container.
+    auto it = child->_slots.begin();
+    while (it != child->_slots.end())
     {
-        Bool processed = false;
-        for (auto const& pair : child->_slots)
+        if (!RewireSlotOnAddChildAtIterator(it, child, updateNumber, notifySlots))
         {
-            auto slot = pair.second;
-            if (RewireSlotOnAddChild(slot, slot, child, updateNumber, notifySlots))
-            {
-                processed = true;
-                break;
-            }
-        }
-
-        if (processed)
-        {
-            continue;
-        }
-        else
-        {
-            break;
+            ++it;
         }
     }
+
     NotifyValueChangedRecursiveAll(notifySlots, updateNumber);
 }
 
@@ -899,6 +889,52 @@ auto AttributeNode::ResolveReferences(StaticAttributeBaseRef reference, SInt32& 
 }
 
 ///
+/// @brief Rewire slot at iterator.
+///
+/// @param[in, out] it Iterator of the slot.
+/// @param[in] child Child node.
+/// @param[in] updateNumber Update number.
+/// @param[in, out] notifySlots Slots to notify.
+///
+/// @return true if `it` was advanced, otherwise false.
+///
+auto AttributeNode::RewireSlotOnAddChildAtIterator(SlotMap::iterator& it, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> Bool
+{
+    if (!it->second)
+    {
+        return false;
+    }
+
+    if (it->second->GetRewireUpdateNumber() == updateNumber)
+    {
+        return false;
+    }
+
+    if (it->second->HasSourceDependentSlot())
+    {
+        return false;
+    }
+
+    if (it->second->GetComputeFunction())
+    {
+        return false;
+    }
+
+    // keep the slot alive to be recycled.
+    auto slot = it->second;
+
+    // Process dependant slots first.
+    RewireValueDependantSlotsOnAddChild(slot, slot, child, updateNumber, notifySlots);
+
+    // Advance it before possible erase of the slot.
+    std::advance(it, 1);
+
+    RewireSlotOnAddChildCore(std::move(slot), child, updateNumber, notifySlots);
+
+    return true;
+}
+
+///
 /// @brief Rewire slot when adding child node.
 ///
 /// @param slot Slot to rewire.
@@ -914,49 +950,43 @@ auto AttributeNode::RewireSlotOnAddChild(
   Shared<AttributeSlot> const& start,
   Shared<AttributeNode> const& child,
   UInt64 const updateNumber,
-  std::vector<Weak<AttributeSlot>>& notifySlots) -> Bool
+  std::vector<Weak<AttributeSlot>>& notifySlots) -> void
 {
-    //FW_DEBUG_LOG_TRACE("AttributeNode::RewireSlotOnAddChild ===========================");
     if (!slot)
     {
-        return false;
+        return;
     }
 
     if (slot->GetRewireUpdateNumber() == updateNumber)
     {
-        return false;
+        return;
     }
 
     if (slot->HasSourceDependentSlot())
     {
-        return false;
+        return;
     }
 
     if (slot->GetComputeFunction())
     {
-        return false;
+        return;
     }
 
-    {
-        auto const valueDependantSlots = slot->GetValueDependantSlots();
-        for (auto i = SInt64(0); i < valueDependantSlots.GetSize(); ++i)
-        {
-            if (auto valueDependantSlot = valueDependantSlots.GetValueAt(i).Lock())
-            {
-                if (!valueDependantSlot->HasSourceDependentSlot())
-                {
-                    if (valueDependantSlot->GetOwner() == child && valueDependantSlot != start)
-                    {
-                        if (RewireSlotOnAddChild(valueDependantSlot, start, child, updateNumber, notifySlots))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    RewireValueDependantSlotsOnAddChild(slot, start, child, updateNumber, notifySlots);
 
+    RewireSlotOnAddChildCore(std::move(slot), child, updateNumber, notifySlots);
+}
+
+///
+/// @brief Rewire single slot.
+///
+/// @param[in, out] slot Slot to rewire.
+/// @param[in] child Child node.
+/// @param[in] updateNumber Update number.
+/// @param[in, out] notifySlots Slots to notify
+///
+auto AttributeNode::RewireSlotOnAddChildCore(Shared<AttributeSlot>&& slot, Shared<AttributeNode> const& child, UInt64 const updateNumber, std::vector<Weak<AttributeSlot>>& notifySlots) -> void
+{
     slot->SetRewireUpdateNumber(updateNumber);
     if (auto const sourceSlot = ResolveSource(slot->GetDescription(), updateNumber, notifySlots))
     {
@@ -976,14 +1006,15 @@ auto AttributeNode::RewireSlotOnAddChild(
             slot->DetachFromValueDependentSlots();
             child->EraseAttributeSlot(slot->GetDescription());
 
-            auto const sourceDependantSlots = slot->GetSourceDependantSlots();
-            auto const valueDependantSlots = slot->GetValueDependantSlots();
+            auto sourceDependantSlots = slot->GetSourceDependantSlots();
+            auto valueDependantSlots = slot->GetValueDependantSlots();
 
+            slot->UnsafeClearSourceDependantSlots();
             for (auto i = SInt64(0); i < sourceDependantSlots.GetSize(); ++i)
             {
                 if (auto const sourceDependantSlot = sourceDependantSlots.GetValueAt(i).Lock())
                 {
-                    sourceDependantSlot->SetSourceDependentSlot(sourceSlot);
+                    sourceDependantSlot->UnsafeSetSourceDependentSlot(sourceSlot);
                 }
             }
 
@@ -1021,6 +1052,9 @@ auto AttributeNode::RewireSlotOnAddChild(
 
             if (slot.GetUseCount() == 1)
             {
+                // Try to reuse capacity of vector.
+                sourceDependantSlots.Clear();
+                slot->UnsafeSetSourceDependantSlots(std::move(sourceDependantSlots));
                 _slotCache->RecycleSlot(std::move(slot));
             }
             else
@@ -1028,9 +1062,39 @@ auto AttributeNode::RewireSlotOnAddChild(
                 FW_DEBUG_ASSERT(false); // TODO: Does this case happen?
             }
         }
-        return true;
     }
-    return false;
+}
+
+///
+/// @brief Rewire value dependant slots.
+///
+/// @param[in] slot Slot to rewire.
+/// @param[in] start Starting slot of rewiring.
+/// @param[in] child Child node.
+/// @param[in] updateNumber Update number.
+/// @param[in, out] notifySlots Slots to notify.
+///
+auto AttributeNode::RewireValueDependantSlotsOnAddChild(
+  Shared<AttributeSlot> const& slot,
+  Shared<AttributeSlot> const& start,
+  Shared<AttributeNode> const& child,
+  UInt64 const updateNumber,
+  std::vector<Weak<AttributeSlot>>& notifySlots) -> void
+{
+    auto const valueDependantSlots = slot->GetValueDependantSlots();
+    for (auto i = SInt64(0); i < valueDependantSlots.GetSize(); ++i)
+    {
+        if (auto valueDependantSlot = valueDependantSlots.GetValueAt(i).Lock())
+        {
+            if (!valueDependantSlot->HasSourceDependentSlot())
+            {
+                if (valueDependantSlot->GetOwner() == child && valueDependantSlot != start)
+                {
+                    RewireSlotOnAddChild(valueDependantSlot, start, child, updateNumber, notifySlots);
+                }
+            }
+        }
+    }
 }
 
 ///
@@ -1066,7 +1130,7 @@ auto AttributeNode::UpdateSlotCacheRecursive(
 
     slot.DetachFromValueDependentSlots();
 
-    if (auto const function = slot.GetComputeFunction())
+    if (auto const& function = slot.GetComputeFunction())
     {
         auto const& references = slot.GetReferences();
 
@@ -1226,12 +1290,15 @@ auto AttributeNode::NotifyValueChangedRecursive(AttributeSlot& slot, UInt64 cons
         {
             slot.SetValueChanged(false);
 
-            if (auto const owner = slot.GetOwner())
+            if (slot.HasEventConnection())
             {
-                auto parameter = Event<AttributeEvent::ValueChanged>();
-                parameter->SetId(slot.GetDescription().Get().GetId());
-                auto event = Event<>(std::move(parameter));
-                slot.GetEventReceiver().SendEventDetached(event);
+                if (auto const owner = slot.GetOwner())
+                {
+                    auto parameter = Event<AttributeEvent::ValueChanged>();
+                    parameter->SetId(slot.GetDescription().Get().GetId());
+                    auto event = Event<>(std::move(parameter));
+                    slot.GetEventReceiver().SendEventDetached(event);
+                }
             }
         }
 
