@@ -16,6 +16,7 @@ fw_link_libraries(${LibraryName} PUBLIC
   Futurewalker::Animation
   Futurewalker::Graphics
   Futurewalker::Text
+  Futurewalker::Resource
 )
 
 if (WIN32)
