@@ -57,7 +57,7 @@ auto AttributeComputeFunction::MakeFunctionWrapper(F f) -> AttributeComputeFunct
     static auto constexpr argumentMapper = []<size_t... Seq>(std::index_sequence<Seq...>, auto& args, auto f) { return f(*args[Seq].template GetValue<std::tuple_element_t<Seq, types>>()...); };
 
     // You might have passed generic lambda object to this function, which is unsupported.
-    // `f` needs to be statelesss and convertible to function pointer.
+    // `f` needs to be stateless and convertible to function pointer.
     auto const fp = +f;
 
     return AttributeComputeFunction(

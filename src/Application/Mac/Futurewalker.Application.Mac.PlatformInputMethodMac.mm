@@ -344,7 +344,6 @@ auto PlatformInputMethodMac::Make(NSView* view) -> Shared<PlatformInputMethodMac
 }
 
 PlatformInputMethodMac::PlatformInputMethodMac(PassKey<PlatformInputMethodMac>, NSView* view)
-  : _view(view)
 {
     @autoreleasepool
     {

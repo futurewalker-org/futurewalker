@@ -980,7 +980,7 @@ auto AttributeNode::RewireSlotOnAddChild(
 ///
 /// @brief Rewire single slot.
 ///
-/// @param[in, out] slot Slot to rewire. 
+/// @param[in, out] slot Slot to rewire.
 /// @param[in] child Child node.
 /// @param[in] updateNumber Update number.
 /// @param[in, out] notifySlots Slots to notify
