@@ -114,6 +114,15 @@ auto PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(PlatformPoin
     auto const nanoseconds = SInt64(seconds * 1'000'000'000 + (remainder * 1'000'000'000) / frequency.QuadPart);
     parameter.SetTimestamp(MonotonicTime::MakeFromNanoseconds(nanoseconds));
 
+    auto windowRect = RECT();
+    ::GetWindowRect(hWnd, &windowRect);
+    auto clientRectPos = POINT();
+    ::ClientToScreen(hWnd, &clientRectPos);
+    clientRectPos.x -= windowRect.left;
+    clientRectPos.y -= windowRect.top;
+
+    auto const displayScale = ::GetDpiForWindow(hWnd) / DisplayScale(USER_DEFAULT_SCREEN_DPI);
+
     if (WM_MOUSEFIRST <= msg && msg <= WM_MOUSELAST)
     {
         auto clientX = GET_X_LPARAM(lParam);
@@ -127,16 +136,20 @@ auto PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(PlatformPoin
                 clientY = clientPoint.y;
             }
         }
-        auto clientRect = RECT();
-        ::GetClientRect(hWnd, &clientRect);
-        auto const displayScale = ::GetDpiForWindow(hWnd) / DisplayScale(USER_DEFAULT_SCREEN_DPI);
-        auto const x = UnitFunction::ConvertVpToDp(clientX + clientRect.left, displayScale);
-        auto const y = UnitFunction::ConvertVpToDp(clientY + clientRect.top, displayScale);
+
+        auto const x = UnitFunction::ConvertVpToDp(clientX + clientRectPos.x, displayScale);
+        auto const y = UnitFunction::ConvertVpToDp(clientY + clientRectPos.y, displayScale);
         parameter.SetPosition({x, y});
         auto const modifiers = ConvertMouseEventParamToModifierKeyFlags(wParam);
         auto const buttons = ConvertMouseEventParamToPointerButtonFlags(wParam);
         parameter.SetModifiers(modifiers);
         parameter.SetButtons(buttons);
+    }
+    else
+    {
+        auto const x = UnitFunction::ConvertVpToDp(clientRectPos.x, displayScale);
+        auto const y = UnitFunction::ConvertVpToDp(clientRectPos.y, displayScale);
+        parameter.SetPosition({x, y});
     }
 }
 
