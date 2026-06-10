@@ -925,7 +925,12 @@ auto PlatformWindowWin::WindowProcedure(PassKey<PlatformWindowContextWin>, HWND 
     {
         return HandleNcHitTest(hWnd, msg, wParam, lParam);
     }
-    else if (msg == WM_NCMOUSEHOVER || msg == WM_NCMOUSEHOVER || msg == WM_NCMOUSELEAVE || msg == WM_NCLBUTTONDOWN || msg == WM_NCLBUTTONDBLCLK || msg == WM_NCLBUTTONUP)
+    else if (
+      msg == WM_NCMOUSEHOVER || msg == WM_NCMOUSEHOVER || msg == WM_NCMOUSELEAVE ||    //
+      msg == WM_NCLBUTTONDOWN || msg == WM_NCLBUTTONDBLCLK || msg == WM_NCLBUTTONUP || //
+      msg == WM_NCRBUTTONDOWN || msg == WM_NCRBUTTONDBLCLK || msg == WM_NCRBUTTONUP || //
+      msg == WM_NCMBUTTONDOWN || msg == WM_NCMBUTTONDBLCLK || msg == WM_NCMBUTTONUP || //
+      msg == WM_NCXBUTTONDOWN || msg == WM_NCXBUTTONDBLCLK || msg == WM_NCXBUTTONUP)
     {
         return HandleNcMouse(hWnd, msg, wParam, lParam);
     }
