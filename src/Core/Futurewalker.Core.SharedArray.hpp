@@ -38,14 +38,18 @@ public:
         return GetSize() == 0;
     }
 
-    auto PushBack(T const& value) -> void
+    auto PushBack(T const& value) -> T&
     {
-        GetOrCreateMutableState().push_back(value);
+        auto& state = GetOrCreateMutableState();
+        state.push_back(value);
+        return state.back();
     }
 
-    auto PushBack(T&& value) -> void
+    auto PushBack(T&& value) -> T&
     {
-        GetOrCreateMutableState().push_back(std::move(value));
+        auto& state = GetOrCreateMutableState();
+        state.push_back(std::move(value));
+        return state.back();
     }
 
     auto Reserve(SInt64 const& capacity) -> void
@@ -68,6 +72,15 @@ public:
         throw Exception(ErrorCode::InvalidArgument);
     }
 
+    auto GetValues() const -> std::span<T const>
+    {
+        if (auto const state = GetImmutableState())
+        {
+            return *state;
+        }
+        return {};
+    }
+
     auto Erase(IndexType const index) -> void
     {
         if (auto const state = GetMutableState())
@@ -76,6 +89,15 @@ public:
             {
                 state->erase(state->begin() + static_cast<typename State::difference_type>(index));
             }
+        }
+    }
+
+    template <class F>
+    auto EraseIf(F&& f) -> void
+    {
+        if (auto const state = GetMutableState())
+        {
+            std::erase_if(*state, std::forward<F>(f));
         }
     }
 

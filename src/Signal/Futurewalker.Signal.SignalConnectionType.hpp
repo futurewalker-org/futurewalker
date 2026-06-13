@@ -9,14 +9,5 @@ namespace FW_EXPORT
 {
 class SignalConnection;
 class ScopedSignalConnection;
-
-///
-/// @brief Position of signal connection.
-///
-enum class SignalConnectPosition
-{
-    front, ///< Before other connections.
-    back,  ///< After other connections.
-};
 }
 }

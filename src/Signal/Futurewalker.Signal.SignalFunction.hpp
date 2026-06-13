@@ -49,9 +49,9 @@ public:
     /// @param f Slot function.
     ///
     template <class F, template <class> class Combiner, class R, class... ArgTypes>
-    static auto Connect(Signal<R(ArgTypes...), Combiner>& sig, F&& f, SignalConnectPosition pos) -> SignalConnection
+    static auto Connect(Signal<R(ArgTypes...), Combiner>& sig, F&& f) -> SignalConnection
     {
-        return sig.Connect(std::forward<F>(f), pos);
+        return sig.Connect(std::forward<F>(f));
     }
 
     ///
@@ -62,9 +62,9 @@ public:
     /// @param pos Position of new connection.
     ///
     template <class F, template <class> class Combiner, class R, class... ArgTypes>
-    static auto ConnectScoped(Signal<R(ArgTypes...), Combiner>& sig, F&& f, SignalConnectPosition pos) -> ScopedSignalConnection
+    static auto ConnectScoped(Signal<R(ArgTypes...), Combiner>& sig, F&& f) -> ScopedSignalConnection
     {
-        return sig.ConnectScoped(std::forward<F>(f), pos);
+        return sig.ConnectScoped(std::forward<F>(f));
     }
 
     ///
@@ -76,11 +76,10 @@ public:
     /// @param pos Position of new connection.
     ///
     template <class T, class F, template <class> class Combiner, class R, class... ArgTypes>
-    requires Concepts::SignalConnectableMember<T, F, R, ArgTypes...>
-    static auto Connect(Signal<R(ArgTypes...), Combiner>& sig, T& t, F f, SignalConnectPosition pos) -> SignalConnection
+        requires Concepts::SignalConnectableMember<T, F, R, ArgTypes...>
+    static auto Connect(Signal<R(ArgTypes...), Combiner>& sig, T& t, F&& f) -> SignalConnection
     {
-        auto slot = [f, &t](ArgTypes&&... args) { return std::invoke(f, t, std::forward<ArgTypes>(args)...); };
-        return sig.Connect(t.GetTracker(), slot, pos);
+        return sig.Connect(t.GetTracker(), t, std::forward<F>(f));
     }
 
     ///
@@ -92,11 +91,10 @@ public:
     /// @param pos Position of new connection.
     ///
     template <class T, class F, template <class> class Combiner, class R, class... ArgTypes>
-    requires Concepts::SignalConnectableFree<T, F, R, ArgTypes...>
-    static auto Connect(Signal<R(ArgTypes...), Combiner>& sig, T& t, F f, SignalConnectPosition pos) -> SignalConnection
+        requires Concepts::SignalConnectableFree<T, F, R, ArgTypes...>
+    static auto Connect(Signal<R(ArgTypes...), Combiner>& sig, T& t, F&& f) -> SignalConnection
     {
-        auto slot = [f](ArgTypes&&... args) { return std::invoke(f, std::forward<ArgTypes>(args)...); };
-        return sig.Connect(t.GetTracker(), slot, pos);
+        return sig.Connect(t.GetTracker(), std::forward<F>(f));
     }
 };
 }

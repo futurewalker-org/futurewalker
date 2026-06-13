@@ -2,38 +2,62 @@
 #pragma once
 
 #include "Futurewalker.Signal.SignalConnectionType.hpp"
-
-#include "Futurewalker.Core.Primitive.hpp"
-#include "Futurewalker.Core.NonCopyable.hpp"
-
-#include <boost/signals2.hpp>
+#include "Futurewalker.Signal.Slot.hpp"
 
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
-///
-/// @brief Signal connection handle.
-///
-class SignalConnection final
+class SignalConnection
 {
 public:
     SignalConnection() = default;
     SignalConnection(SignalConnection const&) = default;
-    SignalConnection& operator=(SignalConnection const&) = default;
+    auto operator=(SignalConnection const&) -> SignalConnection& = default;
 
-    auto IsConnected() const -> Bool;
-    auto Disconnect() -> void;
-    auto Swap(SignalConnection& other) noexcept -> void;
+    SignalConnection(SignalConnection&& other) noexcept
+      : _slot {std::move(other._slot)}
+    {
+    }
+
+    explicit SignalConnection(Weak<SlotImplBase> slot)
+      : _slot {std::move(slot)}
+    {
+    }
+
+    auto operator=(SignalConnection&& other) noexcept -> SignalConnection&
+    {
+        if (this != &other)
+        {
+            _slot = std::move(other._slot);
+        }
+        return *this;
+    }
+
+    auto IsConnected() const noexcept -> Bool
+    {
+        if (auto slot = _slot.Lock())
+        {
+            return slot->IsConnected();
+        }
+        return false;
+    }
+
+    auto Disconnect() noexcept -> void
+    {
+        if (auto slot = _slot.Lock())
+        {
+            return slot->Disconnect();
+        }
+    }
+
+    auto Swap(SignalConnection& other) noexcept -> void
+    {
+        std::swap(_slot, other._slot);
+    }
 
 private:
-    template <class Signature, template <class> class Combiner>
-    friend class Signal;
-
-    SignalConnection(boost::signals2::connection c);
-
-private:
-    boost::signals2::connection _connection;
+    Weak<SlotImplBase> _slot;
 };
 
 ///
@@ -43,15 +67,53 @@ class ScopedSignalConnection final : NonCopyable
 {
 public:
     ScopedSignalConnection() = default;
-    ~ScopedSignalConnection() noexcept;
-    ScopedSignalConnection(SignalConnection&& connection);
-    ScopedSignalConnection(ScopedSignalConnection&& other) noexcept;
-    ScopedSignalConnection& operator=(SignalConnection&& other) noexcept;
-    ScopedSignalConnection& operator=(ScopedSignalConnection&& other) noexcept;
 
-    auto IsConnected() const -> Bool;
-    auto Disconnect() -> void;
-    auto Swap(ScopedSignalConnection& other) noexcept -> void;
+    ~ScopedSignalConnection() noexcept
+    {
+        _connection.Disconnect();
+    }
+
+    ScopedSignalConnection(SignalConnection&& other)
+      : _connection {std::move(other)}
+    {
+    }
+
+    auto operator=(SignalConnection&& other) noexcept -> ScopedSignalConnection&
+    {
+        _connection.Disconnect();
+        _connection = std::move(other);
+        return *this;
+    }
+
+    ScopedSignalConnection(ScopedSignalConnection&& other) noexcept
+      : _connection {std::move(other._connection)}
+    {
+    }
+
+    auto operator=(ScopedSignalConnection&& other) noexcept -> ScopedSignalConnection&
+    {
+        if (this != &other)
+        {
+            _connection.Disconnect();
+            _connection = std::move(other._connection);
+        }
+        return *this;
+    }
+
+    auto IsConnected() const noexcept -> Bool
+    {
+        return _connection.IsConnected();
+    }
+
+    auto Disconnect() noexcept -> void
+    {
+        _connection.Disconnect();
+    }
+
+    auto Swap(ScopedSignalConnection& other) noexcept -> void
+    {
+        _connection.Swap(other._connection);
+    }
 
 private:
     SignalConnection _connection;

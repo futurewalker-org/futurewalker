@@ -2,11 +2,12 @@
 #pragma once
 
 #include "Futurewalker.Signal.SignalType.hpp"
+#include "Futurewalker.Signal.Slot.hpp"
 #include "Futurewalker.Signal.SignalConnection.hpp"
-#include "Futurewalker.Signal.SignalCombiner.hpp"
 
 #include "Futurewalker.Core.Primitive.hpp"
 #include "Futurewalker.Core.NonCopyable.hpp"
+#include "Futurewalker.Core.SharedArray.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -19,18 +20,9 @@ namespace FW_EXPORT
 /// @tparam R Result type of signal.
 /// @tparam ArgTypes Argument types of signal.
 ///
-/// This class wraps boost::signals2 to provide signal-slot features for trackable objects.
-///
 template <template <class> class Combiner, class R, class... ArgTypes>
 class Signal<R(ArgTypes...), Combiner> final : NonCopyable
 {
-    using ResultType = R;
-    using CombinerType = boost::signals2::keywords::combiner_type<Combiner<ResultType>>;
-    using SignatureType = boost::signals2::keywords::signature_type<R(ArgTypes...)>;
-    using SignalType = boost::signals2::signal_type<SignatureType, CombinerType>::type;
-    using SlotFunctionType = boost::function<R(ArgTypes...)>;
-    using SlotType = boost::signals2::slot<R(ArgTypes...), SlotFunctionType>;
-
 public:
     ///
     /// @brief Default constructor.
@@ -41,8 +33,8 @@ public:
     /// @brief Move constructor.
     ///
     Signal(Signal&& other) noexcept
+      : _slots(std::move(other._slots))
     {
-        _signal.swap(other._signal);
     }
 
     ///
@@ -50,8 +42,10 @@ public:
     ///
     Signal& operator=(Signal&& other) noexcept
     {
-        auto tmp = Signal(std::move(other));
-        Swap(tmp);
+        if (&other != this)
+        {
+            _slots = std::move(other._slots);
+        }
         return *this;
     }
 
@@ -60,7 +54,7 @@ public:
     ///
     void Swap(Signal& other) noexcept
     {
-        _signal.swap(other._signal);
+        std::swap(_slots, other._slots);
     }
 
     ///
@@ -68,7 +62,7 @@ public:
     ///
     void DisconnectAll()
     {
-        return _signal.disconnect_all_slots();
+        _slots.Clear();
     }
 
     ///
@@ -76,7 +70,14 @@ public:
     ///
     auto IsEmpty() const -> Bool
     {
-        return _signal.empty();
+        for (auto const& slot : _slots.GetValues())
+        {
+            if (slot.IsConnected())
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     ///
@@ -84,66 +85,102 @@ public:
     ///
     auto GetSlotCount() const -> SInt64
     {
-        return SInt64(_signal.num_slots());
+        auto count = SInt64(0);
+        for (auto const& slot : _slots.GetValues())
+        {
+            if (slot.IsConnected())
+            {
+                ++count;
+            }
+        }
+        return count;
     }
 
     ///
     /// @brief Callable operator.
     ///
-    template <class... Args>
-    auto operator()(Args&&... args)
+    auto operator()(ArgTypes const&... args) -> typename Combiner<R>::ResultType
     {
-        return _signal(std::forward<Args>(args)...);
-    }
-
-    ///
-    /// @brief Connect slot.
-    ///
-    auto Connect(SlotFunctionType slot, SignalConnectPosition pos) -> SignalConnection
-    {
-        return SignalConnection(_signal.connect(std::move(slot), InternalGetBoostConnectPosition(pos)));
-    }
-
-    ///
-    /// @brief Connect slot.
-    ///
-    auto ConnectScoped(SlotFunctionType slot, SignalConnectPosition pos) -> ScopedSignalConnection
-    {
-        return ScopedSignalConnection(Connect(std::move(slot), pos));
-    }
-
-    ///
-    /// @brief Connect with automatic tracking.
-    ///
-    auto Connect(Weak<void> t, SlotFunctionType slot, SignalConnectPosition pos) -> SignalConnection
-    {
-        return SignalConnection(_signal.connect(SlotType(std::move(slot)).track_foreign(SignalWeakWrapper(t)), InternalGetBoostConnectPosition(pos)));
-    }
-
-    ///
-    /// @brief Connect with automatic tracking.
-    ///
-    auto Connect(Weak<void const> t, SlotFunctionType slot, SignalConnectPosition pos) -> SignalConnection
-    {
-        return SignalConnection(_signal.connect(SlotType(std::move(slot)).track_foreign(SignalWeakWrapper(t)), InternalGetBoostConnectPosition(pos)));
-    }
-
-private:
-    auto InternalGetBoostConnectPosition(SignalConnectPosition const pos) const -> boost::signals2::connect_position
-    {
-        switch (pos)
+        struct Collector
         {
-            case SignalConnectPosition::front:
-                return boost::signals2::connect_position::at_front;
-            case SignalConnectPosition::back:
-                return boost::signals2::connect_position::at_back;
-        }
-        return boost::signals2::connect_position::at_back;
+            Signal& _self;
+
+            Collector(Signal& self) noexcept
+              : _self {self}
+            {
+                ++_self._emissionDepth;
+            }
+
+            ~Collector() noexcept
+            {
+                if (--_self._emissionDepth == 0U)
+                {
+                    _self._slots.EraseIf([](auto const& slot) { return !slot.IsConnected(); });
+                }
+            }
+        };
+        auto collector = Collector(*this);
+        auto slots = _slots;
+        return Combiner<R>()(slots.GetValues(), args...);
+    }
+
+    ///
+    /// @brief Connect slot.
+    ///
+    template <class F>
+    auto Connect(F&& f) -> SignalConnection
+    {
+        return SignalConnection(_slots.PushBack(Slot<R(ArgTypes...)>::Make(std::forward<F>(f))).GetImplBase());
+    }
+
+    ///
+    /// @brief Connect slot.
+    ///
+    template <class F>
+    auto ConnectScoped(F&& f) -> ScopedSignalConnection
+    {
+        return SignalConnection(_slots.PushBack(Slot<R(ArgTypes...)>::Make(std::forward<F>(f))).GetImplBase());
+    }
+
+    ///
+    /// @brief Connect with automatic tracking.
+    ///
+    template <class F>
+    auto Connect(Weak<void const> w, F&& f) -> SignalConnection
+    {
+        return SignalConnection(_slots.PushBack(Slot<R(ArgTypes...)>::Make(std::move(w), std::forward<F>(f))).GetImplBase());
+    }
+
+    ///
+    /// @brief Connect with automatic tracking.
+    ///
+    template <class F>
+    auto ConnectScoped(Weak<void const> w, F&& f) -> ScopedSignalConnection
+    {
+        return SignalConnection(_slots.PushBack(Slot<R(ArgTypes...)>::Make(std::move(w), std::forward<F>(f))).GetImplBase());
+    }
+
+    ///
+    /// @brief Connect with automatic tracking.
+    ///
+    template <class T, class F>
+    auto Connect(Weak<void const> w, T& t, F&& f) -> SignalConnection
+    {
+        return SignalConnection(_slots.PushBack(Slot<R(ArgTypes...)>::Make(std::move(w), t, std::forward<F>(f))).GetImplBase());
+    }
+
+    ///
+    /// @brief Connect with automatic tracking.
+    ///
+    template <class T, class F>
+    auto ConnectScoped(Weak<void const> w, T& t, F&& f) -> ScopedSignalConnection
+    {
+        return SignalConnection(_slots.PushBack(Slot<R(ArgTypes...)>::Make(std::move(w), t, std::forward<F>(f))).GetImplBase());
     }
 
 private:
-    SignalType _signal;
+    SharedArray<Slot<R(ArgTypes...)>> _slots;
+    UInt64 _emissionDepth = 0U;
 };
-
 }
 }
