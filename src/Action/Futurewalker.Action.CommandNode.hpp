@@ -15,6 +15,8 @@
 #include "Futurewalker.Core.PassKey.hpp"
 #include "Futurewalker.Core.HashMap.hpp"
 
+#include <vector>
+
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT

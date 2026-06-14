@@ -69,7 +69,7 @@ auto EventReceiver::Connect(Receiver& receiver, Function&& function) -> SignalCo
 {
     auto& eventReceiver = receiver.GetEventReceiver();
     auto slot = [function](Event<>& event) -> Lazy<Bool> { return AsyncFunction::Fn([=, &event]() -> Lazy<Bool> { co_return co_await std::invoke(function, event); }); };
-    return SignalFunction::Connect(eventReceiver.GetSignal(), std::move(slot), SignalConnectPosition::front);
+    return SignalFunction::Connect(eventReceiver.GetSignal(), std::move(slot));
 }
 
 ///
@@ -95,7 +95,7 @@ auto EventReceiver::Connect(Receiver& receiver, Observer&& observer, Function&& 
             co_return false;
         });
     };
-    return SignalFunction::Connect(eventReceiver.GetSignal(), observer, std::move(slot), SignalConnectPosition::front);
+    return SignalFunction::Connect(eventReceiver.GetSignal(), observer, std::move(slot));
 }
 }
 }
