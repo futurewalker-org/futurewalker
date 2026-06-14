@@ -2,174 +2,357 @@
 #pragma once
 
 #include "Futurewalker.Core.SharedArrayType.hpp"
-#include "Futurewalker.Core.PointerIterator.hpp"
-#include "Futurewalker.Core.Memory.hpp"
+#include "Futurewalker.Core.SharedArrayBuffer.hpp"
 #include "Futurewalker.Core.Exception.hpp"
 
-#include <vector>
+#include <new>
+#include <span>
+#include <utility>
 
 namespace FW_DETAIL_NS
 {
+///
+/// @brief Copy-on-write dynamic array with shared storage.
+///
+/// Dynamic array backed by a reference-counted contiguous block.
+///
 template <class T>
 class SharedArray
 {
 public:
     using SizeType = SInt64;
-    using IndexType = SInt64; 
+    using IndexType = SInt64;
 
+    ///
+    /// @brief Default constructor.
+    ///
     SharedArray() noexcept = default;
-    SharedArray(SharedArray const&) noexcept = default;
-    SharedArray(SharedArray&&) noexcept = default;
 
-    auto operator=(SharedArray const&) noexcept -> SharedArray& = default;
-    auto operator=(SharedArray&&) noexcept -> SharedArray& = default;
+    ///
+    /// @brief Copy constructor.
+    ///
+    SharedArray(SharedArray const& other) noexcept
+      : _buffer {other._buffer}
+    {
+        if (_buffer)
+        {
+            _buffer->Retain();
+        }
+    }
 
+    ///
+    /// @brief Move constructor.
+    ///
+    SharedArray(SharedArray&& other) noexcept
+      : _buffer {other._buffer}
+    {
+        other._buffer = nullptr;
+    }
+
+    ///
+    /// @brief Copy assignment operator. 
+    ///
+    auto operator=(SharedArray const& other) noexcept -> SharedArray&
+    {
+        if (this != &other)
+        {
+            if (_buffer)
+            {
+                _buffer->Release();
+            }
+
+            if (other._buffer)
+            {
+                other._buffer->Retain();
+            }
+            _buffer = other._buffer;
+        }
+        return *this;
+    }
+
+    ///
+    /// @brief Move assignment operator. 
+    ///
+    auto operator=(SharedArray&& other) noexcept -> SharedArray&
+    {
+        if (this != &other)
+        {
+            if (_buffer)
+            {
+                _buffer->Release();
+            }
+            _buffer = other._buffer;
+            other._buffer = nullptr;
+        }
+        return *this;
+    }
+
+    ///
+    /// @brief Destructor.
+    ///
+    ~SharedArray() noexcept
+    {
+        if (_buffer)
+        {
+            _buffer->Release();
+        }
+    }
+
+    ///
+    /// @brief Get number of elements in array.
+    ///
     auto GetSize() const noexcept -> SizeType
     {
-        if (auto const state = GetImmutableState())
+        if (_buffer)
         {
-            return std::ssize(*state);
+            return _buffer->GetSize();
         }
         return 0;
     }
 
+    ///
+    /// @brief Get capacity of elements in array.
+    ///
+    auto GetCapacity() const noexcept -> SizeType
+    {
+        if (_buffer)
+        {
+            return _buffer->GetCapacity();
+        }
+        return 0;
+    }
+
+    ///
+    /// @brief Check if the array is empty.
+    ///
     auto IsEmpty() const noexcept -> Bool
     {
         return GetSize() == 0;
     }
 
-    auto PushBack(T const& value) -> T&
+    ///
+    /// @brief Push-back element.
+    ///
+    auto PushBack(T value) -> T&
     {
-        auto& state = GetOrCreateMutableState();
-        state.push_back(value);
-        return state.back();
+        auto const buffer = EnsureMutableBufferForSize(GetSize() + 1, true);
+        auto const bufferSize = buffer->GetSize();
+        auto const slot = buffer->GetData() + bufferSize;
+        ::new (static_cast<void*>(slot)) T(std::move(value));
+        buffer->SetSize(bufferSize + 1);
+        return *slot;
     }
 
-    auto PushBack(T&& value) -> T&
+    ///
+    /// @brief Reserve capacity.
+    ///
+    auto Reserve(SizeType const capacity) -> void
     {
-        auto& state = GetOrCreateMutableState();
-        state.push_back(std::move(value));
-        return state.back();
-    }
-
-    auto Reserve(SInt64 const& capacity) -> void
-    {
-        if (capacity > 0)
+        if (capacity > SizeType(0))
         {
-            GetOrCreateMutableState().reserve(static_cast<size_t>(capacity));
+            EnsureMutableBufferForSize(static_cast<std::int64_t>(capacity), false);
         }
     }
 
+    ///
+    /// @brief Get value at specified index.
+    ///
+    /// @throw Exception when index was out of range.
+    ///
     auto GetValueAt(IndexType const index) const -> T const&
     {
-        if (auto const state = GetImmutableState())
+        if (_buffer)
         {
-            if (0 <= index && index < std::ssize(*state))
+            if (0 <= index && index < _buffer->GetSize())
             {
-                return (*state)[static_cast<size_t>(index)];
+                return _buffer->GetData()[index];
             }
         }
         throw Exception(ErrorCode::InvalidArgument);
     }
 
+    ///
+    /// @brief Get view of elements.
+    ///
     auto GetValues() const -> std::span<T const>
     {
-        if (auto const state = GetImmutableState())
+        if (_buffer)
         {
-            return *state;
+            auto const data = static_cast<T const*>(_buffer->GetData());
+            auto const size = static_cast<std::size_t>(_buffer->GetSize());
+            return std::span<T const>(data, size);
         }
         return {};
     }
 
+    ///
+    /// @brief Erase element at specific index.
+    ///
     auto Erase(IndexType const index) -> void
     {
-        if (auto const state = GetMutableState())
+        if (!_buffer)
         {
-            if (0 <= index && index < std::ssize(*state))
-            {
-                state->erase(state->begin() + static_cast<typename State::difference_type>(index));
-            }
+            return;
         }
+
+        auto const size = _buffer->GetSize();
+        if (index < 0 || size <= index)
+        {
+            return;
+        }
+
+        auto const buffer = EnsureMutableBufferForSize(size, false);
+        auto const data = buffer->GetData();
+        for (auto i = index; i < size - 1; ++i)
+        {
+            data[i] = std::move(data[i + 1]);
+        }
+        data[size - 1].~T();
+        buffer->SetSize(size - 1);
     }
 
+    ///
+    /// @brief Erase elements based on condition.
+    ///
     template <class F>
     auto EraseIf(F&& f) -> void
     {
-        if (auto const state = GetMutableState())
+        if (!_buffer || _buffer->GetSize() == 0)
         {
-            std::erase_if(*state, std::forward<F>(f));
+            return;
         }
+
+        auto const buffer = EnsureMutableBufferForSize(_buffer->GetSize(), false);
+        auto const data = buffer->GetData();
+        auto const size = buffer->GetSize();
+        auto write = SizeType(0);
+        for (auto read = SizeType(0); read < size; ++read)
+        {
+            if (f(data[read]))
+            {
+                continue;
+            }
+            if (write != read)
+            {
+                data[write] = std::move(data[read]);
+            }
+            ++write;
+        }
+        for (auto k = write; k < size; ++k)
+        {
+            data[k].~T();
+        }
+        buffer->SetSize(write);
     }
 
+    ///
+    /// @brief Erase element by single swap with last element.
+    ///
     auto EraseUnordered(IndexType const index) -> void
     {
-        if (auto const state = GetMutableState())
+        if (!_buffer)
         {
-            auto const size = std::ssize(*state);
-            if (0 <= index && index < size)
-            {
-                auto const last = size - 1;
-                if (index != last)
-                {
-                    (*state)[static_cast<size_t>(index)] = std::move(state->back());
-                }
-                state->pop_back();
-            }
+            return;
         }
+
+        auto const size = _buffer->GetSize();
+        if (index < 0 || size <= index)
+        {
+            return;
+        }
+
+        auto const buffer = EnsureMutableBufferForSize(size, false);
+        auto const data = buffer->GetData();
+        auto const last = size - 1;
+        if (index != last)
+        {
+            data[index] = std::move(data[last]);
+        }
+        data[last].~T();
+        buffer->SetSize(last);
     }
 
+    ///
+    /// @brief Clear elements.
+    ///
     auto Clear() -> void
     {
-        if (_state)
+        if (_buffer)
         {
-            if (_state.GetUseCount() == 1)
+            if (_buffer->GetUseCount() == 1)
             {
-                _state->clear();
+                _buffer->Clear();
             }
             else
             {
-                _state.Reset();
+                _buffer->Release();
+                _buffer = nullptr;
             }
         }
     }
 
 private:
-    using State = std::vector<T>;
-    Shared<State> _state;
+    using BufferType = SharedArrayBuffer<T>;
+
+    ///
+    /// @brief Ensure the buffer is uniquely owned with capacity for at least requiredSize elements.
+    ///
+    /// @param[in] requiredSize New required size of the buffer. Should be larger than current size of buffer.
+    /// @param[in] allowGeometricGrowth Allow capacity to glow exponentially to cover required size.
+    ///
+    /// @return Latest value of _buffer.
+    ///
+    /// @note This function only resizes the buffer, so requiredSize can be used to assign new capacity with allowGeometricGrowth==false.
+    /// @note Caller must assign new capacity to the buffer after constructing new element on returned buffer.
+    ///
+    auto EnsureMutableBufferForSize(SizeType requiredSize, Bool const allowGeometricGrowth) -> Pointer<BufferType>
+    {
+        auto const size = _buffer ? _buffer->GetSize() : 0;
+        if (requiredSize < size)
+        {
+            requiredSize = size;
+        }
+
+        if (_buffer)
+        {
+            auto const isUnique = _buffer->GetUseCount() == 1;
+            auto const capacity = _buffer->GetCapacity();
+
+            if (isUnique && capacity >= requiredSize)
+            {
+                return _buffer;
+            }
+
+            auto requiredCapacity = requiredSize;
+            if (allowGeometricGrowth)
+            {
+                requiredCapacity = capacity == 0 ? 1 : capacity;
+                while (requiredSize > requiredCapacity)
+                {
+                    requiredCapacity *= 2;
+                }
+            }
+
+            auto buffer = Pointer<BufferType>(nullptr);
+            if (isUnique)
+            {
+                buffer = BufferType::CreateAndMoveFrom(*_buffer, requiredCapacity);
+            }
+            else
+            {
+                buffer = BufferType::CreateAndCopyFrom(*_buffer, requiredCapacity);
+            }
+            _buffer->Release();
+            _buffer = buffer;
+        }
+        else
+        {
+            _buffer = BufferType::Create(requiredSize);
+        }
+        return _buffer;
+    }
 
 private:
-    auto GetImmutableState() const -> Pointer<State const>
-    {
-        return _state.GetPointer();
-    }
-
-    auto GetMutableState() -> Pointer<State>
-    {
-        if (_state)
-        {
-            if (_state.GetUseCount() == 1)
-            {
-                return _state.GetPointer();
-            }
-            _state = Shared<State>::Make(*_state);
-            return _state.GetPointer();
-        }
-        return nullptr;
-    }
-
-    auto GetOrCreateMutableState() -> State&
-    {
-        if (_state)
-        {
-            if (_state.GetUseCount() == 1)
-            {
-                return *_state;
-            }
-            _state = Shared<State>::Make(*_state);
-            return *_state;
-        }
-        _state = Shared<State>::Make();
-        return *_state;
-    }
+    Pointer<BufferType> _buffer = nullptr;
 };
 }
