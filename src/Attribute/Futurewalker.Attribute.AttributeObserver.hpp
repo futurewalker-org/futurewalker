@@ -44,6 +44,16 @@ public:
     }
 
     ///
+    /// @brief Move constructor.
+    ///
+    AttributeObserver(AttributeObserver&& other) noexcept
+      : _node {std::move(other._node)}
+      , _description {std::move(other._description)}
+      , _signalConnections {std::move(other._signalConnections)}
+    {
+    }
+
+    ///
     /// @brief Destructor.
     ///
     ~AttributeObserver()
@@ -52,6 +62,20 @@ public:
         {
             connection.Disconnect();
         }
+    }
+
+    ///
+    /// @brief Move assignment operator.
+    ///
+    auto operator=(AttributeObserver&& other) noexcept -> AttributeObserver&
+    {
+        if (this != &other)
+        {
+            _node = std::move(other._node);
+            _description = std::move(other._description);
+            _signalConnections = std::move(other._signalConnections);
+        }
+        return *this;
     }
 
     ///

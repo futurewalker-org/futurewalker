@@ -282,7 +282,7 @@ private:
 
 private:
     Shared<EventReceiver> _eventReceiver;
-    Unique<AttributeObserver<T>> _observer;
+    Optional<AttributeObserver<T>> _observer;
     ScopedSignalConnection _connection;
 };
 }
