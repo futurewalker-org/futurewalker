@@ -26,9 +26,9 @@ TEST_CASE("AttributeNode")
     {
         auto node = AttributeNode::Make();
         auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*node);
-        REQUIRE(*observer->GetValue() == 42);
-        observer->SetValue(24);
-        REQUIRE(*observer->GetValue() == 24);
+        REQUIRE(*observer.GetValue() == 42);
+        observer.SetValue(24);
+        REQUIRE(*observer.GetValue() == 24);
     }
 
     SECTION("simple child get/set")
@@ -38,9 +38,9 @@ TEST_CASE("AttributeNode")
         node->AddChild(child);
 
         auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*child);
-        REQUIRE(*observer->GetValue() == 42);
-        observer->SetValue(24);
-        REQUIRE(*observer->GetValue() == 24);
+        REQUIRE(*observer.GetValue() == 42);
+        observer.SetValue(24);
+        REQUIRE(*observer.GetValue() == 24);
     }
 
     SECTION("simple child overloading")
@@ -53,9 +53,9 @@ TEST_CASE("AttributeNode")
 
         auto childobserver = AttributeNode::GetObserver<&IntegerAttribute>(*child);
 
-        parentobserver->SetValue(24);
+        parentobserver.SetValue(24);
 
-        REQUIRE(*childobserver->GetValue() == 24);
+        REQUIRE(*childobserver.GetValue() == 24);
     }
 
     SECTION("reference to same node")
@@ -65,7 +65,7 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
             auto node = AttributeNode::Make();
             auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*node);
-            REQUIRE(*observer->GetValue() == 42);
+            REQUIRE(*observer.GetValue() == 42);
         }
 
         SECTION("get default value from other value")
@@ -74,10 +74,10 @@ TEST_CASE("AttributeNode")
             auto node = AttributeNode::Make();
             {
                 auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*node);
-                observer->SetValue(24);
+                observer.SetValue(24);
             }
             auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*node);
-            REQUIRE(*observer->GetValue() == 24);
+            REQUIRE(*observer.GetValue() == 24);
         }
 
         SECTION("changing value")
@@ -188,19 +188,19 @@ TEST_CASE("AttributeNode")
 
         {
             auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*node);
-            observer->SetValue(24);
+            observer.SetValue(24);
         }
         {
             auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*child);
-            REQUIRE(*observer->GetValue() == 24);
+            REQUIRE(*observer.GetValue() == 24);
         }
         {
             auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*child);
-            observer->SetValue(-1);
+            observer.SetValue(-1);
         }
         {
             auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*child);
-            REQUIRE(*observer->GetValue() == -1);
+            REQUIRE(*observer.GetValue() == -1);
         }
     }
 
@@ -326,15 +326,15 @@ TEST_CASE("AttributeNode")
         {
             {
                 auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*child);
-                REQUIRE(*observer->GetValue() == 42);
+                REQUIRE(*observer.GetValue() == 42);
             }
             {
                 auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*child);
-                observer->SetValue(-1);
+                observer.SetValue(-1);
             }
             {
                 auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*child);
-                REQUIRE(*observer->GetValue() == -1);
+                REQUIRE(*observer.GetValue() == -1);
             }
         }
     }
