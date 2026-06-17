@@ -77,9 +77,9 @@ public:
     static auto ConnectAttributeEvent(Owner& owner, StaticAttributeRef<T> attribute, Observer&& observer, Function&& function) -> SignalConnection;
 
     template <const auto* Attribute, class Owner>
-    static auto GetObserver(Owner& owner) -> Unique<AttributeObserver<ValueTypeOf<Attribute>>>;
+    static auto GetObserver(Owner& owner) -> AttributeObserver<ValueTypeOf<Attribute>>;
     template <class T, class Owner>
-    static auto GetObserver(Owner& owner, StaticAttributeRef<T> attribute) -> Unique<AttributeObserver<T>>;
+    static auto GetObserver(Owner& owner, StaticAttributeRef<T> attribute) -> AttributeObserver<T>;
 
 private:
     auto GetSelf() -> Shared<AttributeNode>;
@@ -363,7 +363,7 @@ auto AttributeNode::ConnectAttributeEvent(Owner& owner, StaticAttributeRef<T> at
 /// @return Observer of the attribute.
 ///
 template <auto const* Attribute, class Owner>
-auto AttributeNode::GetObserver(Owner& owner) -> Unique<AttributeObserver<ValueTypeOf<Attribute>>>
+auto AttributeNode::GetObserver(Owner& owner) -> AttributeObserver<ValueTypeOf<Attribute>>
 {
     static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
     auto constexpr attribute = StaticReference(*Attribute);
@@ -379,15 +379,15 @@ auto AttributeNode::GetObserver(Owner& owner) -> Unique<AttributeObserver<ValueT
 /// @return Observer of the attribute.
 ///
 template <class T, class Owner>
-auto AttributeNode::GetObserver(Owner& owner, StaticAttributeRef<T> attribute) -> Unique<AttributeObserver<T>>
+auto AttributeNode::GetObserver(Owner& owner, StaticAttributeRef<T> attribute) -> AttributeObserver<T>
 {
     if (CheckReferenceLoop(attribute))
     {
         auto& node = owner.GetAttributeNode();
         node.AddAttributeSlot(attribute);
-        return Unique<AttributeObserver<T>>::Make(PassKey<AttributeNode>(), node._self, attribute);
+        return AttributeObserver<T>(PassKey<AttributeNode>(), node._self, attribute);
     }
-    return Unique<AttributeObserver<T>>::Make(PassKey<AttributeNode>(), Weak<AttributeNode>(), attribute);
+    return AttributeObserver<T>(PassKey<AttributeNode>(), Weak<AttributeNode>(), attribute);
 }
 }
 }
