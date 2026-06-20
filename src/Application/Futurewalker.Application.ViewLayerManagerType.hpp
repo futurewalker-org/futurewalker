@@ -15,6 +15,5 @@ using ViewLayerManagerMakeFunction = Function<Shared<ViewLayer>()>;
 using ViewLayerManagerMakeFunctionMap = HashMap<ViewLayerKind, ViewLayerManagerMakeFunction>;
 
 extern UniqueViewLayerKind ViewLayerKindNormal;   // A kind of plain ViewLayer instances.
-extern UniqueViewLayerKind ViewLayerKindDrawable; // A kind of DrawableViewLayer instances.
 }
 }

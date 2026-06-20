@@ -73,7 +73,6 @@ private:
     Bool _invalidated = true;
     Bool _invalidatedPath = true;
     std::vector<SubLayerInfo> _subLayerInfo;
-    ViewLayerId _drawableLayerId = ViewLayerId(0U);
     Shared<Graphics::DisplayList> _displayList;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;

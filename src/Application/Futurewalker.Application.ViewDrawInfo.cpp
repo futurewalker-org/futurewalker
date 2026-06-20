@@ -34,7 +34,6 @@ auto AlignBoundsToPixelGridByExpand(Rect<Dp> const& bounds, DisplayScale const d
 ///
 ViewDrawInfo::ViewDrawInfo()
 {
-    _drawableLayerId = AddSubLayerInfo(ViewLayerKindDrawable);
 }
 
 ///
@@ -174,24 +173,19 @@ auto ViewDrawInfo::UpdateLayers(ViewLayer& layer) -> void
     layer.SetClipMode(_clipMode);
     layer.SetOpacity(_opacity);
 
-    if (const auto drawableLayer = GetSubLayer(_drawableLayerId))
+    if (_displayList && !_displayList->GetBounds().IsEmpty())
     {
-        if (_displayList && !_displayList->GetBounds().IsEmpty())
-        {
-            // We assume origin of the bounds is properly aligned by layout algorithm.
-            auto const bounds = AlignBoundsToPixelGridByExpand(_displayList->GetBounds(), _displayScale, _backingScale);
-            auto const offset = bounds.GetPosition().As<Vector>();
+        // We assume origin of the bounds is properly aligned by layout algorithm.
+        auto const bounds = AlignBoundsToPixelGridByExpand(_displayList->GetBounds(), _displayScale, _backingScale);
+        auto const offset = bounds.GetPosition().As<Vector>();
 
-            drawableLayer->SetOffset(offset);
-            drawableLayer->SetSize(bounds.GetSize());
-            drawableLayer->SetDisplayList(_displayList);
-            drawableLayer->SetDisplayListOffset(-offset);
-        }
-        else
-        {
-            drawableLayer->SetDisplayList(nullptr);
-            drawableLayer->SetDisplayListOffset({});
-        }
+        layer.SetDisplayList(_displayList);
+        layer.SetDisplayListOffset({});
+    }
+    else
+    {
+        layer.SetDisplayList(nullptr);
+        layer.SetDisplayListOffset({});
     }
 }
 

@@ -8,7 +8,6 @@ namespace FW_DETAIL_NS
 namespace FW_EXPORT
 {
 UniqueViewLayerKind ViewLayerKindNormal;   // A kind of plain ViewLayer instances.
-UniqueViewLayerKind ViewLayerKindDrawable; // A kind of DrawableViewLayer instances.
 }
 
 ///
@@ -21,7 +20,6 @@ ViewLayerManager::ViewLayerManager(Shared<PlatformViewLayerContext> const& viewL
   : _viewLayerContext {viewLayerContext}
 {
     Register(ViewLayerKindNormal, [&] { return ViewLayer::Make(_viewLayerContext->MakeViewLayer()); });
-    Register(ViewLayerKindDrawable, [&] { return ViewLayer::Make(_viewLayerContext->MakeViewLayer()); });
 }
 
 ///
