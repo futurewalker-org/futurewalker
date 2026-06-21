@@ -12,6 +12,7 @@
 #include "Futurewalker.Core.Function.hpp"
 #include "Futurewalker.Core.MonotonicTime.hpp"
 #include "Futurewalker.Core.Blank.hpp"
+#include "Futurewalker.Core.PassKey.hpp"
 
 #include <thread>
 #include <mutex>
@@ -33,25 +34,28 @@ class PlatformVsyncProviderWin : NonCopyable
     };
 
 public:
-    PlatformVsyncProviderWin();
+    static auto Make() -> Shared<PlatformVsyncProviderWin>;
+
+    PlatformVsyncProviderWin(PassKey<PlatformVsyncProviderWin>);
     ~PlatformVsyncProviderWin();
 
     auto GetCurrentFrameTime() const -> MonotonicTime;
     auto PostFrameCallback(Weak<void> data, PlatformVsyncCallbackFunction callback) -> void;
 
 private:
+    auto HasCallback() const -> Bool;
     auto GetCallbacks() -> std::vector<CallbackData>;
     auto WaitForCallbackOnThread() -> Bool;
 
     auto RequestStop() -> void;
     auto StopRequested() const -> Bool;
 
-    static auto DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, std::vector<CallbackData> const callbacks, std::weak_ptr<Blank> const tracker) -> Task<void>;
+    static auto DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, Weak<PlatformVsyncProviderWin> const weakSelf) -> Task<void>;
 
 private:
+    Weak<PlatformVsyncProviderWin> _self;
     mutable std::mutex _mutex;
     std::condition_variable _condVar;
-    std::shared_ptr<Blank> _tracker;
     std::vector<CallbackData> _callbacks;
     std::jthread _thread;
     Bool _stop = false;

@@ -14,13 +14,18 @@
 
 namespace FW_DETAIL_NS
 {
+auto PlatformVsyncProviderWin::Make() -> Shared<PlatformVsyncProviderWin>
+{
+    auto vsyncProvider = Shared<PlatformVsyncProviderWin>::Make(PassKey<PlatformVsyncProviderWin>());
+    vsyncProvider->_self = vsyncProvider;
+    return vsyncProvider;
+}
+
 ///
 /// @brief Constructor.
 ///
-PlatformVsyncProviderWin::PlatformVsyncProviderWin()
+PlatformVsyncProviderWin::PlatformVsyncProviderWin(PassKey<PlatformVsyncProviderWin>)
 {
-    _tracker = std::make_shared<Blank>();
-
     _event = ::CreateEventW(NULL, FALSE, FALSE, NULL);
     if (!_event)
     {
@@ -33,7 +38,7 @@ PlatformVsyncProviderWin::PlatformVsyncProviderWin()
 
         while (true)
         {
-            this->WaitForCallbackOnThread();
+            WaitForCallbackOnThread();
 
             const auto count = UINT(1);
             const auto result = ::DCompositionWaitForCompositorClock(count, &event, INFINITE);
@@ -49,10 +54,9 @@ PlatformVsyncProviderWin::PlatformVsyncProviderWin()
                     .targetTimestamp = GetCurrentFrameTime(),
                 };
 
-                auto callbacks = this->GetCallbacks();
-                if (!callbacks.empty())
+                if (HasCallback())
                 {
-                    AsyncFunction::Spawn(DispatchCallbacks(frameInfo, std::move(callbacks), _tracker)).Detach();
+                    AsyncFunction::Spawn(DispatchCallbacks(frameInfo, _self)).Detach();
                 }
             }
             else if (result == WAIT_TIMEOUT || result == WAIT_FAILED)
@@ -116,6 +120,15 @@ auto PlatformVsyncProviderWin::PostFrameCallback(Weak<void> data, PlatformVsyncC
 }
 
 ///
+/// @brief Check if callback exists.
+///
+auto PlatformVsyncProviderWin::HasCallback() const -> Bool
+{
+    auto lock = std::unique_lock(_mutex);
+    return !_callbacks.empty();
+}
+
+///
 /// @brief Returns true if there is a callback.
 ///
 auto PlatformVsyncProviderWin::GetCallbacks() -> std::vector<CallbackData>
@@ -159,14 +172,15 @@ auto PlatformVsyncProviderWin::StopRequested() const -> Bool
 ///
 /// @return A task.
 ///
-auto PlatformVsyncProviderWin::DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, std::vector<CallbackData> const callbacks, std::weak_ptr<Blank> const tracker) -> Task<void>
+auto PlatformVsyncProviderWin::DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, Weak<PlatformVsyncProviderWin> const weakSelf) -> Task<void>
 {
     try
     {
         co_await MainThread::Schedule();
 
-        if (!tracker.expired())
+        if (auto const self = weakSelf.Lock())
         {
+            auto const callbacks = self->GetCallbacks();
             for (auto const& callback : callbacks)
             {
                 if (auto const data = callback.data.Lock())
@@ -191,6 +205,6 @@ auto PlatformVsyncProviderWin::DispatchCallbacks(PlatformVsyncFrameInfo const fr
 ///
 auto Locator::Resolver<PlatformVsyncProviderWin>::Resolve() -> Shared<PlatformVsyncProviderWin>
 {
-    return Shared<PlatformVsyncProviderWin>::Make();
+    return PlatformVsyncProviderWin::Make();
 }
 }
