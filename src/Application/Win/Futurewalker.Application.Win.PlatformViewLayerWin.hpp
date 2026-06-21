@@ -71,17 +71,8 @@ private:
 
 private:
     Shared<PlatformDCompositionDeviceWin> _dcompDevice;
-    Weak<PlatformViewLayerWin> _parent;
-    PlatformViewLayerWinList _children;
-    Flags<PlatformViewLayerRenderFlag> _renderFlags = PlatformViewLayerRenderFlag::None;
-    Vector<Dp> _offset;
-    Size<Dp> _size;
-    ViewClipMode _clipMode = ViewClipMode::None;
-    Float64 _opacity = 1.0;
     HWND _rootHwnd = NULL;
     HWND _hwnd = NULL;
-    Shared<Graphics::DisplayList> _displayList;
-    Vector<Dp> _displayListOffset;
 };
 }
 }

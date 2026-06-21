@@ -85,9 +85,10 @@ auto PlatformViewLayerWin::NotifyRootWindowHandleChanged(HWND const rootHwnd) ->
             }
         }
 
-        for (auto const& child : _children)
+        auto children = GetChildren();
+        for (auto const& child : children)
         {
-            child->NotifyRootWindowHandleChanged(rootHwnd);
+            child.As<PlatformViewLayerWin>()->NotifyRootWindowHandleChanged(rootHwnd);
         }
 
         if (!_rootHwnd)
@@ -125,11 +126,12 @@ auto PlatformViewLayerWin::GetBelowWindowHandle() const -> HWND
 ///
 auto PlatformViewLayerWin::GetBelowWindowHandleCore(Shared<PlatformViewLayerWin const> layer) const -> HWND
 {
-    auto it = _children.rbegin();
+    auto children = GetChildren();
+    auto it = children.rbegin();
 
     if (layer != GetParent())
     {
-        for (; it != _children.rend(); ++it)
+        for (; it != children.rend(); ++it)
         {
             if (*it == layer)
             {
@@ -139,9 +141,9 @@ auto PlatformViewLayerWin::GetBelowWindowHandleCore(Shared<PlatformViewLayerWin 
         }
     }
 
-    for (; it != _children.rend(); ++it)
+    for (; it != children.rend(); ++it)
     {
-        if (auto hwnd = (*it)->GetBelowWindowHandleCore(GetSelf()))
+        if (auto hwnd = (*it).As<PlatformViewLayerWin const>()->GetBelowWindowHandleCore(GetSelf()))
         {
             return hwnd;
         }
