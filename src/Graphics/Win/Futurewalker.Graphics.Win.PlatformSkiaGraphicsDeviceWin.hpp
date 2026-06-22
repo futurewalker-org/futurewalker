@@ -37,7 +37,13 @@ public:
 public:
     PlatformSkiaGraphicsDeviceWin(PassKey<PlatformSkiaGraphicsDeviceWin>, Shared<PlatformD3D12DeviceWin> const& d3d12Device);
 
-    auto MakeSwapChainSurface(Shared<PlatformDCompositionDeviceWin> const& dcompDevice, IntPx const width, IntPx const height) -> Shared<PlatformSwapChainSurfaceWin> override;
+    auto MakeSwapChainSurface(
+      Shared<PlatformDCompositionDeviceWin> const& dcompDevice,
+      IntPx const width,
+      IntPx const height,
+      PixelGeometry const pixelGeometry,
+      Float64 const textGamma,
+      Float64 const textContrast) -> Shared<PlatformSwapChainSurfaceWin> override;
 
     auto NotifyDeviceLost() -> void override;
     auto HandleDeviceLost() -> void override;
@@ -48,7 +54,7 @@ public:
     auto CreateFence() -> Microsoft::WRL::ComPtr<ID3D12Fence>;
     auto CreateSharedHandle(Microsoft::WRL::ComPtr<ID3D12Resource> const& resource) -> Microsoft::WRL::Wrappers::HandleT<Microsoft::WRL::Wrappers::HandleTraits::HANDLENullTraits>;
 
-    auto CreateBackendTextureSurface(GrBackendTexture const& backendTexture) -> sk_sp<SkSurface>;
+    auto CreateBackendTextureSurface(GrBackendTexture const& backendTexture, SkSurfaceProps const& surfaceProps) -> sk_sp<SkSurface>;
 
     auto FlushAndSubmitSurface(SkSurface* surface, SkSurfaces::BackendSurfaceAccess access, GrSyncCpu sync) -> Bool;
     auto FlushAndSubmit(GrSyncCpu sync) -> Bool;

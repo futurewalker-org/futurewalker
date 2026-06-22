@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
+#include "Futurewalker.Graphics.PixelGeometry.hpp"
 #include "Futurewalker.Graphics.Win.PlatformGraphicsDeviceWinType.hpp"
 #include "Futurewalker.Graphics.Win.PlatformSwapChainSurfaceWinType.hpp"
 #include "Futurewalker.Graphics.Win.PlatformD3D12DeviceWinType.hpp"
@@ -30,13 +31,21 @@ public:
     ///
     /// @brief Make swap chain based surface.
     ///
-    /// @param dcompDevice DComposition device.
-    /// @param width Width of surface. Should be >= 1.
-    /// @param height Height of surface. Should be >= 1.
+    /// @param[in] width New width of buffer. Should be >= 1.
+    /// @param[in] height New height of buffer. Should be >= 1.
+    /// @param[in] pixelGeometry Pixel geometry of target screen.
+    /// @param[in] textGamma Text rendering gamma.
+    /// @param[in] textContrast Text rendering contrast.
     ///
     /// @return New surface object, or nullptr on failure.
     ///
-    virtual auto MakeSwapChainSurface(Shared<PlatformDCompositionDeviceWin> const& dcompDevice, IntPx const width, IntPx const height) -> Shared<PlatformSwapChainSurfaceWin> = 0;
+    virtual auto MakeSwapChainSurface(
+      Shared<PlatformDCompositionDeviceWin> const& dcompDevice,
+      IntPx const width,
+      IntPx const height,
+      PixelGeometry const pixelGeometry,
+      Float64 const textGamma,
+      Float64 const textContrast) -> Shared<PlatformSwapChainSurfaceWin> = 0;
 };
 }
 }

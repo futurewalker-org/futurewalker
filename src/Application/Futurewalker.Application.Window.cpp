@@ -547,7 +547,6 @@ auto Window::ReceiveWindowEvent(Event<>& event) -> Async<Bool>
         if (_rootView && _platformObject)
         {
             SetRootViewSize(GetClientRect().GetSize());
-            UpdateRootView(GetFrameTime());
         }
     }
     else if (event.Is<WindowEvent::AreaChanged>())
@@ -997,11 +996,6 @@ auto Window::UpdateRootView(MonotonicTime const targetFrameTime) -> void
         parameter->SetTargetFrameTime(targetFrameTime);
         auto event = Event<>(parameter);
         _rootView->SendEventDetached(event);
-
-        if (_platformObject)
-        {
-            _platformObject->Render();
-        }
     }
 }
 

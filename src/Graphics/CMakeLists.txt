@@ -18,7 +18,7 @@ fw_link_libraries(${LibraryName} PUBLIC
 )
 
 if (WIN32)
-  fw_link_libraries(${LibraryName} PUBLIC d3d11 d3d12 dcomp)
+  fw_link_libraries(${LibraryName} PUBLIC d3d11 d3d12 dcomp dwrite)
 endif()
 
 if (APPLE)

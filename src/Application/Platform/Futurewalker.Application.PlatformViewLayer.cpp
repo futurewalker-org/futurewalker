@@ -212,34 +212,6 @@ auto PlatformViewLayer::SetDisplayListOffset(Vector<Dp> const& offset) -> void
     }
 }
 
-auto PlatformViewLayer::GetDisplayScale() const -> DisplayScale
-{
-    if (IsRoot())
-    {
-        return RootGetDisplayScale();
-    }
-    return _displayScale;
-}
-
-auto PlatformViewLayer::GetBackingScale() const -> BackingScale
-{
-    if (IsRoot())
-    {
-        return RootGetBackingScale();
-    }
-    return _backingScale;
-}
-
-auto PlatformViewLayer::NotifyRootChanged() -> void
-{
-    if (IsRoot())
-    {
-        auto const root = GetRoot();
-        NotifyRootDisplayScaleChanged(root->RootGetDisplayScale());
-        NotifyRootBackingScaleChanged(root->RootGetBackingScale());
-    }
-}
-
 ///
 /// @brief Determine whether the layer should be rasterized.
 ///
@@ -260,16 +232,6 @@ auto PlatformViewLayer::ShouldRasterize() const -> Bool
 auto PlatformViewLayer::GetControl() -> Shared<PlatformViewLayerControl>
 {
     return nullptr;
-}
-
-auto PlatformViewLayer::RootGetDisplayScale() const -> DisplayScale
-{
-    return _displayScale;
-}
-
-auto PlatformViewLayer::RootGetBackingScale() const -> BackingScale
-{
-    return _backingScale;
 }
 
 auto PlatformViewLayer::RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void
@@ -333,42 +295,11 @@ auto PlatformViewLayer::InitializeSelf() -> void
 
 auto PlatformViewLayer::InternalAttach() -> void
 {
-    auto root = GetRoot();
-    NotifyRootDisplayScaleChanged(root->GetDisplayScale());
-    NotifyRootBackingScaleChanged(root->GetBackingScale());
     OnAttach();
 }
 
 auto PlatformViewLayer::InternalDetach() -> void
 {
     OnDetach();
-    NotifyRootBackingScaleChanged(1.0);
-    NotifyRootDisplayScaleChanged(1.0);
-}
-
-auto PlatformViewLayer::NotifyRootDisplayScaleChanged(DisplayScale const rootDisplayScale) -> void
-{
-    if (_displayScale != rootDisplayScale)
-    {
-        _displayScale = rootDisplayScale;
-
-        for (auto const& child : _children)
-        {
-            child->NotifyRootDisplayScaleChanged(rootDisplayScale);
-        }
-    }
-}
-
-auto PlatformViewLayer::NotifyRootBackingScaleChanged(BackingScale const rootBackingScale) -> void
-{
-    if (_backingScale != rootBackingScale)
-    {
-        _backingScale = rootBackingScale;
-
-        for (auto const& child : _children)
-        {
-            child->NotifyRootBackingScaleChanged(rootBackingScale);
-        }
-    }
 }
 }

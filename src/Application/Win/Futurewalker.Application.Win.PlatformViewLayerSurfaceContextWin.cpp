@@ -52,11 +52,12 @@ PlatformViewLayerSurfaceContextWin::PlatformViewLayerSurfaceContextWin(
 ///
 /// @brief 
 ///
-auto PlatformViewLayerSurfaceContextWin::MakeSwapChainSurface(IntPx const width, IntPx const height) -> Shared<Graphics::PlatformSwapChainSurfaceWin>
+auto PlatformViewLayerSurfaceContextWin::MakeSwapChainSurface(IntPx const width, IntPx const height, Graphics::PixelGeometry const pixelGeometry, Float64 const textGamma, Float64 const textContrast)
+  -> Shared<Graphics::PlatformSwapChainSurfaceWin>
 {
     if (_graphicsDevice)
     {
-        return _graphicsDevice->MakeSwapChainSurface(_dcompDevice, width, height);
+        return _graphicsDevice->MakeSwapChainSurface(_dcompDevice, width, height, pixelGeometry, textGamma, textContrast);
     }
     return {};
 }

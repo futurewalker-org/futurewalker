@@ -38,6 +38,21 @@ auto PlatformViewLayerSurfaceWin::SetBackingScale(BackingScale const scale) -> v
     _backingScale = scale;
 }
 
+auto PlatformViewLayerSurfaceWin::SetPixelGeometry(Graphics::PixelGeometry const pixelGeometry) -> void
+{
+    _pixelGeometry = pixelGeometry;
+}
+
+auto PlatformViewLayerSurfaceWin::SetTextGamma(Float64 const textGamma) -> void
+{
+    _textGamma = textGamma;
+}
+
+auto PlatformViewLayerSurfaceWin::SetTextContrast(Float64 const textContrast) -> void
+{
+    _textContrast = textContrast;
+}
+
 auto PlatformViewLayerSurfaceWin::SetVisual(Microsoft::WRL::ComPtr<IDCompositionVisual3> const& visual) -> void
 {
     if (_visual != visual)
@@ -81,42 +96,24 @@ auto PlatformViewLayerSurfaceWin::Clear() -> void
     ResizeSurface();
 }
 
-auto PlatformViewLayerSurfaceWin::GetDisplayScale() const -> DisplayScale
-{
-    return _displayScale;
-}
-
-auto PlatformViewLayerSurfaceWin::GetBackingScale() const -> BackingScale
-{
-    return _backingScale;
-}
-
 auto PlatformViewLayerSurfaceWin::GetSurfaceWidth() const -> IntPx
 {
-    DisplayScale const displayScale = GetDisplayScale();
-    BackingScale const backingScale = GetBackingScale();
-    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.width, displayScale, backingScale)));
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.width, _displayScale, _backingScale)));
 }
 
 auto PlatformViewLayerSurfaceWin::GetSurfaceHeight() const -> IntPx
 {
-    DisplayScale const displayScale = GetDisplayScale();
-    BackingScale const backingScale = GetBackingScale();
-    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.height, displayScale, backingScale)));
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_size.height, _displayScale, _backingScale)));
 }
 
 auto PlatformViewLayerSurfaceWin::GetOffsetX() const -> IntPx
 {
-    DisplayScale const displayScale = GetDisplayScale();
-    BackingScale const backingScale = GetBackingScale();
-    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_offset.x, displayScale, backingScale)));
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_offset.x, _displayScale, _backingScale)));
 }
 
 auto PlatformViewLayerSurfaceWin::GetOffsetY() const -> IntPx
 {
-    DisplayScale const displayScale = GetDisplayScale();
-    BackingScale const backingScale = GetBackingScale();
-    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_offset.y, displayScale, backingScale)));
+    return static_cast<IntPx>(Px::Round(UnitFunction::ConvertDpToPx(_offset.y, _displayScale, _backingScale)));
 }
 
 auto PlatformViewLayerSurfaceWin::ResizeSurface() -> Bool
@@ -131,7 +128,7 @@ auto PlatformViewLayerSurfaceWin::ResizeSurface() -> Bool
 
     if (_surface)
     {
-        if (_surface->Resize(width, height))
+        if (_surface->Resize(width, height, _pixelGeometry, _textGamma, _textContrast))
         {
             return true;
         }
@@ -141,7 +138,7 @@ auto PlatformViewLayerSurfaceWin::ResizeSurface() -> Bool
     {
         if (_context && _visual)
         {
-            _surface = _context->MakeSwapChainSurface(width, height);
+            _surface = _context->MakeSwapChainSurface(width, height, _pixelGeometry, _textGamma, _textContrast);
             if (_surface)
             {
                 ChangeSwapChain(_surface->GetSwapChain());

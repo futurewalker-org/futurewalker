@@ -3,6 +3,7 @@
 
 #include "Futurewalker.Application.Win.PlatformViewLayerSurfaceContextWinType.hpp"
 
+#include "Futurewalker.Graphics.PixelGeometry.hpp"
 #include "Futurewalker.Graphics.Win.PlatformGraphicsDeviceWin.hpp"
 #include "Futurewalker.Graphics.Win.PlatformD3D11DeviceWinType.hpp"
 #include "Futurewalker.Graphics.Win.PlatformD3D12DeviceWinType.hpp"
@@ -31,7 +32,8 @@ public:
 
     PlatformViewLayerSurfaceContextWin(PassKey<PlatformViewLayerSurfaceContextWin>, Shared<PlatformDCompositionDeviceWin> dcompDevice, Shared<PlatformD3D12DeviceWin> d3d12Device);
 
-    auto MakeSwapChainSurface(IntPx const width, IntPx const height) -> Shared<Graphics::PlatformSwapChainSurfaceWin>;
+    auto MakeSwapChainSurface(IntPx const width, IntPx const height, Graphics::PixelGeometry const pixelGeometry, Float64 const textGamma, Float64 const textContrast)
+      -> Shared<Graphics::PlatformSwapChainSurfaceWin>;
 
 private:
     auto GetSelf() -> Shared<PlatformViewLayerSurfaceContextWin>;

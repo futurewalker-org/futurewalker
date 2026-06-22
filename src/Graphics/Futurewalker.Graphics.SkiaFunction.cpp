@@ -93,4 +93,19 @@ auto SkiaFunction::FontStyleToSkFontStyle(FontStyle const& fontStyle) -> SkFontS
     auto const slant = FontSlantToSkFontSlant(fontStyle.GetSlant());
     return SkFontStyle(weight, width, slant);
 }
+
+auto SkiaFunction::PixelGeometryToSkPixelGeometry(PixelGeometry const pixelGeometry) -> SkPixelGeometry
+{
+    switch (pixelGeometry)
+    {
+        case PixelGeometry::Unknown:
+            return kUnknown_SkPixelGeometry;
+        case PixelGeometry::HorizontalRGB:
+            return kRGB_H_SkPixelGeometry;
+        case PixelGeometry::HorizontalBGR:
+            return kBGR_H_SkPixelGeometry;
+    }
+    return kUnknown_SkPixelGeometry;
+}
+
 }

@@ -23,11 +23,19 @@ namespace FW_EXPORT
 class PlatformSkiaSwapChainSurfaceWin : public PlatformSwapChainSurfaceWin
 {
 public:
-    static auto Make(Shared<PlatformSkiaGraphicsDeviceWin> const& device, IntPx const width, IntPx const height) -> Shared<PlatformSkiaSwapChainSurfaceWin>;
+    static auto Make(Shared<PlatformSkiaGraphicsDeviceWin> const& device, IntPx const width, IntPx const height, PixelGeometry const pixelGeometry, Float64 const textGamma, Float64 const textContrast)
+      -> Shared<PlatformSkiaSwapChainSurfaceWin>;
 
-    PlatformSkiaSwapChainSurfaceWin(PassKey<PlatformSkiaSwapChainSurfaceWin>, Shared<PlatformSkiaGraphicsDeviceWin> const& device, IntPx const width, IntPx const height);
+    PlatformSkiaSwapChainSurfaceWin(
+      PassKey<PlatformSkiaSwapChainSurfaceWin>,
+      Shared<PlatformSkiaGraphicsDeviceWin> const& device,
+      IntPx const width,
+      IntPx const height,
+      PixelGeometry const pixelGeometry,
+      Float64 const textGamma,
+      Float64 const textContrast);
 
-    auto Resize(IntPx const width, IntPx const height) -> Bool override;
+    auto Resize(IntPx const width, IntPx const height, PixelGeometry const pixelGeometry, Float64 const textGamma, Float64 const textContrast) -> Bool override;
     auto SetOffset(IntPx const x, IntPx const y) -> void override;
     auto Draw(Function<void(Scene& scene)> func) -> Bool override;
     auto NotifyDeviceLost() -> void override;
@@ -53,6 +61,9 @@ private:
     UINT64 _currentFenceValue = 0U;
     IntPx _width = 0;
     IntPx _height = 0;
+    PixelGeometry _pixelGeometry = PixelGeometry::Unknown;
+    Float64 _textGamma = 0.0;
+    Float64 _textContrast = 0.0;
 
     struct SwapChainSurface
     {

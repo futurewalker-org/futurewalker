@@ -4,6 +4,7 @@
 #include "Futurewalker.Graphics.Win.PlatformSkiaGraphicsDeviceWin.hpp"
 #include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp" 
 #include "Futurewalker.Graphics.SkiaScene.hpp" 
+#include "Futurewalker.Graphics.SkiaFunction.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -35,9 +36,12 @@ auto PlatformSkiaCompositionSwapChainSurfaceWin::Make(
   Shared<PlatformSkiaGraphicsDeviceWin> const& device,
   Shared<PlatformDCompositionDeviceWin> const& dcompDevice,
   IntPx const width,
-  IntPx const height) -> Shared<PlatformSkiaCompositionSwapChainSurfaceWin>
+  IntPx const height,
+  PixelGeometry const pixelGeometry,
+  Float64 const textGamma,
+  Float64 const textContrast) -> Shared<PlatformSkiaCompositionSwapChainSurfaceWin>
 {
-    auto surface = Shared<PlatformSkiaCompositionSwapChainSurfaceWin>::Make(PassKey<PlatformSkiaCompositionSwapChainSurfaceWin>(), device, dcompDevice, width, height);
+    auto surface = Shared<PlatformSkiaCompositionSwapChainSurfaceWin>::Make(PassKey<PlatformSkiaCompositionSwapChainSurfaceWin>(), device, dcompDevice, width, height, pixelGeometry, textGamma, textContrast);
     surface->_self = surface;
     return surface;
 }
@@ -47,19 +51,22 @@ PlatformSkiaCompositionSwapChainSurfaceWin::PlatformSkiaCompositionSwapChainSurf
   Shared<PlatformSkiaGraphicsDeviceWin> const& device,
   Shared<PlatformDCompositionDeviceWin> const& dcompDevice,
   IntPx const width,
-  IntPx const height)
+  IntPx const height,
+  PixelGeometry const pixelGeometry,
+  Float64 const textGamma,
+  Float64 const textContrast)
   : _device(device)
   , _dcompDevice(dcompDevice)
 {
     if (_dcompDevice)
     {
         BuildResources();
-        Resize(width, height);
+        Resize(width, height, pixelGeometry, textGamma, textContrast);
         _dcompDevice->AddDeviceObject(GetSelf());
     }
 }
 
-auto PlatformSkiaCompositionSwapChainSurfaceWin::Resize(IntPx const width, IntPx const height) -> Bool
+auto PlatformSkiaCompositionSwapChainSurfaceWin::Resize(IntPx const width, IntPx const height, Graphics::PixelGeometry const pixelGeometry, Float64 const textGamma, Float64 const textContrast) -> Bool
 {
     if (width <= 0 || height <= 0)
     {
@@ -73,6 +80,9 @@ auto PlatformSkiaCompositionSwapChainSurfaceWin::Resize(IntPx const width, IntPx
         _height = height;
         UpdateSourceRect();
     }
+    _pixelGeometry = pixelGeometry;
+    _textGamma = textGamma;
+    _textContrast = textContrast;
     return true;
 }
 
@@ -90,7 +100,11 @@ auto PlatformSkiaCompositionSwapChainSurfaceWin::SetOffset(IntPx const x, IntPx 
             .M31 = static_cast<FLOAT>(offsetX),
             .M32 = static_cast<FLOAT>(offsetY),
         };
-        _presentationSurface->SetTransform(&transform);
+        auto const hr = _presentationSurface->SetTransform(&transform);
+        if (FAILED(hr))
+        {
+            FW_DEBUG_ASSERT(false);
+        }
     }
 }
 
@@ -115,6 +129,14 @@ auto PlatformSkiaCompositionSwapChainSurfaceWin::Draw(Function<void(Scene& scene
     {
         _presentationBuffers[index] = {};
         _presentationBuffers[index] = AllocPresentationBuffer();
+    }
+    else if (_presentationBuffers[index].surface)
+    {
+        auto const surfaceProps = _presentationBuffers[index].surface->props();
+        if (surfaceProps.pixelGeometry() != SkiaFunction::PixelGeometryToSkPixelGeometry(_pixelGeometry) || !Float64::IsNearlyEqual(surfaceProps.textGamma(), _textGamma, 1e-6) || !Float64::IsNearlyEqual(surfaceProps.textContrast(), _textContrast, 1e-6))
+        {
+            RecreateSurface(_presentationBuffers[index]);
+        }
     }
 
     if (auto const surface = _presentationBuffers[index].surface)
@@ -209,26 +231,30 @@ auto PlatformSkiaCompositionSwapChainSurfaceWin::AllocPresentationBuffer() -> Pr
     auto bufferAvailableEvent = winrt::handle();
     buffer->GetAvailableEvent(bufferAvailableEvent.put());
 
-    auto const resourceDesc = resource->GetDesc();
-
-    // NOTE: GrD3DTextureResourceInfo takes ID3D12Resource* as constructor argument but does NOT add refcount internally.
-    auto const resourceInfo = GrD3DTextureResourceInfo(
-      GrSafeComAddRef(resource.Get()),
-      nullptr,
-      D3D12_RESOURCE_STATE_RENDER_TARGET,
-      resourceDesc.Format,
-      resourceDesc.SampleDesc.Count,
-      resourceDesc.MipLevels,
-      resourceDesc.SampleDesc.Quality);
-
-    auto const backendTexture = GrBackendTexture(static_cast<int>(resourceDesc.Width), static_cast<int>(resourceDesc.Height), resourceInfo);
-    auto surface = _device->CreateBackendTextureSurface(backendTexture);
-    return {
+    auto presentationBuffer = PresentationBuffer {
         .resource = std::move(resource),
         .buffer = std::move(buffer),
         .bufferAvailableEvent = std::move(bufferAvailableEvent),
-        .surface = std::move(surface),
+        .surface = nullptr,
     };
+    RecreateSurface(presentationBuffer);
+    return presentationBuffer;
+}
+
+auto PlatformSkiaCompositionSwapChainSurfaceWin::RecreateSurface(PresentationBuffer& buffer) -> void
+{
+    buffer.surface.reset();
+
+    auto const resourceDesc = buffer.resource->GetDesc();
+
+    // NOTE: GrD3DTextureResourceInfo takes ID3D12Resource* as constructor argument but does NOT add refcount internally.
+    auto const resourceInfo = GrD3DTextureResourceInfo(
+      GrSafeComAddRef(buffer.resource.Get()), nullptr, D3D12_RESOURCE_STATE_RENDER_TARGET, resourceDesc.Format, resourceDesc.SampleDesc.Count, resourceDesc.MipLevels, resourceDesc.SampleDesc.Quality);
+
+    auto const backendTexture = GrBackendTexture(static_cast<int>(resourceDesc.Width), static_cast<int>(resourceDesc.Height), resourceInfo);
+    auto const surfaceProps = SkSurfaceProps(0, SkiaFunction::PixelGeometryToSkPixelGeometry(_pixelGeometry), static_cast<SkScalar>(_textContrast), static_cast<SkScalar>(_textGamma));
+    auto surface = _device->CreateBackendTextureSurface(backendTexture, surfaceProps);
+    buffer.surface = std::move(surface);
 }
 
 auto PlatformSkiaCompositionSwapChainSurfaceWin::UpdateSourceRect() -> void
@@ -263,6 +289,7 @@ auto PlatformSkiaCompositionSwapChainSurfaceWin::BuildResources() -> void
         _presentationManager->CreatePresentationSurface(surfaceHandle.Get(), &_presentationSurface);
         _presentationManager->GetPresentRetiringFence(IID_PPV_ARGS(&_fence));
         _dcompSurface = _dcompDevice->CreateSurfaceFromHandle(surfaceHandle.Get());
+        _presentationSurface->SetColorSpace(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709);
         _presentationSurface->SetAlphaMode(DXGI_ALPHA_MODE_PREMULTIPLIED);
         _presentationBuffers.resize(3);
         UpdateSourceRect();

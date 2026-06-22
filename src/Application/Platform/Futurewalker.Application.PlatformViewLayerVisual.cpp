@@ -126,43 +126,17 @@ auto PlatformViewLayerVisual::SetOpacity(Float64 const opacity) -> void
     }
 }
 
-auto PlatformViewLayerVisual::GetDisplayScale() const -> DisplayScale
+auto PlatformViewLayerVisual::GetRenderParams() const -> PlatformViewLayerVisualRenderParams const&
 {
-    return _displayScale;
+    return _renderParams;
 }
 
-auto PlatformViewLayerVisual::SetDisplayScale(DisplayScale const displayScale) -> void
+auto PlatformViewLayerVisual::SetRenderParams(PlatformViewLayerVisualRenderParams const& renderParams) -> void
 {
-    if (!DisplayScale::IsFinite(displayScale))
+    if (_renderParams != renderParams)
     {
-        FW_DEBUG_ASSERT(false);
-        return;
-    }
-
-    if (_displayScale != displayScale)
-    {
-        _displayScale = displayScale;
-        OnDisplayScaleChanged();
-    }
-}
-
-auto PlatformViewLayerVisual::GetBackingScale() const -> BackingScale
-{
-    return _backingScale;
-}
-
-auto PlatformViewLayerVisual::SetBackingScale(BackingScale const backingScale) -> void
-{
-    if (!BackingScale::IsFinite(backingScale))
-    {
-        FW_DEBUG_ASSERT(false);
-        return;
-    }
-
-    if (_backingScale != backingScale)
-    {
-        _backingScale = backingScale;
-        OnBackingScaleChanged();
+        _renderParams = renderParams;
+        OnRenderParamsChanged();
     }
 }
 

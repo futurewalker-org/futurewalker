@@ -70,7 +70,6 @@ public:
     virtual auto IsClosed() -> Bool = 0;
     virtual auto RequestClose() -> Async<Bool> = 0;
     virtual auto Close() -> void = 0;
-    virtual auto Render() -> void = 0;
     virtual auto RequestFrame() -> void = 0;
     virtual auto GetFrameTime() -> MonotonicTime = 0;
     virtual auto GetViewLayer() -> Shared<PlatformViewLayer> = 0;

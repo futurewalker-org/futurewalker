@@ -4,6 +4,7 @@
 #include "Futurewalker.Graphics.Prelude.hpp"
 #include "Futurewalker.Graphics.MaskFilterType.hpp"
 #include "Futurewalker.Graphics.FontStyleType.hpp"
+#include "Futurewalker.Graphics.PixelGeometry.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -17,6 +18,7 @@
 #include <include/core/SkColor.h>
 #include <include/core/SkBlurTypes.h>
 #include <include/core/SkFontStyle.h>
+#include <include/core/SkSurfaceProps.h>
 
 #include <array>
 
@@ -32,5 +34,6 @@ struct SkiaFunction : NonConstructible
     static auto BlurStyleToSkBlurStyle(BlurStyle const style) -> SkBlurStyle;
     static auto FontSlantToSkFontSlant(FontSlant const slant) -> SkFontStyle::Slant;
     static auto FontStyleToSkFontStyle(FontStyle const& fontStyle) -> SkFontStyle;
+    static auto PixelGeometryToSkPixelGeometry(PixelGeometry const pixelGeometry) -> SkPixelGeometry;
 };
 }

@@ -33,13 +33,16 @@ public:
 
     auto Render() -> void;
 
+    auto SetDisplayScale(DisplayScale const displayScale) -> void;
+    auto SetPixelGeometry(Graphics::PixelGeometry const pixelGeometry) -> void;
+    auto SetTextGamma(Float64 const textGamma) -> void;
+    auto SetTextContrast(Float64 const textContrast) -> void;
+
 protected:
     auto Initialize() -> void override;
 
 private:
     auto RootGetWindowHandle() const -> HWND override;
-    auto RootGetDisplayScale() const -> DisplayScale override;
-    auto RootGetBackingScale() const -> BackingScale override;
 
 private:
     auto RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void override;
@@ -61,6 +64,7 @@ private:
     Microsoft::WRL::ComPtr<IDCompositionTarget> _dcompTarget;
     Microsoft::WRL::ComPtr<IDCompositionVisual3> _dcompVisual;
     Unique<PlatformViewLayerVisualRenderer> _renderer;
+    PlatformViewLayerVisualRenderParams _renderParams;
 };
 }
 }

@@ -32,6 +32,7 @@
 #include "Futurewalker.Core.Win.PlatformStringFunctionWin.hpp"
 
 #include <dwmapi.h>
+#include <dwrite.h>
 
 #include <utility>
 #include <numbers>
@@ -676,22 +677,6 @@ auto PlatformWindowWin::Close() -> void
 ///
 /// @brief
 ///
-auto PlatformWindowWin::Render() -> void
-{
-    if (_rootViewLayer)
-    {
-        _rootViewLayer->Render();
-    }
-
-    if (_compositionDevice)
-    {
-        _compositionDevice->Commit();
-    }
-}
-
-///
-/// @brief
-///
 auto PlatformWindowWin::RequestFrame() -> void
 {
     if (!IsClosed())
@@ -791,6 +776,55 @@ auto PlatformWindowWin::SetBackgroundColor(RGBColor const& backgroundColor) -> v
 }
 
 ///
+/// @brief Get text rendering parameters from monitor.
+///
+static auto GetMonitorTextRenderingParams(HMONITOR monitor, Graphics::PixelGeometry& pixelGeometry, Float64& textGamma, Float64& textContrast) -> Bool
+{
+    if (!monitor)
+    {
+        return false;
+    }
+
+    auto factoryUnknown = Microsoft::WRL::ComPtr<IUnknown>();
+    auto hr = ::DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &factoryUnknown);
+    if (FAILED(hr) || !factoryUnknown)
+    {
+        return false;
+    }
+
+    auto factory = Microsoft::WRL::ComPtr<IDWriteFactory>();
+    hr = factoryUnknown.As(&factory);
+    if (!SUCCEEDED(hr) || !factory)
+    {
+        return false;
+    }
+
+    auto textRenderingParams = Microsoft::WRL::ComPtr<IDWriteRenderingParams>();
+    hr = factory->CreateMonitorRenderingParams(monitor, &textRenderingParams);
+    if (FAILED(hr) || !textRenderingParams)
+    {
+        return false;
+    }
+
+    auto const dwritePixelGeometry = textRenderingParams->GetPixelGeometry();
+    if (dwritePixelGeometry == DWRITE_PIXEL_GEOMETRY_RGB)
+    {
+        pixelGeometry = Graphics::PixelGeometry::HorizontalRGB;
+    }
+    else if (dwritePixelGeometry == DWRITE_PIXEL_GEOMETRY_BGR)
+    {
+        pixelGeometry = Graphics::PixelGeometry::HorizontalBGR;
+    }
+    else
+    {
+        pixelGeometry = Graphics::PixelGeometry::Unknown;
+    }
+    textGamma = textRenderingParams->GetGamma();
+    textContrast = textRenderingParams->GetEnhancedContrast();
+    return true;
+}
+
+///
 /// @brief Set native window handle.
 ///
 /// @param hwnd A window handle.
@@ -801,7 +835,19 @@ auto PlatformWindowWin::SetNativeHandle(PassKey<PlatformWindowContextWin>, HWND 
     {
         _hwnd = hwnd;
         _dpi = ::GetDpiForWindow(_hwnd);
+        _monitor = ::MonitorFromWindow(_hwnd, MONITOR_DEFAULTTONEAREST);
         _rootViewLayer = PlatformRootViewLayerWin::Make(_hwnd, _compositionDevice);
+        _rootViewLayer->SetDisplayScale(GetDisplayScale());
+
+        auto pixelGeometry = Graphics::PixelGeometry::Unknown;
+        auto textGamma = Float64(0.0);
+        auto textContrast = Float64(0.0);
+        if (GetMonitorTextRenderingParams(_monitor, pixelGeometry, textGamma, textContrast))
+        {
+            _rootViewLayer->SetPixelGeometry(pixelGeometry);
+            _rootViewLayer->SetTextGamma(textGamma);
+            _rootViewLayer->SetTextContrast(textContrast);
+        }
     }
 }
 
@@ -1438,12 +1484,14 @@ auto PlatformWindowWin::HandleDpiChanged(HWND hWnd, UINT msg, WPARAM wParam, LPA
         {
             _dpi = yDpi;
 
+            if (_rootViewLayer)
+            {
+                _rootViewLayer->SetDisplayScale(GetDisplayScale());
+                RequestFrame();
+            }
+
             try
             {
-                if (_rootViewLayer)
-                {
-                    _rootViewLayer->NotifyRootChanged();
-                }
                 auto event = Event<>(Event<PlatformWindowEvent::DisplayScaleChanged>());
                 SendWindowEventDetached(event);
             }
@@ -1493,6 +1541,27 @@ auto PlatformWindowWin::HandlePosChanged(HWND hWnd, UINT msg, WPARAM wParam, LPA
             if (FAILED(::DwmExtendFrameIntoClientArea(hWnd, &margins)))
             {
                 FW_DEBUG_LOG_ERROR("PlatformWindowWin: DwmExtendFrameIntoClientArea failed");
+            }
+        }
+
+        auto const monitor = ::MonitorFromWindow(_hwnd, MONITOR_DEFAULTTONEAREST);
+        if (_monitor != monitor)
+        {
+            _monitor = monitor;
+
+            // Update per-monitor text rendering parameters.
+            auto pixelGeometry = Graphics::PixelGeometry::Unknown;
+            auto textGamma = Float64(0.0);
+            auto textContrast = Float64(0.0);
+            if (GetMonitorTextRenderingParams(_monitor, pixelGeometry, textGamma, textContrast))
+            {
+                if (_rootViewLayer)
+                {
+                    _rootViewLayer->SetPixelGeometry(pixelGeometry);
+                    _rootViewLayer->SetTextGamma(textGamma);
+                    _rootViewLayer->SetTextContrast(textContrast);
+                    RequestFrame();
+                }
             }
         }
 
@@ -2068,6 +2137,8 @@ auto PlatformWindowWin::HandleFrameSwap(MonotonicTime const& targetTimestamp) ->
         parameter->SetTargetTimestamp(targetTimestamp);
         auto event = Event<>(parameter);
         SendFrameEventDetached(event);
+
+        Render();
     }
     catch (...)
     {
@@ -2450,6 +2521,22 @@ auto PlatformWindowWin::UpdateThemeColor() -> void
         {
             FW_DEBUG_LOG_ERROR("PlatformWindowWin: Failed to enable DWMA_USE_IMMERSIVE_DARK_MODE");
         }
+    }
+}
+
+///
+/// @brief
+///
+auto PlatformWindowWin::Render() -> void
+{
+    if (_rootViewLayer)
+    {
+        _rootViewLayer->Render();
+    }
+
+    if (_compositionDevice)
+    {
+        _compositionDevice->Commit();
     }
 }
 }

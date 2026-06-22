@@ -3,6 +3,8 @@
 
 #include "Futurewalker.Application.Platform.Prelude.hpp"
 
+#include "Futurewalker.Graphics.PixelGeometry.hpp"
+
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.Identifier.hpp"
 

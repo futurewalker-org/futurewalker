@@ -8,6 +8,8 @@
 #include "Futurewalker.Application.PlatformViewLayerVisualUpdaterType.hpp"
 #include "Futurewalker.Application.PlatformViewLayerVisualPropertyUpdaterType.hpp"
 
+#include "Futurewalker.Graphics.PixelGeometry.hpp"
+
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Function.hpp"
 #include "Futurewalker.Core.Memory.hpp"
@@ -29,15 +31,15 @@ public:
     };
     PlatformViewLayerVisualRenderer(Delegate const& delegate, Shared<PlatformViewLayer> const& layer, Shared<PlatformViewLayerVisualContext> const& context);
 
-    auto Render() -> void;
+    auto Render(PlatformViewLayerVisualRenderParams const& renderParams) -> void;
     auto RequestRebuildLayer() -> void;
     auto RequestUpdateLayer() -> void;
 
 private:
     auto GetLayer() -> Shared<PlatformViewLayer>;
     auto FindBaseVisualByBaseLayerId(PlatformViewLayerId const layerId) -> Shared<PlatformViewLayerVisual>;
-    auto RebuildVisual() -> void;
-    auto UpdateVisual() -> void;
+    auto RebuildVisual(PlatformViewLayerVisualRenderParams const& renderParams) -> void;
+    auto UpdateVisual(PlatformViewLayerVisualRenderParams const& renderParams) -> void;
     auto RenderBegin() -> void;
     auto RenderEnd() -> void;
     auto RenderVisual(Shared<PlatformViewLayerVisual> const& visual) -> void;

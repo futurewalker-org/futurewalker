@@ -72,7 +72,6 @@ public:
     auto IsClosed() -> Bool override;
     auto RequestClose() -> Async<Bool> override;
     auto Close() -> void override;
-    auto Render() -> void override;
     auto RequestFrame() -> void override;
     auto GetFrameTime() -> MonotonicTime override;
     auto CapturePointer(PointerId const id) -> void override;
@@ -144,6 +143,8 @@ private:
 
     auto UpdateThemeColor() -> void;
 
+    auto Render() -> void;
+
 private:
     Weak<PlatformWindowWin> _self;
     Shared<PlatformWindowContextWin> _context;
@@ -155,6 +156,7 @@ private:
     PlatformWindowOptions _options;
     std::vector<Weak<PlatformWindowWin>> _ownedWindows;
     HWND _hwnd = NULL;
+    HMONITOR _monitor = NULL;
     UINT _dpi = USER_DEFAULT_SCREEN_DPI;
     String _title;
     RGBColor _backgroundColor;

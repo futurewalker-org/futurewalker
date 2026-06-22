@@ -35,6 +35,12 @@ PlatformRootViewLayerWin::PlatformRootViewLayerWin(PassKey<PlatformViewLayer> ke
   : PlatformViewLayerWin(key, dcompDevice)
   , _hwnd {hwnd}
 {
+    _renderParams.displayScale = 1.0;
+    _renderParams.backingScale = 1.0;
+    _renderParams.pixelGeometry = Graphics::PixelGeometry::Unknown;
+    _renderParams.textGamma = 2.2;    // SK_GAMMA_EXPONENT
+    _renderParams.textContrast = 0.5; // SK_GAMMA_CONTRAST
+
     _dcompTarget = MakeTarget(_hwnd);
     _dcompVisual = dcompDevice->CreateVisual();
 
@@ -56,7 +62,59 @@ auto PlatformRootViewLayerWin::Render() -> void
 {
     if (_renderer)
     {
-        _renderer->Render();
+        _renderer->Render(_renderParams);
+    }
+}
+
+auto PlatformRootViewLayerWin::SetDisplayScale(DisplayScale const displayScale) -> void
+{
+    if (_renderParams.displayScale != displayScale)
+    {
+        _renderParams.displayScale = displayScale;
+
+        if (_renderer)
+        {
+            _renderer->RequestUpdateLayer();
+        }
+    }
+}
+
+auto PlatformRootViewLayerWin::SetPixelGeometry(Graphics::PixelGeometry const pixelGeometry) -> void
+{
+    if (_renderParams.pixelGeometry != pixelGeometry)
+    {
+        _renderParams.pixelGeometry = pixelGeometry;
+
+        if (_renderer)
+        {
+            _renderer->RequestUpdateLayer();
+        }
+    }
+}
+
+auto PlatformRootViewLayerWin::SetTextGamma(Float64 const textGamma) -> void
+{
+    if (_renderParams.textGamma != textGamma)
+    {
+        _renderParams.textGamma = textGamma;
+
+        if (_renderer)
+        {
+            _renderer->RequestUpdateLayer();
+        }
+    }
+}
+
+auto PlatformRootViewLayerWin::SetTextContrast(Float64 const textContrast) -> void
+{
+    if (_renderParams.textContrast != textContrast)
+    {
+        _renderParams.textContrast = textContrast;
+
+        if (_renderer)
+        {
+            _renderer->RequestUpdateLayer();
+        }
     }
 }
 
@@ -93,27 +151,6 @@ auto PlatformRootViewLayerWin::Initialize() -> void
 auto PlatformRootViewLayerWin::RootGetWindowHandle() const -> HWND
 {
     return _hwnd;
-}
-
-///
-/// @brief
-///
-auto PlatformRootViewLayerWin::RootGetDisplayScale() const -> DisplayScale
-{
-    if (_hwnd)
-    {
-        auto const dpi = ::GetDpiForWindow(_hwnd);
-        return DisplayScale(dpi) / DisplayScale(USER_DEFAULT_SCREEN_DPI);
-    }
-    return 1.0;
-}
-
-///
-/// @brief
-///
-auto PlatformRootViewLayerWin::RootGetBackingScale() const -> BackingScale
-{
-    return 1.0;
 }
 
 ///

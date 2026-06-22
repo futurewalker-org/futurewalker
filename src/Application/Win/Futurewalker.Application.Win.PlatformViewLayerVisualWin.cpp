@@ -39,14 +39,18 @@ auto PlatformViewLayerVisualWin::Render() -> void
     FW_DEBUG_ASSERT(unionRect.IsFinite());
 
     auto const& clipPaths = GetClipPaths();
-    auto const displayScale = GetDisplayScale();
-    auto const backingScale = GetBackingScale();
+    auto const& renderParams = GetRenderParams();
+    auto const displayScale = renderParams.displayScale;
+    auto const backingScale = renderParams.backingScale;
     auto const scale = static_cast<Float64>(displayScale) * static_cast<Float64>(backingScale);
 
     _surface->SetSize(unionRect.GetSize());
     _surface->SetOffset(unionRect.GetPosition().As<Vector>());
-    _surface->SetDisplayScale(GetDisplayScale());
-    _surface->SetBackingScale(GetBackingScale());
+    _surface->SetDisplayScale(displayScale);
+    _surface->SetBackingScale(backingScale);
+    _surface->SetPixelGeometry(renderParams.pixelGeometry);
+    _surface->SetTextGamma(renderParams.textGamma);
+    _surface->SetTextContrast(renderParams.textContrast);
     _surface->Draw([&](Graphics::Scene& scene) {
         scene.PushScale({.x = scale, .y = scale});
         for (auto const& clipPath : clipPaths)
@@ -124,8 +128,9 @@ auto PlatformViewLayerVisualWin::OnOffsetChanged() -> void
     if (_visual)
     {
         auto const offset = GetOffset();
-        auto const displayScale = GetDisplayScale();
-        auto const backingScale = GetBackingScale();
+        auto const& renderParams = GetRenderParams();
+        auto const displayScale = renderParams.displayScale;
+        auto const backingScale = renderParams.backingScale;
         _visual->SetOffsetX(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(offset.x, displayScale, backingScale))));
         _visual->SetOffsetY(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(offset.y, displayScale, backingScale))));
     }
@@ -136,8 +141,9 @@ auto PlatformViewLayerVisualWin::OnClipRectChanged() -> void
     if (_visual)
     {
         auto const clipRect = GetClipRect();
-        auto const displayScale = GetDisplayScale();
-        auto const backingScale = GetBackingScale();
+        auto const& renderParams = GetRenderParams();
+        auto const displayScale = renderParams.displayScale;
+        auto const backingScale = renderParams.backingScale;
         if (clipRect.IsFinite())
         {
             auto const clip = _device->CreateRectangleClip();
@@ -168,12 +174,7 @@ auto PlatformViewLayerVisualWin::OnOpacityChanged() -> void
     }
 }
 
-auto PlatformViewLayerVisualWin::OnDisplayScaleChanged() -> void
-{
-    Invalidate();
-}
-
-auto PlatformViewLayerVisualWin::OnBackingScaleChanged() -> void
+auto PlatformViewLayerVisualWin::OnRenderParamsChanged() -> void
 {
     Invalidate();
 }

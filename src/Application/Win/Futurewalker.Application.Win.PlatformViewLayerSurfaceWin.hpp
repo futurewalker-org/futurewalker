@@ -8,6 +8,7 @@
 #include "Futurewalker.Graphics.Win.PlatformD3D11DeviceWinType.hpp"
 #include "Futurewalker.Graphics.Win.PlatformSwapChainSurfaceWin.hpp"
 #include "Futurewalker.Graphics.DisplayListType.hpp"
+#include "Futurewalker.Graphics.PixelGeometry.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -33,14 +34,15 @@ public:
     auto SetOffset(Vector<Dp> const& offset) -> void;
     auto SetDisplayScale(DisplayScale const scale) -> void;
     auto SetBackingScale(BackingScale const scale) -> void;
+    auto SetPixelGeometry(Graphics::PixelGeometry const pixelGeometry) -> void;
+    auto SetTextGamma(Float64 const textGamma) -> void;
+    auto SetTextContrast(Float64 const textContrast) -> void;
     auto SetVisual(Microsoft::WRL::ComPtr<IDCompositionVisual3> const& visual) -> void;
 
     auto Draw(Function<void(Graphics::Scene& scene)> const& function) -> void;
     auto Clear() -> void;
 
 private:
-    auto GetDisplayScale() const -> DisplayScale;
-    auto GetBackingScale() const -> BackingScale;
     auto GetSurfaceWidth() const -> IntPx;
     auto GetSurfaceHeight() const -> IntPx;
     auto GetOffsetX() const -> IntPx;
@@ -53,6 +55,9 @@ private:
     Size<Dp> _size;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
+    Graphics::PixelGeometry _pixelGeometry = Graphics::PixelGeometry::Unknown;
+    Float64 _textGamma = 0.0;
+    Float64 _textContrast = 0.0;
     Vector<Dp> _offset;
     Shared<PlatformViewLayerSurfaceContextWin> _context;
     Microsoft::WRL::ComPtr<IDCompositionVisual3> _visual;

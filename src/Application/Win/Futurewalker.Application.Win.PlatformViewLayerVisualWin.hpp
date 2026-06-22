@@ -48,8 +48,7 @@ private:
     auto OnClipRectChanged() -> void override;
     auto OnClipPathChanged() -> void override;
     auto OnOpacityChanged() -> void override;
-    auto OnDisplayScaleChanged() -> void override;
-    auto OnBackingScaleChanged() -> void override;
+    auto OnRenderParamsChanged() -> void override;
 
 private:
     Shared<PlatformDCompositionDeviceWin> _device;

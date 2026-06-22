@@ -4,6 +4,7 @@
 #include "Futurewalker.Graphics.Win.PlatformSwapChainSurfaceWinType.hpp"
 #include "Futurewalker.Graphics.Win.PlatformGraphicsDeviceObjectWin.hpp"
 #include "Futurewalker.Graphics.SceneType.hpp"
+#include "Futurewalker.Graphics.PixelGeometry.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -36,10 +37,15 @@ public:
     ///
     /// @brief Resize size of buffer.
     ///
-    /// @param width New width of buffer. Should be >= 1.
-    /// @param height New height of buffer. Should be >= 1.
+    /// @param[in] width New width of buffer. Should be >= 1.
+    /// @param[in] height New height of buffer. Should be >= 1.
+    /// @param[in] pixelGeometry Pixel geometry of target screen.
+    /// @param[in] textGamma Text rendering gamma.
+    /// @param[in] textContrast Text rendering contrast.
     ///
-    virtual auto Resize(IntPx const width, IntPx const height) -> Bool = 0;
+    /// @return Returns true when successfully resized surface.
+    ///
+    virtual auto Resize(IntPx const width, IntPx const height, PixelGeometry const pixelGeometry, Float64 const textGamma, Float64 const textContrast) -> Bool = 0;
 
     ///
     /// @brief Set offset of swap chain surface.

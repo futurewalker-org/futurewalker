@@ -75,11 +75,6 @@ public:
     auto GetDisplayListOffset() const -> Vector<Dp>;
     auto SetDisplayListOffset(Vector<Dp> const& offset) -> void;
 
-    auto GetDisplayScale() const -> DisplayScale;
-    auto GetBackingScale() const -> BackingScale;
-
-    auto NotifyRootChanged() -> void;
-
 public:
     virtual auto ShouldRasterize() const -> Bool;
     virtual auto GetControl() -> Shared<PlatformViewLayerControl>;
@@ -96,8 +91,6 @@ protected:
     static auto MakeDerived(Args&&... args) -> Shared<Derived>;
 
 private:
-    virtual auto RootGetDisplayScale() const -> DisplayScale;
-    virtual auto RootGetBackingScale() const -> BackingScale;
     virtual auto RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void;
     virtual auto RootSizeChanged(Shared<PlatformViewLayer> const& layer) -> void;
     virtual auto RootClipPathChanged(Shared<PlatformViewLayer> const& layer) -> void;
@@ -113,8 +106,6 @@ private:
     auto InitializeSelf() -> void;
     auto InternalAttach() -> void;
     auto InternalDetach() -> void;
-    auto NotifyRootDisplayScaleChanged(DisplayScale const rootDisplayScale) -> void;
-    auto NotifyRootBackingScaleChanged(BackingScale const rootBackingScale) -> void;
 
 private:
     Shared<PlatformViewLayerContext> _context;
@@ -129,8 +120,6 @@ private:
     Float64 _opacity = 1.0;
     Shared<Graphics::DisplayList> _displayList;
     Vector<Dp> _displayListOffset;
-    DisplayScale _displayScale = 1.0;
-    BackingScale _backingScale = 1.0;
     PlatformViewLayerId _id = 0U;
 };
 

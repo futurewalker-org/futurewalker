@@ -153,7 +153,12 @@ public:
 auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText
 {
     auto const width = static_cast<SkScalar>(maxWidth);
-    auto const font = SkFont(GetSkTypeface(typeface), static_cast<SkScalar>(size));
+    auto font = SkFont(GetSkTypeface(typeface), static_cast<SkScalar>(size));
+
+    // TODO: Make this configurable
+    font.setHinting(SkFontHinting::kNormal);
+    font.setSubpixel(true);
+    font.setEdging(SkFont::Edging::kSubpixelAntiAlias);
 
     auto const utf8Str = text.GetString().ToStdString();
     auto const utf8Chars = utf8Str.c_str();

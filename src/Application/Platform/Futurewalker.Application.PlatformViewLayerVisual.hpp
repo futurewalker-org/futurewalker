@@ -58,11 +58,8 @@ public:
     auto GetOpacity() const -> Float64;
     auto SetOpacity(Float64 const opacity) -> void;
 
-    auto GetDisplayScale() const -> DisplayScale;
-    auto SetDisplayScale(DisplayScale const displayScale) -> void;
-
-    auto GetBackingScale() const -> BackingScale;
-    auto SetBackingScale(BackingScale const backingScale) -> void;
+    auto GetRenderParams() const -> PlatformViewLayerVisualRenderParams const&;
+    auto SetRenderParams(PlatformViewLayerVisualRenderParams const& renderParams) -> void;
 
     enum class FragmentType : int32_t
     {
@@ -132,8 +129,7 @@ protected:
     virtual auto OnClipRectChanged() -> void = 0;
     virtual auto OnClipPathChanged() -> void = 0;
     virtual auto OnOpacityChanged() -> void = 0;
-    virtual auto OnDisplayScaleChanged() -> void = 0;
-    virtual auto OnBackingScaleChanged() -> void = 0;
+    virtual auto OnRenderParamsChanged() -> void = 0;
 
 private:
     Weak<PlatformViewLayerVisual> _self;
@@ -149,8 +145,7 @@ private:
     std::vector<PushNodeFragment> _pushNodeFragments;
     std::vector<PopNodeFragment> _popNodeFragments;
     std::vector<SInt32> _pushNodeIndexStack;
-    DisplayScale _displayScale = 1.0;
-    BackingScale _backingScale = 1.0;
+    PlatformViewLayerVisualRenderParams _renderParams;
 };
 
 ///

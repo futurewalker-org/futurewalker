@@ -26,11 +26,26 @@ namespace FW_EXPORT
 class PlatformSkiaCompositionSwapChainSurfaceWin : public PlatformSwapChainSurfaceWin
 {
 public:
-    static auto Make(Shared<PlatformSkiaGraphicsDeviceWin> const& device, Shared<PlatformDCompositionDeviceWin> const& dcompDevice, IntPx const width, IntPx const height) -> Shared<PlatformSkiaCompositionSwapChainSurfaceWin>;
+    static auto Make(
+      Shared<PlatformSkiaGraphicsDeviceWin> const& device,
+      Shared<PlatformDCompositionDeviceWin> const& dcompDevice,
+      IntPx const width,
+      IntPx const height,
+      PixelGeometry const pixelGeometry,
+      Float64 const textGamma,
+      Float64 const textContrast) -> Shared<PlatformSkiaCompositionSwapChainSurfaceWin>;
 
-    PlatformSkiaCompositionSwapChainSurfaceWin(PassKey<PlatformSkiaCompositionSwapChainSurfaceWin> ,Shared<PlatformSkiaGraphicsDeviceWin> const& device, Shared<PlatformDCompositionDeviceWin> const& dcompDevice, IntPx const width, IntPx const height);
+    PlatformSkiaCompositionSwapChainSurfaceWin(
+      PassKey<PlatformSkiaCompositionSwapChainSurfaceWin>,
+      Shared<PlatformSkiaGraphicsDeviceWin> const& device,
+      Shared<PlatformDCompositionDeviceWin> const& dcompDevice,
+      IntPx const width,
+      IntPx const height,
+      PixelGeometry const pixelGeometry,
+      Float64 const textGamma,
+      Float64 const textContrast);
 
-    auto Resize(IntPx const width, IntPx const height) -> Bool override;
+    auto Resize(IntPx const width, IntPx const height, PixelGeometry const pixelGeometry, Float64 const textGamma, Float64 const textContrast) -> Bool override;
     auto SetOffset(IntPx const x, IntPx const y) -> void override;
     auto Draw(Function<void(Scene& scene)> func) -> Bool override;
     auto NotifyDeviceLost() -> void override;
@@ -51,6 +66,7 @@ private:
     };
     auto GetSelf() -> Shared<PlatformSkiaCompositionSwapChainSurfaceWin>;
     auto AllocPresentationBuffer() -> PresentationBuffer;
+    auto RecreateSurface(PresentationBuffer& buffer) -> void;
     auto UpdateSourceRect() -> void;
     auto ClearResources() -> void;
     auto BuildResources() -> void;
@@ -58,6 +74,9 @@ private:
     Weak<PlatformSkiaCompositionSwapChainSurfaceWin> _self;
     IntPx _width = 0;
     IntPx _height = 0;
+    PixelGeometry _pixelGeometry = PixelGeometry::Unknown;
+    Float64 _textGamma = 0.0;
+    Float64 _textContrast = 0.0;
     Delegate _delegate;
     Shared<PlatformSkiaGraphicsDeviceWin> _device;
     Shared<PlatformDCompositionDeviceWin> _dcompDevice;

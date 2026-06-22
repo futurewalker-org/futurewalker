@@ -3,6 +3,7 @@
 #include "Futurewalker.Graphics.Win.PlatformSkiaSwapChainSurfaceWin.hpp"
 #include "Futurewalker.Graphics.Win.PlatformSkiaGraphicsDeviceWin.hpp"
 #include "Futurewalker.Graphics.SkiaScene.hpp"
+#include "Futurewalker.Graphics.SkiaFunction.hpp"
 
 #include "Futurewalker.Base.Debug.hpp"
 
@@ -36,13 +37,22 @@ void ThrowOnFalse(auto const& p)
 ///
 /// @brief Make new instance.
 ///
-/// @param device 
-/// @param width 
-/// @param height 
+/// @param device Graphics device object. Should not be null.
+/// @param width Width of swap chain. Should be >= 1.
+/// @param height Height of swap chain. Should be >= 1.
+/// @param pixelGeometry Pixel geometry of target screen.
+/// @param textGamma Text rendering gamma.
+/// @param textContrast Text rendering contrast.
 ///
-auto PlatformSkiaSwapChainSurfaceWin::Make(Shared<PlatformSkiaGraphicsDeviceWin> const& device, IntPx const width, IntPx const height) -> Shared<PlatformSkiaSwapChainSurfaceWin>
+auto PlatformSkiaSwapChainSurfaceWin::Make(
+  Shared<PlatformSkiaGraphicsDeviceWin> const& device,
+  IntPx const width,
+  IntPx const height,
+  PixelGeometry const pixelGeometry,
+  Float64 const textGamma,
+  Float64 const textContrast) -> Shared<PlatformSkiaSwapChainSurfaceWin>
 {
-    auto surface = Shared<PlatformSkiaSwapChainSurfaceWin>::Make(PassKey<PlatformSkiaSwapChainSurfaceWin>(), device, width, height);
+    auto surface = Shared<PlatformSkiaSwapChainSurfaceWin>::Make(PassKey<PlatformSkiaSwapChainSurfaceWin>(), device, width, height, pixelGeometry, textGamma, textContrast);
     surface->_self = surface;
     return surface;
 }
@@ -50,14 +60,20 @@ auto PlatformSkiaSwapChainSurfaceWin::Make(Shared<PlatformSkiaGraphicsDeviceWin>
 ///
 /// @brief Constructor.
 ///
-/// @param device Graphics device object. Should not be null.
-/// @param width Width of swap chain. Should be >= 1.
-/// @param height Height of swap chain. Should be >= 1.
-///
-PlatformSkiaSwapChainSurfaceWin::PlatformSkiaSwapChainSurfaceWin(PassKey<PlatformSkiaSwapChainSurfaceWin>, Shared<PlatformSkiaGraphicsDeviceWin> const& device, IntPx const width, IntPx const height)
+PlatformSkiaSwapChainSurfaceWin::PlatformSkiaSwapChainSurfaceWin(
+  PassKey<PlatformSkiaSwapChainSurfaceWin>,
+  Shared<PlatformSkiaGraphicsDeviceWin> const& device,
+  IntPx const width,
+  IntPx const height,
+  PixelGeometry const pixelGeometry,
+  Float64 const textGamma,
+  Float64 const textContrast)
   : _device {device}
   , _width {width}
   , _height {height}
+  , _pixelGeometry {pixelGeometry}
+  , _textGamma {textGamma}
+  , _textContrast {textContrast}
 {
     FW_DEBUG_ASSERT(device);
 
@@ -76,14 +92,17 @@ PlatformSkiaSwapChainSurfaceWin::PlatformSkiaSwapChainSurfaceWin(PassKey<Platfor
 }
 
 ///
-/// @brief Resize buffers.
+/// @brief Resize size of buffer.
 ///
-/// @param width New width of swap chain. Should be >= 1.
-/// @param height New height of swap chain. Should be >= 1.
+/// @param width New width of buffer. Should be >= 1.
+/// @param height New height of buffer. Should be >= 1.
+/// @param pixelGeometry Pixel geometry of target screen.
+/// @param textGamma Text rendering gamma.
+/// @param textContrast Text rendering contrast.
 ///
 /// @return Returns true when successfully resized surface.
 ///
-auto PlatformSkiaSwapChainSurfaceWin::Resize(IntPx const width, IntPx const height) -> Bool
+auto PlatformSkiaSwapChainSurfaceWin::Resize(IntPx const width, IntPx const height, Graphics::PixelGeometry const pixelGeometry, Float64 const textGamma, Float64 const textContrast) -> Bool
 {
     if (_width <= 0 || _height <= 0)
     {
@@ -95,7 +114,17 @@ auto PlatformSkiaSwapChainSurfaceWin::Resize(IntPx const width, IntPx const heig
     {
         _width = width;
         _height = height;
+        _pixelGeometry = pixelGeometry;
+        _textGamma = textGamma;
+        _textContrast = textContrast;
         return BuildResources();
+    }
+    else if (_pixelGeometry != pixelGeometry || !Float64::IsNearlyEqual(_textGamma, textGamma, 1e-6) || !Float64::IsNearlyEqual(_textContrast, textContrast, 1e-6))
+    {
+        _pixelGeometry = pixelGeometry;
+        _textGamma = textGamma;
+        _textContrast = textContrast;
+        return RebuildSurfaces();
     }
     return true;
 }
@@ -363,7 +392,7 @@ auto PlatformSkiaSwapChainSurfaceWin::RebuildSurfaces() -> Bool
             // Create surface for each buffer.
             for (auto i = SInt64(0); i < desc.BufferCount; ++i)
             {
-                Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+                auto resource = Microsoft::WRL::ComPtr<ID3D12Resource>();
                 ThrowOnFail(_swapChain->GetBuffer(static_cast<UINT>(i), IID_PPV_ARGS(resource.GetAddressOf())));
                 ThrowOnFalse(resource);
 
@@ -381,7 +410,8 @@ auto PlatformSkiaSwapChainSurfaceWin::RebuildSurfaces() -> Bool
 
                 auto const backendTexture = GrBackendTexture(static_cast<int>(desc.BufferDesc.Width), static_cast<int>(desc.BufferDesc.Height), resourceInfo);
 
-                auto surface = _device->CreateBackendTextureSurface(backendTexture);
+                auto surfaceProps = SkSurfaceProps(0, SkiaFunction::PixelGeometryToSkPixelGeometry(_pixelGeometry), static_cast<SkScalar>(_textContrast), static_cast<SkScalar>(_textGamma));
+                auto surface = _device->CreateBackendTextureSurface(backendTexture, surfaceProps);
                 ThrowOnFalse(surface);
 
                 _swapChainSurfaces.push_back(

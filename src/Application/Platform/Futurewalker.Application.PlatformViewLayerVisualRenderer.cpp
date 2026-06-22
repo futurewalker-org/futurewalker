@@ -22,7 +22,6 @@ PlatformViewLayerVisualRenderer::PlatformViewLayerVisualRenderer(Delegate const&
         _visual->SetBaseLayerId(layer->GetId());
         _visualUpdater = Shared<PlatformViewLayerVisualUpdater>::Make(context);
         _visualPropertyUpdater = Shared<PlatformViewLayerVisualPropertyUpdater>::Make();
-        RebuildVisual();
     }
     else
     {
@@ -31,19 +30,19 @@ PlatformViewLayerVisualRenderer::PlatformViewLayerVisualRenderer(Delegate const&
     }
 }
 
-auto PlatformViewLayerVisualRenderer::Render() -> void
+auto PlatformViewLayerVisualRenderer::Render(PlatformViewLayerVisualRenderParams const& renderParams) -> void
 {
     RenderBegin();
 
     if (_shouldRebuildLayer)
     {
-        RebuildVisual();
+        RebuildVisual(renderParams);
         _shouldRebuildLayer = false;
         _shouldUpdateLayer = false;
     }
     else if (_shouldUpdateLayer)
     {
-        UpdateVisual();
+        UpdateVisual(renderParams);
         _shouldUpdateLayer = false;
     }
 
@@ -101,19 +100,19 @@ auto PlatformViewLayerVisualRenderer::FindBaseVisualByBaseLayerId(PlatformViewLa
     return traverse(_visual, layerId);
 }
 
-auto PlatformViewLayerVisualRenderer::RebuildVisual() -> void
+auto PlatformViewLayerVisualRenderer::RebuildVisual(PlatformViewLayerVisualRenderParams const& renderParams) -> void
 {
     if (_visualUpdater)
     {
-        _visualUpdater->Update(_visual, GetLayer());
+        _visualUpdater->Update(_visual, GetLayer(), renderParams);
     }
 }
 
-auto PlatformViewLayerVisualRenderer::UpdateVisual() -> void
+auto PlatformViewLayerVisualRenderer::UpdateVisual(PlatformViewLayerVisualRenderParams const& renderParams) -> void
 {
     if (_visualPropertyUpdater)
     {
-        _visualPropertyUpdater->Update(_visual, GetLayer());
+        _visualPropertyUpdater->Update(_visual, GetLayer(), renderParams);
     }
 }
 

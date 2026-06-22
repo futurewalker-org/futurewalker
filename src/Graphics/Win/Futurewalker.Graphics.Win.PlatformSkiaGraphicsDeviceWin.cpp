@@ -71,19 +71,28 @@ PlatformSkiaGraphicsDeviceWin::PlatformSkiaGraphicsDeviceWin(PassKey<PlatformSki
 /// @param[in] dcompDevice DComposition device.
 /// @param[in] width Width of surface.
 /// @param[in] height Height of surface.
+/// @param[in] pixelGeometry Pixel geometry of target screen.
+/// @param[in] textGamma Text rendering gamma.
+/// @param[in] textContrast Text rendering contrast.
 ///
-auto PlatformSkiaGraphicsDeviceWin::MakeSwapChainSurface(Shared<PlatformDCompositionDeviceWin> const& dcompDevice, IntPx const width, IntPx const height) -> Shared<PlatformSwapChainSurfaceWin>
+auto PlatformSkiaGraphicsDeviceWin::MakeSwapChainSurface(
+  Shared<PlatformDCompositionDeviceWin> const& dcompDevice,
+  IntPx const width,
+  IntPx const height,
+  PixelGeometry const pixelGeometry,
+  Float64 const textGamma,
+  Float64 const textContrast) -> Shared<PlatformSwapChainSurfaceWin>
 {
     auto surface = Shared<PlatformSwapChainSurfaceWin>();
     if (dcompDevice->IsPresentationSupported())
     {
-        surface = PlatformSkiaCompositionSwapChainSurfaceWin::Make(GetSelf(), dcompDevice, width, height);
+        surface = PlatformSkiaCompositionSwapChainSurfaceWin::Make(GetSelf(), dcompDevice, width, height, pixelGeometry, textGamma, textContrast);
     }
 
     if (!surface)
     {
         FW_DEBUG_LOG_WARNING("PlatformSkiaGraphicsDeviceWin: DComposition swap chain surface is not supported. Falling back to regular swap chain surface.");
-        surface = PlatformSkiaSwapChainSurfaceWin::Make(GetSelf(), width, height);
+        surface = PlatformSkiaSwapChainSurfaceWin::Make(GetSelf(), width, height, pixelGeometry, textGamma, textContrast);
     }
     return surface;
 }
@@ -261,7 +270,7 @@ auto PlatformSkiaGraphicsDeviceWin::CreateSharedHandle(Microsoft::WRL::ComPtr<ID
 ///
 /// @param backendTexture Create surface with backend texture.
 ///
-auto PlatformSkiaGraphicsDeviceWin::CreateBackendTextureSurface(GrBackendTexture const& backendTexture) -> sk_sp<SkSurface>
+auto PlatformSkiaGraphicsDeviceWin::CreateBackendTextureSurface(GrBackendTexture const& backendTexture, SkSurfaceProps const& surfaceProps) -> sk_sp<SkSurface>
 {
     if (_grContext)
     {
@@ -272,7 +281,7 @@ auto PlatformSkiaGraphicsDeviceWin::CreateBackendTextureSurface(GrBackendTexture
             {
                 FW_DEBUG_ASSERT(resourceInfo.fSampleCount == SwapChainSampleDesc.Count);
                 FW_DEBUG_ASSERT(resourceInfo.fSampleQualityPattern == SwapChainSampleDesc.Quality);
-                return SkSurfaces::WrapBackendTexture(_grContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, resourceInfo.fSampleCount, SurfaceColorType, SkColorSpace::MakeSRGB(), nullptr);
+                return SkSurfaces::WrapBackendTexture(_grContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, resourceInfo.fSampleCount, SurfaceColorType, SkColorSpace::MakeSRGB(), &surfaceProps);
             }
             FW_DEBUG_ASSERT(false);
         }
