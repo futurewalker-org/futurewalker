@@ -101,8 +101,9 @@ using namespace Futurewalker;
         return;
     }
     auto const& clipPaths = visual->GetClipPaths();
-    auto const displayScale = visual->GetDisplayScale();
-    auto const backingScale = visual->GetBackingScale();
+    auto const& renderParams = visual->GetRenderParams(); 
+    auto const displayScale = renderParams.displayScale;
+    auto const backingScale = renderParams.backingScale;
     auto const scale = static_cast<FW_NS::Float64>(displayScale) * static_cast<FW_NS::Float64>(backingScale);
 
     surface->SetDisplayScale(displayScale);
@@ -186,17 +187,20 @@ auto PlatformViewLayerVisualMac::Render(NSWindow* window) -> void
 
             if (_needsUpdateGeometry)
             {
-                auto const offset = UnitFunction::ConvertDpToVp(GetOffset().As<Point>(), GetDisplayScale());
+                auto const& renderParams = GetRenderParams();
+                auto const displayScale = renderParams.displayScale;
+
+                auto const offset = UnitFunction::ConvertDpToVp(GetOffset().As<Point>(), displayScale);
                 auto const offsetX = static_cast<CGFloat>(offset.x);
                 auto const offsetY = static_cast<CGFloat>(offset.y);
 
-                auto const clip = UnitFunction::ConvertDpToVp(GetClipRect(), GetDisplayScale());
+                auto const clip = UnitFunction::ConvertDpToVp(GetClipRect(), displayScale);
                 auto const clipX = static_cast<CGFloat>(clip.x0);
                 auto const clipY = static_cast<CGFloat>(clip.y0);
                 auto const clipWidth = static_cast<CGFloat>(clip.GetWidth());
                 auto const clipHeight = static_cast<CGFloat>(clip.GetHeight());
 
-                auto const bounds = UnitFunction::ConvertDpToVp(drawableRect, GetDisplayScale());
+                auto const bounds = UnitFunction::ConvertDpToVp(drawableRect, displayScale);
                 auto const boundsX = static_cast<CGFloat>(bounds.x0);
                 auto const boundsY = static_cast<CGFloat>(bounds.y0);
                 auto const boundsWidth = static_cast<CGFloat>(bounds.GetWidth());
@@ -264,13 +268,7 @@ auto PlatformViewLayerVisualMac::OnOpacityChanged() -> void
     }
 }
 
-auto PlatformViewLayerVisualMac::OnDisplayScaleChanged() -> void
-{
-    _needsUpdateGeometry = true;
-    _needsUpdateContents = true;
-}
-
-auto PlatformViewLayerVisualMac::OnBackingScaleChanged() -> void
+auto PlatformViewLayerVisualMac::OnRenderParamsChanged() -> void
 {
     _needsUpdateGeometry = true;
     _needsUpdateContents = true;

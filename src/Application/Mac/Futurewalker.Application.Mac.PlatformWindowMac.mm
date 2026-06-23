@@ -1549,14 +1549,6 @@ auto PlatformWindowMac::Close() -> void
     }
 }
 
-auto PlatformWindowMac::Render() -> void
-{
-    if (_rootViewLayer)
-    {
-        _rootViewLayer->Render();
-    }
-}
-
 auto PlatformWindowMac::RequestFrame() -> void
 {
     @autoreleasepool
@@ -1629,6 +1621,7 @@ auto PlatformWindowMac::Initialize() -> void
                 auto event = Event<>(Event<PlatformWindowEvent::AreaChanged>());
                 _this->SendWindowEventDetached(event);
             }
+            _this->Frame(_this->_windowDelegate.displayLink.targetTimestamp);
         }];
         [_windowDelegate setCallbackOnMove:[](void* data) -> void {
             auto const _this = static_cast<PlatformWindowMac*>(data);
@@ -1639,6 +1632,11 @@ auto PlatformWindowMac::Initialize() -> void
         [_windowDelegate setCallbackOnScreenProfileChange:[](void*) -> void {}];
         [_windowDelegate setCallbackOnBackingPropertyChange:[](void* data) -> void {
             auto const _this = static_cast<PlatformWindowMac*>(data);
+            if (_this->_rootViewLayer)
+            {
+                _this->_rootViewLayer->SetBackingScale(_this->GetBackingScale());
+                _this->RequestFrame();
+            }
             auto event = Event<>(Event<PlatformWindowEvent::BackingScaleChanged>());
             _this->SendWindowEventDetached(event);
         }];
@@ -1687,12 +1685,7 @@ auto PlatformWindowMac::Initialize() -> void
             @autoreleasepool
             {
                 auto const _this = static_cast<PlatformWindowMac*>(data);
-                auto const currentFrameTime = NSTimeIntervalToMonotonicTime(displayLink.targetTimestamp);
-                _this->_currentFrameTime = currentFrameTime;
-                auto tickEvent = Event<PlatformFrameEvent::Tick>();
-                tickEvent->SetTargetTimestamp(currentFrameTime);
-                auto event = Event<>(tickEvent);
-                _this->SendFrameEventDetached(event);
+                _this->Frame(displayLink.targetTimestamp);
             }
         }];
         [_windowDelegate setCallbackOnWillClose:[](void* data) -> BOOL {
@@ -1703,8 +1696,27 @@ auto PlatformWindowMac::Initialize() -> void
         }];
 
         _rootViewLayer = PlatformRootViewLayerMac::Make(_visualContext, _windowDelegate.window);
+        _rootViewLayer->SetBackingScale(GetBackingScale());
         _currentFrameTime = NSTimeIntervalToMonotonicTime(_windowDelegate.displayLink.targetTimestamp);
     }
+}
+
+auto PlatformWindowMac::Render() -> void
+{
+    if (_rootViewLayer)
+    {
+        _rootViewLayer->Render();
+    }
+}
+
+auto PlatformWindowMac::Frame(NSTimeInterval targetTimestamp) -> void
+{
+    _currentFrameTime = NSTimeIntervalToMonotonicTime(targetTimestamp);
+    auto tickEvent = Event<PlatformFrameEvent::Tick>();
+    tickEvent->SetTargetTimestamp(_currentFrameTime);
+    auto event = Event<>(tickEvent);
+    SendFrameEventDetached(event);
+    Render();
 }
 
 auto PlatformWindowMac::NativeToVpRect(NSRect const& rect) -> Rect<Vp>

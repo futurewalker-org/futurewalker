@@ -14,21 +14,6 @@
 
 namespace FW_DETAIL_NS
 {
-namespace
-{
-///
-/// @brief Expand bounds to align to pixel grid.
-///
-auto AlignBoundsToPixelGridByExpand(Rect<Dp> const& bounds, DisplayScale const displayScale, BackingScale const backingScale) -> Rect<Dp>
-{
-    auto const l = Px::Floor(UnitFunction::ConvertDpToPx(bounds.x0, displayScale, backingScale));
-    auto const t = Px::Floor(UnitFunction::ConvertDpToPx(bounds.y0, displayScale, backingScale));
-    auto const r = Px::Ceil(UnitFunction::ConvertDpToPx(bounds.x1, displayScale, backingScale));
-    auto const b = Px::Ceil(UnitFunction::ConvertDpToPx(bounds.y1, displayScale, backingScale));
-    return UnitFunction::ConvertPxToDp(Rect<Px>(l, t, r, b), backingScale, displayScale);
-}
-}
-
 ///
 /// @brief
 ///
@@ -175,10 +160,6 @@ auto ViewDrawInfo::UpdateLayers(ViewLayer& layer) -> void
 
     if (_displayList && !_displayList->GetBounds().IsEmpty())
     {
-        // We assume origin of the bounds is properly aligned by layout algorithm.
-        auto const bounds = AlignBoundsToPixelGridByExpand(_displayList->GetBounds(), _displayScale, _backingScale);
-        auto const offset = bounds.GetPosition().As<Vector>();
-
         layer.SetDisplayList(_displayList);
         layer.SetDisplayListOffset({});
     }

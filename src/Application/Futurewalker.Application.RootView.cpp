@@ -176,6 +176,7 @@ auto RootView::ReceiveRootViewEvent(Event<>& event) -> Async<Bool>
         if (_layoutInfo.SetSize(size))
         {
             _drawInfo.GetLayer().SetSize(size);
+            RequestFrame();
         }
     }
     else if (event.Is<RootViewEvent::Frame>())

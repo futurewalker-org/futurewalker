@@ -24,12 +24,12 @@ public:
 
     auto Render() -> void;
 
+    auto SetBackingScale(BackingScale const backingScale) -> void;
+
 protected:
     auto Initialize() -> void override;
 
 private:
-    auto RootGetDisplayScale() const -> DisplayScale override;
-    auto RootGetBackingScale() const -> BackingScale override;
     auto RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void override;
     auto RootSizeChanged(Shared<PlatformViewLayer> const& layer) -> void override;
     auto RootClipPathChanged(Shared<PlatformViewLayer> const& layer) -> void override;
@@ -47,6 +47,7 @@ private:
     __strong NSMutableArray<NSView*>* _expectedViews = nil;
     Shared<PlatformViewLayerVisualContextMac> _visualContext;
     Shared<PlatformViewLayerVisualRenderer> _renderer;
+    PlatformViewLayerVisualRenderParams _renderParams;
 };
 }
 }

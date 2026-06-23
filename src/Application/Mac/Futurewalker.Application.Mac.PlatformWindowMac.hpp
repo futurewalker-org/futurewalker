@@ -62,7 +62,6 @@ public:
     auto IsClosed() -> Bool override;
     auto RequestClose() -> Async<Bool> override;
     auto Close() -> void override;
-    auto Render() -> void override;
     auto RequestFrame() -> void override;
     auto GetFrameTime() -> MonotonicTime override;
     auto GetViewLayer() -> Shared<PlatformViewLayer> override;
@@ -73,6 +72,8 @@ public:
 
 private:
     auto Initialize() -> void override;
+    auto Render() -> void;
+    auto Frame(NSTimeInterval targetTimestamp) -> void;
     static auto NativeToVpRect(NSRect const& rect) -> Rect<Vp>;
     static auto VpToNativeRect(Rect<Vp> const& rect) -> NSRect;
 

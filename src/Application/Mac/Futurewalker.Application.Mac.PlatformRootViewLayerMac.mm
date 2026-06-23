@@ -54,6 +54,9 @@ PlatformRootViewLayerMac::PlatformRootViewLayerMac(PassKey<PlatformViewLayer> ke
 {
     @autoreleasepool
     {
+        _renderParams.displayScale = 1.0;
+        _renderParams.backingScale = 1.0;
+
         _view = [PlatformRootViewLayerView new];
         [_view setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
         [_view setFrame:_window.contentView.bounds];
@@ -70,7 +73,20 @@ auto PlatformRootViewLayerMac::Render() -> void
 {
     if (_renderer)
     {
-        _renderer->Render();
+        _renderer->Render(_renderParams);
+    }
+}
+
+auto PlatformRootViewLayerMac::SetBackingScale(BackingScale const backingScale) -> void
+{
+    if (_renderParams.backingScale != backingScale)
+    {
+        _renderParams.backingScale = backingScale;
+
+        if (_renderer)
+        {
+            _renderer->RequestUpdateLayer();
+        }
     }
 }
 
@@ -129,16 +145,6 @@ auto PlatformRootViewLayerMac::Initialize() -> void
       },
       layer,
       context);
-}
-
-auto PlatformRootViewLayerMac::RootGetDisplayScale() const -> DisplayScale
-{
-    return 1.0;
-}
-
-auto PlatformRootViewLayerMac::RootGetBackingScale() const -> BackingScale
-{
-    return [_window backingScaleFactor];
 }
 
 auto PlatformRootViewLayerMac::RootOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void
