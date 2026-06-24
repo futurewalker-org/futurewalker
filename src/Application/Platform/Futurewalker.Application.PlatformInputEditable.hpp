@@ -59,8 +59,7 @@ public:
 
 
 protected:
-    auto SendInputEvent(Event<>& event) -> Async<Bool>;
-    auto SendInputEventDetached(Event<>& event) -> Bool;
+    auto SendInputEvent(Event<>& event) -> Bool;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;

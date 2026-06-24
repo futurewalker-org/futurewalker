@@ -112,14 +112,9 @@ auto FocusNode::GetEventReceiver() const -> EventReceiver const&
     return _eventReceiver;
 }
 
-auto FocusNode::SendEvent(Event<>& event) -> Async<Bool>
+auto FocusNode::SendEvent(Event<>& event) -> Bool
 {
-    co_return co_await GetEventReceiver().SendEvent(event);
-}
-
-auto FocusNode::SendEventDetached(Event<>& event) -> Bool
-{
-    return GetEventReceiver().SendEventDetached(event);
+    return GetEventReceiver().SendEvent(event);
 }
 
 auto FocusNode::DispatchKeyEventFromRoot(PassKey<RootFocusNode>, Event<>& event, Shared<FocusNode> const& target) -> Bool
@@ -216,7 +211,7 @@ auto FocusNode::DispatchKeyEvent(Event<>& event, Shared<FocusNode> const& target
 
     if (self == target)
     {
-        if (SendEventDetached(event))
+        if (SendEvent(event))
         {
             return true;
         }
@@ -235,7 +230,7 @@ auto FocusNode::DispatchKeyEvent(Event<>& event, Shared<FocusNode> const& target
         }
     }
 
-    if (SendEventDetached(event))
+    if (SendEvent(event))
     {
         return true;
     }

@@ -83,7 +83,7 @@ auto IconView::Draw(DrawScope& scope) -> void
     icon.Draw(scene, GetContentRect(), color, alpha);
 }
 
-auto IconView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto IconView::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
@@ -94,6 +94,6 @@ auto IconView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
         }
         InvalidateVisual();
     }
-    co_return false;
+    return false;
 }
 }

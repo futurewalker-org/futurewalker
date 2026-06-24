@@ -321,7 +321,7 @@ auto ButtonView::Initialize() -> void
 ///
 /// @param event
 ///
-auto ButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto ButtonView::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<FocusEvent>())
     {
@@ -356,9 +356,9 @@ auto ButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                     _renderView->SetDown(true);
                     _renderView->SetFocused(IsFocused(), FocusReason::Keyboard);
                     auto buttonEvent = Event<>(Event<ButtonViewEvent::Down>());
-                    SendEventDetached(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
-                co_return true;
+                return true;
             }
         }
         else if (event.Is<KeyEvent::Up>())
@@ -372,9 +372,9 @@ auto ButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                     _keyDown = false;
                     _renderView->SetDown(false);
                     auto buttonEvent = Event<>(Event<ButtonViewEvent::Press>());
-                    SendEventDetached(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
-                co_return true;
+                return true;
             }
         }
     }
@@ -394,14 +394,14 @@ auto ButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                     }
                     RequestFocus(FocusReason::Pointer);
                     auto buttonEvent = Event<>(Event<ButtonViewEvent::Down>());
-                    SendEventDetached(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
                 else if (event.Is<TapGestureViewEvent::Cancel>())
                 {
                     _tapDown = false;
                     _renderView->SetDown(false);
                     auto buttonEvent = Event<>(Event<ButtonViewEvent::Cancel>());
-                    SendEventDetached(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
                 else if (event.Is<TapGestureViewEvent::Tap>())
                 {
@@ -410,10 +410,10 @@ auto ButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                         _tapDown = false;
                         _renderView->SetDown(false);
                         auto buttonEvent = Event<>(Event<ButtonViewEvent::Press>());
-                        SendEventDetached(buttonEvent);
+                        SendEvent(buttonEvent);
                     }
                 }
-                co_return true;
+                return true;
             }
             else if (event.Is<HoverGestureViewEvent>())
             {
@@ -422,20 +422,20 @@ auto ButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                     _hoverEnter = true;
                     _renderView->SetEnter(true);
                     auto buttonEvent = Event<>(Event<ButtonViewEvent::Enter>());
-                    SendEventDetached(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
                 else if (event.Is<HoverGestureViewEvent::Leave>())
                 {
                     _hoverEnter = false;
                     _renderView->SetEnter(false);
                     auto buttonEvent = Event<>(Event<ButtonViewEvent::Leave>());
-                    SendEventDetached(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
-                co_return true;
+                return true;
             }
         }
     }
-    co_return false;
+    return false;
 }
 }
 }

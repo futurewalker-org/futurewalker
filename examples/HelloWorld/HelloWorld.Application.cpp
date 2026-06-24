@@ -37,7 +37,7 @@ auto Application::Initialize() -> void
     EventReceiver::Connect(*this, *this, &Application::ReceiveEvent);
 }
 
-auto Application::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto Application::ReceiveEvent(Event<>& event) -> Bool
 {
     // After Application::Run() is called and framework is ready to run application specific code, ApplicationEvent::Started is sent.
     // You can perform initialization of your application and display first window to user here.
@@ -63,37 +63,38 @@ auto Application::ReceiveEvent(Event<>& event) -> Async<Bool>
         // Actual values are defined in .xml files in Resource folder.
         auto const hello = resource->GetString(R::HelloWorld::Hello);
 
-        // Create main window with background color.
-        auto window = Window::Make({});
-        window->SetTitle(hello);
-        window->SetFrameRect({0, 0, 500, 500});
-        window->SetBackgroundColor(Lamp::Style::ColorSurface);
+        AsyncFunction::SpawnFn([=] -> Async<void> {
+            // Create main window with background color.
+            auto window = Window::Make({});
+            window->SetTitle(hello);
+            window->SetFrameRect({0, 0, 500, 500});
+            window->SetBackgroundColor(Lamp::Style::ColorSurface);
 
-        // Create styled text view.
-        // If you assign attribute value to a view, it will override the attribute inherited from parent.
-        // In this case, we override theme's default value of font size and weight with specified values for the text view.
-        // Template argument of SetValue takes static address of attribute info.
-        // NOTE: We could use static reference instead of pointer to remove '&' in template parameter, but MSVC has a bug that prevent passing static reference.
-        auto text = Lamp::TextView::MakeWithText(hello);
-        AttributeNode::SetValue<&Lamp::TextViewStyle::FontSize>(*text, 42);
-        AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());
+            // Create styled text view.
+            // If you assign attribute value to a view, it will override the attribute inherited from parent.
+            // In this case, we override theme's default value of font size and weight with specified values for the text view.
+            // Template argument of SetValue takes static address of attribute info.
+            // NOTE: We could use static reference instead of pointer to remove '&' in template parameter, but MSVC has a bug that prevent passing static reference.
+            auto text = Lamp::TextView::MakeWithText(hello);
+            AttributeNode::SetValue<&Lamp::TextViewStyle::FontSize>(*text, 42);
+            AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());
 
-        // Create layout view that centers the text view.
-        // Layouts and controls are both derived from View. You can combine them to create your desired UI layout.
-        auto align = AlignView::MakeWithContent(text);
+            // Create layout view that centers the text view.
+            // Layouts and controls are both derived from View. You can combine them to create your desired UI layout.
+            auto align = AlignView::MakeWithContent(text);
 
-        // Set layout view as content of window.
-        window->SetContent(align);
+            // Set layout view as content of window.
+            window->SetContent(align);
 
-        // Show window to user.
-        window->SetVisible(true);
+            // Show window to user.
+            window->SetVisible(true);
 
-        // Wait until window is closed (asynchronous).
-        co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
-
-        // Exit application.
-        co_await Exit();
+            // Wait until window is closed (asynchronous).
+            co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
+            // Exit application.
+            co_await Exit();
+        }).Detach();
     }
-    co_return false;
+    return false;
 }
 }

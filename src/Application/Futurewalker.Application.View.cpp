@@ -60,7 +60,7 @@ auto View::Make() -> Shared<View>
 /// @brief Constructor.
 ///
 View::View(PassKey<View>)
-  : _eventReceiver({.dispatchEvent = [this](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); }})
+  : _eventReceiver({.dispatchEvent = [this](Event<>& event, EventFunction const& dispatch) -> Bool { return DispatchEvent(event, dispatch); }})
 {
 }
 
@@ -449,7 +449,7 @@ auto View::SetVisible(Bool const visible) -> void
             try
             {
                 auto event = Event<>(Event<ViewEvent::VisibleChanged>());
-                SendEventDetached(event);
+                SendEvent(event);
             }
             catch (...)
             {
@@ -505,7 +505,7 @@ auto View::SetEnabled(Bool const enabled) -> void
             UpdateFocusable();
 
             auto event = Event<>(Event<ViewEvent::EnabledChanged>());
-            SendEventDetached(event);
+            SendEvent(event);
         }
     }
 }
@@ -563,19 +563,9 @@ auto View::IsAttached() const -> Bool
 ///
 /// @param event 
 ///
-auto View::SendEvent(Event<>& event) -> Async<Bool>
+auto View::SendEvent(Event<>& event) -> Bool
 {
-    co_return co_await GetEventReceiver().SendEvent(event);
-}
-
-///
-/// @brief
-///
-/// @param event
-///
-auto View::SendEventDetached(Event<>& event) -> Bool
-{
-    return GetEventReceiver().SendEventDetached(event);
+    return GetEventReceiver().SendEvent(event);
 }
 
 ///
@@ -599,7 +589,7 @@ auto View::RemoveFromParent() -> void
         auto parameter = Event<ViewEvent::ChildRemoved>();
         parameter->SetRemovedView(GetSelf());
         auto event = Event<>(parameter);
-        parent->SendEventDetached(event);
+        parent->SendEvent(event);
     }
 }
 
@@ -988,7 +978,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
             if ((phase & PointerPhaseFlag::Target) != PointerPhaseFlag::None)
             {
                 auto targetEvent = Event<>(pointerEvent);
-                if (SendEventDetached(targetEvent))
+                if (SendEvent(targetEvent))
                 {
                     return GetSelf();
                 }
@@ -1003,7 +993,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
                 pointerInterceptEventParameter->SetPointerEvent(pointerEvent);
                 pointerInterceptEventParameter->SetIntercepted(false);
                 auto pointerInterceptEvent = Event<>(pointerInterceptEventParameter);
-                if (SendEventDetached(pointerInterceptEvent))
+                if (SendEvent(pointerInterceptEvent))
                 {
                     if (pointerInterceptEvent.Is<PointerEvent::Forecast>())
                     {
@@ -1037,7 +1027,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
             if ((phase & PointerPhaseFlag::Bubble) != PointerPhaseFlag::None)
             {
                 auto targetEvent = Event<>(pointerEvent);
-                if (SendEventDetached(targetEvent))
+                if (SendEvent(targetEvent))
                 {
                     return GetSelf();
                 }
@@ -1187,7 +1177,7 @@ auto View::HitTest(HitTestScope& scope) -> void
     hitTestParameter->SetPosition(parameter.GetPosition());
     hitTestParameter->SetHit(IsPointerInteractive());
     auto hitTestEvent = Event<>(hitTestParameter);
-    if (SendEventDetached(hitTestEvent))
+    if (SendEvent(hitTestEvent))
     {
         if (hitTestEvent.Is<HitTestEvent>())
         {
@@ -1951,17 +1941,17 @@ auto View::AbandonChild(Shared<View> const& child) -> void
 /// @param event
 /// @param dispatch
 ///
-auto View::DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>
+auto View::DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Bool
 {
     if (event.Is<ViewEvent::Notify>())
     {
-        co_return co_await DispatchNotifyEvent(event, dispatch);
+        return DispatchNotifyEvent(event, dispatch);
     }
     else if (event.Is<ViewEventNotifyBubble>())
     {
-        co_return co_await DispatchNotifyBubbleEvent(event, dispatch);
+        return DispatchNotifyBubbleEvent(event, dispatch);
     }
-    co_return co_await dispatch(event);
+    return dispatch(event);
 }
 
 ///
@@ -1970,13 +1960,13 @@ auto View::DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async
 /// @param event
 /// @param dispatch
 ///
-auto View::DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>
+auto View::DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) -> Bool
 {
     auto notifyEventParameter = event.As<ViewEvent::Notify>();
     notifyEventParameter->SetSender(GetSelf());
     auto notifyEvent = Event<>(notifyEventParameter);
 
-    if (co_await dispatch(notifyEvent))
+    if (dispatch(notifyEvent))
     {
         if (notifyEvent.Is<ViewEvent::Notify>())
         {
@@ -1984,13 +1974,13 @@ auto View::DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) ->
             notifyEventParameter->SetSender(nullptr);
             event = notifyEventParameter;
         }
-        co_return true;
+        return true;
     }
 
     if (auto parent = GetParent())
     {
         auto bubbleEvent = Event<>(Event<ViewEventNotifyBubble>::Make(notifyEvent));
-        if (co_await parent->SendEvent(bubbleEvent))
+        if (parent->SendEvent(bubbleEvent))
         {
             if (notifyEvent.Is<ViewEvent::Notify>())
             {
@@ -1998,10 +1988,10 @@ auto View::DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) ->
                 notifyEventParameter->SetSender(nullptr);
                 event = notifyEventParameter;
             }
-            co_return true;
+            return true;
         }
     }
-    co_return false;
+    return false;
 }
 
 ///
@@ -2010,18 +2000,18 @@ auto View::DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) ->
 /// @param event
 /// @param dispatch
 ///
-auto View::DispatchNotifyBubbleEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>
+auto View::DispatchNotifyBubbleEvent(Event<>& event, EventFunction const& dispatch) -> Bool
 {
-    if (co_await dispatch(event.As<ViewEventNotifyBubble>()->GetEvent()))
+    if (dispatch(event.As<ViewEventNotifyBubble>()->GetEvent()))
     {
-        co_return true;
+        return true;
     }
 
     if (auto parent = GetParent())
     {
-        co_return co_await parent->SendEvent(event);
+        return parent->SendEvent(event);
     }
-    co_return false;
+    return false;
 }
 
 ///
@@ -2103,7 +2093,7 @@ auto View::NotifyActiveChanged(Bool const active) -> void
             ForEachChild([&](View& view) { view.NotifyActiveChanged(active); });
 
             auto event = Event<>(Event<ViewEvent::ActiveChanged>());
-            SendEventDetached(event);
+            SendEvent(event);
         }
     }
     catch (...)
@@ -2137,12 +2127,12 @@ auto View::NotifyAttachedChanged(Bool const attached) -> void
             if (attached)
             {
                 auto event = Event<>(Event<ViewEvent::Attached>());
-                SendEventDetached(event);
+                SendEvent(event);
             }
             else
             {
                 auto event = Event<>(Event<ViewEvent::Detached>());
-                SendEventDetached(event);
+                SendEvent(event);
             }
         }
     }
@@ -2172,7 +2162,7 @@ auto View::NotifyVisibleChanged(Bool const visible) -> void
                 try
                 {
                     auto event = Event<>(Event<ViewEvent::VisibleChanged>());
-                    SendEventDetached(event);
+                    SendEvent(event);
                 }
                 catch (...)
                 {
@@ -2207,7 +2197,7 @@ auto View::NotifyEnabledChanged(Bool const enabled) -> void
                 try
                 {
                     auto event = Event<>(Event<ViewEvent::EnabledChanged>());
-                    SendEventDetached(event);
+                    SendEvent(event);
                 }
                 catch (...)
                 {
@@ -2243,7 +2233,7 @@ auto View::NotifyDisplayScaleChanged(DisplayScale const displayScale) -> void
             try
             {
                 auto event = Event<>(Event<ViewEvent::DisplayScaleChanged>());
-                SendEventDetached(event);
+                SendEvent(event);
             }
             catch (...)
             {
@@ -2275,7 +2265,7 @@ auto View::NotifyBackingScaleChanged(BackingScale const backingScale) -> void
             try
             {
                 auto event = Event<>(Event<ViewEvent::BackingScaleChanged>());
-                SendEventDetached(event);
+                SendEvent(event);
             }
             catch (...)
             {
@@ -2334,7 +2324,7 @@ auto View::NotifyLayoutDirectionChanged(LayoutDirection const layoutDirection) -
             try
             {
                 auto event = Event<>(Event<ViewEvent::LayoutDirectionChanged>());
-                SendEventDetached(event);
+                SendEvent(event);
             }
             catch (...)
             {
@@ -2351,7 +2341,7 @@ auto View::NotifyLayoutDirectionChanged(LayoutDirection const layoutDirection) -
 ///
 /// @brief 
 ///
-auto View::ReceiveFocusNodeEvent(Event<>& event) -> Async<Bool>
+auto View::ReceiveFocusNodeEvent(Event<>& event) -> Bool
 {
     if (event.Is<FocusEvent>())
     {
@@ -2365,7 +2355,7 @@ auto View::ReceiveFocusNodeEvent(Event<>& event) -> Async<Bool>
             }
         }
 
-        co_await SendEvent(event);
+        SendEvent(event);
 
         if (event.Is<FocusEvent::FocusOut>())
         {
@@ -2374,12 +2364,12 @@ auto View::ReceiveFocusNodeEvent(Event<>& event) -> Async<Bool>
                 root->RootSetInputEditable({});
             }
         }
-        co_return true;
+        return true;
     }
     else if (event.Is<KeyEvent>())
     {
-        co_return co_await SendEvent(event);
+        return SendEvent(event);
     }
-    co_return false;
+    return false;
 }
 }

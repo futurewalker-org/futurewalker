@@ -52,7 +52,7 @@ public:
 protected:
     auto Draw(DrawScope& scope) -> void override;
     auto Initialize() -> void override;
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Bool;
 
 private:
     auto InternalUpdateLayout() -> void;

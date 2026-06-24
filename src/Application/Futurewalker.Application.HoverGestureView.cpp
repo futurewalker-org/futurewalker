@@ -52,21 +52,21 @@ auto HoverGestureView::Initialize() -> void
     EventReceiver::Connect(*_gestureRecognizer, *this, &HoverGestureView::ReceiveEvent);
 }
 
-auto HoverGestureView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto HoverGestureView::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<HoverGestureEvent>())
     {
         if (event.Is<HoverGestureEvent::Enter>())
         {
             auto viewEvent = Event<>(Event<HoverGestureViewEvent::Enter>());
-            co_await SendEvent(viewEvent);
+            SendEvent(viewEvent);
         }
         else if (event.Is<HoverGestureEvent::Leave>())
         {
             auto viewEvent = Event<>(Event<HoverGestureViewEvent::Leave>());
-            co_await SendEvent(viewEvent);
+            SendEvent(viewEvent);
         }
     }
-    co_return false;
+    return false;
 }
 }

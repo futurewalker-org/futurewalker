@@ -26,7 +26,7 @@ public:
 
 protected:
     auto Initialize() -> void override;
-    auto ReceiveButtonEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveButtonEvent(Event<>& event) -> Bool;
     auto SetButtonActive(SInt64 const index, Bool const active) -> void;
 
 private:

@@ -68,7 +68,7 @@ auto MenuItemButton::Initialize() -> void
     EventReceiver::Connect(*this, *this, &MenuItemButton::ReceiveEvent);
 }
 
-auto MenuItemButton::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto MenuItemButton::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<MenuButtonViewEvent>())
     {
@@ -78,30 +78,30 @@ auto MenuItemButton::ReceiveEvent(Event<>& event) -> Async<Bool>
             if (event.Is<MenuButtonViewEvent::Down>())
             {
                 auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Down>());
-                co_await SendEvent(buttonEvent);
+                SendEvent(buttonEvent);
             }
             else if (event.Is<MenuButtonViewEvent::Up>())
             {
                 auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Up>());
-                co_await SendEvent(buttonEvent);
+                SendEvent(buttonEvent);
             }
             else if (event.Is<MenuButtonViewEvent::Enter>())
             {
                 auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Enter>());
-                co_await SendEvent(buttonEvent);
+                SendEvent(buttonEvent);
             }
             else if (event.Is<MenuButtonViewEvent::Leave>())
             {
                 auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Leave>());
-                co_await SendEvent(buttonEvent);
+                SendEvent(buttonEvent);
             }
-            co_return true;
+            return true;
         }
     }
-    co_return false;
+    return false;
 }
 
-auto MenuItemButton::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto MenuItemButton::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
@@ -117,7 +117,7 @@ auto MenuItemButton::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
         AttributeNode::SetValue<&IconViewStyle::DisabledColor>(*_buttonView, _iconDisabledColor.GetValueOrDefault());
         AttributeNode::SetValue<&IconViewStyle::DisabledAlpha>(*_buttonView, _iconDisabledAlpha.GetValueOrDefault());
     }
-    co_return false;
+    return false;
 }
 
 auto MenuItemButton::GetContent() -> Shared<View>

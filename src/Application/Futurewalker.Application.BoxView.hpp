@@ -40,7 +40,7 @@ public:
 protected:
     auto Initialize() -> void override;
     auto Draw(DrawScope& scope) -> void override;
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Bool;
 
 private:
     AttributeAccessor<RGBAColor> _backgroundColor;

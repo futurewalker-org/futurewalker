@@ -136,26 +136,26 @@ auto WindowFrame::Arrange(ArrangeScope& scope) -> void
 ///
 /// @param event 
 ///
-auto WindowFrame::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto WindowFrame::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<ViewAreaManagerEvent::GeometryChanged>())
     {
         InvalidateLayout();
         InvalidateVisual();
     }
-    co_return false;
+    return false;
 }
 
 ///
 /// @brief Handle attribute event.
 ///
-auto WindowFrame::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto WindowFrame::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
         UpdateAreaManager();
     }
-    co_return false;
+    return false;
 }
 
 ///

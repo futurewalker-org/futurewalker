@@ -268,16 +268,16 @@ public:
     }
 
 private:
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>
+    auto ReceiveEvent(Event<>& event) -> Bool
     {
         if (event.Is<AttributeEvent::ValueChanged>())
         {
             if (_eventReceiver)
             {
-                co_return co_await _eventReceiver->SendEvent(event);
+                return _eventReceiver->SendEvent(event);
             }
         }
-        co_return false;
+        return false;
     }
 
 private:

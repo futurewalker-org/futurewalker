@@ -53,26 +53,26 @@ auto TapGestureView::Initialize() -> void
     EventReceiver::Connect(*_gestureRecognizer, *this, &TapGestureView::ReceiveEvent);
 }
 
-auto TapGestureView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto TapGestureView::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<TapGestureEvent>())
     {
         if (event.Is<TapGestureEvent::Begin>())
         {
             auto viewEvent = Event<>(Event<TapGestureViewEvent::Begin>());
-            co_await SendEvent(viewEvent);
+            SendEvent(viewEvent);
         }
         else if (event.Is<TapGestureEvent::Cancel>())
         {
             auto viewEvent = Event<>(Event<TapGestureViewEvent::Cancel>());
-            co_await SendEvent(viewEvent);
+            SendEvent(viewEvent);
         }
         else if (event.Is<TapGestureEvent::Tap>())
         {
             auto viewEvent = Event<>(Event<TapGestureViewEvent::Tap>());
-            co_await SendEvent(viewEvent);
+            SendEvent(viewEvent);
         }
     }
-    co_return false;
+    return false;
 }
 }

@@ -80,7 +80,7 @@ PlatformWindowWin::PlatformWindowWin(
   , _compositionDevice {compositionDevice}
   , _options {options}
 {
-    _theme = themeContext->MakeApplicationTheme({.sendThemeEvent = [&](Event<>& event) -> Async<Bool> { co_return co_await ReceiveThemeEvent(event); }});
+    _theme = themeContext->MakeApplicationTheme({.sendThemeEvent = [&](Event<>& event) -> Bool { return ReceiveThemeEvent(event); }});
 }
 
 ///
@@ -632,7 +632,7 @@ auto PlatformWindowWin::RequestClose() -> Async<Bool>
     if (!IsClosed())
     {
         auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
-        co_await SendWindowEvent(event);
+        SendWindowEvent(event);
 
         auto close = True;
         if (event.Is<PlatformWindowEvent::CloseRequested>())
@@ -861,13 +861,13 @@ auto PlatformWindowWin::Initialize() -> void
 //!
 //! @brief
 //!
-auto PlatformWindowWin::ReceiveThemeEvent(Event<>& event) -> Async<Bool>
+auto PlatformWindowWin::ReceiveThemeEvent(Event<>& event) -> Bool
 {
     if (event.Is<PlatformApplicationThemeEvent::SystemBrightnessChanged>())
     {
         UpdateThemeColor();
     }
-    co_return false;
+    return false;
 }
 
 ///
@@ -1233,7 +1233,7 @@ auto PlatformWindowWin::HandleNcHitTest(HWND hWnd, UINT msg, WPARAM wParam, LPAR
                 auto hitTestEvent = Event<PlatformHitTestEvent>();
                 hitTestEvent->SetPosition({dpX, dpY});
                 auto event = Event<>(hitTestEvent);
-                if (SendHitTestEventDetached(event))
+                if (SendHitTestEvent(event))
                 {
                     if (event.Is<PlatformHitTestEvent>())
                     {
@@ -1338,7 +1338,7 @@ auto PlatformWindowWin::HandleActivate(HWND hWnd, UINT msg, WPARAM wParam, LPARA
                 auto windowEvent = Event<PlatformWindowEvent::ActiveChanged>();
                 windowEvent->SetActive(LOWORD(wParam) != WA_INACTIVE);
                 auto event = Event<>(std::move(windowEvent));
-                SendWindowEventDetached(event);
+                SendWindowEvent(event);
             }
 
             // Destroy popup chain when unrelated window is activated.
@@ -1462,7 +1462,7 @@ auto PlatformWindowWin::HandleShow(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
             auto windowEvent = Event<PlatformWindowEvent::VisibleChanged>();
             windowEvent->SetVisible(wParam != FALSE);
             auto event = Event<>(std::move(windowEvent));
-            SendWindowEventDetached(event);
+            SendWindowEvent(event);
         }
         catch (...)
         {
@@ -1493,7 +1493,7 @@ auto PlatformWindowWin::HandleDpiChanged(HWND hWnd, UINT msg, WPARAM wParam, LPA
             try
             {
                 auto event = Event<>(Event<PlatformWindowEvent::DisplayScaleChanged>());
-                SendWindowEventDetached(event);
+                SendWindowEvent(event);
             }
             catch (...)
             {
@@ -1570,7 +1570,7 @@ auto PlatformWindowWin::HandlePosChanged(HWND hWnd, UINT msg, WPARAM wParam, LPA
             try
             {
                 auto event = Event<>(Event<PlatformWindowEvent::PositionChanged>());
-                SendWindowEventDetached(event);
+                SendWindowEvent(event);
             }
             catch (...)
             {
@@ -1587,7 +1587,7 @@ auto PlatformWindowWin::HandlePosChanged(HWND hWnd, UINT msg, WPARAM wParam, LPA
                 RefreshSystemControlRect();
                 {
                     auto event = Event<>(Event<PlatformWindowEvent::SizeChanged>());
-                    SendWindowEventDetached(event);
+                    SendWindowEvent(event);
                 }
                 // Force a new frame so that we can catch up with the new state of DWM in next layout pass.
                 RequestFrame();
@@ -1611,54 +1611,16 @@ auto PlatformWindowWin::HandleClose(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
     {
         try
         {
-            auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
-            auto result = Shared<Optional<Bool>>::Make();
-            AsyncFunction::SpawnFn([&event, result, self = GetSelf()]() mutable -> Task<void> {
-                try
-                {
-                    *result = co_await self->SendWindowEvent(event);
-                }
-                catch (...)
-                {
-                    FW_DEBUG_ASSERT(false);
-                }
-            }).Detach();
-
-            auto quit = Optional<WPARAM>();
-            while (true)
-            {
-                if (result)
-                {
-                    break;
-                }
-
-                auto loopMsg = MSG();
-                if (::GetMessageW(&loopMsg, NULL, 0, 0) == -1)
-                {
-                    FW_DEBUG_ASSERT(false);
-                    continue;
-                }
-
-                if (loopMsg.message == WM_QUIT)
-                {
-                    quit = loopMsg.wParam;
-                    continue;
-                }
-                ::TranslateMessage(&loopMsg);
-                ::DispatchMessageW(&loopMsg);
-            }
-
-            if (quit)
-            {
-                ::PostQuitMessage(static_cast<int>(*quit));
-            }
-
             auto close = True;
-            if (event.Is<PlatformWindowEvent::CloseRequested>())
+            auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
+            if (SendWindowEvent(event))
             {
-                if (event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
+                if (event.Is<PlatformWindowEvent::CloseRequested>())
                 {
-                    close = false;
+                    if (event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
+                    {
+                        close = false;
+                    }
                 }
             }
 
@@ -1704,7 +1666,7 @@ auto PlatformWindowWin::HandleDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
                 if (!_destructing)
                 {
                     auto event = Event<>(Event<PlatformWindowEvent::Closed>());
-                    SendWindowEventDetached(event);
+                    SendWindowEvent(event);
                 }
             }
             catch (...)
@@ -1791,7 +1753,7 @@ auto PlatformWindowWin::HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
             auto parameter = Event<PlatformPointerEvent::Motion::Enter>();
             PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
             auto event = Event<>(parameter);
-            SendPointerEventDetached(event);
+            SendPointerEvent(event);
         }
         {
             FW_DEBUG_LOG_INFO("PlatformWindowWin::HandleMouse(): Motion::Move");
@@ -1799,7 +1761,7 @@ auto PlatformWindowWin::HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
             PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
             PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForMouse(*parameter, msg, wParam, lParam);
             auto event = Event<>(parameter);
-            SendPointerEventDetached(event);
+            SendPointerEvent(event);
         }
 
         auto tme = TRACKMOUSEEVENT {
@@ -1819,7 +1781,7 @@ auto PlatformWindowWin::HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
             auto parameter = Event<PlatformPointerEvent::Motion::Leave>();
             PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
             auto event = Event<>(parameter);
-            SendPointerEventDetached(event);
+            SendPointerEvent(event);
         }
     }
     else if (msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN || msg == WM_XBUTTONDOWN)
@@ -1829,7 +1791,7 @@ auto PlatformWindowWin::HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
         PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForMouse(*parameter, msg, wParam, lParam);
         auto event = Event<>(parameter);
-        SendPointerEventDetached(event);
+        SendPointerEvent(event);
     }
     else if (msg == WM_LBUTTONUP || msg == WM_RBUTTONUP || msg == WM_MBUTTONUP || msg == WM_XBUTTONUP)
     {
@@ -1838,7 +1800,7 @@ auto PlatformWindowWin::HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
         PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForMouse(*parameter, msg, wParam, lParam);
         auto event = Event<>(parameter);
-        SendPointerEventDetached(event);
+        SendPointerEvent(event);
     }
     else if (msg == WM_MOUSEWHEEL || msg == WM_MOUSEHWHEEL)
     {
@@ -1847,7 +1809,7 @@ auto PlatformWindowWin::HandleMouse(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         PlatformPointerEventFunctionWin::SetPointerEventParamsForMouse(*parameter, hWnd, msg, wParam, lParam);
         PlatformPointerEventFunctionWin::SetPointerScrollEventParamsForMouse(*parameter, msg, wParam, lParam);
         auto event = Event<>(parameter);
-        SendPointerEventDetached(event);
+        SendPointerEvent(event);
     }
     return 0;
 }
@@ -1903,7 +1865,7 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
                 parameter->SetComposing(_textStore ? _textStore->IsComposing() : false);
 
                 auto event = Event<>(std::move(parameter));
-                SendKeyEventDetached(event);
+                SendKeyEvent(event);
             }
             catch (...)
             {
@@ -1945,7 +1907,7 @@ auto PlatformWindowWin::HandleKey(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
             parameter->SetComposing(_textStore ? _textStore->IsComposing() : false);
 
             auto event = Event<>(std::move(parameter));
-            SendKeyEventDetached(event);
+            SendKeyEvent(event);
         }
         catch (...)
         {
@@ -1993,7 +1955,7 @@ auto PlatformWindowWin::HandleKeyTraceDown(WPARAM wParam, LPARAM lParam) -> void
             parameter->SetComposing(_textStore ? _textStore->IsComposing() : false);
 
             auto event = Event<>(std::move(parameter));
-            SendKeyEventDetached(event);
+            SendKeyEvent(event);
         }
         catch (...)
         {
@@ -2071,7 +2033,7 @@ auto PlatformWindowWin::HandleSetFocus(HWND hWnd, UINT msg, WPARAM wParam, LPARA
             auto windowEvent = Event<PlatformWindowEvent::FocusedChanged>();
             windowEvent->SetFocused(true);
             auto event = Event<>(std::move(windowEvent));
-            SendWindowEventDetached(event);
+            SendWindowEvent(event);
         }
         catch (...)
         {
@@ -2094,7 +2056,7 @@ auto PlatformWindowWin::HandleKillFocus(HWND hWnd, UINT msg, WPARAM wParam, LPAR
             auto windowEvent = Event<PlatformWindowEvent::FocusedChanged>();
             windowEvent->SetFocused(false);
             auto event = Event<>(std::move(windowEvent));
-            SendWindowEventDetached(event);
+            SendWindowEvent(event);
         }
         catch (...)
         {
@@ -2136,7 +2098,7 @@ auto PlatformWindowWin::HandleFrameSwap(MonotonicTime const& targetTimestamp) ->
         auto parameter = Event<PlatformFrameEvent::Tick>();
         parameter->SetTargetTimestamp(targetTimestamp);
         auto event = Event<>(parameter);
-        SendFrameEventDetached(event);
+        SendFrameEvent(event);
 
         Render();
     }
@@ -2212,7 +2174,7 @@ auto PlatformWindowWin::RefreshSystemControlRect() -> void
                 try
                 {
                     auto event = Event<>(Event<PlatformWindowEvent::AreaChanged>());
-                    SendWindowEventDetached(event);
+                    SendWindowEvent(event);
                 }
                 catch (...)
                 {
@@ -2292,7 +2254,7 @@ void PlatformWindowWin::PointerDown(Bool const down, WPARAM const wParam)
             PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
             PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForPointer(*parameter, pointerId);
             auto event = Event<>(parameter);
-            SendPointerEventDetached(event);
+            SendPointerEvent(event);
         }
         else
         {
@@ -2300,7 +2262,7 @@ void PlatformWindowWin::PointerDown(Bool const down, WPARAM const wParam)
             PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
             PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForPointer(*parameter, pointerId);
             auto event = Event<>(parameter);
-            SendPointerEventDetached(event);
+            SendPointerEvent(event);
         }
     }
 }
@@ -2336,14 +2298,14 @@ void PlatformWindowWin::PointerEnter(Bool const enter, WPARAM const wParam)
             auto parameter = Event<PlatformPointerEvent::Motion::Enter>();
             PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
             auto event = Event<>(parameter);
-            SendPointerEventDetached(event);
+            SendPointerEvent(event);
         }
         else
         {
             auto parameter = Event<PlatformPointerEvent::Motion::Leave>();
             PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
             auto event = Event<>(parameter);
-            SendPointerEventDetached(event);
+            SendPointerEvent(event);
         }
     }
 }
@@ -2368,7 +2330,7 @@ void PlatformWindowWin::PointerUpdate(WPARAM const wParam)
         auto parameter = Event<PlatformPointerEvent::Motion::Cancel>();
         PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
         auto event = Event<>(parameter);
-        SendPointerEventDetached(event);
+        SendPointerEvent(event);
         return;
     }
 
@@ -2378,7 +2340,7 @@ void PlatformWindowWin::PointerUpdate(WPARAM const wParam)
     PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(*parameter, pointerId, _hwnd);
     PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForPointer(*parameter, pointerId);
     auto event = Event<>(parameter);
-    SendPointerEventDetached(event);
+    SendPointerEvent(event);
 }
 
 ///
@@ -2388,7 +2350,7 @@ auto PlatformWindowWin::PointerCancel(WPARAM const wParam) -> void
 {
     (void)wParam;
     auto event = Event<>(Event<PlatformPointerEvent::Motion::Cancel>());
-    SendPointerEventDetached(event);
+    SendPointerEvent(event);
 }
 
 ///
@@ -2419,31 +2381,7 @@ auto PlatformWindowWin::PointerWheel(Bool const vertical, WPARAM const wParam) -
     parameter->SetDeltaY(deltaY);
     parameter->SetDeltaX(deltaX);
     auto event = Event<>(parameter);
-    SendPointerEventDetached(event);
-}
-
-///
-/// @brief
-///
-auto PlatformWindowWin::PostWindowEvent(Event<> const& event) -> void
-{
-    auto weakSelf = Weak(GetSelf());
-    AsyncFunction::SpawnFn([=]() -> Task<void> {
-        try
-        {
-            co_await MainThread::Schedule();
-
-            if (const auto self = weakSelf.Lock())
-            {
-                auto e = event;
-                co_await self->SendWindowEvent(e);
-            }
-        }
-        catch (...)
-        {
-            FW_DEBUG_ASSERT(false);
-        }
-    }).Detach();
+    SendPointerEvent(event);
 }
 
 ///

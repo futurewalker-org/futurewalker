@@ -105,7 +105,7 @@ auto RootView::Initialize() -> void
 ///
 /// @brief Handle event.
 ///
-auto RootView::ReceiveViewEvent(Event<>& event) -> Async<Bool>
+auto RootView::ReceiveViewEvent(Event<>& event) -> Bool
 {
     if (event.Is<ViewEvent::Attached>())
     {
@@ -116,13 +116,13 @@ auto RootView::ReceiveViewEvent(Event<>& event) -> Async<Bool>
     {
         SetAnimationTickerActive(false);
     }
-    co_return false;
+    return false;
 }
 
 ///
 /// @brief Handle root view event.
 ///
-auto RootView::ReceiveRootViewEvent(Event<>& event) -> Async<Bool>
+auto RootView::ReceiveRootViewEvent(Event<>& event) -> Bool
 {
     if (event.Is<RootViewEvent::Owner>())
     {
@@ -189,39 +189,39 @@ auto RootView::ReceiveRootViewEvent(Event<>& event) -> Async<Bool>
     {
         auto parameter = event.As<RootViewEvent::Pointer>();
         auto& sourceEvent = parameter->GetEvent();
-        co_await DispatchPointerEvent(sourceEvent);
-        co_return true;
+        DispatchPointerEvent(sourceEvent);
+        return true;
     }
     else if (event.Is<RootViewEvent::Key>())
     {
         auto parameter = event.As<RootViewEvent::Key>();
         auto& sourceEvent = parameter->GetEvent();
-        co_await DispatchKeyEvent(sourceEvent);
-        co_return true;
+        DispatchKeyEvent(sourceEvent);
+        return true;
     }
     else if (event.Is<RootViewEvent::Input>())
     {
         auto parameter = event.As<RootViewEvent::Input>();
         auto& sourceEvent = parameter->GetEvent();
-        co_await DispatchInputEvent(sourceEvent);
-        co_return true;
+        DispatchInputEvent(sourceEvent);
+        return true;
     }
     else if (event.Is<RootViewEvent::HitTest>())
     {
         auto parameter = event.As<RootViewEvent::HitTest>();
         auto& sourceEvent = parameter->GetEvent();
-        co_await DispatchHitTestEvent(sourceEvent);
-        co_return true;
+        DispatchHitTestEvent(sourceEvent);
+        return true;
     }
     else if (event.Is<RootViewEvent::FocusedChanged>())
     {
         _focusNode->SetActive(event.As<RootViewEvent::FocusedChanged>()->IsFocused());
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
-auto RootView::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
+auto RootView::ReceiveKeyEvent(Event<>& event) -> Bool
 {
     if (event.Is<KeyEvent::Down>())
     {
@@ -243,9 +243,9 @@ auto RootView::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
                 }
             }
         }
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
 ///
@@ -322,7 +322,7 @@ auto RootView::GetFrameTime() const -> MonotonicTime
 ///
 /// @brief 
 ///
-auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
+auto RootView::DispatchPointerEvent(Event<>& event) -> void
 {
     if (event.Is<PointerEvent>())
     {
@@ -331,7 +331,7 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
 
         if (parameter.Is<PointerEvent::Motion::Enter>() || parameter.Is<PointerEvent::Motion::Over>())
         {
-            co_return;
+            return;
         }
 
         if (parameter.Is<PointerEvent::Motion::Leave>() || parameter.Is<PointerEvent::Motion::Out>() || parameter.Is<PointerEvent::Motion::Cancel>())
@@ -356,7 +356,7 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
                     }
                 }
             }
-            co_return;
+            return;
         }
 
         // 1. Use HitTest to pick a candidate for sending events. This becomes initial `target` view.
@@ -450,28 +450,26 @@ auto RootView::DispatchPointerEvent(Event<>& event) -> Async<void>
 ///
 /// @brief Dispatch key event.
 ///
-auto RootView::DispatchKeyEvent(Event<>& event) -> Async<void>
+auto RootView::DispatchKeyEvent(Event<>& event) -> void
 {
     if (_focusNode)
     {
         _focusNode->DispatchKeyEvent(event);
     }
-    co_return;
 }
 
 ///
 /// @brief Dispatch input event.
 ///
-auto RootView::DispatchInputEvent(Event<>& event) -> Async<void>
+auto RootView::DispatchInputEvent(Event<>& event) -> void
 {
     (void)event;
-    co_return;
 }
 
 ///
 /// @brief
 ///
-auto RootView::DispatchHitTestEvent(Event<>& event) -> Async<void>
+auto RootView::DispatchHitTestEvent(Event<>& event) -> void
 {
     if (event.Is<HitTestEvent>())
     {
@@ -479,7 +477,6 @@ auto RootView::DispatchHitTestEvent(Event<>& event) -> Async<void>
         DispatchHitTestEventFromRoot(PassKey<RootView>(), hitTestEvent);
         event = hitTestEvent;
     }
-    co_return;
 }
 
 ///

@@ -72,13 +72,13 @@ auto ClipView::Draw(DrawScope& scope) -> void
     }
 }
 
-auto ClipView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto ClipView::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent>())
     {
         InvalidateVisual();
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 }

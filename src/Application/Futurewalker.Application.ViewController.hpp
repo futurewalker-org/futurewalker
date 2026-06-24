@@ -44,14 +44,9 @@ public:
         return _view;
     }
 
-    auto SendEvent(Event<>& event) -> Async<Bool>
+    auto SendEvent(Event<>& event) -> Bool
     {
-        co_return co_await GetEventReceiver().SendEvent(event);
-    }
-
-    auto SendEventDetached(Event<>& event) -> Bool
-    {
-        return GetEventReceiver().SendEventDetached(event);
+        return GetEventReceiver().SendEvent(event);
     }
 
     auto GetEventReceiver() -> EventReceiver&

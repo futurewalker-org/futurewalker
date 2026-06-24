@@ -102,12 +102,12 @@ auto PopupFrameView::Draw(DrawScope& scope) -> void
     ViewDrawFunction::DrawRoundRectShadow(scene, containerRect, cornerRadius, shadowColor.WithAlphaMultiplied(shadowAlpha), blurRadius, blurStyle, direction);
 }
 
-auto PopupFrameView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto PopupFrameView::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
         InvalidateVisual();
     }
-    co_return false;
+    return false;
 }
 }

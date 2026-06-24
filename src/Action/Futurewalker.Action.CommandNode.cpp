@@ -216,7 +216,7 @@ auto CommandNode::InternalNotifyStateChanged(CommandId const& command) -> void
             auto stateEvent = Event<CommandEvent::StateChanged>();
             stateEvent->SetCommandId(command);
             auto event = Event<>(std::move(stateEvent));
-            GetEventReceiver().SendEventDetached(event);
+            GetEventReceiver().SendEvent(event);
         }
     }
 
@@ -241,7 +241,7 @@ auto CommandNode::InternalNotifyStateChanged() -> void
         auto stateEvent = Event<CommandEvent::StateChanged>();
         stateEvent->SetCommandId(it->first);
         auto event = Event<>(std::move(stateEvent));
-        GetEventReceiver().SendEventDetached(event);
+        GetEventReceiver().SendEvent(event);
 
         ++it;
     }

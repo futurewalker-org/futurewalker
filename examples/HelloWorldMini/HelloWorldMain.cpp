@@ -38,7 +38,7 @@ protected:
         EventReceiver::Connect(*this, *this, &HelloWorldApplication::ReceiveEvent);
     }
 
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>
+    auto ReceiveEvent(Event<>& event) -> Bool
     {
         if (event.Is<ApplicationEvent::Started>())
         {
@@ -47,20 +47,22 @@ protected:
 
             auto const hello = String(u8"Hello, World!");
 
-            auto window = Window::Make({});
-            window->SetTitle(hello);
-            window->SetFrameRect(Rect<Vp>::Make({0, 0}, {500, 500}));
-            auto text = Lamp::TextView::MakeWithText(hello);
-            AttributeNode::SetValue<&Lamp::TextViewStyle::FontSize>(*text, 42);
-            AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());
-            auto align = AlignView::MakeWithContent(text);
-            window->SetContent(align);
-            window->SetVisible(true);
+            AsyncFunction::SpawnFn([=] -> Async<void> {
+                auto window = Window::Make({});
+                window->SetTitle(hello);
+                window->SetFrameRect(Rect<Vp>::Make({0, 0}, {500, 500}));
+                auto text = Lamp::TextView::MakeWithText(hello);
+                AttributeNode::SetValue<&Lamp::TextViewStyle::FontSize>(*text, 42);
+                AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());
+                auto align = AlignView::MakeWithContent(text);
+                window->SetContent(align);
+                window->SetVisible(true);
 
-            co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
-            co_await Exit();
+                co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
+                co_await Exit();
+            }).Detach();
         }
-        co_return false;
+        return false;
     }
 };
 

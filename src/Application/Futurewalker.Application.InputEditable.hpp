@@ -9,8 +9,6 @@
 #include "Futurewalker.Event.EventReceiverType.hpp"
 #include "Futurewalker.Event.EventType.hpp"
 
-#include "Futurewalker.Async.Async.hpp"
-
 #include "Futurewalker.Geometry.Rect.hpp"
 
 #include "Futurewalker.Unit.Unit.hpp" 
@@ -75,7 +73,7 @@ public:
     auto GetPlatformObject(PassKey<InputMethod>) -> Shared<PlatformInputEditable>;
 
 private:
-    auto HandlePlatformInputEvent(Event<>& event) -> Async<Bool>;
+    auto HandlePlatformInputEvent(Event<>& event) -> Bool;
     auto UpdateLayoutRect() -> void;
 
 private:

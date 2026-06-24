@@ -104,7 +104,7 @@ auto PopupMenuButton::Initialize() -> void
     EventReceiver::Connect(*this, *this, &PopupMenuButton::ReceiveEvent);
 }
 
-auto PopupMenuButton::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto PopupMenuButton::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<MenuButtonViewEvent>())
     {
@@ -119,24 +119,24 @@ auto PopupMenuButton::ReceiveEvent(Event<>& event) -> Async<Bool>
                     UpdatePopup();
                 }
                 auto downEvent = Event<>(Event<PopupMenuButtonEvent::Down>());
-                co_await SendEvent(downEvent);
+                SendEvent(downEvent);
             }
             else if (event.Is<MenuButtonViewEvent::Up>())
             {
                 auto upEvent = Event<>(Event<PopupMenuButtonEvent::Up>());
-                co_await SendEvent(upEvent);
+                SendEvent(upEvent);
             }
             else if (event.Is<MenuButtonViewEvent::Enter>())
             {
                 auto enterEvent = Event<>(Event<PopupMenuButtonEvent::Enter>());
-                co_await SendEvent(enterEvent);
+                SendEvent(enterEvent);
             }
             else if (event.Is<MenuButtonViewEvent::Leave>())
             {
                 auto leaveEvent = Event<>(Event<PopupMenuButtonEvent::Leave>());
-                co_await SendEvent(leaveEvent);
+                SendEvent(leaveEvent);
             }
-            co_return true;
+            return true;
         }
     }
     else if (event.Is<PopupMenuEvent>())
@@ -145,9 +145,9 @@ auto PopupMenuButton::ReceiveEvent(Event<>& event) -> Async<Bool>
         {
             DestroyPopup();
         }
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
 auto PopupMenuButton::CreatePopup() -> void

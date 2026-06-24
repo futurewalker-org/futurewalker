@@ -13,7 +13,7 @@ ApplicationTheme::ApplicationTheme(Shared<PlatformApplicationThemeContext> const
   , _applicationContext(applicationContext)
 {
     _platformObject = _platformContext->MakeApplicationTheme({
-      .sendThemeEvent = [this](Event<>& event) -> Async<Bool> { co_return co_await HandlePlatformThemeEvent(event); },
+        .sendThemeEvent = [this](Event<>& event) -> Bool { return HandlePlatformThemeEvent(event); },
     });
 
     UpdateCurrentBrightness();
@@ -94,13 +94,13 @@ auto ApplicationTheme::UpdateCurrentBrightness() -> void
     }
 }
 
-auto ApplicationTheme::HandlePlatformThemeEvent(Event<>& event) -> Async<Bool>
+auto ApplicationTheme::HandlePlatformThemeEvent(Event<>& event) -> Bool
 {
     if (event.Is<PlatformApplicationThemeEvent::SystemBrightnessChanged>())
     {
         UpdateCurrentBrightness();
     }
-    co_return false;
+    return false;
 }
 
 auto ApplicationTheme::InternalGetBrightness() const -> ApplicationThemeBrightness

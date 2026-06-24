@@ -35,55 +35,57 @@ auto ThemeViewerApplication::Initialize() -> void
     EventReceiver::Connect(*this, *this, &ThemeViewerApplication::ReceiveEvent);
 }
 
-auto ThemeViewerApplication::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto ThemeViewerApplication::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<ApplicationEvent::Started>())
     {
         ApplicationTheme::AddTheme(ThemeBrightness::Light, Shared<Lamp::Theme>::Make(ThemeBrightness::Light));
         ApplicationTheme::AddTheme(ThemeBrightness::Dark, Shared<Lamp::Theme>::Make(ThemeBrightness::Dark));
 
-        auto column = FlexLayout::Make();
-        column->SetDirection(FlexLayoutDirection::Column);
-        column->SetMainAxisSize(FlexLayoutMainAxisSize::Max);
-        column->SetMainAxisAlignment(FlexLayoutMainAxisAlignment::Start);
-        column->SetCrossAxisSize(FlexLayoutCrossAxisSize::Max);
-        column->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Center);
-        {
-            auto const brightness = ThemeBrightness::Light;
-            auto schemeView = ColorSchemeView::Make(brightness);
-            auto themeView = ThemeView::MakeWithContent(schemeView);
-            themeView->SetTheme(Shared<Lamp::Theme>::Make(brightness));
-            FlexLayout::SetChildMargin(themeView, EdgeInsets(0, 0, 0, 10));
-            column->AddChild(themeView);
-        }
-        {
-            auto const brightness = ThemeBrightness::Dark;
-            auto schemeView = ColorSchemeView::Make(brightness);
-            auto themeView = ThemeView::MakeWithContent(schemeView);
-            themeView->SetTheme(Shared<Lamp::Theme>::Make(brightness));
-            FlexLayout::SetChildMargin(themeView, EdgeInsets(0, 0, 0, 10));
-            column->AddChild(themeView);
-        }
+        AsyncFunction::SpawnFn([=] -> Async<void> {
+            auto column = FlexLayout::Make();
+            column->SetDirection(FlexLayoutDirection::Column);
+            column->SetMainAxisSize(FlexLayoutMainAxisSize::Max);
+            column->SetMainAxisAlignment(FlexLayoutMainAxisAlignment::Start);
+            column->SetCrossAxisSize(FlexLayoutCrossAxisSize::Max);
+            column->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Center);
+            {
+                auto const brightness = ThemeBrightness::Light;
+                auto schemeView = ColorSchemeView::Make(brightness);
+                auto themeView = ThemeView::MakeWithContent(schemeView);
+                themeView->SetTheme(Shared<Lamp::Theme>::Make(brightness));
+                FlexLayout::SetChildMargin(themeView, EdgeInsets(0, 0, 0, 10));
+                column->AddChild(themeView);
+            }
+            {
+                auto const brightness = ThemeBrightness::Dark;
+                auto schemeView = ColorSchemeView::Make(brightness);
+                auto themeView = ThemeView::MakeWithContent(schemeView);
+                themeView->SetTheme(Shared<Lamp::Theme>::Make(brightness));
+                FlexLayout::SetChildMargin(themeView, EdgeInsets(0, 0, 0, 10));
+                column->AddChild(themeView);
+            }
 
-        auto scroll = ScrollView::Make();
-        scroll->SetDirection(ScrollViewDirection::Vertical);
-        scroll->SetContent(column);
+            auto scroll = ScrollView::Make();
+            scroll->SetDirection(ScrollViewDirection::Vertical);
+            scroll->SetContent(column);
 
-        auto frame = WindowFrame::Make();
-        frame->SetContent(scroll);
+            auto frame = WindowFrame::Make();
+            frame->SetContent(scroll);
 
-        auto window = Window::Make({
-            .backgroundStyle = WindowBackgroundStyle::Solid,
-        });
-        window->SetTitle(u8"Theme Viewer");
-        window->SetBackgroundColor(Lamp::Style::ColorSurface);
-        window->SetFrameRect({0, 0, 1000, 1000});
-        window->SetContent(frame);
-        window->SetVisible(true);
+            auto window = Window::Make({
+                .backgroundStyle = WindowBackgroundStyle::Solid,
+            });
+            window->SetTitle(u8"Theme Viewer");
+            window->SetBackgroundColor(Lamp::Style::ColorSurface);
+            window->SetFrameRect({0, 0, 1000, 1000});
+            window->SetContent(frame);
+            window->SetVisible(true);
 
-        co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
-        co_await Exit();
+            co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
+            co_await Exit();
+        }).Detach();
     }
-    co_return false;
+    return false;
 }
 }

@@ -157,13 +157,13 @@ auto SizedView::Measure(MeasureScope& scope) -> void
     }
 }
 
-auto SizedView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto SizedView::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
         InvalidateLayout();
     }
-    co_return false;
+    return false;
 }
 
 ///

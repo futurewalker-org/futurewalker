@@ -33,8 +33,8 @@ auto EventWaiter::GetTracker() const -> Weak<void const>
 ///
 /// @brief Receive event.
 ///
-auto EventWaiter::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto EventWaiter::ReceiveEvent(Event<>& event) -> Bool
 {
-    co_return _channel.Write(event);
+    return _channel.Write(event);
 }
 }

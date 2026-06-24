@@ -1297,7 +1297,7 @@ auto AttributeNode::NotifyValueChangedRecursive(AttributeSlot& slot, UInt64 cons
                     auto parameter = Event<AttributeEvent::ValueChanged>();
                     parameter->SetId(slot.GetDescription().Get().GetId());
                     auto event = Event<>(std::move(parameter));
-                    slot.GetEventReceiver().SendEventDetached(event);
+                    slot.GetEventReceiver().SendEvent(event);
                 }
             }
         }

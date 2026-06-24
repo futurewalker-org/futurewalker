@@ -32,7 +32,7 @@ private:
     auto ApplyTheme(Shared<Theme> const& theme) -> void;
     auto ApplyThemes() -> void;
     auto UpdateCurrentBrightness() -> void;
-    auto HandlePlatformThemeEvent(Event<>& event) -> Async<Bool>;
+    auto HandlePlatformThemeEvent(Event<>& event) -> Bool;
 
     auto InternalGetBrightness() const -> ApplicationThemeBrightness;
     auto InternalSetBrightness(ApplicationThemeBrightness const brightness) -> void;

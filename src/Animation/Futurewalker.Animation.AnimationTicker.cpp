@@ -288,7 +288,7 @@ auto AnimationTicker::RemoveFromParent() -> void
 ///
 auto AnimationTicker::SendEvent(Event<>& event) -> Bool
 {
-    return GetEventReceiver().SendEventDetached(event);
+    return GetEventReceiver().SendEvent(event);
 }
 
 ///

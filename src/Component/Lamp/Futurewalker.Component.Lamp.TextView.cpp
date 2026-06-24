@@ -50,13 +50,13 @@ auto TextView::Initialize() -> void
     EventReceiver::Connect(*this, *this, &TextView::ReceiveEvent);
 }
 
-auto TextView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto TextView::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<ViewEvent::EnabledChanged>())
     {
         UpdateStyle();
     }
-    co_return false;
+    return false;
 }
 
 auto TextView::UpdateStyle() -> void

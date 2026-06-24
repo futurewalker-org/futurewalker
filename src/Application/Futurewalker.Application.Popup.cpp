@@ -245,14 +245,14 @@ auto Popup::GetWindow() -> Shared<Window>
 ///
 /// @brief
 ///
-auto Popup::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto Popup::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<WindowEvent::Closed>())
     {
         _window = nullptr;
         auto closedEvent = Event<>(Event<PopupEvent::Closed>());
-        co_await GetEventReceiver().SendEvent(closedEvent);
+        return GetEventReceiver().SendEvent(closedEvent);
     }
-    co_return false;
+    return false;
 }
 }

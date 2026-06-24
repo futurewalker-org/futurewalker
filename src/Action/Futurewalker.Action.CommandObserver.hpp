@@ -34,7 +34,7 @@ public:
     auto GetEventReceiver() const -> EventReceiver const&;
 
 private:
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Bool;
 
 private:
     Weak<CommandNode> _commandNode;

@@ -43,7 +43,7 @@ public:
 
 private:
     auto WaitEvent() -> Async<Event<>>;
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Bool;
 
 private:
     Shared<void> _tracker;

@@ -62,7 +62,7 @@ auto TapGestureRecognizer::Stop() -> void
         _delegate = {};
 
         auto dummyEvent = Event<>();
-        GetEventReceiver().SendEventDetached(dummyEvent);
+        GetEventReceiver().SendEvent(dummyEvent);
     }
 }
 
@@ -81,7 +81,7 @@ auto TapGestureRecognizer::Recognize(const Event<PointerEvent>& event, const Rec
         recognizerEvent->area = area;
         recognizerEvent->result = Shared<Bool>::Make(false);
         auto sendingEvent = Event<>(recognizerEvent);
-        if (GetEventReceiver().SendEventDetached(sendingEvent))
+        if (GetEventReceiver().SendEvent(sendingEvent))
         {
             if (sendingEvent.Is<RecognizerEvent>())
             {
@@ -121,7 +121,7 @@ auto TapGestureRecognizer::InternalRecognizeFirstDown() -> Async<Bool>
                     _delegate.capturePointer(pointerId);
                 }
                 auto gestureEvent = Event<>(Event<TapGestureEvent::Begin>());
-                SendEventDetached(gestureEvent);
+                SendEvent(gestureEvent);
             }
             co_return true;
         }
@@ -168,12 +168,12 @@ auto TapGestureRecognizer::InternalRecognizeFirstUp() -> Async<Bool>
                 auto tapEventParameter = Event<TapGestureEvent::Tap>();
                 tapEventParameter->SetTapCount(1);
                 auto sendingEvent = Event<>(tapEventParameter);
-                SendEventDetached(sendingEvent);
+                SendEvent(sendingEvent);
             }
             else
             {
                 auto gestureEvent = Event<>(Event<TapGestureEvent::Cancel>());
-                SendEventDetached(gestureEvent);
+                SendEvent(gestureEvent);
             }
             co_return true;
         }
@@ -186,7 +186,7 @@ auto TapGestureRecognizer::InternalRecognizeFirstUp() -> Async<Bool>
                 _delegate.releasePointer(pointerId);
             }
             auto gestureEvent = Event<>(Event<TapGestureEvent::Cancel>());
-            SendEventDetached(gestureEvent);
+            SendEvent(gestureEvent);
             co_return false;
         }
     }

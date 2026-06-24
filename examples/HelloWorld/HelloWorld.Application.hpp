@@ -14,6 +14,6 @@ public:
 
 protected:
     auto Initialize() -> void override;
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Bool;
 };
 }

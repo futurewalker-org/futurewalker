@@ -38,8 +38,7 @@ public:
 protected:
     virtual auto Initialize() -> void = 0;
 
-    auto SendApplicationEvent(Event<>& event) -> Async<Bool>;
-    auto SendApplicationEventDetached(Event<> const& event) -> void;
+    auto SendApplicationEvent(Event<>& event) -> Bool;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;

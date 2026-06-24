@@ -16,6 +16,6 @@ public:
 protected:
     auto MakeView() -> Shared<SplitPaneView> override;
 
-    auto ReceiveViewEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveViewEvent(Event<>& event) -> Bool;
 };
 }

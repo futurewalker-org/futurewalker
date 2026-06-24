@@ -48,13 +48,13 @@ auto IconView::Initialize() -> void
     EventReceiver::Connect(*this, *this, &IconView::ReceiveEvent);
 }
 
-auto IconView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto IconView::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<ViewEvent::EnabledChanged>())
     {
         UpdateStyle();
     }
-    co_return false;
+    return false;
 }
 
 auto IconView::UpdateStyle() -> void

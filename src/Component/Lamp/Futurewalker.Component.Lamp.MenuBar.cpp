@@ -48,7 +48,7 @@ auto MenuBar::Initialize() -> void
     EventReceiver::Connect(*this, *this, &MenuBar::ReceiveViewEvent);
 }
 
-auto MenuBar::ReceiveViewEvent(Event<>& event) -> Async<Bool>
+auto MenuBar::ReceiveViewEvent(Event<>& event) -> Bool
 {
     if (event.Is<MenuItemButtonEvent>())
     {
@@ -59,7 +59,7 @@ auto MenuBar::ReceiveViewEvent(Event<>& event) -> Async<Bool>
             {
                 CreatePopup();
                 UpdatePopup(*info);
-                co_return true;
+                return true;
             }
         }
         else if (event.Is<MenuItemButtonEvent::Enter>())
@@ -67,14 +67,14 @@ auto MenuBar::ReceiveViewEvent(Event<>& event) -> Async<Bool>
             if (auto const info = FindMenuItemInfo(sender))
             {
                 UpdatePopup(*info);
-                co_return true;
+                return true;
             }
         }
     }
-    co_return false;
+    return false;
 }
 
-auto MenuBar::ReceivePopupMenuEvent(Event<>& event) -> Async<Bool>
+auto MenuBar::ReceivePopupMenuEvent(Event<>& event) -> Bool
 {
     if (event.Is<PopupMenuEvent::Closed>())
     {
@@ -84,9 +84,9 @@ auto MenuBar::ReceivePopupMenuEvent(Event<>& event) -> Async<Bool>
     {
         DestroyPopup();
         CommandNode::Execute(*this, event.As<PopupMenuEvent::Activated>()->GetCommandId());
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
 auto MenuBar::FindMenuItemInfo(Shared<View> const& button) const -> Optional<MenuItemInfo>

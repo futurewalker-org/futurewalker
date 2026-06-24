@@ -145,7 +145,7 @@ public:
 
     auto GetScreen() const -> Shared<Screen>;
 
-    auto SendEvent(Event<>& event) -> Async<Bool>;
+    auto SendEvent(Event<>& event) -> Bool;
 
     auto Minimize() -> void;
     auto Maximize() -> void;
@@ -183,13 +183,13 @@ protected:
     static auto MakeDerived(WindowOptions const& options, Args&&... args) -> Shared<Derived>;
 
 private:
-    auto ReceiveWindowEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveFrameEvent(Event<>& event) -> Async<Bool>;
-    auto ReceivePointerEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveKeyEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveInputEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveHitTestEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveWindowEvent(Event<>& event) -> Bool;
+    auto ReceiveFrameEvent(Event<>& event) -> Bool;
+    auto ReceivePointerEvent(Event<>& event) -> Bool;
+    auto ReceiveKeyEvent(Event<>& event) -> Bool;
+    auto ReceiveInputEvent(Event<>& event) -> Bool;
+    auto ReceiveHitTestEvent(Event<>& event) -> Bool;
+    auto ReceiveAttributeEvent(Event<>& event) -> Bool;
 
 private:
     auto GetSelfBase() -> Shared<Window>;
@@ -203,7 +203,7 @@ private:
     auto CapturePointer(PointerId const id) -> void;
     auto ReleasePointer(PointerId const id) -> void;
 
-    auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
+    auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Bool;
 
     auto AttachAttributeNode(Shared<AttributeNode> const& parent) -> void;
     auto DetachAttributeNode() -> void;
@@ -224,12 +224,12 @@ private:
 
     auto GetPlatformViewLayer() -> Shared<PlatformViewLayer>;
 
-    auto HandlePlatformWindowEvent(Event<>& event) -> Async<Bool>;
-    auto HandlePlatformFrameEvent(Event<>& event) -> Async<Bool>;
-    auto HandlePlatformPointerEvent(Event<>& event) -> Async<Bool>;
-    auto HandlePlatformKeyEvent(Event<>& event) -> Async<Bool>;
-    auto HandlePlatformInputEvent(Event<>& event) -> Async<Bool>;
-    auto HandlePlatformHitTestEvent(Event<>& event) -> Async<Bool>;
+    auto HandlePlatformWindowEvent(Event<>& event) -> Bool;
+    auto HandlePlatformFrameEvent(Event<>& event) -> Bool;
+    auto HandlePlatformPointerEvent(Event<>& event) -> Bool;
+    auto HandlePlatformKeyEvent(Event<>& event) -> Bool;
+    auto HandlePlatformInputEvent(Event<>& event) -> Bool;
+    auto HandlePlatformHitTestEvent(Event<>& event) -> Bool;
 
     auto ConvertPointerEvent(Event<> const& from) const noexcept -> Event<>;
 

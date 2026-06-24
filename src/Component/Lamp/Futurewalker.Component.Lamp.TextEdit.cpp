@@ -43,12 +43,12 @@ auto TextEdit::Initialize() -> void
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveEvent);
 }
 
-auto TextEdit::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto TextEdit::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<ViewEvent::EnabledChanged>())
     {
         UpdateStyle();
-        co_return false;
+        return false;
     }
     else if (event.Is<TextEditEvent>())
     {
@@ -56,9 +56,9 @@ auto TextEdit::ReceiveEvent(Event<>& event) -> Async<Bool>
         {
             UpdateStyle();
         }
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
 auto TextEdit::UpdateStyle() -> void

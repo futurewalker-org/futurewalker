@@ -226,7 +226,7 @@ auto TextEdit::Arrange(ArrangeScope& scope) -> void
     View::Arrange(scope);
 }
 
-auto TextEdit::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto TextEdit::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
@@ -235,21 +235,21 @@ auto TextEdit::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
         InvalidateLayout();
         InvalidateVisual();
     }
-    co_return false;
+    return false;
 }
 
-auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
+auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Bool
 {
     if (event.Is<KeyEvent>())
     {
         if (!_inputEditable)
         {
-            co_return false;
+            return false;
         }
 
         if (event.As<KeyEvent>()->IsComposing())
         {
-            co_return true;
+            return true;
         }
 
         auto const key = event.As<KeyEvent>()->GetKey();
@@ -260,7 +260,7 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
             {
                 _inputEditable->InsertLineBreak();
             }
-            co_return true;
+            return true;
         }
         else if (key == Key::Backspace || key == Key::Delete)
         {
@@ -283,7 +283,7 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
                     _inputEditable->InsertText({}, 0);
                 }
             }
-            co_return true;
+            return true;
         }
         else if (key == Key::ArrowLeft || key == Key::ArrowRight)
         {
@@ -342,18 +342,18 @@ auto TextEdit::ReceiveKeyEvent(Event<>& event) -> Async<Bool>
                 }
             }
         }
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
-auto TextEdit::ReceiveInputEvent(Event<>& event) -> Async<Bool>
+auto TextEdit::ReceiveInputEvent(Event<>& event) -> Bool
 {
     if (event.Is<InputEvent>())
     {
         if (event.Is<InputEvent::Attach>() || event.Is<InputEvent::Detach>())
         {
-            co_return true;
+            return true;
         }
         else
         {
@@ -362,10 +362,10 @@ auto TextEdit::ReceiveInputEvent(Event<>& event) -> Async<Bool>
             InvalidateVisual();
         }
     }
-    co_return false;
+    return false;
 }
 
-auto TextEdit::ReceivePointerEvent(Event<>& event) -> Async<Bool>
+auto TextEdit::ReceivePointerEvent(Event<>& event) -> Bool
 {
     if (event.Is<PointerEvent>())
     {
@@ -390,12 +390,12 @@ auto TextEdit::ReceivePointerEvent(Event<>& event) -> Async<Bool>
         {
             FW_DEBUG_LOG_INFO("TextEdit: Pointer leave");
         }
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
-auto TextEdit::ReceiveFocusEvent(Event<>& event) -> Async<Bool>
+auto TextEdit::ReceiveFocusEvent(Event<>& event) -> Bool
 {
     if (event.Is<FocusEvent::FocusIn>())
     {
@@ -403,7 +403,7 @@ auto TextEdit::ReceiveFocusEvent(Event<>& event) -> Async<Bool>
         auto notifyEventParameter = Event<TextEditEvent::FocusChanged>();
         notifyEventParameter->SetFocused(true);
         auto notifyEvent = Event<>(notifyEventParameter);
-        co_await SendEvent(notifyEvent);
+        SendEvent(notifyEvent);
     }
     else if (event.Is<FocusEvent::FocusOut>())
     {
@@ -411,9 +411,9 @@ auto TextEdit::ReceiveFocusEvent(Event<>& event) -> Async<Bool>
         auto notifyEventParameter = Event<TextEditEvent::FocusChanged>();
         notifyEventParameter->SetFocused(false);
         auto notifyEvent = Event<>(notifyEventParameter);
-        co_await SendEvent(notifyEvent);
+        SendEvent(notifyEvent);
     }
-    co_return false;
+    return false;
 }
 
 auto TextEdit::InternalInsertText(String const& text, CodePoint newSelection) -> void

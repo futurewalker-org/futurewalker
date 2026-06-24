@@ -32,27 +32,17 @@ PlatformWindow::~PlatformWindow() = default;
 ///
 /// @brief
 ///
-auto PlatformWindow::SendWindowEvent(Event<>& event) -> Async<Bool>
+auto PlatformWindow::SendWindowEvent(Event<>& event) -> Bool
 {
-    co_return co_await SendEvent(event, _delegate.sendWindowEvent);
+    return SendEvent(event, _delegate.sendWindowEvent);
 }
 
 ///
 /// @brief
 ///
-auto PlatformWindow::SendFrameEvent(Event<>& event) -> Async<Bool>
+auto PlatformWindow::SendFrameEvent(Event<>& event) -> Bool
 {
-    co_return co_await SendEvent(event, _delegate.sendFrameEvent);
-}
-
-///
-/// @brief
-///
-/// @param event
-///
-auto PlatformWindow::SendPointerEvent(Event<>& event) -> Async<Bool>
-{
-    co_return co_await SendEvent(event, _delegate.sendPointerEvent);
+    return SendEvent(event, _delegate.sendFrameEvent);
 }
 
 ///
@@ -60,9 +50,9 @@ auto PlatformWindow::SendPointerEvent(Event<>& event) -> Async<Bool>
 ///
 /// @param event
 ///
-auto PlatformWindow::SendKeyEvent(Event<>& event) -> Async<Bool>
+auto PlatformWindow::SendPointerEvent(Event<>& event) -> Bool
 {
-    co_return co_await SendEvent(event, _delegate.sendKeyEvent);
+    return SendEvent(event, _delegate.sendPointerEvent);
 }
 
 ///
@@ -70,107 +60,36 @@ auto PlatformWindow::SendKeyEvent(Event<>& event) -> Async<Bool>
 ///
 /// @param event
 ///
-auto PlatformWindow::SendInputEvent(Event<>& event) -> Async<Bool>
+auto PlatformWindow::SendKeyEvent(Event<>& event) -> Bool
 {
-    co_return co_await SendEvent(event, _delegate.sendInputEvent);
+    return SendEvent(event, _delegate.sendKeyEvent);
 }
 
 ///
 /// @brief
 ///
-auto PlatformWindow::SendHitTestEvent(Event<>& event) -> Async<Bool>
+/// @param event
+///
+auto PlatformWindow::SendInputEvent(Event<>& event) -> Bool
 {
-    co_return co_await SendEvent(event, _delegate.sendHitTestEvent);
+    return SendEvent(event, _delegate.sendInputEvent);
 }
 
 ///
 /// @brief
 ///
-auto PlatformWindow::SendWindowEventDetached(Event<>& event) -> Bool
+auto PlatformWindow::SendHitTestEvent(Event<>& event) -> Bool
 {
-    return SendEventDetached(event, &PlatformWindow::SendWindowEvent);
+    return SendEvent(event, _delegate.sendHitTestEvent);
 }
-
 ///
 /// @brief
 ///
-auto PlatformWindow::SendFrameEventDetached(Event<>& event) -> Bool
-{
-    return SendEventDetached(event, &PlatformWindow::SendFrameEvent);
-}
-
-///
-/// @brief
-///
-auto PlatformWindow::SendPointerEventDetached(Event<>& event) -> Bool
-{
-    return SendEventDetached(event, &PlatformWindow::SendPointerEvent);
-}
-
-///
-/// @brief
-///
-auto PlatformWindow::SendKeyEventDetached(Event<>& event) -> Bool
-{
-    return SendEventDetached(event, &PlatformWindow::SendKeyEvent);
-}
-
-///
-/// @brief
-///
-auto PlatformWindow::SendInputEventDetached(Event<>& event) -> Bool
-{
-    return SendEventDetached(event, &PlatformWindow::SendInputEvent);
-}
-
-///
-/// @brief
-///
-auto PlatformWindow::SendHitTestEventDetached(Event<>& event) -> Bool
-{
-    return SendEventDetached(event, &PlatformWindow::SendHitTestEvent);
-}
-
-///
-/// @brief
-///
-auto PlatformWindow::SendEvent(Event<>& event, EventFunction const& func) -> Async<Bool>
+auto PlatformWindow::SendEvent(Event<>& event, EventFunction const& func) -> Bool
 {
     if (func)
     {
-        co_return co_await func(event);
-    }
-    co_return false;
-}
-
-///
-/// @brief
-///
-auto PlatformWindow::SendEventDetached(Event<>& event, auto (PlatformWindow::*func)(Event<>&)->Async<Bool>) -> Bool
-{
-    // GetSelf() may return null during destructor call.
-    if (auto const self = GetSelf())
-    {
-        auto const r = Shared<Bool>::Make(false);
-        auto const e = Shared<Event<>>::Make(event);
-        AsyncFunction::SpawnFn([=]() mutable -> Task<void> {
-            try
-            {
-                *r = co_await ((&*self)->*func)(*e);
-            }
-            catch (...)
-            {
-                FW_DEBUG_ASSERT(false);
-            }
-        }).Detach();
-        event = *e;
-        return *r;
-    }
-
-    if constexpr (BuildConfig::IsDebug())
-    {
-        [[maybe_unused]] auto const& eventParameter = *event;
-        FW_DEBUG_LOG_WARNING("PlatformWindow::SendEventDetached(): Tried to send event from destructing window, ignoring. [{}]", typeid(eventParameter).name());
+        return func(event);
     }
     return false;
 }

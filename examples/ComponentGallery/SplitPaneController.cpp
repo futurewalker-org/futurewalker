@@ -33,14 +33,14 @@ auto SplitPaneController::MakeView() -> Shared<SplitPaneView>
     return splitPane;
 }
 
-auto SplitPaneController::ReceiveViewEvent(Event<>& event) -> Async<Bool>
+auto SplitPaneController::ReceiveViewEvent(Event<>& event) -> Bool
 {
     if (event.Is<SplitPaneViewEvent>())
     {
         auto const index = event.As<SplitPaneViewEvent>()->GetIndex();
         GetView()->SetActivePage(index);
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 }

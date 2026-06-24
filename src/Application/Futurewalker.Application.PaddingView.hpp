@@ -37,7 +37,7 @@ protected:
     auto Arrange(ArrangeScope& scope) -> void override;
 
 private:
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) ->Bool;
     auto GetNormalizedPadding() const -> EdgeInsets;
 
 private:

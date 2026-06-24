@@ -87,14 +87,14 @@ auto ConstrainedView::Measure(MeasureScope& scope) -> void
     }
 }
 
-auto ConstrainedView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto ConstrainedView::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
         InvalidateLayout();
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
 auto ConstrainedView::IntersectConstraints(AxisConstraints const& source, AxisConstraints const& mask) -> AxisConstraints

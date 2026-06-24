@@ -35,7 +35,7 @@ protected:
     auto Draw(DrawScope& scope) -> void override;
 
 private:
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Bool;
 
 private:
     AttributeAccessor<Icon> _icon;

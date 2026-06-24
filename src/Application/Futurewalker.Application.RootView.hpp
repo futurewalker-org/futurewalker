@@ -48,9 +48,9 @@ public:
 protected:
     auto Initialize() -> void override;
 
-    auto ReceiveViewEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveRootViewEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveKeyEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveViewEvent(Event<>& event) -> Bool;
+    auto ReceiveRootViewEvent(Event<>& event) -> Bool;
+    auto ReceiveKeyEvent(Event<>& event) -> Bool;
 
     auto UpdateAnimation(MonotonicTime const frameTime) -> void;
     auto UpdateLayout() -> void;
@@ -61,10 +61,10 @@ protected:
     auto GetFrameTime() const -> MonotonicTime;
 
 private:
-    auto DispatchPointerEvent(Event<>& event) -> Async<void>;
-    auto DispatchKeyEvent(Event<>& event) -> Async<void>;
-    auto DispatchInputEvent(Event<>& event) -> Async<void>;
-    auto DispatchHitTestEvent(Event<>& event) -> Async<void>;
+    auto DispatchPointerEvent(Event<>& event) -> void;
+    auto DispatchKeyEvent(Event<>& event) -> void;
+    auto DispatchInputEvent(Event<>& event) -> void;
+    auto DispatchHitTestEvent(Event<>& event) -> void;
     auto GetPointerCaptureView(PointerId const id) -> Shared<View>;
     auto SetPointerCaptureView(PointerId const id, Shared<View> const& view) -> void;
     auto GetPointerOverView(PointerId const id) -> Shared<View>;

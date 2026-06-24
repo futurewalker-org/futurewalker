@@ -313,7 +313,7 @@ auto TextView::Draw(DrawScope& scope) -> void
 ///
 /// @brief Receive attribute event.
 ///
-auto TextView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto TextView::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
@@ -322,7 +322,7 @@ auto TextView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
         InvalidateLayout();
         InvalidateVisual();
     }
-    co_return false;
+    return false;
 }
 
 ///

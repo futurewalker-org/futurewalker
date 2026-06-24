@@ -42,7 +42,7 @@ public:
 protected:
     auto Initialize() -> void override;
     auto Measure(MeasureScope& scope) -> void override;
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Bool;
 
 private:
     auto MeasureAxis(const AxisConstraints& c, Optional<Dp> const& v) const -> Optional<Dp>;

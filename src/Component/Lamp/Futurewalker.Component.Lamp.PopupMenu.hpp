@@ -57,7 +57,7 @@ public:
 
 protected:
     auto Initialize() -> void;
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Bool;
 
 private:
     auto CreatePopup(Shared<View> const& sourceView) -> void;

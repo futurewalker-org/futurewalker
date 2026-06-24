@@ -171,14 +171,14 @@ auto PopupMenu::Initialize() -> void
 ///
 /// @brief 
 ///
-auto PopupMenu::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto PopupMenu::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<PopupEvent::Closed>())
     {
         DestroyPopup();
         auto closeEvent = Event<>(Event<PopupMenuEvent::Closed>());
-        co_await GetEventReceiver().SendEvent(closeEvent);
-        co_return true;
+        GetEventReceiver().SendEvent(closeEvent);
+        return true;
     }
     else if (event.Is<MenuViewEvent::Activated>())
     {
@@ -187,9 +187,9 @@ auto PopupMenu::ReceiveEvent(Event<>& event) -> Async<Bool>
         auto activatedEventParameter = Event<PopupMenuEvent::Activated>();
         activatedEventParameter->SetCommandId(commandId);
         auto activatedEvent = Event<>(std::move(activatedEventParameter));
-        co_return co_await GetEventReceiver().SendEvent(activatedEvent);
+        return GetEventReceiver().SendEvent(activatedEvent);
     }
-    co_return false;
+    return false;
 }
 
 ///

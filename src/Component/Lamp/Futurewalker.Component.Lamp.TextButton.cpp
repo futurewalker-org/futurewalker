@@ -108,21 +108,21 @@ auto TextButton::Initialize() -> void
     EventReceiver::Connect(*this, *this, &TextButton::ReceiveEvent);
 }
 
-auto TextButton::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto TextButton::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<ButtonViewEvent>())
     {
         if (event.Is<ButtonViewEvent::Press>())
         {
             auto pressEvent = Event<>(Event<TextButtonEvent::Press>());
-            co_await SendEvent(pressEvent);
+            SendEvent(pressEvent);
         }
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
-auto TextButton::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto TextButton::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
@@ -137,6 +137,6 @@ auto TextButton::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
         AttributeNode::SetValue<&TextViewStyle::HorizontalAlignment>(*_buttonView, _textHorizontalAlignment.GetValueOr(TextViewHorizontalAlignment::Center));
         AttributeNode::SetValue<&TextViewStyle::VerticalAlignment>(*_buttonView, _textVerticalAlignment.GetValueOr(TextViewVerticalAlignment::Middle));
     }
-    co_return false;
+    return false;
 }
 }

@@ -194,7 +194,7 @@ auto MenuButtonView::SetCornerRadius(AttributeArg<CornerRadius> const& radius) -
     }
 }
 
-auto MenuButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto MenuButtonView::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<PointerEvent>())
     {
@@ -208,7 +208,7 @@ auto MenuButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                     _buttonView->SetDown(true);
                     RequestFocus(FocusReason::Pointer);
                     auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Down>());
-                    co_await SendEvent(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
             }
             else if (event.Is<PointerEvent::Motion::Up>())
@@ -218,7 +218,7 @@ auto MenuButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                     _pointerDown = false;
                     _buttonView->SetDown(false);
                     auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Up>());
-                    co_await SendEvent(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
             }
             else if (event.Is<PointerEvent::Motion::Enter>())
@@ -228,7 +228,7 @@ auto MenuButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                     _pointerEnter = true;
                     _buttonView->SetEnter(true);
                     auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Enter>());
-                    co_await SendEvent(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
             }
             else if (event.Is<PointerEvent::Motion::Leave>())
@@ -240,7 +240,7 @@ auto MenuButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                     _buttonView->SetDown(false);
                     _buttonView->SetEnter(false);
                     auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Leave>());
-                    co_await SendEvent(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
             }
             else if (event.Is<PointerEvent::Motion::Move>())
@@ -265,15 +265,15 @@ auto MenuButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                 if (down)
                 {
                     auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Up>());
-                    co_await SendEvent(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
                 if (enter)
                 {
                     auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Leave>());
-                    co_await SendEvent(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
             }
-            co_return true;
+            return true;
         }
     }
     else if (event.Is<KeyEvent>())
@@ -289,9 +289,9 @@ auto MenuButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                     _keyDown = true;
                     _buttonView->SetDown(true);
                     auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Down>());
-                    co_await SendEvent(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
-                co_return true;
+                return true;
             }
         }
         else if (event.Is<KeyEvent::Up>())
@@ -306,9 +306,9 @@ auto MenuButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
                     _buttonView->SetDown(false);
 
                     auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Up>());
-                    co_await SendEvent(buttonEvent);
+                    SendEvent(buttonEvent);
                 }
-                co_return true;
+                return true;
             }
         }
     }
@@ -325,6 +325,6 @@ auto MenuButtonView::ReceiveEvent(Event<>& event) -> Async<Bool>
             _buttonView->SetFocused(false, {});
         }
     }
-    co_return false;
+    return false;
 }
 }

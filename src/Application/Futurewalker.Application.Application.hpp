@@ -37,7 +37,7 @@ public:
     Application(PassKey<Application>, ApplicationOptions const& options);
     virtual ~Application() = default;
 
-    auto SendEvent(Event<>& event) -> Async<Bool>;
+    auto SendEvent(Event<>& event) -> Bool;
 
     auto Run() -> Async<void>;
     auto Exit() -> Async<Bool>;
@@ -73,8 +73,8 @@ private:
     auto GetSelfBase() const -> Shared<Application const>;
     auto SetSelfBase(Shared<Application> const& self) -> void;
 
-    auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
-    auto HandlePlatformApplicationEvent(Event<>& event) -> Async<Bool>;
+    auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Bool;
+    auto HandlePlatformApplicationEvent(Event<>& event) -> Bool;
 
 private:
     Weak<Application> _self;

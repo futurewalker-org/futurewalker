@@ -133,7 +133,7 @@ auto RootFocusNode::DispatchKeyEvent(Event<>& event) -> Bool
 {
     if (!DispatchKeyEventFromRoot({}, event, GetFocusedNode()))
     {
-        return SendEventDetached(event);
+        return SendEvent(event);
     }
     return false;
 }
@@ -149,7 +149,7 @@ auto RootFocusNode::SetFocusedNode(Shared<FocusNode> const& newNode, FocusReason
     {
         {
             auto event = Event<>(Event<FocusEvent::FocusWillChange>());
-            SendEventDetached(event);
+            SendEvent(event);
         }
 
         _focusedNode = newNode;
@@ -160,7 +160,7 @@ auto RootFocusNode::SetFocusedNode(Shared<FocusNode> const& newNode, FocusReason
         if (oldNode)
         {
             auto event = Event<>(Event<FocusEvent::FocusOut>());
-            oldNode->SendEventDetached(event);
+            oldNode->SendEvent(event);
         }
 
         if (newNode)
@@ -168,12 +168,12 @@ auto RootFocusNode::SetFocusedNode(Shared<FocusNode> const& newNode, FocusReason
             auto focusEvent = Event<FocusEvent::FocusIn>();
             focusEvent->SetReason(reason);
             auto event = Event<>(std::move(focusEvent));
-            newNode->SendEventDetached(event);
+            newNode->SendEvent(event);
         }
 
         {
             auto event = Event<>(Event<FocusEvent::FocusDidChange>());
-            SendEventDetached(event);
+            SendEvent(event);
         }
     }
 }

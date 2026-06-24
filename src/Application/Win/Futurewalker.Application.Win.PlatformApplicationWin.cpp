@@ -70,10 +70,10 @@ auto PlatformApplicationWin::Run() -> Async<void>
     {
         FW_DEBUG_LOG_INFO("Starting event loop on thread {}", std::this_thread::get_id());
 
-        AsyncFunction::SpawnFn([&]() -> Async<void> {
+        {
             auto e = Event<>(Event<PlatformApplicationEvent::Started>());
-            co_await SendApplicationEvent(e);
-        }).Detach();
+            SendApplicationEvent(e);
+        }
 
         while (true)
         {
@@ -92,10 +92,10 @@ auto PlatformApplicationWin::Run() -> Async<void>
             }
         }
 
-        AsyncFunction::SpawnFn([&]() -> Async<void> {
+        {
             auto e = Event<>(Event<PlatformApplicationEvent::Exited>());
-            co_await SendApplicationEvent(e);
-        }).Detach();
+            SendApplicationEvent(e);
+        }
 
         FW_DEBUG_LOG_INFO("Exiting event loop on thread {}", std::this_thread::get_id());
     }
@@ -231,7 +231,7 @@ auto PlatformApplicationWin::SetActive(Bool const active) -> void
         auto parameter = Event<PlatformApplicationEvent::ActiveChanged>();
         parameter->SetActive(active);
         auto event = Event<>(parameter);
-        SendApplicationEventDetached(event);
+        SendApplicationEvent(event);
     }
 }
 

@@ -11,25 +11,11 @@ PlatformInputEditable::PlatformInputEditable(PassKey<PlatformInputEditable>, Del
 
 PlatformInputEditable::~PlatformInputEditable() = default;
 
-auto PlatformInputEditable::SendInputEvent(Event<>& event) -> Async<Bool>
+auto PlatformInputEditable::SendInputEvent(Event<>& event) -> Bool
 {
     if (_delegate.sendInputevent)
     {
-        co_return co_await _delegate.sendInputevent(event);
-    }
-    co_return false;
-}
-
-auto PlatformInputEditable::SendInputEventDetached(Event<>& event) -> Bool
-{
-    auto const self = GetSelf();
-    auto const e = Shared<Event<>>::Make(event);
-    auto const r = Shared<Bool>::Make(false);
-    AsyncFunction::SpawnFn([=] -> Lazy<void> { *r = co_await self->SendInputEvent(*e); }).Detach();
-    if (*r)
-    {
-        event = *e;
-        return true;
+        return _delegate.sendInputevent(event);
     }
     return false;
 }

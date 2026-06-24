@@ -57,7 +57,7 @@ protected:
     auto Initialize() -> void override;
     auto Measure(MeasureScope& scope) -> void override;
     auto Arrange(ArrangeScope& scope) -> void override;
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Bool;
 
 private:
     auto GetMainAxisConstraints(MeasureScope const& scope) const -> AxisConstraints;

@@ -64,7 +64,7 @@ public:
 
 private:
     auto Initialize() -> void;
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Bool;
     auto GetWindow() -> Shared<Window>;
 
 private:

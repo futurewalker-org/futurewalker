@@ -37,7 +37,7 @@ protected:
     auto Measure(MeasureScope& scope) -> void override;
 
 private:
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Bool;
     auto IntersectConstraints(AxisConstraints const& source, AxisConstraints const& mask) -> AxisConstraints;
 
 private:

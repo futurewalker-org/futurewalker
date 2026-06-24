@@ -79,19 +79,12 @@ public:
 protected:
     virtual auto Initialize() -> void = 0;
 
-    auto SendWindowEvent(Event<>& event) -> Async<Bool>;
-    auto SendFrameEvent(Event<>& event) -> Async<Bool>;
-    auto SendPointerEvent(Event<>& event) -> Async<Bool>;
-    auto SendKeyEvent(Event<>& event) -> Async<Bool>;
-    auto SendInputEvent(Event<>& event) -> Async<Bool>;
-    auto SendHitTestEvent(Event<>& event) -> Async<Bool>;
-
-    auto SendWindowEventDetached(Event<>& event) -> Bool;
-    auto SendFrameEventDetached(Event<>& event) -> Bool;
-    auto SendPointerEventDetached(Event<>& event) -> Bool;
-    auto SendKeyEventDetached(Event<>& event) -> Bool;
-    auto SendInputEventDetached(Event<>& event) -> Bool;
-    auto SendHitTestEventDetached(Event<>& event) -> Bool;
+    auto SendWindowEvent(Event<>& event) -> Bool;
+    auto SendFrameEvent(Event<>& event) -> Bool;
+    auto SendPointerEvent(Event<>& event) -> Bool;
+    auto SendKeyEvent(Event<>& event) -> Bool;
+    auto SendInputEvent(Event<>& event) -> Bool;
+    auto SendHitTestEvent(Event<>& event) -> Bool;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;
@@ -100,8 +93,7 @@ protected:
     static auto MakeDerived(Args&&... args) -> Shared<Derived>;
 
 private:
-    auto SendEvent(Event<>& event, EventFunction const& func) -> Async<Bool>;
-    auto SendEventDetached(Event<>& event, auto (PlatformWindow::*func)(Event<>&)->Async<Bool>) -> Bool;
+    auto SendEvent(Event<>& event, EventFunction const& func) -> Bool;
 
 private:
     Weak<PlatformWindow> _self;

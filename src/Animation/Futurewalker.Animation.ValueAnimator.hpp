@@ -172,7 +172,7 @@ public:
     }
 
 private:
-    auto ReceiveTickerEvent(Event<>& event) -> Async<Bool>
+    auto ReceiveTickerEvent(Event<>& event) -> Bool
     {
         if (event.Is<AnimationTickerEvent::Tick>())
         {
@@ -222,7 +222,7 @@ private:
                 }
             }
         }
-        co_return false;
+        return false;
     }
 
     auto RequestNextTick() -> void

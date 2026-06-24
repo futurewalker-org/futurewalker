@@ -36,8 +36,8 @@ public:
 
 protected:
     auto Initialize() -> void override;
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Bool;
+    auto ReceiveAttributeEvent(Event<>& event) -> Bool;
 
 private:
     Shared<ButtonView> _buttonView;

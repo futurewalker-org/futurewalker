@@ -39,7 +39,7 @@ protected:
     auto Initialize() -> void override;
 
 private:
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Bool;
     auto UpdatePadding() -> void;
 
 private:

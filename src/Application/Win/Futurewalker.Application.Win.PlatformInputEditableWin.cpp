@@ -175,19 +175,19 @@ auto PlatformInputEditableWin::InsertU16String(U16StringView const text, CodePoi
 auto PlatformInputEditableWin::CompositionStart() -> void
 {
     auto event = Event<>(Event<PlatformInputEvent::CompositionStart>());
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 
 auto PlatformInputEditableWin::CompositionUpdate() -> void
 {
     auto event = Event<>(Event<PlatformInputEvent::CompositionUpdate>());
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 
 auto PlatformInputEditableWin::CompositionEnd() -> void
 {
     auto event = Event<>(Event<PlatformInputEvent::CompositionEnd>());
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 
 auto PlatformInputEditableWin::GetRangeFromU16Range(Range<CodeUnit> range) const -> Range<CodePoint>
@@ -202,7 +202,7 @@ auto PlatformInputEditableWin::InternalBeforeInsertText(String const& text, Bool
         auto parameter = Event<PlatformInputEvent::BeforeInsertText>();
         parameter->SetText(text);
         auto event = Event<>(parameter);
-        if (SendInputEventDetached(event))
+        if (SendInputEvent(event))
         {
             if (event.Is<PlatformInputEvent::BeforeInsertText>())
             {
@@ -217,7 +217,7 @@ auto PlatformInputEditableWin::InternalBeforeInsertText(String const& text, Bool
         auto parameter = Event<PlatformInputEvent::BeforeInsertCompositionText>();
         parameter->SetText(text);
         auto event = Event<>(std::move(parameter));
-        SendInputEventDetached(event);
+        SendInputEvent(event);
     }
     return true;
 }
@@ -227,7 +227,7 @@ auto PlatformInputEditableWin::InternalInsertText(String const& text) -> void
     auto parameter = Event<PlatformInputEvent::InsertText>();
     parameter->SetText(text);
     auto event = Event<>(std::move(parameter));
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 
 auto PlatformInputEditableWin::InternalBeforeInsertLineBreak(Bool cancellable) -> Bool
@@ -235,7 +235,7 @@ auto PlatformInputEditableWin::InternalBeforeInsertLineBreak(Bool cancellable) -
     FW_DEBUG_ASSERT(cancellable);
     auto parameter = Event<PlatformInputEvent::BeforeInsertLineBreak>();
     auto event = Event<>(parameter);
-    if (SendInputEventDetached(event))
+    if (SendInputEvent(event))
     {
         if (cancellable)
         {
@@ -254,7 +254,7 @@ auto PlatformInputEditableWin::InternalInsertLineBreak() -> void
 {
     auto parameter = Event<PlatformInputEvent::InsertLineBreak>();
     auto event = Event<>(std::move(parameter));
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 
 auto PlatformInputEditableWin::InternalBeforeDeleteSurroundingText(CodePoint before, CodePoint after, Bool cancellable) -> Bool
@@ -264,7 +264,7 @@ auto PlatformInputEditableWin::InternalBeforeDeleteSurroundingText(CodePoint bef
     parameter->SetBefore(before);
     parameter->SetAfter(after);
     auto event = Event<>(parameter);
-    if (SendInputEventDetached(event))
+    if (SendInputEvent(event))
     {
         if (cancellable)
         {
@@ -285,7 +285,7 @@ auto PlatformInputEditableWin::InternalDeleteSurroundingText(CodePoint before, C
     parameter->SetBefore(before);
     parameter->SetAfter(after);
     auto event = Event<>(std::move(parameter));
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 
 auto PlatformInputEditableWin::InternalOnTextChange(Bool anticipated, CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void
@@ -309,7 +309,7 @@ auto PlatformInputEditableWin::InternalOnSelectionChange(Bool anticipated) -> vo
         }
     }
     auto event = Event<>(Event<PlatformInputEvent::SelectionChange>());
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 
 auto PlatformInputEditableWin::GetTextStore() -> Shared<PlatformInputMethodTextStoreWin>

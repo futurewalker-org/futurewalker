@@ -13,11 +13,11 @@ namespace FW_EXPORT
 /// @brief Signal combiner used for event signals.
 ///
 template <class T>
-using EventSignalCombiner = AsyncSignalCombinerAnyOf<T>;
+using EventSignalCombiner = SignalCombinerAnyOf<T>;
 
 ///
 /// @brief A signal type used for event connections.
 ///
-using EventSignal = Signal<Lazy<Bool>(Event<>&), EventSignalCombiner>;
+using EventSignal = Signal<Bool(Event<>&), EventSignalCombiner>;
 }
 }

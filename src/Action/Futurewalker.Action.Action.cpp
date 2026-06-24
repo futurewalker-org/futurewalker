@@ -23,7 +23,7 @@ auto Action::Execute(CommandId const command) -> void
     auto eventParameter = Event<ActionEvent::Execute>();
     eventParameter->SetCommandId(command);
     auto event = Event<>(std::move(eventParameter));
-    GetEventReceiver().SendEventDetached(event);
+    GetEventReceiver().SendEvent(event);
 }
 
 auto Action::State(CommandId const command, Bool& enabled, Bool& toggled) -> Bool
@@ -31,7 +31,7 @@ auto Action::State(CommandId const command, Bool& enabled, Bool& toggled) -> Boo
     auto eventParameter = Event<ActionEvent::State>();
     eventParameter->SetCommandId(command);
     auto event = Event<>(std::move(eventParameter));
-    if (GetEventReceiver().SendEventDetached(event))
+    if (GetEventReceiver().SendEvent(event))
     {
         if (event.Is<ActionEvent::State>())
         {
@@ -47,7 +47,7 @@ auto Action::State(CommandId const command, Bool& enabled, Bool& toggled) -> Boo
 auto Action::NotifyStateChanged() -> void
 {
     auto event = Event<>(Event<ActionEvent::StateChanged>());
-    GetEventReceiver().SendEventDetached(event);
+    GetEventReceiver().SendEvent(event);
 }
 
 auto Action::GetTracker() -> Weak<void>

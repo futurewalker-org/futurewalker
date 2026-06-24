@@ -66,11 +66,11 @@ protected:
     auto Draw(DrawScope& scope) -> void override;
     auto Measure(MeasureScope& scope) -> void override;
     auto Arrange(ArrangeScope& scope) -> void override;
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveInputEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveKeyEvent(Event<>& event) -> Async<Bool>;
-    auto ReceivePointerEvent(Event<>& event) -> Async<Bool>;
-    auto ReceiveFocusEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Bool;
+    auto ReceiveInputEvent(Event<>& event) -> Bool;
+    auto ReceiveKeyEvent(Event<>& event) -> Bool;
+    auto ReceivePointerEvent(Event<>& event) -> Bool;
+    auto ReceiveFocusEvent(Event<>& event) -> Bool;
 
 private:
     auto InternalInsertText(String const& text, CodePoint newSelection) -> void;

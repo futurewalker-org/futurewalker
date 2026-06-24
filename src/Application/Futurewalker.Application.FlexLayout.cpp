@@ -24,7 +24,7 @@ class InvalidateFromChild final : public ViewEvent::Notify
 auto SendInvalidateFromChild(View& child) -> void
 {
     auto event = Event<>(Event<InvalidateFromChild>());
-    child.SendEventDetached(event);
+    child.SendEvent(event);
 }
 }
 
@@ -474,7 +474,7 @@ auto FlexLayout::Arrange(ArrangeScope& scope) -> void
 ///
 /// @brief Event handler.
 ///
-auto FlexLayout::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto FlexLayout::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<InvalidateFromChild>())
     {
@@ -482,9 +482,9 @@ auto FlexLayout::ReceiveEvent(Event<>& event) -> Async<Bool>
         {
             InvalidateLayout();
         }
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
 ///

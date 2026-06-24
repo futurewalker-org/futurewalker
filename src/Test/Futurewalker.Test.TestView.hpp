@@ -35,7 +35,7 @@ public:
         EventReceiver::Connect(*this, *this, &TestView::ReceiveEvent);
     }
 
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>
+    auto ReceiveEvent(Event<>& event) -> Bool
     {
         if (event.Is<ViewEvent::VisibleChanged>())
         {
@@ -69,7 +69,7 @@ public:
         {
             ++_detachCount;
         }
-        co_return false;
+        return false;
     }
 
     using View::InvalidateLayout;

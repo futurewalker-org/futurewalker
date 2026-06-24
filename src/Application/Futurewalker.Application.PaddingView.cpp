@@ -113,13 +113,13 @@ auto PaddingView::Arrange(ArrangeScope& scope) -> void
     }
 }
 
-auto PaddingView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto PaddingView::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
         InvalidateLayout();
     }
-    co_return false;
+    return false;
 }
 
 auto PaddingView::GetNormalizedPadding() const -> EdgeInsets

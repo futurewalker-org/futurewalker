@@ -117,7 +117,7 @@ auto ScrollView::Arrange(ArrangeScope& scope) -> void
     });
 }
 
-auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto ScrollView::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<PointerEvent::Action::Scroll>())
     {
@@ -147,7 +147,7 @@ auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
                 InvalidateLayout();
             }
         }
-        co_return true;
+        return true;
     }
     else if (event.Is<PointerEvent::Action::Swipe>())
     {
@@ -171,8 +171,8 @@ auto ScrollView::ReceiveEvent(Event<>& event) -> Async<Bool>
                 InvalidateLayout();
             }
         }
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 }

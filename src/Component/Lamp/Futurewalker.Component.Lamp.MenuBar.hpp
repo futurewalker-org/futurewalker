@@ -28,8 +28,8 @@ public:
 
 protected:
     auto Initialize() -> void override;
-    auto ReceiveViewEvent(Event<>& event) -> Async<Bool>;
-    auto ReceivePopupMenuEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveViewEvent(Event<>& event) -> Bool;
+    auto ReceivePopupMenuEvent(Event<>& event) -> Bool;
 
 private:
     struct MenuItemInfo

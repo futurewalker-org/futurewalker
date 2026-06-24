@@ -167,7 +167,7 @@ auto Separator::Draw(DrawScope& scope) -> void
     }
 }
 
-auto Separator::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto Separator::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
@@ -178,7 +178,7 @@ auto Separator::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
         }
         InvalidateVisual();
     }
-    co_return false;
+    return false;
 }
 
 auto Separator::InternalUpdateLayout() -> void

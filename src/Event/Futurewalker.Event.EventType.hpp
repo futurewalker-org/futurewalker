@@ -16,6 +16,6 @@ namespace FW_EXPORT
 template <Concepts::DerivedFrom<EventParameter> Parameter = EventParameter>
 class Event;
 
-using EventFunction = Function<Async<Bool>(Event<>& event)>;
+using EventFunction = Function<Bool(Event<>& event)>;
 }
 }

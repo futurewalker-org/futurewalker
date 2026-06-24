@@ -57,16 +57,16 @@ auto CommandObserver::GetEventReceiver() const -> EventReceiver const&
     return *_eventReceiver;
 }
 
-auto CommandObserver::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto CommandObserver::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<CommandEvent::StateChanged>())
     {
         auto const parameter = event.As<CommandEvent::StateChanged>();
         if (parameter->GetCommandId() == _commandId)
         {
-            co_return co_await GetEventReceiver().SendEvent(event);
+            return GetEventReceiver().SendEvent(event);
         }
     }
-    co_return false;
+    return false;
 }
 }

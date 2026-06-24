@@ -25,7 +25,7 @@ protected:
     auto Initialize() -> void override;
 
 private:
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveEvent(Event<>& event) -> Bool;
     auto UpdateStyle() -> void;
 
 private:

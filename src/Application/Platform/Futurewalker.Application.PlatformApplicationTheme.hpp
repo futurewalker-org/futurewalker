@@ -29,8 +29,7 @@ protected:
     auto GetContext() -> Shared<PlatformApplicationThemeContext>;
     auto GetContext() const -> Shared<PlatformApplicationThemeContext const>;
 
-    auto SendThemeEvent(Event<>& event) -> Async<Bool>;
-    auto SendThemeEventDetached(Event<> const& event) -> void;
+    auto SendThemeEvent(Event<>& event) -> Bool;
 
     template <class Self>
     auto GetSelf(this Self& self) -> Shared<Self>;

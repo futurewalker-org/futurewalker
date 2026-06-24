@@ -26,12 +26,12 @@ Application::Application(PassKey<Application>, ApplicationOptions const& options
   : _id {options.identifier}
 {
     EventReceiver::Delegate delegate = {
-      .dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Async<Bool> { co_return co_await DispatchEvent(event, dispatch); },
+        .dispatchEvent = [&](Event<>& event, EventFunction const& dispatch) -> Bool { return DispatchEvent(event, dispatch); },
     };
     _eventReceiver = EventReceiver::Make(delegate);
     _propertyStore = Unique<PropertyStore>::Make();
     _platformContext = Locator::Resolve<PlatformApplicationContext>();
-    _platformObject = _platformContext->MakePlatformApplication({.sendApplicationEvent = [&](Event<>& event) -> Async<Bool> { co_return co_await HandlePlatformApplicationEvent(event); }});
+    _platformObject = _platformContext->MakePlatformApplication({.sendApplicationEvent = [&](Event<>& event) -> Bool { return HandlePlatformApplicationEvent(event); }});
     _context = Locator::ResolveWithDefault<ApplicationContext>();
     _theme = Locator::ResolveWithDefault<ApplicationTheme>();
     _threadPool = Locator::ResolveWithDefault<ThreadPool>();
@@ -71,7 +71,7 @@ auto Application::Exit() -> Async<Bool>
         {
             auto cancelled = False;
             auto event = Event<>(Event<ApplicationEvent::ExitRequested>());
-            if (co_await SendEvent(event))
+            if (SendEvent(event))
             {
                 if (event.Is<ApplicationEvent::ExitRequested>())
                 {
@@ -110,9 +110,9 @@ auto Application::IsForeground() const -> Bool
 ///
 /// @brief Send event to Application.
 ///
-auto Application::SendEvent(Event<>& event) -> Async<Bool>
+auto Application::SendEvent(Event<>& event) -> Bool
 {
-    co_return co_await GetEventReceiver().SendEvent(event);
+    return GetEventReceiver().SendEvent(event);
 }
 
 ///
@@ -227,9 +227,9 @@ auto Application::SetSelfBase(Shared<Application> const& self) -> void
 /// @param event
 /// @param dispatch
 ///
-auto Application::DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>
+auto Application::DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Bool
 {
-    co_return co_await dispatch(event);
+    return dispatch(event);
 }
 
 ///
@@ -239,22 +239,22 @@ auto Application::DispatchEvent(Event<>& event, EventFunction const& dispatch) -
 ///
 /// @return
 ///
-auto Application::HandlePlatformApplicationEvent(Event<>& event) -> Async<Bool>
+auto Application::HandlePlatformApplicationEvent(Event<>& event) -> Bool
 {
     if (event.Is<PlatformApplicationEvent::Started>())
     {
         auto e = Event<>(Event<ApplicationEvent::Started>());
-        co_return co_await SendEvent(e);
+        return SendEvent(e);
     }
     else if (event.Is<PlatformApplicationEvent::Exiting>())
     {
         auto e = Event<>(Event<ApplicationEvent::ExitRequested>());
-        co_return co_await SendEvent(e);
+        return SendEvent(e);
     }
     else if (event.Is<PlatformApplicationEvent::Exited>())
     {
         auto e = Event<>(Event<ApplicationEvent::Exited>());
-        co_return co_await SendEvent(e);
+        return SendEvent(e);
     }
     else if (event.Is<PlatformApplicationEvent::ActiveChanged>())
     {
@@ -262,7 +262,7 @@ auto Application::HandlePlatformApplicationEvent(Event<>& event) -> Async<Bool>
         auto applicationEventParameter = Event<ApplicationEvent::ActiveChanged>();
         applicationEventParameter->SetActive(parameter->IsActive());
         auto applicationEvent = Event<>(applicationEventParameter);
-        co_await SendEvent(applicationEvent);
+        SendEvent(applicationEvent);
     }
     else if (event.Is<PlatformApplicationEvent::ForegroundChanged>())
     {
@@ -270,8 +270,8 @@ auto Application::HandlePlatformApplicationEvent(Event<>& event) -> Async<Bool>
         auto applicationEventParameter = Event<ApplicationEvent::ForegroundChanged>();
         applicationEventParameter->SetForeground(parameter->IsForeground());
         auto applicationEvent = Event<>(applicationEventParameter);
-        co_await SendEvent(applicationEvent);
+        SendEvent(applicationEvent);
     }
-    co_return false;
+    return false;
 }
 }

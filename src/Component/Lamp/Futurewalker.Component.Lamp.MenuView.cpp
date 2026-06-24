@@ -78,7 +78,7 @@ auto MenuView::Initialize() -> void
     EventReceiver::Connect(*this, *this, &MenuView::ReceiveEvent);
 }
 
-auto MenuView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto MenuView::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<ViewEvent::EnabledChanged>())
     {
@@ -115,7 +115,7 @@ auto MenuView::ReceiveEvent(Event<>& event) -> Async<Bool>
                                 auto notifyEventParameter = Event<MenuViewEvent::Activated>();
                                 notifyEventParameter->SetCommandId(data.item.GetCommandId());
                                 auto notifyEvent = Event<>(std::move(notifyEventParameter));
-                                if (!SendEventDetached(notifyEvent))
+                                if (!SendEvent(notifyEvent))
                                 {
                                     CommandNode::Execute(*this, data.item.GetCommandId());
                                 }
@@ -127,12 +127,12 @@ auto MenuView::ReceiveEvent(Event<>& event) -> Async<Bool>
                 }
             }
         }
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
-auto MenuView::ReceiveCommandEvent(Event<>& event) -> Async<Bool>
+auto MenuView::ReceiveCommandEvent(Event<>& event) -> Bool
 {
     if (event.Is<CommandEvent::StateChanged>())
     {
@@ -145,10 +145,10 @@ auto MenuView::ReceiveCommandEvent(Event<>& event) -> Async<Bool>
             }
         }
     }
-    co_return false;
+    return false;
 }
 
-auto MenuView::ReceivePopupEvent(Event<>& event) -> Async<Bool>
+auto MenuView::ReceivePopupEvent(Event<>& event) -> Bool
 {
     if (event.Is<PopupMenuEvent::Closed>())
     {
@@ -161,9 +161,9 @@ auto MenuView::ReceivePopupEvent(Event<>& event) -> Async<Bool>
         auto notifyEventParameter = Event<MenuViewEvent::Activated>();
         notifyEventParameter->SetCommandId(commandId);
         auto notifyEvent = Event<>(std::move(notifyEventParameter));
-        co_await SendEvent(notifyEvent);
+        SendEvent(notifyEvent);
     }
-    co_return false;
+    return false;
 }
 
 auto MenuView::CreatePopup() -> void

@@ -18,6 +18,8 @@
 #include <Futurewalker.Action.Action.hpp>
 #include <Futurewalker.Action.CommandDispatcher.hpp>
 
+#include <Futurewalker.Async.AsyncFunction.hpp>
+
 #include <Futurewalker.Attribute.AttributeSlotCache.hpp>
 
 #include <Futurewalker.Event.EventReceiver.hpp>
@@ -49,7 +51,7 @@ auto ComponentGalleryApplication::Initialize() -> void
     EventReceiver::Connect(*this, *this, &ComponentGalleryApplication::ReceiveEvent);
 }
 
-auto ComponentGalleryApplication::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto ComponentGalleryApplication::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<ApplicationEvent::Started>())
     {
@@ -57,29 +59,31 @@ auto ComponentGalleryApplication::ReceiveEvent(Event<>& event) -> Async<Bool>
         ApplicationTheme::AddTheme(ThemeBrightness::Dark, Shared<Lamp::Theme>::Make(ThemeBrightness::Dark));
         ApplicationTheme::SetBrightness(ApplicationThemeBrightness::Dark);
 
-        auto frame = WindowFrame::Make();
-        auto controller = SplitPaneController::Make();
-        frame->SetContent(controller->GetView());
+        AsyncFunction::SpawnFn([=]() -> Async<void> {
+            auto frame = WindowFrame::Make();
+            auto controller = SplitPaneController::Make();
+            frame->SetContent(controller->GetView());
 
-        auto menuBar = Lamp::MenuBar::MakeWithMenu(BuildMainMenu());
-        frame->SetTitleContent(menuBar);
+            auto menuBar = Lamp::MenuBar::MakeWithMenu(BuildMainMenu());
+            frame->SetTitleContent(menuBar);
 
-        _window = Window::Make({
-            .backgroundStyle = WindowBackgroundStyle::Solid,
-        });
-        _window->SetBackgroundColor(Lamp::Style::ColorSurface);
-        _window->SetContent(frame);
-        _window->SetSizeConstraints(BoxConstraints::MakeUnbounded({500, 500}));
-        _window->SetFrameRect({0, 0, 1500, 1000});
-        _window->SetVisible(true);
+            _window = Window::Make({
+                .backgroundStyle = WindowBackgroundStyle::Solid,
+            });
+            _window->SetBackgroundColor(Lamp::Style::ColorSurface);
+            _window->SetContent(frame);
+            _window->SetSizeConstraints(BoxConstraints::MakeUnbounded({500, 500}));
+            _window->SetFrameRect({0, 0, 1500, 1000});
+            _window->SetVisible(true);
 
-        co_await EventWaiter(*_window).Wait<WindowEvent::Closed>();
-        co_await Exit();
+            co_await EventWaiter(*_window).Wait<WindowEvent::Closed>();
+            co_await Exit();
+        }).Detach();
     }
-    co_return false;
+    return false;
 }
 
-auto ComponentGalleryApplication::ReceiveCommandEvent(Event<>& event) -> Async<Bool>
+auto ComponentGalleryApplication::ReceiveCommandEvent(Event<>& event) -> Bool
 {
     if (event.Is<ActionEvent>())
     {
@@ -91,7 +95,7 @@ auto ComponentGalleryApplication::ReceiveCommandEvent(Event<>& event) -> Async<B
                 auto parameter = event.As<ActionEvent::State>();
                 parameter->SetEnabled(true);
                 event = parameter;
-                co_return true;
+                return true;
             }
             else if (event.Is<ActionEvent::Execute>())
             {
@@ -116,13 +120,15 @@ auto ComponentGalleryApplication::ReceiveCommandEvent(Event<>& event) -> Async<B
                     dialogWindow->SetFrameRect(Rect<Vp>::Make({windowRect.x0 + (windowRect.GetWidth() - width) / 2, windowRect.y0 + (windowRect.GetHeight() - height) / 2}, {width, height}));
                     dialogWindow->SetBackgroundColor(Lamp::Style::ColorSurface);
                     dialogWindow->SetVisible(true);
-                    co_await EventWaiter(*dialogWindow).Wait<WindowEvent::Closed>();
+
+                    // FIXME
+                    AsyncFunction::SpawnFn([=] -> Async<void> { co_await EventWaiter(*dialogWindow).Wait<WindowEvent::Closed>(); }).Detach();
                 }
-                co_return true;
+                return true;
             }
         }
     }
-    co_return false;
+    return false;
 }
 
 auto ComponentGalleryApplication::BuildMainMenu() const -> Menu

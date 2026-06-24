@@ -126,8 +126,7 @@ public:
     auto IsActive() const -> Bool;
     auto IsAttached() const -> Bool;
 
-    auto SendEvent(Event<>& event) -> Async<Bool>;
-    auto SendEventDetached(Event<>& event) -> Bool;
+    auto SendEvent(Event<>& event) -> Bool;
 
     auto RemoveFromParent() -> void;
 
@@ -272,9 +271,9 @@ private:
     auto AdoptChild(Shared<View> const& child, SInt64 const index) -> void;
     auto AbandonChild(Shared<View> const& child) -> void;
 
-    auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
-    auto DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
-    auto DispatchNotifyBubbleEvent(Event<>& event, EventFunction const& dispatch) -> Async<Bool>;
+    auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Bool;
+    auto DispatchNotifyEvent(Event<>& event, EventFunction const& dispatch) -> Bool;
+    auto DispatchNotifyBubbleEvent(Event<>& event, EventFunction const& dispatch) -> Bool;
     auto DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<View> const& target, Flags<PointerPhaseFlag> const phase) -> Shared<View>;
 
     auto Attach() -> void;
@@ -291,7 +290,7 @@ private:
     auto NotifyBackingScaleChanged(BackingScale const backingScale) -> void;
     auto NotifyLayoutDirectionChanged(LayoutDirection const layoutDirection) -> void;
 
-    auto ReceiveFocusNodeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveFocusNodeEvent(Event<>& event) -> Bool;
 
 private:
     PropertyStore _propertyStore;

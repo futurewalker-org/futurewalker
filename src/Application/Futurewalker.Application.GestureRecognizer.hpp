@@ -57,8 +57,7 @@ public:
     ///
     virtual auto Recognize(Event<PointerEvent> const& event, Rect<Dp> const& area) -> Bool = 0;
 
-    auto SendEvent(Event<>& event) -> Async<Bool>;
-    auto SendEventDetached(Event<>& event) -> Bool;
+    auto SendEvent(Event<>& event) -> Bool;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;

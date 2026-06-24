@@ -106,7 +106,7 @@ auto GestureRecognizerView::Initialize() -> void
 ///
 /// @brief Receive event.
 ///
-auto GestureRecognizerView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto GestureRecognizerView::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<ViewEvent::Attached>())
     {
@@ -148,10 +148,10 @@ auto GestureRecognizerView::ReceiveEvent(Event<>& event) -> Async<Bool>
     {
         if (IsEnabledFromRoot() && IsAttached())
         {
-            co_return _gestureRecognizer->Recognize(event.As<PointerEvent>(), GetContentRect());
+            return _gestureRecognizer->Recognize(event.As<PointerEvent>(), GetContentRect());
         }
-        co_return false;
+        return false;
     }
-    co_return false;
+    return false;
 }
 }

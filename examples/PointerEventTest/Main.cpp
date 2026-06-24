@@ -41,7 +41,7 @@ public:
     {
     }
 
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>
+    auto ReceiveEvent(Event<>& event) -> Bool
     {
         if (event.Is<PointerEvent::Motion>())
         {
@@ -196,9 +196,9 @@ public:
             }
 
             AddChildBack(_layout);
-            co_return true;
+            return true;
         }
-        co_return false;
+        return false;
     }
 
     Shared<FlexLayout> _layout;
@@ -223,21 +223,23 @@ protected:
         EventReceiver::Connect(*this, *this, &App::ReceiveEvent);
     }
 
-    auto ReceiveEvent(Event<>& event) -> Async<Bool>
+    auto ReceiveEvent(Event<>& event) -> Bool
     {
         if (event.Is<ApplicationEvent::Started>())
         {
-            ApplicationTheme::AddTheme(ThemeBrightness::Light, Shared<Lamp::Theme>::Make(ThemeBrightness::Light));
-            ApplicationTheme::AddTheme(ThemeBrightness::Dark, Shared<Lamp::Theme>::Make(ThemeBrightness::Dark));
-            auto window = Window::Make({});
-            auto frame = WindowFrame::Make();
-            frame->SetContent(TestView::Make());
-            window->SetContent(frame);
-            window->SetVisible(true);
-            co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
-            co_await Exit();
+            AsyncFunction::SpawnFn([=] -> Async<void> {
+                ApplicationTheme::AddTheme(ThemeBrightness::Light, Shared<Lamp::Theme>::Make(ThemeBrightness::Light));
+                ApplicationTheme::AddTheme(ThemeBrightness::Dark, Shared<Lamp::Theme>::Make(ThemeBrightness::Dark));
+                auto window = Window::Make({});
+                auto frame = WindowFrame::Make();
+                frame->SetContent(TestView::Make());
+                window->SetContent(frame);
+                window->SetVisible(true);
+                co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
+                co_await Exit();
+            }).Detach();
         }
-        co_return false;
+        return false;
     }
 };
 

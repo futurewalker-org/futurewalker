@@ -112,12 +112,12 @@ auto BoxView::Draw(DrawScope& scope) -> void
     ViewDrawFunction::DrawRoundRectBorder(scene, contentRect, cornerRadius, borderColor.WithAlphaMultiplied(borderAlpha), borderWidth, direction);
 }
 
-auto BoxView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto BoxView::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent>())
     {
         InvalidateVisual();
     }
-    co_return false;
+    return false;
 }
 }

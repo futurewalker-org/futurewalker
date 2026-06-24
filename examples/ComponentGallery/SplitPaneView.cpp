@@ -101,7 +101,7 @@ auto SplitPaneView::SetActivePage(SInt64 const index) -> void
     }
 }
 
-auto SplitPaneView::ReceiveButtonEvent(Event<>& event) -> Async<Bool>
+auto SplitPaneView::ReceiveButtonEvent(Event<>& event) -> Bool
 {
     if (event.Is<Lamp::TextButtonEvent::Press>())
     {
@@ -112,11 +112,11 @@ auto SplitPaneView::ReceiveButtonEvent(Event<>& event) -> Async<Bool>
             auto viewEventParameter = Event<SplitPaneViewEvent>::Make();
             viewEventParameter->SetIndex(*index);
             auto viewEvent = Event<>(std::move(viewEventParameter));
-            co_await SendEvent(viewEvent);
+            SendEvent(viewEvent);
         }
-        co_return true;
+        return true;
     }
-    co_return false;
+    return false;
 }
 
 auto SplitPaneView::SetButtonActive(SInt64 const index, Bool const active) -> void

@@ -23,11 +23,7 @@ auto EventReceiver::Make(Delegate delegate) -> Unique<EventReceiver>
 ///
 auto EventReceiver::HasConnection() const -> Bool
 {
-    if (_eventSignal)
-    {
-        return !_eventSignal->IsEmpty();
-    }
-    return false;
+    return !_eventSignal.IsEmpty();
 }
 
 ///
@@ -35,10 +31,7 @@ auto EventReceiver::HasConnection() const -> Bool
 ///
 auto EventReceiver::DisconnectAll() -> void
 {
-    if (_eventSignal)
-    {
-        _eventSignal->DisconnectAll();
-    }
+    _eventSignal.DisconnectAll();
 }
 
 ///
@@ -54,34 +47,13 @@ EventReceiver::EventReceiver(Delegate delegate)
 ///
 /// @param[in, out] event Event to send.
 ///
-auto EventReceiver::SendEvent(Event<>& event) -> Async<Bool>
+auto EventReceiver::SendEvent(Event<>& event) -> Bool
 {
     if (_delegate.dispatchEvent)
     {
-        co_return co_await _delegate.dispatchEvent(event, [&](Event<>& event) -> Async<Bool> { co_return co_await DispatchEvent(event); });
+        return _delegate.dispatchEvent(event, [&](Event<>& event) -> Bool { return DispatchEvent(event); });
     }
-    co_return co_await DispatchEvent(event);
-}
-
-///
-/// @brief Send event in a detached asynchronous context.
-///
-/// @param[in, out] event
-///
-/// @return When all event slots complate without suspending current coroutine, it returns result of event dispatch.
-/// @return Retruns `false` otherwise.
-///
-auto EventReceiver::SendEventDetached(Event<>& event) -> Bool
-{
-    if (HasConnection())
-    {
-        auto const r = Shared<Bool>::Make(false);
-        auto const e = Shared<Event<>>::Make(event);
-        AsyncFunction::SpawnFn([=, this]() -> Async<void> { *r = co_await SendEvent(*e); }).Detach();
-        event = *e;
-        return *r;
-    }
-    return false;
+    return DispatchEvent(event);
 }
 
 ///
@@ -107,13 +79,9 @@ auto EventReceiver::GetEventReceiver() const -> EventReceiver const&
 ///
 /// @note This function is intended to be used from delegate.
 ///
-auto EventReceiver::DispatchEvent(Event<>& event) -> Async<Bool>
+auto EventReceiver::DispatchEvent(Event<>& event) -> Bool
 {
-    if (_eventSignal)
-    {
-        co_return co_await (*_eventSignal)(event);
-    }
-    co_return false;
+    return _eventSignal(event);
 }
 
 ///
@@ -121,10 +89,6 @@ auto EventReceiver::DispatchEvent(Event<>& event) -> Async<Bool>
 ///
 auto EventReceiver::GetSignal() -> EventSignal&
 {
-    if (!_eventSignal)
-    {
-        _eventSignal.Emplace();
-    }
-    return *_eventSignal;
+    return _eventSignal;
 }
 }

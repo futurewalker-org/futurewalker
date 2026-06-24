@@ -22,7 +22,7 @@ auto PlatformApplicationThemeWin::GetSystemBrightness() const -> ThemeBrightness
 
 auto PlatformApplicationThemeWin::NotifyBrightnessChanged() -> void
 {
-    auto themeEvent = Event<PlatformApplicationThemeEvent::SystemBrightnessChanged>();
-    SendThemeEventDetached(themeEvent);
+    auto themeEvent = Event<>(Event<PlatformApplicationThemeEvent::SystemBrightnessChanged>());
+    SendThemeEvent(themeEvent);
 }
 }

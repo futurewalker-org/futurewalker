@@ -254,13 +254,13 @@ auto ButtonRenderView::Draw(DrawScope& scope) -> void
 ///
 /// @param event
 ///
-auto ButtonRenderView::ReceiveEvent(Event<>& event) -> Async<Bool>
+auto ButtonRenderView::ReceiveEvent(Event<>& event) -> Bool
 {
     if (event.Is<ViewEvent::EnabledChanged>())
     {
         InvalidateVisual();
     }
-    co_return false;
+    return false;
 }
 
 ///
@@ -268,12 +268,12 @@ auto ButtonRenderView::ReceiveEvent(Event<>& event) -> Async<Bool>
 ///
 /// @param event
 ///
-auto ButtonRenderView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto ButtonRenderView::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
         InvalidateVisual();
     }
-    co_return false;
+    return false;
 }
 }

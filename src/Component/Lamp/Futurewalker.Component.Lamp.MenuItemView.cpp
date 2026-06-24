@@ -83,13 +83,13 @@ auto MenuItemView::Initialize() -> void
     UpdatePadding();
 }
 
-auto MenuItemView::ReceiveAttributeEvent(Event<>& event) -> Async<Bool>
+auto MenuItemView::ReceiveAttributeEvent(Event<>& event) -> Bool
 {
     if (event.Is<AttributeEvent::ValueChanged>())
     {
         UpdatePadding();
     }
-    co_return false;
+    return false;
 }
 
 auto MenuItemView::UpdatePadding() -> void

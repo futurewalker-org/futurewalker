@@ -27,31 +27,12 @@ PlatformApplication::PlatformApplication(Delegate const& delegate)
 ///
 /// @param event
 ///
-auto PlatformApplication::SendApplicationEvent(Event<>& event) -> Async<Bool>
+auto PlatformApplication::SendApplicationEvent(Event<>& event) -> Bool
 {
     if (_delegate.sendApplicationEvent)
     {
-        co_return co_await _delegate.sendApplicationEvent(event);
+        return _delegate.sendApplicationEvent(event);
     }
-    co_return false;
-}
-
-///
-/// @brief
-///
-/// @param event
-///
-auto PlatformApplication::SendApplicationEventDetached(Event<> const& event) -> void
-{
-    AsyncFunction::SpawnFn([self = GetSelf(), e = event]() mutable -> Task<void> {
-        try
-        {
-            co_await self->SendApplicationEvent(e);
-        }
-        catch (...)
-        {
-            FW_DEBUG_ASSERT(false);
-        }
-    }).Detach();
+    return false;
 }
 }

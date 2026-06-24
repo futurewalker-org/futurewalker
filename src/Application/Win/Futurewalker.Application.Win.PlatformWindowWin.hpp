@@ -86,7 +86,7 @@ public:
 
 protected:
     auto Initialize() -> void override;
-    auto ReceiveThemeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveThemeEvent(Event<>& event) -> Bool;
 
 private:
     auto HandleCreate(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
@@ -135,8 +135,6 @@ private:
     auto PointerUpdate(WPARAM const wParam) -> void;
     auto PointerCancel(WPARAM const wParam) -> void;
     auto PointerWheel(Bool const vertical, WPARAM const wParam) -> void;
-
-    auto PostWindowEvent(Event<> const& event) -> void;
 
     auto DisableWindow(Shared<PlatformWindowWin> const& source) -> void;
     auto EnableWindow(Shared<PlatformWindowWin> const& source) -> void;

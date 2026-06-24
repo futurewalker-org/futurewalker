@@ -55,7 +55,7 @@ protected:
     auto Draw(DrawScope& scope) -> void override;
 
 private:
-    auto ReceiveAttributeEvent(Event<>& event) -> Async<Bool>;
+    auto ReceiveAttributeEvent(Event<>& event) -> Bool;
     auto GetTypeface() const -> Shared<Graphics::Typeface>;
     auto GetFontSize() const -> Graphics::FontSize;
     auto GetFontMetrics() const -> Graphics::FontMetrics;
