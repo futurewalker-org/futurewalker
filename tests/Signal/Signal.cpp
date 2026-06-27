@@ -684,3 +684,67 @@ TEST_CASE("Signal argument forwarding")
         REQUIRE(CopyCounter::moves == 0);
     }
 }
+
+TEST_CASE("Signal reentrant destruction")
+{
+    SECTION("Destruct self")
+    {
+        struct Caller
+        {
+            Signal<void(), SignalCombinerVoid> sig;
+        };
+        auto caller = Unique<Caller>::Make();
+        caller->sig.Connect([&]() { caller.Reset(); });
+        caller->sig();
+        REQUIRE(!caller);
+    }
+
+    SECTION("Destruct tracked callee")
+    {
+        struct Caller
+        {
+            Signal<void(), SignalCombinerVoid> sig;
+        };
+
+        struct Callee
+        {
+            Weak<void> self;
+            Shared<std::function<void()>> func;
+
+            auto CallFunc()
+            {
+                (*func)();
+            }
+
+            auto GetTracker()
+            {
+                return self;
+            }
+        };
+
+        auto caller = Unique<Caller>::Make();
+        auto callee1 = Shared<Callee>::Make();
+        callee1->self = callee1;
+        auto callee2 = Shared<Callee>::Make();
+        callee2->self = callee2;
+
+        int callCount = 0;
+        auto func = Shared<std::function<void()>>::Make([&] {
+            ++callCount;
+            callee1.Reset();
+            callee2.Reset();
+        });
+        callee1->func = func;
+        callee2->func = func;
+
+        SignalFunction::Connect(caller->sig, *callee1, &Callee::CallFunc);
+        SignalFunction::Connect(caller->sig, *callee2, &Callee::CallFunc);
+
+        caller->sig();
+        caller->sig();
+
+        REQUIRE(!callee1);
+        REQUIRE(!callee2);
+        REQUIRE(callCount == 1);
+    }
+}

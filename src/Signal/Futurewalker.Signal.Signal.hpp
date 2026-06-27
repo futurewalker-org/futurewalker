@@ -101,25 +101,7 @@ public:
     ///
     auto operator()(ArgTypes const&... args) -> typename Combiner<R>::ResultType
     {
-        struct Collector
-        {
-            Signal& _self;
-
-            Collector(Signal& self) noexcept
-              : _self {self}
-            {
-                ++_self._emissionDepth;
-            }
-
-            ~Collector() noexcept
-            {
-                if (--_self._emissionDepth == 0U)
-                {
-                    _self._slots.EraseIf([](auto const& slot) { return !slot.IsConnected(); });
-                }
-            }
-        };
-        auto collector = Collector(*this);
+        _slots.EraseIf([](auto const& slot) { return !slot.IsConnected(); });
         auto slots = _slots;
         return Combiner<R>()(slots.GetValues(), args...);
     }
@@ -180,7 +162,6 @@ public:
 
 private:
     SharedArray<Slot<R(ArgTypes...)>> _slots;
-    UInt64 _emissionDepth = 0U;
 };
 }
 }

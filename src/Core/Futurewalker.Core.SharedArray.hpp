@@ -222,11 +222,27 @@ public:
             return;
         }
 
-        auto const buffer = EnsureMutableBufferForSize(_buffer->GetSize(), false);
+        auto const size = _buffer->GetSize();
+
+        // Find the first element to erase so we only copy when there is actually something to erase.
+        auto first = SizeType(0);
+        {
+            auto const data = _buffer->GetData();
+            while (first < size && !f(data[first]))
+            {
+                ++first;
+            }
+        }
+
+        if (first == size)
+        {
+            return;
+        }
+
+        auto const buffer = EnsureMutableBufferForSize(size, false);
         auto const data = buffer->GetData();
-        auto const size = buffer->GetSize();
-        auto write = SizeType(0);
-        for (auto read = SizeType(0); read < size; ++read)
+        auto write = first;
+        for (auto read = first + 1; read < size; ++read)
         {
             if (f(data[read]))
             {
