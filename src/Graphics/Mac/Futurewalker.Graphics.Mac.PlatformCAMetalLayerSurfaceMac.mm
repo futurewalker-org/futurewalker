@@ -70,6 +70,11 @@ auto PlatformCAMetalLayerSurfaceMac::Draw(Function<void(Scene& canvas)> func) ->
 
         ResizeSurface();
 
+        if (_metalLayer.hidden)
+        {
+            return true;
+        }
+
         auto currentDrawable = GrMTLHandle(nullptr);
         auto const colorType = kBGRA_8888_SkColorType;
         auto const colorSpace = sk_sp<SkColorSpace>();
@@ -145,8 +150,18 @@ auto PlatformCAMetalLayerSurfaceMac::ResizeSurface() -> void
         if (_needsUpdateSize)
         {
             auto const sizePx = UnitFunction::ConvertDpToPxRound(_size, _displayScale, _backingScale);
-            [_metalLayer setDrawableSize:CGSizeMake(static_cast<CGFloat>(sizePx.width), static_cast<CGFloat>(sizePx.height))];
-            [_metalLayer setContentsScale:static_cast<CGFloat>(_backingScale)];
+            if (sizePx.IsEmpty())
+            {
+                [_metalLayer setHidden:YES];
+                [_metalLayer setDrawableSize:CGSizeMake(1, 1)];
+                [_metalLayer setContentsScale:static_cast<CGFloat>(_backingScale)];
+            }
+            else
+            {
+                [_metalLayer setDrawableSize:CGSizeMake(static_cast<CGFloat>(sizePx.width), static_cast<CGFloat>(sizePx.height))];
+                [_metalLayer setContentsScale:static_cast<CGFloat>(_backingScale)];
+                [_metalLayer setHidden:NO];
+            }
             _needsUpdateSize = false;
         }
     }
