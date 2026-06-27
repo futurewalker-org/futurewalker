@@ -37,22 +37,28 @@ public:
     }
 
     auto Invoke(Args const&... args) const -> Optional<R>
-    requires (!Concepts::SameAs<R, void>)
+        requires(!Concepts::SameAs<R, void>)
     {
-        if (_func && IsConnected())
+        if (IsConnected())
         {
-            return _func(args...);
+            if (_func)
+            {
+                return _func(args...);
+            }
         }
         return {};
     }
 
     auto Invoke(Args const&... args) const -> Bool
-    requires Concepts::SameAs<R, void>
+        requires Concepts::SameAs<R, void>
     {
-        if (_func && IsConnected())
+        if (IsConnected())
         {
-            _func(args...);
-            return true;
+            if (_func)
+            {
+                _func(args...);
+                return true;
+            }
         }
         return false;
     }
@@ -73,6 +79,7 @@ public:
     auto Disconnect() noexcept -> void override
     {
         _disconnected = true;
+        _tracker.Reset();
     }
 
 private:
