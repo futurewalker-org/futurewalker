@@ -37,7 +37,7 @@ protected:
     {
         if (event.Is<ApplicationEvent::Started>())
         {
-            AsyncFunction::SpawnFn([=] -> Async<void> {
+            AsyncFunction::SpawnFn([=, this] -> Async<void> {
                 auto window = Window::Make({});
                 window->SetFrameRect(Rect<Vp>::Make({100, 100}, {500, 500}));
                 window->SetVisible(true);

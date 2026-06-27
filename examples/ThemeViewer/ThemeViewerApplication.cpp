@@ -42,7 +42,7 @@ auto ThemeViewerApplication::ReceiveEvent(Event<>& event) -> Bool
         ApplicationTheme::AddTheme(ThemeBrightness::Light, Shared<Lamp::Theme>::Make(ThemeBrightness::Light));
         ApplicationTheme::AddTheme(ThemeBrightness::Dark, Shared<Lamp::Theme>::Make(ThemeBrightness::Dark));
 
-        AsyncFunction::SpawnFn([=] -> Async<void> {
+        AsyncFunction::SpawnFn([=, this] -> Async<void> {
             auto column = FlexLayout::Make();
             column->SetDirection(FlexLayoutDirection::Column);
             column->SetMainAxisSize(FlexLayoutMainAxisSize::Max);

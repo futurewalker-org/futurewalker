@@ -59,7 +59,7 @@ auto ComponentGalleryApplication::ReceiveEvent(Event<>& event) -> Bool
         ApplicationTheme::AddTheme(ThemeBrightness::Dark, Shared<Lamp::Theme>::Make(ThemeBrightness::Dark));
         ApplicationTheme::SetBrightness(ApplicationThemeBrightness::Dark);
 
-        AsyncFunction::SpawnFn([=]() -> Async<void> {
+        AsyncFunction::SpawnFn([=, this]() -> Async<void> {
             auto frame = WindowFrame::Make();
             auto controller = SplitPaneController::Make();
             frame->SetContent(controller->GetView());

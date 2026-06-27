@@ -383,18 +383,18 @@ auto PlatformApplicationMac::Initialize() -> void
                 }
             }
             auto const _this = static_cast<PlatformApplicationMac*>(data);
-            auto const e = Event<PlatformApplicationEvent::Started>();
-            _this->SendApplicationEventDetached(e);
+            auto e = Event<>(Event<PlatformApplicationEvent::Started>());
+            _this->SendApplicationEvent(e);
         }];
         [_delegate setCallbackOnBecomeActive:[](void* data) -> void {
             auto const _this = static_cast<PlatformApplicationMac*>(data);
-            auto const e = Event<PlatformApplicationEvent::ActiveChanged>();
-            _this->SendApplicationEventDetached(e);
+            auto e = Event<>(Event<PlatformApplicationEvent::ActiveChanged>());
+            _this->SendApplicationEvent(e);
         }];
         [_delegate setCallbackOnResignActive:[](void* data) -> void {
             auto const _this = static_cast<PlatformApplicationMac*>(data);
-            auto const e = Event<PlatformApplicationEvent::ActiveChanged>();
-            _this->SendApplicationEventDetached(e);
+            auto e = Event<>(Event<PlatformApplicationEvent::ActiveChanged>());
+            _this->SendApplicationEvent(e);
         }];
     }
 

@@ -47,7 +47,7 @@ protected:
 
             auto const hello = String(u8"Hello, World!");
 
-            AsyncFunction::SpawnFn([=] -> Async<void> {
+            AsyncFunction::SpawnFn([=, this] -> Async<void> {
                 auto window = Window::Make({});
                 window->SetTitle(hello);
                 window->SetFrameRect(Rect<Vp>::Make({0, 0}, {500, 500}));

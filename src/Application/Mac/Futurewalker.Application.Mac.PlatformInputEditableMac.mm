@@ -122,14 +122,14 @@ auto PlatformInputEditableMac::CompositionState(Bool const composing) -> void
             NSLog(@"Start composing");
             auto parameter = Event<PlatformInputEvent::CompositionStart>();
             auto event = Event<>(std::move(parameter));
-            SendInputEventDetached(event);
+            SendInputEvent(event);
         }
         else
         {
             NSLog(@"End composing");
             auto parameter = Event<PlatformInputEvent::CompositionEnd>();
             auto event = Event<>(std::move(parameter));
-            SendInputEventDetached(event);
+            SendInputEvent(event);
         }
     }
 }
@@ -141,7 +141,7 @@ auto PlatformInputEditableMac::CompositionUpdate() -> void
         NSLog(@"Update composing");
         auto parameter = Event<PlatformInputEvent::CompositionUpdate>();
         auto event = Event<>(std::move(parameter));
-        SendInputEventDetached(event);
+        SendInputEvent(event);
     }
 }
 
@@ -202,7 +202,7 @@ auto PlatformInputEditableMac::InternalBeforeInsertText(String const& text, Bool
         auto parameter = Event<PlatformInputEvent::BeforeInsertText>();
         parameter->SetText(text);
         auto event = Event<>(parameter);
-        if (SendInputEventDetached(event))
+        if (SendInputEvent(event))
         {
             if (event.Is<PlatformInputEvent::BeforeInsertText>())
             {
@@ -217,7 +217,7 @@ auto PlatformInputEditableMac::InternalBeforeInsertText(String const& text, Bool
         auto parameter = Event<PlatformInputEvent::BeforeInsertCompositionText>();
         parameter->SetText(text);
         auto event = Event<>(std::move(parameter));
-        SendInputEventDetached(event);
+        SendInputEvent(event);
     }
     return true;
 }
@@ -227,14 +227,14 @@ auto PlatformInputEditableMac::InternalInsertText(String const& text) -> void
     auto parameter = Event<PlatformInputEvent::InsertText>();
     parameter->SetText(text);
     auto event = Event<>(std::move(parameter));
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 
 auto PlatformInputEditableMac::InternalBeforeInsertLineBreak(Bool cancellable) -> Bool
 {
     auto parameter = Event<PlatformInputEvent::BeforeInsertLineBreak>();
     auto event = Event<>(parameter);
-    if (SendInputEventDetached(event))
+    if (SendInputEvent(event))
     {
         if (cancellable)
         {
@@ -253,7 +253,7 @@ auto PlatformInputEditableMac::InternalInsertLineBreak() -> void
 {
     auto parameter = Event<PlatformInputEvent::InsertLineBreak>();
     auto event = Event<>(std::move(parameter));
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 
 auto PlatformInputEditableMac::InternalBeforeDeleteSurroundingText(CodePoint before, CodePoint after, Bool cancellable) -> Bool
@@ -262,7 +262,7 @@ auto PlatformInputEditableMac::InternalBeforeDeleteSurroundingText(CodePoint bef
     parameter->SetBefore(before);
     parameter->SetAfter(after);
     auto event = Event<>(parameter);
-    if (SendInputEventDetached(event))
+    if (SendInputEvent(event))
     {
         if (cancellable)
         {
@@ -283,7 +283,7 @@ auto PlatformInputEditableMac::InternalDeleteSurroundingText(CodePoint before, C
     parameter->SetBefore(before);
     parameter->SetAfter(after);
     auto event = Event<>(std::move(parameter));
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 
 auto PlatformInputEditableMac::InternalOnTextChange(Bool anticipated, CodeUnit u16OldBegin, CodeUnit u16OldEnd, CodeUnit u16NewEnd) -> void
@@ -305,6 +305,6 @@ auto PlatformInputEditableMac::InternalOnSelectionChange(Bool anticipated) -> vo
     }
     auto parameter = Event<PlatformInputEvent::SelectionChange>();
     auto event = Event<>(std::move(parameter));
-    SendInputEventDetached(event);
+    SendInputEvent(event);
 }
 }

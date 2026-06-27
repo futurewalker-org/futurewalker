@@ -63,7 +63,7 @@ auto Application::ReceiveEvent(Event<>& event) -> Bool
         // Actual values are defined in .xml files in Resource folder.
         auto const hello = resource->GetString(R::HelloWorld::Hello);
 
-        AsyncFunction::SpawnFn([=] -> Async<void> {
+        AsyncFunction::SpawnFn([=, this] -> Async<void> {
             // Create main window with background color.
             auto window = Window::Make({});
             window->SetTitle(hello);

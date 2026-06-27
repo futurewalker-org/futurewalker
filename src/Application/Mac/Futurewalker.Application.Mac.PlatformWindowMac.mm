@@ -1603,11 +1603,11 @@ auto PlatformWindowMac::Initialize() -> void
         [_windowContentView setData:this];
         [_windowContentView setCallbackOnPointer:[](void* data, Event<>& event) {
             auto const _this = static_cast<PlatformWindowMac*>(data);
-            _this->SendPointerEventDetached(event);
+            _this->SendPointerEvent(event);
         }];
         [_windowContentView setCallbackOnKey:[](void* data, Event<>& event) {
             auto const _this = static_cast<PlatformWindowMac*>(data);
-            _this->SendKeyEventDetached(event);
+            _this->SendKeyEvent(event);
         }];
 
         [_windowDelegate setData:this];
@@ -1615,18 +1615,18 @@ auto PlatformWindowMac::Initialize() -> void
             auto const _this = static_cast<PlatformWindowMac*>(data);
             {
                 auto event = Event<>(Event<PlatformWindowEvent::SizeChanged>());
-                _this->SendWindowEventDetached(event);
+                _this->SendWindowEvent(event);
             }
             {
                 auto event = Event<>(Event<PlatformWindowEvent::AreaChanged>());
-                _this->SendWindowEventDetached(event);
+                _this->SendWindowEvent(event);
             }
             _this->Frame(_this->_windowDelegate.displayLink.targetTimestamp);
         }];
         [_windowDelegate setCallbackOnMove:[](void* data) -> void {
             auto const _this = static_cast<PlatformWindowMac*>(data);
             auto event = Event<>(Event<PlatformWindowEvent::PositionChanged>());
-            _this->SendWindowEventDetached(event);
+            _this->SendWindowEvent(event);
         }];
         [_windowDelegate setCallbackOnScreenChange:[](void*) -> void {}];
         [_windowDelegate setCallbackOnScreenProfileChange:[](void*) -> void {}];
@@ -1638,48 +1638,33 @@ auto PlatformWindowMac::Initialize() -> void
                 _this->RequestFrame();
             }
             auto event = Event<>(Event<PlatformWindowEvent::BackingScaleChanged>());
-            _this->SendWindowEventDetached(event);
+            _this->SendWindowEvent(event);
         }];
         [_windowDelegate setCallbackOnBecomeKey:[](void* data) -> void {
             auto const _this = static_cast<PlatformWindowMac*>(data);
             auto event = Event<>(Event<PlatformWindowEvent::FocusedChanged>());
-            _this->SendWindowEventDetached(event);
+            _this->SendWindowEvent(event);
         }];
         [_windowDelegate setCallbackOnResignKey:[](void* data) -> void {
             auto const _this = static_cast<PlatformWindowMac*>(data);
             auto event = Event<>(Event<PlatformWindowEvent::FocusedChanged>());
-            _this->SendWindowEventDetached(event);
+            _this->SendWindowEvent(event);
         }];
         [_windowDelegate setCallbackOnShouldClose:[](void* data) -> BOOL {
             auto const _this = static_cast<PlatformWindowMac*>(data);
-            auto const parameter = Event<PlatformWindowEvent::CloseRequested>();
-            auto const event = Event<>(parameter);
-            auto const cancelled = Shared<Optional<Bool>>::Make();
-            AsyncFunction::SpawnFn([self = _this->GetSelf(), e = event, cancelled]() mutable -> Task<void> {
-                try
-                {
-                    if (co_await self->SendWindowEvent(e))
-                    {
-                        if (e.Is<PlatformWindowEvent::CloseRequested>())
-                        {
-                            *cancelled = e.As<PlatformWindowEvent::CloseRequested>()->IsCancelled();
-                            co_return;
-                        }
-                    }
-                    *cancelled = false;
-                }
-                catch (...)
-                {
-                    FW_DEBUG_ASSERT(false);
-                    *cancelled = false;
-                }
-            }).Detach();
-
-            while (!*cancelled)
+            auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
+            auto shouldClose = true;
+            if (_this->SendWindowEvent(event))
             {
-                ::CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.125, YES);
+                if (event.Is<PlatformWindowEvent::CloseRequested>())
+                {
+                    if (event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
+                    {
+                        shouldClose = false;
+                    }
+                }
             }
-            return **cancelled ? NO : YES;
+            return shouldClose;
         }];
         [_windowDelegate setCallbackOnFrameUpdate:[](void* data, CADisplayLink* displayLink) -> void {
             @autoreleasepool
@@ -1691,7 +1676,7 @@ auto PlatformWindowMac::Initialize() -> void
         [_windowDelegate setCallbackOnWillClose:[](void* data) -> BOOL {
             auto const _this = static_cast<PlatformWindowMac*>(data);
             auto event = Event<>(Event<PlatformWindowEvent::Closed>());
-            _this->SendWindowEventDetached(event);
+            _this->SendWindowEvent(event);
             return YES;
         }];
 
@@ -1714,8 +1699,8 @@ auto PlatformWindowMac::Frame(NSTimeInterval targetTimestamp) -> void
     _currentFrameTime = NSTimeIntervalToMonotonicTime(targetTimestamp);
     auto tickEvent = Event<PlatformFrameEvent::Tick>();
     tickEvent->SetTargetTimestamp(_currentFrameTime);
-    auto event = Event<>(tickEvent);
-    SendFrameEventDetached(event);
+    auto event = Event<>(std::move(tickEvent));
+    SendFrameEvent(event);
     Render();
 }
 

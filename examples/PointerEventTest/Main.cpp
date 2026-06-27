@@ -227,7 +227,7 @@ protected:
     {
         if (event.Is<ApplicationEvent::Started>())
         {
-            AsyncFunction::SpawnFn([=] -> Async<void> {
+            AsyncFunction::SpawnFn([=, this] -> Async<void> {
                 ApplicationTheme::AddTheme(ThemeBrightness::Light, Shared<Lamp::Theme>::Make(ThemeBrightness::Light));
                 ApplicationTheme::AddTheme(ThemeBrightness::Dark, Shared<Lamp::Theme>::Make(ThemeBrightness::Dark));
                 auto window = Window::Make({});
