@@ -63,31 +63,12 @@ auto Application::Run() -> Async<void>
 ///
 /// @return True if the application exited successfully.
 ///
-auto Application::Exit() -> Async<Bool>
+auto Application::RequestExit() -> Async<Bool>
 {
-    if (MainThread::IsMainThread())
+    if (_platformObject)
     {
-        if (_platformObject->IsRunning())
-        {
-            auto cancelled = False;
-            auto event = Event<>(Event<ApplicationEvent::ExitRequested>());
-            if (SendEvent(event))
-            {
-                if (event.Is<ApplicationEvent::ExitRequested>())
-                {
-                    cancelled = event.As<ApplicationEvent::ExitRequested>()->IsCancelled();
-                }
-            }
-
-            if (!cancelled)
-            {
-                _platformObject->Exit();
-            }
-            co_return !cancelled;
-        }
-        co_return true;
+        co_return co_await _platformObject->RequestExit();
     }
-    FW_DEBUG_ASSERT(false);
     co_return false;
 }
 
@@ -255,6 +236,22 @@ auto Application::HandlePlatformApplicationEvent(Event<>& event) -> Bool
     {
         auto e = Event<>(Event<ApplicationEvent::Exited>());
         return SendEvent(e);
+    }
+    else if (event.Is<PlatformApplicationEvent::ExitRequested>())
+    {
+        auto parameter = event.As<PlatformApplicationEvent::ExitRequested>();
+        auto applicationEventParameter = Event<ApplicationEvent::ExitRequested>();
+        applicationEventParameter->SetCancelled(parameter->IsCancelled());
+        auto applicationEvent = Event<>(std::move(applicationEventParameter));
+        if (SendEvent(applicationEvent))
+        {
+            if (applicationEvent.Is<ApplicationEvent::ExitRequested>())
+            {
+                parameter->SetCancelled(applicationEvent.As<ApplicationEvent::ExitRequested>()->IsCancelled());
+                event = parameter;
+            }
+            return true;
+        }
     }
     else if (event.Is<PlatformApplicationEvent::ActiveChanged>())
     {

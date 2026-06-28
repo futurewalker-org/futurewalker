@@ -23,6 +23,7 @@ public:
     class Started;
     class Exiting;
     class Exited;
+    class ExitRequested;
     class ActiveChanged;
     class ForegroundChanged;
 };
@@ -46,6 +47,19 @@ class PlatformApplicationEvent::Exiting final : public PlatformApplicationEvent
 ///
 class PlatformApplicationEvent::Exited final : public PlatformApplicationEvent
 {
+};
+
+///
+/// @brief
+///
+class PlatformApplicationEvent::ExitRequested final : public PlatformApplicationEvent
+{
+public:
+    auto IsCancelled() const -> Bool;
+    auto SetCancelled(Bool const cancelled) -> void;
+
+private:
+    Bool _cancelled = false;
 };
 
 ///

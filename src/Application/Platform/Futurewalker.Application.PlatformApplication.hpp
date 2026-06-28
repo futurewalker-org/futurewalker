@@ -29,7 +29,7 @@ public:
 
     virtual ~PlatformApplication() = 0;
     virtual auto Run() -> Async<void> = 0;
-    virtual auto Exit() -> void = 0;
+    virtual auto RequestExit() -> Async<Bool> = 0;
     virtual auto IsRunning() -> Bool = 0;
     virtual auto IsActive() -> Bool = 0;
     virtual auto IsForeground() -> Bool = 0;
