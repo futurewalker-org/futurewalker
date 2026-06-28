@@ -68,13 +68,25 @@ auto Popup::IsClosed() const -> Bool
 }
 
 ///
-/// @brief Close popup.
+/// @brief Close popup by request.
 ///
-auto Popup::Close() -> Async<void>
+auto Popup::RequestClose() -> Async<Bool>
 {
     if (_window)
     {
-        co_await _window->RequestClose();
+        co_return co_await _window->RequestClose();
+    }
+    co_return true;
+}
+
+///
+/// @brief Close popup immediately.
+///
+auto Popup::Close() -> void
+{
+    if (_window)
+    {
+        _window->Close();
     }
 }
 

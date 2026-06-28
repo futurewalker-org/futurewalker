@@ -42,7 +42,8 @@ public:
     auto SetVisible(Bool const visible) -> void;
 
     auto IsClosed() const -> Bool;
-    auto Close() -> Async<void>;
+    auto RequestClose() -> Async<Bool>;
+    auto Close() -> void;
 
     auto GetContent() -> Shared<View>;
     auto GetContent() const -> Shared<View const>;
