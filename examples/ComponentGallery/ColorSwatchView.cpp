@@ -348,7 +348,7 @@ auto MakePaletteView(String const name, std::vector<Swatch> const& swatches) -> 
     column->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Start);
 
     auto text = Lamp::TextView::MakeWithText(name);
-    AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeLabelMedium);
+    AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeLabelMedium);
     column->AddChild(text);
 
     auto const flex = FlexLayout::Make();

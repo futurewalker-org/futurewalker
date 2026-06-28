@@ -760,7 +760,7 @@ auto Window::InitializeSelf(WindowOptions const& options, Shared<Window> const& 
       },
       _frameView);
 
-    AttributeNode::SetValue<&ViewAttribute::AreaManager>(*this, _areaManager);
+    AttributeNode::SetValue<ViewAttribute::AreaManager>(*this, _areaManager);
 
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(RGBAColor, BackgroundColor, {});
     _backgroundColor.BindAttribute(*this, BackgroundColor);

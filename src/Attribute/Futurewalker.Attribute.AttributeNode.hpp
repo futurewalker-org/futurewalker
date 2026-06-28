@@ -43,40 +43,40 @@ public:
     auto GetAttributeNode() -> AttributeNode&;
     auto GetAttributeNode() const -> AttributeNode const&;
 
-    template <const auto* Attribute>
-    using ValueTypeOf = typename std::remove_pointer_t<decltype(Attribute)>::ValueType;
+    template <auto const& Attribute>
+    using ValueTypeOf = typename std::remove_reference_t<decltype(Attribute)>::ValueType;
 
-    template <const auto* Attribute, class Owner>
+    template <auto const& Attribute, class Owner>
     static auto GetValue(Owner& owner) -> Optional<ValueTypeOf<Attribute>>;
     template <class T, class Owner>
     static auto GetValue(Owner& owner, StaticAttributeRef<T> attribute) -> Optional<T>;
 
-    template <const auto* Attribute, class U, class Owner>
+    template <auto const& Attribute, class U, class Owner>
     static auto SetValue(Owner& owner, const U& value) -> void;
     template <class T, class U, class Owner>
     static auto SetValue(Owner& owner, StaticAttributeRef<T> attribute, const U& value) -> void;
 
-    template <const auto* Attribute, class Owner>
+    template <auto const& Attribute, class Owner>
     static auto SetReference(Owner& owner, StaticAttributeRef<ValueTypeOf<Attribute>> reference) -> void;
     template <class T, class Owner>
     static auto SetReference(Owner& owner, StaticAttributeRef<T> attribute, StaticAttributeRef<T> reference) -> void;
 
-    template <const auto* Attribute, class Owner, class F, class... Ts>
+    template <auto const& Attribute, class Owner, class F, class... Ts>
     static auto SetFunction(Owner& owner, F&& f, StaticAttributeRef<Ts>... references) -> void;
     template <class T, class Owner, class F, class... Ts>
     static auto SetFunction(Owner& owner, F&& f, StaticAttributeRef<T> attribute, StaticAttributeRef<Ts>... references) -> void;
 
-    template <const auto* Attribute, class Owner>
+    template <auto const& Attribute, class Owner>
     static auto Clear(Owner& owner) -> void;
     template <class T, class Owner>
     static auto Clear(Owner& owner, StaticAttributeRef<T> attribute) -> void;
 
-    template <const auto* Attribute, class Owner, class Observer, class Function>
+    template <auto const& Attribute, class Owner, class Observer, class Function>
     static auto ConnectAttributeEvent(Owner& owner, Observer&& observer, Function&& function) -> SignalConnection;
     template <class T, class Owner, class Observer, class Function>
     static auto ConnectAttributeEvent(Owner& owner, StaticAttributeRef<T> attribute, Observer&& observer, Function&& function) -> SignalConnection;
 
-    template <const auto* Attribute, class Owner>
+    template <auto const& Attribute, class Owner>
     static auto GetObserver(Owner& owner) -> AttributeObserver<ValueTypeOf<Attribute>>;
     template <class T, class Owner>
     static auto GetObserver(Owner& owner, StaticAttributeRef<T> attribute) -> AttributeObserver<T>;
@@ -146,11 +146,11 @@ private:
 ///
 /// @param[in] owner Reference to owner of AttributeNode.
 ///
-template <const auto* Attribute, class Owner>
+template <auto const& Attribute, class Owner>
 auto AttributeNode::GetValue(Owner& owner) -> Optional<ValueTypeOf<Attribute>>
 {
-    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
-    auto constexpr attribute = StaticReference(*Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_reference_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(Attribute);
     return GetValue(owner, attribute);
 }
 
@@ -192,11 +192,11 @@ auto AttributeNode::GetValue(Owner& owner, StaticAttributeRef<T> attribute) -> O
 /// @param[in] owner Reference to owner of AttributeNode 
 /// @param[in] value Value of the attribute  
 ///
-template <const auto* Attribute, class U, class Owner>
+template <auto const& Attribute, class U, class Owner>
 auto AttributeNode::SetValue(Owner& owner, U const& value) -> void
 {
-    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
-    auto constexpr attribute = StaticReference(*Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_reference_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(Attribute);
     return SetValue(owner, attribute, value);
 }
 
@@ -225,11 +225,11 @@ auto AttributeNode::SetValue(Owner& owner, StaticAttributeRef<T> attribute, U co
 ///
 /// @param[in] owner Reference to owner of AttributeNode
 ///
-template <const auto* Attribute, class Owner>
+template <auto const& Attribute, class Owner>
 auto AttributeNode::SetReference(Owner& owner, StaticAttributeRef<ValueTypeOf<Attribute>> reference) -> void
 {
-    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
-    auto constexpr attribute = StaticReference(*Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_reference_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(Attribute);
     return SetReference(owner, attribute, reference);
 }
 
@@ -257,11 +257,11 @@ auto AttributeNode::SetReference(Owner& owner, StaticAttributeRef<T> attribute, 
 /// @param f Compute function of attribute.
 /// @param references Referenced attributes which are passed to compute function.
 ///
-template <const auto* Attribute, class Owner, class F, class... Ts>
+template <auto const& Attribute, class Owner, class F, class... Ts>
 auto AttributeNode::SetFunction(Owner& owner, F&& f, StaticAttributeRef<Ts>... references) -> void
 {
-    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
-    auto constexpr attribute = StaticReference(*Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_reference_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(Attribute);
     return SetFunction(owner, std::forward<F>(f), attribute, references...);
 }
 
@@ -291,11 +291,11 @@ auto AttributeNode::SetFunction(Owner& owner, F&& f, StaticAttributeRef<T> attri
 ///
 /// @param[in] owner Reference to owner of AttributeNode
 ///
-template <const auto* Attribute, class Owner>
+template <auto const& Attribute, class Owner>
 auto AttributeNode::Clear(Owner& owner) -> void
 {
-    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
-    auto constexpr attribute = StaticReference(*Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_reference_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(Attribute);
     return Clear(owner, attribute);
 }
 
@@ -323,11 +323,11 @@ auto AttributeNode::Clear(Owner& owner, StaticAttributeRef<T> attribute) -> void
 /// @param[in] owner Reference to owner of AttributeNode
 /// @param[in] observer Event observer.
 ///
-template <const auto* Attribute, class Owner, class Observer, class Function>
+template <auto const& Attribute, class Owner, class Observer, class Function>
 auto AttributeNode::ConnectAttributeEvent(Owner& owner, Observer&& observer, Function&& function) -> SignalConnection
 {
-    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
-    auto constexpr attribute = StaticReference(*Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_reference_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(Attribute);
     return ConnectAttributeEvent(owner, attribute, std::forward<Observer>(observer), std::forward<Function>(function));
 }
 
@@ -362,11 +362,11 @@ auto AttributeNode::ConnectAttributeEvent(Owner& owner, StaticAttributeRef<T> at
 ///
 /// @return Observer of the attribute.
 ///
-template <auto const* Attribute, class Owner>
+template <auto const& Attribute, class Owner>
 auto AttributeNode::GetObserver(Owner& owner) -> AttributeObserver<ValueTypeOf<Attribute>>
 {
-    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_pointer_t<decltype(Attribute)>>, StaticAttribute>);
-    auto constexpr attribute = StaticReference(*Attribute);
+    static_assert(Concepts::SpecializationOf<std::remove_cv_t<std::remove_reference_t<decltype(Attribute)>>, StaticAttribute>);
+    auto constexpr attribute = StaticReference(Attribute);
     return GetObserver(owner, attribute);
 }
 

@@ -16,7 +16,7 @@ namespace
 auto MakeTextView(StaticAttributeRef<Graphics::FontSize> const fontSize, String const text) -> Shared<View>
 {
     auto textView = Lamp::TextView::MakeWithText(text);
-    AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*textView, fontSize);
+    AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*textView, fontSize);
     return textView;
 }
 
@@ -73,7 +73,7 @@ auto TypographyPageView::Initialize() -> void
     column->SetCrossAxisSize(FlexLayoutCrossAxisSize::Max);
     {
         auto text = Lamp::TextView::MakeWithText(u8"Typography");
-        AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeHeadlineMedium);
+        AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeHeadlineMedium);
         column->AddChild(text);
     }
     {

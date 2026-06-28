@@ -61,7 +61,7 @@ auto TextEditPageView::Initialize() -> void
     column->SetCrossAxisSize(FlexLayoutCrossAxisSize::Max);
     {
         auto title = Lamp::TextView::MakeWithText(u8"Text Edit");
-        AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*title, Lamp::Style::FontSizeHeadlineMedium);
+        AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*title, Lamp::Style::FontSizeHeadlineMedium);
         column->AddChild(title);
         auto fontSizeListContainer = MakeTextEdits();
         FlexLayout::SetChildMargin(fontSizeListContainer, EdgeInsets(0, 10, 0, 0));

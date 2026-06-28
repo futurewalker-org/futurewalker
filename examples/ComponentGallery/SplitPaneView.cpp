@@ -50,7 +50,7 @@ auto SplitPaneView::Initialize() -> void
     buttonColumn->SetCrossAxisSize(FlexLayoutCrossAxisSize::Min);
     auto buttonColumnSize = SizedView::MakeWithContent(150, Dp::Infinity(), buttonColumn);
     auto buttonColumnTheme = ThemeView::MakeWithContent(Lamp::TextButtonTheme::Make(Lamp::TextButtonTheme::Type::Text), buttonColumnSize);
-    AttributeNode::SetReference<&Lamp::TextButtonStyle::CornerRadius>(*buttonColumnTheme, Lamp::Style::CornerRadiusMedium);
+    AttributeNode::SetReference<Lamp::TextButtonStyle::CornerRadius>(*buttonColumnTheme, Lamp::Style::CornerRadiusMedium);
     auto buttonColumnBox = BoxView::MakeWithContent(buttonColumnTheme);
     buttonColumnBox->SetBackgroundColor(Lamp::Style::ColorSurfaceContainerLow);
     buttonColumnBox->SetCornerRadius(Lamp::Style::CornerRadiusMedium);

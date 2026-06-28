@@ -46,7 +46,7 @@ auto MakeColorSchemeViewContainer(String const text, ThemeBrightness brightness)
     innerColumn->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Start);
 
     auto const title = Lamp::TextView::MakeWithText(text);
-    AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*title, Lamp::Style::FontSizeTitleMedium);
+    AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*title, Lamp::Style::FontSizeTitleMedium);
     innerColumn->AddChild(title);
 
     auto space = SizedView::Make();
@@ -92,7 +92,7 @@ auto ColorPageView::Initialize() -> void
     column->SetCrossAxisSize(FlexLayoutCrossAxisSize::Max);
     {
         auto text = Lamp::TextView::MakeWithText(u8"Color Palettes");
-        AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeHeadlineMedium);
+        AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeHeadlineMedium);
         column->AddChild(text);
     }
     {
@@ -107,7 +107,7 @@ auto ColorPageView::Initialize() -> void
     }
     {
         auto text = Lamp::TextView::MakeWithText(u8"Color Roles");
-        AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeHeadlineMedium);
+        AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeHeadlineMedium);
         column->AddChild(text);
     }
     {

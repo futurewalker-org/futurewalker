@@ -127,15 +127,15 @@ auto TextButton::ReceiveAttributeEvent(Event<>& event) -> Bool
     if (event.Is<AttributeEvent::ValueChanged>())
     {
         // TODO: Implement cached attribute values so we don't have to do this manually.
-        AttributeNode::SetValue<&TextViewStyle::Color>(*_buttonView, _textColor.GetValueOrDefault());
-        AttributeNode::SetValue<&TextViewStyle::DisabledColor>(*_buttonView, _disabledTextColor.GetValueOrDefault());
-        AttributeNode::SetValue<&TextViewStyle::FontSize>(*_buttonView, _textFontSize.GetValueOr(16));
-        AttributeNode::SetValue<&TextViewStyle::FontWeight>(*_buttonView, _textFontWeight.GetValueOr(Graphics::FontWeight::Normal()));
-        AttributeNode::SetValue<&TextViewStyle::FontWidth>(*_buttonView, _textFontWidth.GetValueOr(Graphics::FontWidth::Normal()));
-        AttributeNode::SetValue<&TextViewStyle::FontSlant>(*_buttonView, _textFontSlant.GetValueOr(Graphics::FontSlant::Upright));
-        AttributeNode::SetValue<&TextViewStyle::FontFamily>(*_buttonView, _textFontFamily.GetValueOrDefault());
-        AttributeNode::SetValue<&TextViewStyle::HorizontalAlignment>(*_buttonView, _textHorizontalAlignment.GetValueOr(TextViewHorizontalAlignment::Center));
-        AttributeNode::SetValue<&TextViewStyle::VerticalAlignment>(*_buttonView, _textVerticalAlignment.GetValueOr(TextViewVerticalAlignment::Middle));
+        AttributeNode::SetValue<TextViewStyle::Color>(*_buttonView, _textColor.GetValueOrDefault());
+        AttributeNode::SetValue<TextViewStyle::DisabledColor>(*_buttonView, _disabledTextColor.GetValueOrDefault());
+        AttributeNode::SetValue<TextViewStyle::FontSize>(*_buttonView, _textFontSize.GetValueOr(16));
+        AttributeNode::SetValue<TextViewStyle::FontWeight>(*_buttonView, _textFontWeight.GetValueOr(Graphics::FontWeight::Normal()));
+        AttributeNode::SetValue<TextViewStyle::FontWidth>(*_buttonView, _textFontWidth.GetValueOr(Graphics::FontWidth::Normal()));
+        AttributeNode::SetValue<TextViewStyle::FontSlant>(*_buttonView, _textFontSlant.GetValueOr(Graphics::FontSlant::Upright));
+        AttributeNode::SetValue<TextViewStyle::FontFamily>(*_buttonView, _textFontFamily.GetValueOrDefault());
+        AttributeNode::SetValue<TextViewStyle::HorizontalAlignment>(*_buttonView, _textHorizontalAlignment.GetValueOr(TextViewHorizontalAlignment::Center));
+        AttributeNode::SetValue<TextViewStyle::VerticalAlignment>(*_buttonView, _textVerticalAlignment.GetValueOr(TextViewVerticalAlignment::Middle));
     }
     return false;
 }

@@ -111,7 +111,7 @@ auto ComponentGalleryApplication::ReceiveCommandEvent(Event<>& event) -> Bool
                     });
 
                     auto text = Lamp::TextView::MakeWithText(u8"Futurewalker version 0.0.0");
-                    AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeTitleMedium);
+                    AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeTitleMedium);
                     auto align = AlignView::MakeWithContent(text);
                     dialogWindow->SetContent(align);
 

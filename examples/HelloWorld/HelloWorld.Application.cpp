@@ -73,11 +73,10 @@ auto Application::ReceiveEvent(Event<>& event) -> Bool
             // Create styled text view.
             // If you assign attribute value to a view, it will override the attribute inherited from parent.
             // In this case, we override theme's default value of font size and weight with specified values for the text view.
-            // Template argument of SetValue takes static address of attribute info.
-            // NOTE: We could use static reference instead of pointer to remove '&' in template parameter, but MSVC has a bug that prevent passing static reference.
+            // Template argument of SetValue takes static reference of attribute info.
             auto text = Lamp::TextView::MakeWithText(hello);
-            AttributeNode::SetValue<&Lamp::TextViewStyle::FontSize>(*text, 42);
-            AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());
+            AttributeNode::SetValue<Lamp::TextViewStyle::FontSize>(*text, 42);
+            AttributeNode::SetValue<Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());
 
             // Create layout view that centers the text view.
             // Layouts and controls are both derived from View. You can combine them to create your desired UI layout.

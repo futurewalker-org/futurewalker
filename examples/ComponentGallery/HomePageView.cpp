@@ -26,14 +26,14 @@ auto HomePageView::Initialize() -> void
         {
             auto text = Lamp::TextView::Make();
             text->SetText(u8"Futurewalker Gallery");
-            AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeDisplaySmall);
+            AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeDisplaySmall);
             FlexLayout::SetChildMargin(text, EdgeInsets(0, 0, 0, 10));
             column->AddChild(text);
         }
         {
             auto text = Lamp::TextView::Make();
             text->SetText(u8"Welcome to the Futurewalker Gallery! \nThis is a collection of default UI components and design tokens.");
-            AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeBodyLarge);
+            AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeBodyLarge);
             column->AddChild(text);
         }
     }

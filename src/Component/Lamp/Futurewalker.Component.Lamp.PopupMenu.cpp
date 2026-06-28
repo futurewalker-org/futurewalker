@@ -245,7 +245,7 @@ auto PopupMenu::UpdatePopup() -> void
                 {
                     _menuView->SetMenu(_menu);
                 }
-                auto const blurRadius = UnitFunction::ConvertDpToVp(AttributeNode::GetValue<&Style::Size60>(*_menuView).GetValueOr(0), screenInfo->displayScale);
+                auto const blurRadius = UnitFunction::ConvertDpToVp(AttributeNode::GetValue<Style::Size60>(*_menuView).GetValueOr(0), screenInfo->displayScale);
                 auto const popupSizeWithShadow = UnitFunction::ConvertDpToVp(_popup->Measure(BoxConstraints::MakeUnconstrained()), screenInfo->displayScale);
                 auto const popupSize = Size<Vp>(popupSizeWithShadow.width - blurRadius * 2, popupSizeWithShadow.height - blurRadius * 2);
                 auto const screenRect = screenInfo->workArea;

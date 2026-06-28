@@ -106,16 +106,16 @@ auto MenuItemButton::ReceiveAttributeEvent(Event<>& event) -> Bool
     if (event.Is<AttributeEvent::ValueChanged>())
     {
         // Text view styles
-        AttributeNode::SetValue<&TextViewStyle::Color>(*_buttonView, _textColor.GetValueOrDefault());
-        AttributeNode::SetValue<&TextViewStyle::Alpha>(*_buttonView, _textAlpha.GetValueOrDefault());
-        AttributeNode::SetValue<&TextViewStyle::DisabledColor>(*_buttonView, _textDisabledColor.GetValueOrDefault());
-        AttributeNode::SetValue<&TextViewStyle::DisabledAlpha>(*_buttonView, _textDisabledAlpha.GetValueOrDefault());
+        AttributeNode::SetValue<TextViewStyle::Color>(*_buttonView, _textColor.GetValueOrDefault());
+        AttributeNode::SetValue<TextViewStyle::Alpha>(*_buttonView, _textAlpha.GetValueOrDefault());
+        AttributeNode::SetValue<TextViewStyle::DisabledColor>(*_buttonView, _textDisabledColor.GetValueOrDefault());
+        AttributeNode::SetValue<TextViewStyle::DisabledAlpha>(*_buttonView, _textDisabledAlpha.GetValueOrDefault());
 
         // Icon view styles
-        AttributeNode::SetValue<&IconViewStyle::Color>(*_buttonView, _iconColor.GetValueOrDefault());
-        AttributeNode::SetValue<&IconViewStyle::Alpha>(*_buttonView, _iconAlpha.GetValueOrDefault());
-        AttributeNode::SetValue<&IconViewStyle::DisabledColor>(*_buttonView, _iconDisabledColor.GetValueOrDefault());
-        AttributeNode::SetValue<&IconViewStyle::DisabledAlpha>(*_buttonView, _iconDisabledAlpha.GetValueOrDefault());
+        AttributeNode::SetValue<IconViewStyle::Color>(*_buttonView, _iconColor.GetValueOrDefault());
+        AttributeNode::SetValue<IconViewStyle::Alpha>(*_buttonView, _iconAlpha.GetValueOrDefault());
+        AttributeNode::SetValue<IconViewStyle::DisabledColor>(*_buttonView, _iconDisabledColor.GetValueOrDefault());
+        AttributeNode::SetValue<IconViewStyle::DisabledAlpha>(*_buttonView, _iconDisabledAlpha.GetValueOrDefault());
     }
     return false;
 }

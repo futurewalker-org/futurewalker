@@ -52,8 +52,8 @@ protected:
                 window->SetTitle(hello);
                 window->SetFrameRect(Rect<Vp>::Make({0, 0}, {500, 500}));
                 auto text = Lamp::TextView::MakeWithText(hello);
-                AttributeNode::SetValue<&Lamp::TextViewStyle::FontSize>(*text, 42);
-                AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());
+                AttributeNode::SetValue<Lamp::TextViewStyle::FontSize>(*text, 42);
+                AttributeNode::SetValue<Lamp::TextViewStyle::FontWeight>(*text, Graphics::FontWeight::Bold());
                 auto align = AlignView::MakeWithContent(text);
                 window->SetContent(align);
                 window->SetVisible(true);

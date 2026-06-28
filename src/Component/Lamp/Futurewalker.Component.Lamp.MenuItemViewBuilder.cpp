@@ -36,7 +36,7 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
         if (type == MenuItemType::Item)
         {
             auto leadingIcon = IconView::MakeWithIcon(item.GetLeadingIcon());
-            AttributeNode::SetReference<&IconViewStyle::Size>(*leadingIcon, Style::IconSizeSmall);
+            AttributeNode::SetReference<IconViewStyle::Size>(*leadingIcon, Style::IconSizeSmall);
             auto text = TextView::MakeWithText(item.GetTitle());
             auto itemView = MenuItemView::Make();
             itemView->SetLeadingView(leadingIcon);
@@ -45,7 +45,7 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
             if (!item.GetTrailingIcon().IsEmpty())
             {
                 auto trailingIcon = IconView::MakeWithIcon(item.GetTrailingIcon());
-                AttributeNode::SetReference<&IconViewStyle::Size>(*trailingIcon, Style::IconSizeSmall);
+                AttributeNode::SetReference<IconViewStyle::Size>(*trailingIcon, Style::IconSizeSmall);
                 itemView->SetTrailingView(trailingIcon);
             }
 
@@ -53,7 +53,7 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
             {
                 auto accessKeyString = GetAccessKeyString(item.GetAccessKey(), item.GetAccessKeyModifiers());
                 auto accessKeyText = TextView::MakeWithText(accessKeyString);
-                AttributeNode::SetReference<&TextViewStyle::FontSize>(*accessKeyText, Style::FontSizeLabelSmall);
+                AttributeNode::SetReference<TextViewStyle::FontSize>(*accessKeyText, Style::FontSizeLabelSmall);
                 accessKeyText->SetEnabled(false);
                 itemView->SetTrailingView(accessKeyText);
             }
@@ -63,8 +63,8 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
         {
             auto leadingIcon = IconView::MakeWithIcon(item.GetLeadingIcon());
             auto trailingIcon = IconView::MakeWithIcon(Icon::MakeFromFont(Graphics::FontFamily(u8"Segoe Fluent Icons"), 0xE974));
-            AttributeNode::SetReference<&IconViewStyle::Size>(*leadingIcon, Style::IconSizeSmall);
-            AttributeNode::SetReference<&IconViewStyle::Size>(*trailingIcon, Style::IconSizeExtraSmall);
+            AttributeNode::SetReference<IconViewStyle::Size>(*leadingIcon, Style::IconSizeSmall);
+            AttributeNode::SetReference<IconViewStyle::Size>(*trailingIcon, Style::IconSizeExtraSmall);
             auto text = TextView::MakeWithText(item.GetTitle());
             auto itemView = MenuItemView::Make();
             itemView->SetLeadingView(leadingIcon);

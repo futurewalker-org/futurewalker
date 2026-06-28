@@ -151,7 +151,7 @@ auto MenuBar::BuildView() -> void
         auto text = TextView::MakeWithText(item.GetTitle());
         auto itemView = MenuItemView::MakeWithContents(nullptr, text, nullptr);
         auto button = MenuItemButton::MakeWithContent(itemView);
-        AttributeNode::SetReference<&MenuItemViewStyle::Padding>(*button, AttributeItemPadding);
+        AttributeNode::SetReference<MenuItemViewStyle::Padding>(*button, AttributeItemPadding);
         button->SetEnabled(item.GetSubMenu().GetItems().size() > 0);
         row->AddChild(button);
         _itemInfo.push_back(MenuItemInfo {item, button});

@@ -17,7 +17,7 @@ namespace
 auto MakeColorTile(Size<Dp> size, StaticAttributeRef<RGBAColor> baseColor, StaticAttributeRef<RGBAColor> onColor, String colorName)
 {
     auto text = Lamp::TextView::MakeWithText(colorName);
-    AttributeNode::SetReference<&Lamp::TextViewStyle::Color>(*text, onColor);
+    AttributeNode::SetReference<Lamp::TextViewStyle::Color>(*text, onColor);
     auto align = AlignView::MakeWithContent(text);
     align->SetAlignment(Alignment::TopLeading());
     auto container = BoxView::MakeWithContent(align);

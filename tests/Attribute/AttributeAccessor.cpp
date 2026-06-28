@@ -53,8 +53,8 @@ TEST_CASE("AttributeAccessor")
         FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr2, Attr1);
 
         auto parent = AttributeNode::Make();
-        AttributeNode::SetValue<&Attr1>(*parent, 24);
-        AttributeNode::SetValue<&Attr1>(*parent, 42);
+        AttributeNode::SetValue<Attr1>(*parent, 24);
+        AttributeNode::SetValue<Attr1>(*parent, 42);
 
         auto child = AttributeNode::Make();
 
@@ -67,6 +67,6 @@ TEST_CASE("AttributeAccessor")
 
         parent->RemoveChild(child);
 
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*child) == 0);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*child) == 0);
     }
 }

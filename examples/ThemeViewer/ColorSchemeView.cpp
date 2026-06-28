@@ -31,7 +31,7 @@ auto GetThemeName(ThemeBrightness brightness) -> String
 auto MakeColorTile(Size<Dp> size, StaticAttributeRef<RGBAColor> baseColor, StaticAttributeRef<RGBAColor> onColor, String colorName)
 {
     auto text = Lamp::TextView::MakeWithText(colorName);
-    AttributeNode::SetReference<&Lamp::TextViewStyle::Color>(*text, onColor);
+    AttributeNode::SetReference<Lamp::TextViewStyle::Color>(*text, onColor);
     auto align = AlignView::MakeWithContent(text);
     align->SetAlignment(Alignment::TopLeading());
     auto container = BoxView::MakeWithContent(align);
@@ -72,9 +72,9 @@ auto ColorSchemeView::Initialize() -> void
 
     auto title = Lamp::TextView::MakeWithText(GetThemeName(_brightness));
 
-    AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*title, Lamp::Style::FontSizeTitleMedium);
-    AttributeNode::SetValue<&Lamp::TextViewStyle::FontWeight>(*title, Graphics::FontWeight::Bold());
-    AttributeNode::SetValue<&Lamp::TextViewStyle::HorizontalAlignment>(*title, TextViewHorizontalAlignment::Leading);
+    AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*title, Lamp::Style::FontSizeTitleMedium);
+    AttributeNode::SetValue<Lamp::TextViewStyle::FontWeight>(*title, Graphics::FontWeight::Bold());
+    AttributeNode::SetValue<Lamp::TextViewStyle::HorizontalAlignment>(*title, TextViewHorizontalAlignment::Leading);
     column->AddChild(title);
 
     auto innerRow = FlexLayout::Make();

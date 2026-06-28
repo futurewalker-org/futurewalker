@@ -21,7 +21,7 @@ auto MakeButtons()
     innerColumn->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Start);
     {
         auto text = Lamp::TextView::MakeWithText(u8"Enabled Buttons");
-        AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeLabelMedium);
+        AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeLabelMedium);
         innerColumn->AddChild(text);
     }
     {
@@ -45,7 +45,7 @@ auto MakeButtons()
     }
     {
         auto text = Lamp::TextView::MakeWithText(u8"Disabled Buttons");
-        AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeLabelMedium);
+        AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*text, Lamp::Style::FontSizeLabelMedium);
         innerColumn->AddChild(text);
     }
     {
@@ -99,7 +99,7 @@ auto ButtonPageView::Initialize() -> void
     column->SetCrossAxisSize(FlexLayoutCrossAxisSize::Max);
     {
         auto title = Lamp::TextView::MakeWithText(u8"Text Button");
-        AttributeNode::SetReference<&Lamp::TextViewStyle::FontSize>(*title, Lamp::Style::FontSizeHeadlineMedium);
+        AttributeNode::SetReference<Lamp::TextViewStyle::FontSize>(*title, Lamp::Style::FontSizeHeadlineMedium);
         column->AddChild(title);
         auto fontSizeListContainer = MakeButtons();
         FlexLayout::SetChildMargin(fontSizeListContainer, EdgeInsets(0, 10, 0, 0));

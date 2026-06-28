@@ -17,15 +17,15 @@ TEST_CASE("AttributeNode")
     SECTION("simple get/set")
     {
         auto node = AttributeNode::Make();
-        REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*node) == 42);
-        AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
-        REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*node) == 24);
+        REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*node) == 42);
+        AttributeNode::SetValue<IntegerAttribute>(*node, 24);
+        REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*node) == 24);
     }
 
     SECTION("simple get/set with observer")
     {
         auto node = AttributeNode::Make();
-        auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*node);
+        auto observer = AttributeNode::GetObserver<IntegerAttribute>(*node);
         REQUIRE(*observer.GetValue() == 42);
         observer.SetValue(24);
         REQUIRE(*observer.GetValue() == 24);
@@ -37,7 +37,7 @@ TEST_CASE("AttributeNode")
         auto child = AttributeNode::Make();
         node->AddChild(child);
 
-        auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*child);
+        auto observer = AttributeNode::GetObserver<IntegerAttribute>(*child);
         REQUIRE(*observer.GetValue() == 42);
         observer.SetValue(24);
         REQUIRE(*observer.GetValue() == 24);
@@ -46,12 +46,12 @@ TEST_CASE("AttributeNode")
     SECTION("simple child overloading")
     {
         auto node = AttributeNode::Make();
-        auto parentobserver = AttributeNode::GetObserver<&IntegerAttribute>(*node);
+        auto parentobserver = AttributeNode::GetObserver<IntegerAttribute>(*node);
 
         auto child = AttributeNode::Make();
         node->AddChild(child);
 
-        auto childobserver = AttributeNode::GetObserver<&IntegerAttribute>(*child);
+        auto childobserver = AttributeNode::GetObserver<IntegerAttribute>(*child);
 
         parentobserver.SetValue(24);
 
@@ -64,7 +64,7 @@ TEST_CASE("AttributeNode")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
             auto node = AttributeNode::Make();
-            auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*node);
+            auto observer = AttributeNode::GetObserver<ReferencingAttribute>(*node);
             REQUIRE(*observer.GetValue() == 42);
         }
 
@@ -73,10 +73,10 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
             auto node = AttributeNode::Make();
             {
-                auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*node);
+                auto observer = AttributeNode::GetObserver<ReferencingAttribute>(*node);
                 observer.SetValue(24);
             }
-            auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*node);
+            auto observer = AttributeNode::GetObserver<ReferencingAttribute>(*node);
             REQUIRE(*observer.GetValue() == 24);
         }
 
@@ -84,18 +84,18 @@ TEST_CASE("AttributeNode")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
             auto node = AttributeNode::Make();
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*node) == 42);
-            AttributeNode::SetValue<&ReferencingAttribute>(*node, 24);
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*node) == 24);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*node) == 42);
+            AttributeNode::SetValue<ReferencingAttribute>(*node, 24);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*node) == 24);
         }
 
         SECTION("changing value")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, ReferencingAttribute, IntegerAttribute);
             auto node = AttributeNode::Make();
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*node) == 42);
-            AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*node) == 24);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*node) == 42);
+            AttributeNode::SetValue<IntegerAttribute>(*node, 24);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*node) == 24);
         }
 
         SECTION("indirect update")
@@ -104,9 +104,9 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 2);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr3, Attr1);
-            AttributeNode::SetReference<&Attr3>(*node, Attr2);
-            AttributeNode::SetValue<&Attr2>(*node, 42);
-            REQUIRE(*AttributeNode::GetValue<&Attr3>(*node) == 42);
+            AttributeNode::SetReference<Attr3>(*node, Attr2);
+            AttributeNode::SetValue<Attr2>(*node, 42);
+            REQUIRE(*AttributeNode::GetValue<Attr3>(*node) == 42);
         }
 
         SECTION("indirect update")
@@ -114,12 +114,12 @@ TEST_CASE("AttributeNode")
             auto node = AttributeNode::Make();
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 1);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr2, [](SInt32 a) { return a * 2; }, Attr1);
-            REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 2);
-            AttributeNode::SetValue<&Attr1>(*node, 21);
-            REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 42);
+            REQUIRE(*AttributeNode::GetValue<Attr2>(*node) == 2);
+            AttributeNode::SetValue<Attr1>(*node, 21);
+            REQUIRE(*AttributeNode::GetValue<Attr2>(*node) == 42);
             auto parent = AttributeNode::Make();
             parent->AddChild(node);
-            REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 42);
+            REQUIRE(*AttributeNode::GetValue<Attr2>(*node) == 42);
         }
 
         SECTION("indirect update")
@@ -132,8 +132,8 @@ TEST_CASE("AttributeNode")
             auto parent = AttributeNode::Make();
             parent->AddChild(child);
 
-            AttributeNode::SetValue<&Attr1>(*child, 21);
-            REQUIRE(*AttributeNode::GetValue<&Attr2>(*child) == 42);
+            AttributeNode::SetValue<Attr1>(*child, 21);
+            REQUIRE(*AttributeNode::GetValue<Attr2>(*child) == 42);
         }
 
         SECTION("indirect update")
@@ -143,17 +143,17 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](SInt32 a) { return a * 2; }, Attr1);
 
             auto node = AttributeNode::Make();
-            AttributeNode::SetReference<&Attr2>(*node, Attr3);
-            AttributeNode::SetValue<&Attr1>(*node, 21);
-            REQUIRE(*AttributeNode::GetValue<&Attr1>(*node) == 21);
-            REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 42);
-            REQUIRE(*AttributeNode::GetValue<&Attr3>(*node) == 42);
+            AttributeNode::SetReference<Attr2>(*node, Attr3);
+            AttributeNode::SetValue<Attr1>(*node, 21);
+            REQUIRE(*AttributeNode::GetValue<Attr1>(*node) == 21);
+            REQUIRE(*AttributeNode::GetValue<Attr2>(*node) == 42);
+            REQUIRE(*AttributeNode::GetValue<Attr3>(*node) == 42);
 
             auto parent = AttributeNode::Make();
             parent->AddChild(node);
-            REQUIRE(*AttributeNode::GetValue<&Attr1>(*node) == 21);
-            REQUIRE(*AttributeNode::GetValue<&Attr2>(*node) == 42);
-            REQUIRE(*AttributeNode::GetValue<&Attr3>(*node) == 42);
+            REQUIRE(*AttributeNode::GetValue<Attr1>(*node) == 21);
+            REQUIRE(*AttributeNode::GetValue<Attr2>(*node) == 42);
+            REQUIRE(*AttributeNode::GetValue<Attr3>(*node) == 42);
         }
 
         SECTION("indirect update")
@@ -163,18 +163,18 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, Attr3, [](SInt32 a) { return a * 2; }, Attr1);
 
             auto child = AttributeNode::Make();
-            AttributeNode::SetReference<&Attr2>(*child, Attr3);
-            REQUIRE(*AttributeNode::GetValue<&Attr2>(*child) == 2);
+            AttributeNode::SetReference<Attr2>(*child, Attr3);
+            REQUIRE(*AttributeNode::GetValue<Attr2>(*child) == 2);
 
             auto parent = AttributeNode::Make();
             parent->AddChild(child);
 
-            AttributeNode::SetValue<&Attr1>(*parent, 21);
-            REQUIRE(*AttributeNode::GetValue<&Attr2>(*child) == 42);
+            AttributeNode::SetValue<Attr1>(*parent, 21);
+            REQUIRE(*AttributeNode::GetValue<Attr2>(*child) == 42);
 
             auto root = AttributeNode::Make();
             root->AddChild(parent);
-            REQUIRE(*AttributeNode::GetValue<&Attr2>(*child) == 42);
+            REQUIRE(*AttributeNode::GetValue<Attr2>(*child) == 42);
         }
     }
 
@@ -187,19 +187,19 @@ TEST_CASE("AttributeNode")
         node->AddChild(child);
 
         {
-            auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*node);
+            auto observer = AttributeNode::GetObserver<IntegerAttribute>(*node);
             observer.SetValue(24);
         }
         {
-            auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*child);
+            auto observer = AttributeNode::GetObserver<ReferencingAttribute>(*child);
             REQUIRE(*observer.GetValue() == 24);
         }
         {
-            auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*child);
+            auto observer = AttributeNode::GetObserver<IntegerAttribute>(*child);
             observer.SetValue(-1);
         }
         {
-            auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*child);
+            auto observer = AttributeNode::GetObserver<ReferencingAttribute>(*child);
             REQUIRE(*observer.GetValue() == -1);
         }
     }
@@ -211,31 +211,31 @@ TEST_CASE("AttributeNode")
         FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr3, Attr2);
 
         auto node = AttributeNode::Make();
-        AttributeNode::SetValue<&Attr1>(*node, 12);
+        AttributeNode::SetValue<Attr1>(*node, 12);
 
         auto child = AttributeNode::Make();
-        AttributeNode::SetValue<&Attr2>(*child, 45);
-        REQUIRE((int)*AttributeNode::GetValue<&Attr3>(*child) == 45);
-        REQUIRE((int)*AttributeNode::GetValue<&Attr2>(*child) == 45);
+        AttributeNode::SetValue<Attr2>(*child, 45);
+        REQUIRE((int)*AttributeNode::GetValue<Attr3>(*child) == 45);
+        REQUIRE((int)*AttributeNode::GetValue<Attr2>(*child) == 45);
 
         node->AddChild(child);
-        REQUIRE(*AttributeNode::GetValue<&Attr3>(*child) == 45);
+        REQUIRE(*AttributeNode::GetValue<Attr3>(*child) == 45);
 
         node->RemoveChild(child);
-        REQUIRE(*AttributeNode::GetValue<&Attr3>(*child) == 45);
+        REQUIRE(*AttributeNode::GetValue<Attr3>(*child) == 45);
 
         node->AddChild(child);
-        REQUIRE(*AttributeNode::GetValue<&Attr3>(*child) == 45);
+        REQUIRE(*AttributeNode::GetValue<Attr3>(*child) == 45);
 
         auto node2 = AttributeNode::Make();
         node2->AddChild(node);
-        REQUIRE((int)*AttributeNode::GetValue<&Attr2>(*child) == 45);
-        REQUIRE((int)*AttributeNode::GetValue<&Attr3>(*child) == 45);
+        REQUIRE((int)*AttributeNode::GetValue<Attr2>(*child) == 45);
+        REQUIRE((int)*AttributeNode::GetValue<Attr3>(*child) == 45);
 
         auto node3 = AttributeNode::Make();
         node3->AddChild(node2);
-        REQUIRE((int)*AttributeNode::GetValue<&Attr2>(*child) == 45);
-        REQUIRE((int)*AttributeNode::GetValue<&Attr3>(*child) == 45);
+        REQUIRE((int)*AttributeNode::GetValue<Attr2>(*child) == 45);
+        REQUIRE((int)*AttributeNode::GetValue<Attr3>(*child) == 45);
     }
 
     SECTION("reference from child")
@@ -252,88 +252,88 @@ TEST_CASE("AttributeNode")
 
         SECTION("simple get")
         {
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*child) == 42);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*child) == 42);
         }
 
         SECTION("simple set on child")
         {
-            AttributeNode::SetValue<&IntegerAttribute>(*child, 24);
+            AttributeNode::SetValue<IntegerAttribute>(*child, 24);
 
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*child) == 24);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*child) == 24);
 
-            AttributeNode::SetValue<&IntegerAttribute>(*child, 0);
+            AttributeNode::SetValue<IntegerAttribute>(*child, 0);
 
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*child) == 0);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*child) == 0);
         }
 
         SECTION("simple set on parent")
         {
-            AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
+            AttributeNode::SetValue<IntegerAttribute>(*node, 24);
 
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*child) == 24);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*child) == 24);
 
-            AttributeNode::SetValue<&IntegerAttribute>(*child, 0);
+            AttributeNode::SetValue<IntegerAttribute>(*child, 0);
 
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*child) == 0);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*child) == 0);
         }
 
         SECTION("simple set on parent + indirect update")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, IndirectAttribute, ReferencingAttribute);
 
-            AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
+            AttributeNode::SetValue<IntegerAttribute>(*node, 24);
 
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*child) == 24);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*child) == 24);
 
             // Create value dependency to ReferencingAttribute on child.
-            REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child) == 24);
+            REQUIRE(*AttributeNode::GetValue<IndirectAttribute>(*child) == 24);
 
-            AttributeNode::SetValue<&IntegerAttribute>(*child, 0);
+            AttributeNode::SetValue<IntegerAttribute>(*child, 0);
 
-            REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child) == 0);
+            REQUIRE(*AttributeNode::GetValue<IndirectAttribute>(*child) == 0);
         }
 
         SECTION("simple set on parent + indirect update on grandchild")
         {
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, IndirectAttribute, ReferencingAttribute);
 
-            AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
+            AttributeNode::SetValue<IntegerAttribute>(*node, 24);
 
-            REQUIRE(*AttributeNode::GetValue<&ReferencingAttribute>(*child) == 24);
+            REQUIRE(*AttributeNode::GetValue<ReferencingAttribute>(*child) == 24);
 
             SECTION("child1")
             {
                 // Create value dependency to ReferencingAttribute on child.
-                REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child1) == 24);
+                REQUIRE(*AttributeNode::GetValue<IndirectAttribute>(*child1) == 24);
 
-                AttributeNode::SetValue<&IntegerAttribute>(*child1, 0);
+                AttributeNode::SetValue<IntegerAttribute>(*child1, 0);
 
-                REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child1) == 0);
+                REQUIRE(*AttributeNode::GetValue<IndirectAttribute>(*child1) == 0);
             }
 
             SECTION("child2")
             {
                 // Create value dependency to ReferencingAttribute on child.
-                REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child2) == 24);
+                REQUIRE(*AttributeNode::GetValue<IndirectAttribute>(*child2) == 24);
 
-                AttributeNode::SetValue<&IntegerAttribute>(*child1, 0);
+                AttributeNode::SetValue<IntegerAttribute>(*child1, 0);
 
-                REQUIRE(*AttributeNode::GetValue<&IndirectAttribute>(*child2) == 0);
+                REQUIRE(*AttributeNode::GetValue<IndirectAttribute>(*child2) == 0);
             }
         }
 
         SECTION("via observer 1")
         {
             {
-                auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*child);
+                auto observer = AttributeNode::GetObserver<ReferencingAttribute>(*child);
                 REQUIRE(*observer.GetValue() == 42);
             }
             {
-                auto observer = AttributeNode::GetObserver<&IntegerAttribute>(*child);
+                auto observer = AttributeNode::GetObserver<IntegerAttribute>(*child);
                 observer.SetValue(-1);
             }
             {
-                auto observer = AttributeNode::GetObserver<&ReferencingAttribute>(*child);
+                auto observer = AttributeNode::GetObserver<ReferencingAttribute>(*child);
                 REQUIRE(*observer.GetValue() == -1);
             }
         }
@@ -346,9 +346,9 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 21);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](SInt32 a) { return a * 2; }, Attr1);
             auto node = AttributeNode::Make();
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 42);
-            AttributeNode::SetValue<&Attr1>(*node, 10);
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 20);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 42);
+            AttributeNode::SetValue<Attr1>(*node, 10);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 20);
         }
 
         SECTION("simple compute")
@@ -356,9 +356,9 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 2);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](SInt32 a, SInt32 b) { return a * b; }, Attr1, Attr1);
             auto node = AttributeNode::Make();
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 4);
-            AttributeNode::SetValue<&Attr1>(*node, 10);
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 100);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 4);
+            AttributeNode::SetValue<Attr1>(*node, 10);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 100);
         }
 
         SECTION("simple compute")
@@ -367,11 +367,11 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 32);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](SInt32 a, SInt32 b) { return a + b; }, Attr1, Attr2);
             auto node = AttributeNode::Make();
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 42);
-            AttributeNode::SetValue<&Attr1>(*node, 24);
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 56);
-            AttributeNode::SetValue<&Attr2>(*node, 18);
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 42);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 42);
+            AttributeNode::SetValue<Attr1>(*node, 24);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 56);
+            AttributeNode::SetValue<Attr2>(*node, 18);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 42);
         }
 
         SECTION("simple compute with reference")
@@ -380,13 +380,13 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr2, Attr1);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(SInt32, ComputedAttribute, [](SInt32 a) { return a * 2; }, Attr2);
             auto node = AttributeNode::Make();
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 42);
-            AttributeNode::SetValue<&Attr1>(*node, 10);
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 20);
-            AttributeNode::SetReference<&Attr2>(*node, IntegerAttribute);
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 84);
-            AttributeNode::SetValue<&IntegerAttribute>(*node, 15);
-            REQUIRE(*AttributeNode::GetValue<&ComputedAttribute>(*node) == 30);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 42);
+            AttributeNode::SetValue<Attr1>(*node, 10);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 20);
+            AttributeNode::SetReference<Attr2>(*node, IntegerAttribute);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 84);
+            AttributeNode::SetValue<IntegerAttribute>(*node, 15);
+            REQUIRE(*AttributeNode::GetValue<ComputedAttribute>(*node) == 30);
         }
 
         SECTION("simple compute with reference")
@@ -394,8 +394,8 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr1, 0);
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(SInt32, Attr2, 42);
             auto node = AttributeNode::Make();
-            AttributeNode::SetFunction<&Attr1>(*node, [](SInt32 a) { return a * 2; }, StaticAttributeRef(Attr2));
-            REQUIRE(*AttributeNode::GetValue<&Attr1>(*node) == 84);
+            AttributeNode::SetFunction<Attr1>(*node, [](SInt32 a) { return a * 2; }, StaticAttributeRef(Attr2));
+            REQUIRE(*AttributeNode::GetValue<Attr1>(*node) == 84);
         }
     }
 
@@ -406,13 +406,13 @@ TEST_CASE("AttributeNode")
             auto node = AttributeNode::Make();
             auto child = AttributeNode::Make();
 
-            REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child) == 42);
+            REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*child) == 42);
 
-            AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
+            AttributeNode::SetValue<IntegerAttribute>(*node, 24);
 
             node->AddChild(child);
 
-            REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child) == 24);
+            REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*child) == 24);
         }
 
         SECTION("simple reference")
@@ -422,15 +422,15 @@ TEST_CASE("AttributeNode")
             auto node = AttributeNode::Make();
             auto child = AttributeNode::Make();
 
-            REQUIRE(*AttributeNode::GetValue<&TestAttribute>(*child) == 42);
+            REQUIRE(*AttributeNode::GetValue<TestAttribute>(*child) == 42);
 
             SECTION("change value of referenced attribute")
             {
-                AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
+                AttributeNode::SetValue<IntegerAttribute>(*node, 24);
 
                 node->AddChild(child);
 
-                REQUIRE(*AttributeNode::GetValue<&TestAttribute>(*child) == 24);
+                REQUIRE(*AttributeNode::GetValue<TestAttribute>(*child) == 24);
             }
         }
 
@@ -441,20 +441,20 @@ TEST_CASE("AttributeNode")
             FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(SInt32, Attr3, Attr1);
 
             auto parent = AttributeNode::Make();
-            AttributeNode::SetValue<&Attr1>(*parent, 42);
-            AttributeNode::SetValue<&Attr2>(*parent, 24);
+            AttributeNode::SetValue<Attr1>(*parent, 42);
+            AttributeNode::SetValue<Attr2>(*parent, 24);
 
             auto child = AttributeNode::Make();
 
-            AttributeNode::SetReference<&Attr3>(*child, Attr2);
+            AttributeNode::SetReference<Attr3>(*child, Attr2);
 
             parent->AddChild(child);
 
-            REQUIRE(*AttributeNode::GetValue<&Attr3>(*child) == 24);
+            REQUIRE(*AttributeNode::GetValue<Attr3>(*child) == 24);
 
             parent->RemoveChild(child);
 
-            REQUIRE(*AttributeNode::GetValue<&Attr3>(*child) == 0);
+            REQUIRE(*AttributeNode::GetValue<Attr3>(*child) == 0);
         }
     }
 
@@ -467,11 +467,11 @@ TEST_CASE("AttributeNode")
 
             node->AddChild(child);
 
-            REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child) == 42);
+            REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*child) == 42);
 
             node->RemoveChild(child);
 
-            REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child) == 42);
+            REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*child) == 42);
         }
 
         SECTION("simple value")
@@ -481,16 +481,16 @@ TEST_CASE("AttributeNode")
 
             node->AddChild(child);
 
-            AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
+            AttributeNode::SetValue<IntegerAttribute>(*node, 24);
 
-            REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child) == 24);
+            REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*child) == 24);
 
             node->RemoveChild(child);
 
-            REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child) == 42);
+            REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*child) == 42);
 
             node->AddChild(child);
-            REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child) == 24);
+            REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*child) == 24);
         }
 
         SECTION("simple value")
@@ -502,17 +502,17 @@ TEST_CASE("AttributeNode")
             node->AddChild(child1);
             child1->AddChild(child2);
 
-            AttributeNode::SetValue<&IntegerAttribute>(*node, 24);
+            AttributeNode::SetValue<IntegerAttribute>(*node, 24);
 
-            REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child2) == 24);
+            REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*child2) == 24);
 
             node->RemoveChild(child1);
 
-            REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child2) == 42);
+            REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*child2) == 42);
 
             node->AddChild(child1);
 
-            REQUIRE(*AttributeNode::GetValue<&IntegerAttribute>(*child2) == 24);
+            REQUIRE(*AttributeNode::GetValue<IntegerAttribute>(*child2) == 24);
         }
     }
 
@@ -529,35 +529,35 @@ TEST_CASE("AttributeNode")
         root->AddChild(parent);
         child->AddChild(descendant);
 
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 1);
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*descendant) == 1);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*parent) == 1);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*descendant) == 1);
 
-        AttributeNode::SetValue<&Attr1>(*root, 42);
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 42);
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*descendant) == 1);
+        AttributeNode::SetValue<Attr1>(*root, 42);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*parent) == 42);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*descendant) == 1);
 
         parent->AddChild(child);
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 42);
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*descendant) == 42);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*parent) == 42);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*descendant) == 42);
 
         root.Reset();
         child.Reset();
         descendant.Reset();
 
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 1);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*parent) == 1);
 
         root = AttributeNode::Make();
         child = AttributeNode::Make();
         descendant = AttributeNode::Make();
-        AttributeNode::SetValue<&Attr1>(*root, 42);
+        AttributeNode::SetValue<Attr1>(*root, 42);
 
         root->AddChild(parent);
         child->AddChild(descendant);
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 42);
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*descendant) == 1);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*parent) == 42);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*descendant) == 1);
 
         parent->AddChild(child);
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*parent) == 42);
-        REQUIRE(*AttributeNode::GetValue<&Attr2>(*descendant) == 42);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*parent) == 42);
+        REQUIRE(*AttributeNode::GetValue<Attr2>(*descendant) == 42);
     }
 }
