@@ -153,6 +153,7 @@ public:
 
     auto IsClosed() const -> Bool;
     auto RequestClose() -> Async<Bool>;
+    auto Close() -> void;
 
     auto GetContent() -> Shared<View>;
     auto SetContent(Shared<View> content) -> void;

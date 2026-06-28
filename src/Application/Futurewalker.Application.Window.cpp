@@ -457,6 +457,10 @@ auto Window::IsClosed() const -> Bool
 ///
 /// @brief Request to close the window.
 ///
+/// Sends WindowEvent::CloseRequested event to itself, and then the window will be closed if the event is not canceled.
+///
+/// @return True if the close request is accepted.
+///
 auto Window::RequestClose() -> Async<Bool>
 {
     if (!IsClosed())
@@ -464,6 +468,19 @@ auto Window::RequestClose() -> Async<Bool>
         co_return co_await _platformObject->RequestClose();
     }
     co_return true;
+}
+
+///
+/// @brief Close the window.
+///
+/// Closes the window without sending WindowEvent::CloseRequested event.
+///
+auto Window::Close() -> void
+{
+    if (!IsClosed())
+    {
+        _platformObject->Close();
+    }
 }
 
 ///
