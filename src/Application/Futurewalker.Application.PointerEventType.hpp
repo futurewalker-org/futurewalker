@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Event.hpp"
+#include "Futurewalker.Application.Prelude.hpp"
 
 #include "Futurewalker.Core.Identifier.hpp"
 
