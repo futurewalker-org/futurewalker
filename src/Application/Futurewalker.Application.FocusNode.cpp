@@ -313,6 +313,11 @@ auto FocusNode::Traverse(const Bool forward, Shared<FocusNode> const& prev, Shar
                     {
                         return parent->Traverse(forward, self, start);
                     }
+
+                    if (self == start)
+                    {
+                        return self;
+                    }
                     return _children.front()->Traverse(forward, self, start);
                 }
                 else
@@ -326,6 +331,11 @@ auto FocusNode::Traverse(const Bool forward, Shared<FocusNode> const& prev, Shar
                     if (parent)
                     {
                         return parent->Traverse(forward, self, start);
+                    }
+
+                    if (self == start)
+                    {
+                        return self;
                     }
                     return _children.back()->Traverse(forward, self, start);
                 }
