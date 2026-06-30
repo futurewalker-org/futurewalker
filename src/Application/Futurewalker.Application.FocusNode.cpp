@@ -7,6 +7,7 @@
 #include "Futurewalker.Base.Debug.hpp" 
 
 #include <chrono>
+#include <utility>
 
 namespace FW_DETAIL_NS
 {
@@ -84,12 +85,12 @@ auto FocusNode::SetFocusable(Bool const focusable) -> void
 
 auto FocusNode::GetNextFocus() -> Shared<FocusNode>
 {
-    return Traverse(true, {}, GetSelf());
+    return Traverse(true);
 }
 
 auto FocusNode::GetPrevFocus() -> Shared<FocusNode>
 {
-    return Traverse(false, {}, GetSelf());
+    return Traverse(false);
 }
 
 auto FocusNode::GetChildren() -> FocusNodeList&
@@ -241,14 +242,30 @@ auto FocusNode::DispatchKeyEvent(Event<>& event, Shared<FocusNode> const& target
 /// @brief Find next or previous focus node.
 ///
 /// @param[in] forward Whether to find next (true) or previous (false) focus node.
-/// @param[in] prev Previous node in traversal, or nullopt if this is the first node.
-/// @param[in] start The starting node for traversal.
 ///
 /// @return The next or previous focus node, or start if no other focusable node is found.
 ///
-/// TODO: Don't use recursion.
+auto FocusNode::Traverse(const Bool forward) -> Shared<FocusNode>
+{
+    auto const start = GetSelf();
+    auto prev = Shared<FocusNode>();
+    auto next = start;
+    while (next = next->TraverseCore(forward, std::exchange(prev, next), start))
+    {
+    }
+    return prev;
+}
+
 ///
-auto FocusNode::Traverse(const Bool forward, Shared<FocusNode> const& prev, Shared<FocusNode> const& start) -> Shared<FocusNode>
+/// @brief Get next or previous focus node in traversal order.
+///
+/// @param[in] forward Whether to find next (true) or previous (false) focus node.
+/// @param[in] prev Previous node in traversal, or nullopt if this is the first node.
+/// @param[in] start The starting node for traversal.
+///
+/// @return The next or previous focus node, or nullptr if this node is next focus candidate.
+///
+auto FocusNode::TraverseCore(const Bool forward, Shared<FocusNode> const& prev, Shared<FocusNode> const& start) -> Shared<FocusNode>
 {
     auto const self = GetSelf();
     auto const parent = GetParent();
@@ -259,40 +276,34 @@ auto FocusNode::Traverse(const Bool forward, Shared<FocusNode> const& prev, Shar
         {
             if (self == start)
             {
-                return self;
+                return nullptr;
             }
 
             if (IsFocusable())
             {
-                return self;
+                return nullptr;
             }
 
             if (forward)
             {
                 if (_children.empty())
                 {
-                    if (parent)
-                    {
-                        return parent->Traverse(forward, self, start);
-                    }
+                    return parent;
                 }
                 else
                 {
-                    return _children.front()->Traverse(forward, self, start);
+                    return _children.front();
                 }
             }
             else
             {
                 if (_children.empty())
                 {
-                    if (parent)
-                    {
-                        return parent->Traverse(forward, self, start);
-                    }
+                    return parent;
                 }
                 else
                 {
-                    return _children.back()->Traverse(forward, self, start);
+                    return _children.back();
                 }
             }
         }
@@ -306,38 +317,38 @@ auto FocusNode::Traverse(const Bool forward, Shared<FocusNode> const& prev, Shar
                     auto nextIt = std::next(it);
                     if (nextIt != _children.end())
                     {
-                        return (*nextIt)->Traverse(forward, self, start);
+                        return (*nextIt);
                     }
 
                     if (parent)
                     {
-                        return parent->Traverse(forward, self, start);
+                        return parent;
                     }
 
                     if (self == start)
                     {
-                        return self;
+                        return nullptr;
                     }
-                    return _children.front()->Traverse(forward, self, start);
+                    return _children.front();
                 }
                 else
                 {
                     if (it != _children.begin())
                     {
                         auto const prevIt = std::prev(it);
-                        return (*prevIt)->Traverse(forward, self, start);
+                        return (*prevIt);
                     }
 
                     if (parent)
                     {
-                        return parent->Traverse(forward, self, start);
+                        return parent;
                     }
 
                     if (self == start)
                     {
-                        return self;
+                        return nullptr;
                     }
-                    return _children.back()->Traverse(forward, self, start);
+                    return _children.back();
                 }
             }
         }
@@ -348,32 +359,27 @@ auto FocusNode::Traverse(const Bool forward, Shared<FocusNode> const& prev, Shar
         {
             if (_children.empty())
             {
-                if (parent)
-                {
-                    return parent->Traverse(forward, self, start);
-                }
+                return parent;
             }
             else
             {
-                return _children.front()->Traverse(forward, self, start);
+                return _children.front();
             }
         }
         else
         {
             if (parent)
             {
-                return parent->Traverse(forward, self, start);
+                return parent;
             }
-            else
+
+            if (!_children.empty())
             {
-                if (!_children.empty())
-                {
-                    return _children.back()->Traverse(forward, self, start);
-                }
+                return _children.back();
             }
         }
     }
-    return start;
+    return nullptr;
 }
 
 auto FocusNode::RootGetFocusedNode() const -> Shared<FocusNode>

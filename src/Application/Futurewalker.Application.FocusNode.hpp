@@ -72,7 +72,8 @@ private:
 
     auto DispatchKeyEvent(Event<>& event, Shared<FocusNode> const& target) -> Bool;
 
-    auto Traverse(const Bool forward, Shared<FocusNode> const& prev, Shared<FocusNode> const& start) -> Shared<FocusNode>;
+    auto Traverse(const Bool forward) -> Shared<FocusNode>;
+    auto TraverseCore(const Bool forward, Shared<FocusNode> const& prev, Shared<FocusNode> const& start) -> Shared<FocusNode>;
 
 private:
     virtual auto RootGetFocusedNode() const -> Shared<FocusNode>;
