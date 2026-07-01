@@ -250,8 +250,9 @@ auto FocusNode::Traverse(const Bool forward) -> Shared<FocusNode>
     auto const start = GetSelf();
     auto prev = Shared<FocusNode>();
     auto next = start;
-    while (next = next->TraverseCore(forward, std::exchange(prev, next), start))
+    while (next)
     {
+        next = next->TraverseCore(forward, std::exchange(prev, next), start);
     }
     return prev;
 }
