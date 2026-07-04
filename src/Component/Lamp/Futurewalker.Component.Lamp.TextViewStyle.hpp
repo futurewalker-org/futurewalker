@@ -10,6 +10,7 @@
 #include "Futurewalker.Graphics.FontWidth.hpp"
 #include "Futurewalker.Graphics.FontFamily.hpp"
 #include "Futurewalker.Graphics.FontStyle.hpp"
+#include "Futurewalker.Graphics.FontSmoothing.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -34,6 +35,7 @@ struct TextViewStyle : NonConstructible
     FW_STATIC_ATTRIBUTE(Graphics::FontWidth, FontWidth);
     FW_STATIC_ATTRIBUTE(Graphics::FontSlant, FontSlant);
     FW_STATIC_ATTRIBUTE(Graphics::FontFamily, FontFamily);
+    FW_STATIC_ATTRIBUTE(Graphics::FontSmoothing, FontSmoothing);
     FW_STATIC_ATTRIBUTE(TextViewHorizontalAlignment, HorizontalAlignment);
     FW_STATIC_ATTRIBUTE(TextViewVerticalAlignment, VerticalAlignment);
 };

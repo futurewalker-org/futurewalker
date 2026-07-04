@@ -76,6 +76,7 @@ auto TextView::UpdateStyle() -> void
     _textView->SetFontWidth(TextViewStyle::FontWidth);
     _textView->SetFontSlant(TextViewStyle::FontSlant);
     _textView->SetFontFamily(StaticAttributeRef(TextViewStyle::FontFamily)); // FIXME: MSVC Bug
+    _textView->SetFontSmoothing(TextViewStyle::FontSmoothing);
     _textView->SetHorizontalAlignment(TextViewStyle::HorizontalAlignment);
     _textView->SetVerticalAlignment(TextViewStyle::VerticalAlignment);
 }

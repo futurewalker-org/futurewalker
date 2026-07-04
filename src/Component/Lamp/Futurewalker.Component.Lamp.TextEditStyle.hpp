@@ -13,6 +13,7 @@
 #include "Futurewalker.Graphics.FontSize.hpp"
 #include "Futurewalker.Graphics.FontFamily.hpp"
 #include "Futurewalker.Graphics.FontStyleType.hpp"
+#include "Futurewalker.Graphics.FontSmoothing.hpp"
 
 #include "Futurewalker.Color.RGBAColor.hpp"
 
@@ -47,6 +48,7 @@ struct TextEditStyle : NonConstructible
     FW_STATIC_ATTRIBUTE(EdgeInsets, Padding);
     FW_STATIC_ATTRIBUTE(Graphics::FontSize, FontSize);
     FW_STATIC_ATTRIBUTE(Graphics::FontWeight, FontWeight);
+    FW_STATIC_ATTRIBUTE(Graphics::FontSmoothing, FontSmoothing);
     FW_STATIC_ATTRIBUTE(Graphics::FontWidth, FontWidth);
     FW_STATIC_ATTRIBUTE(Graphics::FontSlant, FontSlant);
     FW_STATIC_ATTRIBUTE(Graphics::FontFamily, FontFamily);

@@ -4,6 +4,7 @@
 #include "Futurewalker.Graphics.Prelude.hpp"
 #include "Futurewalker.Graphics.ShapedTextType.hpp"
 #include "Futurewalker.Graphics.FontSize.hpp"
+#include "Futurewalker.Graphics.FontSmoothing.hpp"
 #include "Futurewalker.Graphics.Typeface.hpp"
 #include "Futurewalker.Graphics.ShapedText.hpp"
 
@@ -48,11 +49,12 @@ public:
     /// @param text Text to shape.
     /// @param typeface Typeface to use for shaping.
     /// @param size Font size.
+    /// @param smoothing Font smoothing.
     /// @param maxWidth Maximum width for the text layout.
     /// @param bcp47ScriptTag BCP47 script tag of the text.
     /// @param direction Direction of the text.
     ///
-    virtual auto ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText = 0;
+    virtual auto ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, FontSmoothing const smoothing, Dp const maxWidth, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText = 0;
 
     ///
     /// @brief Shape a glyph.
@@ -60,10 +62,11 @@ public:
     /// @param codePoint Unicode code point of the glyph.
     /// @param typeface Typeface to use for shaping.
     /// @param size Font size.
+    /// @param smoothing Font smoothing.
     /// @param bcp47ScriptTag BCP47 script tag of the text.
     /// @param direction Direction of the text.
     ///
-    virtual auto ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText = 0;
+    virtual auto ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size, FontSmoothing const smoothing, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText = 0;
 };
 }
 }

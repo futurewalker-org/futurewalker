@@ -15,6 +15,7 @@
 #include "Futurewalker.Graphics.FontWidth.hpp"
 #include "Futurewalker.Graphics.FontWeight.hpp"
 #include "Futurewalker.Graphics.FontStyleType.hpp"
+#include "Futurewalker.Graphics.FontSmoothing.hpp"
 #include "Futurewalker.Graphics.FontMetrics.hpp"
 #include "Futurewalker.Graphics.Typeface.hpp"
 #include "Futurewalker.Graphics.SceneType.hpp"
@@ -60,6 +61,7 @@ public:
     auto SetFontWidth(AttributeArg<Graphics::FontWidth> const& width) -> void;
     auto SetFontSlant(AttributeArg<Graphics::FontSlant> const& slant) -> void;
     auto SetFontFamily(AttributeArg<Graphics::FontFamily> const& family) -> void;
+    auto SetFontSmoothing(AttributeArg<Graphics::FontSmoothing> const& smoothing) -> void;
 
 protected:
     auto Initialize() -> void override;
@@ -96,6 +98,8 @@ private:
     auto InternalGetTextColor() const -> RGBAColor;
     auto InternalGetBorderColor() const -> RGBAColor;
     auto InternalGetTypeface() const -> Shared<Graphics::Typeface>;
+    auto InternalGetFontSize() const -> Graphics::FontSize;
+    auto InternalGetFontSmoothing() const -> Graphics::FontSmoothing;
 
     struct ShapedLine
     {
@@ -165,6 +169,7 @@ private:
     AttributeAccessor<Graphics::FontWidth> _fontWidth;
     AttributeAccessor<Graphics::FontSlant> _fontSlant;
     AttributeAccessor<Graphics::FontFamily> _fontFamily;
+    AttributeAccessor<Graphics::FontSmoothing> _fontSmoothing;
     Shared<Graphics::Typeface> _typeface;
     Shared<Graphics::TextShaper> _textShaper;
     Optional<TextCache> _textCache;

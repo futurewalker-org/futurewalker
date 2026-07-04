@@ -27,6 +27,7 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::BorderRadius, Style::Corner
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::Padding, Style::PaddingExtraSmall);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FontSize, TextViewStyle::FontSize);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FontWeight, TextViewStyle::FontWeight);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextEditStyle::FontSmoothing, TextViewStyle::FontSmoothing);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextEditStyle::FontWidth, Graphics::FontWidth::Normal());
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextEditStyle::FontSlant, Graphics::FontSlant::Upright);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextEditStyle::FontFamily, Graphics::FontFamily());

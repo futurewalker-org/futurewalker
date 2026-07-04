@@ -114,6 +114,11 @@ auto TextEdit::SetFontFamily(AttributeArg<Graphics::FontFamily> const& family) -
     _fontFamily.SetAttributeArg(family);
 }
 
+auto TextEdit::SetFontSmoothing(AttributeArg<Graphics::FontSmoothing> const& smoothing) -> void
+{
+    _fontSmoothing.SetAttributeArg(smoothing);
+}
+
 auto TextEdit::Initialize() -> void
 {
     SetPointerTrackingFlags(ViewPointerTrackingFlag::All);
@@ -137,6 +142,7 @@ auto TextEdit::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWidth, AttributeFontWidth, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSlant, AttributeFontSlant, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontFamily, AttributeFontFamily, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSmoothing, AttributeFontSmoothing, {});
 
     _backgroundColor.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeBackgroundColor, {});
     _backgroundAlpha.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeBackgroundAlpha, {});
@@ -152,6 +158,7 @@ auto TextEdit::Initialize() -> void
     _fontWidth.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontWidth, {0});
     _fontSlant.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontSlant, {});
     _fontFamily.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontFamily, {});
+    _fontSmoothing.BindAndConnectAttributeWithDefaultValue(*this, &TextEdit::ReceiveAttributeEvent, AttributeFontSmoothing, {}); 
 
     EventReceiver::Connect(*_inputEditable, *this, &TextEdit::ReceiveInputEvent);
     EventReceiver::Connect(*this, *this, &TextEdit::ReceiveInputEvent);
@@ -563,7 +570,8 @@ auto TextEdit::InternalUpdateMeasureCache() -> void
     }
 
     auto const typeface = InternalGetTypeface();
-    auto const fontSize = _fontSize.GetValueOr(16);
+    auto const fontSize = InternalGetFontSize();
+    auto const fontSmoothing = InternalGetFontSmoothing();
     auto const fontMetrics = typeface->GetMetrics(fontSize);
     auto const direction = Graphics::TextShaper::Direction::DefaultLtr;
     auto const bcp47ScriptTag = Graphics::TextShaper::FourByteTag({'L', 'a', 't', 'n'});
@@ -572,7 +580,7 @@ auto TextEdit::InternalUpdateMeasureCache() -> void
 
     for (auto const& [textLineOffset, textLine] : _textCache->lines)
     {
-        auto const shapedText = _textShaper->ShapeText(Text(textLine), typeface, fontSize, Dp::Infinity(), bcp47ScriptTag, direction);
+        auto const shapedText = _textShaper->ShapeText(Text(textLine), typeface, fontSize, fontSmoothing, Dp::Infinity(), bcp47ScriptTag, direction);
 
         auto count = CodePoint(0);
         for (auto const& wrappedLine : shapedText.GetLines())
@@ -656,7 +664,7 @@ auto TextEdit::InternalUpdateArrangeCache() -> void
         {
             if (auto const typeface = InternalGetTypeface())
             {
-                auto const fontSize = _fontSize.GetValueOr(16);
+                auto const fontSize = InternalGetFontSize();
                 auto const metrics = typeface->GetMetrics(fontSize);
                 arrangedLine.metrics = metrics;
                 arrangedLine.advance = Dp(0);
@@ -729,6 +737,16 @@ auto TextEdit::InternalGetBorderColor() const -> RGBAColor
 auto TextEdit::InternalGetTypeface() const -> Shared<Graphics::Typeface>
 {
     return _typeface;
+}
+
+auto TextEdit::InternalGetFontSize() const -> Graphics::FontSize
+{
+    return _fontSize.GetValueOr(16);
+}
+
+auto TextEdit::InternalGetFontSmoothing() const -> Graphics::FontSmoothing
+{
+    return _fontSmoothing.GetValueOr(Graphics::FontSmoothing::SubpixelAntiAlias);
 }
 
 auto TextEdit::InternalDrawLines(Graphics::Scene& scene, std::vector<ArrangedLine> const& arrangedLines) const -> void

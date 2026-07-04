@@ -16,6 +16,7 @@
 #include "Futurewalker.Graphics.FontWeight.hpp"
 #include "Futurewalker.Graphics.FontWidth.hpp"
 #include "Futurewalker.Graphics.FontStyleType.hpp"
+#include "Futurewalker.Graphics.FontSmoothing.hpp" 
 #include "Futurewalker.Graphics.FontFamilyType.hpp"
 #include "Futurewalker.Graphics.FontMetrics.hpp"
 
@@ -44,6 +45,7 @@ public:
     auto SetFontWidth(AttributeArg<Graphics::FontWidth> const& width) -> void;
     auto SetFontSlant(AttributeArg<Graphics::FontSlant> const& slant) -> void;
     auto SetFontFamily(AttributeArg<Graphics::FontFamily> const& family) -> void;
+    auto SetFontSmoothing(AttributeArg<Graphics::FontSmoothing> const& smoothing) -> void;
     auto SetHorizontalAlignment(AttributeArg<TextViewHorizontalAlignment> const& alignment) -> void;
     auto SetVerticalAlignment(AttributeArg<TextViewVerticalAlignment> const& alignment) -> void;
 
@@ -58,6 +60,7 @@ private:
     auto ReceiveAttributeEvent(Event<>& event) -> Bool;
     auto GetTypeface() const -> Shared<Graphics::Typeface>;
     auto GetFontSize() const -> Graphics::FontSize;
+    auto GetFontSmoothing() const -> Graphics::FontSmoothing;
     auto GetFontMetrics() const -> Graphics::FontMetrics;
     auto GetTextColor() const -> RGBAColor;
     auto InvalidateLayoutCache() -> void;
@@ -76,6 +79,7 @@ private:
     AttributeAccessor<Graphics::FontWidth> _fontWidth;
     AttributeAccessor<Graphics::FontSlant> _fontSlant;
     AttributeAccessor<Graphics::FontFamily> _fontFamily;
+    AttributeAccessor<Graphics::FontSmoothing> _fontSmoothing;
     AttributeAccessor<TextViewHorizontalAlignment> _horizontalAlignment;
     AttributeAccessor<TextViewVerticalAlignment> _verticalAlignment;
     Shared<Graphics::TextShaper> _shaper;

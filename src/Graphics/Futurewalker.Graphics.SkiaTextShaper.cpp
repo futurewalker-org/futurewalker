@@ -10,6 +10,7 @@
 #include "Futurewalker.Graphics.PlatformSkiaFontManager.hpp"
 
 #include "Futurewalker.Base.Locator.hpp"
+#include "Futurewalker.Base.Debug.hpp"
 
 #include <include/core/SkFontMetrics.h>
 #include <include/core/SkTextBlob.h>
@@ -150,15 +151,33 @@ public:
 ///
 /// @brief Shape text.
 ///
-auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, Dp const maxWidth, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText
+auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typeface, FontSize const size, FontSmoothing const smoothing, Dp const maxWidth, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText
 {
     auto const width = static_cast<SkScalar>(maxWidth);
     auto font = SkFont(GetSkTypeface(typeface), static_cast<SkScalar>(size));
 
-    // TODO: Make this configurable
-    font.setHinting(SkFontHinting::kNormal);
-    font.setSubpixel(true);
-    font.setEdging(SkFont::Edging::kSubpixelAntiAlias);
+    if (smoothing == FontSmoothing::None)
+    {
+        font.setSubpixel(false);
+        font.setEdging(SkFont::Edging::kAlias);
+        font.setHinting(SkFontHinting::kNormal);
+    }
+    else if (smoothing == FontSmoothing::AntiAlias)
+    {
+        font.setSubpixel(true);
+        font.setEdging(SkFont::Edging::kAntiAlias);
+        font.setHinting(SkFontHinting::kNormal);
+    }
+    else if (smoothing == FontSmoothing::SubpixelAntiAlias)
+    {
+        font.setSubpixel(true);
+        font.setEdging(SkFont::Edging::kSubpixelAntiAlias);
+        font.setHinting(SkFontHinting::kNormal);
+    }
+    else
+    {
+        FW_DEBUG_ASSERT(false);
+    }
 
     auto const utf8Str = text.GetString().ToStdString();
     auto const utf8Chars = utf8Str.c_str();
@@ -180,11 +199,11 @@ auto SkiaTextShaper::ShapeText(Text const& text, Shared<Typeface> const& typefac
     return std::move(runHandler).Finalize();
 }
 
-auto SkiaTextShaper::ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText
+auto SkiaTextShaper::ShapeGlyph(char32_t const codePoint, Shared<Typeface> const& typeface, FontSize const size, FontSmoothing const smoothing, FourByteTag const& bcp47ScriptTag, Direction const& direction) -> ShapedText
 {
     auto buffer = std::array<char8_t, U8_MAX_LENGTH>();
     auto offset = 0;
     U8_APPEND_UNSAFE(buffer.data(), offset, codePoint);
-    return ShapeText(Text(String(buffer.data(), offset)), typeface, size, Dp::Infinity(), bcp47ScriptTag, direction);
+    return ShapeText(Text(String(buffer.data(), offset)), typeface, size, smoothing, Dp::Infinity(), bcp47ScriptTag, direction);
 }
 }

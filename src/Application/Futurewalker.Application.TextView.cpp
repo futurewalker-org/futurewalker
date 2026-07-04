@@ -130,6 +130,16 @@ auto TextView::SetFontFamily(AttributeArg<Graphics::FontFamily> const& family) -
 }
 
 ///
+/// @brief 
+///
+/// @param smoothing 
+///
+auto TextView::SetFontSmoothing(AttributeArg<Graphics::FontSmoothing> const& smoothing) -> void
+{
+    _fontSmoothing.SetAttributeArg(smoothing);
+}
+
+///
 /// @brief
 ///
 /// @param alignment
@@ -170,6 +180,7 @@ auto TextView::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontWidth, AttributeFontWidth, {0});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSlant, AttributeFontSlant, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontFamily, AttributeFontFamily, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSmoothing, AttributeFontSmoothing, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewHorizontalAlignment, AttributeHorizontalAlignment, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewVerticalAlignment, AttributeVerticalAlignment, {});
 
@@ -183,6 +194,7 @@ auto TextView::Initialize() -> void
     _fontWidth.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeFontWidth, {0});
     _fontSlant.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeFontSlant, {});
     _fontFamily.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeFontFamily, {});
+    _fontSmoothing.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeFontSmoothing, {});
     _horizontalAlignment.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeHorizontalAlignment, {TextViewHorizontalAlignment::Center});
     _verticalAlignment.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeVerticalAlignment, {TextViewVerticalAlignment::Middle});
 }
@@ -342,6 +354,14 @@ auto TextView::GetFontSize() const -> Graphics::FontSize
 }
 
 ///
+/// @brief Get font smoothing.
+///
+auto TextView::GetFontSmoothing() const -> Graphics::FontSmoothing
+{
+    return _fontSmoothing.GetValueOr(Graphics::FontSmoothing::SubpixelAntiAlias);
+}
+
+///
 /// @brief Get font metrics.
 ///
 auto TextView::GetFontMetrics() const -> Graphics::FontMetrics
@@ -389,6 +409,7 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
     {
         auto const typeface = GetTypeface();
         auto const fontSize = GetFontSize();
+        auto const fontSmoothing = GetFontSmoothing();
         auto const text = GetText();
         if (fontSize > 0 && !text.IsEmpty())
         {
@@ -415,7 +436,7 @@ auto TextView::UpdateLayoutCache(Dp const maxWidth) -> void
                     // Break characters are not printable. Trim them before passing to the shaper.
                     // We also trim spaces for consistency with soft break.
                     auto const lineText = StringFunction::StripTrailingBreakAndSpace(text, prevIndex, *nextIndex);
-                    auto const shapedLine = _shaper->ShapeText(Text(lineText), typeface, fontSize, maxWidth, {'L', 'a', 't', 'n'}, Graphics::TextShaper::Direction::DefaultLtr);
+                    auto const shapedLine = _shaper->ShapeText(Text(lineText), typeface, fontSize, fontSmoothing, maxWidth, {'L', 'a', 't', 'n'}, Graphics::TextShaper::Direction::DefaultLtr);
                     if (shapedLine.GetLineCount() == 1)
                     {
                         auto const lineWidth = shapedLine.GetLines()[0].GetAdvance();
