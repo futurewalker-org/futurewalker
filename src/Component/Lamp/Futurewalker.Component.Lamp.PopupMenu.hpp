@@ -47,7 +47,7 @@ public:
     auto SetAnchorAlignment(PopupMenuAnchorAlignment const alignment) -> void;
 
     auto Show(Shared<View> const& sourceView) -> void;
-    auto Close() -> Async<void>;
+    auto Close() -> void;
 
     auto GetEventReceiver() -> EventReceiver&;
     auto GetEventReceiver() const -> EventReceiver const&;

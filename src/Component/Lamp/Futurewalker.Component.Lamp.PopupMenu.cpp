@@ -118,11 +118,11 @@ auto PopupMenu::Show(Shared<View> const& sourceView) -> void
 ///
 /// @brief Close popup menu.
 ///
-auto PopupMenu::Close() -> Async<void>
+auto PopupMenu::Close() -> void
 {
     if (_popup && !_popup->IsClosed())
     {
-        co_await _popup->Close();
+        _popup->Close();
     }
 }
 
