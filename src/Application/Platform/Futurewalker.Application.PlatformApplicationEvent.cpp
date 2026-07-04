@@ -4,12 +4,12 @@
 
 namespace FW_DETAIL_NS
 {
-auto PlatformApplicationEvent::ExitRequested::IsCancelled() const -> Bool
+auto PlatformApplicationEvent::QuitRequested::IsCancelled() const -> Bool
 {
     return _cancelled;
 }
 
-auto PlatformApplicationEvent::ExitRequested::SetCancelled(Bool const cancelled) -> void
+auto PlatformApplicationEvent::QuitRequested::SetCancelled(Bool const cancelled) -> void
 {
     _cancelled = cancelled;
 }

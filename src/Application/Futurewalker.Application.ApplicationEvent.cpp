@@ -23,7 +23,7 @@ auto ApplicationEvent::ActiveChanged::SetActive(Bool const active) -> void
 ///
 /// @brief
 ///
-auto ApplicationEvent::ExitRequested::IsCancelled() const -> Bool
+auto ApplicationEvent::QuitRequested::IsCancelled() const -> Bool
 {
     return _cancelled;
 }
@@ -31,7 +31,7 @@ auto ApplicationEvent::ExitRequested::IsCancelled() const -> Bool
 ///
 /// @brief
 ///
-auto ApplicationEvent::ExitRequested::SetCancelled(Bool const cancelled) -> void
+auto ApplicationEvent::QuitRequested::SetCancelled(Bool const cancelled) -> void
 {
     _cancelled = cancelled;
 }

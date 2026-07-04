@@ -21,9 +21,8 @@ public:
 
 public:
     class Started;
-    class Exiting;
-    class Exited;
-    class ExitRequested;
+    class Quitting;
+    class QuitRequested;
     class ActiveChanged;
     class ForegroundChanged;
 };
@@ -38,21 +37,14 @@ class PlatformApplicationEvent::Started final : public PlatformApplicationEvent
 ///
 /// @brief
 ///
-class PlatformApplicationEvent::Exiting final : public PlatformApplicationEvent
+class PlatformApplicationEvent::Quitting final : public PlatformApplicationEvent
 {
 };
 
 ///
 /// @brief
 ///
-class PlatformApplicationEvent::Exited final : public PlatformApplicationEvent
-{
-};
-
-///
-/// @brief
-///
-class PlatformApplicationEvent::ExitRequested final : public PlatformApplicationEvent
+class PlatformApplicationEvent::QuitRequested final : public PlatformApplicationEvent
 {
 public:
     auto IsCancelled() const -> Bool;

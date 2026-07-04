@@ -39,12 +39,18 @@ Application::Application(PassKey<Application>, ApplicationOptions const& options
 }
 
 ///
-/// @brief Run application's main event loop.
+/// @brief Start running the application.
 ///
-/// This function awaits until event loop exits by Exit().
+/// After calling this function, the application will send ApplicationEvent::Started event to itself.
+/// On some platforms, this function will never return. Handle ApplicationEvent::Quitting to perform cleanup when application is exiting.
+///
+/// To manually request the application to exit, call Application::RequestQuit().
+/// When the application is requested to exit, ApplicationEvent::QuitRequested will be sent to application.
+/// You can cancel the request by calling ApplicationEvent::QuitRequested::SetCancelled(true).
+/// Note that some platforms do not allow application to exit so RequestQuit() may immediately return false.
 ///
 /// @note This function must be called from main thread.
-/// @note This function cannot be nested.
+/// @note This function cannot be called more than once.
 ///
 auto Application::Run() -> Async<void>
 {
@@ -59,17 +65,20 @@ auto Application::Run() -> Async<void>
 ///
 /// @brief Requests the application to exit.
 ///
+/// Calling this function will send ApplicationEvent::QuitRequested on supported platforms.
+/// The request may be cancelled by calling ApplicationEvent::QuitRequested::SetCancelled(true) in the event handler.
+/// When the application is actually exiting, ApplicationEvent::Quitting will be sent to application.
+///
 /// @note This function must be called from main thread.
 ///
 /// @return True if the application exited successfully.
 ///
-auto Application::RequestExit() -> Async<Bool>
+auto Application::RequestQuit() -> void
 {
     if (_platformObject)
     {
-        co_return co_await _platformObject->RequestExit();
+        _platformObject->RequestQuit();
     }
-    co_return false;
 }
 
 ///
@@ -227,27 +236,22 @@ auto Application::HandlePlatformApplicationEvent(Event<>& event) -> Bool
         auto e = Event<>(Event<ApplicationEvent::Started>());
         return SendEvent(e);
     }
-    else if (event.Is<PlatformApplicationEvent::Exiting>())
+    else if (event.Is<PlatformApplicationEvent::Quitting>())
     {
-        auto e = Event<>(Event<ApplicationEvent::ExitRequested>());
+        auto e = Event<>(Event<ApplicationEvent::Quitting>());
         return SendEvent(e);
     }
-    else if (event.Is<PlatformApplicationEvent::Exited>())
+    else if (event.Is<PlatformApplicationEvent::QuitRequested>())
     {
-        auto e = Event<>(Event<ApplicationEvent::Exited>());
-        return SendEvent(e);
-    }
-    else if (event.Is<PlatformApplicationEvent::ExitRequested>())
-    {
-        auto parameter = event.As<PlatformApplicationEvent::ExitRequested>();
-        auto applicationEventParameter = Event<ApplicationEvent::ExitRequested>();
+        auto parameter = event.As<PlatformApplicationEvent::QuitRequested>();
+        auto applicationEventParameter = Event<ApplicationEvent::QuitRequested>();
         applicationEventParameter->SetCancelled(parameter->IsCancelled());
         auto applicationEvent = Event<>(std::move(applicationEventParameter));
         if (SendEvent(applicationEvent))
         {
-            if (applicationEvent.Is<ApplicationEvent::ExitRequested>())
+            if (applicationEvent.Is<ApplicationEvent::QuitRequested>())
             {
-                parameter->SetCancelled(applicationEvent.As<ApplicationEvent::ExitRequested>()->IsCancelled());
+                parameter->SetCancelled(applicationEvent.As<ApplicationEvent::QuitRequested>()->IsCancelled());
                 event = parameter;
             }
             return true;

@@ -77,7 +77,7 @@ auto ComponentGalleryApplication::ReceiveEvent(Event<>& event) -> Bool
             _window->SetVisible(true);
 
             co_await EventWaiter(*_window).Wait<WindowEvent::Closed>();
-            co_await Exit();
+            RequestQuit();
         }).Detach();
     }
     return false;

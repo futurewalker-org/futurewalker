@@ -236,7 +236,7 @@ protected:
                 window->SetContent(frame);
                 window->SetVisible(true);
                 co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
-                co_await Exit();
+                RequestQuit();
             }).Detach();
         }
         return false;

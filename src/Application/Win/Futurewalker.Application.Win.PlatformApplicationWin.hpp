@@ -29,7 +29,7 @@ public:
     ~PlatformApplicationWin();
 
     auto Run() -> Async<void> override;
-    auto RequestExit() -> Async<Bool> override;
+    auto RequestQuit() -> Async<Bool> override;
     auto IsRunning() -> Bool override;
     auto IsActive() -> Bool override;
     auto IsForeground() -> Bool override;

@@ -21,8 +21,8 @@ public:
 
 public:
     class Started;
-    class ExitRequested;
-    class Exited;
+    class QuitRequested;
+    class Quitting;
     class ActiveChanged;
     class ForegroundChanged;
 };
@@ -37,7 +37,7 @@ class ApplicationEvent::Started final : public ApplicationEvent
 ///
 /// @brief
 ///
-class ApplicationEvent::ExitRequested final : public ApplicationEvent
+class ApplicationEvent::QuitRequested final : public ApplicationEvent
 {
 public:
     auto IsCancelled() const -> Bool;
@@ -50,7 +50,7 @@ private:
 ///
 /// @brief
 ///
-class ApplicationEvent::Exited final : public ApplicationEvent
+class ApplicationEvent::Quitting final : public ApplicationEvent
 {
 };
 

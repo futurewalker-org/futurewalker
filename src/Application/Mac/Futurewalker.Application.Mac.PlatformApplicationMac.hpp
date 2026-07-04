@@ -22,7 +22,7 @@ public:
     PlatformApplicationMac(PassKey<PlatformApplication>, Delegate const& delegate, Shared<PlatformApplicationContextMac> context);
 
     auto Run() -> Async<void> override;
-    auto Exit() -> void override;
+    auto RequestQuit() -> void override;
     auto IsRunning() -> Bool override;
     auto IsActive() -> Bool override;
     auto IsForeground() -> Bool override;

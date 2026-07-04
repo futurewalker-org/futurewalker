@@ -91,7 +91,7 @@ auto Application::ReceiveEvent(Event<>& event) -> Bool
             // Wait until window is closed (asynchronous).
             co_await EventWaiter(*window).Wait<WindowEvent::Closed>();
             // Exit application.
-            co_await Exit();
+            RequestQuit();
         }).Detach();
     }
     return false;

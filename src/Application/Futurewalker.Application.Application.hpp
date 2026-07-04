@@ -40,7 +40,7 @@ public:
     auto SendEvent(Event<>& event) -> Bool;
 
     auto Run() -> Async<void>;
-    auto RequestExit() -> Async<Bool>;
+    auto RequestQuit() -> void;
 
     auto IsActive() const -> Bool;
     auto IsForeground() const -> Bool;

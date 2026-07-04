@@ -27,14 +27,36 @@ using namespace FW_NS;
 @property(assign, nonatomic) void (*callbackOnFinishLaunching)(void*);
 @property(assign, nonatomic) void (*callbackOnBecomeActive)(void*);
 @property(assign, nonatomic) void (*callbackOnResignActive)(void*);
-- (void)applicationDidFinishLaunching:(NSNotification*)notification;
-- (void)applicationDidBecomeActive:(NSNotification*)notification;
-- (void)applicationDidResignActive:(NSNotification*)notification;
-- (void)action:(id)sender;
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem;
+@property(assign, nonatomic) BOOL (*callbackOnShouldTerminate)(void*);
+@property(assign, nonatomic) void (*callbackOnWillTerminate)(void*);
 @end
 
 @implementation PlatformApplicationDelegate
+
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
+{
+    if (_callbackOnShouldTerminate)
+    {
+        if (_callbackOnShouldTerminate(_data))
+        {
+            return NSTerminateNow;
+        }
+        else
+        {
+            return NSTerminateCancel;
+        }
+    }
+    return NSTerminateNow;
+}
+
+- (void)applicationWillTerminate:(NSNotification*)notification
+{
+    if (_callbackOnWillTerminate)
+    {
+        _callbackOnWillTerminate(_data);
+    }
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
     _callbackOnFinishLaunching(_data);
@@ -203,11 +225,11 @@ auto PlatformApplicationMac::Run() -> Async<void>
     }
 }
 
-auto PlatformApplicationMac::Exit() -> void
+auto PlatformApplicationMac::RequestQuit() -> void
 {
     @autoreleasepool
     {
-        [NSApp stop:nil];
+        [NSApp terminate:nil];
     }
 }
 
@@ -394,6 +416,26 @@ auto PlatformApplicationMac::Initialize() -> void
         [_delegate setCallbackOnResignActive:[](void* data) -> void {
             auto const _this = static_cast<PlatformApplicationMac*>(data);
             auto e = Event<>(Event<PlatformApplicationEvent::ActiveChanged>());
+            _this->SendApplicationEvent(e);
+        }];
+        [_delegate setCallbackOnShouldTerminate:[](void* data) -> BOOL {
+            auto const _this = static_cast<PlatformApplicationMac*>(data);
+            auto e = Event<>(Event<PlatformApplicationEvent::QuitRequested>());
+            if (_this->SendApplicationEvent(e))
+            {
+                if (e.Is<PlatformApplicationEvent::QuitRequested>())
+                {
+                    if (e.As<PlatformApplicationEvent::QuitRequested>()->IsCancelled())
+                    {
+                        return NO;
+                    }
+                }
+            }
+            return YES;
+        }];
+        [_delegate setCallbackOnWillTerminate:[](void* data) -> void {
+            auto const _this = static_cast<PlatformApplicationMac*>(data);
+            auto e = Event<>(Event<PlatformApplicationEvent::Quitting>());
             _this->SendApplicationEvent(e);
         }];
     }

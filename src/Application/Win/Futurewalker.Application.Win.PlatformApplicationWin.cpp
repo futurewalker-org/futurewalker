@@ -93,7 +93,7 @@ auto PlatformApplicationWin::Run() -> Async<void>
         }
 
         {
-            auto e = Event<>(Event<PlatformApplicationEvent::Exited>());
+            auto e = Event<>(Event<PlatformApplicationEvent::Quitting>());
             SendApplicationEvent(e);
         }
 
@@ -113,31 +113,31 @@ auto PlatformApplicationWin::Run() -> Async<void>
 ///
 /// @brief
 ///
-auto PlatformApplicationWin::RequestExit() -> Async<Bool>
+auto PlatformApplicationWin::RequestQuit() -> Async<Bool>
 {
     if (IsMainThread())
     {
         if (IsRunning())
         {
             auto cancelled = False;
-            auto event = Event<>(Event<PlatformApplicationEvent::ExitRequested>());
+            auto event = Event<>(Event<PlatformApplicationEvent::QuitRequested>());
             if (SendApplicationEvent(event))
             {
-                if (event.Is<PlatformApplicationEvent::ExitRequested>())
+                if (event.Is<PlatformApplicationEvent::QuitRequested>())
                 {
-                    cancelled = event.As<PlatformApplicationEvent::ExitRequested>()->IsCancelled();
+                    cancelled = event.As<PlatformApplicationEvent::QuitRequested>()->IsCancelled();
                 }
             }
 
             if (!cancelled)
             {
-                FW_DEBUG_LOG_INFO("PlatformEventLoopWin::RequestExit: Called on thread {}", std::this_thread::get_id());
+                FW_DEBUG_LOG_INFO("PlatformEventLoopWin::RequestQuit: Called on thread {}", std::this_thread::get_id());
                 ::PostQuitMessage(0);
             }
             co_return !cancelled;
         }
     }
-    FW_DEBUG_LOG_ERROR("PlatformEventLoopWin::RequestExit: Event loop must run on the thread it belongs to");
+    FW_DEBUG_LOG_ERROR("PlatformEventLoopWin::RequestQuit: Event loop must run on the thread it belongs to");
     FW_DEBUG_ASSERT(false);
     co_return false;
 }
