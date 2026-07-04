@@ -92,11 +92,6 @@ auto PlatformApplicationWin::Run() -> Async<void>
             }
         }
 
-        {
-            auto e = Event<>(Event<PlatformApplicationEvent::Quitting>());
-            SendApplicationEvent(e);
-        }
-
         FW_DEBUG_LOG_INFO("Exiting event loop on thread {}", std::this_thread::get_id());
     }
     catch (...)
@@ -113,7 +108,7 @@ auto PlatformApplicationWin::Run() -> Async<void>
 ///
 /// @brief
 ///
-auto PlatformApplicationWin::RequestQuit() -> Async<Bool>
+auto PlatformApplicationWin::RequestQuit() -> void
 {
     if (IsMainThread())
     {
@@ -134,12 +129,8 @@ auto PlatformApplicationWin::RequestQuit() -> Async<Bool>
                 FW_DEBUG_LOG_INFO("PlatformEventLoopWin::RequestQuit: Called on thread {}", std::this_thread::get_id());
                 ::PostQuitMessage(0);
             }
-            co_return !cancelled;
         }
     }
-    FW_DEBUG_LOG_ERROR("PlatformEventLoopWin::RequestQuit: Event loop must run on the thread it belongs to");
-    FW_DEBUG_ASSERT(false);
-    co_return false;
 }
 
 ///
@@ -329,6 +320,13 @@ Bool PlatformApplicationWin::TranslateAndDispatchMessage(MSG const& msg)
 {
     if (msg.message == WM_QUIT)
     {
+        if (!_quitting)
+        {
+            _quitting = true;
+            auto quittingEvent = Event<>(Event<PlatformApplicationEvent::Quitting>());
+            SendApplicationEvent(quittingEvent);
+        }
+
         ::PostQuitMessage(static_cast<int>(msg.wParam));
 
         if (HasTask())

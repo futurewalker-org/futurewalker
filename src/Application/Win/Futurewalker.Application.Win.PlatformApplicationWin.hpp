@@ -29,7 +29,7 @@ public:
     ~PlatformApplicationWin();
 
     auto Run() -> Async<void> override;
-    auto RequestQuit() -> Async<Bool> override;
+    auto RequestQuit() -> void override;
     auto IsRunning() -> Bool override;
     auto IsActive() -> Bool override;
     auto IsForeground() -> Bool override;
@@ -59,6 +59,7 @@ private:
     Shared<ThisThread::Scheduler> _thisThreadScheduler;
     HWND _hwnd = NULL;
     Bool _running = false;
+    Bool _quitting = false;
     Bool _active = false;
     std::deque<LazyTask<void>> _tasks;
     std::mutex _mutex;
