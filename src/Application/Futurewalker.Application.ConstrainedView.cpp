@@ -6,9 +6,16 @@
 
 namespace FW_DETAIL_NS
 {
-auto ConstrainedView::MakeView() -> Shared<ConstrainedView>
+auto ConstrainedView::Make() -> Shared<ConstrainedView>
 {
     return View::MakeDerived<ConstrainedView>();
+}
+
+auto ConstrainedView::MakeWithContent(Shared<View> const& content) -> Shared<ConstrainedView>
+{
+    auto view = Make();
+    view->SetContent(content);
+    return view;
 }
 
 ConstrainedView::ConstrainedView(PassKey<View> key)
@@ -73,7 +80,7 @@ auto ConstrainedView::Measure(MeasureScope& scope) -> void
     auto const& parameter = scope.GetParameter();
 
     auto const childWidth = IntersectConstraints(parameter.GetWidthConstraints(), _widthConstraints.GetValueOrDefault());
-    auto const childHeight = IntersectConstraints(parameter.GetWidthConstraints(), _widthConstraints.GetValueOrDefault());
+    auto const childHeight = IntersectConstraints(parameter.GetHeightConstraints(), _heightConstraints.GetValueOrDefault());
     if (auto const content = GetContent())
     {
         auto const size = scope.MeasureChild(content, childWidth, childHeight);

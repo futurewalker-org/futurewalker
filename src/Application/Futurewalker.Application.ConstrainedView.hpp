@@ -18,7 +18,8 @@ namespace FW_EXPORT
 class ConstrainedView final : public View
 {
 public:
-    static auto MakeView() -> Shared<ConstrainedView>;
+    static auto Make() -> Shared<ConstrainedView>;
+    static auto MakeWithContent(Shared<View> const& content) -> Shared<ConstrainedView>;
 
     ConstrainedView(PassKey<View> key);
 
