@@ -290,8 +290,9 @@ function(fw_bundle_resources NAME)
   set(_resource_bundle_path "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/Resource/${NAME}.dat")
   add_custom_command(
     OUTPUT ${_resource_bundle_path}
-    DEPENDS resource-compiler ${_resource_cache_target_name}
+    DEPENDS resource-compiler ${_resource_cache_paths} ${_resource_cache_target_name}
     COMMAND resource-compiler --bundle ${_resource_cache_paths} --output ${_resource_bundle_path}
+    COMMAND_EXPAND_LISTS
     VERBATIM)
 
   set(_resource_custom_target_name "${NAME}-RunBundleResources")
