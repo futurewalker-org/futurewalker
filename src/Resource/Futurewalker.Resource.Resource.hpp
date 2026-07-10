@@ -10,6 +10,7 @@
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.String.hpp"
 #include "Futurewalker.Core.Uuid.hpp"
+#include "Futurewalker.Core.InputStream.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -23,7 +24,8 @@ class Resource : NonCopyable
 public:
     Resource(Weak<ResourceBundle> const& bundle, SInt64 const& moduleIndex);
 
-    auto GetString(ResourceId const id) -> String;
+    auto LoadString(ResourceId const id) -> String;
+    auto LoadFile(ResourceId const id) -> Shared<InputStream>;
 
 private:
     Weak<ResourceBundle> _bundle;

@@ -14,6 +14,9 @@
 #include "Futurewalker.Core.Uuid.hpp"
 #include "Futurewalker.Core.HashMap.hpp"
 #include "Futurewalker.Core.SharedArray.hpp"
+#include "Futurewalker.Core.MemoryInputStream.hpp"
+
+#include <boost/unordered_map.hpp>
 
 #include <vector>
 
@@ -34,6 +37,7 @@ public:
     auto GetModuleCount() const -> SInt64;
 
     auto LoadString(SInt64 const moduleIndex, ResourceId const id) -> Optional<String>;
+    auto LoadFile(SInt64 const moduleIndex, ResourceId const id) -> Shared<InputStream>;
 
     auto GetPrimaryLocale(SInt64 const moduleIndex) -> Locale const&;
     auto GetCurrentLocale(SInt64 const moduleIndex) -> Locale const&;
@@ -42,6 +46,7 @@ public:
 
 private:
     auto InternalLoadStringResource(ResourceBundleResourcesChunk const& resourcesChunk, Locale const& locale) -> Optional<String>;
+    auto InternalLoadFileResource(ResourceBundleResourcesChunk const& resourcesChunk, Locale const& locale) -> Unique<MemoryInputStream>;
 
 private:
     struct ResourceModule
@@ -50,7 +55,8 @@ private:
         std::vector<Locale> locales;           // Supported locales.
         Locale primaryLocale;                  // Primary locale.
         Locale currentLocale;                  // Current locale.
-        HashMap<ResourceId, String> strings;   // Cached strings.
+        boost::unordered_map<ResourceId, String> strings;   // Cached strings.
+        boost::unordered_map<ResourceId, Unique<MemoryInputStream>> files; // Cached files.
         Shared<Resource> resource;             // Loaded resource (cached).
     };
     Weak<ResourceBundle> _self;           // Self.

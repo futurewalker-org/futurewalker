@@ -6,6 +6,8 @@
 #include "Futurewalker.Base.LocaleFunction.hpp"
 #include "Futurewalker.Base.Debug.hpp"
 
+#include "Futurewalker.Core.MemoryInputStream.hpp"
+
 namespace FW_DETAIL_NS
 {
 namespace
@@ -111,6 +113,15 @@ auto LoadResourceStringResourceChunk(FileInputStream& stream, UInt32 const offse
     stream.Read({(std::byte*)&chunk.next_ptr, sizeof(chunk.next_ptr)});
 }
 
+auto LoadResourceFileResourceChunk(FileInputStream& stream, UInt32 const offset, ResourceBundleFileResourceChunk& chunk) -> void
+{
+    stream.SetPosition(offset, SeekPosition::Begin);
+    stream.Read({(std::byte*)&chunk.chunk_size, sizeof(chunk.chunk_size)});
+    stream.Read({(std::byte*)&chunk.locale_ptr, sizeof(chunk.locale_ptr)});
+    stream.Read({(std::byte*)&chunk.data_ptr, sizeof(chunk.data_ptr)});
+    stream.Read({(std::byte*)&chunk.next_ptr, sizeof(chunk.next_ptr)});
+}
+
 auto LoadResourceDataChunkAsString(FileInputStream& stream, UInt32 const offset, String& value) -> void
 {
     stream.SetPosition(offset, SeekPosition::Begin);
@@ -120,6 +131,16 @@ auto LoadResourceDataChunkAsString(FileInputStream& stream, UInt32 const offset,
     auto buffer = std::vector<std::byte>(std::max(dataChunk.chunk_size, chunkSizeBytes) - chunkSizeBytes);
     stream.Read({buffer.data(), buffer.size()});
     value = String::MakeFromStdString({(char const*)buffer.data(), buffer.size()});
+}
+
+auto LoadResourceDataChunkAsByteArray(FileInputStream& stream, UInt32 const offset, std::vector<std::byte>& value) -> void
+{
+    stream.SetPosition(offset, SeekPosition::Begin);
+    auto dataChunk = ResourceBundleDataChunk();
+    auto const chunkSizeBytes = static_cast<uint32_t>(sizeof(dataChunk.chunk_size));
+    stream.Read({(std::byte*)&dataChunk.chunk_size, chunkSizeBytes});
+    value.resize(std::max(dataChunk.chunk_size, chunkSizeBytes) - chunkSizeBytes);
+    stream.Read({value.data(), value.size()});
 }
 }
 
@@ -294,6 +315,63 @@ auto ResourceBundle::LoadString(SInt64 const moduleIndex, ResourceId const id) -
 }
 
 ///
+/// @brief Load file resource.
+///
+/// @param[in] moduleIndex Index of resource module.
+/// @param[in] id Resource ID.
+///
+/// @return Loaded resource file stream.
+///
+auto ResourceBundle::LoadFile(SInt64 const moduleIndex, ResourceId const id) -> Shared<InputStream>
+{
+    if (moduleIndex < 0 || std::ssize(_modules) <= moduleIndex)
+    {
+        FW_DEBUG_ASSERT(false);
+        return {};
+    }
+
+    auto& module = _modules[static_cast<size_t>(moduleIndex)];
+
+    // Check if the resource is already loaded.
+    if (auto const it = module.files.find(id); it != module.files.end())
+    {
+        return it->second->Clone();
+    }
+
+    // Load from input stream, cache the result.
+    auto offset = module.moduleChunk.resources_ptr;
+    while (offset != 0)
+    {
+        auto resourcesChunk = ResourceBundleResourcesChunk();
+        LoadResourceBundleResourceChunk(*_stream, offset, resourcesChunk);
+
+        if (resourcesChunk.number == static_cast<UInt32>(id))
+        {
+            if (resourcesChunk.type == ResourceBundleResourceChunkType::File)
+            {
+                if (auto file = InternalLoadFileResource(resourcesChunk, module.currentLocale))
+                {
+                    auto& cache = module.files[id];
+                    cache = std::move(file);
+                    return cache->Clone();
+                }
+
+                if (auto file = InternalLoadFileResource(resourcesChunk, module.primaryLocale))
+                {
+                    auto& cache = module.files[id];
+                    cache = std::move(file);
+                    return cache->Clone();
+                }
+            }
+            FW_DEBUG_LOG_ERROR("Mismatched resource type for resource ID");
+            return {};
+        }
+        offset = resourcesChunk.next_ptr;
+    }
+    return {};
+}
+
+///
 /// @brief Get primary locale of module.
 ///
 /// @param[in] moduleIndex Module index. 
@@ -367,4 +445,33 @@ auto ResourceBundle::InternalLoadStringResource(ResourceBundleResourcesChunk con
     }
     return {};
 }
+
+///
+/// @brief Load file resource for given locale.
+///
+/// @param[in] resourcesChunk Resources chunk.
+/// @param[in] locale locale.
+///
+auto ResourceBundle::InternalLoadFileResource(ResourceBundleResourcesChunk const& resourcesChunk, Locale const& locale) -> Unique<MemoryInputStream>
+{
+    auto dataOffset = resourcesChunk.resource_ptr;
+    while (dataOffset != 0)
+    {
+        auto fileResourceChunk = ResourceBundleFileResourceChunk();
+        LoadResourceFileResourceChunk(*_stream, dataOffset, fileResourceChunk);
+
+        auto resourceLocale = String();
+        LoadResourceDataChunkAsString(*_stream, fileResourceChunk.locale_ptr, resourceLocale);
+
+        if (resourceLocale == locale.GetLanguageTag())
+        {
+            auto bytes = std::vector<std::byte>();
+            LoadResourceDataChunkAsByteArray(*_stream, fileResourceChunk.data_ptr, bytes);
+            return MemoryInputStream::Make(bytes, true);
+        }
+        dataOffset = fileResourceChunk.next_ptr;
+    }
+    return {};
+}
+
 }
