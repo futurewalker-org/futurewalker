@@ -720,7 +720,73 @@ auto RootView::RootCancelInput(Shared<View> const& view) -> void
 {
     if (view)
     {
-        // TODO: send events.
+        auto cancelCaptureViews = [&](auto const& view) -> Bool {
+            for (auto const& [pointerId, weakCaptureView] : _pointerCaptureViews)
+            {
+                auto const captureView = weakCaptureView.Lock();
+                if (captureView == view)
+                {
+                    SetPointerCaptureView(pointerId, nullptr);
+
+                    if (_delegate.releasePointer)
+                    {
+                        _delegate.releasePointer(pointerId);
+                    }
+
+                    auto cancelEventParameter = Event<PointerEvent::Motion::Cancel>();
+                    // TODO: Set other parameters.
+                    cancelEventParameter->SetPointerId(pointerId);
+                    DispatchPointerEventFromRoot(PassKey<RootView>(), cancelEventParameter, view, PointerPhaseFlag::Target);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        auto cancelOverViews = [&](auto const& view) -> Bool {
+            for (auto const& [pointerId, weakOverView] : _pointerOverViews)
+            {
+                auto const overView = weakOverView.Lock();
+                if (overView == view)
+                {
+                    SetPointerOverView(pointerId, nullptr);
+
+                    if (_delegate.releasePointer)
+                    {
+                        _delegate.releasePointer(pointerId);
+                    }
+
+                    auto oldEnterViews = GetPathFromDescendant(overView);
+
+                    // TODO: This could be an "Out" event, but we don't want to send it after sending "Cancel" event.
+                    auto cancelEventParameter = Event<PointerEvent::Motion::Cancel>();
+                    // TODO: Set other parameters.
+                    cancelEventParameter->SetPointerId(pointerId);
+                    DispatchPointerEventFromRoot(PassKey<RootView>(), cancelEventParameter, overView, PointerPhaseFlag::Target);
+
+                    for (auto const& oldEnterView : oldEnterViews)
+                    {
+                        if (IsAncestorOf(oldEnterView))
+                        {
+                            auto leaveEventParameter = Event<PointerEvent::Motion::Leave>();
+                            // TODO: Set other parameters.
+                            leaveEventParameter->SetPointerId(pointerId);
+                            DispatchPointerEventFromRoot(PassKey<RootView>(), leaveEventParameter, oldEnterView, PointerPhaseFlag::Target);
+                        }
+                    }
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        while (cancelCaptureViews(view))
+        {
+        }
+
+        while (cancelOverViews(view))
+        {
+        }
     }
 }
 

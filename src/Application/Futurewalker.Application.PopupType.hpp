@@ -26,5 +26,26 @@ struct PopupOptions
     ///
     Bool allowActiveOwnerPopup = false;
 };
+
+///
+/// @brief Edge of the anchor rectangle to which the popup is anchored.
+///
+enum class PopupAnchorEdge
+{
+    Leading,
+    Top,
+    Trailing,
+    Bottom,
+};
+
+///
+/// @brief Alignment of popup along the anchor edge.
+///
+enum class PopupAnchorAlignment
+{
+    Start,
+    Center,
+    End,
+};
 }
 }

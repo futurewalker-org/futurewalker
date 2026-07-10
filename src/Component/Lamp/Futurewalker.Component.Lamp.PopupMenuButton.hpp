@@ -47,10 +47,6 @@ private:
     auto CreatePopup() -> void;
     auto DestroyPopup() -> void;
     auto UpdatePopup() -> void;
-    auto IsDown() const -> Bool;
-    auto IsEnter() const -> Bool; 
-    auto SetDown(Bool const down) -> void;
-    auto SetEnter(Bool const enter) -> void;
 
 private:
     Menu _menu;

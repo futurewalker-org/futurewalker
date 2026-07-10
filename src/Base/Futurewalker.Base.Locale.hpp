@@ -29,8 +29,8 @@ public:
     static auto MakeFromLanguageTag(String const& languageTag) -> Optional<Locale>;
 
     explicit Locale(Shared<PlatformLocale> platformLocale);
-    Locale(Locale const& other);
-    auto operator=(Locale const& other) -> Locale&;
+    Locale(Locale const& other) noexcept;
+    auto operator=(Locale const& other) noexcept -> Locale&;
 
     auto operator==(Locale const& other) const -> bool;
     auto operator!=(Locale const& other) const -> bool = default;

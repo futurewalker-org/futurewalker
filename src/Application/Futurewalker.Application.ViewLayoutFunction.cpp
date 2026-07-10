@@ -114,4 +114,112 @@ auto ViewLayoutFunction::AlignToPixelGridByCeil(Rect<Dp> const& rect, View const
     auto const size = AlignToPixelGridByCeil(rect.GetSize(), view);
     return Rect<Dp>::Make(position, size);
 }
+
+///
+/// @brief Calculate popup position.
+///
+/// @param sourceRect Rectangle of the source view in global coordinate space.
+/// @param popupSize Size of the popup menu.
+/// @param screenRect Rectangle of the screen's work area.
+/// @param edge Edge of the source rectangle to which the popup is anchored.
+/// @param alignment Alignment of the popup relative to the anchor edge.
+/// @param rtl True if layout direction is right-to-left.
+///
+auto ViewLayoutFunction::CalcPopupPosition(
+  Rect<Vp> const& sourceRect,
+  Size<Vp> const& popupSize,
+  Rect<Vp> const& screenRect,
+  PopupAnchorEdge const edge,
+  PopupAnchorAlignment const alignment,
+  Bool const rtl) -> Point<Vp>
+{
+    if (edge == PopupAnchorEdge::Leading || edge == PopupAnchorEdge::Trailing)
+    {
+        auto x = Vp(0);
+        if ((!rtl && edge == PopupAnchorEdge::Leading) || (rtl && edge == PopupAnchorEdge::Trailing))
+        {
+            x = sourceRect.x0 - popupSize.width;
+            x = Vp::Max(screenRect.x0, x);
+        }
+        else if ((!rtl && edge == PopupAnchorEdge::Trailing) || (rtl && edge == PopupAnchorEdge::Leading))
+        {
+            x = sourceRect.x1;
+            x = Vp::Min(x, screenRect.x1 - popupSize.width);
+        }
+
+        if (rtl)
+        {
+            x = Vp::Min(x, screenRect.x1 - popupSize.width);
+        }
+        else
+        {
+            x = Vp::Max(x, screenRect.x0);
+        }
+
+        auto y = Vp(0);
+        if (alignment == PopupAnchorAlignment::Start)
+        {
+            y = sourceRect.y0;
+        }
+        else if (alignment == PopupAnchorAlignment::Center)
+        {
+            y = (sourceRect.y0 + sourceRect.y1 - popupSize.height) / 2;
+        }
+        else if (alignment == PopupAnchorAlignment::End)
+        {
+            y = sourceRect.y1 - popupSize.height;
+            y = Vp::Min(y, screenRect.y1 - popupSize.height);
+        }
+        y = Vp::Max(y, screenRect.y0);
+
+        return {x, y};
+    }
+    else if (edge == PopupAnchorEdge::Top || edge == PopupAnchorEdge::Bottom)
+    {
+        auto y = Vp(0);
+        if (edge == PopupAnchorEdge::Top)
+        {
+            y = sourceRect.y0 - popupSize.height;
+        }
+        else if (edge == PopupAnchorEdge::Bottom)
+        {
+            y = sourceRect.y1;
+            y = Vp::Min(y, screenRect.y1 - popupSize.height);
+        }
+        y = Vp::Max(y, screenRect.y0);
+
+        auto x = Vp(0);
+        if ((!rtl && alignment == PopupAnchorAlignment::Start) || (rtl && alignment == PopupAnchorAlignment::End))
+        {
+            x = sourceRect.x0;
+            x = Vp::Min(x, screenRect.x1 - popupSize.width);
+        }
+        else if ((!rtl && alignment == PopupAnchorAlignment::End) || (rtl && alignment == PopupAnchorAlignment::Start))
+        {
+            x = sourceRect.x1 - popupSize.width;
+            x = Vp::Max(x, screenRect.x0);
+        }
+        else if (alignment == PopupAnchorAlignment::Center)
+        {
+            x = (sourceRect.x0 + sourceRect.x1 - popupSize.width) / 2;
+        }
+
+        if (rtl)
+        {
+            x = Vp::Min(x, screenRect.x1 - popupSize.width);
+        }
+        else
+        {
+            x = Vp::Max(x, screenRect.x0);
+        }
+
+        return {x, y};
+    }
+    else
+    {
+        FW_DEBUG_LOG_ERROR("Invalid PopupAnchorEdge");
+        FW_DEBUG_ASSERT(false);
+    }
+    return {};
+}
 }

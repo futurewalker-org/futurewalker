@@ -3,6 +3,7 @@
 
 #include "Futurewalker.Application.Prelude.hpp"
 #include "Futurewalker.Application.View.hpp"
+#include "Futurewalker.Application.PopupType.hpp"
 
 #include "Futurewalker.Geometry.hpp"
 
@@ -34,6 +35,9 @@ public:
     static auto AlignToPixelGridByCeil(Point<Dp> const& point, View const& view) -> Point<Dp>;
     static auto AlignToPixelGridByCeil(Size<Dp> const& size, View const& view) -> Size<Dp>;
     static auto AlignToPixelGridByCeil(Rect<Dp> const& rect, View const& view) -> Rect<Dp>;
+
+    static auto CalcPopupPosition(Rect<Vp> const& sourceRect, Size<Vp> const& popupSize, Rect<Vp> const& screenRect, PopupAnchorEdge const edge, PopupAnchorAlignment const alignment, Bool const rtl)
+      -> Point<Vp>;
 };
 }
 }

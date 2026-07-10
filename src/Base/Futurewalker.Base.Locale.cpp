@@ -72,12 +72,12 @@ Locale::Locale(Shared<PlatformLocale> platformLocale)
 {
 }
 
-Locale::Locale(Locale const& other)
+Locale::Locale(Locale const& other) noexcept
   : _platform(other._platform)
 {
 }
 
-auto Locale::operator=(Locale const& other) -> Locale&
+auto Locale::operator=(Locale const& other) noexcept -> Locale&
 {
     if (this != &other)
     {

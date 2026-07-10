@@ -206,8 +206,8 @@ auto PopupMenu::CreatePopup(Shared<View> const& sourceView) -> void
         auto frame = PopupFrameView::MakeWithContent(_menuView);
         frame->SetBlurRadius(Style::Size60);
         frame->SetCornerRadius(Style::CornerRadiusSmall);
-        frame->SetShadowColor(Color::Neutral10);
-        frame->SetShadowAlpha(0.3);
+        frame->SetShadowColor(Color::Neutral0);
+        frame->SetShadowAlpha(0.5);
         _popup->SetContent(frame);
         _popup->SetBackgroundColor(RGBAColor());
         EventReceiver::Connect(*_popup, *this, &PopupMenu::ReceiveEvent);

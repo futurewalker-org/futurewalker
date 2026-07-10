@@ -35,20 +35,23 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
         auto const type = item.GetType();
         if (type == MenuItemType::Item)
         {
-            auto leadingIcon = IconView::MakeWithIcon(item.GetLeadingIcon());
-            AttributeNode::SetReference<IconViewStyle::Size>(*leadingIcon, Style::IconSizeSmall);
-            auto text = TextView::MakeWithText(item.GetTitle());
             auto itemView = MenuItemView::Make();
-            itemView->SetLeadingView(leadingIcon);
-            itemView->SetMiddleView(text);
-
+            if (!item.GetLeadingIcon().IsEmpty())
+            {
+                auto leadingIcon = IconView::MakeWithIcon(item.GetLeadingIcon());
+                AttributeNode::SetReference<IconViewStyle::Size>(*leadingIcon, Style::IconSizeSmall);
+                itemView->SetLeadingView(leadingIcon);
+            }
+            {
+                auto text = TextView::MakeWithText(item.GetTitle());
+                itemView->SetMiddleView(text);
+            }
             if (!item.GetTrailingIcon().IsEmpty())
             {
                 auto trailingIcon = IconView::MakeWithIcon(item.GetTrailingIcon());
                 AttributeNode::SetReference<IconViewStyle::Size>(*trailingIcon, Style::IconSizeSmall);
                 itemView->SetTrailingView(trailingIcon);
             }
-
             if (!item.GetAccessKey().IsEmpty())
             {
                 auto accessKeyString = GetAccessKeyString(item.GetAccessKey(), item.GetAccessKeyModifiers());
@@ -61,15 +64,22 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
         }
         else if (type == MenuItemType::SubMenu)
         {
-            auto leadingIcon = IconView::MakeWithIcon(item.GetLeadingIcon());
-            auto trailingIcon = IconView::MakeWithIcon(Icon::MakeFromFont(Graphics::FontFamily(u8"Segoe Fluent Icons"), 0xE974));
-            AttributeNode::SetReference<IconViewStyle::Size>(*leadingIcon, Style::IconSizeSmall);
-            AttributeNode::SetReference<IconViewStyle::Size>(*trailingIcon, Style::IconSizeExtraSmall);
-            auto text = TextView::MakeWithText(item.GetTitle());
             auto itemView = MenuItemView::Make();
-            itemView->SetLeadingView(leadingIcon);
-            itemView->SetMiddleView(text);
-            itemView->SetTrailingView(trailingIcon);
+            if (!item.GetLeadingIcon().IsEmpty())
+            {
+                auto leadingIcon = IconView::MakeWithIcon(item.GetLeadingIcon());
+                AttributeNode::SetReference<IconViewStyle::Size>(*leadingIcon, Style::IconSizeSmall);
+                itemView->SetLeadingView(leadingIcon);
+            }
+            {
+                auto text = TextView::MakeWithText(item.GetTitle());
+                itemView->SetMiddleView(text);
+            }
+            {
+                auto trailingIcon = IconView::MakeWithIcon(Icon::MakeFromFont(Graphics::FontFamily(u8"Segoe Fluent Icons"), 0xF745));
+                AttributeNode::SetReference<IconViewStyle::Size>(*trailingIcon, Style::IconSizeSmall);
+                itemView->SetTrailingView(trailingIcon);
+            }
             return itemView;
         }
         else if (type == MenuItemType::Separator)

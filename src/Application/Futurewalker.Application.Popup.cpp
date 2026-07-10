@@ -4,6 +4,8 @@
 #include "Futurewalker.Application.Window.hpp"
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.MeasureScope.hpp"
+#include "Futurewalker.Application.KeyEvent.hpp"
+#include "Futurewalker.Application.Key.hpp"
 
 namespace FW_DETAIL_NS
 {
@@ -264,6 +266,15 @@ auto Popup::ReceiveEvent(Event<>& event) -> Bool
         _window = nullptr;
         auto closedEvent = Event<>(Event<PopupEvent::Closed>());
         return GetEventReceiver().SendEvent(closedEvent);
+    }
+    else if (event.Is<KeyEvent>())
+    {
+        auto const key = event.As<KeyEvent>()->GetKey();
+        if (key == Key::Escape)
+        {
+            Close();
+            return true;
+        }
     }
     return false;
 }

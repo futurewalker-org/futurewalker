@@ -29,7 +29,7 @@ namespace FW_EXPORT
 ///
 /// @brief Text view.
 ///
-class TextView final : public View
+class TextView : public View
 {
 public:
     static auto Make() -> Shared<TextView>;
