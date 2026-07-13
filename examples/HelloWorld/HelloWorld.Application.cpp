@@ -61,7 +61,7 @@ auto Application::ReceiveEvent(Event<>& event) -> Bool
 
         // Loads localized string of "Hello, World!".
         // Actual values are defined in .xml files in Resource folder.
-        auto const hello = resource->GetString(R::HelloWorld::Hello);
+        auto const hello = resource->LoadString(R::HelloWorld::Hello);
 
         AsyncFunction::SpawnFn([=, this] -> Async<void> {
             // Create main window with background color.
