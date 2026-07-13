@@ -118,7 +118,7 @@ auto StringFunction::StripTrailingBreakAndSpace(String const& text, String::Inde
         auto c = String::CharType();
         if (text.GetChar(prevIdx, c))
         {
-            if (!UnicodeFunction::IsSpace(c) && !UnicodeFunction::IsBreak(c))
+            if (!UnicodeFunction::IsSeparator(c) && !UnicodeFunction::IsBreak(c))
             {
                 return text.GetSubString(begin, idx);
             }

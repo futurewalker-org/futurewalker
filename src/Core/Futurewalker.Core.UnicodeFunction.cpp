@@ -494,13 +494,13 @@ auto UnicodeFunction::GetPrevCodePointIndex(Pointer<char16_t const> data, SInt64
 }
 
 ///
-/// @brief Check if code point is a whitespace character.
+/// @brief Check if code point is a separator character.
 ///
 /// Includes class Zs (Space Separator), Zl (Line Separator), and Zp (Paragraph Separator).
 ///
 /// @param[in] codePoint The Unicode code point to check.
 ///
-auto UnicodeFunction::IsSpace(char32_t const codePoint) -> Bool
+auto UnicodeFunction::IsSeparator(char32_t const codePoint) -> Bool
 {
     auto const value = u_getIntPropertyValue(codePoint, UCHAR_GENERAL_CATEGORY);
     return value == U_SPACE_SEPARATOR || value == U_LINE_SEPARATOR || value == U_PARAGRAPH_SEPARATOR;
