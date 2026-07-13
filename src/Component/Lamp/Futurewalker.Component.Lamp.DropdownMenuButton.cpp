@@ -21,7 +21,6 @@
 #include "Futurewalker.Resource.Resource.hpp"
 
 #include "Resource/Futurewalker.Component.Lamp.hpp"
-#include "Resource/Futurewalker.Component.Lamp.Icon.hpp"
 
 namespace FW_LAMP_DETAIL_NS
 {

@@ -11,4 +11,6 @@ fw_link_libraries(${LibraryName} PUBLIC
   Futurewalker::Application
 )
 
+fw_add_resources(${LibraryName})
+
 fw_source_group(${LibraryName})
