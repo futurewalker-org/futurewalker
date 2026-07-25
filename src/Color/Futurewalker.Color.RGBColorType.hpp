@@ -13,6 +13,8 @@ class RGBColorT;
 ///
 /// @brief Generic RGB color.
 ///
+/// @note This class does not carry information about the color space in which the channels are encoded.
+///
 using RGBColor = RGBColorT<void>;
 }
 }

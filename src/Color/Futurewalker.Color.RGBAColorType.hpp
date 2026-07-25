@@ -13,6 +13,8 @@ class RGBAColorT;
 ///
 /// @brief Generic RGBA color.
 ///
+/// @note This class does not carry information about the color space in which the channels are encoded.
+///
 using RGBAColor = RGBAColorT<void>;
 }
 }

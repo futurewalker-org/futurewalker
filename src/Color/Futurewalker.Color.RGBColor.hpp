@@ -13,8 +13,6 @@ namespace FW_EXPORT
 ///
 /// Represents a color which consists of red, green, and blue channels.
 ///
-/// @note This class does not carry information about the color space in which the channels are encoded.
-///
 template <class Tag>
 class RGBColorT
 {
