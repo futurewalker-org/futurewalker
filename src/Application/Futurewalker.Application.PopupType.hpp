@@ -22,6 +22,11 @@ struct PopupOptions
     Bool hasFrame = false;
 
     ///
+    /// @brief Whether the popup is allowed to be closed by keyboard events like Escape key.
+    ///
+    Bool allowCloseByKey = true;
+
+    ///
     /// @brief Whether the popup is allowed to be active when its owner is active.
     ///
     Bool allowActiveOwnerPopup = false;

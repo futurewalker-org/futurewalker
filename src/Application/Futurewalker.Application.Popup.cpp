@@ -269,11 +269,18 @@ auto Popup::ReceiveEvent(Event<>& event) -> Bool
     }
     else if (event.Is<KeyEvent>())
     {
-        auto const key = event.As<KeyEvent>()->GetKey();
-        if (key == Key::Escape)
+        if (GetEventReceiver().SendEvent(event))
         {
-            Close();
             return true;
+        }
+        else if (_options.allowCloseByKey)
+        {
+            auto const key = event.As<KeyEvent>()->GetKey();
+            if (key == Key::Escape)
+            {
+                Close();
+                return true;
+            }
         }
     }
     return false;
