@@ -337,6 +337,17 @@ auto PlatformWindowContextWin::RequestFrame(Weak<PlatformWindowWin> window, Plat
 ///
 /// @brief
 ///
+auto PlatformWindowContextWin::CancelFrame(Weak<PlatformWindowWin> window) -> void
+{
+    if (_vsyncProvider)
+    {
+        _vsyncProvider->RemoveFrameCallback(window);
+    }
+}
+
+///
+/// @brief
+///
 auto PlatformWindowContextWin::GetFrameTime(PlatformWindowWin const& window) const -> MonotonicTime
 {
     (void)window;

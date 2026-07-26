@@ -105,7 +105,7 @@ auto PlatformVsyncProviderWin::PostFrameCallback(Weak<void> data, PlatformVsyncC
         const auto rhs = data.Lock();
         if (lhs && rhs)
         {
-            return cb.data.Lock() == data.Lock();
+            return lhs == rhs;
         }
         return false;
     });
@@ -120,12 +120,40 @@ auto PlatformVsyncProviderWin::PostFrameCallback(Weak<void> data, PlatformVsyncC
 }
 
 ///
+/// @brief Remove posted frame callback.
+///
+/// @param data User data.
+///
+auto PlatformVsyncProviderWin::RemoveFrameCallback(Weak<void> data) -> void
+{
+    auto lock = std::unique_lock(_mutex);
+
+    std::erase_if(_callbacks, [&](const auto& cb) {
+        const auto lhs = cb.data.Lock();
+        const auto rhs = data.Lock();
+        if (lhs && rhs)
+        {
+            return lhs == rhs;
+        }
+        return false;
+    });
+}
+
+///
 /// @brief Check if callback exists.
 ///
 auto PlatformVsyncProviderWin::HasCallback() const -> Bool
 {
     auto lock = std::unique_lock(_mutex);
-    return !_callbacks.empty();
+
+    for (auto const& callback : _callbacks)
+    {
+        if (!callback.data.IsExpired())
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 ///

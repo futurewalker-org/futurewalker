@@ -657,7 +657,7 @@ auto PlatformWindowWin::RequestClose() -> Async<Bool>
 ///
 auto PlatformWindowWin::Close() -> void
 {
-    if (_hwnd)
+    if (!IsClosed())
     {
         if (const auto owner = _options.owner.TryAs<PlatformWindowWin>())
         {
@@ -1657,6 +1657,11 @@ auto PlatformWindowWin::HandleDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
             try
             {
+                if (const auto context = GetContext())
+                {
+                    context->CancelFrame(GetSelf());
+                }
+
                 if (const auto owner = _options.owner.TryAs<PlatformWindowWin>())
                 {
                     owner->RemoveOwnedWindow(GetSelf());
@@ -1668,6 +1673,7 @@ auto PlatformWindowWin::HandleDestroy(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
                     auto event = Event<>(Event<PlatformWindowEvent::Closed>());
                     SendWindowEvent(event);
                 }
+                _hwnd = NULL;
             }
             catch (...)
             {

@@ -53,6 +53,7 @@ public:
     auto InitializeWindow(Shared<PlatformWindowWin> const& window, PlatformWindowOptions const& options) -> void;
 
     auto RequestFrame(Weak<PlatformWindowWin> window, PlatformVsyncCallbackFunction callback) -> void;
+    auto CancelFrame(Weak<PlatformWindowWin> window) -> void;
     auto GetFrameTime(PlatformWindowWin const& window) const -> MonotonicTime;
 
     auto GetKeyboardLayout() -> PlatformKeyboardLayoutWin&;

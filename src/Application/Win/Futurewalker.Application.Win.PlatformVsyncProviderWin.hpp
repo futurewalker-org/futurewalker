@@ -41,6 +41,7 @@ public:
 
     auto GetCurrentFrameTime() const -> MonotonicTime;
     auto PostFrameCallback(Weak<void> data, PlatformVsyncCallbackFunction callback) -> void;
+    auto RemoveFrameCallback(Weak<void> data) -> void;
 
 private:
     auto HasCallback() const -> Bool;
