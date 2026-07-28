@@ -746,7 +746,7 @@ auto TextEdit::InternalGetFontSize() const -> Graphics::FontSize
 
 auto TextEdit::InternalGetFontSmoothing() const -> Graphics::FontSmoothing
 {
-    return _fontSmoothing.GetValueOr(Graphics::FontSmoothing::SubpixelAntiAlias);
+    return _fontSmoothing.GetValueOr(Graphics::FontSmoothing::AntiAlias);
 }
 
 auto TextEdit::InternalDrawLines(Graphics::Scene& scene, std::vector<ArrangedLine> const& arrangedLines) const -> void

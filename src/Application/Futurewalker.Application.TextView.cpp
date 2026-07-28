@@ -358,7 +358,7 @@ auto TextView::GetFontSize() const -> Graphics::FontSize
 ///
 auto TextView::GetFontSmoothing() const -> Graphics::FontSmoothing
 {
-    return _fontSmoothing.GetValueOr(Graphics::FontSmoothing::SubpixelAntiAlias);
+    return _fontSmoothing.GetValueOr(Graphics::FontSmoothing::AntiAlias);
 }
 
 ///

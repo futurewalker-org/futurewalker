@@ -12,9 +12,9 @@ namespace FW_EXPORT
 ///
 enum class FontSmoothing
 {
-    None,
-    AntiAlias,
-    SubpixelAntiAlias,
+    None, //!< No anti-aliasing.
+    AntiAlias, //!< Grayscale anti-aliasing.
+    SubpixelAntiAlias, //!< Subpixel anti-aliasing.
 };
 }
 }
