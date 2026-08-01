@@ -57,14 +57,14 @@ public:
     ///
     /// @param reference Initial reference value of attribute.
     ///
-    template <const auto* Reference>
+    template <auto const& Reference>
     static auto MakeWithDefaultReference(
 #if FW_ENABLE_DEBUG
       Pointer<char const> name
 #endif
       ) -> StaticAttribute<T>
     {
-        auto const reference = StaticAttributeBaseRef(*Reference);
+        auto const reference = StaticAttributeBaseRef(Reference);
         return StaticAttribute<T>(
 #if FW_ENABLE_DEBUG
           name,
@@ -80,19 +80,19 @@ public:
     ///
     /// @param f Compute function of attribute.
     ///
-    template <const auto*... References, class F>
+    template <auto const&... References, class F>
     static auto MakeWithDefaultFunction(
 #if FW_ENABLE_DEBUG
       Pointer<char const> name,
 #endif
       F f) -> StaticAttribute<T>
     {
-        auto constexpr references = std::array {StaticAttributeBaseRef(*References)...};
+        auto constexpr references = std::array {StaticAttributeBaseRef(References)...};
         return StaticAttribute<T>(
 #if FW_ENABLE_DEBUG
           name,
 #endif
-          AttributeComputeFunction::MakeFunctionWrapper<T, typename std::remove_reference_t<decltype(*References)>::ValueType...>(f),
+          AttributeComputeFunction::MakeFunctionWrapper<T, typename std::remove_reference_t<decltype(References)>::ValueType...>(f),
           references);
     }
 
