@@ -1,22 +1,19 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Core.Prelude.hpp"
+#include "Futurewalker.Geometry.Prelude.hpp"
 
 namespace FW_DETAIL_NS
 {
 namespace FW_EXPORT
 {
 template <class>
-struct Vector2;
+struct Matrix3x3;
 
 template <class>
-struct Vector3;
+struct Matrix4x4;
 
 template <class>
-struct Vector4;
-
-template <class>
-struct Vector5;
+struct Matrix5x5;
 }
 }

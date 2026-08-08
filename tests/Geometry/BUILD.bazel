@@ -5,6 +5,7 @@ fw_test_suite(
     tags = ["Geometry"],
     names = [
         "Offset",
+        "Matrix",
         "Point",
         "Radius",
         "Rect",
