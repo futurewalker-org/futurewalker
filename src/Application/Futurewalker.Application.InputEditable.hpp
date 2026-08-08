@@ -54,8 +54,8 @@ public:
 
     auto GetComposingRange() const -> Range<CodePoint>;
 
-    auto GetLayoutOffset() const -> Vector<Dp>;
-    auto SetLayoutOffset(Vector<Dp> const& offset) -> void;
+    auto GetLayoutOffset() const -> Vector2<Dp>;
+    auto SetLayoutOffset(Vector2<Dp> const& offset) -> void;
 
     auto GetLayoutRect() const -> Rect<Dp>;
     auto SetLayoutRect(Rect<Dp> const& rect) -> void;
@@ -79,7 +79,7 @@ private:
 private:
     Shared<PlatformInputEditable> _platform;
     Shared<EventReceiver> _eventReceiver;
-    Vector<Dp> _layoutOffset;
+    Vector2<Dp> _layoutOffset;
     Rect<Dp> _layoutRect;
 };
 }

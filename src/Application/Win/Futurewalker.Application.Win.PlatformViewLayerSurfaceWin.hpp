@@ -31,7 +31,7 @@ public:
     PlatformViewLayerSurfaceWin();
 
     auto SetSize(Size<Dp> const& size) -> void;
-    auto SetOffset(Vector<Dp> const& offset) -> void;
+    auto SetOffset(Vector2<Dp> const& offset) -> void;
     auto SetDisplayScale(DisplayScale const scale) -> void;
     auto SetBackingScale(BackingScale const scale) -> void;
     auto SetPixelGeometry(Graphics::PixelGeometry const pixelGeometry) -> void;
@@ -58,7 +58,7 @@ private:
     Graphics::PixelGeometry _pixelGeometry = Graphics::PixelGeometry::Unknown;
     Float64 _textGamma = 0.0;
     Float64 _textContrast = 0.0;
-    Vector<Dp> _offset;
+    Vector2<Dp> _offset;
     Shared<PlatformViewLayerSurfaceContextWin> _context;
     Microsoft::WRL::ComPtr<IDCompositionVisual3> _visual;
     Shared<Graphics::PlatformSwapChainSurfaceWin> _surface;

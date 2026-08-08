@@ -23,7 +23,7 @@ auto PlatformViewLayerSurfaceWin::SetSize(Size<Dp> const& size) -> void
     _size = size;
 }
 
-auto PlatformViewLayerSurfaceWin::SetOffset(Vector<Dp> const& offset) -> void
+auto PlatformViewLayerSurfaceWin::SetOffset(Vector2<Dp> const& offset) -> void
 {
     _offset = offset;
 }

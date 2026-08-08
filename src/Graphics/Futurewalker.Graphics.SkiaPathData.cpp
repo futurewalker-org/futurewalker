@@ -72,7 +72,7 @@ auto SkiaPathData::Clone() const -> Shared<PathData>
     return clone;
 }
 
-auto SkiaPathData::Translate(Vector<Dp> const& offset) -> void
+auto SkiaPathData::Translate(Vector2<Dp> const& offset) -> void
 {
     auto const x = static_cast<SkScalar>(offset.x);
     auto const y = static_cast<SkScalar>(offset.y);

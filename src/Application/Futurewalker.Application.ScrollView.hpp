@@ -41,7 +41,7 @@ private:
     Flags<ScrollViewDirection> _direction = ScrollViewDirection::None;
     AttributeAccessor<Float64> _horizontalScrollFactor;
     AttributeAccessor<Float64> _verticalScrollFactor;
-    Vector<Dp> _offset;
+    Vector2<Dp> _offset;
 };
 }
 }

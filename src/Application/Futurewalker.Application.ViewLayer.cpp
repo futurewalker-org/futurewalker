@@ -110,7 +110,7 @@ auto ViewLayer::GetChildAt(SInt64 const index) -> Shared<ViewLayer>
 ///
 /// @param offset Offset of origin in parent's origin.
 ///
-auto ViewLayer::SetOffset(Vector<Dp> const& offset) -> void
+auto ViewLayer::SetOffset(Vector2<Dp> const& offset) -> void
 {
     if (offset.IsFinite())
     {
@@ -200,7 +200,7 @@ auto ViewLayer::SetDisplayList(Shared<Graphics::DisplayList> const& displayList)
     }
 }
 
-auto ViewLayer::SetDisplayListOffset(Vector<Dp> const& offset) -> void
+auto ViewLayer::SetDisplayListOffset(Vector2<Dp> const& offset) -> void
 {
     if (offset.IsFinite())
     {

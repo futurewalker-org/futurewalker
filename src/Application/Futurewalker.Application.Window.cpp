@@ -189,7 +189,7 @@ auto Window::SetRestoredFrameRect(Rect<Vp> const& rect) -> void
 auto Window::LocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>
 {
     auto const position = GetFrameRect().GetPosition();
-    return position + UnitFunction::ConvertDpToVp(point, GetDisplayScale()).As<Vector>();
+    return position + UnitFunction::ConvertDpToVp(point, GetDisplayScale()).As<Vector2>();
 }
 
 ///
@@ -198,7 +198,7 @@ auto Window::LocalToGlobalPoint(Point<Dp> const& point) const -> Point<Vp>
 auto Window::GlobalToLocalPoint(Point<Vp> const& point) const -> Point<Dp>
 {
     auto const position = GetFrameRect().GetPosition();
-    return UnitFunction::ConvertVpToDp(point - position.As<Vector>(), GetDisplayScale());
+    return UnitFunction::ConvertVpToDp(point - position.As<Vector2>(), GetDisplayScale());
 }
 
 ///
@@ -1058,7 +1058,7 @@ auto Window::UpdateAreaRects() -> void
         auto const titleBarRects = _platformObject->GetAreaBounds(WindowArea::TitleBar);
         auto const localTitleBarInsets = EdgeInsets::Max(titleBarInsets - frameInsets, EdgeInsets());
         auto const localTitleBarRects = titleBarRects
-                                        | std::ranges::views::transform([&](auto const& rect) { return Rect<Dp>::Offset(rect, -Vector<Dp>(frameInsets.leading, frameInsets.top)); })
+                                        | std::ranges::views::transform([&](auto const& rect) { return Rect<Dp>::Offset(rect, -Vector2<Dp>(frameInsets.leading, frameInsets.top)); })
                                         | std::ranges::to<std::vector>();
         _areaManager->SetAreaInsets(ViewArea::TitleBar, localTitleBarInsets);
         _areaManager->SetAreaBounds(ViewArea::TitleBar, localTitleBarRects);

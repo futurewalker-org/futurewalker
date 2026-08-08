@@ -249,7 +249,7 @@ auto View::LocalToAncestorPoint(Point<Dp> const& point, ReferenceArg<View const>
         {
             return result;
         }
-        result = result + (*self).GetFrameRect().GetCorner<0, 0>().As<Vector>();
+        result = result + (*self).GetFrameRect().GetCorner<0, 0>().As<Vector2>();
         self = (*self).GetParent();
     }
     return result;
@@ -271,7 +271,7 @@ auto View::AncestorToLocalPoint(Point<Dp> const& point, ReferenceArg<View const>
         {
             return result;
         }
-        result = result - (*self).GetFrameRect().GetCorner<0, 0>().As<Vector>();
+        result = result - (*self).GetFrameRect().GetCorner<0, 0>().As<Vector2>();
         self = (*self).GetParent();
     }
     return result;
@@ -830,7 +830,7 @@ auto View::EnterArrangeScope(PassKey<ArrangeScope>, ArrangeParameter const& para
 
         if (oldFrameRect.GetPosition() != newFrameRect.GetPosition())
         {
-            GetLayer().SetOffset(newFrameRect.GetPosition().As<Vector>());
+            GetLayer().SetOffset(newFrameRect.GetPosition().As<Vector2>());
         }
 
         if (oldFrameRect.GetSize() != newFrameRect.GetSize())
@@ -841,7 +841,7 @@ auto View::EnterArrangeScope(PassKey<ArrangeScope>, ArrangeParameter const& para
 
         if (auto const editable = GetInputEditable())
         {
-            editable->SetLayoutOffset(LocalToRootPoint({}).As<Vector>());
+            editable->SetLayoutOffset(LocalToRootPoint({}).As<Vector2>());
         }
     }
     catch (...)
@@ -917,7 +917,7 @@ auto View::EnterHitTestScope(PassKey<HitTestScope> key, HitTestParameter const& 
                 if (view && view->IsVisible())
                 {
                     auto childParameter = parameter;
-                    childParameter.SetPosition(childParameter.GetPosition() - view->GetFrameRect().GetPosition().As<Vector>());
+                    childParameter.SetPosition(childParameter.GetPosition() - view->GetFrameRect().GetPosition().As<Vector2>());
                     if (auto const result = view->EnterHitTestScope(key, childParameter))
                     {
                         return result;
@@ -969,7 +969,7 @@ auto View::DispatchPointerEvent(Event<PointerEvent> const& pointerEvent, Shared<
         }
 
         auto dispatch = [](View& view, Event<PointerEvent> pointerEvent, Shared<View> const& target, Flags<PointerPhaseFlag> const phase) {
-            auto const offset = view.GetFrameRect().GetPosition().As<Vector>();
+            auto const offset = view.GetFrameRect().GetPosition().As<Vector2>();
             pointerEvent->SetPosition(pointerEvent->GetPosition() - offset);
             return view.DispatchPointerEvent(pointerEvent, target, phase);
         };
@@ -1429,7 +1429,7 @@ auto View::SetInputEditable(Shared<InputEditable> const& editable) -> void
 
         if (_inputEditable)
         {
-            _inputEditable->SetLayoutOffset(LocalToRootPoint({}).As<Vector>());
+            _inputEditable->SetLayoutOffset(LocalToRootPoint({}).As<Vector2>());
         }
 
         if (root && _inputEditable)
