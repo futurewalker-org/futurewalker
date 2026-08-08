@@ -79,6 +79,12 @@ auto SkiaPathData::Translate(Vector2<Dp> const& offset) -> void
     _path.offset(x, y);
 }
 
+auto SkiaPathData::Transform(Matrix3x3<Dp> const& transform) -> void
+{
+    auto const skMatrix = SkiaFunction::Matrix3x3ToSkMatrix(transform);
+    _path.transform(skMatrix);
+}
+
 auto SkiaPathData::IsEmpty() const -> Bool
 {
     return _path.isEmpty();

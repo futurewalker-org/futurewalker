@@ -15,6 +15,7 @@
 #include "Futurewalker.Core.NonConstructible.hpp"
 
 #include <include/core/SkRRect.h>
+#include <include/core/SkMatrix.h>
 #include <include/core/SkColor.h>
 #include <include/core/SkBlurTypes.h>
 #include <include/core/SkFontStyle.h>
@@ -29,7 +30,9 @@ struct SkiaFunction : NonConstructible
     static auto PointToSkPoint(Point<Dp> const& point) -> SkPoint;
     static auto RectToSkRect(Rect<Dp> const& rect) -> SkRect;
     static auto RadiusToSkVector(Radius<Dp> const& radius) -> SkVector;
+    static auto Matrix3x3ToSkMatrix(Matrix3x3<Dp> const& matrix) -> SkMatrix;
     static auto RoundRectToSkRRect(RoundRect<Dp> const& roundRect) -> SkRRect;
+    static auto ChannelToScalar(Channel const& channel) -> SkScalar;
     static auto RGBAColorToSkColor4f(RGBAColor const& color) -> SkColor4f;
     static auto BlurStyleToSkBlurStyle(BlurStyle const style) -> SkBlurStyle;
     static auto FontSlantToSkFontSlant(FontSlant const slant) -> SkFontStyle::Slant;

@@ -3,6 +3,7 @@
 
 #include "Futurewalker.Graphics.SceneType.hpp"
 #include "Futurewalker.Graphics.MaskFilterType.hpp"
+#include "Futurewalker.Graphics.ColorFilterType.hpp"
 #include "Futurewalker.Graphics.DisplayListType.hpp"
 #include "Futurewalker.Graphics.GlyphRunType.hpp"
 #include "Futurewalker.Graphics.Path.hpp"
@@ -28,8 +29,9 @@ class Scene : NonCopyable
 public:
     struct LayerParam
     {
-        RGBAColor color = RGBAColor(0, 0, 0, 1);
+        Channel alpha = Channel(1);
         BlendMode blendMode = BlendMode::SrcOver;
+        Shared<ColorFilter> colorFilter = nullptr;
     };
 
     struct ClipRectParam
@@ -65,6 +67,11 @@ public:
     {
         Float64 x = 0;
         Float64 y = 0;
+    };
+
+    struct TransformParam
+    {
+        Matrix3x3<Dp> transform = Matrix3x3<Dp>::MakeIdentity();
     };
 
     struct PopParam
@@ -133,6 +140,7 @@ public:
     virtual auto PushTranslate(TranslateParam param) -> void = 0;
     virtual auto PushRotate(RotateParam param) -> void = 0;
     virtual auto PushScale(ScaleParam param) -> void = 0;
+    virtual auto PushTransform(TransformParam param) -> void = 0;
     virtual auto Pop(PopParam param) -> void = 0;
     virtual auto AddLine(LineParam param) -> void = 0;
     virtual auto AddRect(RectParam param) -> void = 0;

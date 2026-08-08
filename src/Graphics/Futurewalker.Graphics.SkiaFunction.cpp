@@ -31,6 +31,21 @@ auto SkiaFunction::RadiusToSkVector(Radius<Dp> const& radius) -> SkVector
     };
 }
 
+auto SkiaFunction::Matrix3x3ToSkMatrix(Matrix3x3<Dp> const& matrix) -> SkMatrix
+{
+    auto skMatrix = SkMatrix();
+    skMatrix[0] = static_cast<SkScalar>(matrix.m00);
+    skMatrix[1] = static_cast<SkScalar>(matrix.m01);
+    skMatrix[2] = static_cast<SkScalar>(matrix.m02);
+    skMatrix[3] = static_cast<SkScalar>(matrix.m10);
+    skMatrix[4] = static_cast<SkScalar>(matrix.m11);
+    skMatrix[5] = static_cast<SkScalar>(matrix.m12);
+    skMatrix[6] = static_cast<SkScalar>(matrix.m20);
+    skMatrix[7] = static_cast<SkScalar>(matrix.m21);
+    skMatrix[8] = static_cast<SkScalar>(matrix.m22);
+    return skMatrix;
+}
+
 auto SkiaFunction::RoundRectToSkRRect(RoundRect<Dp> const& roundRect) -> SkRRect
 {
     auto const rect = RectToSkRect(roundRect.GetRect());
@@ -43,6 +58,11 @@ auto SkiaFunction::RoundRectToSkRRect(RoundRect<Dp> const& roundRect) -> SkRRect
     auto rr = SkRRect();
     rr.setRectRadii(rect, radii.data());
     return rr;
+}
+
+auto SkiaFunction::ChannelToScalar(Channel const& channel) -> SkScalar
+{
+    return static_cast<SkScalar>(channel.GetF64());
 }
 
 auto SkiaFunction::RGBAColorToSkColor4f(RGBAColor const& color) -> SkColor4f

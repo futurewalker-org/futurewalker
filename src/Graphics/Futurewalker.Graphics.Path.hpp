@@ -41,6 +41,8 @@ public:
     auto Translate(Dp const dx, Dp const dy) -> Path&;
     auto Translate(Vector2<Dp> const& offset) -> Path&;
 
+    auto Transform(Matrix3x3<Dp> const& transform) -> Path&;
+
     auto AddRect(Rect<Dp> const& rect) -> Path&;
     auto AddRoundRect(RoundRect<Dp> const& roundRect) -> Path&;
     auto AddPath(Path const& path) -> Path&;

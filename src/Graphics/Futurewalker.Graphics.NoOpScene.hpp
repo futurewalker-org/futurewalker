@@ -21,6 +21,7 @@ public:
     auto PushTranslate(TranslateParam param) -> void override;
     auto PushRotate(RotateParam param) -> void override;
     auto PushScale(ScaleParam param) -> void override;
+    auto PushTransform(TransformParam param) -> void override;
     auto Pop(PopParam param) -> void override;
     auto AddLine(LineParam param) -> void override;
     auto AddRect(RectParam param) -> void override;

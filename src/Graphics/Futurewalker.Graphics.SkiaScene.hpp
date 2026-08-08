@@ -17,6 +17,7 @@ class SkiaScene : public Scene
 {
 public:
     auto SetCanvas(Pointer<SkCanvas> const canvas) -> void;
+    auto GetCanvas() const -> Pointer<SkCanvas>;
 
     auto PushLayer(LayerParam param) -> void override;
     auto PushClipRect(ClipRectParam param) -> void override;
@@ -25,6 +26,7 @@ public:
     auto PushTranslate(TranslateParam param) -> void override;
     auto PushRotate(RotateParam param) -> void override;
     auto PushScale(ScaleParam param) -> void override;
+    auto PushTransform(TransformParam param) -> void override;
     auto Pop(PopParam param) -> void override;
     auto AddLine(LineParam param) -> void override;
     auto AddRect(RectParam param) -> void override;

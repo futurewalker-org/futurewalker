@@ -39,6 +39,11 @@ auto NoOpScene::PushScale(ScaleParam param) -> void
     (void)param;
 }
 
+auto NoOpScene::PushTransform(TransformParam param) -> void
+{
+    (void)param;
+}
+
 auto NoOpScene::Pop(PopParam param) -> void
 {
     (void)param;

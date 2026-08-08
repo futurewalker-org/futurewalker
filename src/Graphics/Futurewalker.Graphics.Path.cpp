@@ -71,6 +71,12 @@ auto Path::Translate(Vector2<Dp> const& offset) -> Path&
     return *this;
 }
 
+auto Path::Transform(Matrix3x3<Dp> const& transform) -> Path&
+{
+    GetMutableState().Transform(transform);
+    return *this;
+}
+
 auto Path::AddRect(Rect<Dp> const& rect) -> Path&
 {
     GetMutableState().AddRect(rect);

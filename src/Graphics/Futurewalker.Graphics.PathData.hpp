@@ -31,6 +31,7 @@ public:
     virtual auto AddPath(Path const& path) -> void = 0;
     virtual auto Clone() const -> Shared<PathData> = 0;
     virtual auto Translate(Vector2<Dp> const& offset) -> void = 0;
+    virtual auto Transform(Matrix3x3<Dp> const& transform) -> void = 0;
     virtual auto IsEmpty() const -> Bool = 0;
     virtual auto IsEqual(PathData const& other) const -> Bool = 0;
 };

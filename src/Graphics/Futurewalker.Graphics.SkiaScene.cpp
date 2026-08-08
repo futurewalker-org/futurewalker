@@ -6,6 +6,7 @@
 #include "Futurewalker.Graphics.SkiaPathData.hpp"
 #include "Futurewalker.Graphics.SkiaFunction.hpp"
 #include "Futurewalker.Graphics.SkiaMaskFilter.hpp"
+#include "Futurewalker.Graphics.SkiaColorFilter.hpp"
 
 #include <include/core/SkPaint.h>
 #include <include/core/SkRRect.h>
@@ -51,6 +52,11 @@ auto SceneParamToSkPaint(auto const& param) -> SkPaint
         p.setColor4f(SkiaFunction::RGBAColorToSkColor4f(param.color));
     }
 
+    if constexpr (requires { param.alpha; })
+    {
+        p.setAlphaf(SkiaFunction::ChannelToScalar(param.alpha));
+    }
+
     if constexpr (requires { param.drawStyle; })
     {
         p.setStyle(DrawStyleToSkPaintStyle(param.drawStyle));
@@ -79,6 +85,14 @@ auto SceneParamToSkPaint(auto const& param) -> SkPaint
         }
     }
 
+    if constexpr (requires { param.colorFilter; })
+    {
+        if (auto const colorFilter = param.colorFilter.template TryAs<SkiaColorFilter>())
+        {
+            p.setColorFilter(colorFilter->GetSkiaColorFilter());
+        }
+    }
+
     return p;
 }
 }
@@ -91,6 +105,14 @@ auto SceneParamToSkPaint(auto const& param) -> SkPaint
 auto SkiaScene::SetCanvas(Pointer<SkCanvas> const canvas) -> void
 {
     _canvas = canvas;
+}
+
+///
+/// @brief
+///
+auto SkiaScene::GetCanvas() const -> Pointer<SkCanvas>
+{
+    return _canvas;
 }
 
 ///
@@ -204,6 +226,16 @@ auto SkiaScene::PushScale(ScaleParam param) -> void
         auto const sy = static_cast<SkScalar>(param.y);
         _canvas->save();
         _canvas->scale(sx, sy);
+    }
+}
+
+auto SkiaScene::PushTransform(TransformParam param) -> void
+{
+    if (_canvas)
+    {
+        auto const m = SkiaFunction::Matrix3x3ToSkMatrix(param.transform);
+        _canvas->save();
+        _canvas->concat(m);
     }
 }
 
