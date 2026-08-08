@@ -76,7 +76,7 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
                 itemView->SetMiddleView(text);
             }
             {
-                auto trailingIcon = IconView::MakeWithIcon(Icon::MakeFromFont(Graphics::FontFamily(u8"Segoe Fluent Icons"), 0xF745));
+                auto trailingIcon = IconView::MakeWithIcon(Icon::MakeFromFont(Graphics::FontFamily(u8"Segoe Fluent Icons"), 0xF745, 16));
                 AttributeNode::SetReference<IconViewStyle::Size>(*trailingIcon, Style::IconSizeSmall);
                 itemView->SetTrailingView(trailingIcon);
             }

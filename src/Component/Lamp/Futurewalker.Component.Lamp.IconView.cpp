@@ -43,6 +43,7 @@ IconView::IconView(PassKey<View> key)
 auto IconView::Initialize() -> void
 {
     _iconView = ::FW_NS::IconView::Make();
+    _iconView->SetUseColor(true);
     AddChildBack(_iconView);
     UpdateStyle();
     EventReceiver::Connect(*this, *this, &IconView::ReceiveEvent);

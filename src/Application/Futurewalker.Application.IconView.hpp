@@ -26,6 +26,7 @@ public:
     auto SetIcon(AttributeArg<Icon> const& icon) -> void;
 
     auto SetSize(AttributeArg<Dp> const& size) -> void;
+    auto SetUseColor(AttributeArg<Bool> const& useColor) -> void;
     auto SetColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetAlpha(AttributeArg<Channel> const& alpha) -> void;
 
@@ -40,6 +41,7 @@ private:
 private:
     AttributeAccessor<Icon> _icon;
     AttributeAccessor<Dp> _size;
+    AttributeAccessor<Bool> _useColor;
     AttributeAccessor<RGBAColor> _color;
     AttributeAccessor<Channel> _alpha;
 };

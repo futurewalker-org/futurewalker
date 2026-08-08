@@ -4,7 +4,9 @@
 #include "Futurewalker.Application.IconType.hpp"
 
 #include "Futurewalker.Graphics.FontFamily.hpp"
+#include "Futurewalker.Graphics.FontSize.hpp"
 #include "Futurewalker.Graphics.SceneType.hpp"
+#include "Futurewalker.Graphics.SvgDocumentType.hpp"
 
 #include "Futurewalker.Unit.hpp"
 
@@ -20,8 +22,9 @@ namespace FW_EXPORT
 class Icon
 {
 public:
-    static auto MakeBlank() -> Icon;
-    static auto MakeFromFont(Graphics::FontFamily const& family, char32_t const& codePoint) -> Icon;
+    static auto MakeBlank(Size<Dp> const& intrinsicSize = {}) -> Icon;
+    static auto MakeFromFont(Graphics::FontFamily const& family, char32_t const& codePoint, Graphics::FontSize const& size) -> Icon;
+    static auto MakeFromSvgDocument(Unique<Graphics::SvgDocument> svgDocument) -> Icon;
 
     Icon() = default;
 
@@ -29,7 +32,9 @@ public:
     auto operator==(Icon const& other) const -> bool = default;
     auto operator!=(Icon const& other) const -> bool = default;
 
-    auto Draw(Graphics::Scene& scene, Rect<Dp> const& rect, RGBAColor const& color, Channel const& alpha) const -> void;
+    auto Draw(Graphics::Scene& scene, Size<Dp> const& size) const -> void;
+
+    auto GetIntrinsicSize() const -> Size<Dp>;
 
     auto IsEmpty() const -> Bool;
 
