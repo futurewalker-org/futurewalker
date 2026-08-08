@@ -38,11 +38,13 @@ public:
     auto SetClipPath(Graphics::Path const& path) -> void;
     auto SetClipMode(ViewClipMode const clipMode) -> void;
     auto SetOpacity(Float64 const opacity) -> void;
+    auto SetTransform(Matrix3x3<Dp> const& transform) -> void;
 
     auto GetDisplayList(PassKey<View>) -> Shared<Graphics::DisplayList>;
     auto GetClipPath(PassKey<View>) -> Optional<Graphics::Path>;
     auto GetClipMode(PassKey<View>) -> ViewClipMode;
     auto GetOpacity(PassKey<View>) -> Float64;
+    auto GetTransform(PassKey<View>) -> Matrix3x3<Dp>;
 
     static auto DrawRootView(PassKey<RootView>, View& view) -> void;
 
@@ -58,6 +60,7 @@ private:
     Optional<Graphics::Path> _clipPath;
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
+    Matrix3x3<Dp> _transform = Matrix3x3<Dp>::MakeIdentity();
 };
 }
 }

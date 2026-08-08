@@ -211,6 +211,14 @@ auto ViewLayer::SetDisplayListOffset(Vector<Dp> const& offset) -> void
     }
 }
 
+auto ViewLayer::SetTransform(Matrix3x3<Dp> const& transform) -> void
+{
+    if (_platformLayer)
+    {
+        _platformLayer->SetTransform(transform);
+    }
+}
+
 ///
 /// @brief
 ///

@@ -53,6 +53,7 @@ private:
     auto RootRenderFlagsChanged(Shared<PlatformViewLayer> const& layer) -> void override;
     auto RootDisplayListChanged(Shared<PlatformViewLayer> const& layer) -> void override;
     auto RootDisplayListOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void override;
+    auto RootTransformChanged(Shared<PlatformViewLayer> const& layer) -> void override;
     auto RootChildAdded(Shared<PlatformViewLayer> const& child) -> void override;
     auto RootChildRemoved(Shared<PlatformViewLayer> const& parent) -> void override;
 

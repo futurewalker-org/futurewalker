@@ -46,8 +46,11 @@ public:
     auto GetBaseLayerId() const -> PlatformViewLayerId;
     auto SetBaseLayerId(PlatformViewLayerId const layerId) -> void;
 
-    auto GetOffset() const -> Vector<Dp>;
-    auto SetOffset(Vector<Dp> const& offset) -> void;
+    auto GetOffset() const -> Vector2<Dp>;
+    auto SetOffset(Vector2<Dp> const& offset) -> void;
+
+    auto GetTransform() const -> Matrix3x3<Dp>;
+    auto SetTransform(Matrix3x3<Dp> const& transform) -> void;
 
     auto GetClipRect() const -> Rect<Dp>;
     auto SetClipRect(Rect<Dp> const& clipRect) -> void;
@@ -78,7 +81,7 @@ public:
     struct DisplayListFragment
     {
         Shared<Graphics::DisplayList> displayList;
-        Vector<Dp> displayListOffset;
+        Vector2<Dp> displayListOffset;
 
         auto operator==(DisplayListFragment const& other) const -> bool = default;
         auto operator!=(DisplayListFragment const& other) const -> bool = default;
@@ -86,7 +89,8 @@ public:
 
     struct PushNodeFragment
     {
-        Vector<Dp> offset;
+        Vector2<Dp> offset;
+        Matrix3x3<Dp> transform = Matrix3x3<Dp>::MakeIdentity();
         Rect<Dp> clipRect;
         Optional<Graphics::Path> clipPath;
         Float64 opacity = 1.0;
@@ -126,6 +130,7 @@ protected:
     virtual auto Initialize() -> void = 0;
     virtual auto OnFragmentChanged() -> void = 0;
     virtual auto OnOffsetChanged() -> void = 0;
+    virtual auto OnTransformChanged() -> void = 0;
     virtual auto OnClipRectChanged() -> void = 0;
     virtual auto OnClipPathChanged() -> void = 0;
     virtual auto OnOpacityChanged() -> void = 0;
@@ -136,7 +141,8 @@ private:
     Weak<PlatformViewLayerVisual> _parent;
     std::vector<Shared<PlatformViewLayerVisual>> _children;
     PlatformViewLayerId _baseLayerId = PlatformViewLayerId(0U);
-    Vector<Dp> _offset;
+    Vector2<Dp> _offset;
+    Matrix3x3<Dp> _transform = Matrix3x3<Dp>::MakeIdentity();
     Rect<Dp> _clipRect;
     std::vector<Graphics::Path> _clipPaths;
     Float64 _opacity = 1.0;

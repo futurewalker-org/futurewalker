@@ -8,11 +8,12 @@
 
 namespace FW_DETAIL_NS
 {
-auto PlatformViewLayerVisualPropertyUpdater::PushNode(PlatformViewLayerId const& id, Vector<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void
+auto PlatformViewLayerVisualPropertyUpdater::PushNode(PlatformViewLayerId const& id, Vector2<Dp> const& offset, Matrix3x3<Dp> const& transform, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void
 {
     _nodeStack.push_back({
         .id = id,
         .offset = offset,
+        .transform = transform,
         .clipRect = clipRect,
         .clipPath = clipPath,
         .opacity = opacity,
@@ -21,7 +22,7 @@ auto PlatformViewLayerVisualPropertyUpdater::PushNode(PlatformViewLayerId const&
     // Ignore initial PushNode() before first visual is pushed.
     if (InternalGetBaseVisual())
     {
-        InternalReplaceNextPushNodeFragment(offset, clipRect, clipPath, opacity);
+        InternalReplaceNextPushNodeFragment(offset, transform, clipRect, clipPath, opacity);
     }
 }
 
@@ -76,7 +77,7 @@ auto PlatformViewLayerVisualPropertyUpdater::UpdateFragment(
   PlatformViewLayerId const id,
   PlatformViewLayerVisualRenderParams const& renderParams,
   Shared<Graphics::DisplayList> const& displayList,
-  Vector<Dp> const& displayListOffset) -> void
+  Vector2<Dp> const& displayListOffset) -> void
 {
     auto visual = InternalGetCurrentVisual();
     if (!visual)
@@ -90,6 +91,7 @@ auto PlatformViewLayerVisualPropertyUpdater::UpdateFragment(
               _currentFragmentIndex++,
               {
                   .offset = node.offset,
+                  .transform = node.transform,
                   .clipRect = node.clipRect,
                   .clipPath = node.clipPath,
                   .opacity = node.opacity,
@@ -106,10 +108,11 @@ auto PlatformViewLayerVisualPropertyUpdater::UpdateCore(Shared<PlatformViewLayer
 {
     auto const layerId = layer->GetId();
     auto const layerOffset = layer->GetOffset();
+    auto const layerTransform = layer->GetTransform();
     auto const layerOpacity = layer->GetOpacity();
     auto const layerClipRect = layer->GetClipMode() == ViewClipMode::Bounds ? Rect<Dp>::Make({}, layer->GetSize()) : Rect<Dp>::Infinite();
     auto const layerClipPath = layer->GetClipPath();
-    PushNode(layerId, layerOffset, layerClipRect, layerClipPath, layerOpacity);
+    PushNode(layerId, layerOffset, layerTransform, layerClipRect, layerClipPath, layerOpacity);
 
     auto const needsSurface = layer->ShouldRasterize();
     if (needsSurface)
@@ -157,13 +160,15 @@ auto PlatformViewLayerVisualPropertyUpdater::InternalSetCurrentVisualProperties(
 {
     if (visual)
     {
-        auto offset = Vector<Dp>();
+        auto offset = Vector2<Dp>();
+        auto transform = Matrix3x3<Dp>::MakeIdentity();
         auto clipRect = Rect<Dp>();
         auto clipPaths = std::vector<Graphics::Path>();
         auto opacity = Float64(1.0);
-        InternalGetNodeState(target, offset, clipRect, clipPaths, opacity);
+        InternalGetNodeState(target, offset, transform, clipRect, clipPaths, opacity);
         visual->SetRenderParams(renderParams);
         visual->SetOffset(offset);
+        visual->SetTransform(transform);
         visual->SetClipRect(clipRect);
         visual->SetClipPaths(clipPaths);
         visual->SetOpacity(opacity);
@@ -182,34 +187,49 @@ auto PlatformViewLayerVisualPropertyUpdater::InternalPopBaseVisual() -> void
     _baseVisualStack.pop_back();
 }
 
-auto PlatformViewLayerVisualPropertyUpdater::InternalGetNodeState(SInt64 const target, Vector<Dp>& offset, Rect<Dp>& clipRect, std::vector<Graphics::Path>& clipPaths, Float64& opacity) const -> void
+auto PlatformViewLayerVisualPropertyUpdater::InternalGetNodeState(SInt64 const target, Vector2<Dp>& offset, Matrix3x3<Dp>& transform, Rect<Dp>& clipRect, std::vector<Graphics::Path>& clipPaths, Float64& opacity) const -> void
 {
-    auto totalOffset = Vector<Dp>();
+    auto transformClipRect = [](Rect<Dp> const& rect, Matrix3x3<Dp> const& transform) -> Rect<Dp> {
+        auto const topLeft = transform * Vector3<Dp>(rect.x0, rect.y0, 1.0);
+        auto const topRight = transform * Vector3<Dp>(rect.x1, rect.y0, 1.0);
+        auto const bottomLeft = transform * Vector3<Dp>(rect.x0, rect.y1, 1.0);
+        auto const bottomRight = transform * Vector3<Dp>(rect.x1, rect.y1, 1.0);
+        auto const minX = std::min({topLeft.x, topRight.x, bottomLeft.x, bottomRight.x});
+        auto const maxX = std::max({topLeft.x, topRight.x, bottomLeft.x, bottomRight.x});
+        auto const minY = std::min({topLeft.y, topRight.y, bottomLeft.y, bottomRight.y});
+        auto const maxY = std::max({topLeft.y, topRight.y, bottomLeft.y, bottomRight.y});
+        return Rect<Dp>(minX, minY, maxX, maxY);
+    };
+
+    auto currentTransform = Matrix3x3<Dp>::MakeIdentity();
+    auto currentClipRect = Rect<Dp>::Infinite();
+    auto currentClipPaths = std::vector<Graphics::Path>();
     auto accumulatedOpacity = Float64(1.0);
     for (auto i = SInt64(0); i <= target; ++i)
     {
         auto const& node = _nodeStack[static_cast<size_t>(i)];
-        totalOffset += node.offset;
+        currentTransform = currentTransform * Matrix3x3<Dp>::MakeTranslation(node.offset) * node.transform;
+        currentClipRect = Rect<Dp>::Intersect(currentClipRect, transformClipRect(node.clipRect, currentTransform));
         accumulatedOpacity *= node.opacity;
-    }
-
-    auto currentOffset = -totalOffset;
-    auto currentClipRect = Rect<Dp>::Infinite();
-    auto currentClipPaths = std::vector<Graphics::Path>();
-    for (auto i = SInt64(0); i <= target; ++i)
-    {
-        auto const& node = _nodeStack[static_cast<size_t>(i)];
-        currentOffset += node.offset;
-        currentClipRect = Rect<Dp>::Intersect(Rect<Dp>::Offset(currentClipRect, currentOffset), node.clipRect);
 
         if (node.clipPath)
         {
             currentClipPaths.push_back(*node.clipPath);
-            currentClipPaths.back().Translate(currentOffset);
+            currentClipPaths.back().Transform(currentTransform);
         }
     }
-    offset = currentOffset;
-    clipRect = currentClipRect;
+
+    auto const currentClipRectOffset = currentClipRect.GetPosition().As<Vector2>();
+    auto const currentClipRectSize = currentClipRect.GetSize();
+
+    for (auto& clipPath : currentClipPaths)
+    {
+        clipPath.Translate(-currentClipRectOffset);
+    }
+
+    offset = currentClipRectOffset;
+    transform = currentTransform;
+    clipRect = Rect<Dp>::Make({0, 0}, currentClipRectSize);
     clipPaths = currentClipPaths;
     opacity = accumulatedOpacity;
 }
@@ -237,7 +257,7 @@ auto PlatformViewLayerVisualPropertyUpdater::InternalGetCurrentNodeIndex() const
     return static_cast<SInt64>(std::ssize(_nodeStack)) - 1;
 }
 
-auto PlatformViewLayerVisualPropertyUpdater::InternalReplaceNextPushNodeFragment(Vector<Dp> const& offset, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void
+auto PlatformViewLayerVisualPropertyUpdater::InternalReplaceNextPushNodeFragment(Vector2<Dp> const& offset, Matrix3x3<Dp> const& transform, Rect<Dp> const& clipRect, Optional<Graphics::Path> const& clipPath, Float64 const& opacity) -> void
 {
     if (auto const visual = InternalGetCurrentVisual())
     {
@@ -246,6 +266,7 @@ auto PlatformViewLayerVisualPropertyUpdater::InternalReplaceNextPushNodeFragment
           _currentFragmentIndex++,
           {
               .offset = offset,
+              .transform = transform,
               .clipRect = clipRect,
               .clipPath = clipPath,
               .opacity = opacity,
@@ -262,7 +283,7 @@ auto PlatformViewLayerVisualPropertyUpdater::InternalReplaceNextPopNodeFragment(
     }
 }
 
-auto PlatformViewLayerVisualPropertyUpdater::InternalReplaceNextDisplayListFragment(Shared<Graphics::DisplayList> const& displayList, Vector<Dp> const& displayListOffset) -> void
+auto PlatformViewLayerVisualPropertyUpdater::InternalReplaceNextDisplayListFragment(Shared<Graphics::DisplayList> const& displayList, Vector2<Dp> const& displayListOffset) -> void
 {
     if (auto const visual = InternalGetCurrentVisual())
     {

@@ -58,17 +58,31 @@ auto PlatformViewLayerVisual::SetBaseLayerId(PlatformViewLayerId const layerId) 
     _baseLayerId = layerId;
 }
 
-auto PlatformViewLayerVisual::GetOffset() const -> Vector<Dp>
+auto PlatformViewLayerVisual::GetOffset() const -> Vector2<Dp>
 {
     return _offset;
 }
 
-auto PlatformViewLayerVisual::SetOffset(Vector<Dp> const& offset) -> void
+auto PlatformViewLayerVisual::SetOffset(Vector2<Dp> const& offset) -> void
 {
     if (_offset != offset)
     {
         _offset = offset;
         OnOffsetChanged();
+    }
+}
+
+auto PlatformViewLayerVisual::GetTransform() const -> Matrix3x3<Dp>
+{
+    return _transform;
+}
+
+auto PlatformViewLayerVisual::SetTransform(Matrix3x3<Dp> const& transform) -> void
+{
+    if (_transform != transform)
+    {
+        _transform = transform;
+        OnTransformChanged();
     }
 }
 
@@ -292,10 +306,26 @@ auto PlatformViewLayerVisual::GetFragmentCount() const -> SInt32
 
 auto PlatformViewLayerVisual::CalcFragmentBounds() const -> Rect<Dp>
 {
-    auto offsets = std::vector<Vector<Dp>>();
+    static constexpr auto transformClipRect = [](Rect<Dp> const& rect, Matrix3x3<Dp> const& transform) -> Rect<Dp> {
+        if (rect.IsFinite())
+        {
+            auto const topLeft = transform * Vector3<Dp>(rect.x0, rect.y0, 1.0);
+            auto const topRight = transform * Vector3<Dp>(rect.x1, rect.y0, 1.0);
+            auto const bottomLeft = transform * Vector3<Dp>(rect.x0, rect.y1, 1.0);
+            auto const bottomRight = transform * Vector3<Dp>(rect.x1, rect.y1, 1.0);
+            auto const minX = std::min({topLeft.x, topRight.x, bottomLeft.x, bottomRight.x});
+            auto const maxX = std::max({topLeft.x, topRight.x, bottomLeft.x, bottomRight.x});
+            auto const minY = std::min({topLeft.y, topRight.y, bottomLeft.y, bottomRight.y});
+            auto const maxY = std::max({topLeft.y, topRight.y, bottomLeft.y, bottomRight.y});
+            return Rect<Dp>(minX, minY, maxX, maxY);
+        }
+        return Rect<Dp>::Infinite();
+    };
+
+    auto transforms = std::vector<Matrix3x3<Dp>>();
     auto clipRects = std::vector<Rect<Dp>>();
 
-    offsets.push_back(GetOffset());
+    transforms.push_back(Matrix3x3<Dp>::MakeIdentity());
     clipRects.push_back(GetClipRect());
 
     auto unionRect = Rect<Dp>();
@@ -304,24 +334,18 @@ auto PlatformViewLayerVisual::CalcFragmentBounds() const -> Rect<Dp>
         {
             if (auto const fragment = GetPushNodeFragment(fragmentInfo.index))
             {
-                auto const currentOffset = offsets.empty() ? Vector<Dp>() : offsets.back();
+                auto const currentTransform = transforms.empty() ? Matrix3x3<Dp>::MakeIdentity() : transforms.back();
                 auto const currentClipRect = clipRects.empty() ? GetClipRect() : clipRects.back();
-                offsets.push_back(currentOffset + fragment->offset);
-                clipRects.push_back(Rect<Dp>::Intersect(currentClipRect, Rect<Dp>::Offset(fragment->clipRect, offsets.back())));
+                transforms.push_back(currentTransform * Matrix3x3<Dp>::MakeTranslation(fragment->offset) * fragment->transform);
+                clipRects.push_back(Rect<Dp>::Intersect(currentClipRect, transformClipRect(fragment->clipRect, transforms.back())));
             }
         }
         else if (fragmentInfo.type == FragmentType::PopNode)
         {
-            FW_DEBUG_ASSERT(!offsets.empty());
+            FW_DEBUG_ASSERT(!transforms.empty());
             FW_DEBUG_ASSERT(!clipRects.empty());
-            if (!offsets.empty())
-            {
-                offsets.pop_back();
-            }
-            if (!clipRects.empty())
-            {
-                clipRects.pop_back();
-            }
+            transforms.pop_back();
+            clipRects.pop_back();
         }
         else if (fragmentInfo.type == FragmentType::DisplayList)
         {
@@ -329,14 +353,15 @@ auto PlatformViewLayerVisual::CalcFragmentBounds() const -> Rect<Dp>
             {
                 if (fragment->displayList)
                 {
-                    auto const currentOffset = offsets.empty() ? Vector<Dp>() : offsets.back();
+                    auto const currentTransform = transforms.empty() ? Matrix3x3<Dp>::MakeIdentity() : transforms.back();
                     auto const currentClipRect = clipRects.empty() ? GetClipRect() : clipRects.back();
 
                     auto bounds = currentClipRect;
-                    auto const displayListBounds = Rect<Dp>::Offset(fragment->displayList->GetBounds(), currentOffset + fragment->displayListOffset);
-                    if (displayListBounds.IsFinite())
+                    auto const localDisplayListBounds = Rect<Dp>::Offset(fragment->displayList->GetBounds(), fragment->displayListOffset);
+                    auto const transformedDisplayListBounds = transformClipRect(localDisplayListBounds, currentTransform);
+                    if (transformedDisplayListBounds.IsFinite())
                     {
-                        bounds = Rect<Dp>::Intersect(bounds, displayListBounds);
+                        bounds = Rect<Dp>::Intersect(bounds, transformedDisplayListBounds);
                     }
                     unionRect = Rect<Dp>::Union(unionRect, bounds);
                 }

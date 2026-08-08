@@ -47,6 +47,7 @@ public:
     auto SetClipPath(Optional<Graphics::Path> const& path) -> void;
     auto SetClipMode(ViewClipMode const clipMode) -> void;
     auto SetOpacity(Float64 const opacity) -> void;
+    auto SetTransform(Matrix3x3<Dp> const& transform) -> void;
     auto UpdateLayers(ViewLayer& layer) -> void;
 
     auto GetSubLayer(ViewLayerId const id) -> Shared<ViewLayer>;
@@ -79,5 +80,6 @@ private:
     Optional<Graphics::Path> _clipPath;
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
+    Matrix3x3<Dp> _transform = Matrix3x3<Dp>::MakeIdentity();
 };
 }

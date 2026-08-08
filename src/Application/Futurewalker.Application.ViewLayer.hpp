@@ -65,6 +65,7 @@ public:
     auto SetShouldRasterize(Bool const shouldRasterize) -> void;
     auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void;
     auto SetDisplayListOffset(Vector<Dp> const& offset) -> void;
+    auto SetTransform(Matrix3x3<Dp> const& transform) -> void;
 
 private:
     auto GetSelf() -> Shared<ViewLayer>;

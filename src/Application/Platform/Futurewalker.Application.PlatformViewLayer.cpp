@@ -100,12 +100,12 @@ auto PlatformViewLayer::GetChildren() const -> std::vector<Shared<PlatformViewLa
     return {_children.begin(), _children.end()};
 }
 
-auto PlatformViewLayer::GetOffset() const -> Vector<Dp>
+auto PlatformViewLayer::GetOffset() const -> Vector2<Dp>
 {
     return _offset;
 }
 
-auto PlatformViewLayer::SetOffset(Vector<Dp> const& pos) -> void
+auto PlatformViewLayer::SetOffset(Vector2<Dp> const& pos) -> void
 {
     if (_offset != pos)
     {
@@ -198,17 +198,31 @@ auto PlatformViewLayer::SetDisplayList(Shared<Graphics::DisplayList> const& disp
     }
 }
 
-auto PlatformViewLayer::GetDisplayListOffset() const -> Vector<Dp>
+auto PlatformViewLayer::GetDisplayListOffset() const -> Vector2<Dp>
 {
     return _displayListOffset;
 }
 
-auto PlatformViewLayer::SetDisplayListOffset(Vector<Dp> const& offset) -> void
+auto PlatformViewLayer::SetDisplayListOffset(Vector2<Dp> const& offset) -> void
 {
     if (_displayListOffset != offset)
     {
         _displayListOffset = offset;
         GetRoot()->RootDisplayListOffsetChanged(GetSelf());
+    }
+}
+
+auto PlatformViewLayer::GetTransform() const -> Matrix3x3<Dp>
+{
+    return _transform;
+}
+
+auto PlatformViewLayer::SetTransform(Matrix3x3<Dp> const& transform) -> void
+{
+    if (_transform != transform)
+    {
+        _transform = transform;
+        GetRoot()->RootTransformChanged(GetSelf());
     }
 }
 
@@ -270,6 +284,11 @@ auto PlatformViewLayer::RootDisplayListChanged(Shared<PlatformViewLayer> const& 
 }
 
 auto PlatformViewLayer::RootDisplayListOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void
+{
+    (void)layer;
+}
+
+auto PlatformViewLayer::RootTransformChanged(Shared<PlatformViewLayer> const& layer) -> void
 {
     (void)layer;
 }

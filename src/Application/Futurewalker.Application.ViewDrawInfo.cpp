@@ -152,11 +152,20 @@ auto ViewDrawInfo::SetOpacity(Float64 const opacity) -> void
 ///
 /// @brief
 ///
+auto ViewDrawInfo::SetTransform(Matrix3x3<Dp> const& transform) -> void
+{
+    _transform = transform;
+}
+
+///
+/// @brief
+///
 auto ViewDrawInfo::UpdateLayers(ViewLayer& layer) -> void
 {
     layer.SetClipPath(_clipPath);
     layer.SetClipMode(_clipMode);
     layer.SetOpacity(_opacity);
+    layer.SetTransform(_transform);
 
     if (_displayList && !_displayList->GetBounds().IsEmpty())
     {

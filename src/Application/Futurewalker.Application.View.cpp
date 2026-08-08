@@ -875,6 +875,7 @@ auto View::EnterDrawScope(PassKey<DrawScope> key) -> void
                     _drawInfo.SetClipPath(scope.GetClipPath({}));
                     _drawInfo.SetClipMode(scope.GetClipMode({}));
                     _drawInfo.SetOpacity(scope.GetOpacity({}));
+                    _drawInfo.SetTransform(scope.GetTransform({}));
                     _drawInfo.UpdateLayers(GetLayer());
                 }
                 catch (...)

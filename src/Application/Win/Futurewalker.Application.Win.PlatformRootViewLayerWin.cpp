@@ -252,6 +252,18 @@ auto PlatformRootViewLayerWin::RootDisplayListOffsetChanged(Shared<PlatformViewL
 }
 
 ///
+/// @brief Notify transform change.
+///
+auto PlatformRootViewLayerWin::RootTransformChanged(Shared<PlatformViewLayer> const& layer) -> void
+{
+    (void)layer;
+    if (_renderer)
+    {
+        _renderer->RequestUpdateLayer();
+    }
+}
+
+///
 /// @brief Notify child added.
 ///
 auto PlatformRootViewLayerWin::RootChildAdded(Shared<PlatformViewLayer> const& child) -> void

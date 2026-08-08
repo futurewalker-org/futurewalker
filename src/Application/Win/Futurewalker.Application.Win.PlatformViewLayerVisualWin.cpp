@@ -45,7 +45,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
     auto const scale = static_cast<Float64>(displayScale) * static_cast<Float64>(backingScale);
 
     _surface->SetSize(unionRect.GetSize());
-    _surface->SetOffset(unionRect.GetPosition().As<Vector>());
+    _surface->SetOffset(unionRect.GetPosition().As<Vector2>());
     _surface->SetDisplayScale(displayScale);
     _surface->SetBackingScale(backingScale);
     _surface->SetPixelGeometry(renderParams.pixelGeometry);
@@ -64,6 +64,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
                 if (auto const fragment = GetPushNodeFragment(fragmentInfo.index))
                 {
                     scene.PushTranslate({.x = fragment->offset.x, .y = fragment->offset.y});
+                    scene.PushTransform({.transform = fragment->transform});
                     scene.PushClipRect({.rect = fragment->clipRect});
 
                     if (fragment->clipPath)
@@ -76,7 +77,7 @@ auto PlatformViewLayerVisualWin::Render() -> void
             {
                 if (auto const fragment = GetPopNodeFragment(fragmentInfo.index))
                 {
-                    scene.Pop({.count = 2});
+                    scene.Pop({.count = 3});
 
                     if (auto const pushFragment = GetPushNodeFragment(fragment->pushNodeIndex))
                     {
@@ -133,6 +134,24 @@ auto PlatformViewLayerVisualWin::OnOffsetChanged() -> void
         auto const backingScale = renderParams.backingScale;
         _visual->SetOffsetX(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(offset.x, displayScale, backingScale))));
         _visual->SetOffsetY(static_cast<FLOAT>(Px::Round(UnitFunction::ConvertDpToPx(offset.y, displayScale, backingScale))));
+    }
+}
+
+auto PlatformViewLayerVisualWin::OnTransformChanged() -> void
+{
+    if (_visual)
+    {
+        auto const transform = GetTransform();
+        auto d3dTransform = D2D_MATRIX_4X4_F();
+        d3dTransform.m[0][0] = static_cast<FLOAT>(transform.m00);
+        d3dTransform.m[0][1] = static_cast<FLOAT>(transform.m10);
+        d3dTransform.m[1][0] = static_cast<FLOAT>(transform.m01);
+        d3dTransform.m[1][1] = static_cast<FLOAT>(transform.m11);
+        d3dTransform.m[2][2] = 1.f;
+        d3dTransform.m[3][0] = static_cast<FLOAT>(transform.m02);
+        d3dTransform.m[3][1] = static_cast<FLOAT>(transform.m12);
+        d3dTransform.m[3][3] = static_cast<FLOAT>(transform.m22);
+        _visual->SetTransform(d3dTransform);
     }
 }
 

@@ -62,6 +62,14 @@ auto DrawScope::SetOpacity(Float64 const opacity) -> void
 ///
 /// @brief
 ///
+auto DrawScope::SetTransform(Matrix3x3<Dp> const& transform) -> void
+{
+    _transform = transform;
+}
+
+///
+/// @brief
+///
 auto DrawScope::GetDisplayList(PassKey<View>) -> Shared<Graphics::DisplayList>
 {
     return EndRecording();
@@ -89,6 +97,14 @@ auto DrawScope::GetClipMode(PassKey<View>) -> ViewClipMode
 auto DrawScope::GetOpacity(PassKey<View>) -> Float64
 {
     return _opacity;
+}
+
+///
+/// @brief
+///
+auto DrawScope::GetTransform(PassKey<View>) -> Matrix3x3<Dp>
+{
+    return _transform;
 }
 
 ///

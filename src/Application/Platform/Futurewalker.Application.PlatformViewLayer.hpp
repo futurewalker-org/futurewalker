@@ -51,8 +51,8 @@ public:
     auto GetChildren() -> std::vector<Shared<PlatformViewLayer>>;
     auto GetChildren() const -> std::vector<Shared<PlatformViewLayer const>>;
 
-    auto GetOffset() const -> Vector<Dp>;
-    auto SetOffset(Vector<Dp> const& pos) -> void;
+    auto GetOffset() const -> Vector2<Dp>;
+    auto SetOffset(Vector2<Dp> const& pos) -> void;
 
     auto GetSize() const -> Size<Dp>;
     auto SetSize(Size<Dp> const& size) -> void;
@@ -72,8 +72,11 @@ public:
     auto GetDisplayList() const -> Shared<Graphics::DisplayList>;
     auto SetDisplayList(Shared<Graphics::DisplayList> const& displayList) -> void;
 
-    auto GetDisplayListOffset() const -> Vector<Dp>;
-    auto SetDisplayListOffset(Vector<Dp> const& offset) -> void;
+    auto GetDisplayListOffset() const -> Vector2<Dp>;
+    auto SetDisplayListOffset(Vector2<Dp> const& offset) -> void;
+
+    auto GetTransform() const -> Matrix3x3<Dp>;
+    auto SetTransform(Matrix3x3<Dp> const& transform) -> void;
 
 public:
     virtual auto ShouldRasterize() const -> Bool;
@@ -99,6 +102,7 @@ private:
     virtual auto RootRenderFlagsChanged(Shared<PlatformViewLayer> const& layer) -> void;
     virtual auto RootDisplayListChanged(Shared<PlatformViewLayer> const& layer) -> void;
     virtual auto RootDisplayListOffsetChanged(Shared<PlatformViewLayer> const& layer) -> void;
+    virtual auto RootTransformChanged(Shared<PlatformViewLayer> const& layer) -> void;
     virtual auto RootChildAdded(Shared<PlatformViewLayer> const& child) -> void;
     virtual auto RootChildRemoved(Shared<PlatformViewLayer> const& parent) -> void;
 
@@ -114,12 +118,13 @@ private:
     std::list<Shared<PlatformViewLayer>> _children;
     Flags<PlatformViewLayerRenderFlag> _renderFlags = PlatformViewLayerRenderFlag::None;
     Size<Dp> _size;
-    Vector<Dp> _offset;
+    Vector2<Dp> _offset;
     Optional<Graphics::Path> _clipPath;
     ViewClipMode _clipMode = ViewClipMode::None;
     Float64 _opacity = 1.0;
     Shared<Graphics::DisplayList> _displayList;
-    Vector<Dp> _displayListOffset;
+    Vector2<Dp> _displayListOffset;
+    Matrix3x3<Dp> _transform = Matrix3x3<Dp>::MakeIdentity();
     PlatformViewLayerId _id = 0U;
 };
 
