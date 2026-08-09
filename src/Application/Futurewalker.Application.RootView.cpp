@@ -181,9 +181,7 @@ auto RootView::ReceiveRootViewEvent(Event<>& event) -> Bool
     }
     else if (event.Is<RootViewEvent::Frame>())
     {
-        UpdateAnimation(event.As<RootViewEvent::Frame>()->GetTargetFrameTime());
-        UpdateLayout();
-        UpdateVisual();
+        ProcessFrame(event.As<RootViewEvent::Frame>()->GetTargetFrameTime());
     }
     else if (event.Is<RootViewEvent::Pointer>())
     {
@@ -291,6 +289,36 @@ auto RootView::UpdateVisual() -> void
 ///
 /// @brief
 ///
+auto RootView::ProcessFrame(MonotonicTime const frameTime) -> void
+{
+    if (!_inFrame)
+    {
+        _inFrame = true;
+        _inFrameFrameRequest = false;
+
+        try
+        {
+            UpdateAnimation(frameTime);
+            UpdateLayout();
+            UpdateVisual();
+        }
+        catch (...)
+        {
+            FW_DEBUG_ASSERT(false);
+        }
+        _inFrame = false;
+
+        if (_inFrameFrameRequest)
+        {
+            _inFrameFrameRequest = false;
+            RequestFrame();
+        }
+    }
+}
+
+///
+/// @brief
+///
 auto RootView::SetAnimationTickerActive(Bool const active) -> void
 {
     _animationTicker->SetActive(active);
@@ -301,9 +329,16 @@ auto RootView::SetAnimationTickerActive(Bool const active) -> void
 ///
 auto RootView::RequestFrame() -> void
 {
-    if (_delegate.requestFrame)
+    if (_inFrame)
     {
-        _delegate.requestFrame();
+        _inFrameFrameRequest = true;
+    }
+    else
+    {
+        if (_delegate.requestFrame)
+        {
+            _delegate.requestFrame();
+        }
     }
 }
 

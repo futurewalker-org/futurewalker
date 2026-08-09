@@ -38,7 +38,10 @@ PlatformVsyncProviderWin::PlatformVsyncProviderWin(PassKey<PlatformVsyncProvider
 
         while (true)
         {
-            WaitForCallbackOnThread();
+            if (!WaitForCallbackOnThread())
+            {
+                break;
+            }
 
             const auto count = UINT(1);
             const auto result = ::DCompositionWaitForCompositorClock(count, &event, INFINITE);
@@ -50,14 +53,12 @@ PlatformVsyncProviderWin::PlatformVsyncProviderWin(PassKey<PlatformVsyncProvider
 
             if (result == WAIT_OBJECT_0 + count)
             {
-                const auto frameInfo = PlatformVsyncFrameInfo {
-                    .targetTimestamp = GetCurrentFrameTime(),
-                };
-
-                if (HasCallback())
                 {
-                    AsyncFunction::Spawn(DispatchCallbacks(frameInfo, _self)).Detach();
+                    auto lock = std::unique_lock(_mutex);
+                    _state = State::Dispatching;
                 }
+                auto const frameTime = GetCurrentFrameTime();
+                AsyncFunction::Spawn(DispatchCallbacks(frameTime, _self)).Detach();
             }
             else if (result == WAIT_TIMEOUT || result == WAIT_FAILED)
             {
@@ -116,7 +117,12 @@ auto PlatformVsyncProviderWin::PostFrameCallback(Weak<void> data, PlatformVsyncC
         return;
     }
     _callbacks.emplace_back(data, callback);
-    _condVar.notify_one();
+
+    if (_state == State::Idle)
+    {
+        _state = State::Requesting;
+        _condVar.notify_one();
+    }
 }
 
 ///
@@ -140,29 +146,12 @@ auto PlatformVsyncProviderWin::RemoveFrameCallback(Weak<void> data) -> void
 }
 
 ///
-/// @brief Check if callback exists.
+/// @brief Consume callbacks and return them.
 ///
-auto PlatformVsyncProviderWin::HasCallback() const -> Bool
+auto PlatformVsyncProviderWin::ConsumeCallbacks() -> std::vector<CallbackData>
 {
     auto lock = std::unique_lock(_mutex);
-
-    for (auto const& callback : _callbacks)
-    {
-        if (!callback.data.IsExpired())
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-///
-/// @brief Returns true if there is a callback.
-///
-auto PlatformVsyncProviderWin::GetCallbacks() -> std::vector<CallbackData>
-{
-    auto lock = std::unique_lock(_mutex);
-    return std::move(_callbacks);
+    return std::exchange(_callbacks, {});
 }
 
 ///
@@ -171,8 +160,29 @@ auto PlatformVsyncProviderWin::GetCallbacks() -> std::vector<CallbackData>
 auto PlatformVsyncProviderWin::WaitForCallbackOnThread() -> Bool
 {
     auto lock = std::unique_lock(_mutex);
-    _condVar.wait(lock, [&] { return !_callbacks.empty() || _stop; });
+    _condVar.wait(lock, [&] { return _state == State::Requesting || _stop; });
     return !_stop;
+}
+
+///
+/// @brief End dispatching callbacks.
+///
+auto PlatformVsyncProviderWin::EndDispatching() -> void
+{
+    auto lock = std::unique_lock(_mutex);
+
+    if (_state == State::Dispatching)
+    {
+        if (!_callbacks.empty())
+        {
+            _state = State::Requesting;
+            _condVar.notify_one();
+        }
+        else
+        {
+            _state = State::Idle;
+        }
+    }
 }
 
 ///
@@ -200,7 +210,7 @@ auto PlatformVsyncProviderWin::StopRequested() const -> Bool
 ///
 /// @return A task.
 ///
-auto PlatformVsyncProviderWin::DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, Weak<PlatformVsyncProviderWin> const weakSelf) -> Task<void>
+auto PlatformVsyncProviderWin::DispatchCallbacks(MonotonicTime const frameTime, Weak<PlatformVsyncProviderWin> const weakSelf) -> Task<void>
 {
     try
     {
@@ -208,14 +218,24 @@ auto PlatformVsyncProviderWin::DispatchCallbacks(PlatformVsyncFrameInfo const fr
 
         if (auto const self = weakSelf.Lock())
         {
-            auto const callbacks = self->GetCallbacks();
+            auto const callbacks = self->ConsumeCallbacks();
             for (auto const& callback : callbacks)
             {
                 if (auto const data = callback.data.Lock())
                 {
                     if (callback.callback)
                     {
-                        callback.callback(data, frameInfo);
+                        try
+                        {
+                            auto frameInfo = PlatformVsyncFrameInfo {
+                                .targetTimestamp = frameTime,
+                            };
+                            callback.callback(data, frameInfo);
+                        }
+                        catch (...)
+                        {
+                            FW_DEBUG_ASSERT(false);
+                        }
                     }
                 }
             }
@@ -225,6 +245,11 @@ auto PlatformVsyncProviderWin::DispatchCallbacks(PlatformVsyncFrameInfo const fr
     {
         FW_DEBUG_LOG_ERROR("Failed to dispatch vsync event");
         FW_DEBUG_ASSERT(false);
+    }
+
+    if (auto const self = weakSelf.Lock())
+    {
+        self->EndDispatching();
     }
 }
 

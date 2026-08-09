@@ -55,6 +55,7 @@ protected:
     auto UpdateAnimation(MonotonicTime const frameTime) -> void;
     auto UpdateLayout() -> void;
     auto UpdateVisual() -> void;
+    auto ProcessFrame(MonotonicTime const frameTime) -> void;
 
     auto SetAnimationTickerActive(Bool const active) -> void;
     auto RequestFrame() -> void;
@@ -98,6 +99,8 @@ private:
 private:
     Bool _attached = false;
     Bool _active = false;
+    Bool _inFrame = false;
+    Bool _inFrameFrameRequest = false;
     DisplayScale _displayScale = 1.0;
     BackingScale _backingScale = 1.0;
     Delegate _delegate;

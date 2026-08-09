@@ -44,21 +44,28 @@ public:
     auto RemoveFrameCallback(Weak<void> data) -> void;
 
 private:
-    auto HasCallback() const -> Bool;
-    auto GetCallbacks() -> std::vector<CallbackData>;
+    auto ConsumeCallbacks() -> std::vector<CallbackData>;
     auto WaitForCallbackOnThread() -> Bool;
+    auto EndDispatching() -> void;
 
     auto RequestStop() -> void;
     auto StopRequested() const -> Bool;
 
-    static auto DispatchCallbacks(PlatformVsyncFrameInfo const frameInfo, Weak<PlatformVsyncProviderWin> const weakSelf) -> Task<void>;
+    static auto DispatchCallbacks(MonotonicTime const frameTime, Weak<PlatformVsyncProviderWin> const weakSelf) -> Task<void>;
 
 private:
+    enum class State
+    {
+        Idle,
+        Requesting,
+        Dispatching
+    };
     Weak<PlatformVsyncProviderWin> _self;
     mutable std::mutex _mutex;
     std::condition_variable _condVar;
     std::vector<CallbackData> _callbacks;
     std::jthread _thread;
+    State _state = State::Idle;
     Bool _stop = false;
     HANDLE _event = NULL;
 };
