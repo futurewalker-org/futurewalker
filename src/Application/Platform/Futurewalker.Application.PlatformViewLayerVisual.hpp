@@ -56,7 +56,7 @@ public:
     auto SetClipRect(Rect<Dp> const& clipRect) -> void;
 
     auto GetClipPaths() const -> std::vector<Graphics::Path> const&;
-    auto SetClipPaths(std::vector<Graphics::Path> const& clipPaths) -> void;
+    auto SetClipPaths(std::vector<Graphics::Path> clipPaths) -> void;
 
     auto GetOpacity() const -> Float64;
     auto SetOpacity(Float64 const opacity) -> void;

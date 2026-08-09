@@ -111,11 +111,11 @@ auto PlatformViewLayerVisual::GetClipPaths() const -> std::vector<Graphics::Path
     return _clipPaths;
 }
 
-auto PlatformViewLayerVisual::SetClipPaths(std::vector<Graphics::Path> const& clipPaths) -> void
+auto PlatformViewLayerVisual::SetClipPaths(std::vector<Graphics::Path> clipPaths) -> void
 {
     if (_clipPaths != clipPaths)
     {
-        _clipPaths = clipPaths;
+        _clipPaths = std::move(clipPaths);
         OnClipPathChanged();
     }
 }

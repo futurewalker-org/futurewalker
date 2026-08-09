@@ -170,7 +170,7 @@ auto PlatformViewLayerVisualPropertyUpdater::InternalSetCurrentVisualProperties(
         visual->SetOffset(offset);
         visual->SetTransform(transform);
         visual->SetClipRect(clipRect);
-        visual->SetClipPaths(clipPaths);
+        visual->SetClipPaths(std::move(clipPaths));
         visual->SetOpacity(opacity);
     }
 }
@@ -230,7 +230,7 @@ auto PlatformViewLayerVisualPropertyUpdater::InternalGetNodeState(SInt64 const t
     offset = currentClipRectOffset;
     transform = currentTransform;
     clipRect = Rect<Dp>::Make({0, 0}, currentClipRectSize);
-    clipPaths = currentClipPaths;
+    clipPaths = std::move(currentClipPaths);
     opacity = accumulatedOpacity;
 }
 
