@@ -95,5 +95,7 @@ conan build . -pr:h=./conan/vs2022_x86_64_Debug.profile --build=missing
 
 ## License
 
-Licensed under the Mozilla Public License 2.0
+Futurewalker is licensed under the [Mozilla Public License 2.0](https://www.mozilla.org/en-US/MPL/2.0/).  
+Additionally, codes under `examples` folder are licensed under the [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt) License (public domain).
 
+This repository contains icon SVG files provided by [Lucide Icons](https://github.com/lucide-icons/lucide) project, which is licensed under the [ISC License](https://github.com/lucide-icons/lucide/blob/main/LICENSE).
