@@ -18,6 +18,30 @@ struct RecognizerEvent final : EventParameter
     Rect<Dp> area;
     Shared<Bool> result;
 };
+
+auto MatchPointerButtonFlag(PointerButton const button, Flags<PointerButtonFlag> const& allowedButtons) -> Bool
+{
+    switch (button)
+    {
+        case PointerButton::Unknown:
+            return false;
+        case PointerButton::Button1:
+            return allowedButtons.Contains(PointerButtonFlag::Button1);
+        case PointerButton::Button2:
+            return allowedButtons.Contains(PointerButtonFlag::Button2);
+        case PointerButton::Button3:
+            return allowedButtons.Contains(PointerButtonFlag::Button3);
+        case PointerButton::ButtonX1:
+            return allowedButtons.Contains(PointerButtonFlag::ButtonX1);
+        case PointerButton::ButtonX2:
+            return allowedButtons.Contains(PointerButtonFlag::ButtonX2);
+        case PointerButton::Barrel:
+            return allowedButtons.Contains(PointerButtonFlag::Barrel);
+        case PointerButton::Eraser:
+            return allowedButtons.Contains(PointerButtonFlag::Eraser);
+    }
+    return false;
+}
 }
 
 ///
@@ -98,7 +122,7 @@ auto TapGestureRecognizer::Recognize(const Event<PointerEvent>& event, const Rec
 ///
 /// @brief Recognize first down event.
 ///
-auto TapGestureRecognizer::InternalRecognizeFirstDown() -> Async<Bool>
+auto TapGestureRecognizer::InternalRecognizeFirstDown(PointerId& pressedPointerId, PointerButton& pressedButton) -> Async<Bool>
 {
     while (true)
     {
@@ -107,23 +131,29 @@ auto TapGestureRecognizer::InternalRecognizeFirstDown() -> Async<Bool>
         auto const& area = event->area;
         auto const& result = event->result;
 
-        const auto pointerId = pointerEvent->GetPointerId();
-        const auto pos = pointerEvent->GetPosition();
+        auto const pointerId = pointerEvent->GetPointerId();
+        auto const pos = pointerEvent->GetPosition();
 
         if (pointerEvent.Is<PointerEvent::Motion::Down>())
         {
-            *result = true;
-
-            if (Rect<Dp>::Intersect(area, pos))
+            auto const button = pointerEvent.As<PointerEvent::Motion::Down>()->GetButton();
+            if (MatchPointerButtonFlag(button, _allowedButtons))
             {
-                if (_delegate.capturePointer)
+                *result = true;
+
+                if (Rect<Dp>::Intersect(area, pos))
                 {
-                    _delegate.capturePointer(pointerId);
+                    if (_delegate.capturePointer)
+                    {
+                        _delegate.capturePointer(pointerId);
+                    }
+                    auto gestureEvent = Event<>(Event<TapGestureEvent::Begin>());
+                    SendEvent(gestureEvent);
                 }
-                auto gestureEvent = Event<>(Event<TapGestureEvent::Begin>());
-                SendEvent(gestureEvent);
+                pressedPointerId = pointerId;
+                pressedButton = button;
+                co_return true;
             }
-            co_return true;
         }
         else if (pointerEvent.Is<PointerEvent::Motion::Cancel>())
         {
@@ -141,7 +171,7 @@ auto TapGestureRecognizer::InternalRecognizeFirstDown() -> Async<Bool>
 ///
 /// @brief Recognize first up event.
 ///
-auto TapGestureRecognizer::InternalRecognizeFirstUp() -> Async<Bool>
+auto TapGestureRecognizer::InternalRecognizeFirstUp(PointerId const pressedPointerId, PointerButton const pressedButton) -> Async<Bool>
 {
     while (true)
     {
@@ -151,31 +181,40 @@ auto TapGestureRecognizer::InternalRecognizeFirstUp() -> Async<Bool>
         auto const& area = event->area;
         auto const& result = event->result;
 
-        const auto pointerId = pointerEvent->GetPointerId();
-        const auto pos = pointerEvent->GetPosition();
+        auto const pointerId = pointerEvent->GetPointerId();
+        auto const pos = pointerEvent->GetPosition();
+
+        if (pointerId != pressedPointerId)
+        {
+            continue;
+        }
 
         if (pointerEvent.Is<PointerEvent::Motion::Up>())
         {
-            *result = true;
+            auto const button = pointerEvent.As<PointerEvent::Motion::Up>()->GetButton();
+            if (button == pressedButton)
+            {
+                *result = true;
 
-            if (_delegate.releasePointer)
-            {
-                _delegate.releasePointer(pointerId);
-            }
+                if (_delegate.releasePointer)
+                {
+                    _delegate.releasePointer(pointerId);
+                }
 
-            if (Rect<Dp>::Intersect(area, pos))
-            {
-                auto tapEventParameter = Event<TapGestureEvent::Tap>();
-                tapEventParameter->SetTapCount(1);
-                auto sendingEvent = Event<>(tapEventParameter);
-                SendEvent(sendingEvent);
+                if (Rect<Dp>::Intersect(area, pos))
+                {
+                    auto tapEventParameter = Event<TapGestureEvent::Tap>();
+                    tapEventParameter->SetTapCount(1);
+                    auto sendingEvent = Event<>(tapEventParameter);
+                    SendEvent(sendingEvent);
+                }
+                else
+                {
+                    auto gestureEvent = Event<>(Event<TapGestureEvent::Cancel>());
+                    SendEvent(gestureEvent);
+                }
+                co_return true;
             }
-            else
-            {
-                auto gestureEvent = Event<>(Event<TapGestureEvent::Cancel>());
-                SendEvent(gestureEvent);
-            }
-            co_return true;
         }
         else if (event->pointerEvent.Is<PointerEvent::Motion::Cancel>())
         {
@@ -199,9 +238,11 @@ auto TapGestureRecognizer::InternalRecognize() -> Async<void>
 {
     while (true)
     {
-        if (co_await InternalRecognizeFirstDown())
+        auto pointerId = PointerId(0U);
+        auto pressedButton = PointerButton::Unknown;
+        if (co_await InternalRecognizeFirstDown(pointerId, pressedButton))
         {
-            co_await InternalRecognizeFirstUp();
+            co_await InternalRecognizeFirstUp(pointerId, pressedButton);
         }
     }
 }

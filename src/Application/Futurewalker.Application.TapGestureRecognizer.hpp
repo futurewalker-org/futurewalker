@@ -33,8 +33,8 @@ public:
 
 private:
     auto InternalRecognize() -> Async<void>;
-    auto InternalRecognizeFirstDown() -> Async<Bool>;
-    auto InternalRecognizeFirstUp() -> Async<Bool>;
+    auto InternalRecognizeFirstDown(PointerId& pressedPointerId, PointerButton& pressedButton) -> Async<Bool>;
+    auto InternalRecognizeFirstUp(PointerId const pressedPointerId, PointerButton const pressedButton) -> Async<Bool>;
 
 private:
     Flags<PointerButtonFlag> _allowedButtons = PointerButtonFlag::Button1;
