@@ -95,6 +95,11 @@ auto MenuItemButton::ReceiveEvent(Event<>& event) -> Bool
                 auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Leave>());
                 SendEvent(buttonEvent);
             }
+            else if (event.Is<MenuButtonViewEvent::Cancel>())
+            {
+                auto buttonEvent = Event<>(Event<MenuItemButtonEvent::Cancel>());
+                SendEvent(buttonEvent);
+            }
             return true;
         }
     }
@@ -135,5 +140,15 @@ auto MenuItemButton::SetContent(Shared<View> const& content) -> void
     {
         _container->SetContent(content);
     }
+}
+
+auto MenuItemButton::SetFocusable(Bool const focusable) -> void
+{
+    _buttonView->SetFocusable(focusable);
+}
+
+auto MenuItemButton::SetEnter(Bool const enter) -> void
+{
+    _buttonView->SetEnter(enter);
 }
 }

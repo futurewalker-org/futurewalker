@@ -16,6 +16,7 @@ public:
     class Up;
     class Enter;
     class Leave;
+    class Cancel;
 };
 
 class MenuItemButtonEvent::Down final : public MenuItemButtonEvent
@@ -31,6 +32,10 @@ class MenuItemButtonEvent::Enter final : public MenuItemButtonEvent
 };
 
 class MenuItemButtonEvent::Leave final : public MenuItemButtonEvent
+{
+};
+
+class MenuItemButtonEvent::Cancel final : public MenuItemButtonEvent
 {
 };
 }

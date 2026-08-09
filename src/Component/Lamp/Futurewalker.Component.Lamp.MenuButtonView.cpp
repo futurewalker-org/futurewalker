@@ -58,6 +58,23 @@ auto MenuButtonView::SetContent(Shared<View> const& content) -> void
     }
 }
 
+auto MenuButtonView::SetFocusable(Bool const focusable) -> void
+{
+    if (focusable)
+    {
+        SetFocusTrackingFlags(ViewFocusTrackingFlag::All);
+    }
+    else
+    {
+        SetFocusTrackingFlags(ViewFocusTrackingFlag::None);
+    }
+}
+
+auto MenuButtonView::SetEnter(Bool const enter) -> void
+{
+    _buttonView->SetEnter(enter);
+}
+
 auto MenuButtonView::SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void
 {
     if (_buttonView)
@@ -202,76 +219,44 @@ auto MenuButtonView::ReceiveEvent(Event<>& event) -> Bool
         {
             if (event.Is<PointerEvent::Motion::Down>())
             {
-                if (!_pointerDown)
-                {
-                    _pointerDown = true;
-                    _buttonView->SetDown(true);
-                    RequestFocus(FocusReason::Pointer);
-                    auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Down>());
-                    SendEvent(buttonEvent);
-                }
+                _buttonView->SetDown(true);
+                RequestFocus(FocusReason::Pointer);
+                auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Down>());
+                SendEvent(buttonEvent);
             }
             else if (event.Is<PointerEvent::Motion::Up>())
             {
-                if (_pointerDown)
-                {
-                    _pointerDown = false;
-                    _buttonView->SetDown(false);
-                    auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Up>());
-                    SendEvent(buttonEvent);
-                }
+                _buttonView->SetDown(false);
+                auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Up>());
+                SendEvent(buttonEvent);
             }
             else if (event.Is<PointerEvent::Motion::Enter>())
             {
-                if (!_pointerEnter)
-                {
-                    _pointerEnter = true;
-                    _buttonView->SetEnter(true);
-                    auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Enter>());
-                    SendEvent(buttonEvent);
-                }
+                _buttonView->SetEnter(true);
+                auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Enter>());
+                SendEvent(buttonEvent);
             }
             else if (event.Is<PointerEvent::Motion::Leave>())
             {
-                if (_pointerEnter)
-                {
-                    _pointerDown = false;
-                    _pointerEnter = false;
-                    _buttonView->SetDown(false);
-                    _buttonView->SetEnter(false);
-                    auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Leave>());
-                    SendEvent(buttonEvent);
-                }
+                _buttonView->SetDown(false);
+                _buttonView->SetEnter(false);
+                auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Leave>());
+                SendEvent(buttonEvent);
             }
             else if (event.Is<PointerEvent::Motion::Move>())
             {
                 if (event.As<PointerEvent::Motion::Move>()->GetButtons() != PointerButtonFlag::None)
                 {
-                    if (!_pointerDown)
-                    {
-                        _pointerDown = true;
-                        _buttonView->SetDown(true);
-                    }
+                    _buttonView->SetDown(true);
                 }
+                _buttonView->SetEnter(true);
             }
             else if (event.Is<PointerEvent::Motion::Cancel>())
             {
-                auto const down = std::exchange(_pointerDown, false);
-                auto const enter = std::exchange(_pointerEnter, false);
-
                 _buttonView->SetDown(false);
                 _buttonView->SetEnter(false);
-
-                if (down)
-                {
-                    auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Up>());
-                    SendEvent(buttonEvent);
-                }
-                if (enter)
-                {
-                    auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Leave>());
-                    SendEvent(buttonEvent);
-                }
+                auto buttonEvent = Event<>(Event<MenuButtonViewEvent::Cancel>());
+                SendEvent(buttonEvent);
             }
             return true;
         }

@@ -32,6 +32,9 @@ public:
     auto GetContent() -> Shared<View>;
     auto SetContent(Shared<View> const& content) -> void;
 
+    auto SetFocusable(Bool const focusable) -> void;
+    auto SetEnter(Bool const enter) -> void;
+
 protected:
     auto Initialize() -> void override;
     auto ReceiveEvent(Event<>& event) -> Bool;

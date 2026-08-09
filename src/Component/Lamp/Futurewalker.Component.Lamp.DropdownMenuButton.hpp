@@ -4,6 +4,7 @@
 #include "Futurewalker.Component.Lamp.DropdownMenuButtonType.hpp"
 #include "Futurewalker.Component.Lamp.DropdownMenuButtonEvent.hpp"
 #include "Futurewalker.Component.Lamp.MenuButtonViewType.hpp"
+#include "Futurewalker.Component.Lamp.MenuItemButtonType.hpp"
 #include "Futurewalker.Component.Lamp.TextViewType.hpp"
 
 #include "Futurewalker.Application.View.hpp"
@@ -52,17 +53,24 @@ public:
 protected:
     auto Initialize() -> void override;
     auto ReceiveEvent(Event<>& event) -> Bool;
+    auto ReceivePopupEvent(Event<>& event) -> Bool;
     auto ReceiveAttributeEvent(Event<>& event) -> Bool;
     auto CreatePopup() -> void;
     auto DestroyPopup() -> void;
     auto UpdatePopup() -> void;
+    auto ShowPopup() -> void;
     auto UpdateItems() -> void;
     auto UpdateButtonText() -> void;
+    auto ChangeCurrentIndex(SInt64 const index) -> void;
+    auto FindButtonIndex(Shared<View> const& button) const -> Optional<SInt64>;
+    auto GetButton(SInt64 const index) -> Shared<MenuItemButton>;
 
 private:
     SInt64 _currentIndex = -1;
+    SInt64 _enteredIndex = -1;
     std::vector<ItemInfo> _items;
     Shared<TextView> _buttonText;
+    Shared<FlexLayout> _buttonRow;
     Shared<MenuButtonView> _button;
     Shared<Popup> _popup;
     Shared<FlexLayout> _itemColumn;

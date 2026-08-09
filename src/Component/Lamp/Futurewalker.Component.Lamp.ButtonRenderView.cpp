@@ -23,6 +23,7 @@ auto ButtonRenderView::MakeWithContent(Shared<View> const& content) -> Shared<Bu
 
 ButtonRenderView::ButtonRenderView(PassKey<View> key)
   : View(key)
+  , _hoverHighlightAnimator(0.0)
 {
 }
 
@@ -63,6 +64,7 @@ auto ButtonRenderView::SetEnter(Bool const enter) -> void
     if (_enter != enter)
     {
         _enter = enter;
+        _hoverHighlightAnimator.AnimateTo(enter ? 1.0 : 0.0);
         InvalidateVisual();
     }
 }
@@ -200,6 +202,10 @@ void ButtonRenderView::Initialize()
     _pressHighlightAlpha.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributePressHighlightAlpha, ButtonViewStyle::PressHighlightAlpha);
     _cornerRadius.BindAndConnectAttributeWithDefaultReference(*this, &ButtonRenderView::ReceiveAttributeEvent, AttributeCornerRadius, ButtonViewStyle::CornerRadius);
 
+    _hoverHighlightAnimator.BindAnimationTicker(*this);
+    _hoverHighlightAnimator.SetDuration(TimeInterval::MakeFromMilliseconds(50));
+    _hoverHighlightAnimator.SetUpdateCallback([&](auto const&) { InvalidateVisual(); });
+
     EventReceiver::Connect(*this, *this, &ButtonRenderView::ReceiveEvent);
 }
 
@@ -241,9 +247,9 @@ auto ButtonRenderView::Draw(DrawScope& scope) -> void
         {
             highlightAlpha = _pressHighlightAlpha.GetValueOrDefault();
         }
-        else if (_enter)
+        else
         {
-            highlightAlpha = _hoverHighlightAlpha.GetValueOrDefault();
+            highlightAlpha = _hoverHighlightAlpha.GetValueOrDefault().GetF64() * _hoverHighlightAnimator.GetCurrentValue();
         }
         ViewDrawFunction::DrawRoundRect(scene, rect, cornerRadius, colorWithAlpha(highlightColor, highlightAlpha), layoutDirection);
     }

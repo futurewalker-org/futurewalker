@@ -9,6 +9,7 @@
 #include "Futurewalker.Component.Lamp.Color.hpp"
 #include "Futurewalker.Component.Lamp.PopupFrameView.hpp"
 #include "Futurewalker.Component.Lamp.PopupMenuButtonStyle.hpp" // FIXME
+#include "Futurewalker.Component.Lamp.IconView.hpp"
 
 #include "Futurewalker.Application.Popup.hpp"
 #include "Futurewalker.Application.PaddingView.hpp"
@@ -16,11 +17,17 @@
 #include "Futurewalker.Application.BoxView.hpp"
 #include "Futurewalker.Application.Screen.hpp"
 #include "Futurewalker.Application.ViewLayoutFunction.hpp"
+#include "Futurewalker.Application.Icon.hpp" 
+#include "Futurewalker.Application.KeyEvent.hpp"
+#include "Futurewalker.Application.Key.hpp"
+
+#include "Futurewalker.Graphics.SvgDocument.hpp"
 
 #include "Futurewalker.Resource.ResourceManager.hpp"
 #include "Futurewalker.Resource.Resource.hpp"
 
 #include "Resource/Futurewalker.Component.Lamp.hpp"
+#include "Resource/Futurewalker.Component.Lamp.Icon.hpp"
 
 namespace FW_LAMP_DETAIL_NS
 {
@@ -108,8 +115,28 @@ auto DropdownMenuButton::Initialize() -> void
 
     _itemColumn = FlexLayout::Make();
 
+    _buttonRow = FlexLayout::Make();
+    _buttonRow->SetDirection(FlexLayoutDirection::Row);
+    _buttonRow->SetMainAxisSize(FlexLayoutMainAxisSize::Min);
+    _buttonRow->SetMainAxisAlignment(FlexLayoutMainAxisAlignment::Start);
+    _buttonRow->SetCrossAxisSize(FlexLayoutCrossAxisSize::Min);
+    _buttonRow->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Center);
+
     _buttonText = Lamp::TextView::Make();
-    auto buttonContentPadding = PaddingView::MakeWithContent(_buttonText);
+    FlexLayout::SetChildGrowFactor(_buttonText, 1.0);
+    FlexLayout::SetChildShrinkFactor(_buttonText, 1.0);
+    FlexLayout::SetChildMainAxisFlexibility(_buttonText, FlexLayoutMainAxisFlexibility::Expand);
+    _buttonRow->AddChild(_buttonText);
+
+    auto resource = ResourceManager::GetResource(M::Futurewalker::Component::Lamp);
+    auto file = resource->LoadFile(R::Futurewalker::Component::Lamp::Icon::ChevronDown);
+    auto svg = Graphics::SvgDocument::LoadFromStream(file);
+    auto icon = Icon::MakeFromSvgDocument(std::move(svg));
+    auto iconView = Lamp::IconView::MakeWithIcon(icon);
+    AttributeNode::SetReference<IconViewStyle::Size>(*iconView, Style::Size160);
+    _buttonRow->AddChild(iconView);
+
+    auto buttonContentPadding = PaddingView::MakeWithContent(_buttonRow);
     buttonContentPadding->SetPadding(PopupMenuButtonStyle::Padding);
 
     _button = MenuButtonView::MakeWithContent(buttonContentPadding);
@@ -139,42 +166,127 @@ auto DropdownMenuButton::Initialize() -> void
 
 auto DropdownMenuButton::ReceiveEvent(Event<>& event) -> Bool
 {
-    if (event.Is<PopupEvent::Closed>())
-    {
-        DestroyPopup();
-        return true;
-    }
-    else if (event.Is<MenuButtonViewEvent::Down>())
+    if (event.Is<MenuButtonViewEvent::Down>())
     {
         if (!_items.empty())
         {
             CreatePopup();
             UpdatePopup();
+            ShowPopup();
         }
         return true;
     }
-    else if (event.Is<MenuItemButtonEvent::Up>())
+    else if (event.Is<MenuItemButtonEvent>())
     {
-        DestroyPopup();
-
-        auto sender = event.As<MenuItemButtonEvent>()->GetSender();
-        for (auto i = SInt64(0); i < _itemColumn->GetAddedChildCount(); ++i)
+        if (event.Is<MenuItemButtonEvent::Up>())
         {
-            if (_itemColumn->GetAddedChildAt(i) == sender)
+            DestroyPopup();
+
+            auto const sender = event.As<MenuItemButtonEvent>()->GetSender();
+
+            if (auto const buttonIndex = FindButtonIndex(sender))
             {
-                if (_currentIndex != i)
+                ChangeCurrentIndex(*buttonIndex);
+            }
+            return true;
+        }
+        else if (event.Is<MenuItemButtonEvent::Enter>())
+        {
+            auto const sender = event.As<MenuItemButtonEvent>()->GetSender();
+
+            if (auto const buttonIndex = FindButtonIndex(sender))
+            {
+                if (_enteredIndex != *buttonIndex)
                 {
-                    _currentIndex = i;
-                    UpdateButtonText();
-                    auto notifyEventParameter = Event<DropdownMenuButtonEvent::CurrentItemChanged>();
-                    notifyEventParameter->SetCurrentIndex(_currentIndex);
-                    auto notifyEvent = Event<>(std::move(notifyEventParameter));
-                    SendEvent(notifyEvent);
+                    if (auto const button = GetButton(_enteredIndex))
+                    {
+                        button->SetEnter(false);
+                    }
+                    _enteredIndex = *buttonIndex;
                 }
-                break;
+            }
+        }
+        else if (event.Is<MenuItemButtonEvent::Leave>())
+        {
+            if (auto const button = GetButton(_enteredIndex))
+            {
+                // Leave the button highlighted.
+                button->SetEnter(true);
+            }
+        }
+        else if (event.Is<MenuItemButtonEvent::Cancel>())
+        {
+            if (_enteredIndex != -1)
+            {
+                if (auto const button = GetButton(_enteredIndex))
+                {
+                    button->SetEnter(false);
+                }
+                _enteredIndex = -1;
             }
         }
         return true;
+    }
+    return false;
+}
+
+auto DropdownMenuButton::ReceivePopupEvent(Event<>& event) -> Bool
+{
+    if (event.Is<PopupEvent::Closed>())
+    {
+        DestroyPopup();
+        return true;
+    }
+    else if (event.Is<KeyEvent::Down>())
+    {
+        auto const& parameter = event.As<KeyEvent::Down>();
+        auto const& key = parameter->GetKey();
+        if (key == Key::ArrowDown)
+        {
+            if (_enteredIndex != -1)
+            {
+                if (auto const button = GetButton(_enteredIndex))
+                {
+                    button->SetEnter(false);
+                }
+
+                _enteredIndex = SInt64::Min(_enteredIndex + 1, _itemColumn->GetAddedChildCount() - 1);
+
+                if (auto const button = GetButton(_enteredIndex))
+                {
+                    button->SetEnter(true);
+                }
+            }
+            return true;
+        }
+        else if (key == Key::ArrowUp)
+        {
+            if (_enteredIndex != -1)
+            {
+                if (auto const button = GetButton(_enteredIndex))
+                {
+                    button->SetEnter(false);
+                }
+
+                _enteredIndex = SInt64::Max(_enteredIndex - 1, 0);
+
+                if (auto const button = GetButton(_enteredIndex))
+                {
+                    button->SetEnter(true);
+                }
+            }
+            return true;
+        }
+        else if (key == Key::Enter || key == Key::Space)
+        {
+            DestroyPopup();
+
+            if (_enteredIndex != -1)
+            {
+                ChangeCurrentIndex(_enteredIndex);
+            }
+            return true;
+        }
     }
     return false;
 }
@@ -204,7 +316,7 @@ auto DropdownMenuButton::CreatePopup() -> void
 {
     if (!_popup)
     {
-        _popup = Popup::Make({.allowActiveOwnerPopup = true}, GetSelf());
+        _popup = Popup::Make({}, GetSelf());
         auto padding = PaddingView::MakeWithContent(_itemColumn);
         padding->SetPadding(Style::PaddingExtraSmall);
         auto box = BoxView::MakeWithContent(padding);
@@ -216,7 +328,7 @@ auto DropdownMenuButton::CreatePopup() -> void
         frame->SetShadowAlpha(0.5);
         _popup->SetContent(frame);
         _popup->SetBackgroundColor(RGBAColor());
-        EventReceiver::Connect(*_popup, *this, &DropdownMenuButton::ReceiveEvent);
+        EventReceiver::Connect(*_popup, *this, &DropdownMenuButton::ReceivePopupEvent);
     }
 }
 
@@ -233,17 +345,15 @@ auto DropdownMenuButton::UpdatePopup() -> void
     {
         if (auto const screenInfo = sourceScreen->GetInfo())
         {
-            auto test = AttributeNode::GetValue<Style::Size60>(*this).GetValueOr(0);
-            (void)test;
+            auto const buttonWidth = sourceRect.GetWidth();
             auto const blurRadius = UnitFunction::ConvertDpToVp(AttributeNode::GetValue<Style::Size60>(*_itemColumn).GetValueOr(0), screenInfo->displayScale);
             auto const popupSizeWithShadow = UnitFunction::ConvertDpToVp(_popup->Measure(BoxConstraints::MakeUnconstrained()), screenInfo->displayScale);
-            auto const popupSize = Size<Vp>(popupSizeWithShadow.width - blurRadius * 2, popupSizeWithShadow.height - blurRadius * 2);
+            auto const popupSize = Size<Vp>(Vp::Max(popupSizeWithShadow.width - blurRadius * 2, buttonWidth), popupSizeWithShadow.height - blurRadius * 2);
             auto const screenRect = screenInfo->workArea;
             auto const isRtl = GetLayoutDirection() == LayoutDirection::RightToLeft;
             auto const popupPos = ViewLayoutFunction::CalcPopupPosition(sourceRect, popupSize, screenRect, PopupAnchorEdge::Bottom, PopupAnchorAlignment::Start, isRtl);
-            auto const popupRect = Rect<Vp>::Offset(Rect<Vp>::Make(popupPos, popupSizeWithShadow), Vector<Vp>(-blurRadius, -blurRadius));
+            auto const popupRect = Rect<Vp>::Offset(Rect<Vp>::Make(popupPos, Size<Vp>(popupSize.width + blurRadius * 2, popupSize.height + blurRadius * 2)), Vector2<Vp>(-blurRadius, -blurRadius));
             _popup->SetFrameRect(popupRect);
-            _popup->SetVisible(true);
         }
     }
 }
@@ -257,6 +367,22 @@ auto DropdownMenuButton::DestroyPopup() -> void
     }
 }
 
+auto DropdownMenuButton::ShowPopup() -> void
+{
+    if (_popup)
+    {
+        for (auto i = SInt64(0); i < _itemColumn->GetAddedChildCount(); ++i)
+        {
+            if (auto const button = GetButton(i))
+            {
+                button->SetEnter(i == _currentIndex);
+            }
+        }
+        _enteredIndex = _currentIndex;
+        _popup->SetVisible(true);
+    }
+}
+
 auto DropdownMenuButton::UpdateItems() -> void
 {
     _itemColumn->RemoveChildren();
@@ -266,6 +392,7 @@ auto DropdownMenuButton::UpdateItems() -> void
         auto menuItem = MenuItemView::Make();
         menuItem->SetMiddleView(Lamp::TextView::MakeWithText(item.name));
         auto menuItemButton = MenuItemButton::MakeWithContent(menuItem);
+        menuItemButton->SetFocusable(false);
         _itemColumn->AddChild(menuItemButton);
     }
 
@@ -287,5 +414,28 @@ auto DropdownMenuButton::UpdateButtonText() -> void
     {
         _buttonText->SetText(_placeholderText.GetValueOrDefault());
     }
+}
+
+auto DropdownMenuButton::ChangeCurrentIndex(SInt64 const index) -> void
+{
+    if (_currentIndex != index)
+    {
+        _currentIndex = index;
+        UpdateButtonText();
+        auto notifyEventParameter = Event<DropdownMenuButtonEvent::CurrentItemChanged>();
+        notifyEventParameter->SetCurrentIndex(_currentIndex);
+        auto notifyEvent = Event<>(std::move(notifyEventParameter));
+        SendEvent(notifyEvent);
+    }
+}
+
+auto DropdownMenuButton::FindButtonIndex(Shared<View> const& button) const -> Optional<SInt64>
+{
+    return _itemColumn->GetAddedChildIndex(button);
+}
+
+auto DropdownMenuButton::GetButton(SInt64 const index) -> Shared<MenuItemButton>
+{
+    return _itemColumn->GetAddedChildAt(index).TryAs<MenuItemButton>();
 }
 }

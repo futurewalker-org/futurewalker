@@ -8,6 +8,8 @@
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
+#include "Futurewalker.Animation.ValueAnimator.hpp"
+
 #include "Futurewalker.Color.hpp"
 
 namespace FW_LAMP_DETAIL_NS
@@ -79,6 +81,7 @@ private:
     AttributeAccessor<Channel> _hoverHighlightAlpha;
     AttributeAccessor<Channel> _pressHighlightAlpha;
     AttributeAccessor<CornerRadius> _cornerRadius;
+    ValueAnimator<Float64> _hoverHighlightAnimator;
 };
 }
 }

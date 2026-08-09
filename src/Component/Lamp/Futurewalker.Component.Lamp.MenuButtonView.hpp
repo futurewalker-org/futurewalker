@@ -26,6 +26,9 @@ public:
     auto GetContent() -> Shared<View>;
     auto SetContent(Shared<View> const& content) -> void;
 
+    auto SetFocusable(Bool const focusable) -> void;
+    auto SetEnter(Bool const enter) -> void;
+
     auto SetBackgroundColor(AttributeArg<RGBAColor> const& color) -> void;
     auto SetBackgroundAlpha(AttributeArg<Channel> const& alpha) -> void;
     auto SetDisabledBackgroundColor(AttributeArg<RGBAColor> const& color) -> void;
@@ -51,8 +54,6 @@ protected:
     auto ReceiveEvent(Event<>& event) -> Bool;
 
 private:
-    Bool _pointerDown = false;
-    Bool _pointerEnter = false;
     Bool _keyDown = false;
     Shared<ContainerView> _container;
     Shared<ButtonRenderView> _buttonView;
