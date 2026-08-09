@@ -80,7 +80,7 @@ public:
     ///
     /// @param callback Update callback to call when the current value is changed.
     ///
-    auto SetUpdateCallback(Function<void()> callback) -> void
+    auto SetUpdateCallback(Function<void(T const&)> callback) -> void
     {
         _updateCallback = std::move(callback);
     }
@@ -237,7 +237,7 @@ private:
     {
         if (_updateCallback)
         {
-            _updateCallback();
+            _updateCallback(_currentValue);
         }
     }
 
@@ -260,7 +260,7 @@ private:
     TimeInterval _startTime;
     AnimationInterpolationFunction _interpolationFunction;
     ScopedSignalConnection _connection;
-    Function<void()> _updateCallback;
+    Function<void(T const&)> _updateCallback;
     Function<void()> _completionCallback;
     Shared<void> _tracker;
 };
