@@ -191,21 +191,15 @@ auto PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForMouse(Platfo
 
     if (parameter.Is<PlatformPointerEvent::Motion::Down>())
     {
-        auto downParameter = parameter.As<PlatformPointerEvent::Motion::Down>();
-        setParams(downParameter);
-        parameter = downParameter;
+        setParams(parameter.As<PlatformPointerEvent::Motion::Down>());
     }
     else if (parameter.Is<PlatformPointerEvent::Motion::Up>())
     {
-        auto upParameter = parameter.As<PlatformPointerEvent::Motion::Up>();
-        setParams(upParameter);
-        parameter = upParameter;
+        setParams(parameter.As<PlatformPointerEvent::Motion::Up>());
     }
     else if (parameter.Is<PlatformPointerEvent::Motion::Move>())
     {
-        auto moveParameter = parameter.As<PlatformPointerEvent::Motion::Move>();
-        setParams(moveParameter);
-        parameter = moveParameter;
+        setParams(parameter.As<PlatformPointerEvent::Motion::Move>());
     }
 }
 
@@ -283,6 +277,7 @@ auto PlatformPointerEventFunctionWin::SetPointerEventParamsForPointer(PlatformPo
         }
     }
 }
+
 auto PlatformPointerEventFunctionWin::SetPointerMotionEventParamsForPointer(PlatformPointerEvent::Motion& parameter, UINT32 const pointerId) -> void
 {
     auto setParams = [&](auto& parameter) {
