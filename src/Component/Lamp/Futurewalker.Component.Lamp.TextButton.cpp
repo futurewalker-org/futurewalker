@@ -9,6 +9,8 @@
 #include "Futurewalker.Application.FlexLayout.hpp"
 #include "Futurewalker.Application.PaddingView.hpp"
 
+#include "Futurewalker.Attribute.StaticAttribute.hpp" 
+
 namespace FW_LAMP_DETAIL_NS
 {
 auto TextButton::Make() -> Shared<TextButton>
@@ -31,6 +33,8 @@ auto TextButton::MakeWithText(AttributeArg<String> const& text) -> Shared<TextBu
 
 auto TextButton::MakeWithTextAndIcon(AttributeArg<String> const& text, AttributeArg<Icon> const& icon) -> Shared<TextButton>
 {
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(EdgeInsets, AttributeIconMargin, [](Dp const& s) { return EdgeInsets(0, 0, s, 0); }, TextButtonStyle::IconSpace);
+
     auto textView = TextView::MakeWithText(text);
     auto iconView = IconView::MakeWithIcon(icon);
     auto flex = FlexLayout::Make();
@@ -39,11 +43,10 @@ auto TextButton::MakeWithTextAndIcon(AttributeArg<String> const& text, Attribute
     flex->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Stretch);
     flex->SetMainAxisSize(FlexLayoutMainAxisSize::Min);
     flex->SetCrossAxisSize(FlexLayoutCrossAxisSize::Min);
-    flex->AddChild(iconView);
+    flex->AddChild(PaddingView::MakeWithPaddingAndContent(AttributeIconMargin, iconView));
     flex->AddChild(textView);
     FlexLayout::SetChildGrowFactor(textView, 1.0);
     FlexLayout::SetChildShrinkFactor(textView, 1.0);
-    FlexLayout::SetChildMargin(iconView, EdgeInsets());
     return MakeWithContent(flex);
 }
 

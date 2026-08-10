@@ -3,6 +3,7 @@
 #include "Futurewalker.Component.Lamp.TextButtonStyle.hpp"
 #include "Futurewalker.Component.Lamp.TextViewStyle.hpp"
 #include "Futurewalker.Component.Lamp.ButtonViewStyle.hpp"
+#include "Futurewalker.Component.Lamp.IconViewStyle.hpp"
 #include "Futurewalker.Component.Lamp.Style.hpp"
 
 namespace FW_LAMP_DETAIL_NS
@@ -34,4 +35,5 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextFontSlant, TextViewSt
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextFontFamily, TextViewStyle::FontFamily);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextHorizontalAlignment, TextViewStyle::HorizontalAlignment);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextVerticalAlignment, TextViewStyle::VerticalAlignment);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::IconSpace, Style::SpaceSmall);
 }
