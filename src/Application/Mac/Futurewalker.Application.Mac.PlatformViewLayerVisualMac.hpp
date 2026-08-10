@@ -25,6 +25,7 @@ protected:
     auto Initialize() -> void override;
     auto OnFragmentChanged() -> void override;
     auto OnOffsetChanged() -> void override;
+    auto OnTransformChanged() -> void override;
     auto OnClipRectChanged() -> void override;
     auto OnClipPathChanged() -> void override;
     auto OnOpacityChanged() -> void override;

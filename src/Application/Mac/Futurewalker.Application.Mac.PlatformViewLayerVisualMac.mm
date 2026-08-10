@@ -122,6 +122,7 @@ using namespace Futurewalker;
                 if (auto const fragment = visual->GetPushNodeFragment(fragmentInfo.index))
                 {
                     scene.PushTranslate({.x = fragment->offset.x, .y = fragment->offset.y});
+                    scene.PushTransform({.transform = fragment->transform});
                     scene.PushClipRect({.rect = fragment->clipRect});
 
                     if (fragment->clipPath)
@@ -134,7 +135,7 @@ using namespace Futurewalker;
             {
                 if (auto const fragment = visual->GetPopNodeFragment(fragmentInfo.index))
                 {
-                    scene.Pop({.count = 2});
+                    scene.Pop({.count = 3});
 
                     if (auto const pushFragment = visual->GetPushNodeFragment(fragment->pushNodeIndex))
                     {
@@ -242,6 +243,11 @@ auto PlatformViewLayerVisualMac::OnFragmentChanged() -> void
 }
 
 auto PlatformViewLayerVisualMac::OnOffsetChanged() -> void
+{
+    _needsUpdateGeometry = true;
+}
+
+auto PlatformViewLayerVisualMac::OnTransformChanged() -> void
 {
     _needsUpdateGeometry = true;
 }
