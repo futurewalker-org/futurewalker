@@ -518,10 +518,17 @@ auto ParseResourceFiles(
 
 auto AssignEntryNumbers(ModuleData& moduleData, std::map<std::u16string, uint32_t> const& entryNumberMapping) -> void
 {
-    auto maxId = 0u;
-    for (auto const& [id, entry] : moduleData.strings)
+    auto maxNumber = 0u;
+    for (auto const& [id, number] : entryNumberMapping)
     {
-        maxId = std::max(maxId, entry.number);
+        maxNumber = std::max(maxNumber, number);
+    }
+
+    std::println("entryNumberMapping size: {}", entryNumberMapping.size());
+    std::println("maxNumber: {}", maxNumber);
+    for (auto const& [id, number] : entryNumberMapping)
+    {
+        std::println("entryNumberMapping: id={}, number={}", StringToUtf8(id), number);
     }
 
     for (auto& [id, entry] : moduleData.strings)
@@ -533,8 +540,9 @@ auto AssignEntryNumbers(ModuleData& moduleData, std::map<std::u16string, uint32_
         }
         else
         {
-            entry.number = ++maxId;
+            entry.number = ++maxNumber;
         }
+        std::println("Assigning number {} to string entry id {}", entry.number, StringToUtf8(id));
     }
 
     for (auto& [id, entry] : moduleData.files)
@@ -546,8 +554,9 @@ auto AssignEntryNumbers(ModuleData& moduleData, std::map<std::u16string, uint32_
         }
         else
         {
-            entry.number = ++maxId;
+            entry.number = ++maxNumber;
         }
+        std::println("Assigning number {} to file entry id {}", entry.number, StringToUtf8(id));
     }
 }
 
