@@ -1,5 +1,5 @@
 ﻿#include "ComponentGalleryApplication.hpp"
-#include "SplitPaneController.hpp"  
+#include "SplitPaneView.hpp"
 
 #include <Futurewalker.Component.Lamp.TextView.hpp>
 #include <Futurewalker.Component.Lamp.Theme.hpp>
@@ -61,8 +61,8 @@ auto ComponentGalleryApplication::ReceiveEvent(Event<>& event) -> Bool
 
         AsyncFunction::SpawnFn([=, this]() -> Async<void> {
             auto frame = WindowFrame::Make();
-            auto controller = SplitPaneController::Make();
-            frame->SetContent(controller->GetView());
+            auto view = SplitPaneView::Make();
+            frame->SetContent(view);
 
             auto menuBar = Lamp::MenuBar::MakeWithMenu(BuildMainMenu());
             frame->SetTitleContent(menuBar);
@@ -70,7 +70,7 @@ auto ComponentGalleryApplication::ReceiveEvent(Event<>& event) -> Bool
             _window = Window::Make({
                 .backgroundStyle = WindowBackgroundStyle::Solid,
             });
-            _window->SetBackgroundColor(Lamp::Style::ColorSurface);
+            _window->SetBackgroundColor(Lamp::Style::ColorSurfaceContainer);
             _window->SetContent(frame);
             _window->SetSizeConstraints(BoxConstraints::MakeUnbounded({500, 500}));
             _window->SetFrameRect({0, 0, 1500, 1000});

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources prefix="ComponentGallery.Icon" locale="en-US">
+    <file id="House">../icons/house.svg</file>
+    <file id="LibraryBig">../icons/library-big.svg</file>
+    <file id="LayoutGrid">../icons/layout-grid.svg</file>
+</resources>

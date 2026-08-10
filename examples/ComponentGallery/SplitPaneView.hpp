@@ -16,22 +16,13 @@ public:
 
     SplitPaneView(PassKey<View> key);
 
-    struct PageInfo
-    {
-        String title;
-        Shared<View> content;
-    };
-    auto SetPages(std::vector<PageInfo> const& pages) -> void;
-    auto SetActivePage(SInt64 const index) -> void;
-
 protected:
     auto Initialize() -> void override;
     auto ReceiveButtonEvent(Event<>& event) -> Bool;
-    auto SetButtonActive(SInt64 const index, Bool const active) -> void;
+    auto SetButtonSelected(Shared<View> const& button, Bool const active) -> void;
 
 private:
-    SInt64 _index = -1;
-    std::vector<PageInfo> _pages;
+    Weak<View> _selected;
     Shared<FlexLayout> _buttonColumn;
     Shared<BoxView> _rightPaneContentArea;
 };
