@@ -154,7 +154,7 @@ auto PlatformViewLayerVisual::SetRenderParams(PlatformViewLayerVisualRenderParam
     }
 }
 
-auto PlatformViewLayerVisual::AddDisplayListFragment(PlatformViewLayerId layerId, DisplayListFragment const& fragment) -> void
+auto PlatformViewLayerVisual::AddDisplayListFragment(PlatformViewLayerId layerId, DisplayListFragment&& fragment) -> void
 {
     _fragments.push_back(
       FragmentInfo {
@@ -162,11 +162,11 @@ auto PlatformViewLayerVisual::AddDisplayListFragment(PlatformViewLayerId layerId
           .type = FragmentType::DisplayList,
           .index = SInt32(std::ssize(_displayListFragments)),
       });
-    _displayListFragments.push_back(fragment);
+    _displayListFragments.push_back(std::move(fragment));
     OnFragmentChanged();
 }
 
-auto PlatformViewLayerVisual::AddPushNodeFragment(PlatformViewLayerId layerId, PushNodeFragment const& fragment) -> void
+auto PlatformViewLayerVisual::AddPushNodeFragment(PlatformViewLayerId layerId, PushNodeFragment&& fragment) -> void
 {
     _fragments.push_back(
       FragmentInfo {
@@ -174,7 +174,7 @@ auto PlatformViewLayerVisual::AddPushNodeFragment(PlatformViewLayerId layerId, P
           .type = FragmentType::PushNode,
           .index = SInt32(std::ssize(_pushNodeFragments)),
       });
-    _pushNodeFragments.push_back(fragment);
+    _pushNodeFragments.push_back(std::move(fragment));
     _pushNodeIndexStack.push_back(SInt32(std::ssize(_pushNodeFragments) - 1));
     OnFragmentChanged();
 }
@@ -207,7 +207,7 @@ auto PlatformViewLayerVisual::AddPopNodeFragment(PlatformViewLayerId layerId) ->
     OnFragmentChanged();
 }
 
-auto PlatformViewLayerVisual::ReplaceDisplayListFragment(SInt32 const index, DisplayListFragment const& fragment) -> void
+auto PlatformViewLayerVisual::ReplaceDisplayListFragment(SInt32 const index, DisplayListFragment&& fragment) -> void
 {
     if (0 <= index && index < SInt32(std::ssize(_fragments)))
     {
@@ -217,7 +217,7 @@ auto PlatformViewLayerVisual::ReplaceDisplayListFragment(SInt32 const index, Dis
             auto& existingFragment = _displayListFragments[static_cast<size_t>(fragmentInfo.index)];
             if (existingFragment != fragment)
             {
-                existingFragment = fragment;
+                existingFragment = std::move(fragment);
                 OnFragmentChanged();
             }
             return;
@@ -226,7 +226,7 @@ auto PlatformViewLayerVisual::ReplaceDisplayListFragment(SInt32 const index, Dis
     FW_DEBUG_ASSERT(false);
 }
 
-auto PlatformViewLayerVisual::ReplacePushNodeFragment(SInt32 const index, PushNodeFragment const& fragment) -> void
+auto PlatformViewLayerVisual::ReplacePushNodeFragment(SInt32 const index, PushNodeFragment&& fragment) -> void
 {
     if (0 <= index && index < SInt32(std::ssize(_fragments)))
     {
@@ -236,7 +236,7 @@ auto PlatformViewLayerVisual::ReplacePushNodeFragment(SInt32 const index, PushNo
             auto& existingFragment = _pushNodeFragments[static_cast<size_t>(fragmentInfo.index)];
             if (existingFragment != fragment)
             {
-                existingFragment = fragment;
+                existingFragment = std::move(fragment);
                 OnFragmentChanged();
             }
             return;

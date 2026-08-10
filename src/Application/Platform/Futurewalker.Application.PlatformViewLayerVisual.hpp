@@ -106,11 +106,11 @@ public:
         auto operator!=(PopNodeFragment const& other) const -> bool = default;
     };
 
-    auto AddDisplayListFragment(PlatformViewLayerId layerId, DisplayListFragment const& fragment) -> void;
-    auto AddPushNodeFragment(PlatformViewLayerId layerId, PushNodeFragment const& fragment) -> void;
+    auto AddDisplayListFragment(PlatformViewLayerId layerId, DisplayListFragment&& fragment) -> void;
+    auto AddPushNodeFragment(PlatformViewLayerId layerId, PushNodeFragment&& fragment) -> void;
     auto AddPopNodeFragment(PlatformViewLayerId layerId) -> void;
-    auto ReplaceDisplayListFragment(SInt32 const index, DisplayListFragment const& fragment) -> void;
-    auto ReplacePushNodeFragment(SInt32 const index, PushNodeFragment const& fragment) -> void;
+    auto ReplaceDisplayListFragment(SInt32 const index, DisplayListFragment&& fragment) -> void;
+    auto ReplacePushNodeFragment(SInt32 const index, PushNodeFragment&& fragment) -> void;
     auto ClearFragments() -> void;
     auto ForEachFragment(Function<void(FragmentInfo const&)> const& func) const -> void;
     auto GetDisplayListFragment(SInt32 const index) const -> Pointer<DisplayListFragment const>;
