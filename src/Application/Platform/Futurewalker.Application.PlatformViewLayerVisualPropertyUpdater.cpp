@@ -126,7 +126,7 @@ auto PlatformViewLayerVisualPropertyUpdater::UpdateCore(Shared<PlatformViewLayer
 
     for (auto const& child : layer->GetChildren())
     {
-        UpdateCore(child.As<PlatformViewLayer>(), renderParams);
+        UpdateCore(child, renderParams);
     }
 
     if (needsSurface)
