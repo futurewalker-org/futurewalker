@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources prefix="Futurewalker.Component.Lamp.Icon" locale="en-US">
     <file id="ChevronDown">../icons/chevron-down.svg</file>
+    <file id="ChevronRight">../icons/chevron-right.svg</file>
 </resources>

@@ -10,7 +10,15 @@
 #include "Futurewalker.Application.MenuItem.hpp"
 #include "Futurewalker.Application.KeyFunction.hpp"
 
+#include "Futurewalker.Resource.ResourceManager.hpp"
+#include "Futurewalker.Resource.Resource.hpp"
+
+#include "Futurewalker.Graphics.SvgDocument.hpp"
+
 #include "Futurewalker.Base.Debug.hpp"
+
+#include "Resource/Futurewalker.Component.Lamp.hpp"
+#include "Resource/Futurewalker.Component.Lamp.Icon.hpp"
 
 namespace FW_LAMP_DETAIL_NS
 {
@@ -76,7 +84,11 @@ auto MenuItemViewBuilder::MakeForMenuView() -> MenuItemViewBuilder
                 itemView->SetMiddleView(text);
             }
             {
-                auto trailingIcon = IconView::MakeWithIcon(Icon::MakeFromFont(Graphics::FontFamily(u8"Segoe Fluent Icons"), 0xF745, 16));
+                auto resource = ResourceManager::GetResource(M::Futurewalker::Component::Lamp);
+                auto file = resource->LoadFile(R::Futurewalker::Component::Lamp::Icon::ChevronRight);
+                auto svg = Graphics::SvgDocument::LoadFromStream(file);
+                auto icon = Icon::MakeFromSvgDocument(std::move(svg));
+                auto trailingIcon = IconView::MakeWithIcon(icon);
                 AttributeNode::SetReference<IconViewStyle::Size>(*trailingIcon, Style::IconSizeSmall);
                 itemView->SetTrailingView(trailingIcon);
             }
