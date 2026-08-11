@@ -6,12 +6,13 @@ project(Futurewalker CXX)
 # ------------------------------------------
 # Options
 # ------------------------------------------
-option(FW_ENABLE_TESTING "Enable Tests" ${PROJECT_IS_TOP_LEVEL})
+option(FW_ENABLE_TESTS "Enable Tests" ${PROJECT_IS_TOP_LEVEL})
+option(FW_ENABLE_EXAMPLES "Enable Examples" ${PROJECT_IS_TOP_LEVEL})
 
 # ------------------------------------------
 # Tests
 # ------------------------------------------
-if (FW_ENABLE_TESTING)
+if (FW_ENABLE_TESTS)
   enable_testing()
 endif()
 
@@ -328,9 +329,12 @@ endfunction()
 # ------------------------------------------
 
 add_subdirectory(${FW_SOURCE_DIR})
-add_subdirectory(${FW_EXAMPLE_DIR})
 add_subdirectory(${FW_TOOL_DIR})
 
-if(BUILD_TESTING)
+if (FW_ENABLE_EXAMPLES)
+  add_subdirectory(${FW_EXAMPLE_DIR})
+endif()
+
+if(FW_ENABLE_TESTS)
   add_subdirectory(${FW_TEST_DIR})
 endif()
