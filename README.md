@@ -63,7 +63,7 @@ Currently only supports Windows 11.
 
 > [!NOTE]  
 > These instructions are for building the tests and examples in this repository.  
-> There is not yet a proper way to develop applications.  
+> If you want to build your own application using Futurewalker, see [futurewalker-cpp-template](https://github.com/futurewalker-org/futurewalker-cpp-template) repository.
 
 You can build tests and examples with following steps:
 
