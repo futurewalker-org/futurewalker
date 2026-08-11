@@ -774,10 +774,17 @@ auto View::EnterMeasureScope(PassKey<MeasureScope>, MeasureParameter const& para
 {
     try
     {
+        if (!IsVisibleFromRoot())
+        {
+            FW_DEBUG_ASSERT(false);
+            return {};
+        }
+
         if (_layoutInfo.IsMeasuring() || _layoutInfo.IsArranging())
         {
             FW_DEBUG_LOG_ERROR("View::EnterMeasureScope: Re-entrant measure/arrange detected.");
             FW_DEBUG_ASSERT(false);
+            return {};
         }
 
         if (_layoutInfo.BeginMeasure(parameter))
@@ -805,10 +812,17 @@ auto View::EnterArrangeScope(PassKey<ArrangeScope>, ArrangeParameter const& para
 {
     try
     {
+        if (!IsVisibleFromRoot())
+        {
+            FW_DEBUG_ASSERT(false);
+            return;
+        }
+
         if (_layoutInfo.IsMeasuring() || _layoutInfo.IsArranging())
         {
             FW_DEBUG_LOG_ERROR("View::EnterArrangeScope: Re-entrant measure/arrange detected.");
             FW_DEBUG_ASSERT(false);
+            return;
         }
 
         if (_layoutInfo.BeginArrange(parameter))
