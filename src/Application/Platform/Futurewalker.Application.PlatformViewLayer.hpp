@@ -48,7 +48,7 @@ public:
     auto GetParent() -> Shared<PlatformViewLayer>;
     auto GetParent() const -> Shared<PlatformViewLayer const>;
 
-    auto GetChildren() -> std::vector<Shared<PlatformViewLayer>>;
+    auto GetChildren() -> std::vector<Shared<PlatformViewLayer>> const&;
     auto GetChildren() const -> std::vector<Shared<PlatformViewLayer const>>;
 
     auto GetOffset() const -> Vector2<Dp>;
@@ -115,7 +115,7 @@ private:
     Shared<PlatformViewLayerContext> _context;
     Weak<PlatformViewLayer> _self;
     Weak<PlatformViewLayer> _parent;
-    std::list<Shared<PlatformViewLayer>> _children;
+    std::vector<Shared<PlatformViewLayer>> _children;
     Flags<PlatformViewLayerRenderFlag> _renderFlags = PlatformViewLayerRenderFlag::None;
     Size<Dp> _size;
     Vector2<Dp> _offset;

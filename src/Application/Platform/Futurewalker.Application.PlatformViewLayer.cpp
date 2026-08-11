@@ -90,9 +90,9 @@ auto PlatformViewLayer::GetParent() const -> Shared<PlatformViewLayer const>
     return _parent.Lock();
 }
 
-auto PlatformViewLayer::GetChildren() -> std::vector<Shared<PlatformViewLayer>>
+auto PlatformViewLayer::GetChildren() -> std::vector<Shared<PlatformViewLayer>> const&
 {
-    return {_children.begin(), _children.end()};
+    return _children;
 }
 
 auto PlatformViewLayer::GetChildren() const -> std::vector<Shared<PlatformViewLayer const>>
