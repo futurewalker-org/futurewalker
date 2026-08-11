@@ -4,9 +4,16 @@ cmake_policy(VERSION 3.31)
 project(Futurewalker CXX)
 
 # ------------------------------------------
-# CTest
+# Options
 # ------------------------------------------
-include (CTest)
+option(FW_ENABLE_TESTING "Enable Tests" ${PROJECT_IS_TOP_LEVEL})
+
+# ------------------------------------------
+# Tests
+# ------------------------------------------
+if (FW_ENABLE_TESTING)
+  enable_testing()
+endif()
 
 # ------------------------------------------
 # Directories
