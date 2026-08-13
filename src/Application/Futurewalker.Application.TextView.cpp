@@ -244,6 +244,7 @@ auto TextView::Draw(DrawScope& scope) -> void
         auto xHeightMin = Dp::Infinity();
         auto xHeightMax = Dp(0);
         auto lineTop = Dp(0);
+        auto firstLineLeading = Optional<Dp>();
         for (auto const& shapedText : _shapedTexts)
         {
             for (auto const& line : shapedText.GetLines())
@@ -256,6 +257,10 @@ auto TextView::Draw(DrawScope& scope) -> void
                         xHeightMin = Dp::Min(xHeightMin, lineTop + lineMetrics.ascent - lineMetrics.xHeight);
                         xHeightMax = Dp::Max(xHeightMax, lineTop + lineMetrics.ascent);
                         lineTop += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
+                        if (!firstLineLeading)
+                        {
+                            firstLineLeading = lineMetrics.leading;
+                        }
                     }
                 }
                 else
@@ -264,6 +269,10 @@ auto TextView::Draw(DrawScope& scope) -> void
                     xHeightMin = Dp::Min(xHeightMin, lineTop + lineMetrics.ascent - lineMetrics.xHeight);
                     xHeightMax = Dp::Max(xHeightMax, lineTop + lineMetrics.ascent);
                     lineTop += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
+                    if (!firstLineLeading)
+                    {
+                        firstLineLeading = lineMetrics.leading;
+                    }
                 }
             }
         }
@@ -273,6 +282,7 @@ auto TextView::Draw(DrawScope& scope) -> void
             auto const xHeightRange = xHeightMax - xHeightMin;
             y = rect.y0 + (rect.GetHeight() - xHeightRange) / 2;
             y -= xHeightMin;
+            y -= firstLineLeading.GetValueOr(0) / 2;
         }
         else
         {
