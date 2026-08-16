@@ -48,6 +48,7 @@ public:
     auto SetFontSmoothing(AttributeArg<Graphics::FontSmoothing> const& smoothing) -> void;
     auto SetHorizontalAlignment(AttributeArg<TextViewHorizontalAlignment> const& alignment) -> void;
     auto SetVerticalAlignment(AttributeArg<TextViewVerticalAlignment> const& alignment) -> void;
+    auto SetVerticalTrim(AttributeArg<TextViewVerticalTrim> const& trim) -> void;
 
     TextView(PassKey<View> key);
 
@@ -63,6 +64,8 @@ private:
     auto GetFontSmoothing() const -> Graphics::FontSmoothing;
     auto GetFontMetrics() const -> Graphics::FontMetrics;
     auto GetTextColor() const -> RGBAColor;
+    auto GetFirstLineMetrics() const -> Optional<Graphics::FontMetrics>;
+    auto GetLastLineMetrics() const -> Optional<Graphics::FontMetrics>;
     auto InvalidateLayoutCache() -> void;
     auto UpdateLayoutCache(Dp const maxWidth) -> void;
     auto InvalidateFontCache() -> void;
@@ -82,6 +85,7 @@ private:
     AttributeAccessor<Graphics::FontSmoothing> _fontSmoothing;
     AttributeAccessor<TextViewHorizontalAlignment> _horizontalAlignment;
     AttributeAccessor<TextViewVerticalAlignment> _verticalAlignment;
+    AttributeAccessor<TextViewVerticalTrim> _verticalTrim;
     Shared<Graphics::TextShaper> _shaper;
     Shared<Graphics::Typeface> _typeface;
     Graphics::FontMetrics _fontMetrics;

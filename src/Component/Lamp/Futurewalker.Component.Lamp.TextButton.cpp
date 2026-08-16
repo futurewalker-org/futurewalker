@@ -105,6 +105,7 @@ auto TextButton::Initialize() -> void
     _textFontFamily.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::TextFontFamily);
     _textHorizontalAlignment.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::TextHorizontalAlignment);
     _textVerticalAlignment.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::TextVerticalAlignment);
+    _textVerticalTrim.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::TextVerticalTrim);
 
     AddChildBack(_buttonView);
 
@@ -139,6 +140,7 @@ auto TextButton::ReceiveAttributeEvent(Event<>& event) -> Bool
         AttributeNode::SetValue<TextViewStyle::FontFamily>(*_buttonView, _textFontFamily.GetValueOrDefault());
         AttributeNode::SetValue<TextViewStyle::HorizontalAlignment>(*_buttonView, _textHorizontalAlignment.GetValueOr(TextViewHorizontalAlignment::Center));
         AttributeNode::SetValue<TextViewStyle::VerticalAlignment>(*_buttonView, _textVerticalAlignment.GetValueOr(TextViewVerticalAlignment::Middle));
+        AttributeNode::SetValue<TextViewStyle::VerticalTrim>(*_buttonView, _textVerticalTrim.GetValueOr(TextViewVerticalTrim::CapHeight));
     }
     return false;
 }

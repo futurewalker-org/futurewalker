@@ -38,6 +38,7 @@ struct TextViewStyle : NonConstructible
     FW_STATIC_ATTRIBUTE(Graphics::FontSmoothing, FontSmoothing);
     FW_STATIC_ATTRIBUTE(TextViewHorizontalAlignment, HorizontalAlignment);
     FW_STATIC_ATTRIBUTE(TextViewVerticalAlignment, VerticalAlignment);
+    FW_STATIC_ATTRIBUTE(TextViewVerticalTrim, VerticalTrim);
 };
 }
 }

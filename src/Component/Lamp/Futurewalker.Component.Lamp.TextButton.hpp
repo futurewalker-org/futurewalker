@@ -51,6 +51,7 @@ private:
     AttributeAccessor<Graphics::FontFamily> _textFontFamily;
     AttributeAccessor<TextViewHorizontalAlignment> _textHorizontalAlignment;
     AttributeAccessor<TextViewVerticalAlignment> _textVerticalAlignment;
+    AttributeAccessor<TextViewVerticalTrim> _textVerticalTrim;
 };
 }
 }

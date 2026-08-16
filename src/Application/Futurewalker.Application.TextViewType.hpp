@@ -28,5 +28,16 @@ enum class TextViewVerticalAlignment
     Middle,
     Bottom,
 };
+
+///
+/// @brief
+///
+enum class TextViewVerticalTrim
+{
+    None,
+    Leading,
+    XHeight,
+    CapHeight
+};
 }
 }

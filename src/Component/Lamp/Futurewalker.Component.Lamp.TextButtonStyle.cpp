@@ -35,5 +35,6 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextFontSlant, TextViewSt
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextFontFamily, TextViewStyle::FontFamily);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextHorizontalAlignment, TextViewStyle::HorizontalAlignment);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextVerticalAlignment, TextViewStyle::VerticalAlignment);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextButtonStyle::TextVerticalTrim, TextViewVerticalTrim::CapHeight);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::IconSpace, Style::SpaceSmall);
 }

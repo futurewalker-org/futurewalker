@@ -19,4 +19,5 @@ FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::FontFamily, Graphics::FontFamil
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::FontSmoothing, Graphics::FontSmoothing::AntiAlias);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::HorizontalAlignment, TextViewHorizontalAlignment::Leading);
 FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::VerticalAlignment, TextViewVerticalAlignment::Middle);
+FW_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewStyle::VerticalTrim, TextViewVerticalTrim::None);
 }

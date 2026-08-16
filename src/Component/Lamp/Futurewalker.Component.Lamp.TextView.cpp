@@ -79,6 +79,7 @@ auto TextView::UpdateStyle() -> void
     _textView->SetFontSmoothing(TextViewStyle::FontSmoothing);
     _textView->SetHorizontalAlignment(TextViewStyle::HorizontalAlignment);
     _textView->SetVerticalAlignment(TextViewStyle::VerticalAlignment);
+    _textView->SetVerticalTrim(TextViewStyle::VerticalTrim);
 }
 }
 }

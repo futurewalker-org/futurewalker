@@ -160,6 +160,16 @@ auto TextView::SetVerticalAlignment(AttributeArg<TextViewVerticalAlignment> cons
 }
 
 ///
+/// @brief
+///
+/// @param trim
+///
+auto TextView::SetVerticalTrim(AttributeArg<TextViewVerticalTrim> const& trim) -> void
+{
+    _verticalTrim.SetAttributeArg(trim);
+}
+
+///
 /// @brief Constructor.
 ///
 TextView::TextView(PassKey<View> key)
@@ -183,6 +193,7 @@ auto TextView::Initialize() -> void
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(Graphics::FontSmoothing, AttributeFontSmoothing, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewHorizontalAlignment, AttributeHorizontalAlignment, {});
     FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewVerticalAlignment, AttributeVerticalAlignment, {});
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_VALUE(TextViewVerticalTrim, AttributeVerticalTrim, {});
 
     _shaper = Graphics::TextShaper::Make();
 
@@ -197,6 +208,7 @@ auto TextView::Initialize() -> void
     _fontSmoothing.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeFontSmoothing, {});
     _horizontalAlignment.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeHorizontalAlignment, {TextViewHorizontalAlignment::Center});
     _verticalAlignment.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeVerticalAlignment, {TextViewVerticalAlignment::Middle});
+    _verticalTrim.BindAndConnectAttributeWithDefaultValue(*this, &TextView::ReceiveAttributeEvent, AttributeVerticalTrim, {TextViewVerticalTrim::None});
 }
 
 ///
@@ -211,7 +223,51 @@ auto TextView::Measure(MeasureScope& scope) -> void
     UpdateFontCache();
     UpdateLayoutCache(widthConstraints.GetMax());
 
-    auto const textSize = GetShapedTextSize();
+    auto textSize = GetShapedTextSize();
+    auto const vTrim = _verticalTrim.GetValueOr(TextViewVerticalTrim::None);
+    if (vTrim == TextViewVerticalTrim::Leading)
+    {
+        if (auto const firstLineMetrics = GetFirstLineMetrics())
+        {
+            textSize.height -= firstLineMetrics->leading / 2;
+        }
+        if (auto const lastLineMetrics = GetLastLineMetrics())
+        {
+            textSize.height -= lastLineMetrics->leading / 2;
+        }
+    }
+    else if (vTrim == TextViewVerticalTrim::CapHeight)
+    {
+        if (auto const firstLineMetrics = GetFirstLineMetrics())
+        {
+            textSize.height -= firstLineMetrics->leading / 2;
+            if (firstLineMetrics->capHeight != 0)
+            {
+                textSize.height -= firstLineMetrics->ascent - firstLineMetrics->capHeight;
+            }
+        }
+        if (auto const lastLineMetrics = GetLastLineMetrics())
+        {
+            textSize.height -= lastLineMetrics->leading / 2;
+            textSize.height -= lastLineMetrics->descent;
+        }
+    }
+    else if (vTrim == TextViewVerticalTrim::XHeight)
+    {
+        if (auto const firstLineMetrics = GetFirstLineMetrics())
+        {
+            textSize.height -= firstLineMetrics->leading / 2;
+            if (firstLineMetrics->xHeight != 0)
+            {
+                textSize.height -= firstLineMetrics->ascent - firstLineMetrics->xHeight;
+            }
+        }
+        if (auto const lastLineMetrics = GetLastLineMetrics())
+        {
+            textSize.height -= lastLineMetrics->leading / 2;
+            textSize.height -= lastLineMetrics->descent;
+        }
+    }
     auto const measuredWidth = AxisConstraints::Constrain(widthConstraints, textSize.width);
     auto const measuredHeight = AxisConstraints::Constrain(heightConstraints, textSize.height);
     scope.SetMeasuredSize(measuredWidth, measuredHeight);
@@ -229,22 +285,102 @@ auto TextView::Draw(DrawScope& scope) -> void
     auto const color = GetTextColor();
     auto const isRTL = GetLayoutDirection() == LayoutDirection::RightToLeft;
 
-    const auto hAlign = _horizontalAlignment.GetValueOr(TextViewHorizontalAlignment::Center);
-    const auto vAlign = _verticalAlignment.GetValueOr(TextViewVerticalAlignment::Middle);
+    auto const hAlign = _horizontalAlignment.GetValueOr(TextViewHorizontalAlignment::Center);
+    auto const vAlign = _verticalAlignment.GetValueOr(TextViewVerticalAlignment::Middle);
+    auto const vTrim = _verticalTrim.GetValueOr(TextViewVerticalTrim::None);
 
     auto const textSize = GetShapedTextSize();
 
     auto y = Dp(0);
-    if (vAlign == TextViewVerticalAlignment::Bottom)
+    if (vAlign == TextViewVerticalAlignment::Top)
+    {
+        y = rect.y0;
+
+        if (auto const firstLineMetrics = GetFirstLineMetrics())
+        {
+            if (vTrim == TextViewVerticalTrim::Leading)
+            {
+                y -= firstLineMetrics->leading / 2;
+            }
+            else if (vTrim == TextViewVerticalTrim::CapHeight)
+            {
+                y -= firstLineMetrics->leading / 2;
+                if (firstLineMetrics->capHeight != 0)
+                {
+                    y -= firstLineMetrics->ascent - firstLineMetrics->capHeight;
+                }
+            }
+            else if (vTrim == TextViewVerticalTrim::XHeight)
+            {
+                y -= firstLineMetrics->leading / 2;
+                if (firstLineMetrics->xHeight != 0)
+                {
+                    y -= firstLineMetrics->ascent - firstLineMetrics->xHeight;
+                }
+            }
+        }
+    }
+    else if (vAlign == TextViewVerticalAlignment::Bottom)
     {
         y = rect.y0 + rect.GetHeight() - textSize.height;
+
+        if (auto const lastLineMetrics = GetLastLineMetrics())
+        {
+            if (vTrim == TextViewVerticalTrim::Leading)
+            {
+                y += lastLineMetrics->leading / 2;
+            }
+            else if (vTrim == TextViewVerticalTrim::CapHeight || vTrim == TextViewVerticalTrim::XHeight)
+            {
+                y += lastLineMetrics->leading / 2;
+                y += lastLineMetrics->descent;
+            }
+        }
     }
     else if (vAlign == TextViewVerticalAlignment::Middle)
     {
-        auto xHeightMin = Dp::Infinity();
-        auto xHeightMax = Dp(0);
+        auto heightMin = Dp::Infinity();
+        auto heightMax = Dp(0);
         auto lineTop = Dp(0);
-        auto firstLineLeading = Optional<Dp>();
+
+        auto addLineMetrics = [&](auto const& lineMetrics) {
+            if (vTrim == TextViewVerticalTrim::Leading)
+            {
+                heightMin = Dp::Min(heightMin, lineTop + lineMetrics.leading / 2);
+                heightMax = Dp::Max(heightMax, lineTop + lineMetrics.leading / 2 + lineMetrics.ascent + lineMetrics.descent);
+            }
+            else if (vTrim == TextViewVerticalTrim::CapHeight)
+            {
+                if (lineMetrics.capHeight != 0)
+                {
+                    heightMin = Dp::Min(heightMin, lineTop + lineMetrics.leading / 2 + lineMetrics.ascent - lineMetrics.capHeight);
+                }
+                else
+                {
+                    heightMin = Dp::Min(heightMin, lineTop + lineMetrics.leading / 2);
+                }
+                heightMax = Dp::Max(heightMax, lineTop + lineMetrics.leading / 2 + lineMetrics.ascent);
+            }
+            else if (vTrim == TextViewVerticalTrim::XHeight)
+            {
+                if (lineMetrics.xHeight != 0)
+                {
+                    heightMin = Dp::Min(heightMin, lineTop + lineMetrics.leading / 2 + lineMetrics.ascent - lineMetrics.xHeight);
+                }
+                else
+                {
+                    heightMin = Dp::Min(heightMin, lineTop + lineMetrics.leading / 2);
+                }
+                heightMax = Dp::Max(heightMax, lineTop + lineMetrics.leading / 2 + lineMetrics.ascent);
+            }
+            else
+            {
+                heightMin = Dp::Min(heightMin, lineTop);
+                heightMax = Dp::Max(heightMax, lineTop + lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading);
+            }
+            lineTop += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
+        };
+
         for (auto const& shapedText : _shapedTexts)
         {
             for (auto const& line : shapedText.GetLines())
@@ -254,35 +390,22 @@ auto TextView::Draw(DrawScope& scope) -> void
                     if (auto const typeface = GetTypeface())
                     {
                         auto const lineMetrics = typeface->GetMetrics(GetFontSize());
-                        xHeightMin = Dp::Min(xHeightMin, lineTop + lineMetrics.ascent - lineMetrics.xHeight);
-                        xHeightMax = Dp::Max(xHeightMax, lineTop + lineMetrics.ascent);
-                        lineTop += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
-                        if (!firstLineLeading)
-                        {
-                            firstLineLeading = lineMetrics.leading;
-                        }
+                        addLineMetrics(lineMetrics);
                     }
                 }
                 else
                 {
                     auto const lineMetrics = line.GetMetrics();
-                    xHeightMin = Dp::Min(xHeightMin, lineTop + lineMetrics.ascent - lineMetrics.xHeight);
-                    xHeightMax = Dp::Max(xHeightMax, lineTop + lineMetrics.ascent);
-                    lineTop += lineMetrics.ascent + lineMetrics.descent + lineMetrics.leading;
-                    if (!firstLineLeading)
-                    {
-                        firstLineLeading = lineMetrics.leading;
-                    }
+                    addLineMetrics(lineMetrics);
                 }
             }
         }
 
-        if (Dp::IsFinite(xHeightMin) && xHeightMin <= xHeightMax)
+        if (Dp::IsFinite(heightMin) && heightMin <= heightMax)
         {
-            auto const xHeightRange = xHeightMax - xHeightMin;
-            y = rect.y0 + (rect.GetHeight() - xHeightRange) / 2;
-            y -= xHeightMin;
-            y -= firstLineLeading.GetValueOr(0) / 2;
+            auto const heightRange = heightMax - heightMin;
+            y = rect.y0 + (rect.GetHeight() - heightRange) / 2;
+            y -= heightMin;
         }
         else
         {
@@ -387,6 +510,58 @@ auto TextView::GetTextColor() const -> RGBAColor
     auto const color = _color.GetValueOrDefault();
     auto const alpha = _alpha.GetValueOrDefault();
     return RGBAColor(color.GetRed(), color.GetGreen(), color.GetBlue(), alpha.GetF64() * color.GetAlpha().GetF64());
+}
+
+///
+/// @brief Get metrics of the first measured line.
+///
+auto TextView::GetFirstLineMetrics() const -> Optional<Graphics::FontMetrics>
+{
+    for (auto const& shapedText : _shapedTexts)
+    {
+        for (auto const& line : shapedText.GetLines())
+        {
+            if (line.GetRunCount() == 0)
+            {
+                if (auto const typeface = GetTypeface())
+                {
+                    return typeface->GetMetrics(GetFontSize());
+                }
+            }
+            else
+            {
+                return line.GetMetrics();
+            }
+        }
+    }
+    return {};
+}
+
+///
+/// @brief Get metrics of the last measured line.
+///
+auto TextView::GetLastLineMetrics() const -> Optional<Graphics::FontMetrics>
+{
+    for (auto it = _shapedTexts.rbegin(); it != _shapedTexts.rend(); ++it)
+    {
+        auto const& shapedText = *it;
+        for (auto lineIt = shapedText.GetLines().rbegin(); lineIt != shapedText.GetLines().rend(); ++lineIt)
+        {
+            auto const& line = *lineIt;
+            if (line.GetRunCount() == 0)
+            {
+                if (auto const typeface = GetTypeface())
+                {
+                    return typeface->GetMetrics(GetFontSize());
+                }
+            }
+            else
+            {
+                return line.GetMetrics();
+            }
+        }
+    }
+    return {};
 }
 
 ///
