@@ -95,7 +95,7 @@ auto SplitPaneView::Initialize() -> void
         column->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Stretch);
         {
             auto button = Lamp::TextButton::MakeWithTextAndIcon(u8"Color", Icon::MakeBlank());
-            FlexLayout::SetChildMargin(button, EdgeInsets(0, 0, 0, 4));
+            FlexLayout::SetChildMargin(button, EdgeInsets(0, 4, 0, 4));
             SetPageView(button, ColorPageView::Make());
             column->AddChild(button);
         }
@@ -118,7 +118,7 @@ auto SplitPaneView::Initialize() -> void
         column->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Stretch);
         {
             auto button = Lamp::TextButton::MakeWithTextAndIcon(u8"Buttons", Icon::MakeBlank());
-            FlexLayout::SetChildMargin(button, EdgeInsets(0, 0, 0, 4));
+            FlexLayout::SetChildMargin(button, EdgeInsets(0, 4, 0, 4));
             SetPageView(button, ButtonPageView::Make());
             column->AddChild(button);
         }

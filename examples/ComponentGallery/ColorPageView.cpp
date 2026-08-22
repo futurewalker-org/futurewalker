@@ -32,8 +32,8 @@ auto MakeColorPaletteContainer(ThemeBrightness brightness)
 
     auto padding = PaddingView::MakeWithPaddingAndContent(Lamp::Style::PaddingMedium, innerColumn);
     auto container = BoxView::MakeWithContent(padding);
-    container->SetBackgroundColor(Lamp::Style::ColorSurfaceContainer);
-    container->SetBorderColor(Lamp::Style::ColorOutlineVariant);
+    container->SetBackgroundColor(Lamp::Style::ColorSurfaceContainerLow);
+    container->SetBorderColor(Lamp::Style::ColorSurfaceContainer);
     container->SetCornerRadius(Lamp::Style::CornerRadiusSmall);
     container->SetBorderWidth(1);
     return container;
@@ -64,8 +64,8 @@ auto MakeColorSchemeViewContainer(String const text, ThemeBrightness brightness)
     auto clip = ClipView::MakeWithContent(padding);
     clip->SetCornerRadius(Lamp::Style::CornerRadiusSmall);
     auto container = BoxView::MakeWithContent(clip);
-    container->SetBackgroundColor(Lamp::Style::ColorSurfaceContainer);
-    container->SetBorderColor(Lamp::Style::ColorOutlineVariant);
+    container->SetBackgroundColor(Lamp::Style::ColorSurfaceContainerLow);
+    container->SetBorderColor(Lamp::Style::ColorSurfaceContainer);
     container->SetCornerRadius(Lamp::Style::CornerRadiusSmall);
     container->SetBorderWidth(1);
     return container;
@@ -97,6 +97,11 @@ auto ColorPageView::Initialize() -> void
     }
     {
         auto colorPaletteContainer = MakeColorPaletteContainer(ThemeBrightness::Dark);
+        FlexLayout::SetChildMargin(colorPaletteContainer, EdgeInsets(0, 10, 0, 0));
+        column->AddChild(colorPaletteContainer);
+    }
+    {
+        auto colorPaletteContainer = MakeColorPaletteContainer(ThemeBrightness::Light);
         FlexLayout::SetChildMargin(colorPaletteContainer, EdgeInsets(0, 10, 0, 0));
         column->AddChild(colorPaletteContainer);
     }
