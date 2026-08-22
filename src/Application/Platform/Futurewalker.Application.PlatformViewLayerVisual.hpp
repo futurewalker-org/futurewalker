@@ -91,7 +91,7 @@ public:
     {
         Vector2<Dp> offset;
         Matrix3x3<Dp> transform = Matrix3x3<Dp>::MakeIdentity();
-        Rect<Dp> clipRect;
+        Rect<Dp> clipRect = Rect<Dp>::Infinite();
         Optional<Graphics::Path> clipPath;
         Float64 opacity = 1.0;
 
