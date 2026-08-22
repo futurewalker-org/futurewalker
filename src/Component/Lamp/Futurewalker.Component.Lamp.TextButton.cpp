@@ -8,6 +8,7 @@
 #include "Futurewalker.Application.IconView.hpp"
 #include "Futurewalker.Application.FlexLayout.hpp"
 #include "Futurewalker.Application.PaddingView.hpp"
+#include "Futurewalker.Application.ConstrainedView.hpp"
 
 #include "Futurewalker.Attribute.StaticAttribute.hpp" 
 
@@ -74,10 +75,15 @@ TextButton::TextButton(PassKey<View> key)
 
 auto TextButton::Initialize() -> void
 {
+    FW_LOCAL_STATIC_ATTRIBUTE_DEFAULT_FUNCTION(AxisConstraints, AttributeHeightConstraints, [](Dp const& s) { return AxisConstraints::MakeUnbounded(s); }, TextButtonStyle::MinimumHeight);
+
     _paddingView = PaddingView::MakeWithPaddingAndContent(TextButtonStyle::Padding, _buttonView);
     _paddingView->SetPadding(TextButtonStyle::Padding);
 
-    _buttonView = ButtonView::MakeWithContent(_paddingView);
+    _constrainedView = ConstrainedView::MakeWithContent(_paddingView);
+    _constrainedView->SetHeightConstraints(AttributeHeightConstraints);
+
+    _buttonView = ButtonView::MakeWithContent(_constrainedView);
     _buttonView->SetBackgroundColor(TextButtonStyle::BackgroundColor);
     _buttonView->SetBackgroundAlpha(TextButtonStyle::BackgroundAlpha);
     _buttonView->SetDisabledBackgroundColor(TextButtonStyle::DisabledBackgroundColor);

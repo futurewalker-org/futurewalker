@@ -57,6 +57,7 @@ struct TextButtonStyle : NonConstructible
     FW_STATIC_ATTRIBUTE(TextViewVerticalAlignment, TextVerticalAlignment);
     FW_STATIC_ATTRIBUTE(TextViewVerticalTrim, TextVerticalTrim);
     FW_STATIC_ATTRIBUTE(Dp, IconSpace);
+    FW_STATIC_ATTRIBUTE(Dp, MinimumHeight);
 };
 }
 }

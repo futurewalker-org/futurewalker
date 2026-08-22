@@ -10,6 +10,7 @@
 #include "Futurewalker.Application.View.hpp"
 #include "Futurewalker.Application.IconType.hpp"
 #include "Futurewalker.Application.PaddingViewType.hpp"
+#include "Futurewalker.Application.ConstrainedViewType.hpp"
 
 #include "Futurewalker.Attribute.AttributeArg.hpp"
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
@@ -42,6 +43,7 @@ protected:
 private:
     Shared<ButtonView> _buttonView;
     Shared<PaddingView> _paddingView;
+    Shared<ConstrainedView> _constrainedView;
     AttributeAccessor<RGBAColor> _textColor;
     AttributeAccessor<RGBAColor> _disabledTextColor;
     AttributeAccessor<Graphics::FontSize> _textFontSize;
