@@ -31,7 +31,7 @@ auto PlatformScreenMac::Refresh(CGFloat const mainScreenOrigin) -> void
             frame.origin.y = mainScreenOrigin - (frame.origin.y + frame.size.height);
             frame.origin.x -= static_cast<CGFloat>(screenInfo.bounds.x0);
             frame.origin.y -= static_cast<CGFloat>(screenInfo.bounds.y0);
-            screenInfo.safeArea = Rect<Vp>::Make(Point<Vp>(frame.origin.x, frame.origin.y), Size<Vp>(frame.size.width, frame.size.height));
+            screenInfo.workArea = Rect<Vp>::Make(Point<Vp>(frame.origin.x, frame.origin.y), Size<Vp>(frame.size.width, frame.size.height));
         }
         {
             auto const insets = [_screen safeAreaInsets];
