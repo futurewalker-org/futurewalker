@@ -105,6 +105,7 @@ auto DropdownMenuButton::SetCurrentIndex(SInt64 const index) -> void
         return;
     }
     _currentIndex = index;
+    UpdateButtonText();
 }
 
 auto DropdownMenuButton::Initialize() -> void
