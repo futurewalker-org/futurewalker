@@ -145,6 +145,12 @@ auto PopupMenuButton::ReceiveEvent(Event<>& event) -> Bool
         {
             DestroyPopup();
         }
+        else if (event.Is<PopupMenuEvent::Activated>())
+        {
+            DestroyPopup();
+            CommandNode::Execute(*this, event.As<PopupMenuEvent::Activated>()->GetCommandId());
+            return true;
+        }
         return true;
     }
     return false;
