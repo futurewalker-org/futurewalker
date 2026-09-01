@@ -14,6 +14,8 @@
 
 #include "Futurewalker.Attribute.AttributeAccessor.hpp"
 
+#include <any>
+
 namespace FW_LAMP_DETAIL_NS
 {
 namespace FW_EXPORT
@@ -26,7 +28,8 @@ class DropdownMenuButton : public View
 public:
     struct ItemInfo
     {
-        String name; // Display name of the item.
+        String name; ///< Display name of the item.
+        std::any data; ///< Optional data associated with the item.
     };
 
     static auto Make() -> Shared<DropdownMenuButton>;
