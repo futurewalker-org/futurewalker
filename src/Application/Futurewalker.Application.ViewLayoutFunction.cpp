@@ -123,6 +123,7 @@ auto ViewLayoutFunction::AlignToPixelGridByCeil(Rect<Dp> const& rect, View const
 /// @param screenRect Rectangle of the screen's work area.
 /// @param edge Edge of the source rectangle to which the popup is anchored.
 /// @param alignment Alignment of the popup relative to the anchor edge.
+/// @param margin Margin between the source view and the popup menu.
 /// @param rtl True if layout direction is right-to-left.
 ///
 auto ViewLayoutFunction::CalcPopupPosition(
@@ -131,6 +132,7 @@ auto ViewLayoutFunction::CalcPopupPosition(
   Rect<Vp> const& screenRect,
   PopupAnchorEdge const edge,
   PopupAnchorAlignment const alignment,
+  Vp const margin,
   Bool const rtl) -> Point<Vp>
 {
     if (edge == PopupAnchorEdge::Leading || edge == PopupAnchorEdge::Trailing)
@@ -138,12 +140,12 @@ auto ViewLayoutFunction::CalcPopupPosition(
         auto x = Vp(0);
         if ((!rtl && edge == PopupAnchorEdge::Leading) || (rtl && edge == PopupAnchorEdge::Trailing))
         {
-            x = sourceRect.x0 - popupSize.width;
-            x = Vp::Max(screenRect.x0, x);
+            x = sourceRect.x0 - popupSize.width - margin;
+            x = Vp::Max(x, screenRect.x0);
         }
         else if ((!rtl && edge == PopupAnchorEdge::Trailing) || (rtl && edge == PopupAnchorEdge::Leading))
         {
-            x = sourceRect.x1;
+            x = sourceRect.x1 + margin;
             x = Vp::Min(x, screenRect.x1 - popupSize.width);
         }
 
@@ -179,11 +181,11 @@ auto ViewLayoutFunction::CalcPopupPosition(
         auto y = Vp(0);
         if (edge == PopupAnchorEdge::Top)
         {
-            y = sourceRect.y0 - popupSize.height;
+            y = sourceRect.y0 - popupSize.height - margin;
         }
         else if (edge == PopupAnchorEdge::Bottom)
         {
-            y = sourceRect.y1;
+            y = sourceRect.y1 + margin;
             y = Vp::Min(y, screenRect.y1 - popupSize.height);
         }
         y = Vp::Max(y, screenRect.y0);

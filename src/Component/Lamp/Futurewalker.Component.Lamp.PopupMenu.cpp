@@ -8,6 +8,7 @@
 
 #include "Futurewalker.Application.Popup.hpp"
 #include "Futurewalker.Application.Screen.hpp"
+#include "Futurewalker.Application.ViewLayoutFunction.hpp"
 
 namespace FW_LAMP_DETAIL_NS
 {
@@ -87,7 +88,7 @@ auto PopupMenu::SetAnchorRect(Rect<Dp> const& rect) -> void
 ///
 /// @note The change will be reflected when Show() is called next time.
 ///
-auto PopupMenu::SetAnchorEdge(PopupMenuAnchorEdge const edge) -> void
+auto PopupMenu::SetAnchorEdge(PopupAnchorEdge const edge) -> void
 {
     _anchorEdge = edge;
 }
@@ -99,7 +100,7 @@ auto PopupMenu::SetAnchorEdge(PopupMenuAnchorEdge const edge) -> void
 ///
 /// @note The change will be reflected when Show() is called next time.
 ///
-auto PopupMenu::SetAnchorAlignment(PopupMenuAnchorAlignment const alignment) -> void
+auto PopupMenu::SetAnchorAlignment(PopupAnchorAlignment const alignment) -> void
 {
     _alignment = alignment;
 }
@@ -250,115 +251,12 @@ auto PopupMenu::UpdatePopup() -> void
                 auto const popupSize = Size<Vp>(popupSizeWithShadow.width - blurRadius * 2, popupSizeWithShadow.height - blurRadius * 2);
                 auto const screenRect = screenInfo->workArea;
                 auto const isRtl = sourceView->GetLayoutDirection() == LayoutDirection::RightToLeft;
-                auto const popupPos = CalcPopupPosition(sourceRect, popupSize, screenRect, isRtl);
+                auto const popupPos = ViewLayoutFunction::CalcPopupPosition(sourceRect, popupSize, screenRect, _anchorEdge, _alignment, blurRadius, isRtl);
                 auto const popupRect = Rect<Vp>::Offset(Rect<Vp>::Make(popupPos, popupSizeWithShadow), Vector2<Vp>(-blurRadius, -blurRadius));
                 _popup->SetFrameRect(popupRect);
                 _popup->SetVisible(true);
             }
         }
     }
-}
-
-///
-/// @brief Calculate popup position.
-///
-/// @param sourceRect Rectangle of the source view in global coordinate space.
-/// @param popupSize Size of the popup menu.
-/// @param screenRect Rectangle of the screen's work area.
-/// @param rtl True if layout direction is right-to-left.
-///
-auto PopupMenu::CalcPopupPosition(Rect<Vp> const& sourceRect, Size<Vp> const& popupSize, Rect<Vp> const& screenRect, Bool const rtl) const -> Point<Vp>
-{
-    auto const anchorEdge = _anchorEdge;
-    auto const alignment = _alignment;
-
-    if (anchorEdge == PopupMenuAnchorEdge::Leading || anchorEdge == PopupMenuAnchorEdge::Trailing)
-    {
-        auto x = Vp(0);
-        if ((!rtl && anchorEdge == PopupMenuAnchorEdge::Leading) || (rtl && anchorEdge == PopupMenuAnchorEdge::Trailing))
-        {
-            x = sourceRect.x0 - popupSize.width;
-            x = Vp::Max(screenRect.x0, x);
-        }
-        else if ((!rtl && anchorEdge == PopupMenuAnchorEdge::Trailing) || (rtl && anchorEdge == PopupMenuAnchorEdge::Leading))
-        {
-            x = sourceRect.x1;
-            x = Vp::Min(x, screenRect.x1 - popupSize.width);
-        }
-
-        if (rtl)
-        {
-            x = Vp::Min(x, screenRect.x1 - popupSize.width);
-        }
-        else
-        {
-            x = Vp::Max(x, screenRect.x0);
-        }
-
-        auto y = Vp(0);
-        if (alignment == PopupMenuAnchorAlignment::Start)
-        {
-            y = sourceRect.y0;
-        }
-        else if (alignment == PopupMenuAnchorAlignment::Center)
-        {
-            y = (sourceRect.y0 + sourceRect.y1 - popupSize.height) / 2;
-        }
-        else if (alignment == PopupMenuAnchorAlignment::End)
-        {
-            y = sourceRect.y1 - popupSize.height;
-            y = Vp::Min(y, screenRect.y1 - popupSize.height);
-        }
-        y = Vp::Max(y, screenRect.y0);
-
-        return {x, y};
-    }
-    else if (anchorEdge == PopupMenuAnchorEdge::Top || anchorEdge == PopupMenuAnchorEdge::Bottom)
-    {
-        auto y = Vp(0);
-        if (anchorEdge == PopupMenuAnchorEdge::Top)
-        {
-            y = sourceRect.y0 - popupSize.height;
-        }
-        else if (anchorEdge == PopupMenuAnchorEdge::Bottom)
-        {
-            y = sourceRect.y1;
-            y = Vp::Min(y, screenRect.y1 - popupSize.height);
-        }
-        y = Vp::Max(y, screenRect.y0);
-
-        auto x = Vp(0);
-        if ((!rtl && alignment == PopupMenuAnchorAlignment::Start) || (rtl && alignment == PopupMenuAnchorAlignment::End))
-        {
-            x = sourceRect.x0;
-            x = Vp::Min(x, screenRect.x1 - popupSize.width);
-        }
-        else if ((!rtl && alignment == PopupMenuAnchorAlignment::End) || (rtl && alignment == PopupMenuAnchorAlignment::Start))
-        {
-            x = sourceRect.x1 - popupSize.width;
-            x = Vp::Max(x, screenRect.x0);
-        }
-        else if (alignment == PopupMenuAnchorAlignment::Center)
-        {
-            x = (sourceRect.x0 + sourceRect.x1 - popupSize.width) / 2;
-        }
-
-        if (rtl)
-        {
-            x = Vp::Min(x, screenRect.x1 - popupSize.width);
-        }
-        else
-        {
-            x = Vp::Max(x, screenRect.x0);
-        }
-
-        return {x, y};
-    }
-    else
-    {
-        FW_DEBUG_LOG_ERROR("Invalid PopupMenuAnchorEdge");
-        FW_DEBUG_ASSERT(false);
-    }
-    return {};
 }
 }

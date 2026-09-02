@@ -201,8 +201,8 @@ auto MenuView::UpdatePopup(SInt64 const index) -> void
                     auto const buttonRect = view->LocalToAncestorRect(view->GetContentRect(), GetSelf());
                     _popup->SetMenu(item.GetSubMenu());
                     _popup->SetAnchorRect(buttonRect);
-                    _popup->SetAnchorEdge(PopupMenuAnchorEdge::Trailing);
-                    _popup->SetAnchorAlignment(PopupMenuAnchorAlignment::Start);
+                    _popup->SetAnchorEdge(PopupAnchorEdge::Trailing);
+                    _popup->SetAnchorAlignment(PopupAnchorAlignment::Start);
                     _popup->Show(GetSelf());
                 }
             }

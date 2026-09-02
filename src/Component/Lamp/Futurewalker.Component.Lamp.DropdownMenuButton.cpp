@@ -352,7 +352,7 @@ auto DropdownMenuButton::UpdatePopup() -> void
             auto const popupSize = Size<Vp>(Vp::Max(popupSizeWithShadow.width - blurRadius * 2, buttonWidth), popupSizeWithShadow.height - blurRadius * 2);
             auto const screenRect = screenInfo->workArea;
             auto const isRtl = GetLayoutDirection() == LayoutDirection::RightToLeft;
-            auto const popupPos = ViewLayoutFunction::CalcPopupPosition(sourceRect, popupSize, screenRect, PopupAnchorEdge::Bottom, PopupAnchorAlignment::Start, isRtl);
+            auto const popupPos = ViewLayoutFunction::CalcPopupPosition(sourceRect, popupSize, screenRect, PopupAnchorEdge::Bottom, PopupAnchorAlignment::Start, blurRadius, isRtl);
             auto const popupRect = Rect<Vp>::Offset(Rect<Vp>::Make(popupPos, Size<Vp>(popupSize.width + blurRadius * 2, popupSize.height + blurRadius * 2)), Vector2<Vp>(-blurRadius, -blurRadius));
             _popup->SetFrameRect(popupRect);
         }

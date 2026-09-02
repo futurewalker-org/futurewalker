@@ -51,7 +51,7 @@ auto PopupMenuButton::SetMenu(Menu const& menu) -> void
     UpdatePopup();
 }
 
-auto PopupMenuButton::SetAnchorEdge(PopupMenuAnchorEdge edge) -> void
+auto PopupMenuButton::SetAnchorEdge(PopupAnchorEdge edge) -> void
 {
     if (_anchorEdge != edge)
     {
@@ -60,7 +60,7 @@ auto PopupMenuButton::SetAnchorEdge(PopupMenuAnchorEdge edge) -> void
     }
 }
 
-auto PopupMenuButton::SetAnchorAlignment(PopupMenuAnchorAlignment alignment) -> void
+auto PopupMenuButton::SetAnchorAlignment(PopupAnchorAlignment alignment) -> void
 {
     if (_anchorAlignment != alignment)
     {

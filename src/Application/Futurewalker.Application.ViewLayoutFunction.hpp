@@ -36,8 +36,14 @@ public:
     static auto AlignToPixelGridByCeil(Size<Dp> const& size, View const& view) -> Size<Dp>;
     static auto AlignToPixelGridByCeil(Rect<Dp> const& rect, View const& view) -> Rect<Dp>;
 
-    static auto CalcPopupPosition(Rect<Vp> const& sourceRect, Size<Vp> const& popupSize, Rect<Vp> const& screenRect, PopupAnchorEdge const edge, PopupAnchorAlignment const alignment, Bool const rtl)
-      -> Point<Vp>;
+    static auto CalcPopupPosition(
+      Rect<Vp> const& sourceRect,
+      Size<Vp> const& popupSize,
+      Rect<Vp> const& screenRect,
+      PopupAnchorEdge const edge,
+      PopupAnchorAlignment const alignment,
+      Vp const margin,
+      Bool const rtl) -> Point<Vp>;
 };
 }
 }

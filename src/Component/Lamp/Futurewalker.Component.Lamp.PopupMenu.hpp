@@ -43,8 +43,8 @@ public:
     auto SetConstraints(BoxConstraints const& constraints) -> void;
 
     auto SetAnchorRect(Rect<Dp> const& rect) -> void;
-    auto SetAnchorEdge(PopupMenuAnchorEdge const edge) -> void;
-    auto SetAnchorAlignment(PopupMenuAnchorAlignment const alignment) -> void;
+    auto SetAnchorEdge(PopupAnchorEdge const edge) -> void;
+    auto SetAnchorAlignment(PopupAnchorAlignment const alignment) -> void;
 
     auto Show(Shared<View> const& sourceView) -> void;
     auto Close() -> void;
@@ -63,12 +63,11 @@ private:
     auto CreatePopup(Shared<View> const& sourceView) -> void;
     auto DestroyPopup() -> void;
     auto UpdatePopup() -> void;
-    auto CalcPopupPosition(Rect<Vp> const& sourceRect, Size<Vp> const& popupSize, Rect<Vp> const& screenRect, Bool const rtl) const -> Point<Vp>;
 
 private:
     Menu _menu;
-    PopupMenuAnchorEdge _anchorEdge = PopupMenuAnchorEdge::Bottom;
-    PopupMenuAnchorAlignment _alignment = PopupMenuAnchorAlignment::Start;
+    PopupAnchorEdge _anchorEdge = PopupAnchorEdge::Bottom;
+    PopupAnchorAlignment _alignment = PopupAnchorAlignment::Start;
     BoxConstraints _constraints = BoxConstraints::MakeUnconstrained();
     Rect<Dp> _anchorRect;
     Shared<EventReceiver> _eventReceiver;

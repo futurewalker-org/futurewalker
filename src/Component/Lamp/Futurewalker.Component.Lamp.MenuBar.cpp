@@ -122,8 +122,8 @@ auto MenuBar::UpdatePopup(MenuItemInfo const& info) -> void
         auto const buttonRect = info.button->LocalToAncestorRect(info.button->GetContentRect(), GetSelf());
         _popup->SetMenu(info.item.GetSubMenu());
         _popup->SetAnchorRect(buttonRect);
-        _popup->SetAnchorEdge(PopupMenuAnchorEdge::Bottom);
-        _popup->SetAnchorAlignment(PopupMenuAnchorAlignment::Start);
+        _popup->SetAnchorEdge(PopupAnchorEdge::Bottom);
+        _popup->SetAnchorAlignment(PopupAnchorAlignment::Start);
         _popup->Show(GetSelf());
     }
 }

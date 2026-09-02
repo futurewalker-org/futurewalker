@@ -12,6 +12,7 @@
 #include "Futurewalker.Application.Menu.hpp"
 #include "Futurewalker.Application.CornerRadius.hpp"
 #include "Futurewalker.Application.PaddingViewType.hpp"
+#include "Futurewalker.Application.PopupType.hpp"
 
 #include "Futurewalker.Attribute.AttributeArg.hpp"
 
@@ -34,8 +35,8 @@ public:
     auto GetMenu() const -> Menu;
     auto SetMenu(Menu const& menu) -> void;
 
-    auto SetAnchorEdge(PopupMenuAnchorEdge edge) -> void;
-    auto SetAnchorAlignment(PopupMenuAnchorAlignment alignment) -> void;
+    auto SetAnchorEdge(PopupAnchorEdge edge) -> void;
+    auto SetAnchorAlignment(PopupAnchorAlignment alignment) -> void;
 
     PopupMenuButton(PassKey<View> key);
 
@@ -50,8 +51,8 @@ private:
 
 private:
     Menu _menu;
-    PopupMenuAnchorEdge _anchorEdge = PopupMenuAnchorEdge::Bottom;
-    PopupMenuAnchorAlignment _anchorAlignment = PopupMenuAnchorAlignment::Start;
+    PopupAnchorEdge _anchorEdge = PopupAnchorEdge::Bottom;
+    PopupAnchorAlignment _anchorAlignment = PopupAnchorAlignment::Start;
     Shared<PopupMenu> _popupMenu;
     Shared<PaddingView> _paddingView;
     Shared<MenuButtonView> _buttonView;
