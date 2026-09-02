@@ -28,6 +28,8 @@ FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::HoverHighlightAlpha, Styl
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::PressHighlightAlpha, Style::AlphaHighlightPress);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextColor, Style::ColorOnSecondaryContainer);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::DisabledTextColor, TextViewStyle::DisabledColor);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::IconColor, Style::ColorOnSecondaryContainer);
+FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::DisabledIconColor, IconViewStyle::DisabledColor);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextFontSize, TextViewStyle::FontSize);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextFontWeight, TextViewStyle::FontWeight);
 FW_STATIC_ATTRIBUTE_DEFAULT_REFERENCE(TextButtonStyle::TextFontWidth, TextViewStyle::FontWidth);

@@ -25,6 +25,7 @@ auto TextButtonTheme::Apply(AttributeNode& target) -> void
         AttributeNode::SetReference<TextButtonStyle::BackgroundColor>(target, Style::ColorPrimary);
         AttributeNode::SetReference<TextButtonStyle::BackgroundAlpha>(target, Style::AlphaOpaque);
         AttributeNode::SetReference<TextButtonStyle::TextColor>(target, Style::ColorOnPrimary);
+        AttributeNode::SetReference<TextButtonStyle::IconColor>(target, Style::ColorOnPrimary);
         AttributeNode::SetReference<TextButtonStyle::HighlightColor>(target, Style::ColorOnPrimary);
         AttributeNode::SetReference<TextButtonStyle::BorderColor>(target, Style::ColorOutline);
         AttributeNode::SetReference<TextButtonStyle::BorderWidth>(target, Style::SizeNone);
@@ -34,6 +35,7 @@ auto TextButtonTheme::Apply(AttributeNode& target) -> void
         AttributeNode::SetReference<TextButtonStyle::BackgroundColor>(target, Style::ColorSecondaryContainer);
         AttributeNode::SetReference<TextButtonStyle::BackgroundAlpha>(target, Style::AlphaOpaque);
         AttributeNode::SetReference<TextButtonStyle::TextColor>(target, Style::ColorOnSecondaryContainer);
+        AttributeNode::SetReference<TextButtonStyle::IconColor>(target, Style::ColorOnSecondaryContainer);
         AttributeNode::SetReference<TextButtonStyle::HighlightColor>(target, Style::ColorOnSecondaryContainer);
         AttributeNode::SetReference<TextButtonStyle::BorderColor>(target, Style::ColorOutlineVariant);
         AttributeNode::SetReference<TextButtonStyle::BorderWidth>(target, Style::SizeNone);
@@ -44,6 +46,7 @@ auto TextButtonTheme::Apply(AttributeNode& target) -> void
         AttributeNode::SetReference<TextButtonStyle::BackgroundAlpha>(target, Style::AlphaNone);
         AttributeNode::SetReference<TextButtonStyle::DisabledBackgroundAlpha>(target, Style::AlphaNone);
         AttributeNode::SetReference<TextButtonStyle::TextColor>(target, Style::ColorOnSecondaryContainer);
+        AttributeNode::SetReference<TextButtonStyle::IconColor>(target, Style::ColorOnSecondaryContainer);
         AttributeNode::SetReference<TextButtonStyle::HighlightColor>(target, Style::ColorOnSecondaryContainer);
         AttributeNode::SetReference<TextButtonStyle::BorderColor>(target, Style::ColorOutlineVariant);
         AttributeNode::SetReference<TextButtonStyle::BorderWidth>(target, Style::Size10);
@@ -54,6 +57,7 @@ auto TextButtonTheme::Apply(AttributeNode& target) -> void
         AttributeNode::SetReference<TextButtonStyle::BackgroundAlpha>(target, Style::AlphaNone);
         AttributeNode::SetReference<TextButtonStyle::DisabledBackgroundAlpha>(target, Style::AlphaNone);
         AttributeNode::SetReference<TextButtonStyle::TextColor>(target, Style::ColorOnSecondaryContainer);
+        AttributeNode::SetReference<TextButtonStyle::IconColor>(target, Style::ColorOnSecondaryContainer);
         AttributeNode::SetReference<TextButtonStyle::HighlightColor>(target, Style::ColorOnSecondaryContainer);
         AttributeNode::SetReference<TextButtonStyle::BorderColor>(target, Style::ColorOutlineVariant);
         AttributeNode::SetReference<TextButtonStyle::BorderWidth>(target, Style::SizeNone);
@@ -65,6 +69,7 @@ auto TextButtonTheme::Clear(AttributeNode& target) -> void
     AttributeNode::Clear<TextButtonStyle::BackgroundColor>(target);
     AttributeNode::Clear<TextButtonStyle::BackgroundAlpha>(target);
     AttributeNode::Clear<TextButtonStyle::TextColor>(target);
+    AttributeNode::Clear<TextButtonStyle::IconColor>(target);
     AttributeNode::Clear<TextButtonStyle::HighlightColor>(target);
     AttributeNode::Clear<TextButtonStyle::BorderColor>(target);
     AttributeNode::Clear<TextButtonStyle::BorderWidth>(target);

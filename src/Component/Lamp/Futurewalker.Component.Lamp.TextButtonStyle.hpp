@@ -48,6 +48,8 @@ struct TextButtonStyle : NonConstructible
     FW_STATIC_ATTRIBUTE(Channel, PressHighlightAlpha);
     FW_STATIC_ATTRIBUTE(RGBAColor, TextColor);
     FW_STATIC_ATTRIBUTE(RGBAColor, DisabledTextColor);
+    FW_STATIC_ATTRIBUTE(RGBAColor, IconColor);
+    FW_STATIC_ATTRIBUTE(RGBAColor, DisabledIconColor);
     FW_STATIC_ATTRIBUTE(Graphics::FontSize, TextFontSize);
     FW_STATIC_ATTRIBUTE(Graphics::FontWeight, TextFontWeight);
     FW_STATIC_ATTRIBUTE(Graphics::FontWidth, TextFontWidth);

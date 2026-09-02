@@ -54,6 +54,8 @@ private:
     AttributeAccessor<TextViewHorizontalAlignment> _textHorizontalAlignment;
     AttributeAccessor<TextViewVerticalAlignment> _textVerticalAlignment;
     AttributeAccessor<TextViewVerticalTrim> _textVerticalTrim;
+    AttributeAccessor<RGBAColor> _iconColor;
+    AttributeAccessor<RGBAColor> _disabledIconColor;
 };
 }
 }

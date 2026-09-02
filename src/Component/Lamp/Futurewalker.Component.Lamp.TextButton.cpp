@@ -112,6 +112,8 @@ auto TextButton::Initialize() -> void
     _textHorizontalAlignment.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::TextHorizontalAlignment);
     _textVerticalAlignment.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::TextVerticalAlignment);
     _textVerticalTrim.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::TextVerticalTrim);
+    _iconColor.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::IconColor);
+    _disabledIconColor.BindAndConnectAttribute(*this, &TextButton::ReceiveAttributeEvent, TextButtonStyle::DisabledIconColor);
 
     AddChildBack(_buttonView);
 
@@ -147,6 +149,8 @@ auto TextButton::ReceiveAttributeEvent(Event<>& event) -> Bool
         AttributeNode::SetValue<TextViewStyle::HorizontalAlignment>(*_buttonView, _textHorizontalAlignment.GetValueOr(TextViewHorizontalAlignment::Center));
         AttributeNode::SetValue<TextViewStyle::VerticalAlignment>(*_buttonView, _textVerticalAlignment.GetValueOr(TextViewVerticalAlignment::Middle));
         AttributeNode::SetValue<TextViewStyle::VerticalTrim>(*_buttonView, _textVerticalTrim.GetValueOr(TextViewVerticalTrim::CapHeight));
+        AttributeNode::SetValue<IconViewStyle::Color>(*_buttonView, _iconColor.GetValueOrDefault());
+        AttributeNode::SetValue<IconViewStyle::DisabledColor>(*_buttonView, _disabledIconColor.GetValueOrDefault());
     }
     return false;
 }
