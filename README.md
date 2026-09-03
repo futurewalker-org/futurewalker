@@ -9,7 +9,7 @@ A cross-platform GUI framework written in C++23.
 > Futurewalker is still in an early phase of development.  
 > If you're interested in the project, try it out and give us your feedback!  
 
-<img src=docs/images/20260309_Gallery_Color.png width=412> <img src=docs/images/20260309_Gallery_Buttons.png width=412>
+<img src=docs/images/20260904_Gallery_TextButton.png width=412> <img src=docs/images/20260904_Gallery_Color.png width=412>
 
 ## Overview
 
