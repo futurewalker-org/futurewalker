@@ -1,0 +1,17 @@
+# ------------------------------------------
+# Gallery
+# ------------------------------------------
+set(Example "Gallery")
+set(ExampleName "Example-${Example}")
+
+fw_add_binary(${ExampleName} Windowed)
+
+fw_link_libraries(${ExampleName} PUBLIC 
+  Futurewalker::Config
+  Futurewalker::Application
+  Futurewalker::Component::Lamp
+  Futurewalker::Main
+)
+
+fw_add_resources(${ExampleName})
+fw_bundle_resources(${ExampleName})

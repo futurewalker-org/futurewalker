@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources prefix="Gallery.Icon" locale="en-US">
+    <file id="House">../icons/house.svg</file>
+    <file id="LibraryBig">../icons/library-big.svg</file>
+    <file id="LayoutGrid">../icons/layout-grid.svg</file>
+    <file id="PencilRuler">../icons/pencil-ruler.svg</file>
+    <file id="AppWindow">../icons/app-window.svg</file>
+    <file id="SunMoon">../icons/sun-moon.svg</file>
+</resources>
