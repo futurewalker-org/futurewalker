@@ -3,11 +3,12 @@
 [![windows-2022](https://github.com/futurewalker-org/futurewalker/actions/workflows/windows-2022.yml/badge.svg?event=push)](https://github.com/futurewalker-org/futurewalker/actions/workflows/windows-2022.yml)
 [![macos-26](https://github.com/futurewalker-org/futurewalker/actions/workflows/macos-26.yml/badge.svg?event=push)](https://github.com/futurewalker-org/futurewalker/actions/workflows/macos-26.yml)
 
-A cross-platform GUI framework written in C++23.  
+A cross-platform GUI application framework written in C++23.  
 
 > [!NOTE]  
-> Futurewalker is still in an early phase of development.  
+> Futurewalker is currently in active development. 
 > If you're interested in the project, try it out and give us your feedback!  
+> You can clone [futurewalker-cpp-template](https://github.com/futurewalker-org/futurewalker-cpp-template) repo and start tinkering with it.
 
 <img src=docs/images/20260904_Gallery_TextButton.png width=412> <img src=docs/images/20260904_Gallery_Color.png width=412>
 
