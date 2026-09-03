@@ -6,6 +6,16 @@
 
 namespace FW_DETAIL_NS
 {
+auto SystemInfo::GetPlatformKind() -> PlatformKind
+{
+    if (auto const platform = Locator::GetInstance<PlatformSystemInfo>())
+    {
+        return platform->GetPlatformKind();
+    }
+    FW_DEBUG_ASSERT(false);
+    return PlatformKind::Unknown;
+}
+
 ///
 /// @brief Returns true if the system is Windows.
 ///
@@ -69,5 +79,15 @@ auto SystemInfo::IsAndroid() -> Bool
     }
     FW_DEBUG_ASSERT(false);
     return false;
+}
+
+auto SystemInfo::GetSystemVersion() -> SystemVersion
+{
+    if (auto const platform = Locator::GetInstance<PlatformSystemInfo>())
+    {
+        return platform->GetSystemVersion();
+    }
+    FW_DEBUG_ASSERT(false);
+    return SystemVersion {0, 0, 0};
 }
 }

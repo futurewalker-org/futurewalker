@@ -19,11 +19,13 @@ namespace FW_EXPORT
 class SystemInfo : NonConstructible
 {
 public:
+    static auto GetPlatformKind() -> PlatformKind;
     static auto IsWindows() -> Bool;
     static auto IsUnix() -> Bool;
     static auto IsMacOS() -> Bool;
     static auto IsIOS() -> Bool;
     static auto IsAndroid() -> Bool;
+    static auto GetSystemVersion() -> SystemVersion;
 };
 }
 }

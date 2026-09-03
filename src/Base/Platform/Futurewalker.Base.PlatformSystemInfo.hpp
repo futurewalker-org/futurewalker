@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Futurewalker.Base.PlatformSystemInfoType.hpp"
+#include "Futurewalker.Base.SystemInfoType.hpp"
 
 #include "Futurewalker.Core.NonCopyable.hpp"
 #include "Futurewalker.Core.Primitive.hpp"
@@ -17,11 +18,13 @@ class PlatformSystemInfo : NonCopyable
 {
 public:
     virtual ~PlatformSystemInfo() = 0;
+    virtual auto GetPlatformKind() const -> PlatformKind = 0;
     virtual auto IsWindows() const -> Bool = 0;
     virtual auto IsUnix() const -> Bool = 0;
     virtual auto IsMacOS() const -> Bool = 0;
     virtual auto IsIOS() const -> Bool = 0;
     virtual auto IsAndroid() const -> Bool = 0;
+    virtual auto GetSystemVersion() const -> SystemVersion = 0;
 };
 }
 }

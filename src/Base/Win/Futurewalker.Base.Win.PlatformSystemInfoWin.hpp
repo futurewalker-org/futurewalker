@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
+#include "Futurewalker.Base.Win.Prelude.hpp"
 #include "Futurewalker.Base.PlatformSystemInfo.hpp"
 #include "Futurewalker.Base.Locator.hpp"
 
@@ -14,11 +15,13 @@ namespace FW_EXPORT
 class PlatformSystemInfoWin final : public PlatformSystemInfo
 {
 public:
+    auto GetPlatformKind() const -> PlatformKind override;
     auto IsWindows() const -> Bool override;
     auto IsUnix() const -> Bool override;
     auto IsMacOS() const -> Bool override;
     auto IsIOS() const -> Bool override;
     auto IsAndroid() const -> Bool override;
+    auto GetSystemVersion() const -> SystemVersion override;
 };
 
 ///
