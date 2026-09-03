@@ -23,6 +23,8 @@ class ApplicationTheme : NonCopyable
 public:
     explicit ApplicationTheme(Shared<PlatformApplicationThemeContext> const& platformContext, Shared<ApplicationContext> const& applicationContext);
 
+    static auto GetCurrentBrightness() -> ThemeBrightness;
+
     static auto GetBrightness() -> ApplicationThemeBrightness;
     static auto SetBrightness(ApplicationThemeBrightness const brightness) -> void;
 
@@ -34,6 +36,7 @@ private:
     auto UpdateCurrentBrightness() -> void;
     auto HandlePlatformThemeEvent(Event<>& event) -> Bool;
 
+    auto InternalGetCurrentBrightness() const -> ThemeBrightness;
     auto InternalGetBrightness() const -> ApplicationThemeBrightness;
     auto InternalSetBrightness(ApplicationThemeBrightness const brightness) -> void;
     auto InternalAddTheme(ThemeBrightness const brightness, Shared<Theme> const& theme) -> void;

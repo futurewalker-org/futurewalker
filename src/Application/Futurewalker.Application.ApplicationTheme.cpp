@@ -19,6 +19,15 @@ ApplicationTheme::ApplicationTheme(Shared<PlatformApplicationThemeContext> const
     UpdateCurrentBrightness();
 }
 
+auto ApplicationTheme::GetCurrentBrightness() -> ThemeBrightness
+{
+    if (auto const theme = Locator::GetInstance<ApplicationTheme>())
+    {
+        return theme->InternalGetCurrentBrightness();
+    }
+    return ThemeBrightness::Light;
+}
+
 auto ApplicationTheme::GetBrightness() -> ApplicationThemeBrightness
 {
     if (auto const theme = Locator::GetInstance<ApplicationTheme>())
@@ -101,6 +110,11 @@ auto ApplicationTheme::HandlePlatformThemeEvent(Event<>& event) -> Bool
         UpdateCurrentBrightness();
     }
     return false;
+}
+
+auto ApplicationTheme::InternalGetCurrentBrightness() const -> ThemeBrightness
+{
+    return _currentBrightness;
 }
 
 auto ApplicationTheme::InternalGetBrightness() const -> ApplicationThemeBrightness
