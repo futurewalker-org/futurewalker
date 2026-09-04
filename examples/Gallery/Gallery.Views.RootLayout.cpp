@@ -101,6 +101,7 @@ auto RootLayout::Initialize() -> void
         SetPageView(homeButton, homeView);
         SetButtonSelected(homeButton, true);
         buttonColumn->AddChild(homeButton);
+        _selected = homeButton;
     }
     // Foundation
     {
@@ -150,12 +151,6 @@ auto RootLayout::Initialize() -> void
         column->SetMainAxisSize(FlexLayoutMainAxisSize::Min);
         column->SetCrossAxisSize(FlexLayoutCrossAxisSize::Max);
         column->SetCrossAxisAlignment(FlexLayoutCrossAxisAlignment::Stretch);
-        //{
-        //    auto button = Lamp::TextButton::MakeWithTextAndIcon(u8"Button", Icon::MakeBlank());
-        //    FlexLayout::SetChildMargin(button, EdgeInsets(0, 4, 0, 4));
-        //    SetPageView(button, ButtonPage::Make());
-        //    column->AddChild(button);
-        //}
         {
             auto button = Lamp::TextButton::MakeWithTextAndIcon(loadString(R::Gallery::String::TextButtonPage::Title), Icon::MakeBlank());
             FlexLayout::SetChildMargin(button, EdgeInsets(0, 4, 0, 4));
