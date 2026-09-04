@@ -116,12 +116,6 @@ auto TypographyPage::Initialize() -> void
 {
     auto resource = ResourceManager::GetResource(M::Gallery);
 
-    auto loadIcon = [&](auto fileId) {
-        auto file = resource->LoadFile(fileId);
-        auto svg = Graphics::SvgDocument::LoadFromStream(file);
-        return Icon::MakeFromSvgDocument(std::move(svg));
-    };
-
     auto column = FlexLayout::Make();
     column->SetDirection(FlexLayoutDirection::Column);
     column->SetMainAxisSize(FlexLayoutMainAxisSize::Max);
