@@ -99,7 +99,7 @@ auto DropdownMenuButton::GetCurrentIndex() const -> SInt64
 
 auto DropdownMenuButton::SetCurrentIndex(SInt64 const index) -> void
 {
-    if (index < 0 || index >= static_cast<SInt64>(_items.size()))
+    if (index < -1 || index >= static_cast<SInt64>(_items.size()))
     {
         FW_DEBUG_LOG_ERROR("DropdownMenuButton::SetCurrentIndex: Index out of bounds");
         return;
