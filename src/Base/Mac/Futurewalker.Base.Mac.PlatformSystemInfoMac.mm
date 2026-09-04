@@ -4,6 +4,11 @@
 
 namespace FW_DETAIL_NS
 {
+auto PlatformSystemInfoMac::GetPlatformKind() const -> PlatformKind
+{
+    return PlatformKind::MacOS;
+}
+
 auto PlatformSystemInfoMac::IsWindows() const -> Bool
 {
     return false;
@@ -11,7 +16,7 @@ auto PlatformSystemInfoMac::IsWindows() const -> Bool
 
 auto PlatformSystemInfoMac::IsUnix() const -> Bool
 {
-    return false; // FIXME: Should this return true for macOS?
+    return true;
 }
 
 auto PlatformSystemInfoMac::IsMacOS() const -> Bool
@@ -27,6 +32,19 @@ auto PlatformSystemInfoMac::IsIOS() const -> Bool
 auto PlatformSystemInfoMac::IsAndroid() const -> Bool
 {
     return false;
+}
+
+auto PlatformSystemInfoMac::GetSystemVersion() const -> SystemVersion
+{
+    @autoreleasepool
+    {
+        auto version = [NSProcessInfo processInfo].operatingSystemVersion;
+        return SystemVersion {
+          static_cast<int>(version.majorVersion),
+          static_cast<int>(version.minorVersion),
+          static_cast<int>(version.patchVersion),
+        };
+    }
 }
 
 auto Locator::Resolver<PlatformSystemInfoMac>::Resolve() -> Shared<PlatformSystemInfoMac>
