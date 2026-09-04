@@ -29,7 +29,7 @@ public:
     struct ItemInfo
     {
         String name; ///< Display name of the item.
-        std::any data; ///< Optional data associated with the item.
+        std::any data = {}; ///< Optional data associated with the item.
     };
 
     static auto Make() -> Shared<DropdownMenuButton>;
