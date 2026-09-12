@@ -12,7 +12,7 @@ namespace Futurewalker::Gallery
 class Application : public Futurewalker::Application
 {
 public:
-    static auto Make() -> Shared<Application>;
+    static auto Make() -> Unique<Application>;
 
     Application(PassKey<Futurewalker::Application> key);
 

@@ -34,12 +34,14 @@ namespace FW_EXPORT
 class Application : NonCopyable
 {
 public:
+    static auto Run(Unique<Application> app) -> Async<void>;
+
+public:
     Application(PassKey<Application>, ApplicationOptions const& options);
     virtual ~Application() = default;
 
     auto SendEvent(Event<>& event) -> Bool;
 
-    auto Run() -> Async<void>;
     auto RequestQuit() -> void;
 
     auto IsActive() const -> Bool;
@@ -63,21 +65,13 @@ protected:
     auto SetMainMenu(Menu const& menu) -> void;
 
     template <Concepts::DerivedFrom<Application> Derived, class... Args>
-    static auto MakeDerived(Args&&... args) -> Shared<Derived>;
-
-    template <class Self>
-    auto GetSelf(this Self& self) -> Shared<Self>;
+    static auto MakeDerived(Args&&... args) -> Unique<Derived>;
 
 private:
-    auto GetSelfBase() -> Shared<Application>;
-    auto GetSelfBase() const -> Shared<Application const>;
-    auto SetSelfBase(Shared<Application> const& self) -> void;
-
     auto DispatchEvent(Event<>& event, EventFunction const& dispatch) -> Bool;
     auto HandlePlatformApplicationEvent(Event<>& event) -> Bool;
 
 private:
-    Weak<Application> _self;
     Unique<EventReceiver> _eventReceiver;
     Unique<PropertyStore> _propertyStore;
     Shared<PlatformApplicationContext> _platformContext;
@@ -87,6 +81,7 @@ private:
     Shared<ThreadPool> _threadPool;
     Shared<ViewLayerManager> _viewLayerManager;
     String _id;
+    Shared<void> _tracker;
 };
 
 ///
@@ -95,23 +90,11 @@ private:
 /// @param[in] args Arguments for constructor of application class.
 ///
 template <Concepts::DerivedFrom<Application> Derived, class... Args>
-auto Application::MakeDerived(Args&&... args) -> Shared<Derived>
+auto Application::MakeDerived(Args&&... args) -> Unique<Derived>
 {
-    auto app = Shared<Derived>::Make(PassKey<Application>(), std::forward<Args>(args)...);
-    static_cast<Application&>(*app).SetSelfBase(app);
+    auto app = Unique<Derived>::Make(PassKey<Application>(), std::forward<Args>(args)...);
     static_cast<Application&>(*app).Initialize();
     return app;
-}
-
-///
-/// @brief 
-///
-/// @param self 
-///
-template <class Self>
-auto Application::GetSelf(this Self& self) -> Shared<Self>
-{
-    return static_cast<TypeTraits::PropagateCVRef<Self&, Application>>(self).GetSelfBase().template UnsafeAs<Self>();
 }
 }
 }

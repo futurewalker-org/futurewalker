@@ -16,7 +16,7 @@ auto Main() -> Async<ExitCode>
     {
         auto env = Environment();
         auto app = ComponentGallery::ComponentGalleryApplication::Make();
-        co_await app->Run();
+        co_await Application::Run(std::move(app));
     }
     catch (...)
     {

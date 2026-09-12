@@ -13,8 +13,14 @@
 #include "Futurewalker.Base.Win.PlatformThreadRuntimeContextWin.hpp"
 #include "Futurewalker.Base.Win.PlatformInstanceHandleWin.hpp" 
 
+#include "Futurewalker.Async.ThreadPool.hpp"
+#include "Futurewalker.Async.ThisThread.hpp"
+
 #include "Futurewalker.Core.Memory.hpp"
 #include "Futurewalker.Core.PassKey.hpp"
+
+#include <deque>
+#include <thread>
 
 namespace FW_DETAIL_NS
 {
@@ -45,14 +51,34 @@ public:
 
     ~PlatformApplicationContextWin() override;
 
-    auto MakePlatformApplication(PlatformApplication::Delegate delegate) -> Shared<PlatformApplication> override;
+    auto MakeApplication(PlatformApplication::Delegate delegate) -> Shared<PlatformApplication> override;
+    auto GetCurrentApplication() -> Shared<PlatformApplication> override;
+    auto RunApplication(Shared<PlatformApplication> app, Function<void()> cleanup) -> Async<void> override;
 
-    auto GetCurrentApplication() -> Shared<PlatformApplicationWin>;
+    auto PostQuitMessage() -> void;
 
-    auto CreateMessageWindow(PassKey<PlatformApplicationWin>, PlatformApplicationWin& application) -> HWND;
-    auto DestroyMessageWindow(PassKey<PlatformApplicationWin>, HWND hwnd) -> void;
+    auto Schedule() -> AsyncTask<void>;
+    auto ScheduleAfter(const std::chrono::nanoseconds& delay) -> AsyncTask<void>;
+
+    auto IsMainThread() const -> Bool;
+    auto IsRunning() const -> Bool;
 
 private:
+    auto Initialize() -> void;
+    auto GetSelf() -> Shared<PlatformApplicationContextWin>;
+    auto GetSelf() const -> Shared<PlatformApplicationContextWin const>;
+    auto CreateMessageWindow() -> Bool;
+    auto DestroyMessageWindow() -> void;
+    auto TranslateAndDispatchMessage(Shared<PlatformApplicationWin> const& app, MSG const& msg, Function<void()> const& cleanup) -> Bool;
+    auto HandlePostedEvent(Bool& callDefaultProcedure, WPARAM wParam, LPARAM lParam) -> LRESULT;
+
+    auto BeginRunning(Shared<PlatformApplicationWin> const& app) -> void;
+    auto EndRunning(Shared<PlatformApplicationWin> const& app) -> void;
+
+    auto Post(LazyTask<void> task) -> void;
+    auto PopTask() -> Optional<LazyTask<void>>;
+    auto HasTask() -> Bool;
+
     static auto CALLBACK MessageWindowProcedure(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT;
 
 private:
@@ -65,6 +91,14 @@ private:
     Shared<PlatformApplicationThemeContext> _themeContext;
     Weak<PlatformApplicationWin> _currentApplication;
     ATOM _classAtom = 0;
+    Shared<ThreadPool> _threadPool;
+    std::thread::id _mainThreadId;
+    Shared<ThisThread::Scheduler> _mainThreadScheduler;
+    HWND _messageWindow = nullptr;
+    Bool _running = false;
+    Bool _quitting = false;
+    std::deque<LazyTask<void>> _tasks;
+    std::mutex _mutex;
 };
 
 ///

@@ -25,10 +25,7 @@ auto PlatformMainThreadWin::IsMainThread() const -> Bool
 {
     if (auto applicationContext = Locator::GetInstance<PlatformApplicationContext>().TryAs<PlatformApplicationContextWin>())
     {
-        if (auto application = applicationContext->GetCurrentApplication())
-        {
-            return application->IsMainThread();
-        }
+        return applicationContext->IsMainThread();
     }
     return false;
 }
@@ -40,10 +37,7 @@ auto PlatformMainThreadWin::Schedule() -> AsyncTask<void>
 {
     if (auto applicationContext = Locator::GetInstance<PlatformApplicationContext>().TryAs<PlatformApplicationContextWin>())
     {
-        if (auto application = applicationContext->GetCurrentApplication())
-        {
-            co_return co_await application->Schedule();
-        }
+        co_return co_await applicationContext->Schedule();
     }
     throw Exception(ErrorCode::Failure);
 }
@@ -57,10 +51,7 @@ auto PlatformMainThreadWin::ScheduleAfter(const std::chrono::nanoseconds& delay)
 {
     if (auto applicationContext = Locator::GetInstance<PlatformApplicationContext>().TryAs<PlatformApplicationContextWin>())
     {
-        if (auto application = applicationContext->GetCurrentApplication())
-        {
-            co_return co_await application->ScheduleAfter(delay);
-        }
+        co_return co_await applicationContext->ScheduleAfter(delay);
     }
     throw Exception(ErrorCode::Failure);
 }

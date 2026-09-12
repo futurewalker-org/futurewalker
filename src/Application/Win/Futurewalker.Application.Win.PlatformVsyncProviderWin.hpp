@@ -39,19 +39,22 @@ public:
     PlatformVsyncProviderWin(PassKey<PlatformVsyncProviderWin>);
     ~PlatformVsyncProviderWin();
 
+    auto Start() -> void;
+    auto Stop() -> void;
+
     auto GetCurrentFrameTime() const -> MonotonicTime;
     auto PostFrameCallback(Weak<void> data, PlatformVsyncCallbackFunction callback) -> void;
     auto RemoveFrameCallback(Weak<void> data) -> void;
 
 private:
-    auto ConsumeCallbacks() -> std::vector<CallbackData>;
+    auto ConsumeCallbacks(std::vector<CallbackData>& data, SInt64 const session) -> Bool;
     auto WaitForCallbackOnThread() -> Bool;
     auto EndDispatching() -> void;
 
     auto RequestStop() -> void;
     auto StopRequested() const -> Bool;
 
-    static auto DispatchCallbacks(MonotonicTime const frameTime, Weak<PlatformVsyncProviderWin> const weakSelf) -> Task<void>;
+    static auto DispatchCallbacks(SInt64 const session, MonotonicTime const frameTime, Weak<PlatformVsyncProviderWin> const weakSelf) -> Task<void>;
 
 private:
     enum class State
@@ -68,6 +71,7 @@ private:
     State _state = State::Idle;
     Bool _stop = false;
     HANDLE _event = NULL;
+    SInt64 _session = 0;
 };
 
 ///

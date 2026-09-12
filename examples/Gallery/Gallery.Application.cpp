@@ -38,7 +38,7 @@ namespace
 auto const CommandApplicationHelpAbout = UniqueCommandId();
 }
 
-auto Application::Make() -> Shared<Application>
+auto Application::Make() -> Unique<Application>
 {
     return Application::MakeDerived<Application>();
 }

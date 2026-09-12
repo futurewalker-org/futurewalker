@@ -11,7 +11,7 @@ namespace Futurewalker::ComponentGallery
 class ComponentGalleryApplication : public Application
 {
 public:
-    static auto Make() -> Shared<ComponentGalleryApplication>;
+    static auto Make() -> Unique<ComponentGalleryApplication>;
 
     ComponentGalleryApplication(PassKey<Application> key);
 

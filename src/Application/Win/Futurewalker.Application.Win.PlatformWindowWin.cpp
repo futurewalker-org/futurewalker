@@ -1428,7 +1428,7 @@ auto PlatformWindowWin::HandleActivateApp(HWND hWnd, UINT msg, WPARAM wParam, LP
     {
         if (auto context = Locator::GetInstance<PlatformApplicationContext>().As<PlatformApplicationContextWin>())
         {
-            if (auto application = context->GetCurrentApplication())
+            if (auto application = context->GetCurrentApplication().TryAs<PlatformApplicationWin>())
             {
                 const auto active = static_cast<bool>(wParam);
                 application->SetActive(active);

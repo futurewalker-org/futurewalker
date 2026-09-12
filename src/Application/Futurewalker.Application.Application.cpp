@@ -20,6 +20,37 @@
 namespace FW_DETAIL_NS
 {
 ///
+/// @brief Run an application.
+///
+/// After calling this function, the application will send ApplicationEvent::Started event to itself.
+/// On some platforms, this function will never return. You can handle ApplicationEvent::Quitting to perform cleanup when application is exiting.
+/// The application object passed to this function will be destroyed right before the application exists, so the destructor can also be used for cleanup.
+///
+/// To manually request the application to quit, call Application::RequestQuit().
+/// When the application is requested to quit, ApplicationEvent::QuitRequested will be sent to application.
+/// You can cancel the request by calling ApplicationEvent::QuitRequested::SetCancelled(true).
+/// Note that some platforms do not allow application to quit so RequestQuit() may immediately return false.
+///
+/// @note This function must be called from main thread.
+/// @note This function cannot be called more than once.
+///
+auto Application::Run(Unique<Application> app) -> Async<void>
+{
+    if (!MainThread::IsMainThread())
+    {
+        FW_DEBUG_ASSERT(false);
+        co_return;
+    }
+
+    if (!app || !app->_platformObject || !app->_platformContext)
+    {
+        FW_DEBUG_ASSERT(false);
+        co_return;
+    }
+    co_return co_await app->_platformContext->RunApplication(app->_platformObject, [&] { app.Reset(); });
+}
+
+///
 /// @brief Constructor.
 ///
 Application::Application(PassKey<Application>, ApplicationOptions const& options)
@@ -31,35 +62,12 @@ Application::Application(PassKey<Application>, ApplicationOptions const& options
     _eventReceiver = EventReceiver::Make(delegate);
     _propertyStore = Unique<PropertyStore>::Make();
     _platformContext = Locator::Resolve<PlatformApplicationContext>();
-    _platformObject = _platformContext->MakePlatformApplication({.sendApplicationEvent = [&](Event<>& event) -> Bool { return HandlePlatformApplicationEvent(event); }});
+    _platformObject = _platformContext->MakeApplication({.sendApplicationEvent = [&](Event<>& event) -> Bool { return HandlePlatformApplicationEvent(event); }});
     _context = Locator::ResolveWithDefault<ApplicationContext>();
     _theme = Locator::ResolveWithDefault<ApplicationTheme>();
     _threadPool = Locator::ResolveWithDefault<ThreadPool>();
     _viewLayerManager = Locator::ResolveWithDefault<ViewLayerManager>();
-}
-
-///
-/// @brief Start running the application.
-///
-/// After calling this function, the application will send ApplicationEvent::Started event to itself.
-/// On some platforms, this function will never return. Handle ApplicationEvent::Quitting to perform cleanup when application is exiting.
-///
-/// To manually request the application to exit, call Application::RequestQuit().
-/// When the application is requested to exit, ApplicationEvent::QuitRequested will be sent to application.
-/// You can cancel the request by calling ApplicationEvent::QuitRequested::SetCancelled(true).
-/// Note that some platforms do not allow application to exit so RequestQuit() may immediately return false.
-///
-/// @note This function must be called from main thread.
-/// @note This function cannot be called more than once.
-///
-auto Application::Run() -> Async<void>
-{
-    if (MainThread::IsMainThread())
-    {
-        co_return co_await _platformObject->Run();
-    }
-    FW_DEBUG_ASSERT(false);
-    co_return;
+    _tracker = Shared<int>::Make();
 }
 
 ///
@@ -110,7 +118,7 @@ auto Application::SendEvent(Event<>& event) -> Bool
 ///
 auto Application::GetTracker() -> Weak<void>
 {
-    return _self;
+    return _tracker;
 }
 
 ///
@@ -118,7 +126,7 @@ auto Application::GetTracker() -> Weak<void>
 ///
 auto Application::GetTracker() const -> Weak<void const>
 {
-    return _self;
+    return _tracker;
 }
 
 ///
@@ -185,30 +193,6 @@ auto Application::SetMainMenu(Menu const& menu) -> void
     {
         _platformObject->SetMainMenu(menu);
     }
-}
-
-///
-/// @brief
-///
-auto Application::GetSelfBase() -> Shared<Application>
-{
-    return _self.Lock();
-}
-
-///
-/// @brief
-///
-auto Application::GetSelfBase() const -> Shared<Application const>
-{
-    return _self.Lock();
-}
-
-///
-/// @brief
-///
-auto Application::SetSelfBase(Shared<Application> const& self) -> void
-{
-    _self = self;
 }
 
 ///

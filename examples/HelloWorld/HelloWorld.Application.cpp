@@ -21,7 +21,7 @@
 
 namespace Futurewalker::HelloWorld
 {
-auto Application::Make() -> Shared<Application>
+auto Application::Make() -> Unique<Application>
 {
     return Futurewalker::Application::MakeDerived<Application>();
 }

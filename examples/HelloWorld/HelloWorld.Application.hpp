@@ -8,7 +8,7 @@ namespace Futurewalker::HelloWorld
 class Application final : public Futurewalker::Application
 {
 public:
-    static auto Make() -> Shared<Application>;
+    static auto Make() -> Unique<Application>;
 
     Application(PassKey<Futurewalker::Application> key);
 

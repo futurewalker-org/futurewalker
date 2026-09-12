@@ -14,6 +14,11 @@
 
 namespace FW_DETAIL_NS
 {
+///
+/// @brief Create a new instance of PlatformVsyncProviderWin.
+///
+/// @note Should only be called from the main thread.
+///
 auto PlatformVsyncProviderWin::Make() -> Shared<PlatformVsyncProviderWin>
 {
     auto vsyncProvider = Shared<PlatformVsyncProviderWin>::Make(PassKey<PlatformVsyncProviderWin>());
@@ -26,16 +31,30 @@ auto PlatformVsyncProviderWin::Make() -> Shared<PlatformVsyncProviderWin>
 ///
 PlatformVsyncProviderWin::PlatformVsyncProviderWin(PassKey<PlatformVsyncProviderWin>)
 {
-    _event = ::CreateEventW(NULL, FALSE, FALSE, NULL);
-    if (!_event)
+}
+
+///
+/// @brief Start monitoring for VSync events.
+///
+/// @note Should only be called from the main thread.
+///
+auto PlatformVsyncProviderWin::Start() -> void
+{
+    if (_thread.joinable())
     {
-        throw Exception(ErrorCode::Failure, "CreateEventW failed");
+        return;
     }
 
-    _thread = std::jthread([this, event = _event] {
-        auto frequency = LARGE_INTEGER();
-        ::QueryPerformanceFrequency(&frequency);
+    _session += 1;
+    _state = State::Idle;
+    _stop = false;
+    _event = NULL;
+    _callbacks.clear();
 
+    _event = ::CreateEventW(NULL, FALSE, FALSE, NULL);
+    FW_DEBUG_ASSERT(_event);
+
+    _thread = std::jthread([this, event = _event] {
         while (true)
         {
             if (!WaitForCallbackOnThread())
@@ -43,24 +62,28 @@ PlatformVsyncProviderWin::PlatformVsyncProviderWin(PassKey<PlatformVsyncProvider
                 break;
             }
 
-            const auto count = UINT(1);
-            const auto result = ::DCompositionWaitForCompositorClock(count, &event, INFINITE);
+            const auto count = UINT(event ? 1 : 0);
+            const auto result = ::DCompositionWaitForCompositorClock(count, &event, 50);
 
             if (StopRequested())
             {
                 break;
             }
 
-            if (result == WAIT_OBJECT_0 + count)
+            if ((result == WAIT_OBJECT_0 + count) || (result == WAIT_TIMEOUT))
             {
+                auto session = SInt64(0);
+                auto self = Weak<PlatformVsyncProviderWin>();
                 {
                     auto lock = std::unique_lock(_mutex);
                     _state = State::Dispatching;
+                    session = _session;
+                    self = _self;
                 }
                 auto const frameTime = GetCurrentFrameTime();
-                AsyncFunction::Spawn(DispatchCallbacks(frameTime, _self)).Detach();
+                AsyncFunction::Spawn(DispatchCallbacks(session, frameTime, self)).Detach();
             }
-            else if (result == WAIT_TIMEOUT || result == WAIT_FAILED)
+            else if (result == WAIT_FAILED)
             {
                 FW_DEBUG_LOG_ERROR("DCompositionWaitForCompositorClock failed");
                 FW_DEBUG_ASSERT(false);
@@ -70,16 +93,41 @@ PlatformVsyncProviderWin::PlatformVsyncProviderWin(PassKey<PlatformVsyncProvider
 }
 
 ///
+/// @brief Stop monitoring for VSync events.
+///
+/// @note Should only be called from the main thread.
+///
+auto PlatformVsyncProviderWin::Stop() -> void
+{
+    if (!_thread.joinable())
+    {
+        return;
+    }
+
+    RequestStop();
+
+    _thread.join();
+
+    if (_event)
+    {
+        ::CloseHandle(_event);
+        _event = NULL;
+    }
+    _callbacks.clear();
+}
+
+///
 /// @brief Destructor.
 ///
 PlatformVsyncProviderWin::~PlatformVsyncProviderWin()
 {
-    RequestStop();
-    _thread.join();
+    Stop();
 }
 
 ///
 /// @brief Get current frame time.
+///
+/// @note Should only be called from the main thread.
 ///
 auto PlatformVsyncProviderWin::GetCurrentFrameTime() const -> MonotonicTime
 {
@@ -92,9 +140,16 @@ auto PlatformVsyncProviderWin::GetCurrentFrameTime() const -> MonotonicTime
 /// @param data User data.
 /// @param callback Callback function.
 ///
+/// @note Should only be called from the main thread.
+///
 auto PlatformVsyncProviderWin::PostFrameCallback(Weak<void> data, PlatformVsyncCallbackFunction callback) -> void
 {
     if (data.IsExpired())
+    {
+        return;
+    }
+
+    if (!_thread.joinable())
     {
         return;
     }
@@ -130,8 +185,15 @@ auto PlatformVsyncProviderWin::PostFrameCallback(Weak<void> data, PlatformVsyncC
 ///
 /// @param data User data.
 ///
+/// @note Should only be called from the main thread.
+///
 auto PlatformVsyncProviderWin::RemoveFrameCallback(Weak<void> data) -> void
 {
+    if (!_thread.joinable())
+    {
+        return;
+    }
+
     auto lock = std::unique_lock(_mutex);
 
     std::erase_if(_callbacks, [&](const auto& cb) {
@@ -148,10 +210,15 @@ auto PlatformVsyncProviderWin::RemoveFrameCallback(Weak<void> data) -> void
 ///
 /// @brief Consume callbacks and return them.
 ///
-auto PlatformVsyncProviderWin::ConsumeCallbacks() -> std::vector<CallbackData>
+auto PlatformVsyncProviderWin::ConsumeCallbacks(std::vector<CallbackData>& data, SInt64 const session) -> Bool
 {
     auto lock = std::unique_lock(_mutex);
-    return std::exchange(_callbacks, {});
+    if (session == _session)
+    {
+        data = std::exchange(_callbacks, {});
+        return true;
+    }
+    return false;
 }
 
 ///
@@ -193,7 +260,10 @@ auto PlatformVsyncProviderWin::RequestStop() -> void
     auto lock = std::unique_lock(_mutex);
     _stop = true;
     _condVar.notify_one();
-    ::SetEvent(_event);
+    if (_event)
+    {
+        ::SetEvent(_event);
+    }
 }
 
 ///
@@ -210,7 +280,7 @@ auto PlatformVsyncProviderWin::StopRequested() const -> Bool
 ///
 /// @return A task.
 ///
-auto PlatformVsyncProviderWin::DispatchCallbacks(MonotonicTime const frameTime, Weak<PlatformVsyncProviderWin> const weakSelf) -> Task<void>
+auto PlatformVsyncProviderWin::DispatchCallbacks(SInt64 const session, MonotonicTime const frameTime, Weak<PlatformVsyncProviderWin> const weakSelf) -> Task<void>
 {
     try
     {
@@ -218,7 +288,17 @@ auto PlatformVsyncProviderWin::DispatchCallbacks(MonotonicTime const frameTime, 
 
         if (auto const self = weakSelf.Lock())
         {
-            auto const callbacks = self->ConsumeCallbacks();
+            if (!self->_thread.joinable())
+            {
+                co_return;
+            }
+
+            auto callbacks = std::vector<CallbackData>();
+            if (!self->ConsumeCallbacks(callbacks, session))
+            {
+                co_return;
+            }
+
             for (auto const& callback : callbacks)
             {
                 if (auto const data = callback.data.Lock())

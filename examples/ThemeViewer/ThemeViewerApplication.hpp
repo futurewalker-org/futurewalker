@@ -8,7 +8,7 @@ namespace Futurewalker::ThemeViewer
 class ThemeViewerApplication : public Application
 {
 public:
-    static auto Make() -> Shared<ThemeViewerApplication>;
+    static auto Make() -> Unique<ThemeViewerApplication>;
 
     ThemeViewerApplication(PassKey<Application> key);
 

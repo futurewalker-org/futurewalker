@@ -15,94 +15,22 @@ namespace FW_DETAIL_NS
 ///
 /// @brief Create PlatformApplicationWin object.
 ///
-auto PlatformApplicationWin::Make(Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<ThreadPool> threadPool) -> Shared<PlatformApplicationWin>
+auto PlatformApplicationWin::Make(Delegate delegate, Shared<PlatformApplicationContextWin> context) -> Shared<PlatformApplicationWin>
 {
-    return PlatformApplication::MakeDerived<PlatformApplicationWin>(delegate, context, threadPool);
+    return PlatformApplication::MakeDerived<PlatformApplicationWin>(delegate, context);
 }
 
 ///
 /// @brief
 ///
-PlatformApplicationWin::PlatformApplicationWin(PassKey<PlatformApplication>, Delegate delegate, Shared<PlatformApplicationContextWin> context, Shared<ThreadPool> threadPool)
+PlatformApplicationWin::PlatformApplicationWin(PassKey<PlatformApplication>, Delegate delegate, Shared<PlatformApplicationContextWin> context)
   : PlatformApplication(delegate)
   , _context {context}
-  , _threadPool {threadPool}
 {
-}
-
-///
-/// @brief Destructor.
-///
-PlatformApplicationWin::~PlatformApplicationWin()
-{
-    if (ThisThread::GetScheduler() == _thisThreadScheduler)
+    if (!_context)
     {
-        ThisThread::SetScheduler(nullptr);
+        throw Exception(ErrorCode::Failure);
     }
-}
-
-///
-/// @brief
-///
-auto PlatformApplicationWin::Run() -> Async<void>
-{
-    if (!IsMainThread())
-    {
-        throw Exception(ErrorCode::InvalidOperation, "Application must run on main thread");
-    }
-
-    if (std::exchange(_running, true))
-    {
-        FW_DEBUG_LOG_ERROR("PlatformApplicationWin::Run: Event loop must run on the thread it belongs to");
-        FW_DEBUG_ASSERT(false);
-        co_return;
-    }
-
-    auto const hwnd = _context->CreateMessageWindow({}, *this);
-    if (!hwnd)
-    {
-        FW_DEBUG_LOG_ERROR("PlatformEventLoopWin::Run: Failed to create message window");
-        FW_DEBUG_ASSERT(false);
-        co_return;
-    }
-
-    try
-    {
-        FW_DEBUG_LOG_INFO("Starting event loop on thread {}", std::this_thread::get_id());
-
-        {
-            auto e = Event<>(Event<PlatformApplicationEvent::Started>());
-            SendApplicationEvent(e);
-        }
-
-        while (true)
-        {
-            auto msg = MSG();
-            const auto result = ::GetMessageW(&msg, NULL, 0, 0);
-
-            if (result == -1)
-            {
-                break;
-            }
-
-            // WM_QUIT or other messages.
-            if (!TranslateAndDispatchMessage(msg))
-            {
-                break;
-            }
-        }
-
-        FW_DEBUG_LOG_INFO("Exiting event loop on thread {}", std::this_thread::get_id());
-    }
-    catch (...)
-    {
-        FW_DEBUG_LOG_ERROR("PlatformEventLoopWin::Run: Unhandled exception in event loop");
-        FW_DEBUG_ASSERT(false);
-    }
-
-    _context->DestroyMessageWindow({}, hwnd);
-
-    _running = false;
 }
 
 ///
@@ -110,35 +38,23 @@ auto PlatformApplicationWin::Run() -> Async<void>
 ///
 auto PlatformApplicationWin::RequestQuit() -> void
 {
-    if (IsMainThread())
+    if (_context->IsMainThread() && _context->IsRunning())
     {
-        if (IsRunning())
+        auto cancelled = False;
+        auto event = Event<>(Event<PlatformApplicationEvent::QuitRequested>());
+        if (SendApplicationEvent(event))
         {
-            auto cancelled = False;
-            auto event = Event<>(Event<PlatformApplicationEvent::QuitRequested>());
-            if (SendApplicationEvent(event))
+            if (event.Is<PlatformApplicationEvent::QuitRequested>())
             {
-                if (event.Is<PlatformApplicationEvent::QuitRequested>())
-                {
-                    cancelled = event.As<PlatformApplicationEvent::QuitRequested>()->IsCancelled();
-                }
-            }
-
-            if (!cancelled)
-            {
-                FW_DEBUG_LOG_INFO("PlatformEventLoopWin::RequestQuit: Called on thread {}", std::this_thread::get_id());
-                ::PostQuitMessage(0);
+                cancelled = event.As<PlatformApplicationEvent::QuitRequested>()->IsCancelled();
             }
         }
-    }
-}
 
-///
-/// @brief
-///
-auto PlatformApplicationWin::IsRunning() -> Bool
-{
-    return _running;
+        if (!cancelled)
+        {
+            _context->PostQuitMessage();
+        }
+    }
 }
 
 ///
@@ -170,65 +86,33 @@ auto PlatformApplicationWin::SetMainMenu(Menu const& menu) -> void
 }
 
 ///
-/// @brief Check if the current thread is the main thread.
+/// @brief Mark the application as started.
 ///
-auto PlatformApplicationWin::IsMainThread() const -> Bool
+auto PlatformApplicationWin::SetStarted() -> void
 {
-    return _threadId == std::this_thread::get_id();
-}
-
-///
-/// @brief Schedule task to event loop.
-///
-auto PlatformApplicationWin::Schedule() -> AsyncTask<void>
-{
-    struct Awaitable
+    if (!_started)
     {
-        Weak<PlatformApplicationWin> application;
-
-        auto await_ready() const noexcept -> bool
-        {
-            return false;
-        }
-
-        auto await_suspend(std::coroutine_handle<> c) -> void
-        {
-            if (auto app = application.Lock())
-            {
-                return app->Post([](std::coroutine_handle<> c) -> LazyTask<void> { co_return c.resume(); }(c));
-            }
-            throw Exception(ErrorCode::Failure);
-        }
-
-        auto await_resume() -> void
-        {
-        }
-    };
-    co_await Awaitable {GetSelf()};
-}
-
-///
-/// @brief Schedule task to event loop after delay.
-///
-/// @param delay Delay
-///
-auto PlatformApplicationWin::ScheduleAfter(const std::chrono::nanoseconds& delay) -> AsyncTask<void>
-{
-    auto self = GetSelf();
-
-    co_await _threadPool->ScheduleAfter(delay);
-
-    if (auto app = GetSelf())
-    {
-        co_return co_await app->Schedule();
+        _started = true;
+        auto e = Event<>(Event<PlatformApplicationEvent::Started>());
+        SendApplicationEvent(e);
     }
-    throw Exception(ErrorCode::Failure);
 }
 
 ///
-/// @brief
+/// @brief Mark the application as quitting.
 ///
-/// @param active
+auto PlatformApplicationWin::SetQuitting() -> void
+{
+    if (!_quitting)
+    {
+        _quitting = true;
+        auto e = Event<>(Event<PlatformApplicationEvent::Quitting>());
+        SendApplicationEvent(e);
+    }
+}
+
+///
+/// @brief Set active state.
 ///
 auto PlatformApplicationWin::SetActive(Bool const active) -> void
 {
@@ -244,163 +128,9 @@ auto PlatformApplicationWin::SetActive(Bool const active) -> void
 }
 
 ///
-/// @brief Set native handle for the application.
-///
-auto PlatformApplicationWin::SetNativeHandle(PassKey<PlatformApplicationContextWin>, HWND hwnd) -> void
-{
-    _hwnd = hwnd;
-}
-
-auto PlatformApplicationWin::MessageWindowProcedure(PassKey<PlatformApplicationContextWin>, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept -> LRESULT
-{
-    auto callDefaultProcedure = true;
-    auto result = LRESULT();
-    try
-    {
-        if (msg == WM_FW_EVENT_QUEUE_POST)
-        {
-            result = HandlePostedEvent(callDefaultProcedure, wParam, lParam);
-        }
-    }
-    catch (...)
-    {
-        FW_DEBUG_LOG_ERROR("Unhandled exception in window procedure");
-        FW_DEBUG_ASSERT(false);
-    }
-
-    if (callDefaultProcedure)
-    {
-        return ::DefWindowProcW(hwnd, msg, wParam, lParam);
-    }
-    return result;
-}
-
-///
 /// @brief Initialize.
 ///
 auto PlatformApplicationWin::Initialize() -> void
 {
-    class ThisThreadScheduler final : public ThisThread::Scheduler
-    {
-        Weak<PlatformApplicationWin> _app;
-
-    public:
-        ThisThreadScheduler(Weak<PlatformApplicationWin> app)
-          : _app {app}
-        {
-        }
-
-        auto Schedule() -> AsyncTask<void> override
-        {
-            if (auto const app = _app.Lock())
-            {
-                co_return co_await app->Schedule();
-            }
-            throw Exception(ErrorCode::InvalidOperation);
-        }
-
-        auto ScheduleAfter(std::chrono::nanoseconds const delay) -> AsyncTask<void> override
-        {
-            if (auto const app = _app.Lock())
-            {
-                co_return co_await app->ScheduleAfter(delay);
-            }
-            throw Exception(ErrorCode::InvalidOperation);
-        }
-    };
-    _threadId = std::this_thread::get_id();
-    _thisThreadScheduler = Shared<ThisThreadScheduler>::Make(GetSelf());
-    ThisThread::SetScheduler(_thisThreadScheduler);
-}
-
-///
-/// @brief Translate and dispatch window message.
-///
-Bool PlatformApplicationWin::TranslateAndDispatchMessage(MSG const& msg)
-{
-    if (msg.message == WM_QUIT)
-    {
-        if (!_quitting)
-        {
-            _quitting = true;
-            auto quittingEvent = Event<>(Event<PlatformApplicationEvent::Quitting>());
-            SendApplicationEvent(quittingEvent);
-        }
-
-        ::PostQuitMessage(static_cast<int>(msg.wParam));
-
-        if (HasTask())
-        {
-            return true;
-        }
-        return false;
-    }
-
-    ::TranslateMessage(&msg);
-    ::DispatchMessageW(&msg);
-
-    return true;
-}
-
-///
-/// @brief
-///
-auto PlatformApplicationWin::HandlePostedEvent(bool& callDefaultProcedure, WPARAM wParam, LPARAM lParam) -> LRESULT
-{
-    (void)wParam;
-    (void)lParam;
-    if (auto task = PopTask())
-    {
-        AsyncFunction::Spawn(std::move(*task)).Detach();
-    }
-    callDefaultProcedure = false;
-    return 0;
-}
-
-///
-/// @brief
-///
-auto PlatformApplicationWin::Post(LazyTask<void> task) -> void
-{
-    std::unique_lock lock(_mutex);
-
-    if (_hwnd)
-    {
-        _tasks.push_front(std::move(task));
-
-        if (!::PostMessageW(_hwnd, WM_FW_EVENT_QUEUE_POST, 0, 0))
-        {
-            FW_DEBUG_LOG_ERROR("PostMessage for WM_FW_EVENT_QUEUE_POST failed");
-            FW_DEBUG_ASSERT(false);
-        }
-    }
-    else
-    {
-        throw Exception(ErrorCode::Failure, "Thread was already exited");
-    }
-}
-
-///
-/// @brief
-///
-auto PlatformApplicationWin::PopTask() -> Optional<LazyTask<void>>
-{
-    std::unique_lock lock(_mutex);
-    if (!_tasks.empty())
-    {
-        auto task = std::move(_tasks.back());
-        _tasks.pop_back();
-        return task;
-    }
-    return {};
-}
-
-///
-/// @brief
-///
-auto PlatformApplicationWin::HasTask() -> Bool
-{
-    std::unique_lock lock(_mutex);
-    return !_tasks.empty();
 }
 }

@@ -32,7 +32,7 @@ namespace
 auto const CommandApplicationHelpAbout = UniqueCommandId();
 }
 
-auto ComponentGalleryApplication::Make() -> Shared<ComponentGalleryApplication>
+auto ComponentGalleryApplication::Make() -> Unique<ComponentGalleryApplication>
 {
     return Application::MakeDerived<ComponentGalleryApplication>();
 }

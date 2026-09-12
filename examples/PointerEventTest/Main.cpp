@@ -207,7 +207,7 @@ public:
 class App : public Application
 {
 public:
-    static auto Make() -> Shared<App>
+    static auto Make() -> Unique<App>
     {
         return Application::MakeDerived<App>();
     }
@@ -249,7 +249,7 @@ auto Main() -> Async<ExitCode>
     {
         auto env = Environment();
         auto app = App::Make();
-        co_await app->Run();
+        co_await Application::Run(std::move(app));
     }
     catch (...)
     {

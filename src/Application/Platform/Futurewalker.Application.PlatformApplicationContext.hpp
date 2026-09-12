@@ -19,7 +19,9 @@ class PlatformApplicationContext : NonCopyable
 {
 public:
     virtual ~PlatformApplicationContext() = 0;
-    virtual auto MakePlatformApplication(PlatformApplication::Delegate delegate) -> Shared<PlatformApplication> = 0;
+    virtual auto MakeApplication(PlatformApplication::Delegate delegate) -> Shared<PlatformApplication> = 0;
+    virtual auto GetCurrentApplication() -> Shared<PlatformApplication> = 0;
+    virtual auto RunApplication(Shared<PlatformApplication> app, Function<void()> cleanup) -> Async<void> = 0;
 };
 }
 }

@@ -377,6 +377,28 @@ auto PlatformWindowContextWin::GetInputMethodContext() -> PlatformInputMethodCon
 }
 
 ///
+/// @brief Set the running state.
+///
+/// @param running
+///
+auto PlatformWindowContextWin::SetRunning(const Bool running) -> void
+{
+    if (_running != running)
+    {
+        _running = running;
+
+        if (_running)
+        {
+            _vsyncProvider->Start();
+        }
+        else
+        {
+            _vsyncProvider->Stop();
+        }
+    }
+}
+
+///
 /// @brief Create window for desktop message handling.
 ///
 auto PlatformWindowContextWin::CreateMessageWindow() -> void

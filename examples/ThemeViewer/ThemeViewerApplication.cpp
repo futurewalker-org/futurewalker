@@ -20,7 +20,7 @@
 
 namespace Futurewalker::ThemeViewer
 {
-auto ThemeViewerApplication::Make() -> Shared<ThemeViewerApplication>
+auto ThemeViewerApplication::Make() -> Unique<ThemeViewerApplication>
 {
     return Application::MakeDerived<ThemeViewerApplication>();
 }

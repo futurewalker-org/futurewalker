@@ -22,7 +22,7 @@ namespace Futurewalker
 class HelloWorldApplication : public Application
 {
 public:
-    static auto Make() -> Shared<HelloWorldApplication>
+    static auto Make() -> Unique<HelloWorldApplication>
     {
         return Application::MakeDerived<HelloWorldApplication>();
     }
@@ -72,7 +72,7 @@ auto Main() -> Async<ExitCode>
     {
         auto env = Environment();
         auto app = HelloWorldApplication::Make();
-        co_await app->Run();
+        co_await Application::Run(std::move(app));
     }
     catch (...)
     {

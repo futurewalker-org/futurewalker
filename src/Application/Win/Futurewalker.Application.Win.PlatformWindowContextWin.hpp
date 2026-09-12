@@ -2,13 +2,13 @@
 #pragma once
 
 #include "Futurewalker.Application.Win.PlatformWindowContextWin.hpp"
-#include "Futurewalker.Application.PlatformWindowContext.hpp"
-#include "Futurewalker.Application.PlatformScreenContext.hpp"
-#include "Futurewalker.Application.PlatformApplicationThemeContext.hpp"
 #include "Futurewalker.Application.Win.PlatformWindowWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformVsyncProviderWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformKeyboardLayoutWinType.hpp"
 #include "Futurewalker.Application.Win.PlatformInputMethodContextWinType.hpp"
+#include "Futurewalker.Application.PlatformWindowContext.hpp"
+#include "Futurewalker.Application.PlatformScreenContext.hpp"
+#include "Futurewalker.Application.PlatformApplicationThemeContext.hpp"
 
 #include "Futurewalker.Graphics.Win.PlatformDCompositionDeviceWin.hpp"
 
@@ -59,6 +59,8 @@ public:
     auto GetKeyboardLayout() -> PlatformKeyboardLayoutWin&;
     auto GetInputMethodContext() -> PlatformInputMethodContextWin&;
 
+    auto SetRunning(const Bool running) -> void;
+
 private:
     auto CreateMessageWindow() -> void;
     auto DestroyMessageWindow() -> void;
@@ -81,6 +83,7 @@ private:
     ATOM _messageWindowClass = 0;
     std::vector<HWND> _levelWindows;
     HWND _messageWindow = NULL;
+    Bool _running = false;
 };
 
 ///
