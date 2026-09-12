@@ -3,6 +3,9 @@
 #include "Futurewalker.Application.Mac.PlatformApplicationContextMac.hpp"
 #include "Futurewalker.Application.Mac.PlatformApplicationMac.hpp"
 #include "Futurewalker.Application.Mac.PlatformScreenContextMac.hpp"
+#include "Futurewalker.Application.Mac.PlatformWindowContextMac.hpp"
+
+#include "Futurewalker.Base.Debug.hpp"
 
 @interface PlatformApplicationContextMacDelegate : NSObject
 @property(assign, nonatomic) void* data;
@@ -73,9 +76,37 @@ PlatformApplicationContextMac::~PlatformApplicationContextMac()
     _delegate = nil;
 }
 
-auto PlatformApplicationContextMac::MakePlatformApplication(PlatformApplication::Delegate delegate) -> Shared<PlatformApplication>
+auto PlatformApplicationContextMac::MakeApplication(PlatformApplication::Delegate delegate) -> Shared<PlatformApplication>
 {
-    return PlatformApplicationMac::Make(delegate, _self.Lock());
+    if (_currentApplication.IsExpired())
+    {
+        auto application = PlatformApplicationMac::Make(delegate, _self.Lock());
+        _currentApplication = application;
+        return application;
+    }
+    throw Exception(ErrorCode::InvalidOperation, "Attempted to create multiple Application instances");
+}
+
+auto PlatformApplicationContextMac::GetCurrentApplication() -> Shared<PlatformApplication>
+{
+    return _currentApplication.Lock();
+}
+
+auto PlatformApplicationContextMac::RunApplication(Shared<PlatformApplication> app, Function<void()> cleanup) -> Async<void>
+{
+    auto appMac = app.TryAs<PlatformApplicationMac>();
+    if (!appMac || appMac != _currentApplication.Lock())
+    {
+        FW_DEBUG_ASSERT(false);
+        throw Exception(ErrorCode::InvalidOperation, "Application instance is not valid");
+    }
+
+    if (!MainThread::IsMainThread())
+    {
+        FW_DEBUG_ASSERT(false);
+        throw Exception(ErrorCode::InvalidOperation, "Application must run on main thread");
+    }
+    co_return co_await appMac->Run(cleanup);
 }
 
 auto PlatformApplicationContextMac::Schedule() -> AsyncTask<void>
@@ -86,6 +117,11 @@ auto PlatformApplicationContextMac::Schedule() -> AsyncTask<void>
 auto PlatformApplicationContextMac::ScheduleAfter(const std::chrono::nanoseconds& delay) -> AsyncTask<void>
 {
     co_await _mainThread->ScheduleAfter(delay);
+}
+
+auto PlatformApplicationContextMac::SetActive(Bool const active) -> void
+{
+    (void)active; // TODO
 }
 
 auto Locator::Resolver<PlatformApplicationContextMac>::Resolve() -> Shared<PlatformApplicationContextMac>

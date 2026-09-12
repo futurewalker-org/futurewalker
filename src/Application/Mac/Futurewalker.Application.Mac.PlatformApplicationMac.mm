@@ -207,37 +207,11 @@ PlatformApplicationMac::PlatformApplicationMac(PassKey<PlatformApplication>, Del
 {
 }
 
-auto PlatformApplicationMac::Run() -> Async<void>
-{
-    @autoreleasepool
-    {
-        if ([NSApp isRunning])
-        {
-            FW_DEBUG_LOG_ERROR("Nested Application::Run() is not allowed");
-            FW_DEBUG_ASSERT(false);
-            co_return;
-        }
-        FW_DEBUG_LOG_INFO("PlatformApplicationMac::Run");
-        [NSApp setDelegate:_delegate];
-        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular]; // TODO: Can this be removed?
-        [NSApp run];
-        [NSApp setDelegate:nil];
-    }
-}
-
 auto PlatformApplicationMac::RequestQuit() -> void
 {
     @autoreleasepool
     {
         [NSApp terminate:nil];
-    }
-}
-
-auto PlatformApplicationMac::IsRunning() -> Bool
-{
-    @autoreleasepool
-    {
-        return [NSApp isRunning];
     }
 }
 
@@ -387,6 +361,37 @@ auto PlatformApplicationMac::SetMainMenu(Menu const& menu) -> void
     }
 }
 
+auto PlatformApplicationMac::Run(Function<void()> const& cleanup) -> Async<void>
+{
+    @autoreleasepool
+    {
+        if ([NSApp isRunning])
+        {
+            FW_DEBUG_LOG_ERROR("Nested Application::Run() is not allowed");
+            FW_DEBUG_ASSERT(false);
+            co_return;
+        }
+
+        FW_DEBUG_LOG_INFO("PlatformApplicationMac::Run");
+
+        if (cleanup)
+        {
+            _cleanup = &cleanup;
+        }
+        [NSApp setDelegate:_delegate];
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular]; // TODO: Can this be removed?
+        [NSApp run];
+        [NSApp setDelegate:nil];
+        _cleanup = nullptr;
+    }
+}
+
+#define FW_MAKE_CALLBACK(func)                                         \
+    [](void* data) {                                                   \
+        auto const _this = static_cast<PlatformApplicationMac*>(data); \
+        return _this->func();                                          \
+    }
+
 auto PlatformApplicationMac::Initialize() -> void
 {
     @autoreleasepool
@@ -394,50 +399,11 @@ auto PlatformApplicationMac::Initialize() -> void
         _delegate = [PlatformApplicationDelegate new];
 
         [_delegate setData:this];
-        [_delegate setCallbackOnFinishLaunching:[](void* data) -> void {
-            @autoreleasepool
-            {
-                if (!NSRunningApplication.currentApplication.active)
-                {
-                    // Activate app and bring all windows to frontmost.
-                    [NSApplication.sharedApplication activate];
-                    [NSRunningApplication.currentApplication activateWithOptions:NSApplicationActivateAllWindows];
-                }
-            }
-            auto const _this = static_cast<PlatformApplicationMac*>(data);
-            auto e = Event<>(Event<PlatformApplicationEvent::Started>());
-            _this->SendApplicationEvent(e);
-        }];
-        [_delegate setCallbackOnBecomeActive:[](void* data) -> void {
-            auto const _this = static_cast<PlatformApplicationMac*>(data);
-            auto e = Event<>(Event<PlatformApplicationEvent::ActiveChanged>());
-            _this->SendApplicationEvent(e);
-        }];
-        [_delegate setCallbackOnResignActive:[](void* data) -> void {
-            auto const _this = static_cast<PlatformApplicationMac*>(data);
-            auto e = Event<>(Event<PlatformApplicationEvent::ActiveChanged>());
-            _this->SendApplicationEvent(e);
-        }];
-        [_delegate setCallbackOnShouldTerminate:[](void* data) -> BOOL {
-            auto const _this = static_cast<PlatformApplicationMac*>(data);
-            auto e = Event<>(Event<PlatformApplicationEvent::QuitRequested>());
-            if (_this->SendApplicationEvent(e))
-            {
-                if (e.Is<PlatformApplicationEvent::QuitRequested>())
-                {
-                    if (e.As<PlatformApplicationEvent::QuitRequested>()->IsCancelled())
-                    {
-                        return NO;
-                    }
-                }
-            }
-            return YES;
-        }];
-        [_delegate setCallbackOnWillTerminate:[](void* data) -> void {
-            auto const _this = static_cast<PlatformApplicationMac*>(data);
-            auto e = Event<>(Event<PlatformApplicationEvent::Quitting>());
-            _this->SendApplicationEvent(e);
-        }];
+        [_delegate setCallbackOnFinishLaunching:FW_MAKE_CALLBACK(CallbackOnFinishLaunching)];
+        [_delegate setCallbackOnBecomeActive:FW_MAKE_CALLBACK(CallbackOnBecomeActive)];
+        [_delegate setCallbackOnResignActive:FW_MAKE_CALLBACK(CallbackOnResignActive)];
+        [_delegate setCallbackOnShouldTerminate:FW_MAKE_CALLBACK(CallbackOnShouldTerminate)];
+        [_delegate setCallbackOnWillTerminate:FW_MAKE_CALLBACK(CallbackOnWillTerminate)];
     }
 
     class ThisThreadScheduler final : public ThisThread::Scheduler
@@ -472,6 +438,66 @@ auto PlatformApplicationMac::Initialize() -> void
     ThisThread::SetScheduler(_thisThreadScheduler);
 }
 
+auto PlatformApplicationMac::CallbackOnFinishLaunching() -> void
+{
+    @autoreleasepool
+    {
+        if (!NSRunningApplication.currentApplication.active)
+        {
+            // Activate app and bring all windows to frontmost.
+            [NSApplication.sharedApplication activate];
+            [NSRunningApplication.currentApplication activateWithOptions:NSApplicationActivateAllWindows];
+        }
+    }
+    auto e = Event<>(Event<PlatformApplicationEvent::Started>());
+    SendApplicationEvent(e);
+}
+
+auto PlatformApplicationMac::CallbackOnBecomeActive() -> void
+{
+    SetActive(true);
+    auto parameter = Event<PlatformApplicationEvent::ActiveChanged>();
+    parameter->SetActive(true);
+    auto e = Event<>(std::move(parameter));
+    SendApplicationEvent(e);
+}
+
+auto PlatformApplicationMac::CallbackOnResignActive() -> void
+{
+    SetActive(false);
+    auto parameter = Event<PlatformApplicationEvent::ActiveChanged>();
+    parameter->SetActive(false);
+    auto e = Event<>(std::move(parameter));
+    SendApplicationEvent(e);
+}
+
+auto PlatformApplicationMac::CallbackOnShouldTerminate() -> BOOL
+{
+    auto e = Event<>(Event<PlatformApplicationEvent::QuitRequested>());
+    if (SendApplicationEvent(e))
+    {
+        if (e.Is<PlatformApplicationEvent::QuitRequested>())
+        {
+            if (e.As<PlatformApplicationEvent::QuitRequested>()->IsCancelled())
+            {
+                return NO;
+            }
+        }
+    }
+    return YES;
+}
+
+auto PlatformApplicationMac::CallbackOnWillTerminate() -> void
+{
+    auto e = Event<>(Event<PlatformApplicationEvent::Quitting>());
+    SendApplicationEvent(e);
+
+    if (_cleanup)
+    {
+        (*_cleanup)();
+    }
+}
+
 auto PlatformApplicationMac::Schedule() -> AsyncTask<void>
 {
     co_await _context->Schedule();
@@ -480,5 +506,13 @@ auto PlatformApplicationMac::Schedule() -> AsyncTask<void>
 auto PlatformApplicationMac::ScheduleAfter(const std::chrono::nanoseconds& delay) -> AsyncTask<void>
 {
     co_await _context->ScheduleAfter(delay);
+}
+
+auto PlatformApplicationMac::SetActive(Bool const active) -> void
+{
+    if (_context)
+    {
+        _context->SetActive(active);
+    }
 }
 }

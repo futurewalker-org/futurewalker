@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
-#include "Futurewalker.Application.Mac.Prelude.hpp"
+#include "Futurewalker.Application.Mac.PlatformApplicationMacType.hpp"
 #include "Futurewalker.Application.PlatformApplicationContext.hpp"
 #include "Futurewalker.Application.PlatformMainThreadType.hpp"
 #include "Futurewalker.Application.PlatformWindowContextType.hpp"
@@ -29,13 +29,18 @@ public:
 
     ~PlatformApplicationContextMac();
 
-    auto MakePlatformApplication(PlatformApplication::Delegate delegate) -> Shared<PlatformApplication> override;
+    auto MakeApplication(PlatformApplication::Delegate delegate) -> Shared<PlatformApplication> override;
+    auto GetCurrentApplication() -> Shared<PlatformApplication> override;
+    auto RunApplication(Shared<PlatformApplication> app, Function<void()> cleanup) -> Async<void> override;
 
     auto Schedule() -> AsyncTask<void>;
     auto ScheduleAfter(const std::chrono::nanoseconds& delay) -> AsyncTask<void>;
 
+    auto SetActive(Bool const active) -> void;
+
 private:
     Weak<PlatformApplicationContextMac> _self;
+    Weak<PlatformApplicationMac> _currentApplication;
     Shared<PlatformMainThread> _mainThread;
     Shared<PlatformWindowContext> _windowContext;
     Shared<PlatformScreenContext> _screenContext;
