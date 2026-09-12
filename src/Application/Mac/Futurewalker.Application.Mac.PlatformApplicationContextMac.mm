@@ -5,6 +5,8 @@
 #include "Futurewalker.Application.Mac.PlatformScreenContextMac.hpp"
 #include "Futurewalker.Application.Mac.PlatformWindowContextMac.hpp"
 
+#include "Futurewalker.Application.MainThread.hpp"
+
 #include "Futurewalker.Base.Debug.hpp"
 
 @interface PlatformApplicationContextMacDelegate : NSObject
