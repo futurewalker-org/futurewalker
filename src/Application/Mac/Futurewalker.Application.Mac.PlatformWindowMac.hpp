@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 #pragma once
 
+#include "Futurewalker.Application.Mac.PlatformWindowMacType.hpp"
 #include "Futurewalker.Application.PlatformWindow.hpp"
 #include "Futurewalker.Application.Mac.PlatformWindowContextMacType.hpp"
 #include "Futurewalker.Application.Mac.PlatformRootViewLayerMacType.hpp"
@@ -70,10 +71,37 @@ public:
 
     auto GetNativeHandle() -> NSWindow*;
 
+    auto IsOwned() const -> Bool;
+    auto IsOwnerOf(PlatformWindowMac const& window) const -> Bool;
+    auto GetOwner() -> Shared<PlatformWindowMac>;
+    auto GetOwner() const -> Shared<PlatformWindowMac const>;
+    auto GetRootOwner() -> Shared<PlatformWindowMac>;
+    auto GetOwnedWindows() -> std::vector<Weak<PlatformWindowMac>> const&;
+    auto RemoveOwnedWindow(Shared<PlatformWindowMac> const& window) -> void;
+
+    auto OrderFront() -> void;
+
 private:
     auto Initialize() -> void override;
+    auto CallbackOnPointer(Event<>& event) -> void;
+    auto CallbackOnKey(Event<>& event) -> void;
+    auto CallbackOnResize() -> void;
+    auto CallbackOnMove() -> void;
+    auto CallbackOnScreenChange() -> void;
+    auto CallbackOnScreenProfileChange() -> void;
+    auto CallbackOnBackingPropertyChange() -> void;
+    auto CallbackOnBecomeKey() -> void;
+    auto CallbackOnResignKey() -> void;
+    auto CallbackOnShouldClose() -> BOOL;
+    auto CallbackOnWillClose() -> BOOL;
+    auto CallbackOnFrameUpdate(CADisplayLink* displayLink) -> void;
     auto Render() -> void;
     auto Frame(NSTimeInterval targetTimestamp) -> void;
+    auto NotifyContextBecomeKey() -> void;
+    auto NotifyContextResignKey() -> void;
+    auto CanMakeVisible() -> Bool;
+    auto DestroyPopupChainOnResignKey() -> void;
+    auto CloseOwnedWindowsRecursive() -> void;
     static auto NativeToVpRect(NSRect const& rect) -> Rect<Vp>;
     static auto VpToNativeRect(Rect<Vp> const& rect) -> NSRect;
 
@@ -87,6 +115,8 @@ private:
     BoxConstraints _sizeConstraints;
     String _title;
     MonotonicTime _currentFrameTime;
+    std::vector<Weak<PlatformWindowMac>> _ownedWindows;
+    Bool _closed = false;
 };
 }
 }

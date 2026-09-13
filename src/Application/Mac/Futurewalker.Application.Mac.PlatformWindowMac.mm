@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MPL-2.0
 
 #include "Futurewalker.Application.Mac.PlatformWindowMac.hpp"
+#include "Futurewalker.Application.Mac.PlatformWindowContextMac.hpp"
 #include "Futurewalker.Application.Mac.PlatformRootViewLayerMac.hpp"
 #include "Futurewalker.Application.Mac.PlatformInputMethodMac.hpp"
 #include "Futurewalker.Application.Mac.PlatformInputEditableMac.hpp"
@@ -18,6 +19,7 @@
 #include "Futurewalker.Core.Mac.PlatformStringFunctionMac.hpp"
 
 #include <bit>
+#include <algorithm>
 #include <Carbon/Carbon.h>
 
 using namespace FW_NS;
@@ -77,6 +79,7 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
 @property(assign, nonatomic) Shared<PlatformInputMethodMac> inputMethod;
 - (instancetype)initWithFrame:(NSRect)frameRect;
 - (BOOL)acceptsFirstResponder;
+- (BOOL)acceptsFirstMouse:(NSEvent*)event;
 - (void)updateTrackingAreas;
 - (void)cursorUpdate:(NSEvent *)event;
 - (void)mouseDown:(NSEvent*)event;
@@ -146,6 +149,12 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
 
 - (BOOL)acceptsFirstResponder
 {
+    return YES;
+}
+
+- (BOOL)acceptsFirstMouse:(NSEvent*)event
+{
+    // Click-through is enabled to match Windows behavior.
     return YES;
 }
 
@@ -986,6 +995,7 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
 - (NSRect)windowWillUseStandardFrame:(NSWindow *)window defaultFrame:(NSRect)newFrame;
 - (void)requestFrame;
 - (void)displayLinkDidUpdate:(CADisplayLink*)sender;
+- (void)destroyWindow;
 @end
 
 @implementation PlatformWindowDelegate
@@ -1101,6 +1111,7 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
 
 - (void)windowDidBecomeKey:(NSNotification*)notification
 {
+    FW_DEBUG_LOG_INFO("windowDidBecomeKey: wn={} akw={} level={}", self.window.windowNumber, NSApp.keyWindow.windowNumber, self.window.level);
     if (_data && _callbackOnBecomeKey)
     {
         _callbackOnBecomeKey(_data);
@@ -1109,7 +1120,8 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
 
 - (void)windowDidResignKey:(NSNotification*)notification
 {
-    if (_data && _callbackOnResignKey)
+    FW_DEBUG_LOG_INFO("windowDidResignKey: wn={} akw={} level={}", self.window.windowNumber, NSApp.keyWindow.windowNumber, self.window.level);
+    if (_window && _data && _callbackOnResignKey)
     {
         _callbackOnResignKey(_data);
     }
@@ -1135,9 +1147,6 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
 
 - (void)windowWillClose:(NSNotification*)notification
 {
-    [_displayLink invalidate];
-    _displayLink = nil;
-    _window = nil;
     if (_data && _callbackOnWillClose)
     {
         _callbackOnWillClose(_data);
@@ -1166,6 +1175,17 @@ static auto SetPointerMotionEventParameter(NSEvent* event, auto& motionEvent, au
     if (_data && _callbackOnFrameUpdate)
     {
         _callbackOnFrameUpdate(_data, sender);
+    }
+}
+
+- (void)destroyWindow
+{
+    if (_window)
+    {
+        [_displayLink invalidate];
+        _displayLink = nil;
+        [_window orderOut:nil];
+        _window = nil;
     }
 }
 
@@ -1230,9 +1250,12 @@ auto PlatformWindowMac::IsVisible() -> Bool
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            return _windowDelegate.window.isVisible;
+            if (_windowDelegate.window)
+            {
+                return _windowDelegate.window.isVisible;
+            }
         }
         return false;
     }
@@ -1242,13 +1265,26 @@ auto PlatformWindowMac::SetVisible(Bool const visible) -> void
 {
     @autoreleasepool
     {
+        if (IsClosed())
+        {
+            return;
+        }
+
         if (_windowDelegate.window)
         {
             if (visible != Bool(_windowDelegate.window.isVisible))
             {
                 if (visible)
                 {
-                    [_windowDelegate.window makeKeyAndOrderFront:nil];
+                    if (CanMakeVisible())
+                    {
+                        [_windowDelegate.window makeKeyAndOrderFront:nil];
+
+                        if (_context)
+                        {
+                            _context->UpdateWindowLevel();
+                        }
+                    }
                 }
                 else
                 {
@@ -1263,9 +1299,12 @@ auto PlatformWindowMac::IsActive() -> Bool
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            return [_windowDelegate.window isKeyWindow];
+            if (_windowDelegate.window)
+            {
+                return [_windowDelegate.window isKeyWindow];
+            }
         }
         return false;
     }
@@ -1275,9 +1314,12 @@ auto PlatformWindowMac::SetActive() -> void
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            [_windowDelegate.window makeKeyAndOrderFront:nil];
+            if (_windowDelegate.window)
+            {
+                [_windowDelegate.window makeKeyAndOrderFront:nil];
+            }
         }
     }
 }
@@ -1286,9 +1328,12 @@ auto PlatformWindowMac::IsFocused() -> Bool
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            return [_windowDelegate.window isKeyWindow];
+            if (_windowDelegate.window)
+            {
+                return [_windowDelegate.window isKeyWindow];
+            }
         }
         return false;
     }
@@ -1298,9 +1343,12 @@ auto PlatformWindowMac::SetFocus() -> void
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            return [_windowDelegate.window makeKeyWindow];
+            if (_windowDelegate.window)
+            {
+                return [_windowDelegate.window makeKeyWindow];
+            }
         }
     }
 }
@@ -1309,9 +1357,12 @@ auto PlatformWindowMac::GetFrameRect() -> Rect<Vp>
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            return NativeToVpRect(_windowDelegate.window.frame);
+            if (_windowDelegate.window)
+            {
+                return NativeToVpRect(_windowDelegate.window.frame);
+            }
         }
         return {};
     }
@@ -1321,9 +1372,12 @@ auto PlatformWindowMac::SetFrameRect(Rect<Vp> const& rect) -> void
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            [_windowDelegate.window setFrame:VpToNativeRect(rect) display:NO];
+            if (_windowDelegate.window)
+            {
+                [_windowDelegate.window setFrame:VpToNativeRect(rect) display:NO];
+            }
         }
     }
 }
@@ -1342,15 +1396,19 @@ auto PlatformWindowMac::GetRestoredFrameRect() -> Rect<Vp>
 {
     @autoreleasepool
     {
-        auto const window = _windowDelegate.window;
-        if (window.isZoomed)
+        if (!IsClosed())
         {
-            return NativeToVpRect([_windowDelegate restoredFrame]);
+            auto const window = _windowDelegate.window;
+            if (window.isZoomed)
+            {
+                return NativeToVpRect([_windowDelegate restoredFrame]);
+            }
+            else
+            {
+                return GetFrameRect();
+            }
         }
-        else
-        {
-            return GetFrameRect();
-        }
+        return {};
     }
 }
 
@@ -1358,15 +1416,18 @@ auto PlatformWindowMac::SetRestoredFrameRect(Rect<Vp> const& rect) -> void
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            if (_windowDelegate.window.isZoomed)
+            if (_windowDelegate.window)
             {
-                // TODO: Currently not supported.
-            }
-            else
-            {
-                SetFrameRect(rect);
+                if (_windowDelegate.window.isZoomed)
+                {
+                    // TODO: Currently not supported.
+                }
+                else
+                {
+                    SetFrameRect(rect);
+                }
             }
         }
     }
@@ -1376,6 +1437,11 @@ auto PlatformWindowMac::GetAreaBounds(WindowArea const windowArea) -> std::vecto
 {
     @autoreleasepool
     {
+        if (IsClosed())
+        {
+            return {};
+        }
+
         if (_windowDelegate.window)
         {
             if (windowArea == WindowArea::TitleBar)
@@ -1403,6 +1469,11 @@ auto PlatformWindowMac::GetAreaInsets(WindowArea const area) -> EdgeInsets
 {
     @autoreleasepool
     {
+        if (IsClosed())
+        {
+            return {};
+        }
+
         auto const window = _windowDelegate.window;
         if (window)
         {
@@ -1439,9 +1510,12 @@ auto PlatformWindowMac::GetBackingScale() -> BackingScale
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            return _windowDelegate.window.backingScaleFactor;
+            if (_windowDelegate.window)
+            {
+                return _windowDelegate.window.backingScaleFactor;
+            }
         }
         return 1.0;
     }
@@ -1456,14 +1530,17 @@ auto PlatformWindowMac::SetSizeConstraints(BoxConstraints const& constraints) ->
 {
     @autoreleasepool
     {
-        _sizeConstraints = constraints;
-
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            auto const minSize = constraints.GetMinSize();
-            auto const maxSize = constraints.GetMaxSize();
-            [_windowDelegate.window setMinSize:NSMakeSize(static_cast<CGFloat>(minSize.width), static_cast<CGFloat>(minSize.height))];
-            [_windowDelegate.window setMaxSize:NSMakeSize(static_cast<CGFloat>(maxSize.width), static_cast<CGFloat>(maxSize.height))];
+            _sizeConstraints = constraints;
+
+            if (_windowDelegate.window)
+            {
+                auto const minSize = constraints.GetMinSize();
+                auto const maxSize = constraints.GetMaxSize();
+                [_windowDelegate.window setMinSize:NSMakeSize(static_cast<CGFloat>(minSize.width), static_cast<CGFloat>(minSize.height))];
+                [_windowDelegate.window setMaxSize:NSMakeSize(static_cast<CGFloat>(maxSize.width), static_cast<CGFloat>(maxSize.height))];
+            }
         }
     }
 }
@@ -1477,10 +1554,13 @@ auto PlatformWindowMac::SetTitle(String const& title) -> void
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            auto const nsTitle = PlatformStringFunctionMac::ConvertStringToNSString(title);
-            [_windowDelegate.window setTitle:nsTitle];
+            if (_windowDelegate.window)
+            {
+                auto const nsTitle = PlatformStringFunctionMac::ConvertStringToNSString(title);
+                [_windowDelegate.window setTitle:nsTitle];
+            }
         }
     }
 }
@@ -1489,9 +1569,12 @@ auto PlatformWindowMac::Minimize() -> void
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            [_windowDelegate.window miniaturize:nil];
+            if (_windowDelegate.window)
+            {
+                [_windowDelegate.window miniaturize:nil];
+            }
         }
     }
 }
@@ -1500,9 +1583,12 @@ auto PlatformWindowMac::Maximize() -> void
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            [_windowDelegate.window setIsZoomed:YES];
+            if (_windowDelegate.window)
+            {
+                [_windowDelegate.window setIsZoomed:YES];
+            }
         }
     }
 }
@@ -1511,9 +1597,12 @@ auto PlatformWindowMac::Restore() -> void
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            [_windowDelegate.window setIsZoomed:NO];
+            if (_windowDelegate.window)
+            {
+                [_windowDelegate.window setIsZoomed:NO];
+            }
         }
     }
 }
@@ -1522,7 +1611,11 @@ auto PlatformWindowMac::IsClosed() -> Bool
 {
     @autoreleasepool
     {
-        return _windowDelegate.window == nil;
+        if (_windowDelegate.window)
+        {
+            return _closed;
+        }
+        return true;
     }
 }
 
@@ -1530,11 +1623,15 @@ auto PlatformWindowMac::RequestClose() -> Async<Bool>
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            [_windowDelegate.window performClose:nil];
+            if (_windowDelegate.window)
+            {
+                [_windowDelegate.window performClose:nil];
+            }
+            co_return true;
         }
-        co_return true;
+        co_return false;
     }
 }
 
@@ -1542,9 +1639,12 @@ auto PlatformWindowMac::Close() -> void
 {
     @autoreleasepool
     {
-        if (_windowDelegate.window)
+        if (!IsClosed())
         {
-            [_windowDelegate.window close];
+            if (_windowDelegate.window)
+            {
+                [_windowDelegate.window close];
+            }
         }
     }
 }
@@ -1553,7 +1653,10 @@ auto PlatformWindowMac::RequestFrame() -> void
 {
     @autoreleasepool
     {
-        [_windowDelegate requestFrame];
+        if (!IsClosed())
+        {
+            [_windowDelegate requestFrame];
+        }
     }
 }
 
@@ -1569,17 +1672,28 @@ auto PlatformWindowMac::GetViewLayer() -> Shared<PlatformViewLayer>
 
 auto PlatformWindowMac::GetInputMethod() -> Shared<PlatformInputMethod>
 {
-    return [_windowContentView inputMethod];
+    @autoreleasepool
+    {
+        return [_windowContentView inputMethod];
+    }
 }
 
 auto PlatformWindowMac::SetBackgroundColor(RGBColor const& color) -> void
 {
-    if (_options.backgroundStyle == WindowBackgroundStyle::Solid)
+    @autoreleasepool
     {
-        [_windowDelegate.window setBackgroundColor:[NSColor colorWithRed:static_cast<CGFloat>(color.GetRed().GetValue())
-                                                    green:static_cast<CGFloat>(color.GetGreen().GetValue())
-                                                     blue:static_cast<CGFloat>(color.GetBlue().GetValue())
-                                                    alpha:1.0]];
+        if (IsClosed())
+        {
+            return;
+        }
+
+        if (_options.backgroundStyle == WindowBackgroundStyle::Solid)
+        {
+            [_windowDelegate.window setBackgroundColor:[NSColor colorWithRed:static_cast<CGFloat>(color.GetRed().GetValue())
+                                                                       green:static_cast<CGFloat>(color.GetGreen().GetValue())
+                                                                        blue:static_cast<CGFloat>(color.GetBlue().GetValue())
+                                                                       alpha:1.0]];
+        }
     }
 }
 
@@ -1591,98 +1705,252 @@ auto PlatformWindowMac::GetNativeHandle() -> NSWindow*
     }
 }
 
+auto PlatformWindowMac::IsOwned() const -> Bool
+{
+    return _options.owner != nullptr;
+}
+
+auto PlatformWindowMac::IsOwnerOf(PlatformWindowMac const& window) const -> Bool
+{
+    auto owner = window.GetOwner();
+    while (owner)
+    {
+        if (owner.GetPointer() == GetSelf().GetPointer())
+        {
+            return true;
+        }
+        owner = owner->GetOwner();
+    }
+    return false;
+}
+
+auto PlatformWindowMac::GetOwner() -> Shared<PlatformWindowMac>
+{
+    return _options.owner.TryAs<PlatformWindowMac>();
+}
+
+auto PlatformWindowMac::GetOwner() const -> Shared<PlatformWindowMac const>
+{
+    return _options.owner.TryAs<PlatformWindowMac>();
+}
+
+auto PlatformWindowMac::GetRootOwner() -> Shared<PlatformWindowMac>
+{
+    auto owner = GetOwner();
+    if (owner)
+    {
+        return owner->GetRootOwner();
+    }
+    return GetSelf();
+}
+
+auto PlatformWindowMac::GetOwnedWindows() -> std::vector<Weak<PlatformWindowMac>> const&
+{
+    return _ownedWindows;
+}
+
+auto PlatformWindowMac::RemoveOwnedWindow(Shared<PlatformWindowMac> const& window) -> void
+{
+    auto it = std::find_if(_ownedWindows.begin(), _ownedWindows.end(), [&](auto const& owned) { return owned.Lock() == window; });
+    if (it != _ownedWindows.end())
+    {
+        _ownedWindows.erase(it);
+    }
+}
+
+///
+/// @brief Moves this window to the front of its owner's owned windows.
+///
+/// @note This function does not change the actual z-order of the windows on the screen; it only updates the internal owned windows list.
+///
+auto PlatformWindowMac::OrderFront() -> void
+{
+    if (auto owner = GetOwner())
+    {
+        auto const self = GetSelf();
+        auto& ownedWindows = owner->_ownedWindows;
+        auto it = std::find_if(ownedWindows.begin(), ownedWindows.end(), [&](auto const& owned) { return owned.Lock() == self; });
+        if (it != ownedWindows.end())
+        {
+            std::rotate(it, it + 1, ownedWindows.end());
+        }
+    }
+}
+
+#define FW_MAKE_CALLBACK(func)                                    \
+    [](void* data) {                                              \
+        auto const _this = static_cast<PlatformWindowMac*>(data); \
+        return _this->func();                                     \
+    }
+
+#define FW_MAKE_CALLBACK_WITH_EVENT(func)                         \
+    [](void* data, Event<>& event) {                              \
+        auto const _this = static_cast<PlatformWindowMac*>(data); \
+        return _this->func(event);                                \
+    }
+
+#define FW_MAKE_CALLBACK_WITH_DISPLAY_LINK(func)                  \
+    [](void* data, CADisplayLink* displayLink) {                  \
+        auto const _this = static_cast<PlatformWindowMac*>(data); \
+        return _this->func(displayLink);                          \
+    }
+
 auto PlatformWindowMac::Initialize() -> void
 {
     @autoreleasepool
     {
+        if (auto owner = GetOwner())
+        {
+            owner->_ownedWindows.push_back(GetSelf());
+        }
+
         _windowContentView = [[PlatformWindowContentView alloc] initWithFrame:NSMakeRect(0, 0, 1, 1)];
         _windowDelegate = [[PlatformWindowDelegate alloc] initWithOptions:_options];
 
         [_windowDelegate setContentView:_windowContentView];
 
         [_windowContentView setData:this];
-        [_windowContentView setCallbackOnPointer:[](void* data, Event<>& event) {
-            auto const _this = static_cast<PlatformWindowMac*>(data);
-            _this->SendPointerEvent(event);
-        }];
-        [_windowContentView setCallbackOnKey:[](void* data, Event<>& event) {
-            auto const _this = static_cast<PlatformWindowMac*>(data);
-            _this->SendKeyEvent(event);
-        }];
+        [_windowContentView setCallbackOnPointer:FW_MAKE_CALLBACK_WITH_EVENT(CallbackOnPointer)];
+        [_windowContentView setCallbackOnKey:FW_MAKE_CALLBACK_WITH_EVENT(CallbackOnKey)];
 
         [_windowDelegate setData:this];
-        [_windowDelegate setCallbackOnResize:[](void* data) -> void {
-            auto const _this = static_cast<PlatformWindowMac*>(data);
-            {
-                auto event = Event<>(Event<PlatformWindowEvent::SizeChanged>());
-                _this->SendWindowEvent(event);
-            }
-            {
-                auto event = Event<>(Event<PlatformWindowEvent::AreaChanged>());
-                _this->SendWindowEvent(event);
-            }
-            _this->Frame(_this->_windowDelegate.displayLink.targetTimestamp);
-        }];
-        [_windowDelegate setCallbackOnMove:[](void* data) -> void {
-            auto const _this = static_cast<PlatformWindowMac*>(data);
-            auto event = Event<>(Event<PlatformWindowEvent::PositionChanged>());
-            _this->SendWindowEvent(event);
-        }];
-        [_windowDelegate setCallbackOnScreenChange:[](void*) -> void {}];
-        [_windowDelegate setCallbackOnScreenProfileChange:[](void*) -> void {}];
-        [_windowDelegate setCallbackOnBackingPropertyChange:[](void* data) -> void {
-            auto const _this = static_cast<PlatformWindowMac*>(data);
-            if (_this->_rootViewLayer)
-            {
-                _this->_rootViewLayer->SetBackingScale(_this->GetBackingScale());
-                _this->RequestFrame();
-            }
-            auto event = Event<>(Event<PlatformWindowEvent::BackingScaleChanged>());
-            _this->SendWindowEvent(event);
-        }];
-        [_windowDelegate setCallbackOnBecomeKey:[](void* data) -> void {
-            auto const _this = static_cast<PlatformWindowMac*>(data);
-            auto event = Event<>(Event<PlatformWindowEvent::FocusedChanged>());
-            _this->SendWindowEvent(event);
-        }];
-        [_windowDelegate setCallbackOnResignKey:[](void* data) -> void {
-            auto const _this = static_cast<PlatformWindowMac*>(data);
-            auto event = Event<>(Event<PlatformWindowEvent::FocusedChanged>());
-            _this->SendWindowEvent(event);
-        }];
-        [_windowDelegate setCallbackOnShouldClose:[](void* data) -> BOOL {
-            auto const _this = static_cast<PlatformWindowMac*>(data);
-            auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
-            auto shouldClose = true;
-            if (_this->SendWindowEvent(event))
-            {
-                if (event.Is<PlatformWindowEvent::CloseRequested>())
-                {
-                    if (event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
-                    {
-                        shouldClose = false;
-                    }
-                }
-            }
-            return shouldClose;
-        }];
-        [_windowDelegate setCallbackOnFrameUpdate:[](void* data, CADisplayLink* displayLink) -> void {
-            @autoreleasepool
-            {
-                auto const _this = static_cast<PlatformWindowMac*>(data);
-                _this->Frame(displayLink.targetTimestamp);
-            }
-        }];
-        [_windowDelegate setCallbackOnWillClose:[](void* data) -> BOOL {
-            auto const _this = static_cast<PlatformWindowMac*>(data);
-            auto event = Event<>(Event<PlatformWindowEvent::Closed>());
-            _this->SendWindowEvent(event);
-            return YES;
-        }];
+        [_windowDelegate setCallbackOnResize:FW_MAKE_CALLBACK(CallbackOnResize)];
+        [_windowDelegate setCallbackOnMove:FW_MAKE_CALLBACK(CallbackOnMove)];
+        [_windowDelegate setCallbackOnScreenChange:FW_MAKE_CALLBACK(CallbackOnScreenChange)];
+        [_windowDelegate setCallbackOnScreenProfileChange:FW_MAKE_CALLBACK(CallbackOnScreenProfileChange)];
+        [_windowDelegate setCallbackOnBackingPropertyChange:FW_MAKE_CALLBACK(CallbackOnBackingPropertyChange)];
+        [_windowDelegate setCallbackOnBecomeKey:FW_MAKE_CALLBACK(CallbackOnBecomeKey)];
+        [_windowDelegate setCallbackOnResignKey:FW_MAKE_CALLBACK(CallbackOnResignKey)];
+        [_windowDelegate setCallbackOnShouldClose:FW_MAKE_CALLBACK(CallbackOnShouldClose)];
+        [_windowDelegate setCallbackOnWillClose:FW_MAKE_CALLBACK(CallbackOnWillClose)];
+        [_windowDelegate setCallbackOnFrameUpdate:FW_MAKE_CALLBACK_WITH_DISPLAY_LINK(CallbackOnFrameUpdate)];
 
         _rootViewLayer = PlatformRootViewLayerMac::Make(_visualContext, _windowDelegate.window);
         _rootViewLayer->SetBackingScale(GetBackingScale());
         _currentFrameTime = NSTimeIntervalToMonotonicTime(_windowDelegate.displayLink.targetTimestamp);
+    }
+}
+
+auto PlatformWindowMac::CallbackOnPointer(Event<>& event) -> void
+{
+    SendPointerEvent(event);
+}
+
+auto PlatformWindowMac::CallbackOnKey(Event<>& event) -> void
+{
+    SendKeyEvent(event);
+}
+
+auto PlatformWindowMac::CallbackOnResize() -> void
+{
+    {
+        auto event = Event<>(Event<PlatformWindowEvent::SizeChanged>());
+        SendWindowEvent(event);
+    }
+    {
+        auto event = Event<>(Event<PlatformWindowEvent::AreaChanged>());
+        SendWindowEvent(event);
+    }
+    Frame(_windowDelegate.displayLink.targetTimestamp);
+}
+
+auto PlatformWindowMac::CallbackOnMove() -> void
+{
+    auto event = Event<>(Event<PlatformWindowEvent::PositionChanged>());
+    SendWindowEvent(event);
+}
+
+auto PlatformWindowMac::CallbackOnScreenChange() -> void
+{
+}
+
+auto PlatformWindowMac::CallbackOnScreenProfileChange() -> void
+{
+}
+
+auto PlatformWindowMac::CallbackOnBackingPropertyChange() -> void
+{
+    if (_rootViewLayer)
+    {
+        _rootViewLayer->SetBackingScale(GetBackingScale());
+        RequestFrame();
+    }
+    auto event = Event<>(Event<PlatformWindowEvent::BackingScaleChanged>());
+    SendWindowEvent(event);
+}
+
+auto PlatformWindowMac::CallbackOnBecomeKey() -> void
+{
+    NotifyContextBecomeKey();
+    auto event = Event<>(Event<PlatformWindowEvent::FocusedChanged>());
+    SendWindowEvent(event);
+}
+
+auto PlatformWindowMac::CallbackOnResignKey() -> void
+{
+    NotifyContextResignKey();
+    auto event = Event<>(Event<PlatformWindowEvent::FocusedChanged>());
+    SendWindowEvent(event);
+    DestroyPopupChainOnResignKey();
+}
+
+auto PlatformWindowMac::CallbackOnShouldClose() -> BOOL
+{
+    auto event = Event<>(Event<PlatformWindowEvent::CloseRequested>());
+    auto shouldClose = true;
+    if (SendWindowEvent(event))
+    {
+        if (event.Is<PlatformWindowEvent::CloseRequested>())
+        {
+            if (event.As<PlatformWindowEvent::CloseRequested>()->IsCancelled())
+            {
+                shouldClose = false;
+            }
+        }
+    }
+    return shouldClose;
+}
+
+auto PlatformWindowMac::CallbackOnWillClose() -> BOOL
+{
+    if (!_closed)
+    {
+        _closed = true;
+
+        CloseOwnedWindowsRecursive();
+
+        @autoreleasepool
+        {
+            if (_windowDelegate.window.isKeyWindow)
+            {
+                if (auto owner = GetOwner())
+                {
+                    if (!owner->IsClosed())
+                    {
+                        owner->SetActive();
+                    }
+                }
+            }
+            [_windowDelegate destroyWindow];
+        }
+
+        // TODO
+        //if (const auto owner = GetOwner())
+        //{
+        //    owner->RemoveOwnedWindow(GetSelf());
+        //}
+
+        auto event = Event<>(Event<PlatformWindowEvent::Closed>());
+        SendWindowEvent(event);
+    }
+    return YES;
+}
+
+auto PlatformWindowMac::CallbackOnFrameUpdate(CADisplayLink* displayLink) -> void
+{
+    @autoreleasepool
+    {
+        Frame(displayLink.targetTimestamp);
     }
 }
 
@@ -1702,6 +1970,101 @@ auto PlatformWindowMac::Frame(NSTimeInterval targetTimestamp) -> void
     auto event = Event<>(std::move(tickEvent));
     SendFrameEvent(event);
     Render();
+}
+
+auto PlatformWindowMac::NotifyContextBecomeKey() -> void
+{
+    if (_context)
+    {
+        _context->SetWindowActive(GetSelf(), true);
+    }
+}
+
+auto PlatformWindowMac::NotifyContextResignKey() -> void
+{
+    if (_context)
+    {
+        _context->SetWindowActive(GetSelf(), false);
+    }
+}
+
+auto PlatformWindowMac::CanMakeVisible() -> Bool
+{
+    if (_windowDelegate.window)
+    {
+        if (auto const owner = GetOwner())
+        {
+            return owner->IsVisible();
+        }
+        return true;
+    }
+    return false;
+}
+
+auto PlatformWindowMac::DestroyPopupChainOnResignKey() -> void
+{
+    if (_options.behavior == WindowBehavior::Popup)
+    {
+        auto destroy = True;
+        auto ownerKeyWindow = Pointer<PlatformWindowMac>(nullptr);
+        if (auto const nativeKeyWindow = NSApplication.sharedApplication.keyWindow)
+        {
+            if ([nativeKeyWindow.delegate isKindOfClass:[PlatformWindowDelegate class]])
+            {
+                auto const nativeKeyWindowDelegate = (PlatformWindowDelegate*)nativeKeyWindow.delegate;
+                if (auto const keyWindow = (PlatformWindowMac*)nativeKeyWindowDelegate.data)
+                {
+                    if (keyWindow->IsOwnerOf(*this))
+                    {
+                        if (keyWindow->_options.behavior != WindowBehavior::Popup || !_options.allowActiveOwnerPopup)
+                        {
+                            ownerKeyWindow = keyWindow;
+                        }
+                        else
+                        {
+                            destroy = false;
+                        }
+                    }
+                    else if (IsOwnerOf(*keyWindow))
+                    {
+                        destroy = false;
+                    }
+                }
+            }
+        }
+
+        if (destroy)
+        {
+            Close();
+
+            auto owner = GetOwner();
+            while (owner)
+            {
+                if (owner->_options.behavior != WindowBehavior::Popup)
+                {
+                    break;
+                }
+                if (owner.GetPointer() == ownerKeyWindow)
+                {
+                    break;
+                }
+                owner->Close();
+                owner = owner->GetOwner();
+            }
+        }
+    }
+}
+
+auto PlatformWindowMac::CloseOwnedWindowsRecursive() -> void
+{
+    for (auto const& weakWindow : _ownedWindows)
+    {
+        if (auto const window = weakWindow.Lock())
+        {
+            window->CloseOwnedWindowsRecursive();
+        }
+    }
+    Close();
 }
 
 auto PlatformWindowMac::NativeToVpRect(NSRect const& rect) -> Rect<Vp>
