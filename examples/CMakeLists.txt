@@ -1,4 +1,3 @@
-add_subdirectory(ComponentGallery)
 add_subdirectory(HelloWorld)
 add_subdirectory(HelloWorldMini)
 add_subdirectory(PointerEventTest)
