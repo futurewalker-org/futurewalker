@@ -280,11 +280,13 @@ auto DropdownMenuButton::ReceivePopupEvent(Event<>& event) -> Bool
         }
         else if (key == Key::Enter || key == Key::Space)
         {
+            // Destroying popup will reset _enteredIndex.
+            auto const enteredIndex = _enteredIndex;
             DestroyPopup();
 
-            if (_enteredIndex != -1)
+            if (enteredIndex != -1)
             {
-                ChangeCurrentIndex(_enteredIndex);
+                ChangeCurrentIndex(enteredIndex);
             }
             return true;
         }
