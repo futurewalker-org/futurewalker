@@ -2136,6 +2136,11 @@ auto View::NotifyAttachedChanged(Bool const attached) -> void
         {
             _attached = attached;
 
+            if (!attached)
+            {
+                CancelInput();
+            }
+
             if (_attached)
             {
                 _drawInfo.AttachAllSubLayers(GetLayer(), *_layerManager);
