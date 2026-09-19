@@ -73,6 +73,19 @@ auto FocusNode::IsFocused() const -> Bool
     return false;
 }
 
+auto FocusNode::GetFocusedReason() const -> FocusReason
+{
+    // TODO: cache result.
+    if (auto root = GetRoot())
+    {
+        if (root->RootGetFocusedNode() == GetSelf())
+        {
+            return root->RootGetFocusedReason();
+        }
+    }
+    return FocusReason::None;
+}
+
 auto FocusNode::IsFocusable() const -> Bool
 {
     return _focusable;
@@ -384,6 +397,11 @@ auto FocusNode::TraverseCore(const Bool forward, Shared<FocusNode> const& prev, 
 }
 
 auto FocusNode::RootGetFocusedNode() const -> Shared<FocusNode>
+{
+    return {};
+}
+
+auto FocusNode::RootGetFocusedReason() const -> FocusReason
 {
     return {};
 }

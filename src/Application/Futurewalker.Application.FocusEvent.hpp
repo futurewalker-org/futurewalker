@@ -32,7 +32,7 @@ public:
     auto SetReason(FocusReason const reason) -> void;
 
 private:
-    FocusReason _reason = FocusReason::Other;
+    FocusReason _reason = FocusReason::None;
 };
 
 ///

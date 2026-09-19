@@ -34,15 +34,16 @@ private:
 
 private:
     auto RootGetFocusedNode() const -> Shared<FocusNode> override;
+    auto RootGetFocusedReason() const -> FocusReason override;
     auto RootRequestFocus(Shared<FocusNode> node, FocusReason const reason) -> void override;
     auto RootReleaseFocus(Shared<FocusNode> node) -> void override;
 
 private:
     Bool _active = true;
     Weak<FocusNode> _focusedNode;
-    FocusReason _focusReason = FocusReason::Other;
+    FocusReason _focusReason = FocusReason::None;
     Weak<FocusNode> _lastFocusedNode;
-    FocusReason _lastFocusReason = FocusReason::Other;
+    FocusReason _lastFocusReason = FocusReason::None;
 };
 }
 }

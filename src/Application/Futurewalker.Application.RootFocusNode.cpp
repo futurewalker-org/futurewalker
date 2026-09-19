@@ -47,12 +47,12 @@ auto RootFocusNode::SetActive(Bool const active) -> void
         {
             if (GetFocusedNode())
             {
-                SetFocusedNode({}, FocusReason::Other);
+                SetFocusedNode({}, FocusReason::None);
             }
             else
             {
                 _lastFocusedNode = {};
-                _lastFocusReason = FocusReason::Other;
+                _lastFocusReason = FocusReason::None;
             }
         }
     }
@@ -189,6 +189,14 @@ auto RootFocusNode::RootGetFocusedNode() const -> Shared<FocusNode>
 ///
 /// @brief
 ///
+auto RootFocusNode::RootGetFocusedReason() const -> FocusReason
+{
+    return _focusReason;
+}
+
+///
+/// @brief
+///
 auto RootFocusNode::RootRequestFocus(Shared<FocusNode> node, FocusReason const reason) -> void
 {
     if (node && node->IsFocusable())
@@ -204,7 +212,7 @@ auto RootFocusNode::RootReleaseFocus(Shared<FocusNode> node) -> void
 {
     if (node && node == RootGetFocusedNode())
     {
-        SetFocusedNode({}, FocusReason::Other);
+        SetFocusedNode({}, FocusReason::None);
     }
 }
 }

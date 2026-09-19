@@ -120,6 +120,7 @@ public:
     auto SetEnabled(Bool const enabled) -> void;
 
     auto IsFocused() const -> Bool;
+    auto GetFocusedReason() const -> FocusReason;
     auto RequestFocus(FocusReason const reason) -> void;
     auto ReleaseFocus() -> void;
 

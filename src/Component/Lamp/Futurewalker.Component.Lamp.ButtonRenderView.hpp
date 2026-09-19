@@ -63,7 +63,7 @@ private:
     Bool _down = false;
     Bool _enter = false;
     Bool _focused = false;
-    FocusReason _focusReason = FocusReason::Other;
+    FocusReason _focusReason = FocusReason::None;
     AttributeAccessor<RGBAColor> _backgroundColor;
     AttributeAccessor<Channel> _backgroundAlpha;
     AttributeAccessor<RGBAColor> _disabledBackgroundColor;

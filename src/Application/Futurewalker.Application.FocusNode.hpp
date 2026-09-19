@@ -31,6 +31,7 @@ public:
     auto ReleaseFocus() -> void;
 
     auto IsFocused() const -> Bool;
+    auto GetFocusedReason() const -> FocusReason;
 
     auto IsFocusable() const -> Bool;
     auto SetFocusable(Bool const focusable) -> void;
@@ -77,6 +78,7 @@ private:
 
 private:
     virtual auto RootGetFocusedNode() const -> Shared<FocusNode>;
+    virtual auto RootGetFocusedReason() const -> FocusReason;
     virtual auto RootRequestFocus(Shared<FocusNode> node, FocusReason const reason) -> void;
     virtual auto RootReleaseFocus(Shared<FocusNode> node) -> void;
 

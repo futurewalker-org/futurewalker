@@ -521,6 +521,14 @@ auto View::IsFocused() const -> Bool
 ///
 /// @brief
 ///
+auto View::GetFocusedReason() const -> FocusReason
+{
+    return GetFocusNode().GetFocusedReason();
+}
+
+///
+/// @brief
+///
 auto View::RequestFocus(FocusReason const reason) -> void
 {
     GetFocusNode().RequestFocus(reason);
