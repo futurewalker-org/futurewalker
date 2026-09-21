@@ -63,6 +63,7 @@ private:
     Weak<PlatformInputMethodTextStoreWin> _self;
     HWND _hwnd = NULL;
     TfEditCookie _editCookie = TF_INVALID_EDIT_COOKIE;
+    DWORD _unadviseCookie = 0;
     Shared<PlatformInputMethodContextWin> _platformContext;
     Weak<PlatformInputEditableWin> _editable;
     Microsoft::WRL::ComPtr<ITfDocumentMgr> _documentMgr;

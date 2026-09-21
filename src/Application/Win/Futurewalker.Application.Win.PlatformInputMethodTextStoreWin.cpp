@@ -719,8 +719,8 @@ PlatformInputMethodTextStoreWin::PlatformInputMethodTextStoreWin(PassKey<Platfor
         return;
     }
 
-    DWORD unadviseCookie = 0;
-    hr = source->AdviseSink(IID_ITfKeyTraceEventSink, _textStore.Get(), &unadviseCookie);
+    _unadviseCookie = 0;
+    hr = source->AdviseSink(IID_ITfKeyTraceEventSink, _textStore.Get(), &_unadviseCookie);
     if (FAILED(hr))
     {
         FW_DEBUG_ASSERT(false);
@@ -733,6 +733,15 @@ PlatformInputMethodTextStoreWin::PlatformInputMethodTextStoreWin(PassKey<Platfor
 ///
 PlatformInputMethodTextStoreWin::~PlatformInputMethodTextStoreWin()
 {
+    if (_platformContext && _unadviseCookie != 0)
+    {
+        Microsoft::WRL::ComPtr<ITfSource> source;
+        if (SUCCEEDED(_platformContext->GetThreadMgr().As(&source)) && source)
+        {
+            source->UnadviseSink(_unadviseCookie);
+        }
+    }
+
     if (_documentMgr)
     {
         _documentMgr->Pop(TF_POPF_ALL);
