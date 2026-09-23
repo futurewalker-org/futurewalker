@@ -152,7 +152,7 @@ auto CheckBox::ReceiveEvent(Event<>& event) -> Bool
     else if (event.Is<KeyEvent::Down>())
     {
         auto const key = event.As<KeyEvent::Down>()->GetUnmodifiedKey();
-        if ((key != Key::Process) && key == Key::Space || key == Key::Enter)
+        if ((key != Key::Process) && (key == Key::Space || key == Key::Enter))
         {
             if (!_keyDown && !_tapDown)
             {
