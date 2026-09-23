@@ -106,5 +106,19 @@
     <string id="IconButtonPage.SizeMedium">Medium</string>
     <string id="IconButtonPage.SizeLarge">Large</string>
     <string id="IconButtonPage.PressCount">Pressed {} times</string>
+    <string id="CheckBoxPage.Title">Check Box</string>
+    <string id="CheckBoxPage.Description">Check boxes let users select one or more items from a set, or turn an option on or off.</string>
+    <string id="CheckBoxPage.VariantsTitle">Variants</string>
+    <string id="CheckBoxPage.EnabledCheckBoxes">Enabled</string>
+    <string id="CheckBoxPage.DisabledCheckBoxes">Disabled</string>
+    <string id="CheckBoxPage.StateUnchecked">Unchecked</string>
+    <string id="CheckBoxPage.StateChecked">Checked</string>
+    <string id="CheckBoxPage.StateIndeterminate">Indeterminate</string>
+    <string id="CheckBoxPage.PreviewTitle">Interactive Preview</string>
+    <string id="CheckBoxPage.StateLabel">State</string>
+    <string id="CheckBoxPage.StateEnabled">Enabled</string>
+    <string id="CheckBoxPage.StateDisabled">Disabled</string>
+    <string id="CheckBoxPage.CurrentState">Current state: {}</string>
+    <string id="CheckBoxPage.CheckBoxLabelText">CheckBox label text</string>
     <string id="TextEditPage.Title">Text Edit</string>
 </resources>

@@ -7,6 +7,7 @@
 #include "Gallery.Pages.PopupMenuButton.hpp"
 #include "Gallery.Pages.DropdownMenuButton.hpp"
 #include "Gallery.Pages.IconButton.hpp"
+#include "Gallery.Pages.CheckBox.hpp"
 #include "Gallery.Pages.TextEdit.hpp"
 #include "Gallery.Pages.Windowing.hpp"
 
@@ -43,6 +44,7 @@
 #include "Resource/Gallery.String.PopupMenuButtonPage.hpp"
 #include "Resource/Gallery.String.DropdownMenuButtonPage.hpp"
 #include "Resource/Gallery.String.IconButtonPage.hpp"
+#include "Resource/Gallery.String.CheckBoxPage.hpp"
 #include "Resource/Gallery.String.TextEditPage.hpp"
 
 namespace Futurewalker::Gallery
@@ -173,6 +175,12 @@ auto RootLayout::Initialize() -> void
             auto button = Lamp::TextButton::MakeWithTextAndIcon(loadString(R::Gallery::String::DropdownMenuButtonPage::Title), Icon::MakeBlank());
             FlexLayout::SetChildMargin(button, EdgeInsets(0, 4, 0, 4));
             SetPageView(button, DropdownMenuButtonPage::Make());
+            column->AddChild(button);
+        }
+        {
+            auto button = Lamp::TextButton::MakeWithTextAndIcon(loadString(R::Gallery::String::CheckBoxPage::Title), Icon::MakeBlank());
+            FlexLayout::SetChildMargin(button, EdgeInsets(0, 4, 0, 4));
+            SetPageView(button, CheckBoxPage::Make());
             column->AddChild(button);
         }
         {
