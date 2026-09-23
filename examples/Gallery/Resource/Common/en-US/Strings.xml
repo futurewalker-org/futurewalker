@@ -107,7 +107,7 @@
     <string id="IconButtonPage.SizeLarge">Large</string>
     <string id="IconButtonPage.PressCount">Pressed {} times</string>
     <string id="CheckBoxPage.Title">Check Box</string>
-    <string id="CheckBoxPage.Description">Check boxes let users select one or more items from a set, or turn an option on or off.</string>
+    <string id="CheckBoxPage.Description">Check boxes are button controls that allow users to make a binary choice. It can also represent an indeterminate state.</string>
     <string id="CheckBoxPage.VariantsTitle">Variants</string>
     <string id="CheckBoxPage.EnabledCheckBoxes">Enabled</string>
     <string id="CheckBoxPage.DisabledCheckBoxes">Disabled</string>
